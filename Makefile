@@ -30,12 +30,16 @@ LATEXOPTS = -interaction=nonstopmode -file-line-error-style -synctex=1
 CHAPTERS = \
 	01-intro.texw \
 	02-fundamentals.texw
-	
+
 # Code.  One (or more) Python files per chapter.
-CODE = ${CHAPTERS:.texw=.py} ${MAIN}.py
+CODE = ${MAIN}.py ${CHAPTERS:.texw=.py}
 
 # HTML files.  We assume one HTML file per chapter.
-HTML = ${CHAPTERS:.texw=.html}
+# However, we must make the overall HTML first to fix .aux files.
+HTML = ${MAIN}.html ${CHAPTERS:.texw=.html}
+
+# PDF files.  We are normally interested only in the main PDF file.
+PDF = ${MAIN}.pdf
 
 # Temporary files
 TEMP = *.4ct *.4tc *.aux *.css *.dvi *.idv *.lg *.log *.out *.tmp \
@@ -45,10 +49,10 @@ TEMP = *.4ct *.4tc *.aux *.css *.dvi *.idv *.lg *.log *.out *.tmp \
 # Default targets
 all:	pdf code html 
 
-pdf:	${MAIN}.pdf 
+pdf:	${PDF}
 
 py python code:	${CODE}
-	
+
 html:	${HTML}
 
 FORCE:	
