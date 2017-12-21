@@ -1,6 +1,9 @@
 #!/bin/sh
 # TextMate drop-in replacement for pdflatex
 
+# Usage: ./pdflatex.sh OPTIONS SOURCE
+# where SOURCE is a ,texw input file
+
 # Thank you, stackoverflow
 opts="${@:1:$# -1}"
 last="${@: -1}"
@@ -11,9 +14,7 @@ main=gstbook
 # Weaving options
 pweave="pweave -f texminted"
 
-# Ensure we have weave in our path
-PATH=/opt/local/Library/Frameworks/Python.framework/Versions/3.6/bin/:$PATH
-
+# Weave
 source="$last"
 case $source in
 ??-*.texw)
@@ -44,11 +45,24 @@ esac
 pdflatex $opts -shell-escape "$main".tex
 status=$?
 
+# Fix the resulting .synctex.gz table (if any)
+# This only fixes file names, not line numbers
+if [ -f "$main".synctex.gz ]; then
+    gunzip "$main".synctex.gz
+    sed 's/\.tex$/\.texw/' "$main".synctex | gzip > "$main".synctex.gz
+    rm "$main".synctex
+    echo "Fixed SyncTeX file to point back to .texw file."
+fi
+
 # Move target to appropriate PDF
 if $all; then
     :
 else
     mv "$main".pdf "$base".pdf
-    echo "Output file is $base.pdf"
+    if [ -f "$main".synctex.gz ]; then
+        mv "$main".synctex.gz "$base".synctex.gz
+        echo "SyncTeX moved to $base.synctex.gz."
+    fi
+    echo "Output written to $base.pdf."
 fi
 exit $status

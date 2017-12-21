@@ -3,6 +3,9 @@
 
 # Example usages:
 # make (or make all)        - Make everything
+# make pdf					- Make the book as one PDF
+# make html					- Make html files (one per chapter)
+# make code					- Make python files (one or more per chapter)
 # make gstbook.pdf          - Make the whole book as one PDF
 # make 01-intro.pdf         - Make one chapter as PDF
 # make 01-intro.html        - Make one chapter as HTML
@@ -21,28 +24,30 @@ PWEAVE = pweave
 PTANGLE = ptangle
 
 # Options for LaTeX
-LATEXOPTS = -interaction=nonstopmode -file-line-error-style
-
-# Temporary files
-TEMP = *.4ct *.4tc *.aux *.css *.dvi *.idv *.lg *.log *.out *.tmp *.xref *x.png
+LATEXOPTS = -interaction=nonstopmode -file-line-error-style -synctex=1
 
 # Chapters
 CHAPTERS = \
 	01-intro.texw \
 	02-fundamentals.texw
 	
-# Code
-CODE = ${CHAPTERS:.texw=.py}
+# Code.  One (or more) Python files per chapter.
+CODE = ${CHAPTERS:.texw=.py} ${MAIN}.py
 
-# HTML files
+# HTML files.  We assume one HTML file per chapter.
 HTML = ${CHAPTERS:.texw=.html}
 
-# Default target
+# Temporary files
+TEMP = *.4ct *.4tc *.aux *.css *.dvi *.idv *.lg *.log *.out *.tmp \
+	*.xref *x.png *.synctex *.synctex.gz \
+	 ${CHAPTERS:.texw=.tex} ${CHAPTERS:.texw=.pdf} ${MAIN}.tex
+
+# Default targets
 all:	pdf code html 
-	
+
 pdf:	${MAIN}.pdf 
 
-py python code:	${MAIN}.py ${CODE}
+py python code:	${CODE}
 	
 html:	${HTML}
 
@@ -81,6 +86,7 @@ include.tex:
 
 # Cleanup
 clean:	FORCE
-	${RM} ${TEMP} ${MAIN}.tex ${MAIN}.pdf ${MAIN}.html ${MAIN}.py \
-	${CHAPTERS:.texw=.tex}
+	${RM} ${MAIN}.pdf ${TEMP} ${CODE} ${HTML}
 	
+realclean: clean
+	$(RM) -fr _minted-gstbook figures
