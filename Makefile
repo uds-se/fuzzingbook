@@ -31,14 +31,14 @@ ${MAIN}.html:	${MAIN}.tex
 	
 # Recipes for ptangle, pweave, etc
 %.pdf:	%.tex
-	echo '\includeonly{$(basename $<)}' > include.tex
+	echo '\includeonly{$(basename $< .tex)}' > include.tex
 	${PDFLATEX} -shell-escape ${LATEXOPTS} -jobname ${TMP} ${MAIN}.tex
 	mv ${TMP}.pdf $@
 
 # FIXME: Does not move CSS files
 # FIXME: Do not overwrite gstbook.html
 %.html:	%.tex
-	echo '\includeonly{$<}' > include.tex
+	echo '\includeonly{$(basename $< .tex)}' > include.tex
 	${HTLATEX} ${MAIN}.tex "" "" "" -shell-escape ${LATEXOPTS} ${MAIN}.tex
 	mv ${MAIN}.html $@
 
