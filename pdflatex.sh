@@ -42,11 +42,12 @@ case $source in
 esac
 
 # Now run PDFLaTeX on the main file (with the appropriate \includeonly)
+# FIXME: Error messages should link back to .texw source files
 pdflatex $opts -shell-escape "$main".tex
 status=$?
 
 # Fix the resulting .synctex.gz table (if any)
-# This only fixes file names, not line numbers
+# This only fixes file names, not line numbers (FIXME)
 if [ -f "$main".synctex.gz ]; then
     gunzip "$main".synctex.gz
     sed 's/\.tex$/\.texw/' "$main".synctex | gzip > "$main".synctex.gz
