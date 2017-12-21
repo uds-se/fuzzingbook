@@ -42,7 +42,7 @@ HTML = ${MAIN}.html ${CHAPTERS:.texw=.html}
 PDF = ${MAIN}.pdf
 
 # Temporary files
-TEMP = *.4ct *.4tc *.aux *.css *.dvi *.idv *.lg *.log *.out *.tmp \
+TEMP = *.4ct *.4tc *.aux *.css *.dvi *.idv *.lg *.lof *.log *.out *.tmp *.toc \
 	*.xref *x.png *.synctex *.synctex.gz \
 	 ${CHAPTERS:.texw=.tex} ${CHAPTERS:.texw=.pdf} ${MAIN}.tex
 
@@ -74,6 +74,7 @@ include.tex:
 	echo '\includeonly{$(basename $< .tex)}' > include.tex
 	${PDFLATEX} -shell-escape ${LATEXOPTS} -jobname ${TMP} ${MAIN}.tex
 	mv ${TMP}.pdf $@
+	$(RM) $(TMP).*
 
 # FIXME: Does not move CSS files
 # FIXME: Do not overwrite gstbook.html
