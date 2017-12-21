@@ -8,28 +8,40 @@ last="${@: -1}"
 # The main file
 main=gstbook
 
+# Weaving options
+pweave="pweave -f texminted"
+
+# Ensure we have weave in our path
+PATH=/opt/local/Library/Frameworks/Python.framework/Versions/3.6/bin/:$PATH
+
 source="$last"
 case $source in
-*.tex)
-    # Include only chapter
+??-*.texw)
+    # Include and weave only one chapter
     all=false
-    base=$(basename "$source" .tex)
+    base=$(basename "$source" .texw)
     echo "\\includeonly{$base}" > include.tex
+    $pweave "$source"
     ;;
 *.texw)
-    # Include all
+    # Include all; weave all files
     all=true
     base=$(basename "$source" .texw)
     echo "" > include.tex
+    for chapter in ??-*.texw; do
+        $pweave $chapter
+    done
+    $pweave "$source"
+    ;;
+*.tex)
+    # Just regular PDFLaTeX; no weaving
+    all=true
+    main=$(basename "$source" .tex)
     ;;
 esac
 
-# Weave (with the appropriate include)
-PATH=/opt/local/Library/Frameworks/Python.framework/Versions/3.6/bin/:$PATH
-pweave -f texminted "$main".texw
-
-# Now run PDFLaTeX on the main file
-pdflatex $opts "$main".tex
+# Now run PDFLaTeX on the main file (with the appropriate \includeonly)
+pdflatex $opts -shell-escape "$main".tex
 status=$?
 
 # Move target to appropriate PDF
