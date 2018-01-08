@@ -1,14 +1,16 @@
-## Generating Software Tests
+# Generating Software Tests
 
 This is the repository for the book "Generating Software Tests" (working title)
 
-Project page: https://projects.cispa.saarland/zeller/gstbook
+Project page:
 
-# Summary
+	 https://projects.cispa.saarland/zeller/gstbook
 
-The idea is to have a textbook on software test generation, teaching students and professionals alike the latest and greatest concepts in test generation.  The book would come with plenty of code samples that allow the reader to immediately try out the concepts as well as extend them for her/his own purposes.  These code samples would come in Python, as the language easily allows for all sorts of code analysis.
+## Summary
 
-# Contents and Organization
+The idea is to have a _textbook on software test generation,_ teaching students and professionals alike the latest and greatest concepts in test generation.  The book would come with plenty of code samples that allow the reader to immediately try out the concepts as well as extend them for her/his own purposes.  These code samples would come in Python, as the language easily allows for all sorts of code analysis.
+
+## Contents and Organization
 
 The contents and organization of the book would roughly be based on the lecture “Security Testing” that Andreas and Rahul are currently running.  A typical set of chapters could be based on the lectures we have prepared, plus a few more:
 
@@ -36,9 +38,26 @@ The contents and organization of the book would roughly be based on the lecture 
 22. The Future of Test Generation
 * Appendix: Glossary
 
-Each chapter would be about 10–20 pages in length, such that the book overall would have about 300 pages.  Keep in mind that the code is (mostly) part of the book, so this is programming as well as writing. Each chapter would come with exercises, typically extending the given code in some way, as well as references to related work.  All titles, including the book title itself, are also up for discussion.
+Each chapter would be about 10–20 pages in length, such that the book overall would have about 300 pages.  Keep in mind that the code is (mostly) part of the book, so this is programming as well as writing. Each chapter would come with exercises, typically extending the given code in some way, as well as references to related work.
 
-# Technical Organization
+**Open Issue:** GUI and API fuzzing is not covered (but probably should---possibly by illustrating that a grammar can also produce API calls and/or events).
+
+**Open Issue:** Techniques on unstructured input (e.g. simple random fuzzing or random mutation) should be discussed first before going into grammar-based fuzzing and mutations.
+
+
+### Title
+
+The working title of the book is "Generating Software Tests".  So far, this has not seen any major objection.
+
+
+### Glossary
+
+I will start with a glossary of terms that should be consistently used throughout the book.
+
+
+## Technical Organization
+
+### Literate Programming with Pweave
 
 On the technical side, I would like to adopt a “literate programming” style, where each chapter comes in a single file from which one can extract
 
@@ -46,17 +65,77 @@ On the technical side, I would like to adopt a “literate programming” style,
 * a HTML file, to be read in the browser
 * a Python file with all the code
 
-The “literate programming" style would also allow to execute the code samples as they are being typeset; this allows for quality assurance as well as easy explanation of what the code is doing.  For your convenience, the "ptangle-demo" folder holds an example with one .texw source file and derived HTML, PDF, and Python files; note how everything including syntax highlighting is done from one source.  We will have a git repo and an automated test suite.
+The “literate programming" style would also allow to execute the code samples as they are being typeset; this allows for quality assurance as well as easy explanation of what the code is doing.  For details, see the *pweave* framework:
 
-# Publishing
+	http://mpastell.com/pweave/
+
+For your convenience, the "ptangle-demo" folder holds an example with one .texw source file and derived HTML, PDF, and Python files; note how everything including syntax highlighting is done from one source.  We will have a git repo and an automated test suite.
+
+
+### LaTeX Conventions
+
+For the LaTeX side, I will come with central *macros* that should help organize the code.  Please use these as much as possible; avoid introducing macros that replicate existing features.
+
+
+### Python Conventions
+
+#### Keep Things Simple
+
+For Python, rule number one is to keep things *as simple as possible.*
+
+* Stick to simple functions and data types.  We want our readers to focus on functionality, not Python.
+* Avoid Python-specific features.  We want our readers to be able to translate our code into languages of their choice---say, C or Java code.
+* Avoid object orientation.  OO in Python is special, so do not burden readers with it unless necessary.  Using existing Python classes is fine, as long as you do not derive new classes from them.
+* Avoid defining data structures.  Stick to lists, maps, tuples, as provided by Python.
+
+The exception to the above rules is if a specific Python feature saves so much code that even with its natural language rationale
+
+#### Consistency
+
+Rule number two is *consistency*.  By default, all Python code should follow the rules as set forth in PEP 8:
+
+	https://www.python.org/dev/peps/pep-0008/
+
+We use Python 3 (specifically, Python 3.6) for all code.  Still, try to write code that can be easily backported to Python 2.
+
+### Tools
+
+We can use the project page to maintain bug reports, etc.
+
+
+
+## Publishing
 
 On the publishing side, the could be made available in HTML form during a “beta” phase, with new chapters being published in regular intervals (i.e., one per week), announced on Facebook, Twitter, etc.  This should create some buzz for the printed book and give our colleagues opportunity for feedback.  When the printed book comes out, my idea is that parts of the HTML (say, later chapters or later sections in a number of chapters) would no longer be accessible, asking to purchase the "final" book instead.  We can still update the original sources, such that the Python code can be up-to-date; we can also add more chapters, which would then be available in full until the next edition comes out.  We also have to find a publisher for the book, maybe revitalizing our previous relationship with Morgan Kaufmann.
 
-# Design
+## Design
 
-Regarding design, we will need to find someone with good knowledge in CSS and HTML design, such that we have a nice-looking HTML output; the printed version (paper and PDF/ebook) will be handled by the publisher.  I would love to have some full-page illustrations as in the TeXBook (maybe one per chapter?); 
-pointers to illustrators are welcome.
+### PDF
 
-# Timeframe
+The printed version (paper and/or PDF/ebook) will be handled by the publisher.  We need to make sure that we can still maintain our source code; that is. we have to include the publisher's style files and react to comments.
 
-Finally, the timeframe. "Security testing" will be taught again starting October 2018, so this would be the time when new material can be beta-tested on a large scale.  (Maybe Gordon would also like to teach it?)  Hence, October 2018 would be the time when all (or at least the early) chapters would have to be finalized.  The final manuscript would then go to the editor early 2019.
+
+### HTML
+
+Regarding design, we will need to find someone with good knowledge in CSS and HTML design, such that we have a nice-looking HTML output
+
+The book "Rust by Example" has a nice functional design, also combining code snippets with explanations.  I love the way you can execute code to see the output - hey, you can even *change* the code (how?):
+
+	https://rustbyexample.com/index.html
+
+
+### Illustrations
+
+I would love to have some full-page illustrations as in the TeXBook (maybe one per chapter?); pointers to illustrators are welcome.
+
+
+
+## Timeframe
+
+Finally, the timeframe. "Security testing" will be taught again starting October 2018, so this would be the time when new material can be beta-tested on a large scale, and at least the early chapters would have to be finalized.
+
+I would love to publish one new chapter per week to the public for general comment; this is something we can also start in October 2018.
+
+Gordon would also like to teach this in Spring 2019; at this point, the manuscript could already have significantly matured, based on feedback by our students and the public feedback.  Hence, this would serve as a second trial run; if all goes well, the manuscript could then go to the editor in Summer 2019.
+
+
