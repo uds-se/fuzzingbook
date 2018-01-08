@@ -69,12 +69,21 @@ The “literate programming" style would also allow to execute the code samples 
 
 	http://mpastell.com/pweave/
 
-For your convenience, the "ptangle-demo" folder holds an example with one .texw source file and derived HTML, PDF, and Python files; note how everything including syntax highlighting is done from one source.  We will have a git repo and an automated test suite.
+For your convenience, the "ptangle-demo" folder holds an example with one .texw source file and derived HTML, PDF, and Python files; note how everything including syntax highlighting is done from one source.  The file "gstbook.texw" and the included .texw chapter files will contain the real thing.
+
 
 
 ### LaTeX Conventions
 
+#### Macros
+
 For the LaTeX side, I will come with central *macros* that should help organize the code.  Please use these as much as possible; avoid introducing macros that replicate existing features.
+
+#### Building
+
+The project comes with a Makefile that allows to create the book (make pdf) as well as derivatives (make html, make code).  See the first lines of the Makefile for examples.  You will need _pweave_ and _htlatex_ installed.
+
+I also have written a shell script _pdflatex.sh_ which works like _pdflatex_, except that the input is a .texw file (and not a .tex file).  This is useful in integrated environments (such as my TextMate editor), where you can then replace the name of your PDFLaTeX binary by "pdflatex.sh".  This script also restores some of the synchronization between the source file and the PDF, such that you can navigate between them.
 
 
 ### Python Conventions
@@ -98,10 +107,23 @@ Rule number two is *consistency*.  By default, all Python code should follow the
 
 We use Python 3 (specifically, Python 3.6) for all code.  Still, try to write code that can be easily backported to Python 2.
 
-### Tools
 
-We can use the project page to maintain bug reports, etc.
 
+### Quality Assurance
+
+#### Assertions
+
+In your code, make use of plenty of assertions that allow to catch errors quickly.  You can also add _hidden assertions_ that would not be included in the final PDF, but still run (and break the build if they fail).
+
+
+#### Issue Tracker
+
+The GitLab project page allows to enter and track issues.
+
+
+#### Git
+
+We use git in a single strand of revisions.  Do not branch, do not merge. Sync early; sync often.  Only push if everything builds and passes.
 
 
 ## Publishing
