@@ -7,6 +7,8 @@ SOURCES = \
 	ch01_Fuzzer.ipynb \
 	ch02_Coverage.ipynb
 
+BIB = gstbook.bib
+
 # Where to place the result
 CONVERTED = converted/
 
@@ -53,30 +55,29 @@ edit:
 	jupyter notebook
 
 # Conversion rules - chapters
-$(CONVERTED)%.pdf:	$(CONVERTED)%.tex
-	pdflatex $<
-	-bibtex $*
-	pdflatex $<
-	pdflatex $<
-	-mv $*.pdf $(CONVERTED)
-	$(RM) $*.tex $*.aux $*.bbl $*.blg $*.log $*.out $*.toc
+$(CONVERTED)%.pdf:	$(CONVERTED)%.tex $(BIB)
+	cd $(CONVERTED) && pdflatex $*
+	-cd $(CONVERTED) && bibtex $*
+	cd $(CONVERTED) && pdflatex $*
+	cd $(CONVERTED) && pdflatex $*
+	cd $(CONVERTED) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc
 
-$(CONVERTED)%.tex:	%.ipynb
+$(CONVERTED)%.tex:	%.ipynb $(BIB)
 	$(CONVERT_TO_TEX) $<
 
-$(CONVERTED)%.html:	%.ipynb
+$(CONVERTED)%.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_HTML) $<
 
 $(CONVERTED)%.py:	%.ipynb
 	$(CONVERT_TO_PYTHON) $<
 
 # Conversion rules - entire book
-$(CONVERTED)book.tex:	$(SOURCES)
+$(CONVERTED)book.tex:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_TEX) book
 	$(RM) book
 
-$(CONVERTED)book.html:	$(SOURCES)
+$(CONVERTED)book.html:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_HTML) book
 	$(RM) book
@@ -92,7 +93,6 @@ AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
 	  $(CONVERTED)*.frm \
 	  $(CONVERTED)*.lof \
 	  $(CONVERTED)*.lot
-	  
 	  
 clean:
 	$(RM) $(TEXS) $(PDFS) $(HTMLS) $(SLIDES) $(PYS)
