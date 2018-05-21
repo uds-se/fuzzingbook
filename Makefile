@@ -42,12 +42,15 @@ BOOK_FILES  = $(CONVERTED)book_files
 
 # Short targets
 all:	chapters book
+
 chapters: pdf html
 book:	book-pdf book-html
+
 pdf:	$(PDFS)
 html:	$(HTMLS)
 code:	$(PYS)
 slides:	$(SLIDES)
+
 book-pdf:  $(BOOK_PDF)
 book-html: $(BOOK_HTML)
 
@@ -60,7 +63,9 @@ $(CONVERTED)%.pdf:	$(CONVERTED)%.tex $(BIB)
 	-cd $(CONVERTED) && bibtex $*
 	cd $(CONVERTED) && pdflatex $*
 	cd $(CONVERTED) && pdflatex $*
-	cd $(CONVERTED) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc
+	cd $(CONVERTED) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm \
+		$*.lof $*.lot $*.nbpub.log
+	@echo Created $@
 
 $(CONVERTED)%.tex:	%.ipynb $(BIB)
 	$(CONVERT_TO_TEX) $<
@@ -76,11 +81,13 @@ $(CONVERTED)book.tex:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_TEX) book
 	$(RM) book
+	@echo Created $@
 
 $(CONVERTED)book.html:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_HTML) book
 	$(RM) book
+	@echo Created $@
 
 # Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
