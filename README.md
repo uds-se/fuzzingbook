@@ -19,28 +19,28 @@ The contents and organization of the book would roughly be based on the lecture 
 3. Text-Based Fuzzing
 4. Grammar-Based Fuzzing
 5. Generating Complex Inputs
-6. Mutation-Based Fuzzing
-7. Parsing Inputs
-8. Simplifying Inputs
-9. Search-Based Testing
-10. Evolving Test Suites
-11. Solving Constraints
-12. Symbolic Testing
-13. Mining Grammars
-14. Taint Analysis
-15. Mutation Analysis
-16. Probabilistic Testing
-17. Generating Unit Tests
-18. Carving Unit Tests
-19. Inferring Invariants
-20. Protection and Repair
-21. Fuzzing in the Large
-22. The Future of Test Generation
+6. Fuzzing Function Calls
+7. Fuzzing User Interfaces
+8. Mutation-Based Fuzzing
+9. Parsing Inputs
+10. Simplifying Inputs
+11. Search-Based Testing
+12. Evolving Test Suites
+13. Solving Constraints
+14. Symbolic Testing
+15. Mining Grammars
+16. Taint Analysis
+17. Mutation Analysis
+18. Probabilistic Testing
+19. Generating Unit Tests
+20. Carving Unit Tests
+21. Inferring Invariants
+22. Protection and Repair
+23. Fuzzing in the Large
+24. The Future of Test Generation
 * Appendix: Glossary
 
 Each chapter would be about 10–20 pages in length, such that the book overall would have about 300 pages.  Keep in mind that the code is (mostly) part of the book, so this is programming as well as writing. Each chapter would come with exercises, typically extending the given code in some way, as well as references to related work.
-
-**Open Issue:** GUI and API fuzzing is not covered (but probably should---possibly by illustrating that a grammar can also produce API calls and/or events).
 
 **Open Issue:** Techniques on unstructured input (e.g. simple random fuzzing or random mutation) should be discussed first before going into grammar-based fuzzing and mutations.
 
@@ -57,7 +57,7 @@ I will start with a glossary of terms that should be consistently used throughou
 
 ## Technical Organization
 
-### Literate Programming with Pweave
+### Literate Programming with Jupyter Notebooks
 
 On the technical side, I would like to adopt a “literate programming” style, where each chapter comes in a single file from which one can extract
 
@@ -67,18 +67,22 @@ On the technical side, I would like to adopt a “literate programming” style,
 
 The “literate programming" style would also allow to execute the code samples as they are being typeset; this allows for quality assurance as well as easy explanation of what the code is doing.
 
-The general idea is to organize each chapter as a **Jupyter Notebook**, as this allows for all the three formats above, as well as interaction by students and teachers.  (You can even generate slides out of a notebook)  We will use the "bookbook" package for conversion; details follow.
+The general idea is to organize each chapter as a **Jupyter Notebook**, as this allows for all the three formats above, as well as interaction by students and teachers.  (You can even generate slides out of a notebook).
 
 
-### LaTeX Conventions
+### Writing Conventions
 
-#### Macros
+#### Creating and Building
 
-For the LaTeX side, I will come with central *macros* that should help organize the code.  Please use these as much as possible; avoid introducing macros that replicate existing features.
+To work on the notebook files, you need the following:
 
-#### Building
+1. Jupyter notebook.  The easiest way to install this is via the [Anaconda distribution](https://www.anaconda.com/download/)
 
-Install Jupyter Notebook (or, on a Mac, the nice "Pineapple" app) and you can start editing and toying with the .ipnyb files right away.
+2. Once you have the Jupyter notebook installed, you can start editing and coding right away by starting `jupyter notebook` in the topmost folder.  You can download PDF versions from the environment.
+
+3. On the Mac, the `Pineapple` app integrates a nice editor with a local server.  This is easy to use, but misses a few features.
+
+4. To create the entire book (with citations, references, and all), you also need the [ipybublish](https://github.com/chrisjsewell/ipypublish) package.  This allows you to merge multiple chapters into a single PDF or HTML file, create slides, and more.  A Makefile provides the essential tools for creation.
 
 
 ### Python Conventions
