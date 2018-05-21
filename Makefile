@@ -63,18 +63,21 @@ $(CONVERTED)%.pdf:	$(CONVERTED)%.tex $(BIB)
 	-cd $(CONVERTED) && bibtex $*
 	cd $(CONVERTED) && pdflatex $*
 	cd $(CONVERTED) && pdflatex $*
-	cd $(CONVERTED) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm \
-		$*.lof $*.lot $*.nbpub.log
+	@cd $(CONVERTED) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm \
+		$*.lof $*.lot
 	@echo Created $@
 
 $(CONVERTED)%.tex:	%.ipynb $(BIB)
 	$(CONVERT_TO_TEX) $<
+	@cd $(CONVERTED) && $(RM) $*.nbpub.log
 
 $(CONVERTED)%.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_HTML) $<
+	@cd $(CONVERTED) && $(RM) $*.nbpub.log
 
 $(CONVERTED)%.slides.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
+	@cd $(CONVERTED) && $(RM) $*.nbpub.log
 
 $(CONVERTED)%.py:	%.ipynb
 	$(CONVERT_TO_PYTHON) $<
@@ -83,13 +86,13 @@ $(CONVERTED)%.py:	%.ipynb
 $(CONVERTED)book.tex:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_TEX) book
-	$(RM) book
+	@$(RM) book
 	@echo Created $@
 
 $(CONVERTED)book.html:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_HTML) book
-	$(RM) book
+	@$(RM) book
 	@echo Created $@
 
 # Cleanup
