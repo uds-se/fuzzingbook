@@ -17,8 +17,8 @@ TEXS   = $(SOURCES:%.ipynb=$(CONVERTED)%.tex)
 PDFS   = $(SOURCES:%.ipynb=$(CONVERTED)%.pdf)
 HTMLS  = $(SOURCES:%.ipynb=$(CONVERTED)%.html)
 SLIDES = $(SOURCES:%.ipynb=$(CONVERTED)%.slides.html)
-PYS    = $(SOURCES:%.ipynb=$(CONVERTED)%.py)
 FILES  = $(SOURCES:%.ipynb=$(CONVERTED)%_files)
+PYS    = $(SOURCES:%.ipynb=%.py)
 
 # Standard Jupyter tools
 CONVERT_TO_PYTHON = jupyter nbconvert --to python
@@ -48,7 +48,7 @@ book:	book-pdf book-html
 
 pdf:	$(PDFS)
 html:	$(HTMLS)
-code:	$(PYS)
+python code:	$(PYS)
 slides:	$(SLIDES)
 
 book-pdf:  $(BOOK_PDF)
@@ -72,6 +72,9 @@ $(CONVERTED)%.tex:	%.ipynb $(BIB)
 
 $(CONVERTED)%.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_HTML) $<
+
+$(CONVERTED)%.slides.html:	%.ipynb $(BIB)
+	$(CONVERT_TO_SLIDES) $<
 
 $(CONVERTED)%.py:	%.ipynb
 	$(CONVERT_TO_PYTHON) $<
