@@ -122,7 +122,7 @@ The GitLab project page allows to enter and track issues.
 
 #### Git
 
-We use git in a single strand of revisions.  Do not branch, do not merge. Sync early; sync often.  Only push if everything builds and passes.
+We use git in a single strand of revisions.  Do not branch, do not merge. Sync early; sync often.  Only push if everything ("make all") builds and passes.
 
 
 ## Publishing
