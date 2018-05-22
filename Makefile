@@ -1,11 +1,16 @@
 # gstbook Makefile
 
 # Current sources.  Files starting with '_' are not included in the book.
+GUIDE = _Guide_for_Authors
+CH00  = ch00_Title
+CH01  = ch01_Fuzzer
+CH02  = ch02_Coverage
+
 SOURCES = \
-	_Guide_for_Authors.ipynb \
-	ch00_Title.ipynb \
-	ch01_Fuzzer.ipynb \
-	ch02_Coverage.ipynb
+	$(GUIDE).ipynb \
+	$(CH00).ipynb \
+	$(CH01).ipynb \
+	$(CH02).ipynb
 
 BIB = gstbook.bib
 
@@ -23,7 +28,7 @@ PYS    = $(SOURCES:%.ipynb=%.py)
 # Standard Jupyter tools
 CONVERT_TO_PYTHON = jupyter nbconvert --to python
 
-# Use standard Jupyter tools
+# Alternative 1: Use standard Jupyter tools
 # CONVERT_TO_HTML   = jupyter nbconvert --to html
 # CONVERT_TO_TEX    = jupyter nbconvert --to latex --template gstbook.tplx
 # BOOK_TEX   =
@@ -31,7 +36,8 @@ CONVERT_TO_PYTHON = jupyter nbconvert --to python
 # BOOK_HTML  =
 # BOOK_FILES =
 
-# Use nbpublish (see nbpublish -h for details)
+# Alternative 2: Use nbpublish (https://github.com/chrisjsewell/ipypublish)
+# (see nbpublish -h for details)
 CONVERT_TO_HTML   = nbpublish -f html_ipypublish_all
 CONVERT_TO_TEX    = nbpublish -f latex_ipypublish_all
 CONVERT_TO_SLIDES = nbpublish -f slides_ipypublish_all
@@ -41,21 +47,38 @@ BOOK_HTML   = $(CONVERTED)book.html
 BOOK_FILES  = $(CONVERTED)book_files
 
 # Short targets
+# Default target is "chapters", as that's what you'd typically like to recreate after a change
+chapters: html pdf
+
+# Individual chapters
+guide: $(CONVERTED)$(GUIDE).html $(CONVERTED)$(GUIDE).pdf
+ch00: $(CONVERTED)$(CH00).html $(CONVERTED)$(CH00).pdf
+ch01: $(CONVERTED)$(CH01).html $(CONVERTED)$(CH01).pdf
+ch02: $(CONVERTED)$(CH02).html $(CONVERTED)$(CH02).pdf
+
+# The book is recreated after any change to any source
+book:	book-html book-pdf
 all:	chapters book
 
-chapters: pdf html
-book:	book-pdf book-html
-
-pdf:	$(PDFS)
+# Individual targets
 html:	$(HTMLS)
+pdf:	$(PDFS)
 python code:	$(PYS)
 slides:	$(SLIDES)
 
 book-pdf:  $(BOOK_PDF)
 book-html: $(BOOK_HTML)
 
-edit:	
+# Invoke notebook and editor
+edit jupyter notebook:
 	jupyter notebook
+
+# Help
+help:
+	@echo "Use 'make chapters' (default), 'make book', 'make code'"
+	@echo "Generated documents are written to '$(CONVERTED)' folder"
+	@echo "Code is written to current folder"
+	@echo "Use 'make clean' to cleanup"
 
 # Conversion rules - chapters
 $(CONVERTED)%.pdf:	$(CONVERTED)%.tex $(BIB)
@@ -79,7 +102,7 @@ $(CONVERTED)%.slides.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
 	@cd $(CONVERTED) && $(RM) $*.nbpub.log
 
-$(CONVERTED)%.py:	%.ipynb
+%.py:	%.ipynb
 	$(CONVERT_TO_PYTHON) $<
 
 # Conversion rules - entire book
@@ -106,9 +129,20 @@ AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
 	  $(CONVERTED)*.frm \
 	  $(CONVERTED)*.lof \
 	  $(CONVERTED)*.lot
-	  
-clean:
-	$(RM) $(TEXS) $(PDFS) $(HTMLS) $(SLIDES) $(PYS)
+
+clean-code:
+	$(RM) $(PYS)
+
+clean-chapters:
+	$(RM) $(TEXS) $(PDFS) $(HTMLS) $(SLIDES)
+	$(RM) -r $(FILES)
+
+clean-book:
 	$(RM) $(BOOK_TEX) $(BOOK_PDF) $(BOOK_HTML)
-	$(RM) -r $(FILES) $(BOOK_FILES)
+	$(RM) -r $(BOOK_FILES)
+
+clean-aux:
 	$(RM) $(AUX)
+
+clean: clean-code clean-chapters clean-book clean-aux
+	@echo "All derived files deleted"
