@@ -12,6 +12,7 @@ SOURCES = \
 	$(CH01).ipynb \
 	$(CH02).ipynb
 
+# The bibliography file
 BIB = gstbook.bib
 
 # Where to place the result
@@ -25,13 +26,17 @@ SLIDES = $(SOURCES:%.ipynb=$(CONVERTED)%.slides.html)
 FILES  = $(SOURCES:%.ipynb=$(CONVERTED)%_files)
 PYS    = $(SOURCES:%.ipynb=%.py)
 
-
+## Tools
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
 NBPUBLISH ?= nbpublish
 
 # The nbconvert alternative (okay for chapters; doesn't work for book)
 NBCONVERT ?= jupyter nbconvert
+
+# LaTeX
+PDFLATEX ?= pdflatex
+BIBTEX ?= bibtex
 
 ifndef PUBLISH
 # Determine publishing program
@@ -85,18 +90,27 @@ book:	book-html book-pdf
 all:	chapters book
 
 # Individual targets
-html:	$(HTMLS)
-pdf:	$(PDFS)
+html:	ipypublish-chapters $(HTMLS)
+pdf:	ipypublish-chapters $(PDFS)
 python code:	$(PYS)
 slides:	$(SLIDES)
 
+book-pdf:  ipypublish-book $(BOOK_PDF)
+book-html: ipypublish-book $(BOOK_HTML)
+
 ifeq ($(PUBLISH),nbpublish)
-book-pdf:  $(BOOK_PDF)
-book-html: $(BOOK_HTML)
+ipypublish-book:
+ipypublish-chapters:
 else
-book-pdf book-html:
-	@echo To create the book, install ipypublish
-	@echo from https://github.com/chrisjsewell/ipypublish
+ipypublish-book:
+	@echo "To create the book, you need the 'nbpublish' program."
+	@echo "This is part of the 'ipypublish' package"
+	@echo "at https://github.com/chrisjsewell/ipypublish"
+ipypublish-chapters:
+	@echo "Warning: Using '$(NBCONVERT)' instead of '$(NBPUBLISH)'"
+	@echo "Documents will be created without citations and references"
+	@echo "Install the 'ipypublish' package"
+	@echo "from https://github.com/chrisjsewell/ipypublish"
 endif
 
 # Invoke notebook and editor
@@ -113,10 +127,10 @@ help:
 
 # Conversion rules - chapters
 $(CONVERTED)%.pdf:	$(CONVERTED)%.tex $(BIB)
-	cd $(CONVERTED) && pdflatex $*
-	-cd $(CONVERTED) && bibtex $*
-	cd $(CONVERTED) && pdflatex $*
-	cd $(CONVERTED) && pdflatex $*
+	cd $(CONVERTED) && $(PDFLATEX) $*
+	-cd $(CONVERTED) && $(BIBTEX) $*
+	cd $(CONVERTED) && $(PDFLATEX) $*
+	cd $(CONVERTED) && $(PDFLATEX) $*
 	@cd $(CONVERTED) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm \
 		$*.lof $*.lot
 	@echo Created $@
