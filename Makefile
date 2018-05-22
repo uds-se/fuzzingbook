@@ -25,26 +25,50 @@ SLIDES = $(SOURCES:%.ipynb=$(CONVERTED)%.slides.html)
 FILES  = $(SOURCES:%.ipynb=$(CONVERTED)%_files)
 PYS    = $(SOURCES:%.ipynb=%.py)
 
-# Standard Jupyter tools
-CONVERT_TO_PYTHON = jupyter nbconvert --to python
 
-# Alternative 1: Use standard Jupyter tools
-# CONVERT_TO_HTML   = jupyter nbconvert --to html
-# CONVERT_TO_TEX    = jupyter nbconvert --to latex --template gstbook.tplx
-# BOOK_TEX   =
-# BOOK_PDF   =
-# BOOK_HTML  =
-# BOOK_FILES =
-
-# Alternative 2: Use nbpublish (https://github.com/chrisjsewell/ipypublish)
+# The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
-CONVERT_TO_HTML   = nbpublish -f html_ipypublish_all
-CONVERT_TO_TEX    = nbpublish -f latex_ipypublish_all
-CONVERT_TO_SLIDES = nbpublish -f slides_ipypublish_all
+NBPUBLISH ?= nbpublish
+
+# The nbconvert alternative (okay for chapters; doesn't work for book)
+NBCONVERT ?= jupyter nbconvert
+
+ifndef PUBLISH
+# Determine publishing program
+OUT := $(shell which $(NBPUBLISH) > /dev/null && echo yes)
+ifeq ($(OUT),yes)
+# We have nbpublish
+PUBLISH = nbpublish
+else
+# Issue a warning message
+OUT := $(shell $(NBPUBLISH) -h > /dev/null)
+# We have nbconvert
+PUBLISH = nbconvert
+endif
+endif
+
+ifeq ($(PUBLISH),nbpublish)
+CONVERT_TO_HTML   = $(NBPUBLISH) -f html_ipypublish_all
+CONVERT_TO_TEX    = $(NBPUBLISH) -f latex_ipypublish_all
+CONVERT_TO_SLIDES = $(NBPUBLISH) -f slides_ipypublish_all
 BOOK_TEX    = $(CONVERTED)book.tex
 BOOK_PDF    = $(CONVERTED)book.pdf
 BOOK_HTML   = $(CONVERTED)book.html
 BOOK_FILES  = $(CONVERTED)book_files
+else
+# Use standard Jupyter tools
+HAVE_NBPUBLISH = 0
+CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(CONVERTED)
+CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template gstbook.tplx --output-dir=$(CONVERTED)
+CONVERT_TO_SLIDES = error
+BOOK_TEX   = 
+BOOK_PDF   = 
+BOOK_HTML  = 
+BOOK_FILES = 
+endif
+
+# For Python, we can always use the standard Jupyter tools
+CONVERT_TO_PYTHON = $(NBCONVERT) --to python
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
@@ -66,8 +90,14 @@ pdf:	$(PDFS)
 python code:	$(PYS)
 slides:	$(SLIDES)
 
+ifeq ($(PUBLISH),nbpublish)
 book-pdf:  $(BOOK_PDF)
 book-html: $(BOOK_HTML)
+else
+book-pdf book-html:
+	@echo To create the book, install ipypublish
+	@echo from https://github.com/chrisjsewell/ipypublish
+endif
 
 # Invoke notebook and editor
 edit jupyter notebook:
@@ -78,6 +108,7 @@ help:
 	@echo "Use 'make chapters' (default), 'make book', 'make code'"
 	@echo "Generated documents are written to '$(CONVERTED)' folder"
 	@echo "Code is written to current folder"
+	@echo "Use make PUBLISH=(nbconvert|nbpublish) to define a converter (default: auto)"
 	@echo "Use 'make clean' to cleanup"
 
 # Conversion rules - chapters
