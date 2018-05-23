@@ -2,9 +2,9 @@
 
 # Current sources.  Files starting with '_' are not included in the book.
 GUIDE = _Guide_for_Authors
-CH00  = ch00_Title
-CH01  = ch01_Fuzzer
-CH02  = ch02_Coverage
+CH00  = Ch00_Title
+CH01  = Ch01_Fuzzer
+CH02  = Ch02_Coverage
 
 SOURCES = \
 	$(GUIDE).ipynb \
