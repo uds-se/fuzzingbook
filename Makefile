@@ -15,16 +15,22 @@ SOURCES = \
 # The bibliography file
 BIB = gstbook.bib
 
-# Where to place the result
-CONVERTED = converted/
+# Where to place the pdf, html, slides
+PDF_TARGET    = pdf/
+HTML_TARGET   = html/
+SLIDES_TARGET = slides/
+CODE_TARGET   = code/
 
 # Various derived files
-TEXS   = $(SOURCES:%.ipynb=$(CONVERTED)%.tex)
-PDFS   = $(SOURCES:%.ipynb=$(CONVERTED)%.pdf)
-HTMLS  = $(SOURCES:%.ipynb=$(CONVERTED)%.html)
-SLIDES = $(SOURCES:%.ipynb=$(CONVERTED)%.slides.html)
-FILES  = $(SOURCES:%.ipynb=$(CONVERTED)%_files)
-PYS    = $(SOURCES:%.ipynb=%.py)
+TEXS   = $(SOURCES:%.ipynb=$(PDF_TARGET)%.tex)
+PDFS   = $(SOURCES:%.ipynb=$(PDF_TARGET)%.pdf)
+HTMLS  = $(SOURCES:%.ipynb=$(HTML_TARGET)%.html)
+SLIDES = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
+PYS    = $(SOURCES:%.ipynb=$(CODE_TARGET)%.py)
+
+PDF_FILES     = $(SOURCES:%.ipynb=$(PDF_TARGET)%_files)
+HTML_FILES    = $(SOURCES:%.ipynb=$(HTML_TARGET)%_files)
+SLIDES_FILES  = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%_files)
 
 ## Tools
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
@@ -53,37 +59,44 @@ endif
 endif
 
 ifeq ($(PUBLISH),nbpublish)
-CONVERT_TO_HTML   = $(NBPUBLISH) -f html_ipypublish_all
-CONVERT_TO_TEX    = $(NBPUBLISH) -f latex_ipypublish_all
-CONVERT_TO_SLIDES = $(NBPUBLISH) -f slides_ipypublish_all
-BOOK_TEX    = $(CONVERTED)book.tex
-BOOK_PDF    = $(CONVERTED)book.pdf
-BOOK_HTML   = $(CONVERTED)book.html
-BOOK_FILES  = $(CONVERTED)book_files
+CONVERT_TO_HTML   = $(NBPUBLISH) -f html_ipypublish_all --outpath $(HTML_TARGET)
+CONVERT_TO_TEX    = $(NBPUBLISH) -f latex_ipypublish_all --outpath $(PDF_TARGET)
+# CONVERT_TO_SLIDES = $(NBPUBLISH) -f slides_ipypublish_all --outpath $(SLIDES_TARGET)
+BOOK_TEX    = $(PDF_TARGET)book.tex
+BOOK_PDF    = $(PDF_TARGET)book.pdf
+BOOK_HTML   = $(HTML_TARGET)book.html
+BOOK_HTML_FILES = $(HTML_TARGET)book_files
+BOOK_PDF_FILES  = $(PDF_TARGET)book_files
 else
 # Use standard Jupyter tools
 HAVE_NBPUBLISH = 0
-CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(CONVERTED)
-CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template gstbook.tplx --output-dir=$(CONVERTED)
-CONVERT_TO_SLIDES = error
+CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(HTML_TARGET)
+CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template gstbook.tplx --output-dir=$(PDF_TARGET)
+# CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
 BOOK_TEX   = 
 BOOK_PDF   = 
 BOOK_HTML  = 
-BOOK_FILES = 
+BOOK_HTML_FILES = 
+BOOK_PDF_FILES  = 
 endif
 
 # For Python, we can always use the standard Jupyter tools
-CONVERT_TO_PYTHON = $(NBCONVERT) --to python
+CONVERT_TO_PYTHON = $(NBCONVERT) --to python --output-dir=$(CODE_TARGET)
+
+# For slides, we also use the standard Jupyter tools
+# Main reason: Jupyter has a neat interface to control slides/sub-slides/etc
+CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
+
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
 chapters: html pdf
 
 # Individual chapters
-guide: $(CONVERTED)$(GUIDE).html $(CONVERTED)$(GUIDE).pdf
-ch00: $(CONVERTED)$(CH00).html $(CONVERTED)$(CH00).pdf
-ch01: $(CONVERTED)$(CH01).html $(CONVERTED)$(CH01).pdf
-ch02: $(CONVERTED)$(CH02).html $(CONVERTED)$(CH02).pdf
+guide: $(HTML_TARGET)$(GUIDE).html $(PDF_TARGET)$(GUIDE).pdf
+ch00: $(HTML_TARGET)$(CH00).html $(PDF_TARGET)$(CH00).pdf
+ch01: $(HTML_TARGET)$(CH01).html $(PDF_TARGET)$(CH01).pdf
+ch02: $(HTML_TARGET)$(CH02).html $(PDF_TARGET)$(CH02).pdf
 
 # The book is recreated after any change to any source
 book:	book-html book-pdf
@@ -120,71 +133,76 @@ edit jupyter notebook:
 # Help
 help:
 	@echo "Use 'make chapters' (default), 'make book', 'make code'"
-	@echo "Generated documents are written to '$(CONVERTED)' folder"
+	@echo "Generated PDFs are written to '$(PDF_TARGET)' folder"
+	@echo "Generated HTML is written to '$(PDF_HTML)' folder"
 	@echo "Code is written to current folder"
 	@echo "Use make PUBLISH=(nbconvert|nbpublish) to define a converter (default: auto)"
 	@echo "Use 'make clean' to cleanup"
 
 # Conversion rules - chapters
-$(CONVERTED)%.pdf:	$(CONVERTED)%.tex $(BIB)
-	cd $(CONVERTED) && $(PDFLATEX) $*
-	-cd $(CONVERTED) && $(BIBTEX) $*
-	cd $(CONVERTED) && $(PDFLATEX) $*
-	cd $(CONVERTED) && $(PDFLATEX) $*
-	@cd $(CONVERTED) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm \
+$(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
+	cd $(PDF_TARGET) && $(PDFLATEX) $*
+	-cd $(PDF_TARGET) && $(BIBTEX) $*
+	cd $(PDF_TARGET) && $(PDFLATEX) $*
+	cd $(PDF_TARGET) && $(PDFLATEX) $*
+	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm \
 		$*.lof $*.lot
 	@echo Created $@
 
-$(CONVERTED)%.tex:	%.ipynb $(BIB)
+$(PDF_TARGET)%.tex:	%.ipynb $(BIB)
 	$(CONVERT_TO_TEX) $<
-	@cd $(CONVERTED) && $(RM) $*.nbpub.log
+	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-$(CONVERTED)%.html:	%.ipynb $(BIB)
+$(HTML_TARGET)%.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_HTML) $<
-	@cd $(CONVERTED) && $(RM) $*.nbpub.log
+	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log
 
-$(CONVERTED)%.slides.html:	%.ipynb $(BIB)
+$(SLIDES_TARGET)%.slides.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
-	@cd $(CONVERTED) && $(RM) $*.nbpub.log
+	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log
 
-%.py:	%.ipynb
+# For code, we comment out gstbook imports, ensuring we import a .py and not the .ipynb file
+$(CODE_TARGET)%.py:	%.ipynb
 	$(CONVERT_TO_PYTHON) $<
+	sed 's/^import gstbook.*/# & # only in notebook/' $@ > $@~ && mv $@~ $@
 
 # Conversion rules - entire book
-$(CONVERTED)book.tex:	$(SOURCES) $(BIB)
+$(PDF_TARGET)book.tex:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_TEX) book
 	@$(RM) book
+	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 	@echo Created $@
 
-$(CONVERTED)book.html:	$(SOURCES) $(BIB)
+$(HTML_TARGET)book.html:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_HTML) book
 	@$(RM) book
+	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log
 	@echo Created $@
 
 # Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
-	  $(CONVERTED)*.aux \
-	  $(CONVERTED)*.bbl \
-	  $(CONVERTED)*.blg \
-	  $(CONVERTED)*.log \
-	  $(CONVERTED)*.out \
-	  $(CONVERTED)*.toc \
-	  $(CONVERTED)*.frm \
-	  $(CONVERTED)*.lof \
-	  $(CONVERTED)*.lot
+	  $(PDF_TARGET)*.aux \
+	  $(PDF_TARGET)*.bbl \
+	  $(PDF_TARGET)*.blg \
+	  $(PDF_TARGET)*.log \
+	  $(PDF_TARGET)*.out \
+	  $(PDF_TARGET)*.toc \
+	  $(PDF_TARGET)*.frm \
+	  $(PDF_TARGET)*.lof \
+	  $(PDF_TARGET)*.lot
 
 clean-code:
 	$(RM) $(PYS)
 
 clean-chapters:
 	$(RM) $(TEXS) $(PDFS) $(HTMLS) $(SLIDES)
-	$(RM) -r $(FILES)
+	$(RM) -r $(PDF_FILES) $(HTML_FILES) $(SLIDES_FILES)
 
 clean-book:
 	$(RM) $(BOOK_TEX) $(BOOK_PDF) $(BOOK_HTML)
-	$(RM) -r $(BOOK_FILES)
+	$(RM) -r $(BOOK_HTML_FILES) $(BOOK_PDF_FILES)
 
 clean-aux:
 	$(RM) $(AUX)
