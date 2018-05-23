@@ -147,6 +147,7 @@ $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	cd $(PDF_TARGET) && $(PDFLATEX) $*
 	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm \
 		$*.lof $*.lot
+	@cd $(PDF_TARGET) && $(RM) -r $*.tex $*_files
 	@echo Created $@
 
 $(PDF_TARGET)%.tex:	%.ipynb $(BIB)
@@ -155,11 +156,11 @@ $(PDF_TARGET)%.tex:	%.ipynb $(BIB)
 
 $(HTML_TARGET)%.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_HTML) $<
-	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log
+	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 
 $(SLIDES_TARGET)%.slides.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
-	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log
+	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 
 # For code, we comment out gstbook imports, ensuring we import a .py and not the .ipynb file
 $(CODE_TARGET)%.py:	%.ipynb
@@ -170,15 +171,15 @@ $(CODE_TARGET)%.py:	%.ipynb
 $(PDF_TARGET)book.tex:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_TEX) book
-	@$(RM) book
-	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
+	$(RM) book
+	cd $(PDF_TARGET) && $(RM) book.nbpub.log
 	@echo Created $@
 
 $(HTML_TARGET)book.html:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_HTML) book
-	@$(RM) book
-	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log
+	$(RM) book
+	cd $(HTML_TARGET) && $(RM) book.nbpub.log book_files/$(BIB)
 	@echo Created $@
 
 # Cleanup
