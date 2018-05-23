@@ -90,7 +90,7 @@ CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
-chapters: html pdf
+chapters: html pdf code
 
 # Individual chapters
 guide: $(HTML_TARGET)$(GUIDE).html $(PDF_TARGET)$(GUIDE).pdf
@@ -100,7 +100,7 @@ ch02: $(HTML_TARGET)$(CH02).html $(PDF_TARGET)$(CH02).pdf
 
 # The book is recreated after any change to any source
 book:	book-html book-pdf
-all:	chapters book
+all:	chapters slides book
 
 # Individual targets
 html:	ipypublish-chapters $(HTMLS)
