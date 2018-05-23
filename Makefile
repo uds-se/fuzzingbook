@@ -132,12 +132,22 @@ edit jupyter notebook:
 
 # Help
 help:
-	@echo "Use 'make chapters' (default), 'make book', 'make code'"
-	@echo "Generated PDFs are written to '$(PDF_TARGET)' folder"
-	@echo "Generated HTML is written to '$(PDF_HTML)' folder"
-	@echo "Code is written to current folder"
-	@echo "Use make PUBLISH=(nbconvert|nbpublish) to define a converter (default: auto)"
-	@echo "Use 'make clean' to cleanup"
+	@echo "Welcome to the 'gstbook' makefile!"
+	@echo "* Use 'make chapters' (default) or 'make book'"
+	@echo "  to generate PDF, HTML, code, and slides"
+	@echo "* To create a subcategory only,"
+	@echo "  use 'make pdf', 'make html', 'make code', 'make slides'."
+	@echo "* To create all inputs in all output formats,"
+	@echo "  use 'make all'."
+	@echo ""
+	@echo "Created files end here:"
+	@echo "* PDFs -> '$(PDF_TARGET)', HTML -> '$(HTML_TARGET)', Python code -> '$(CODE_TARGET)', Slides -> '$(SLIDES_TARGET)'"
+	@echo ""
+	@echo "Settings:"
+	@echo "* Use make PUBLISH=(nbconvert|nbpublish) to choose a converter (default: auto)"
+	@echo ""
+	@echo "Cleanup:"
+	@echo "* Use 'make clean' to delete all derived files"
 
 # Conversion rules - chapters
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
