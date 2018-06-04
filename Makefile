@@ -20,6 +20,7 @@ PDF_TARGET    = pdf/
 HTML_TARGET   = html/
 SLIDES_TARGET = slides/
 CODE_TARGET   = code/
+WORD_TARGET   = word/
 
 # Various derived files
 TEXS   = $(SOURCES:%.ipynb=$(PDF_TARGET)%.tex)
@@ -27,6 +28,7 @@ PDFS   = $(SOURCES:%.ipynb=$(PDF_TARGET)%.pdf)
 HTMLS  = $(SOURCES:%.ipynb=$(HTML_TARGET)%.html)
 SLIDES = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
 PYS    = $(SOURCES:%.ipynb=$(CODE_TARGET)%.py)
+WORDS  = $(SOURCES:%.ipynb=$(WORD_TARGET)%.docx)
 
 PDF_FILES     = $(SOURCES:%.ipynb=$(PDF_TARGET)%_files)
 HTML_FILES    = $(SOURCES:%.ipynb=$(HTML_TARGET)%_files)
@@ -43,6 +45,9 @@ NBCONVERT ?= jupyter nbconvert
 # LaTeX
 PDFLATEX ?= pdflatex
 BIBTEX ?= bibtex
+
+# Word
+PANDOC ?= pandoc
 
 ifndef PUBLISH
 # Determine publishing program
@@ -87,6 +92,9 @@ CONVERT_TO_PYTHON = $(NBCONVERT) --to python --output-dir=$(CODE_TARGET)
 # Main reason: Jupyter has a neat interface to control slides/sub-slides/etc
 CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
 
+# For Word .docx files, we start from the HTML version
+CONVERT_TO_WORD = $(PANDOC) 
+
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
@@ -107,6 +115,7 @@ html:	ipypublish-chapters $(HTMLS)
 pdf:	ipypublish-chapters $(PDFS)
 python code:	$(PYS)
 slides:	$(SLIDES)
+word docx: $(WORDS)
 
 book-pdf:  ipypublish-book $(BOOK_PDF)
 book-html: ipypublish-book $(BOOK_HTML)
@@ -176,6 +185,10 @@ $(SLIDES_TARGET)%.slides.html:	%.ipynb $(BIB)
 $(CODE_TARGET)%.py:	%.ipynb
 	$(CONVERT_TO_PYTHON) $<
 	sed 's/^import gstbook.*/# & # only in notebook/' $@ > $@~ && mv $@~ $@
+	
+# For word, we convert from the HTML file
+$(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
+	$(PANDOC) --css=$(WORD_TARGET)pandoc.css $< -o $@
 
 # Conversion rules - entire book
 $(PDF_TARGET)book.tex:	$(SOURCES) $(BIB)
@@ -208,7 +221,7 @@ clean-code:
 	$(RM) $(PYS)
 
 clean-chapters:
-	$(RM) $(TEXS) $(PDFS) $(HTMLS) $(SLIDES)
+	$(RM) $(TEXS) $(PDFS) $(HTMLS) $(SLIDES) $(WORDS)
 	$(RM) -r $(PDF_FILES) $(HTML_FILES) $(SLIDES_FILES)
 
 clean-book:
