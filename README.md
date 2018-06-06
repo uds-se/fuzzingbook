@@ -92,11 +92,18 @@ To work on the notebook files, you need the following:
 For Python, rule number one is to keep things *as simple as possible.*
 
 * Stick to simple functions and data types.  We want our readers to focus on functionality, not Python.
+
 * Avoid Python-specific features.  We want our readers to be able to translate our code into languages of their choice---say, C or Java code.
-* Avoid object orientation.  OO in Python is special, so do not burden readers with it unless necessary.  Using existing Python classes is fine, as long as you do not derive new classes from them.
+
 * Avoid defining data structures.  Stick to lists, maps, tuples, as provided by Python.
 
-The exception to the above rules is if a specific Python feature saves so much code that even with its natural language rationale
+* The case for object orientation is open:
+
+  * In Favor: OO may allow us to create classes for common objects (Grammar, etc.) and to add new features deriving from them.  (But then, we'd need such a design first.)
+  
+  * Against: OO in Python is special, so explanations would burden readers.  Also, the Jupyter Notebook format makes incremental definition of classes cumbersome (see the included `@extend_class` decorator)
+
+The exception to the above rules is if a specific Python feature saves so much code that even with its natural language rationale, it is shorter.
 
 #### Consistency
 
