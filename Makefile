@@ -2,15 +2,19 @@
 
 # Current sources.  Files starting with '_' are not included in the book.
 GUIDE = _Guide_for_Authors
-CH00  = Ch00_Title
-CH01  = Ch01_Fuzzer
-CH02  = Ch02_Coverage
+CH00a  = Ch00a_Title
+CH00b  = Ch00b_Preface
+CH01   = Ch01_Intro_Testing
+CH02   = Ch02_Intro_Fuzzing
+CH03   = Ch03_Coverage
 
 SOURCES = \
 	$(GUIDE).ipynb \
-	$(CH00).ipynb \
+	$(CH00a).ipynb \
+	$(CH00b).ipynb \
 	$(CH01).ipynb \
-	$(CH02).ipynb
+	$(CH02).ipynb \
+	$(CH03).ipynb \
 
 # The bibliography file
 BIB = gstbook.bib
@@ -102,9 +106,11 @@ chapters: html pdf code
 
 # Individual chapters
 guide: $(HTML_TARGET)$(GUIDE).html $(PDF_TARGET)$(GUIDE).pdf
-ch00: $(HTML_TARGET)$(CH00).html $(PDF_TARGET)$(CH00).pdf
+ch00a: $(HTML_TARGET)$(CH00a).html $(PDF_TARGET)$(CH00a).pdf
+ch00b: $(HTML_TARGET)$(CH00b).html $(PDF_TARGET)$(CH00b).pdf
 ch01: $(HTML_TARGET)$(CH01).html $(PDF_TARGET)$(CH01).pdf
 ch02: $(HTML_TARGET)$(CH02).html $(PDF_TARGET)$(CH02).pdf
+ch03: $(HTML_TARGET)$(CH03).html $(PDF_TARGET)$(CH03).pdf
 
 # The book is recreated after any change to any source
 book:	book-html book-pdf
