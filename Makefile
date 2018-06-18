@@ -126,7 +126,7 @@ CONVERT_TO_WORD = $(PANDOC)
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
-default run chapters: html pdf code
+chapters default run: html pdf code
 
 # Individual chapters
 guide: $(HTML_TARGET)$(GUIDE).html $(PDF_TARGET)$(GUIDE).pdf
