@@ -187,7 +187,7 @@ help:
 	@echo "* PDFs -> '$(PDF_TARGET)', HTML -> '$(HTML_TARGET)', Python code -> '$(CODE_TARGET)', Slides -> '$(SLIDES_TARGET)'"
 	@echo ""
 	@echo "Settings:"
-	@echo "* Use make PUBLISH=(nbconvert|nbpublish) to choose a converter (default: auto)"
+	@echo "* Use make PUBLISH=(nbconvert|nbpublish|bookbook) to choose a converter (default: auto)"
 	@echo ""
 	@echo "Cleanup:"
 	@echo "* Use 'make clean' to delete all derived files"
