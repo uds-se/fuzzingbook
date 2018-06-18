@@ -39,20 +39,24 @@ PDF_FILES     = $(SOURCES:%.ipynb=$(PDF_TARGET)%_files)
 HTML_FILES    = $(SOURCES:%.ipynb=$(HTML_TARGET)%_files)
 SLIDES_FILES  = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%_files)
 
+# Configuration
+# What we use for production: nbpublish (preferred), bookbook, or nbconvert
+PUBLISH ?= nbpublish
+
 ## Tools
 # Python
 PYTHON ?= python
-
-# The bookbook tool
-BOOKBOOK_LATEX ?= $(PYTHON) -m bookbook.latex
-BOOKBOOK_HTML  ?= $(PYTHON) -m bookbook.html
-PUBLISH ?= bookbook
 
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
 NBPUBLISH ?= nbpublish
 
-# The nbconvert alternative (okay for chapters; doesn't work for book)
+# The bookbook tool (okay for chapters and books; but no citations yet)
+# https://github.com/takluyver/bookbook
+BOOKBOOK_LATEX ?= $(PYTHON) -m bookbook.latex
+BOOKBOOK_HTML  ?= $(PYTHON) -m bookbook.html
+
+# The nbconvert alternative (okay for chapters; doesn't work for book; no citations)
 NBCONVERT ?= jupyter nbconvert
 
 # LaTeX
@@ -145,6 +149,10 @@ word docx: $(WORDS)
 book-pdf:  ipypublish-book $(BOOK_PDF)
 book-html: ipypublish-book $(BOOK_HTML)
 
+ifeq ($(PUBLISH),bookbook)
+ipypublish-book:
+ipypublish-chapters:
+else
 ifeq ($(PUBLISH),nbpublish)
 ipypublish-book:
 ipypublish-chapters:
@@ -158,6 +166,7 @@ ipypublish-chapters:
 	@echo "Documents will be created without citations and references"
 	@echo "Install the 'ipypublish' package"
 	@echo "from https://github.com/chrisjsewell/ipypublish"
+endif
 endif
 
 # Invoke notebook and editor
