@@ -194,10 +194,11 @@ help:
 
 # Conversion rules - chapters
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
-	cd $(PDF_TARGET) && $(PDFLATEX) $*
-	-cd $(PDF_TARGET) && $(BIBTEX) $*
-	cd $(PDF_TARGET) && $(PDFLATEX) $*
-	cd $(PDF_TARGET) && $(PDFLATEX) $*
+	@echo Running LaTeX...
+	@cd $(PDF_TARGET) && $(PDFLATEX) $*
+	@-cd $(PDF_TARGET) && $(BIBTEX) $*
+	@cd $(PDF_TARGET) && $(PDFLATEX) $*
+	@cd $(PDF_TARGET) && $(PDFLATEX) $*
 	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm \
 		$*.lof $*.lot
 	@cd $(PDF_TARGET) && $(RM) -r $*.tex $*_files
