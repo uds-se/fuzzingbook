@@ -2,19 +2,20 @@
 
 # Current sources.  Files starting with '_' are not included in the book.
 GUIDE = _Guide_for_Authors
-TITLE = Ch-1_Title
 CH00  = Ch00_Preface
-CH01  = Ch01_Intro_Testing
-CH02  = Ch02_Intro_Fuzzing
+CH01  = Ch01_Testing
+CH02  = Ch02_Fuzzing
 CH03  = Ch03_Coverage
 
-SOURCES = \
-	$(GUIDE).ipynb \
-	$(TITLE).ipynb \
+CHAPTERS = \
 	$(CH00).ipynb \
 	$(CH01).ipynb \
 	$(CH02).ipynb \
-	$(CH03).ipynb \
+	$(CH03).ipynb
+
+SOURCES = \
+	$(GUIDE).ipynb \
+	$(CHAPTERS)
 
 # The bibliography file
 BIB = gstbook.bib
@@ -39,6 +40,14 @@ HTML_FILES    = $(SOURCES:%.ipynb=$(HTML_TARGET)%_files)
 SLIDES_FILES  = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%_files)
 
 ## Tools
+# Python
+PYTHON ?= python
+
+# The bookbook tool
+BOOKBOOK_LATEX ?= $(PYTHON) -m bookbook.latex
+BOOKBOOK_HTML  ?= $(PYTHON) -m bookbook.html
+PUBLISH ?= bookbook
+
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
 NBPUBLISH ?= nbpublish
@@ -67,7 +76,18 @@ PUBLISH = nbconvert
 endif
 endif
 
+ifeq ($(PUBLISH),bookbook)
+# Use bookbook
+CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(HTML_TARGET)
+CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template gstbook.tplx --output-dir=$(PDF_TARGET)
+BOOK_TEX    = $(PDF_TARGET)book.tex
+BOOK_PDF    = $(PDF_TARGET)book.pdf
+BOOK_HTML   = $(HTML_TARGET)book.html
+BOOK_HTML_FILES = $(HTML_TARGET)book_files
+BOOK_PDF_FILES  = $(PDF_TARGET)book_files
+else
 ifeq ($(PUBLISH),nbpublish)
+# Use nbpublish
 CONVERT_TO_HTML   = $(NBPUBLISH) -f html_ipypublish_all --outpath $(HTML_TARGET)
 CONVERT_TO_TEX    = $(NBPUBLISH) -f latex_ipypublish_all --outpath $(PDF_TARGET)
 # CONVERT_TO_SLIDES = $(NBPUBLISH) -f slides_ipypublish_all --outpath $(SLIDES_TARGET)
@@ -78,7 +98,6 @@ BOOK_HTML_FILES = $(HTML_TARGET)book_files
 BOOK_PDF_FILES  = $(PDF_TARGET)book_files
 else
 # Use standard Jupyter tools
-HAVE_NBPUBLISH = 0
 CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(HTML_TARGET)
 CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template gstbook.tplx --output-dir=$(PDF_TARGET)
 # CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
@@ -87,6 +106,7 @@ BOOK_PDF   =
 BOOK_HTML  = 
 BOOK_HTML_FILES = 
 BOOK_PDF_FILES  = 
+endif
 endif
 
 # For Python, we can always use the standard Jupyter tools
@@ -106,7 +126,6 @@ default run chapters: html pdf code
 
 # Individual chapters
 guide: $(HTML_TARGET)$(GUIDE).html $(PDF_TARGET)$(GUIDE).pdf
-title: $(HTML_TARGET)$(TITLE).html $(PDF_TARGET)$(TITLE).pdf
 ch00: $(HTML_TARGET)$(CH00).html $(PDF_TARGET)$(CH00).pdf
 ch01: $(HTML_TARGET)$(CH01).html $(PDF_TARGET)$(CH01).pdf
 ch02: $(HTML_TARGET)$(CH02).html $(PDF_TARGET)$(CH02).pdf
@@ -197,6 +216,8 @@ $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
 	$(PANDOC) --css=$(WORD_TARGET)pandoc.css $< -o $@
 
 # Conversion rules - entire book
+ifeq ($(PUBLISH),nbpublish)
+# With nbpublish
 $(PDF_TARGET)book.tex:	$(SOURCES) $(BIB)
 	-ln -s . book
 	$(CONVERT_TO_TEX) book
@@ -210,6 +231,31 @@ $(HTML_TARGET)book.html:	$(SOURCES) $(BIB)
 	$(RM) book
 	cd $(HTML_TARGET) && $(RM) book.nbpub.log book_files/$(BIB)
 	@echo Created $@
+
+else
+
+# With bookbook
+$(PDF_TARGET)book.tex: $(SOURCES) $(BIB)
+	-mkdir book
+	-for file in $(CHAPTERS); do \
+	    ln -s ../$$file book/$$(echo $$file | sed 's/[^-0-9]*\([-0-9][0-9]*\)_\(.*\)/\1-\2/g'); \
+	done
+	cd book; $(BOOKBOOK_LATEX)
+	mv book/combined.tex $@
+	$(RM) -r book
+	@echo Created $@
+
+$(HTML_TARGET)book.html: $(SOURCES) $(BIB)
+	-mkdir book
+	-for file in $(CHAPTERS); do \
+	    ln -s ../$$file book/$$(echo $$file | sed 's/[^-0-9]*\([-0-9][0-9]*\)_\(.*\)/\1-\2/g'); \
+	done
+	cd book; $(BOOKBOOK_HTML)
+	mv book/html/index.html $@
+	mv book/html/*.html $(HTML_TARGET)
+	$(RM) -r book
+	@echo Created $@
+endif
 
 # Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
