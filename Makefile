@@ -195,6 +195,7 @@ help:
 # Conversion rules - chapters
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@echo Running LaTeX...
+	@-cd $(PDF_TARGET) && ln -s ../PICS .
 	@cd $(PDF_TARGET) && $(PDFLATEX) $*
 	@-cd $(PDF_TARGET) && $(BIBTEX) $*
 	@cd $(PDF_TARGET) && $(PDFLATEX) $*
@@ -211,10 +212,12 @@ $(PDF_TARGET)%.tex:	%.ipynb $(BIB)
 $(HTML_TARGET)%.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
+	@-cd $(HTML_TARGET) && ln -s ../PICS .
 
 $(SLIDES_TARGET)%.slides.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
+	@-cd $(SLIDES_TARGET) && ln -s ../PICS .
 
 # For code, we comment out gstbook imports, ensuring we import a .py and not the .ipynb file
 $(CODE_TARGET)%.py:	%.ipynb
