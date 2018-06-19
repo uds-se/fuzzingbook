@@ -43,6 +43,9 @@ SLIDES_FILES  = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%_files)
 # What we use for production: nbpublish (preferred), bookbook, or nbconvert
 PUBLISH ?= nbpublish
 
+# What we use for LaTeX: latexmk (preferred), or pdflatex
+LATEX ?= latexmk
+
 ## Tools
 # Python
 PYTHON ?= python
@@ -62,6 +65,8 @@ NBCONVERT ?= jupyter nbconvert
 # LaTeX
 PDFLATEX ?= pdflatex
 BIBTEX ?= bibtex
+LATEXMK ?= latexmk
+LATEXMK_OPTS ?= -pdf -quiet
 
 # Word
 PANDOC ?= pandoc
@@ -79,6 +84,21 @@ OUT := $(shell $(NBPUBLISH) -h > /dev/null)
 PUBLISH = nbconvert
 endif
 endif
+
+ifndef LATEX
+# Determine publishing program
+OUT := $(shell which $(LATEXMK) > /dev/null && echo yes)
+ifeq ($(OUT),yes)
+# We have latexmk
+LATEX = $(LATEXMK)
+else
+# Issue a warning message
+OUT := $(shell $(LATEXMK) -h > /dev/null)
+# We have pdflatex
+LATEX = $(PDFLATEX)
+endif
+endif
+
 
 ifeq ($(PUBLISH),bookbook)
 # Use bookbook
@@ -126,7 +146,7 @@ CONVERT_TO_WORD = $(PANDOC)
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
-chapters default run: html pdf code
+chapters default run: html code pdf
 
 # Individual chapters
 guide: $(HTML_TARGET)$(GUIDE).html $(PDF_TARGET)$(GUIDE).pdf
@@ -193,17 +213,28 @@ help:
 	@echo "* Use 'make clean' to delete all derived files"
 
 # Conversion rules - chapters
+ifeq ($(LATEX),pdflatex)
+# Use PDFLaTeX
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@echo Running LaTeX...
-	@-cd $(PDF_TARGET) && ln -s ../PICS .
-	@cd $(PDF_TARGET) && $(PDFLATEX) $*
-	@-cd $(PDF_TARGET) && $(BIBTEX) $*
-	@cd $(PDF_TARGET) && $(PDFLATEX) $*
-	@cd $(PDF_TARGET) && $(PDFLATEX) $*
-	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm \
-		$*.lof $*.lot
+	@-test -L $(PDF_TARGET)/PICS || ln -s ../PICS $(PDF_TARGET)
+	cd $(PDF_TARGET) && $(PDFLATEX) $*
+	-cd $(PDF_TARGET) && $(BIBTEX) $*
+	cd $(PDF_TARGET) && $(PDFLATEX) $*
+	cd $(PDF_TARGET) && $(PDFLATEX) $*
+	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm $*.lof $*.lot $*.fls
 	@cd $(PDF_TARGET) && $(RM) -r $*.tex $*_files
 	@echo Created $@
+else
+# Use LaTeXMK
+$(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
+	@echo Running LaTeXMK...
+	@-test -L $(PDF_TARGET)/PICS || ln -s ../PICS $(PDF_TARGET)
+	cd $(PDF_TARGET) && $(LATEXMK) $(LATEXMK_OPTS) $*
+	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm $*.lof $*.lot $*.fls $*.fdb_latexmk
+	@cd $(PDF_TARGET) && $(RM) -r $*.tex $*_files
+	@echo Created $@
+endif
 
 $(PDF_TARGET)%.tex:	%.ipynb $(BIB)
 	$(CONVERT_TO_TEX) $<
@@ -212,12 +243,12 @@ $(PDF_TARGET)%.tex:	%.ipynb $(BIB)
 $(HTML_TARGET)%.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	@-cd $(HTML_TARGET) && ln -s ../PICS .
+	@-test -L $(HTML_TARGET)/PICS || ln -s ../PICS $(HTML_TARGET)
 
 $(SLIDES_TARGET)%.slides.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	@-cd $(SLIDES_TARGET) && ln -s ../PICS .
+	@-test -L $(HTML_TARGET)/PICS || ln -s ../PICS $(HTML_TARGET)
 
 # For code, we comment out gstbook imports, ensuring we import a .py and not the .ipynb file
 $(CODE_TARGET)%.py:	%.ipynb
@@ -244,9 +275,7 @@ $(HTML_TARGET)book.html:	$(SOURCES) $(BIB)
 	$(RM) book
 	cd $(HTML_TARGET) && $(RM) book.nbpub.log book_files/$(BIB)
 	@echo Created $@
-
 else
-
 # With bookbook
 $(PDF_TARGET)book.tex: $(SOURCES) $(BIB)
 	-mkdir book
