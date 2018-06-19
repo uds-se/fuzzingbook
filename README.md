@@ -14,31 +14,31 @@ The idea is to have a _textbook on software test generation,_ teaching students 
 
 The contents and organization of the book would roughly be based on the lecture “Security Testing” that Andreas and Rahul are currently running.  A typical set of chapters could be based on the lectures we have prepared, plus a few more:
 
-1. Introduction
-2. Fundamentals of Testing
-3. Text-Based Fuzzing
-4. Grammar-Based Fuzzing
-5. Generating Complex Inputs
-6. Fuzzing Function Calls
-7. Fuzzing User Interfaces
-8. Mutation-Based Fuzzing
-9. Parsing Inputs
-10. Simplifying Inputs
-11. Search-Based Testing
-12. Evolving Test Suites
-13. Solving Constraints
-14. Symbolic Testing
-15. Mining Grammars
-16. Taint Analysis
-17. Mutation Analysis
-18. Probabilistic Testing
-19. Generating Unit Tests
-20. Carving Unit Tests
-21. Inferring Invariants
-22. Protection and Repair
-23. Fuzzing in the Large
-24. The Future of Test Generation
-* Appendix: Glossary
+* Preface
+1. Fundamentals of Testing
+2. Text-Based Fuzzing
+3. Grammar-Based Fuzzing
+4. Generating Complex Inputs
+5. Fuzzing Function Calls
+6. Fuzzing User Interfaces
+7. Mutation-Based Fuzzing
+8. Parsing Inputs
+9. Simplifying Inputs
+10. Search-Based Testing
+11. Evolving Test Suites
+12. Solving Constraints
+13. Symbolic Testing
+14. Mining Grammars
+15. Taint Analysis
+16. Mutation Analysis
+17. Probabilistic Testing
+18. Generating Unit Tests
+19. Carving Unit Tests
+20. Inferring Invariants
+21. Protection and Repair
+22. Fuzzing in the Large
+23. The Future of Test Generation
+* Glossary
 
 Each chapter would be about 10–20 pages in length, such that the book overall would have about 300 pages.  Keep in mind that the code is (mostly) part of the book, so this is programming as well as writing. Each chapter would come with exercises, typically extending the given code in some way, as well as references to related work.
 
