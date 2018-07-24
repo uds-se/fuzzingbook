@@ -21,19 +21,21 @@ SOURCES = \
 BIB = gstbook.bib
 
 # Where to place the pdf, html, slides
-PDF_TARGET    = pdf/
-HTML_TARGET   = html/
-SLIDES_TARGET = slides/
-CODE_TARGET   = code/
-WORD_TARGET   = word/
+PDF_TARGET      = pdf/
+HTML_TARGET     = html/
+SLIDES_TARGET   = slides/
+CODE_TARGET     = code/
+WORD_TARGET     = word/
+MARKDOWN_TARGET = markdown/
 
 # Various derived files
-TEXS   = $(SOURCES:%.ipynb=$(PDF_TARGET)%.tex)
-PDFS   = $(SOURCES:%.ipynb=$(PDF_TARGET)%.pdf)
-HTMLS  = $(SOURCES:%.ipynb=$(HTML_TARGET)%.html)
-SLIDES = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
-PYS    = $(SOURCES:%.ipynb=$(CODE_TARGET)%.py)
-WORDS  = $(SOURCES:%.ipynb=$(WORD_TARGET)%.docx)
+TEXS      = $(SOURCES:%.ipynb=$(PDF_TARGET)%.tex)
+PDFS      = $(SOURCES:%.ipynb=$(PDF_TARGET)%.pdf)
+HTMLS     = $(SOURCES:%.ipynb=$(HTML_TARGET)%.html)
+SLIDES    = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
+PYS       = $(SOURCES:%.ipynb=$(CODE_TARGET)%.py)
+WORDS     = $(SOURCES:%.ipynb=$(WORD_TARGET)%.docx)
+MARKDOWNS = $(SOURCES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 
 PDF_FILES     = $(SOURCES:%.ipynb=$(PDF_TARGET)%_files)
 HTML_FILES    = $(SOURCES:%.ipynb=$(HTML_TARGET)%_files)
@@ -70,6 +72,9 @@ LATEXMK_OPTS ?= -pdf -quiet
 
 # Word
 PANDOC ?= pandoc
+
+# Markdown (see https://github.com/aaren/notedown)
+NOTEDOWN ?= notedown
 
 ifndef PUBLISH
 # Determine publishing program
@@ -143,6 +148,9 @@ CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
 # For Word .docx files, we start from the HTML version
 CONVERT_TO_WORD = $(PANDOC) 
 
+# For Markdown .md files, we use markdown
+CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown --run
+
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
@@ -164,7 +172,8 @@ html:	ipypublish-chapters $(HTMLS)
 pdf:	ipypublish-chapters $(PDFS)
 python code:	$(PYS)
 slides:	$(SLIDES)
-word docx: $(WORDS)
+word doc docx: $(WORDS)
+md markdown: $(MARKDOWNS)
 
 book-pdf:  ipypublish-book $(BOOK_PDF)
 book-html: ipypublish-book $(BOOK_HTML)
@@ -199,7 +208,7 @@ help:
 	@echo "* Use 'make chapters' (default) or 'make book'"
 	@echo "  to generate PDF, HTML, code, and slides"
 	@echo "* To create a subcategory only,"
-	@echo "  use 'make pdf', 'make html', 'make code', 'make slides'."
+	@echo "  use 'make pdf', 'make html', 'make code', 'make slides', 'make markdown'."
 	@echo "* To create all inputs in all output formats,"
 	@echo "  use 'make all'."
 	@echo ""
@@ -249,6 +258,9 @@ $(SLIDES_TARGET)%.slides.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/PICS || ln -s ../PICS $(HTML_TARGET)
+
+$(MARKDOWN_TARGET)%.md:	%.ipynb $(BIB)
+	$(CONVERT_TO_MARKDOWN) $< > $@
 
 # For code, we comment out gstbook imports, ensuring we import a .py and not the .ipynb file
 $(CODE_TARGET)%.py:	%.ipynb
