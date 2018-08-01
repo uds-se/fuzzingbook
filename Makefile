@@ -37,6 +37,8 @@ PYS       = $(SOURCES:%.ipynb=$(CODE_TARGET)%.py)
 WORDS     = $(SOURCES:%.ipynb=$(WORD_TARGET)%.docx)
 MARKDOWNS = $(SOURCES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 
+CHAPTER_PYS = $(CHAPTERS:%.ipynb=$(CODE_TARGET)%.py)
+
 PDF_FILES     = $(SOURCES:%.ipynb=$(PDF_TARGET)%_files)
 HTML_FILES    = $(SOURCES:%.ipynb=$(HTML_TARGET)%_files)
 SLIDES_FILES  = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%_files)
@@ -75,6 +77,10 @@ PANDOC ?= pandoc
 
 # Markdown (see https://github.com/aaren/notedown)
 NOTEDOWN ?= notedown
+
+# Style checks
+PYCODESTYLE = pycodestyle
+PYCODESTYLE_OPTS = --config setup.cfg
 
 ifndef PUBLISH
 # Determine publishing program
@@ -265,7 +271,8 @@ $(MARKDOWN_TARGET)%.md:	%.ipynb $(BIB)
 # For code, we comment out gstbook imports, ensuring we import a .py and not the .ipynb file
 $(CODE_TARGET)%.py:	%.ipynb
 	$(CONVERT_TO_PYTHON) $<
-	sed 's/^import gstbook.*/# & # only in notebook/' $@ > $@~ && mv $@~ $@
+	sed 's/^import gstbook$$/# & # only in notebook/' $@ > $@~ && mv $@~ $@
+	sed 's/^get_ipython().*$$/# & # only in notebook/' $@ > $@~ && mv $@~ $@
 	
 # For word, we convert from the HTML file
 $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
@@ -310,6 +317,10 @@ $(HTML_TARGET)book.html: $(SOURCES) $(BIB)
 	$(RM) -r book
 	@echo Created $@
 endif
+
+# Style checks
+style checkstyle: $(PYS)
+	$(PYCODESTYLE) $(PYCODESTYLE_OPTS) $(PYS)
 
 # Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
