@@ -270,9 +270,10 @@ $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
 
 $(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
-	$(CONVERT_TO_MARKDOWN) $< > $@
+	( cd $(NOTEBOOKS); $(CONVERT_TO_MARKDOWN) $(notdir $<) ) > $@
 
-# For code, we comment out gstbook imports, ensuring we import a .py and not the .ipynb file
+# For code, we comment out gstbook imports, 
+# ensuring we import a .py and not the .ipynb file
 $(CODE_TARGET)%.py:	$(NOTEBOOKS)/%.ipynb
 	$(CONVERT_TO_PYTHON) $<
 	sed 's/^import gstbook$$/# & # only in notebook/' $@ > $@~ && mv $@~ $@
