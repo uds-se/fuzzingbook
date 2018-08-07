@@ -15,34 +15,27 @@ The idea is to have a _textbook on software test generation,_ teaching students 
 The contents and organization of the book would roughly be based on the lecture “Security Testing” that Andreas and Rahul are currently running.  A typical set of chapters could be based on the lectures we have prepared, plus a few more:
 
 * Preface
-1. Fundamentals of Testing
+1. Introduction to Testing
 2. Text-Based Fuzzing
-3. Grammar-Based Fuzzing
-4. Generating Complex Inputs
-5. Fuzzing Function Calls
-6. Fuzzing User Interfaces
-7. Mutation-Based Fuzzing
-8. Parsing Inputs
-9. Simplifying Inputs
-10. Search-Based Testing
-11. Evolving Test Suites
-12. Solving Constraints
-13. Symbolic Testing
-14. Mining Grammars
-15. Taint Analysis
-16. Mutation Analysis
-17. Probabilistic Testing
-18. Generating Unit Tests
-19. Carving Unit Tests
-20. Inferring Invariants
-21. Protection and Repair
-22. Fuzzing in the Large
-23. The Future of Test Generation
+3. Mutation-Based Fuzzing
+4. Fuzzing and Debugging
+5. Grammar-Based Fuzzing
+6. Fuzzing Function Calls
+7. Fuzzing User Interfaces
+8. Parsing and Mutating Inputs
+9. Search-Based Testing
+10. Constraint-Based Testing
+11. Mining Grammars
+12. Fuzzing and Mutations
+13. Probabilistic Testing
+14. Carving Unit Tests
+15. Fuzzing and Invariants
+16. Protection and Repair
 * Glossary
+
 
 Each chapter would be about 10–20 pages in length, such that the book overall would have about 300 pages.  Keep in mind that the code is (mostly) part of the book, so this is programming as well as writing. Each chapter would come with exercises, typically extending the given code in some way, as well as references to related work.
 
-**Open Issue:** Techniques on unstructured input (e.g. simple random fuzzing or random mutation) should be discussed first before going into grammar-based fuzzing and mutations.
 
 
 ### Title
@@ -58,13 +51,30 @@ I will start with a glossary of terms that should be consistently used throughou
 
 ## Publishing
 
-On the publishing side, the could be made available in HTML form during a “beta” phase, with new chapters being published in regular intervals (i.e., one per week), announced on Facebook, Twitter, etc.  This should create some buzz for the printed book and give our colleagues opportunity for feedback.  When the printed book comes out, my idea is that parts of the HTML (say, later chapters or later sections in a number of chapters) would no longer be accessible, asking to purchase the "final" book instead.  We can still update the original sources, such that the Python code can be up-to-date; we can also add more chapters, which would then be available in full until the next edition comes out.  We also have to find a publisher for the book, maybe revitalizing our previous relationship with Morgan Kaufmann.
+### Open Source
+
+Jupyter notebooks have a lot of benefits for teaching.  We should therefore make our material available as open source under some permissive license:
+
+* **Notebooks** can be placed online, rendered within Gitlab or Github and available for download.  The MyBinder service even allows to run them interactively in a browser.
+
+* **HTML** is probably the most accessible format; we can make HTML pages available on a site.
+
+* **Code** can be made available for download.
+
+We can have new chapters being published in regular intervals (i.e., one per week), announced on Facebook, Twitter, etc.  This should create some buzz for the printed book and give our colleagues opportunity for feedback.
+
+### Book
+
+The **PDF** version is something I would rather publish as a book.  To create value over the (online) HTML/notebook versions, I would suggest to include *additional chapters* with authors from the field who would then explain how the concepts from the book translate to large-scale, industrial settings.
+
+I would not mind if the proceedings from the book went to some charity or public cause.  Suggestions are welcome!
+
 
 ## Design
 
 ### PDF
 
-The printed version (paper and/or PDF/ebook) will be handled by the publisher.  We need to make sure that we can still maintain our source code; that is. we have to include the publisher's style files and react to comments.
+The printed version (paper and/or PDF/ebook) will be handled by the publisher.  We need to make sure that we can still maintain our source code; that is, we have to include the publisher's style files and react to comments.
 
 
 ### HTML
