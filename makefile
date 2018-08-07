@@ -205,21 +205,20 @@ edit jupyter notebook:
 # Help
 help:
 	@echo "Welcome to the 'gstbook' makefile!"
-	@echo "* Use 'make chapters' (default) or 'make book'"
-	@echo "  to generate PDF, HTML, code, and slides"
-	@echo "* To create a subcategory only,"
-	@echo "  use 'make pdf', 'make html', 'make code', 'make slides', 'make markdown'."
-	@echo "* To create all inputs in all output formats,"
-	@echo "  use 'make all'."
+	@echo ""
+	@echo "* make chapters (default) -> PDF, HTML, code, and slides for all chapters"
+	@echo "* make (pdf|html|code|slides|word|markdown) -> given subcategory only"
+	@echo "* make book -> entire book in PDF and HTML"
+	@echo "* make all -> all inputs in all output formats"
+	@echo "* make style -> style checker"
+	@echo "* make clean -> delete all derived files"
 	@echo ""
 	@echo "Created files end here:"
 	@echo "* PDFs -> '$(PDF_TARGET)', HTML -> '$(HTML_TARGET)', Python code -> '$(CODE_TARGET)', Slides -> '$(SLIDES_TARGET)'"
 	@echo ""
 	@echo "Settings:"
-	@echo "* Use make PUBLISH=(nbconvert|nbpublish|bookbook) to choose a converter (default: auto)"
-	@echo ""
-	@echo "Cleanup:"
-	@echo "* Use 'make clean' to delete all derived files"
+	@echo "* Use make PUBLISH=(nbconvert|nbpublish|bookbook) to choose a converter"
+	@echo "  (default: automatic)"
 
 # Conversion rules - chapters
 ifeq ($(LATEX),pdflatex)
@@ -301,10 +300,12 @@ $(HTML_TARGET)book.html:	$(SOURCES) $(BIB)
 else
 # With bookbook
 $(PDF_TARGET)book.tex: $(SOURCES) $(BIB)
-	-mkdir book
-	-chapter=0; \
+	-$(RM) -r book
+	mkdir book
+	chapter=0; \
 	for file in $(CHAPTERS); do \
-	    ln -s ../$$file book/$$(echo $$file | sed "s/.*/$$chapter-&/g"); \
+		chnum=$$(printf "%02d" $$chapter); \
+		ln -s ../$$file book/$$(echo $$file | sed 's/.*/'$${chnum}'-&/g'); \
 		chapter=$$(expr $$chapter + 1); \
 	done
 	cd book; $(BOOKBOOK_LATEX)
