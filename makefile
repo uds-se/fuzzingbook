@@ -4,7 +4,7 @@
 CHAPTERS = \
 	Preface.ipynb \
 	Intro_Testing.ipynb \
-	Intro_Fuzzing.ipynb \
+	Basic_Fuzzing.ipynb \
 	Coverage.ipynb
 
 # The guide
