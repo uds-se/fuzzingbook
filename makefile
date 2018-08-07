@@ -91,6 +91,7 @@ else
 OUT := $(shell $(NBPUBLISH) -h > /dev/null)
 # We have nbconvert
 PUBLISH = nbconvert
+PUBLISH_PLUGINS = 
 endif
 endif
 
@@ -118,17 +119,20 @@ BOOK_PDF    = $(PDF_TARGET)book.pdf
 BOOK_HTML   = $(HTML_TARGET)book.html
 BOOK_HTML_FILES = $(HTML_TARGET)book_files
 BOOK_PDF_FILES  = $(PDF_TARGET)book_files
+PUBLISH_PLUGINS = 
 else
 ifeq ($(PUBLISH),nbpublish)
 # Use nbpublish
 CONVERT_TO_HTML   = $(NBPUBLISH) -f html_ipypublish_all --outpath $(HTML_TARGET)
-CONVERT_TO_TEX    = $(NBPUBLISH) -f latex_ipypublish_all --outpath $(PDF_TARGET)
+CONVERT_TO_TEX    = $(NBPUBLISH) -f latex_ipypublish_chapter --outpath $(PDF_TARGET)
 # CONVERT_TO_SLIDES = $(NBPUBLISH) -f slides_ipypublish_all --outpath $(SLIDES_TARGET)
 BOOK_TEX    = $(PDF_TARGET)book.tex
 BOOK_PDF    = $(PDF_TARGET)book.pdf
 BOOK_HTML   = $(HTML_TARGET)book.html
 BOOK_HTML_FILES = $(HTML_TARGET)book_files
 BOOK_PDF_FILES  = $(PDF_TARGET)book_files
+PUBLISH_PLUGINS = \
+	ipypublish_plugins/latex_ipypublish_book.py 	ipypublish_plugins/latex_ipypublish_chapter.py
 else
 # Use standard Jupyter tools
 CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(HTML_TARGET)
@@ -139,6 +143,7 @@ BOOK_PDF   =
 BOOK_HTML  = 
 BOOK_HTML_FILES = 
 BOOK_PDF_FILES  = 
+PUBLISH_PLUGINS = 
 endif
 endif
 
@@ -244,7 +249,7 @@ $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@echo Created $@
 endif
 
-$(PDF_TARGET)%.tex:	%.ipynb $(BIB)
+$(PDF_TARGET)%.tex:	%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
@@ -276,7 +281,7 @@ $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
 # and let the book converters run on this
 ifeq ($(PUBLISH),nbpublish)
 # With nbpublish
-$(PDF_TARGET)book.tex:	$(SOURCES) $(BIB)
+$(PDF_TARGET)book.tex:	$(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
 	mkdir book
 	chapter=0; \
@@ -286,7 +291,7 @@ $(PDF_TARGET)book.tex:	$(SOURCES) $(BIB)
 		chapter=$$(expr $$chapter + 1); \
 	done
 	ln -s ../$(BIB) book
-	$(CONVERT_TO_TEX) book
+	$(NBPUBLISH) -f latex_ipypublish_book --outpath $(PDF_TARGET) book
 	$(RM) -r book
 	cd $(PDF_TARGET) && $(RM) book.nbpub.log
 	@echo Created $@
@@ -299,7 +304,7 @@ $(HTML_TARGET)book.html:	$(SOURCES) $(BIB)
 	@echo Created $@
 else
 # With bookbook
-$(PDF_TARGET)book.tex: $(SOURCES) $(BIB)
+$(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
 	mkdir book
 	chapter=0; \
@@ -313,7 +318,7 @@ $(PDF_TARGET)book.tex: $(SOURCES) $(BIB)
 	$(RM) -r book
 	@echo Created $@
 
-$(HTML_TARGET)book.html: $(SOURCES) $(BIB)
+$(HTML_TARGET)book.html: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	-mkdir book
 	-for file in $(CHAPTERS); do \
 	    ln -s ../$$file book/$$(echo $$file | sed 's/[^-0-9]*\([-0-9][0-9]*\)_\(.*\)/\1-\2/g'); \
