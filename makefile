@@ -11,12 +11,18 @@ CHAPTERS = \
 GUIDE = Guide_for_Authors
 
 # All sources
-SOURCES = \
+SOURCE_FILES = \
 	$(GUIDE).ipynb \
 	$(CHAPTERS)
 
 # The bibliography file
 BIB = gstbook.bib
+
+# Where the notebooks are
+NOTEBOOKS = notebooks
+
+# Sources in the notebooks folder
+SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
 
 # Where to place the pdf, html, slides
 PDF_TARGET      = pdf/
@@ -27,19 +33,19 @@ WORD_TARGET     = word/
 MARKDOWN_TARGET = markdown/
 
 # Various derived files
-TEXS      = $(SOURCES:%.ipynb=$(PDF_TARGET)%.tex)
-PDFS      = $(SOURCES:%.ipynb=$(PDF_TARGET)%.pdf)
-HTMLS     = $(SOURCES:%.ipynb=$(HTML_TARGET)%.html)
-SLIDES    = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
-PYS       = $(SOURCES:%.ipynb=$(CODE_TARGET)%.py)
-WORDS     = $(SOURCES:%.ipynb=$(WORD_TARGET)%.docx)
-MARKDOWNS = $(SOURCES:%.ipynb=$(MARKDOWN_TARGET)%.md)
+TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
+PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
+HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html)
+SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
+PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py)
+WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
+MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 
 CHAPTER_PYS = $(CHAPTERS:%.ipynb=$(CODE_TARGET)%.py)
 
-PDF_FILES     = $(SOURCES:%.ipynb=$(PDF_TARGET)%_files)
-HTML_FILES    = $(SOURCES:%.ipynb=$(HTML_TARGET)%_files)
-SLIDES_FILES  = $(SOURCES:%.ipynb=$(SLIDES_TARGET)%_files)
+PDF_FILES     = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%_files)
+HTML_FILES    = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%_files)
+SLIDES_FILES  = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%_files)
 
 # Configuration
 # What we use for production: nbpublish (preferred), bookbook, or nbconvert
@@ -249,25 +255,25 @@ $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@echo Created $@
 endif
 
-$(PDF_TARGET)%.tex:	%.ipynb $(BIB) $(PUBLISH_PLUGINS)
+$(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-$(HTML_TARGET)%.html:	%.ipynb $(BIB)
+$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
 
-$(SLIDES_TARGET)%.slides.html:	%.ipynb $(BIB)
+$(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
 
-$(MARKDOWN_TARGET)%.md:	%.ipynb $(BIB)
+$(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
 	$(CONVERT_TO_MARKDOWN) $< > $@
 
 # For code, we comment out gstbook imports, ensuring we import a .py and not the .ipynb file
-$(CODE_TARGET)%.py:	%.ipynb
+$(CODE_TARGET)%.py:	$(NOTEBOOKS)/%.ipynb
 	$(CONVERT_TO_PYTHON) $<
 	sed 's/^import gstbook$$/# & # only in notebook/' $@ > $@~ && mv $@~ $@
 	sed 's/^get_ipython().*$$/# & # only in notebook/' $@ > $@~ && mv $@~ $@
@@ -281,13 +287,13 @@ $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
 # and let the book converters run on this
 ifeq ($(PUBLISH),nbpublish)
 # With nbpublish
-$(PDF_TARGET)book.tex:	$(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
+$(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
 	mkdir book
 	chapter=0; \
 	for file in $(CHAPTERS); do \
 		chnum=$$(printf "%02d" $$chapter); \
-	    ln -s ../$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
+	    ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
 		chapter=$$(expr $$chapter + 1); \
 	done
 	ln -s ../$(BIB) book
@@ -296,10 +302,18 @@ $(PDF_TARGET)book.tex:	$(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	cd $(PDF_TARGET) && $(RM) book.nbpub.log
 	@echo Created $@
 
-$(HTML_TARGET)book.html:	$(SOURCES) $(BIB)
-	-ln -s . book
+$(HTML_TARGET)book.html: $(SOURCES) $(BIB)
+	-$(RM) -r book
+	mkdir book
+	chapter=0; \
+	for file in $(CHAPTERS); do \
+		chnum=$$(printf "%02d" $$chapter); \
+	    ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
+		chapter=$$(expr $$chapter + 1); \
+	done
+	ln -s ../$(BIB) book
 	$(CONVERT_TO_HTML) book
-	$(RM) book
+	$(RM) -r book
 	cd $(HTML_TARGET) && $(RM) book.nbpub.log book_files/$(BIB)
 	@echo Created $@
 else
@@ -310,7 +324,7 @@ $(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	chapter=0; \
 	for file in $(CHAPTERS); do \
 		chnum=$$(printf "%02d" $$chapter); \
-		ln -s ../$$file book/$$(echo $$file | sed 's/.*/'$${chnum}'-&/g'); \
+		ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/'$${chnum}'-&/g'); \
 		chapter=$$(expr $$chapter + 1); \
 	done
 	cd book; $(BOOKBOOK_LATEX)
@@ -319,9 +333,10 @@ $(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	@echo Created $@
 
 $(HTML_TARGET)book.html: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
-	-mkdir book
-	-for file in $(CHAPTERS); do \
-	    ln -s ../$$file book/$$(echo $$file | sed 's/[^-0-9]*\([-0-9][0-9]*\)_\(.*\)/\1-\2/g'); \
+	-$(RM) -r book
+	mkdir book
+	for file in $(CHAPTERS); do \
+	    ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/[^-0-9]*\([-0-9][0-9]*\)_\(.*\)/\1-\2/g'); \
 	done
 	cd book; $(BOOKBOOK_HTML)
 	mv book/html/index.html $@
@@ -350,7 +365,7 @@ clean-code:
 	$(RM) $(PYS)
 
 clean-chapters:
-	$(RM) $(TEXS) $(PDFS) $(HTMLS) $(SLIDES) $(WORDS)
+	$(RM) $(TEXS) $(PDFS) $(HTMLS) $(SLIDES) $(WORDS) $(MARKDOWNS)
 	$(RM) -r $(PDF_FILES) $(HTML_FILES) $(SLIDES_FILES)
 
 clean-book:
@@ -362,3 +377,12 @@ clean-aux:
 
 clean: clean-code clean-chapters clean-book clean-aux
 	@echo "All derived files deleted"
+
+realclean: clean
+	cd $(PDF_TARGET); $(RM) *.pdf
+	cd $(HTML_TARGET); $(RM) *.html; $(RM) -r *_files
+	cd $(SLIDES_TARGET); $(RM) *.html
+	cd $(CODE_TARGET); $(RM) *.py*
+	cd $(WORD_TARGET); $(RM) *.docx
+	cd $(MARKDOWN_TARGET); $(RM) *.md
+	@echo "All old files deleted"
