@@ -1,18 +1,16 @@
 # gstbook Makefile
 
-# Current sources.  Files starting with '_' are not included in the book.
-GUIDE = _Guide_for_Authors
-CH00  = Ch00_Preface
-CH01  = Ch01_Testing
-CH02  = Ch02_Fuzzing
-CH03  = Ch03_Coverage
-
+# Chapters to include in the book, in this order
 CHAPTERS = \
-	$(CH00).ipynb \
-	$(CH01).ipynb \
-	$(CH02).ipynb \
-	$(CH03).ipynb
+	Preface.ipynb \
+	Intro_Testing.ipynb \
+	Intro_Fuzzing.ipynb \
+	Coverage.ipynb
 
+# The guide
+GUIDE = Guide_for_Authors
+
+# All sources
 SOURCES = \
 	$(GUIDE).ipynb \
 	$(CHAPTERS)
@@ -162,12 +160,8 @@ CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown --run
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
 chapters default run: html code pdf
 
-# Individual chapters
+# Shortcut for the guide
 guide: $(HTML_TARGET)$(GUIDE).html $(PDF_TARGET)$(GUIDE).pdf
-ch00: $(HTML_TARGET)$(CH00).html $(PDF_TARGET)$(CH00).pdf
-ch01: $(HTML_TARGET)$(CH01).html $(PDF_TARGET)$(CH01).pdf
-ch02: $(HTML_TARGET)$(CH02).html $(PDF_TARGET)$(CH02).pdf
-ch03: $(HTML_TARGET)$(CH03).html $(PDF_TARGET)$(CH03).pdf
 
 # The book is recreated after any change to any source
 book:	book-html book-pdf
@@ -232,7 +226,7 @@ ifeq ($(LATEX),pdflatex)
 # Use PDFLaTeX
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@echo Running LaTeX...
-	@-test -L $(PDF_TARGET)/PICS || ln -s ../PICS $(PDF_TARGET)
+	@-test -L $(PDF_TARGET)/pics || ln -s ../pics $(PDF_TARGET)
 	cd $(PDF_TARGET) && $(PDFLATEX) $*
 	-cd $(PDF_TARGET) && $(BIBTEX) $*
 	cd $(PDF_TARGET) && $(PDFLATEX) $*
@@ -244,7 +238,7 @@ else
 # Use LaTeXMK
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@echo Running LaTeXMK...
-	@-test -L $(PDF_TARGET)/PICS || ln -s ../PICS $(PDF_TARGET)
+	@-test -L $(PDF_TARGET)/pics || ln -s ../pics $(PDF_TARGET)
 	cd $(PDF_TARGET) && $(LATEXMK) $(LATEXMK_OPTS) $*
 	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm $*.lof $*.lot $*.fls $*.fdb_latexmk
 	@cd $(PDF_TARGET) && $(RM) -r $*.tex $*_files
@@ -258,12 +252,12 @@ $(PDF_TARGET)%.tex:	%.ipynb $(BIB)
 $(HTML_TARGET)%.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	@-test -L $(HTML_TARGET)/PICS || ln -s ../PICS $(HTML_TARGET)
+	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
 
 $(SLIDES_TARGET)%.slides.html:	%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	@-test -L $(HTML_TARGET)/PICS || ln -s ../PICS $(HTML_TARGET)
+	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
 
 $(MARKDOWN_TARGET)%.md:	%.ipynb $(BIB)
 	$(CONVERT_TO_MARKDOWN) $< > $@
@@ -279,12 +273,22 @@ $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
 	$(PANDOC) --css=$(WORD_TARGET)pandoc.css $< -o $@
 
 # Conversion rules - entire book
+# We create a book/ folder with the chapters ordered by number, 
+# and let the book converters run on this
 ifeq ($(PUBLISH),nbpublish)
 # With nbpublish
 $(PDF_TARGET)book.tex:	$(SOURCES) $(BIB)
-	-ln -s . book
+	-$(RM) -r book
+	mkdir book
+	chapter=0; \
+	for file in $(CHAPTERS); do \
+		chnum=$$(printf "%02d" $$chapter); \
+	    ln -s ../$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
+		chapter=$$(expr $$chapter + 1); \
+	done
+	ln -s ../$(BIB) book
 	$(CONVERT_TO_TEX) book
-	$(RM) book
+	$(RM) -r book
 	cd $(PDF_TARGET) && $(RM) book.nbpub.log
 	@echo Created $@
 
@@ -298,8 +302,10 @@ else
 # With bookbook
 $(PDF_TARGET)book.tex: $(SOURCES) $(BIB)
 	-mkdir book
-	-for file in $(CHAPTERS); do \
-	    ln -s ../$$file book/$$(echo $$file | sed 's/[^-0-9]*\([-0-9][0-9]*\)_\(.*\)/\1-\2/g'); \
+	-chapter=0; \
+	for file in $(CHAPTERS); do \
+	    ln -s ../$$file book/$$(echo $$file | sed "s/.*/$$chapter-&/g"); \
+		chapter=$$(expr $$chapter + 1); \
 	done
 	cd book; $(BOOKBOOK_LATEX)
 	mv book/combined.tex $@
