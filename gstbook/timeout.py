@@ -19,9 +19,13 @@ except:
             return repr(self.value)
 
 end_time = 0
+original_trace_function = None
 
 def check_time(frame, event, arg):
     global end_time
+    
+    if original_trace_function is not None:
+        original_trace_function(frame, event, arg)
     
     current_time = time.time()
     # print(end_time - current_time, "seconds left")
@@ -35,17 +39,17 @@ def timeout(seconds_before_timeout):
     def decorate(f):
 
         def new_f(*args, **kwargs):
-            global end_time
+            global end_time, original_trace_function
             
             start_time = time.time()
             end_time   = start_time + seconds_before_timeout
             
-            old_trace = sys.gettrace()
+            original_trace_function = sys.gettrace()
             try:
                 sys.settrace(check_time)
                 result = f(*args, **kwargs)
             finally:
-                sys.settrace(old_trace)
+                sys.settrace(original_trace_function)
             return result
         return new_f
 
@@ -65,7 +69,7 @@ class Timeout(object):
         end_time   = start_time + self.seconds_before_timeout
         # print("End time:", end_time)
 
-        self.old_trace = sys.gettrace()
+        original_trace_function = sys.gettrace()
         sys.settrace(check_time)
         
     def __exit__(self, exc_type, exc_value, traceback):
@@ -73,7 +77,7 @@ class Timeout(object):
         self.cancel()
 
     def cancel(self):
-        sys.settrace(self.old_trace)
+        sys.settrace(original_trace_function)
 
 
 
