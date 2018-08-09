@@ -181,7 +181,8 @@ template: $(HTML_TARGET)$(TEMPLATE).html $(PDF_TARGET)$(TEMPLATE).pdf
 
 # The book is recreated after any change to any source
 book:	book-html book-pdf
-all:	chapters slides book
+all:	chapters code slides book
+and more:	word markdown
 
 # Individual targets
 html:	ipypublish-chapters $(HTMLS)
