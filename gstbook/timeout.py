@@ -22,8 +22,6 @@ end_time = 0
 original_trace_function = None
 
 def check_time(frame, event, arg):
-    global end_time
-    
     if original_trace_function is not None:
         original_trace_function(frame, event, arg)
     
