@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Portable timeout decorator
+# Portable timeout decorator; raises exception after given time interval
 # Not very efficient, but should work on all platforms
 
 __all__ = [ "timeout", "Timeout" ]
