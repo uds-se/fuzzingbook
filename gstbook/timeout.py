@@ -70,6 +70,8 @@ class Timeout(object):
         original_trace_function = sys.gettrace()
         sys.settrace(check_time)
         
+        return self
+                
     def __exit__(self, exc_type, exc_value, traceback):
         # print("Exit")
         self.cancel()

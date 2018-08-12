@@ -72,6 +72,7 @@ class ExpectTimeout(object):
 
         original_trace_function = sys.gettrace()
         sys.settrace(check_time)
+        return self
         
     def __exit__(self, exc_type, exc_value, tb):
         # End of `with` clause

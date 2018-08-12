@@ -20,7 +20,7 @@ def expect_error(f):
 # Class
 class ExpectError(object):
     def __enter__(self):
-        pass
+        return self
 
     def __exit__(self, exc_type, exc_value, tb):
         # End of `with` clause
