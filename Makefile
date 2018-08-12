@@ -7,17 +7,16 @@ CHAPTERS = \
 	Basic_Fuzzing.ipynb \
 	Coverage.ipynb
 
-# The guide
-GUIDE = Guide_for_Authors
-
-# The template
-TEMPLATE = Template
+# Additional notebooks (not to be included)
+APPENDICES = \
+	Guide_for_Authors.ipynb \
+	Template.ipynb \
+	ExpectError.ipynb
 
 # All sources
 SOURCE_FILES = \
-	$(GUIDE).ipynb \
-	$(TEMPLATE).ipynb \
-	$(CHAPTERS)
+	$(CHAPTERS) \
+	$(APPENDICES)
 
 # The bibliography file
 BIB = gstbook.bib
@@ -174,10 +173,6 @@ CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown --run
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
 chapters default run: html code pdf
-
-# Shortcut for guide and template
-guide: $(HTML_TARGET)$(GUIDE).html $(PDF_TARGET)$(GUIDE).pdf
-template: $(HTML_TARGET)$(TEMPLATE).html $(PDF_TARGET)$(TEMPLATE).pdf
 
 # The book is recreated after any change to any source
 book:	book-html book-pdf
