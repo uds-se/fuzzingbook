@@ -5,7 +5,16 @@ CHAPTERS = \
 	Preface.ipynb \
 	Intro_Testing.ipynb \
 	Basic_Fuzzing.ipynb \
-	Coverage.ipynb
+	Coverage.ipynb \
+	Mutation_Fuzzing.ipynb
+
+# Coming up next:
+# - Leveraging_Coverage.ipynb
+# - Grammars.ipynb
+# - Grammar_Testing.ipynb
+
+# Later
+# - Reducing.ipynb
 
 # Additional notebooks (not to be included)
 APPENDICES = \
@@ -350,6 +359,19 @@ endif
 # Style checks
 style checkstyle: $(PYS)
 	$(PYCODESTYLE) $(PYCODESTYLE_OPTS) $(PYS)
+
+# List of Cross References
+crossref xref: $(SOURCES)
+	@echo "Referenced notebooks (* = missing)"
+	@files=$$(grep '\.ipynb)' $(SOURCES) | sed 's/.*[(]\([a-zA-Z0-9_][a-zA-Z0-9_]*\.ipynb\)[)].*/\1/' | sort | uniq); \
+	for file in $$files; do \
+		if [ -f $(NOTEBOOKS)/$$file ]; then \
+		    echo '  ' $$file; \
+		else \
+			echo '* ' $$file; \
+		fi \
+	done
+
 
 # Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
