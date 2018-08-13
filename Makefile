@@ -359,6 +359,7 @@ endif
 # Style checks
 style checkstyle: $(PYS)
 	$(PYCODESTYLE) $(PYCODESTYLE_OPTS) $(PYS)
+	@echo "All style checks passed."
 
 # List of Cross References
 crossref xref: $(SOURCES)
