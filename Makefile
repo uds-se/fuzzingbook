@@ -6,8 +6,7 @@ CHAPTERS = \
 	Intro_Testing.ipynb \
 	Basic_Fuzzing.ipynb \
 	Coverage.ipynb \
-	Mutation_Fuzzing.ipynb \
-	Guided_Mutations.ipynb
+	Mutation_Fuzzing.ipynb
 
 # Coming up next:
 # - Grammars.ipynb
