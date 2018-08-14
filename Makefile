@@ -19,7 +19,8 @@ CHAPTERS = \
 APPENDICES = \
 	Guide_for_Authors.ipynb \
 	Template.ipynb \
-	ExpectError.ipynb
+	ExpectError.ipynb \
+	Timer.ipynb
 
 # All sources
 SOURCE_FILES = \
