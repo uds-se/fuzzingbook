@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+# Replace '$FOO' by '<foo>'
+
+import re
+import fileinput
+import sys
+
+RE_SYMBOL = re.compile(r'(\$[a-zA-Z_]+[a-zA-Z_]*)')
+
+def bnfize(line):
+    while True:
+        m = re.search(RE_SYMBOL, line)
+        if m is None:
+            break
+
+        symbol = line[m.start():m.end()]
+        line = line[:m.start()] + "<" + symbol[1:].lower() + ">" + line[m.end():]
+
+    return line
+
+
+assert bnfize("1 + $FOO + 2") == "1 + <foo> + 2"
+assert bnfize("$FOO") == "<foo>"
+assert bnfize("1 + 2") == "1 + 2"
+
+for line in fileinput.input(openhook=fileinput.hook_encoded("utf-8")):
+    conversion = bnfize(line)
+    sys.stdout.buffer.write(conversion.encode("utf-8"))
