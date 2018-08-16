@@ -286,8 +286,7 @@ $(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
 # ensuring we import a .py and not the .ipynb file
 $(CODE_TARGET)%.py:	$(NOTEBOOKS)/%.ipynb
 	$(CONVERT_TO_PYTHON) $<
-	sed 's/^import gstbook$$/# & # only in notebook/' $@ > $@~ && mv $@~ $@
-	sed 's/^get_ipython().*$$/# & # only in notebook/' $@ > $@~ && mv $@~ $@
+	sh utils/adjust-py-export.sh < $@ > $@~ && mv $@~ $@
 	
 # For word, we convert from the HTML file
 $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
@@ -356,13 +355,15 @@ $(HTML_TARGET)book.html: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	@echo Created $@
 endif
 
+## Some checks
+
 # Style checks
-style checkstyle: $(PYS)
+style check-style checkstyle: $(PYS)
 	$(PYCODESTYLE) $(PYCODESTYLE_OPTS) $(PYS)
 	@echo "All style checks passed."
 
 # List of Cross References
-crossref xref: $(SOURCES)
+crossref check-crossref xref: $(SOURCES)
 	@echo "Referenced notebooks (* = missing)"
 	@files=$$(grep '\.ipynb)' $(SOURCES) | sed 's/.*[(]\([a-zA-Z0-9_][a-zA-Z0-9_]*\.ipynb\)[)].*/\1/' | sort | uniq); \
 	for file in $$files; do \
@@ -373,6 +374,13 @@ crossref xref: $(SOURCES)
 		fi \
 	done
 
+# Run all code
+PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
+$(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
+	$(PYTHON) $< > $@ 2>&1 || (echo "Error" >> $@; tail $@; exit 1)
+
+check-code: code $(PYS_OUT)
+	@grep "^Error" $(PYS_OUT) || echo "All code checks passed."
 
 # Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
