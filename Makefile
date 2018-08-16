@@ -377,10 +377,10 @@ crossref check-crossref xref: $(SOURCES)
 # Run all code
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
 $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
-	$(PYTHON) $< > $@ 2>&1 || (echo "Error" >> $@; tail $@; exit 1)
+	$(PYTHON) $< > $@ 2>&1 || (echo "Error while running $(PYTHON)" >> $@; tail $@; exit 1)
 
 check-code: code $(PYS_OUT)
-	@grep "^Error" $(PYS_OUT) || echo "All code checks passed."
+	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 
 # Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
@@ -395,7 +395,7 @@ AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
 	  $(PDF_TARGET)*.lot
 
 clean-code:
-	$(RM) $(PYS)
+	$(RM) $(PYS) $(PYS_OUT)
 
 clean-chapters:
 	$(RM) $(TEXS) $(PDFS) $(HTMLS) $(SLIDES) $(WORDS) $(MARKDOWNS)
