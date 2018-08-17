@@ -4,10 +4,15 @@
 # We want to import notebooks as modules
 # Source: http://jupyter-notebook.readthedocs.io/en/stable/examples/Notebook/Importing%20Notebooks.html
 
-import io, os, sys, types
+import io, os, sys, types, re
 from IPython import get_ipython
 from nbformat import read
 from IPython.core.interactiveshell import InteractiveShell
+
+# To avoid re-running notebook computations during import,
+# we only import code cells that match this regular expression
+# i.e. definitions of functions, classes, UPPERCASE_VARIABLES, and imports
+RE_CODE = re.compile("^(def |class |@|[A-Z0-9_]* = |import |from )")
 
 def find_notebook(fullname, path=None):
     """find a notebook, given its fully qualified name and an optional path
@@ -64,8 +69,9 @@ class NotebookLoader(object):
             if cell.cell_type == 'code':
                 # transform the input to executable Python
                 code = self.shell.input_transformer_manager.transform_cell(cell.source)
-                # run the code in themodule
-                exec(code, mod.__dict__)
+                if RE_CODE.match(code):
+                    # run the code in themodule
+                    exec(code, mod.__dict__)
         finally:
             self.shell.user_ns = save_user_ns
         return mod
