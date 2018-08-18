@@ -71,7 +71,12 @@ class NotebookLoader(object):
                 code = self.shell.input_transformer_manager.transform_cell(cell.source)
                 if RE_CODE.match(code):
                     # run the code in themodule
+                    # print("import", repr(code))
                     exec(code, mod.__dict__)
+                else:
+                    # print("ignore", repr(code))
+                    pass
+    
         finally:
             self.shell.user_ns = save_user_ns
         return mod
