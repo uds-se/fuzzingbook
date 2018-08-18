@@ -7,10 +7,11 @@ CHAPTERS = \
 	Basic_Fuzzing.ipynb \
 	Coverage.ipynb \
 	Mutation_Fuzzing.ipynb \
-	Grammars.ipynb
+	Grammars.ipynb \
+	Derivation_Trees.ipynb
 
 # Coming up next:
-# - Grammar_Testing.ipynb
+# Parsing?
 
 # Later
 # - Reducing.ipynb
