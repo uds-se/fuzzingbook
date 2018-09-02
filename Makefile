@@ -188,7 +188,8 @@ CONVERT_TO_WORD = $(PANDOC)
 
 # For Markdown .md files, we use markdown
 # Note: adding --run re-executes all code
-CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown
+# CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown
+CONVERT_TO_MARKDOWN = $(NBCONVERT) --to markdown
 
 
 # Short targets
@@ -298,7 +299,17 @@ $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
 
 $(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
-	( cd $(NOTEBOOKS); $(CONVERT_TO_MARKDOWN) $(notdir $<) ) > $@
+	$(eval TMPDIR := $(shell mktemp -d))
+	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(HEADER) > $(TMPDIR)/Header.ipynb
+	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(FOOTER) > $(TMPDIR)/Footer.ipynb
+	sed 's/\.ipynb)/\.html)/g' $< > $(TMPDIR)/tmp-$(notdir $<)
+	$(NBMERGE) $(TMPDIR)/Header.ipynb $(TMPDIR)/tmp-$(notdir $<) $(TMPDIR)/Footer.ipynb > $(TMPDIR)/$(notdir $<)
+	$(CONVERT_TO_MARKDOWN) $(TMPDIR)/$(notdir $<)
+	$(RM) -r $(MARKDOWN_TARGET)$(basename $(notdir $<)).md $(MARKDOWN_TARGET)$(basename $(notdir $<))_files
+	mv $(TMPDIR)/$(basename $(notdir $<)).md $(MARKDOWN_TARGET)
+	@-mv $(TMPDIR)/$(basename $(notdir $<))_files $(MARKDOWN_TARGET)
+	@-$(RM) -fr $(TMPDIR)
+
 
 # For code, we comment out fuzzingbook imports, 
 # ensuring we import a .py and not the .ipynb file
@@ -401,7 +412,9 @@ check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Publishing
-publish docs: publish-html publish-code
+docs: publish-html publish-code
+publish: docs
+	git add docs/*
 	git commit -m "Doc update" docs
 
 # Add/update HTML code in repository
@@ -411,6 +424,12 @@ publish-html: html
 
 publish-code: code
 	cp -pr code docs
+
+# As an alternative, we may also push .md files directly, allowing us to use a theme.
+# However, this loses math rendering and citations
+publish-markdown: markdown
+	cp -pr markdown/* docs
+	cp docs/Main.md docs/index.md
 
 
 # Cleanup
@@ -438,8 +457,11 @@ clean-book:
 
 clean-aux:
 	$(RM) $(AUX)
+	
+clean-docs:
+	$(RM) -r docs/*.md docs/*.html docs/*_files docs/code
 
-clean: clean-code clean-chapters clean-book clean-aux
+clean: clean-code clean-chapters clean-book clean-aux clean-docs
 	@echo "All derived files deleted"
 
 realclean: clean
