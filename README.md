@@ -2,7 +2,7 @@
 
 This is the repository for the book "Generating Software Tests" (working title)
 
-To start reading right away, see the [HTML version](https://github.com/uds-se/fuzzingbook/tree/master/html).
+To start reading right away, start with the [main notebook](notebooks/Main.ipynb).
 
 
 ## Contents
@@ -34,3 +34,9 @@ The contents of this book will include topics such as:
 * Glossary
 
 Each chapter would be about 10–20 pages in length, including code. Each chapter comes with exercises, typically extending the given code in some way, as well as references to related work.
+
+
+## License
+
+_This work is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/)._<br>
+![Creative Commons License](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)
