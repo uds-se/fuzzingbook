@@ -2,7 +2,7 @@
 
 This is the repository for the book "Generating Software Tests" (working title)
 
-To start reading right away, see the [HTML version](https://github.com/uds-se/fuzzingbook/html/).
+To start reading right away, see the [HTML version](https://github.com/uds-se/fuzzingbook/tree/master/html).
 
 
 ## Contents
