@@ -22,9 +22,12 @@ APPENDICES = \
 	Template.ipynb \
 	ExpectError.ipynb \
 	Timer.ipynb
+FRONTMATTER = \
+	Main.ipynb
 
 # All sources
 SOURCE_FILES = \
+	$(FRONTMATTER) \
 	$(CHAPTERS) \
 	$(APPENDICES)
 
@@ -189,11 +192,11 @@ CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown --run
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
-chapters default run: html code pdf
+chapters default run: html code
 
 # The book is recreated after any change to any source
 book:	book-html book-pdf
-all:	chapters code slides book
+all:	chapters pdf code slides book
 and more:	word markdown
 
 # Individual targets
@@ -277,11 +280,12 @@ $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER)
+$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER) Makefile
 	$(eval TMPDIR := $(shell mktemp -d))
 	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(HEADER) > $(TMPDIR)/Header.ipynb
 	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(FOOTER) > $(TMPDIR)/Footer.ipynb
-	$(NBMERGE) $(TMPDIR)/Header.ipynb $< $(TMPDIR)/Footer.ipynb > $(TMPDIR)/$(notdir $<)
+	sed 's/\.ipynb)/\.html)/g' $< > $(TMPDIR)/tmp-$(notdir $<)
+	$(NBMERGE) $(TMPDIR)/Header.ipynb $(TMPDIR)/tmp-$(notdir $<) $(TMPDIR)/Footer.ipynb > $(TMPDIR)/$(notdir $<)
 	$(CONVERT_TO_HTML) $(TMPDIR)/$(notdir $<)
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
