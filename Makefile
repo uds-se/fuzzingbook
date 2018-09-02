@@ -280,7 +280,7 @@ $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER) Makefile
+$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER)
 	$(eval TMPDIR := $(shell mktemp -d))
 	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(HEADER) > $(TMPDIR)/Header.ipynb
 	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(FOOTER) > $(TMPDIR)/Footer.ipynb
@@ -400,16 +400,15 @@ check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Publishing
-publish: publish-html publish-code
+publish docs: publish-html publish-code
 	
 # Add/update HTML code in repository
-# This actually should go to "fuzzingbook.org" (which would point to "fuzzingbook.cispa.saarland")
-publish-html:
-	# git add -f $(HTML_TARGET)/*.html $(HTML_TARGET)/*_files
-	# git commit -m "Updated HTML files" $(HTML_TARGET)
+publish-html: html
+	cp -pr html/* docs
+	cp docs/Main.html docs/index.html
 
-publish-code:
-	# git commit -m "Updated Python code" $(CODE_TARGET) $(PYS)
+publish-code: code
+	cp -pr code docs
 
 
 # Cleanup
