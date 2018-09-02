@@ -400,14 +400,17 @@ check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Publishing
-publish: publish-html
+publish: publish-html publish-code
 	
 # Add/update HTML code in repository
 # This actually should go to "fuzzingbook.org" (which would point to "fuzzingbook.cispa.saarland")
 publish-html:
 	# git add -f $(HTML_TARGET)/*.html $(HTML_TARGET)/*_files
 	# git commit -m "Updated HTML files" $(HTML_TARGET)
-	
+
+publish-code:
+	# git commit -m "Updated Python code" $(CODE_TARGET) $(PYS)
+
 
 # Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
