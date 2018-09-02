@@ -187,7 +187,8 @@ CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
 CONVERT_TO_WORD = $(PANDOC) 
 
 # For Markdown .md files, we use markdown
-CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown --run
+# Note: adding --run re-executes all code
+CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown
 
 
 # Short targets
@@ -401,7 +402,8 @@ check-code: code $(PYS_OUT)
 	
 # Publishing
 publish docs: publish-html publish-code
-	
+	git commit -m "Doc update" docs
+
 # Add/update HTML code in repository
 publish-html: html
 	cp -pr html/* docs
