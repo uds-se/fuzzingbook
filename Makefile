@@ -398,6 +398,16 @@ $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 
 check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
+	
+# Publishing
+publish: publish-html
+	
+# Add/update HTML code in repository
+# This actually should go to "fuzzingbook.org" (which would point to "fuzzingbook.cispa.saarland")
+publish-html:
+	# git add -f $(HTML_TARGET)/*.html $(HTML_TARGET)/*_files
+	# git commit -m "Updated HTML files" $(HTML_TARGET)
+	
 
 # Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
