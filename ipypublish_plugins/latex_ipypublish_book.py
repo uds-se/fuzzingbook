@@ -17,7 +17,7 @@ from ipypublish.preprocessors.latex_doc_defaults import MetaDefaults
 from ipypublish.preprocessors.latex_doc_links import LatexDocLinks
 from ipypublish.preprocessors.split_outputs import SplitOutputs
 
-# Additions for gstbook - AZ
+# Additions for fuzzingbook - AZ
 title.tplx_dict['document_predoc'] = r"""
 ((*- if nb.metadata["ipub"]: -*))
     \begingroup

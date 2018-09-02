@@ -1,4 +1,4 @@
-# gstbook Makefile
+# Fuzzingbook Makefile
 
 # Chapters to include in the book, in this order
 CHAPTERS = \
@@ -32,7 +32,7 @@ SOURCE_FILES = \
 	$(APPENDICES)
 
 # The bibliography file
-BIB = gstbook.bib
+BIB = fuzzingbook.bib
 
 # Where the notebooks are
 NOTEBOOKS = notebooks
@@ -142,7 +142,7 @@ endif
 ifeq ($(PUBLISH),bookbook)
 # Use bookbook
 CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(HTML_TARGET)
-CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template gstbook.tplx --output-dir=$(PDF_TARGET)
+CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template fuzzingbook.tplx --output-dir=$(PDF_TARGET)
 BOOK_TEX    = $(PDF_TARGET)book.tex
 BOOK_PDF    = $(PDF_TARGET)book.pdf
 BOOK_HTML   = $(HTML_TARGET)book.html
@@ -165,7 +165,7 @@ PUBLISH_PLUGINS = \
 else
 # Use standard Jupyter tools
 CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(HTML_TARGET)
-CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template gstbook.tplx --output-dir=$(PDF_TARGET)
+CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template fuzzingbook.tplx --output-dir=$(PDF_TARGET)
 # CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
 BOOK_TEX   = 
 BOOK_PDF   = 
@@ -236,7 +236,7 @@ edit jupyter notebook:
 
 # Help
 help:
-	@echo "Welcome to the 'gstbook' makefile!"
+	@echo "Welcome to the 'fuzzingbook' makefile!"
 	@echo ""
 	@echo "* make chapters (default) -> PDF, HTML, code, and slides for all chapters"
 	@echo "* make (pdf|html|code|slides|word|markdown) -> given subcategory only"
@@ -299,7 +299,7 @@ $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 $(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
 	( cd $(NOTEBOOKS); $(CONVERT_TO_MARKDOWN) $(notdir $<) ) > $@
 
-# For code, we comment out gstbook imports, 
+# For code, we comment out fuzzingbook imports, 
 # ensuring we import a .py and not the .ipynb file
 $(CODE_TARGET)%.py:	$(NOTEBOOKS)/%.ipynb
 	$(CONVERT_TO_PYTHON) $<
