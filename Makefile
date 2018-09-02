@@ -45,6 +45,10 @@ CODE_TARGET     = code/
 WORD_TARGET     = word/
 MARKDOWN_TARGET = markdown/
 
+# Headers for HTML
+HEADER = notebooks/Header.ipynb
+FOOTER = notebooks/Footer.ipynb
+
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
@@ -82,6 +86,9 @@ BOOKBOOK_HTML  ?= $(PYTHON) -m bookbook.html
 
 # The nbconvert alternative (okay for chapters; doesn't work for book; no citations)
 NBCONVERT ?= jupyter nbconvert
+
+# Notebook merger
+NBMERGE = $(PYTHON) utils/nbmerge.py
 
 # LaTeX
 PDFLATEX ?= pdflatex
@@ -270,10 +277,15 @@ $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB)
-	$(CONVERT_TO_HTML) $<
+$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER)
+	$(eval TMPDIR := $(shell mktemp -d))
+	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(HEADER) > $(TMPDIR)/Header.ipynb
+	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(FOOTER) > $(TMPDIR)/Footer.ipynb
+	$(NBMERGE) $(TMPDIR)/Header.ipynb $< $(TMPDIR)/Footer.ipynb > $(TMPDIR)/$(notdir $<)
+	$(CONVERT_TO_HTML) $(TMPDIR)/$(notdir $<)
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
+	@-$(RM) -fr $(TMPDIR)
 
 $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<

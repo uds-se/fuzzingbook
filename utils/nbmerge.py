@@ -28,7 +28,7 @@ def merge_notebooks(filenames):
     if not hasattr(merged.metadata, 'name'):
         merged.metadata.name = ''
     merged.metadata.name += "_merged"
-    print(nbformat.writes(merged))
+    sys.stdout.buffer.write(nbformat.writes(merged).encode('utf-8'))
 
 if __name__ == '__main__':
     notebooks = sys.argv[1:]
