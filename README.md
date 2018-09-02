@@ -2,7 +2,7 @@
 
 This is the repository for the book "Generating Software Tests" (working title)
 
-To start reading right away, start with the [main notebook](notebooks/Main.ipynb).
+To start reading right away, start with the [HTML version](https://uds-se.github.io/fuzzingbook/).
 
 
 ## Contents
