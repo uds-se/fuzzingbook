@@ -292,7 +292,7 @@ $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER)
 	$(CONVERT_TO_HTML) $(TMPDIR)/$(notdir $<)
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
-	# @-$(RM) -fr $(TMPDIR)
+	@-$(RM) -fr $(TMPDIR)
 
 $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
