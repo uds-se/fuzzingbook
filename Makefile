@@ -288,10 +288,11 @@ $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER)
 	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(FOOTER) > $(TMPDIR)/Footer.ipynb
 	sed 's/\.ipynb)/\.html)/g' $< > $(TMPDIR)/tmp-$(notdir $<)
 	$(NBMERGE) $(TMPDIR)/Header.ipynb $(TMPDIR)/tmp-$(notdir $<) $(TMPDIR)/Footer.ipynb > $(TMPDIR)/$(notdir $<)
+	cp $(BIB) $(TMPDIR)
 	$(CONVERT_TO_HTML) $(TMPDIR)/$(notdir $<)
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
-	@-$(RM) -fr $(TMPDIR)
+	# @-$(RM) -fr $(TMPDIR)
 
 $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
@@ -304,6 +305,7 @@ $(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
 	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(FOOTER) > $(TMPDIR)/Footer.ipynb
 	sed 's/\.ipynb)/\.html)/g' $< > $(TMPDIR)/tmp-$(notdir $<)
 	$(NBMERGE) $(TMPDIR)/Header.ipynb $(TMPDIR)/tmp-$(notdir $<) $(TMPDIR)/Footer.ipynb > $(TMPDIR)/$(notdir $<)
+	cp $(BIB) $(TMPDIR)
 	$(CONVERT_TO_MARKDOWN) $(TMPDIR)/$(notdir $<)
 	$(RM) -r $(MARKDOWN_TARGET)$(basename $(notdir $<)).md $(MARKDOWN_TARGET)$(basename $(notdir $<))_files
 	mv $(TMPDIR)/$(basename $(notdir $<)).md $(MARKDOWN_TARGET)
