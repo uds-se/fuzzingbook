@@ -433,7 +433,7 @@ check-code: code $(PYS_OUT)
 	
 # Publishing
 docs: publish-html publish-code publish-slides
-	cp -pr README.md $(DOCS_TARGET)index.md
+	tail +2 README.md > $(DOCS_TARGET)index.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
 publish: docs
