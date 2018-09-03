@@ -47,6 +47,7 @@ SLIDES_TARGET   = slides/
 CODE_TARGET     = code/
 WORD_TARGET     = word/
 MARKDOWN_TARGET = markdown/
+DOCS_TARGET     = docs/
 
 # Headers for HTML
 HEADER = notebooks/Header.ipynb
@@ -414,18 +415,24 @@ check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Publishing
-docs: publish-html publish-code
+docs: publish-html publish-code publish-slides
 publish: docs
-	git add docs/*
-	git commit -m "Doc update" docs
+	git add $(DOCS_TARGET)/*
+	git commit -m "Doc update" $(DOCS_TARGET)
 
 # Add/update HTML code in repository
 publish-html: html
-	cp -pr html/* docs
-	cp docs/Main.html docs/index.html
+	@-mkdir $(DOCS_TARGET)html
+	cp -pr $(HTML_TARGET) $(DOCS_TARGET)html
 
 publish-code: code
-	cp -pr code docs
+	@-mkdir $(DOCS_TARGET)code
+	cp -pr $(CODE_TARGET) $(DOCS_TARGET)code
+
+publish-slides: slides
+	@-mkdir $(DOCS_TARGET)slides
+	cp -pr $(SLIDES_TARGET) $(DOCS_TARGET)slides
+
 
 # As an alternative, we may also push .md files directly, allowing us to use a theme.
 # However, this loses math rendering and citations
