@@ -421,9 +421,12 @@ check-code: code $(PYS_OUT)
 	
 # Publishing
 docs: publish-html publish-code publish-slides
+	@echo "Now use 'make publish' to commit changes to docs."
+
 publish: docs
-	git add $(DOCS_TARGET)/*
-	git commit -m "Doc update" $(DOCS_TARGET)
+	git add $(DOCS_TARGET)*
+	-git commit -m "Doc update" $(DOCS_TARGET)
+	@echo "Now use 'git push' to place docs on website."
 
 # Add/update HTML code in repository
 publish-html: html
