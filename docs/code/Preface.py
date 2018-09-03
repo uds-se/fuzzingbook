@@ -16,7 +16,7 @@
 # * It places software test generation techniques in a coherent framework, allowing the techniques to dovetail and integrate with each other.
 
 # ## Why this book?
-
+# 
 # Software test generation brings software quality to a new level.  Not only are we talking about automatically _executing_ software tests (as with unit testing), but actually _producing_ software tests automatically.  In contrast to the simple generation of random inputs (or "fuzzing"), we discuss test generation techniques that adhere to the input language, that systematically cover code structure, and that even are able to automatically learn the input language of the program under test.  These novel techniques lead to dramatic improvements in test generation and software testing, and they now are mature enough to be assembled in a book - even with executable code.
 
 # ## Who is this book for?
@@ -29,10 +29,10 @@
 # 
 # This book comes in four formats:
 # 
-# 1. As a set of _HTML pages_ to view in your browser (free)
-# 2. As a set of _Python modules_ to try out examples yourself (free)
-# 3. As a set of _Jupyter notebooks_, which you can edit, interact with, and derive the above formats from, as well as others such as slides or Word files (free).
-# 4. As a _printed book or PDF_ (available for purchase)
+# 1. As a set of _HTML pages_ to view in your browser.
+# 2. As a set of _Python modules_ to try out examples yourself.
+# 3. As a set of _Jupyter notebooks_, which you can edit, interact with, and derive the above formats from, as well as others such as slides or Word files.
+# 4. As a _printed book or PDF_ (once it is complete).
 # 
 # For self-teaching, the HTML pages may be fine; for offline reading, we'd rather recommend the printed book or PDF.  For teaching, we recommend the Notebook format, as you can easily interact with them, and extend the material for your own purposes.
 

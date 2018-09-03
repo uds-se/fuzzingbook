@@ -28,7 +28,9 @@ def my_sqrt(x):
     return approx
 
 
-# Your job is now to find out whether this function actually does what it claims to do.  You can now _test_ the function with a few values.  For `x = 4`, for instance, it produces the correct value:
+# Your job is now to find out whether this function actually does what it claims to do.
+
+# To find our whether `my_sqrt()` works correctly, you can _test_ it with a few values.  For `x = 4`, for instance, it produces the correct value:
 
 # In[3]:
 
@@ -63,7 +65,9 @@ my_sqrt(2) * my_sqrt(2)
 # 1. Manually, you can only check a very limited number of executions and their results
 # 2. After any change to the program, you have to repeat the testing process
 # 
-# This is why it is very useful to _automate_ tests.  One simple way of doing so is to let the computer first do the computation, and then have it check the results.  For instance, this piece of code automatically tests whether $\sqrt{4} = 2$ holds:
+# This is why it is very useful to _automate_ tests.  One simple way of doing so is to let the computer first do the computation, and then have it check the results.
+
+# For instance, this piece of code automatically tests whether $\sqrt{4} = 2$ holds:
 
 # In[6]:
 
@@ -83,7 +87,7 @@ else:
 # 3. We only check a single input (and a single result)
 # 
 # Let us address these issues one by one.  First, let's make the test a bit more compact.  Almost all programming languages do have a means to automatically check whether a condition holds, and stop execution if it does not.  This is called an _assertion_, and it is immensely useful for testing.
-# 
+
 # In Python, the `assert` statement takes a condition, and if the condition is true, nothing happens.  (If everything works as it should, you should not be bothered.)  If the condition evaluates to false, though, `assert` raises an exception, indicating that a test just failed.
 # 
 # In our example, we can use `assert` to easily check whether `my_sqrt()` yields the expected result as above:
@@ -162,13 +166,13 @@ for n in range(1, 1000):
 
 # How much time does it take to test `my_sqrt()` with 100 values?  Let's see:
 
-# In[35]:
+# In[15]:
 
 
 from Timer import Timer
 
 
-# In[36]:
+# In[16]:
 
 
 with Timer() as t:
@@ -178,17 +182,17 @@ print(t.elapsed_time())
 
 
 # 100 values take about a a hundredth of a second, so a single execution of `my_sqrt()` takes 1/10000 second, or about 100 microseconds.
-# 
+
 # Let's repeat this with 10,000 values, and let's pick them at random.  The Python `random.random()` function returns a random value between 0.0 and 1.0:
 
-# In[37]:
+# In[17]:
 
 
 import random
 from Timer import Timer
 
 
-# In[37]:
+# In[18]:
 
 
 with Timer() as t:
@@ -202,9 +206,11 @@ print(t.elapsed_time())
 
 # ## Run-Time Verification
 # 
-# Instead of writing and running tests for `my_aqrt()`, we can also go and integrate the check right into the implementation.  This way, _each and every_ invocation of `my_sqrt()` will be automatically checked.  This is very easy to implement:
+# Instead of writing and running tests for `my_aqrt()`, we can also go and _integrate the check right into the implementation._  This way, _each and every_ invocation of `my_sqrt()` will be automatically checked.
 
-# In[38]:
+# Such an _automatic run-time check_ is very easy to implement:
+
+# In[19]:
 
 
 def my_sqrt_checked(x):
@@ -215,25 +221,25 @@ def my_sqrt_checked(x):
 
 # Now, whenever we compute a root with `my_sqrt_checked()`$\dots$
 
-# In[19]:
+# In[20]:
 
 
 my_sqrt_checked(2.0)
 
 
 # we already know that the result is correct, and will so for every new successful computation.
-# 
-# This, of course, assumes two things:
-# 
-# 1. One has to be able to _formulate_ such run-time checks.  Having concrete values to check against should always be possible, but formulating desired properties in an abstract fashion can be very complex.  In practice, you need to decide which properties are most crucial, and design appropriate checks for them.
-# 
-# 2. One has to be able to _afford_ such run-time checks.  In the case of `my_sqrt()`, the check is not very expensive; but if we have to check, say, a large data structure even after a simple operation, the cost of the check may soon be prohibitive.  On the other hand, a comprehensive suite of run-time checks is a great way to find errors and quickly debug them; you need to decide how many such capabilities you would still want during production.
+
+# Automatic run-time checks, as above, assume two things, though:
+
+# * One has to be able to _formulate_ such run-time checks.  Having concrete values to check against should always be possible, but formulating desired properties in an abstract fashion can be very complex.  In practice, you need to decide which properties are most crucial, and design appropriate checks for them.
+
+# * One has to be able to _afford_ such run-time checks.  In the case of `my_sqrt()`, the check is not very expensive; but if we have to check, say, a large data structure even after a simple operation, the cost of the check may soon be prohibitive.  On the other hand, a comprehensive suite of run-time checks is a great way to find errors and quickly debug them; you need to decide how many such capabilities you would still want during production.
 
 # ## System Input vs Function Input
 
 # At this point, we may make `my_sqrt()` available to other programmers, who may then embed it in their code.  At some point, it will have to process input that comes from _third parties_, i.e. is not under control by the programmer.  Let us simulate this _system input_ by assuming a function `exposed_sqrt()` whose input is a string under third-party control:
 
-# In[20]:
+# In[21]:
 
 
 def exposed_sqrt(s):
@@ -243,7 +249,7 @@ def exposed_sqrt(s):
 
 # We can easily invoke `exposed_sqrt()` with some system input:
 
-# In[21]:
+# In[22]:
 
 
 exposed_sqrt("4")
@@ -253,13 +259,13 @@ exposed_sqrt("4")
 
 # Indeed, if you invoke `my_sqrt()` with a negative number, it enters an infinite loop.  For technical reasons, we cannot have infinite loops in this chapter (unless we'd want the code to run forever); so we use a special `with ExpectTimeOut(1)` construct to interrupt execution after one second.
 
-# In[39]:
+# In[23]:
 
 
 from ExpectError import ExpectTimeout
 
 
-# In[40]:
+# In[24]:
 
 
 with ExpectTimeout(1):
@@ -269,7 +275,7 @@ with ExpectTimeout(1):
 
 # Consequently, when accepting external input, we must ensure that it is properly validated.  We may write, for instance:
 
-# In[41]:
+# In[25]:
 
 
 def exposed_sqrt(s):
@@ -282,7 +288,7 @@ def exposed_sqrt(s):
 
 # and then we can be sure that `my_sqrt()` is only invoked according to its specification.
 
-# In[42]:
+# In[26]:
 
 
 exposed_sqrt("-1")
@@ -290,13 +296,13 @@ exposed_sqrt("-1")
 
 # But wait!  What happens if `exposed_sqrt()` is not invoked with a number?  Then we would try to convert a non-number string, which would also result in a runtime error:
 
-# In[43]:
+# In[27]:
 
 
 from ExpectError import ExpectError
 
 
-# In[44]:
+# In[28]:
 
 
 with ExpectError():
@@ -305,7 +311,7 @@ with ExpectError():
 
 # Here's a version which also checks for bad inputs:
 
-# In[45]:
+# In[29]:
 
 
 def exposed_sqrt(s):
@@ -320,19 +326,19 @@ def exposed_sqrt(s):
             print('The root of', x, 'is', my_sqrt(x))
 
 
-# In[46]:
+# In[30]:
 
 
 exposed_sqrt("4")
 
 
-# In[47]:
+# In[31]:
 
 
 exposed_sqrt("-1")
 
 
-# In[48]:
+# In[32]:
 
 
 exposed_sqrt("xyzzy")
@@ -342,9 +348,11 @@ exposed_sqrt("xyzzy")
 
 # ## The Limits of Testing
 # 
-# Despite best efforts in testing, keep in mind that you are always checking functionality for a _finite_ set of inputs.  Thus, there may always be _untested_ inputs for which the function may still fail.  In the case of `my_sqrt()`, for instance, computing $\sqrt{0}$ results in a division by zero:
+# Despite best efforts in testing, keep in mind that you are always checking functionality for a _finite_ set of inputs.  Thus, there may always be _untested_ inputs for which the function may still fail.
 
-# In[49]:
+# In the case of `my_sqrt()`, for instance, computing $\sqrt{0}$ results in a division by zero:
+
+# In[33]:
 
 
 with ExpectError():
@@ -353,7 +361,7 @@ with ExpectError():
 
 # In our tests so far, we have not checked this condition, meaning that a program which builds on $\sqrt{0} = 0$ will surprisingly fail.  We can, of course, fix the function accordingly, documenting the accepted values for `x` and handling the special case `x = 0`:
 
-# In[50]:
+# In[34]:
 
 
 def my_sqrt_fixed(x):
@@ -365,7 +373,7 @@ def my_sqrt_fixed(x):
 
 # With this, we can now correctly compute $\sqrt{0} = 0$:
 
-# In[51]:
+# In[35]:
 
 
 assert my_sqrt_fixed(0) == 0
@@ -374,7 +382,7 @@ assert my_sqrt_fixed(0) == 0
 # Illegal values now result in an exception:
 # 
 
-# In[52]:
+# In[36]:
 
 
 with ExpectError():
@@ -405,8 +413,7 @@ with ExpectError():
 # Enjoy the read!
 
 # ## Exercises
-# 
+
 # ### Shellsort
 # 
 # Consider the following implementation of a shellsort function.  \todo{Expand it}
-# 

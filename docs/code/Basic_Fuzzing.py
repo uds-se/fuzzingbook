@@ -77,8 +77,6 @@ fuzzer()
 
 # Now imagine that this string were the input to a program expecting a specific input format – say, a comma-separated list of values, or an e-mail address.  Would the program be able to process such an input without any problems?
 
-# ## Fuzzing Alphabets
-# 
 # If the above fuzzing input already is intriguing, consider that fuzzing can easily be set up to produce other kinds of input.  For instance, we can also have `fuzzer()` produce a series of upercase letters.  We use `ord(c)` to return the ASCII code of the character `c`.
 
 # In[6]:
@@ -205,7 +203,9 @@ os.remove("input.txt")
 sum(1 for (data, result) in runs if result.stderr == "")
 
 
-# Most inputs apparently are invalid – not a big surprise, as it is unlikely that a random input contains a valid arithmetic expression.  Let us take a look at the first error message: 
+# Most inputs apparently are invalid – not a big surprise, as it is unlikely that a random input contains a valid arithmetic expression.
+
+# Let us take a look at the first error message: 
 
 # In[16]:
 
@@ -256,7 +256,7 @@ sum(1 for (data, result) in runs if result.returncode != 0)
 # ```
 # Ironically, this already fails if `input` is `"Wednesday"` (9 characters); any excess characters (here, `'y'` and the following `'\0'` string terminator) are simply copied to whatever resides in memory after `weekday`, triggering arbitrary behavior; maybe some boolean character variable which would be set from `'n'` to `'y'`.  With fuzzing, it is very easy to produce arbitrary long inputs and input elements.
 
-# We can easily simulate this behavior in a Python function:
+# We can easily simulate this buffer overflow behavior in a Python function:
 
 # In[19]:
 
@@ -303,7 +303,7 @@ with ExpectError():
 # ```
 # What happens if the input ends prematurely, as would perfectly be feasible with fuzzing?  Well, `getchar()` returns `EOF`, and keeps on returning `EOF` when called again; so the code above simply enters an infinite loop.
 
-# Again, we can simulate this behavior.  Here's a function that will effectively hang if no space is present in the input:
+# Again, we can simulate such missing error checks.  Here's a function that will effectively hang if no space is present in the input:
 
 # In[21]:
 
@@ -352,7 +352,7 @@ with ExpectTimeout(2):
 # What happens if `size` is very large, exceeding program memory?  What happens if `size` is less then the number of characters following?  What happens if `size` is negative?  By providing a random number here, fuzzing can create all kinds of damages.
 # 
 
-# Again, we can easily simulate this in Python.  The function `collapse_if_too_large()` fails if the passed value (a string) is too large after having been converted to an integer.
+# Again, we can easily simulate such rogue numbers in Python.  The function `collapse_if_too_large()` fails if the passed value (a string) is too large after having been converted to an integer.
 
 # In[23]:
 
