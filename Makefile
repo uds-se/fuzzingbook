@@ -432,12 +432,13 @@ check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Publishing
-docs: publish-html publish-code publish-slides README.md
+docs: publish-html publish-code publish-slides $(DOCS_TARGET)index.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
 # TODO: Also remove Twitter scripts
-README.md: $(DOCS_TARGET)index.md
-	tail +2 $(DOCS_TARGET)index.md > README.md
+$(DOCS_TARGET)index.md: README.md
+	echo '<h1>Generating Software Tests</h1>' > $@
+	tail +2 README.md >> $@
 
 publish: docs
 	git add $(DOCS_TARGET)*
