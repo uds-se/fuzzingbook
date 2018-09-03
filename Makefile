@@ -422,15 +422,15 @@ publish: docs
 
 # Add/update HTML code in repository
 publish-html: html
-	@-mkdir $(DOCS_TARGET)html
+	@-mkdir $(DOCS_TARGET)html 2> /dev/null
 	cp -pr $(HTML_TARGET) $(DOCS_TARGET)html
 
 publish-code: code
-	@-mkdir $(DOCS_TARGET)code
+	@-mkdir $(DOCS_TARGET)code 2> /dev/null
 	cp -pr $(CODE_TARGET) $(DOCS_TARGET)code
 
 publish-slides: slides
-	@-mkdir $(DOCS_TARGET)slides
+	@-mkdir $(DOCS_TARGET)slides 2> /dev/null
 	cp -pr $(SLIDES_TARGET) $(DOCS_TARGET)slides
 
 
