@@ -297,9 +297,12 @@ $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER)
 	@-$(RM) -fr $(TMPDIR)
 
 $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
-	$(CONVERT_TO_SLIDES) $<
+	$(eval TMPDIR := $(shell mktemp -d))
+	sed 's/\.ipynb)/\.slides\.html)/g' $< > $(TMPDIR)/$(notdir $<)
+	$(CONVERT_TO_SLIDES) $(TMPDIR)/$(notdir $<)
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
+	@-$(RM) -fr $(TMPDIR)
 
 # Reconstructing the reveal.js dir
 $(REVEAL_JS):
