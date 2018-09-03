@@ -234,23 +234,32 @@ ipypublish-chapters:
 endif
 endif
 
-# Invoke notebook and editor
-edit jupyter notebook:
+# Invoke notebook and editor: `make jupyter lab`
+edit notebook:
 	jupyter notebook
+
+lab:
+	jupyter lab
+	
+jupyter:
+
 
 # Help
 help:
-	@echo "Welcome to the 'fuzzingbook' makefile!"
+	@echo "Welcome to the 'fuzzingbook' Makefile!"
 	@echo ""
-	@echo "* make chapters (default) -> PDF, HTML, code, and slides for all chapters"
+	@echo "* make chapters (default) -> HTML and code for all chapters (notebooks)"
 	@echo "* make (pdf|html|code|slides|word|markdown) -> given subcategory only"
 	@echo "* make book -> entire book in PDF and HTML"
 	@echo "* make all -> all inputs in all output formats"
 	@echo "* make style -> style checker"
+	@echo "* make crossref -> cross reference checker"
+	@echo "* make publish -> place on official web site"
 	@echo "* make clean -> delete all derived files"
 	@echo ""
 	@echo "Created files end here:"
 	@echo "* PDFs -> '$(PDF_TARGET)', HTML -> '$(HTML_TARGET)', Python code -> '$(CODE_TARGET)', Slides -> '$(SLIDES_TARGET)'"
+	@echo "* Web site files -> '$(DOCS_TARGET)'"
 	@echo ""
 	@echo "Settings:"
 	@echo "* Use make PUBLISH=(nbconvert|nbpublish|bookbook) to choose a converter"
@@ -453,7 +462,7 @@ publish-slides: slides
 # However, this loses math rendering and citations
 publish-markdown: markdown
 	cp -pr markdown/* docs
-	cp docs/Main.md docs/index.md
+	cp $(DOCS_TARGET)Main.md $(DOCS_TARGET)index.md
 
 
 # Cleanup
@@ -483,7 +492,7 @@ clean-aux:
 	$(RM) $(AUX)
 	
 clean-docs:
-	$(RM) -r docs/*.md docs/*.html docs/*_files docs/code
+	$(RM) -r $(DOCS_TARGET)*.md $(DOCS_TARGET)html $(DOCS_TARGET)code $(DOCS_TARGET)slides
 
 clean: clean-code clean-chapters clean-book clean-aux clean-docs
 	@echo "All derived files deleted"
