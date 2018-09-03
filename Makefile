@@ -438,6 +438,7 @@ docs: publish-html publish-code publish-slides
 
 publish: docs
 	git add $(DOCS_TARGET)*
+	-git status
 	-git commit -m "Doc update" $(DOCS_TARGET)
 	@echo "Now use 'git push' to place docs on website."
 
