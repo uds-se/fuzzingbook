@@ -16,11 +16,10 @@ You can use this book in three ways:
 This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>.
 
 
-## Latest News
+<a class="twitter-timeline" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">FuzzingBook news</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @FuzzingBook on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>.
 
-<a class="twitter-timeline" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">FuzzingBook news</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 
 ## About the Authors
@@ -91,7 +90,7 @@ Again, we're glad you're here!  See our [Guide for Authors](https://github.com/u
 At this point, we do not provide support for PDF versions.  We are working on producing PDF and paper versions once the book is complete.
 
 
-## License
+<hr>
 
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 
