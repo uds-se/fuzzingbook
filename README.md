@@ -1,9 +1,12 @@
-# Generating Software Tests
-## Breaking Software for Fun and Profit
-
 __Welcome to "Generating Software Tests"!__  This book teaches how to automate _software testing_, specifically by showing how to _generate tests automatically_.  Such generated tests can be extended into ordinary tests, by adding code that checks for correct behavior; or be used for "fuzzing", that is, finding inputs that cause a program to crash, hang, or otherwise malfunction.
 
+
+## Breaking Software for Fun and Profit
+
 This work is designed as a _textbook_ for a course in software testing; as _supplementary material_ in a software testing or software engineering course; and as a _resource for software developers_. We cover random fuzzing, mutation-based fuzzing, grammar-based test generation, symbolic testing, and much more, illustrating all techniques with code examples that you can try out yourself.
+
+
+## A Textbook for Paper, Screen, and Keyboard
 
 You can use this book in three ways:
 
@@ -15,10 +18,14 @@ You can use this book in three ways:
 
 This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>.
 
+<a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @FuzzingBook on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>.
+
+
+
+
+## News
 
 <a class="twitter-timeline" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">FuzzingBook news</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-<a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @FuzzingBook on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>.
 
 
 
