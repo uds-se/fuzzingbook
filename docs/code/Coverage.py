@@ -66,7 +66,9 @@ def cgi_decode(s):
 cgi_decode("Hello+world")
 
 
-# If we want to systematically test `cgi_decode()`, how would we proceed?  Testing literature distinguishes two ways of deriving tests: _Black-box testing_ and _White-box testing._
+# If we want to systematically test `cgi_decode()`, how would we proceed?
+
+# The testing literature distinguishes two ways of deriving tests: _Black-box testing_ and _White-box testing._
 
 # ## Black-Box Testing
 # 
@@ -103,7 +105,7 @@ except ValueError:
 # * **Branch testing** – each branch in the code must be taken at least once.  (This translates to each `if` and `while` decision once being true, and once being false.)
 # 
 # Besides these, there are far more coverage criteria, including sequences of branches taken, loop iterations taken (zero, one, many), data flows between variable definitions and usages, and many more; \cite{Pezze2008} has a great overview.
-# 
+
 # Let us consider `cgi_decode()`, above, and reason what we have to do such that each statement of the code is executed at least once.  We'd have to cover
 # 
 # * The block following `if c == '+'`
@@ -112,7 +114,7 @@ except ValueError:
 # 
 # This results in the same conditions as with black-box testing, above; again, the assertions above indeed would cover every statement in the code.  Such a correspondence is actually pretty common, since programmers tend to implement different behaviors in different code locations; and thus, covering these locations will lead to test cases that cover the different (specified) behaviors.
 # 
-# The advantage of white-box testing is that it finds errors in _implemented_ behavior.  It can be conducted even in cases where the specification does not provide sufficient details; actually, it helps in identifying (and thus specifiying) corner cases in the specification.  The downside is that it may miss _non-implemented_ behavior: If some specified functionality is missing, white-box testing will not find it.
+# The advantage of white-box testing is that it finds errors in _implemented_ behavior.  It can be conducted even in cases where the specification does not provide sufficient details; actually, it helps in identifying (and thus specifying) corner cases in the specification.  The downside is that it may miss _non-implemented_ behavior: If some specified functionality is missing, white-box testing will not find it.
 
 # ## Tracing Executions
 # 
@@ -121,7 +123,7 @@ except ValueError:
 # ### Tracing Executions in Python
 # 
 # In most programming languages, it is rather difficult to set up programs such that one can trace their execution.  Not so in Python.  The function `sys.settrace(f)` allows to define a function `f()` that is called for each and every line executed.  Even better, it gets access to the current function and its name, current variable contents, and more.  It is thus an ideal tool for _dynamic analysis_ – that is, the analysis of what actually happens during an execution.
-# 
+
 # To illustrate how this works, let us again look into a specific execution of `cgi_decode()`.
 
 # In[35]:
@@ -270,7 +272,7 @@ for lineno in range(1, len(cgi_decode_lines)):
 # ## A Coverage Class
 # 
 # In this book, we will make use of coverage again and again – to _measure_ the effectiveness of different test generation techniques, but also to _guide_ test generation towards code coverage.  Our previous implementation with a global `coverage` variable is a bit cumbersome for that.  We therefore implement some functionality that will help us measuring coverage easily.
-# 
+
 # The key idea of getting coverage is to make use of the Python `with` statement.  The general form
 # 
 # ```python
@@ -287,7 +289,7 @@ for lineno in range(1, len(cgi_decode_lines)):
 # ```
 # 
 # Here, tracing is automatically turned on during `function_to_be_traced()` and turned off again after the `with` block; afterwards, we can access the set of lines executed.
-# 
+
 # Here's the full implementation with all its bells and whistles.  You don't have to get everything; it suffices that you know how to use it:
 
 # In[46]:
@@ -342,7 +344,7 @@ print(cov.coverage())
 # As you can see, the `Coverage()` class not only keeps track of lines executed, but also of function names.  This is useful if you have a program that spans multiple files.
 
 # ## Comparing Coverage
-
+# 
 # Since we represent coverage as a set of executed lines, we can also apply _set operations_ on these.  For instance, we can find out which lines are covered by individual test cases, but not others:
 
 # In[48]:
@@ -493,7 +495,7 @@ plt.ylabel('lines covered');
 
 # This is just _one_ run, of course; so let's repeat this a number of times and plot the averages.
 
-# In[62]:
+# In[ ]:
 
 
 runs = 100
@@ -511,6 +513,10 @@ average_coverage = []
 for i in range(trials):
     average_coverage.append(sum_coverage[i] / runs)
 
+
+# In[62]:
+
+
 plt.plot(average_coverage)
 plt.title('Average coverage of cgi_decode() with random inputs');
 plt.xlabel('# of inputs')
@@ -520,9 +526,9 @@ plt.ylabel('lines covered');
 # We see that on average, we get full coverage after 40–60 fuzzing inputs.
 
 # ## Finding Errors with Basic Fuzzing
-
-# Given sufficient time, we can indeed cover each and every line within `cgi_decode()`.  This does not mean that they would be error-free, though.  Since we do not check the result of `cgi_decode()`, the function could return any value without us checking or noticing.  To catch such errors, we would have to set up a _results checker_ (commonly called an _oracle_) that would verify test results.  In our case, we could compare against another implementation of `cgi_decode()` and see whether both produce the same results.
 # 
+# Given sufficient time, we can indeed cover each and every line within `cgi_decode()`.  This does not mean that they would be error-free, though.  Since we do not check the result of `cgi_decode()`, the function could return any value without us checking or noticing.  To catch such errors, we would have to set up a _results checker_ (commonly called an _oracle_) that would verify test results.  In our case, we could compare against another implementation of `cgi_decode()` and see whether both produce the same results.
+
 # Where fuzzing is great at, though, is in finding _internal errors_ that can be detected even without checking the result.  Actually, if one runs our `fuzzer()` on `cgi_decode()`, one quickly finds such an error, as the following code shows:
 
 # In[63]:
@@ -548,7 +554,7 @@ s
 
 
 # The problem here is at the end of the string.  After a `'%'` character, our implementation will always attempt to access two more (hexadecimal) characters, but if these are not there, we will get an `IndexError` exception.  
-# 
+
 # This problem is actually also present in the original implementation \cite{Pezze2008}, where the code to access the next two characters reads
 # 
 # ```c
@@ -558,7 +564,7 @@ s
 # 
 # Here, `eptr` is a pointer to the character to be read; `++` increments it by one character.
 # In this C implementation, the problem is actually much worse.  If the `'%'` character is at the end of the string, the above code will first read a terminating character (`'\0'` in C strings) and then the following character, which may be any memory content after the string, and which thus may cause the program to fail uncontrollably.  The somewhat good news is that `'\0'` is not a valid hexadecimal character, and thus, the C version will "only" read one character beyond the end of the string.
-# 
+
 # Interestingly enough, none of the manual tests we had designed earlier would catch this bug.  Actually, neither statement nor branch coverage, nor any of the coverage criteria commonly discussed in literature would find it.  However, a simple fuzzing run can identify the error with a few runs.  This definitely calls for more fuzzing!
 
 # ## Lessons Learned
