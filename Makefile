@@ -183,6 +183,7 @@ CONVERT_TO_PYTHON = $(NBCONVERT) --to python --output-dir=$(CODE_TARGET)
 # For slides, we also use the standard Jupyter tools
 # Main reason: Jupyter has a neat interface to control slides/sub-slides/etc
 CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
+REVEAL_JS = $(SLIDES_TARGET)reveal.js
 
 # For Word .docx files, we start from the HTML version
 CONVERT_TO_WORD = $(PANDOC) 
@@ -206,7 +207,7 @@ and more:	word markdown
 html:	ipypublish-chapters $(HTMLS)
 pdf:	ipypublish-chapters $(PDFS)
 python code:	$(PYS)
-slides:	$(SLIDES)
+slides:	$(SLIDES) $(REVEAL_JS)
 word doc docx: $(WORDS)
 md markdown: $(MARKDOWNS)
 
@@ -299,6 +300,10 @@ $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 	$(CONVERT_TO_SLIDES) $<
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
+
+# Reconstructing the reveal.js dir
+$(REVEAL_JS):
+	git submodule update --init
 
 $(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
 	$(eval TMPDIR := $(shell mktemp -d))
