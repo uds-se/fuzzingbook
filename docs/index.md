@@ -17,9 +17,8 @@ You can use this book in three ways:
 
 * You can __present chapters as slides__ (beta).  This allows for presenting the material in lectures.  Just click on "View slides" at the top of each chapter. [Try viewing slides on the introduction to fuzzing.](http://www.fuzzingbook.org/slides/Basic_Fuzzing.slides.html).
 
-This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>.
-
-<a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @FuzzingBook on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>.
+This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>. 
+<a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @FuzzingBook on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 
 
