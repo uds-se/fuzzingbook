@@ -82,7 +82,7 @@ We're glad you ask that.  The [development page](https://github.com/uds-se/fuzzi
 
 ### How can I contribute?
 
-Again, we're glad you're here!  See our [Guide for Authors](https://github.com/uds-se/fuzzingbook/notebooks/Guide_For_Authors.ipynb) for instructions on coding and writing.
+Again, we're glad you're here!  See our [Guide for Authors](http://www.fuzzingbook.org/html/Guide_for_Authors.html) for instructions on coding and writing.
 
 
 ### Do you provide PDFs of your material?

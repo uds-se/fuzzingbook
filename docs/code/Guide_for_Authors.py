@@ -29,15 +29,23 @@
 # The notebook can be _exported_ to multiple (non-interactive) formats:
 # 
 # * HTML – for placing this material online.
-# * PDF – for printing (and selling :-)
+# * PDF – for printing
 # * Python – for coding
 # * Slides – for presenting
 # 
-# The default export options already do a good job in producing these formats; however, there also is a Makefile that generates all of these automatically.
+# The included Makefile can generate all of these automatically.
+# 
+# At this point, we mostly focus on HTML and Python, as we want to get these out quickly; but you should also occasionally ensure that your notebooks can (still) be exported into PDF.  Other formats (Word, Markdown) are experimental.
+
+# ## Sites
+# 
+# All sources for the book end up on the [Github project page](https://github.com/uds-se/fuzzingbook).  This holds the sources (notebooks), utilities (Makefiles), as well as an issue tracker.
+# 
+# The derived material for the book ends up in the `docs/` folder, from where it is eventually pushed to the [fuzzingbook website](http://www.fuzzingbook.org/).  This site allows to read the chapters online, can launch Jupyter notebooks using the binder service, and provides access to code and slide formats.  Use `make publish` to create and update the site.
 
 # ### The Book
 # 
-# The book is compiled automatically from the individual notebooks.  Each notebook becomes a chapter; references are compiled in the final chapter.
+# The book is compiled automatically from the individual notebooks.  Each notebook becomes a chapter; references are compiled in the final chapter.  Use `make book` to create the book.
 
 # ## Creating and Building
 
@@ -47,7 +55,7 @@
 # 
 # 1. Jupyter notebook.  The easiest way to install this is via the [Anaconda distribution](https://www.anaconda.com/download/).
 # 
-# 2. Once you have the Jupyter notebook installed, you can start editing and coding right away by starting `jupyter notebook` in the topmost folder.
+# 2. Once you have the Jupyter notebook installed, you can start editing and coding right away by starting `jupyter notebook` (or `jupyter lab`) in the topmost folder.
 # 
 # 3. If (like me) you don't like the Jupyter Notebook interface, there's two alternatives I can recommend:
 #     * [Jupyter Lab](https://jupyterlab.readthedocs.io/en/stable/) is the designated successor to Jupyter Notebook.  Invoke it as `jupyter lab`.  It comes with a much more modern interface, but misses autocompletion and a couple of extensions.  I am running it [as a Desktop application](http://christopherroach.com/articles/jupyterlab-desktop-app/) which gets rid of all the browser toolbars.
@@ -58,8 +66,9 @@
 
 # ### Version Control
 # 
-# We use git in a single strand of revisions.  Do not branch, do not merge. Sync early; sync often.  Only push if everything ("make all") builds and passes.
+# We use git in a single strand of revisions.  Feel free branch for features, but eventually merge back into the main "master" branch. Sync early; sync often.  Only push if everything ("make all") builds and passes.
 # 
+# The Github repo thus will typically reflect work in progress.  If you reach a stable milestone, you can push things on the fuzzingbook.org web site, using `make publish`.
 
 # The [nbdime](https://github.com/jupyter/nbdime) package gives you tools such as `nbdiff` (and even better, `nbdiff-web`) to compare notebooks against each other; this ensures that cell _contents_ are compared rather than the binary format.
 # 
@@ -78,9 +87,11 @@
 # 
 # 1. Set up a new `.ipynb` notebook file as copy of [Template.ipynb](Template.ipynb).
 # 
-# 2. Include it in the `CHAPTERS` list in the `Makefile`
+# 2. Include it in the `CHAPTERS` list in the `Makefile`.
 # 
-# 3. Add it to the git repository.
+# 3. Include it in the table of contents in [Main.ipynb](Main.ipynb).
+# 
+# 4. Add it to the git repository.
 
 # ## Coding
 
@@ -156,7 +167,7 @@ fuzzer(100, ord('0'), 10)
 
 # ### Issue Tracker
 # 
-# The GitLab project page allows to enter and track issues.
+# The [Github project page](https://github.com/uds-se/fuzzingbook) allows to enter and track issues.
 
 # ## Writing Text
 # 
@@ -174,13 +185,12 @@ fuzzer(100, ord('0'), 10)
 # 
 # Use
 # 
-# * _emphasis_ for highlighting,
+# * _emphasis_ (`_emphasis_`) for highlighting,
 # * `backticks` for code and other verbatim elements.
-# 
 
 # ### Hyphens and Dashes
 # 
-# Use – for em-dashes, - for hyphens, and $-$ for minus.
+# Use – (`–`) for em-dashes, - (`-`) for hyphens, and $-$ (`$-$`) for minus.
 
 # ### Lists and Enumerations
 # 
@@ -220,9 +230,9 @@ fuzzer(100, ord('0'), 10)
 
 # ## Images
 # 
-# To insert images, use Markdown syntax `![Andreas Zeller](PICS/Zeller.jpg){width=100%}` inserts a picture from the `PICS` folder.
+# To insert images, use Markdown syntax `![Word cloud](PICS/wordcloud.png){width=100%}` inserts a picture from the `PICS` folder.
 
-# ![Andreas Zeller](PICS/Zeller.jpg){width=100%}
+# ![Word cloud](PICS/wordcloud.png){width=100%}
 
 # All pictures go to `PICS/`, both in source as well as derived formats; both are stored in git, too.  (Not all of us have all tools to recreate diagrams, etc.)
 
@@ -317,8 +327,15 @@ fuzzer(100, ord('0'), 10)
 
 # ### Citations
 # 
-# To cite papers, cite in LaTeX style: `\cite{purdom1972}`, which gets you \cite{purdom1972}.  The keys refer to BibTeX entries in [fuzzingbook.bib](fuzzingbook.bib).  
-# 
+# To cite papers, cite in LaTeX style.  The text
+
+# In[1]:
+
+
+print(r"\cite{purdom1972}")
+
+
+# is expanded to \cite{purdom1972}.  The keys refer to BibTeX entries in [fuzzingbook.bib](fuzzingbook.bib).  
 # * LaTeX/PDF output will have a "References" section appended.
 # * HTML output will link to the URL field from the BibTeX entry. Be sure it points to the DOI.
 
@@ -383,17 +400,15 @@ plt.title('Increase in data');
 # 
 # You can set up the notebooks such that they also can be presented as slides.  In the browser, select View -> Cell Toolbar -> Slideshow.  You can then select a slide type for each cell:
 # 
-# * `New slide` starts a new slide with the cell
-# * `Sub-slide` starts a new slide (which you navigate "down" to)
-# * `Fragment` is a cell that gets revealed after a click
-# * `Skip` is skipped during the slide show
+# * `New slide` starts a new slide with the cell (typically, every `## SECTION` in the chapter)
+# * `Sub-slide` starts a new sub-slide which you navigate "down" to (anything in the section)
+# * `Fragment` is a cell that gets revealed after a click (on the same slide)
+# * `Skip` is skipped during the slide show (e.g. `import` statements; navigation guides)
 # * `Notes` goes into presenter notes
 # 
 # To create slides, do `make slides`; to view them, change into the `slides/` folder and open the created HTML files.  (The `reveal.js` package has to be in the same folder as the slide to be presented.)
 # 
-# I am not sure how many people will use the notebooks as slide shows, but it comes as a nice extra.
-# 
-# 
+# The ability to use slide shows is a compelling argument for teachers and instructors in our audience.
 
 # (Hint: In a slide presentation, type `s` to see presenter notes.)
 
@@ -412,6 +427,8 @@ plt.title('Increase in data');
 #   * Spell Checker (while you're editing)
 #   
 #   * Table of contents (for quick navigation)
+#   
+# Extensions for _Jupyter Lab_ are much less varied and less supported, but things get better.
 
 # ## Interaction
 # 
