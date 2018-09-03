@@ -421,7 +421,7 @@ check-code: code $(PYS_OUT)
 	
 # Publishing
 docs: publish-html publish-code publish-slides
-	cp -pr README.md $(DOCS_TARGET)/index.md
+	cp -pr README.md $(DOCS_TARGET)index.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
 publish: docs
@@ -431,18 +431,18 @@ publish: docs
 
 # Add/update HTML code in repository
 publish-html: html
-	test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
-	test -d $(DOCS_TARGET)html || mkdir $(DOCS_TARGET)html
+	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)html || mkdir $(DOCS_TARGET)html
 	cp -pr $(HTML_TARGET) $(DOCS_TARGET)html
 
 publish-code: code
-	test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
-	test -d $(DOCS_TARGET)code || mkdir $(DOCS_TARGET)code
+	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)code || mkdir $(DOCS_TARGET)code
 	cp -pr $(CODE_TARGET) $(DOCS_TARGET)code
 
 publish-slides: slides
-	test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
-	test -d $(DOCS_TARGET)slides || mkdir $(DOCS_TARGET)slides
+	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)slides || mkdir $(DOCS_TARGET)slides
 	cp -pr $(SLIDES_TARGET) $(DOCS_TARGET)slides
 
 
