@@ -1,3 +1,4 @@
+
 __Welcome to "Generating Software Tests"!__  This book teaches how to automate _software testing_, specifically by showing how to _generate tests automatically_.  Such generated tests can be extended into ordinary tests, by adding code that checks for correct behavior; or be used for "fuzzing", that is, finding inputs that cause a program to crash, hang, or otherwise malfunction.
 
 
