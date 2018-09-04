@@ -308,6 +308,7 @@ $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER) $(PUBLISH_
 	$(NBMERGE) $(TMPDIR)/Header.ipynb $(TMPDIR)/tmp-$(notdir $<) $(TMPDIR)/Footer.ipynb > $(TMPDIR)/$(notdir $<)
 	cp $(BIB) $(TMPDIR)
 	$(CONVERT_TO_HTML) $(TMPDIR)/$(notdir $<)
+	$(PYTHON) utils/post-html.py < $@ > $@~ && mv $@~ $@
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
 	@-$(RM) -fr $(TMPDIR)
