@@ -295,8 +295,13 @@ $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 
 $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER)
 	$(eval TMPDIR := $(shell mktemp -d))
-	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(HEADER) > $(TMPDIR)/Header.ipynb
-	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(FOOTER) > $(TMPDIR)/Footer.ipynb
+	$(eval CHAPTER := $(basename $(notdir $<)))
+	$(eval DATE := $(shell stat -f '%Sm' $<))
+	$(eval SED_SCRIPT := $(TMPDIR)/script.sed)
+	echo 's/CHAPTER/$(CHAPTER)/g' > $(SED_SCRIPT)
+	echo 's/DATE/$(DATE)/g' >> $(SED_SCRIPT)
+	sed -f $(SED_SCRIPT) $(HEADER) > $(TMPDIR)/Header.ipynb
+	sed -f $(SED_SCRIPT) $(FOOTER) > $(TMPDIR)/Footer.ipynb
 	sed 's/\.ipynb)/\.html)/g' $< > $(TMPDIR)/tmp-$(notdir $<)
 	$(NBMERGE) $(TMPDIR)/Header.ipynb $(TMPDIR)/tmp-$(notdir $<) $(TMPDIR)/Footer.ipynb > $(TMPDIR)/$(notdir $<)
 	cp $(BIB) $(TMPDIR)
