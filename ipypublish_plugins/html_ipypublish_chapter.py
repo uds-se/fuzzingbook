@@ -30,9 +30,7 @@ fuzzingbook_tpl_dict = {
     
     'html_header': """
 <!-- load Google fonts -->
-<link href='https://fonts.googleapis.com/css?family=Patua+One' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Source+Code+Pro' rel='stylesheet' type='text/css'>
-<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
     """
 }
 
