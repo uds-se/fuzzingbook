@@ -153,7 +153,7 @@ PUBLISH_PLUGINS =
 else
 ifeq ($(PUBLISH),nbpublish)
 # Use nbpublish
-CONVERT_TO_HTML   = $(NBPUBLISH) -f html_ipypublish_all --outpath $(HTML_TARGET)
+CONVERT_TO_HTML   = $(NBPUBLISH) -f html_ipypublish_chapter --outpath $(HTML_TARGET)
 CONVERT_TO_TEX    = $(NBPUBLISH) -f latex_ipypublish_chapter --outpath $(PDF_TARGET)
 # CONVERT_TO_SLIDES = $(NBPUBLISH) -f slides_ipypublish_all --outpath $(SLIDES_TARGET)
 BOOK_TEX    = $(PDF_TARGET)book.tex
