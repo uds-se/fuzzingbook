@@ -23,6 +23,19 @@ from ipypublish.preprocessors.latex_doc_links import LatexDocLinks
 from ipypublish.preprocessors.latextags_to_html import LatexTagsToHTML
 from ipypublish.preprocessors.split_outputs import SplitOutputs
 
+# Own adaptations -- AZ
+# Fonts from https://designshack.net/articles/css/10-great-google-font-combinations-you-can-copy/
+fuzzingbook_tpl_dict = {
+    'meta_docstring': 'with fuzzingbook css adaptations',
+    
+    'html_header': """
+<!-- load Google fonts -->
+<link href='http://fonts.googleapis.com/css?family=Patua+One' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro' rel='stylesheet' type='text/css'>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    """
+}
+
 cell_defaults = {
     "ipub": {
         "figure": {
@@ -61,6 +74,7 @@ config = {'TemplateExporter.filters': {'replace_string': replace_string},
 
 template = create_tpl([
     document.tpl_dict,
+    fuzzingbook_tpl_dict,
     content.tpl_dict, content_tagging.tpl_dict,
     mathjax.tpl_dict, widgets.tpl_dict,
     #    inout_prompt.tpl_dict,

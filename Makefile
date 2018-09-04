@@ -77,7 +77,7 @@ LATEX ?= latexmk
 
 ## Tools
 # Python
-PYTHON ?= python
+PYTHON ?= python3
 
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
@@ -162,7 +162,9 @@ BOOK_HTML   = $(HTML_TARGET)book.html
 BOOK_HTML_FILES = $(HTML_TARGET)book_files
 BOOK_PDF_FILES  = $(PDF_TARGET)book_files
 PUBLISH_PLUGINS = \
-	ipypublish_plugins/latex_ipypublish_book.py 	ipypublish_plugins/latex_ipypublish_chapter.py
+    ipypublish_plugins/html_ipypublish_chapter.py \
+	ipypublish_plugins/latex_ipypublish_book.py \
+	ipypublish_plugins/latex_ipypublish_chapter.py
 else
 # Use standard Jupyter tools
 CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(HTML_TARGET)
@@ -293,7 +295,7 @@ $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER)
+$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER) $(PUBLISH_PLUGINS)
 	$(eval TMPDIR := $(shell mktemp -d))
 	$(eval CHAPTER := $(basename $(notdir $<)))
 	$(eval DATE := $(shell stat -f '%Sm' $<))
