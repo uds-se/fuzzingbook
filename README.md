@@ -4,10 +4,6 @@
 __Welcome to "Generating Software Tests"!__ 
 Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by _automating_ software testing, specifically by _generating tests automatically_.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code. 
 
-## Breaking Software for Fun and Profit
-
-This work is designed as a _textbook_ for a course in software testing; as _supplementary material_ in a software testing or software engineering course; and as a _resource for software developers_. We cover random fuzzing, mutation-based fuzzing, grammar-based test generation, symbolic testing, and much more, illustrating all techniques with code examples that you can try out yourself.
-
 ## A Textbook for Paper, Screen, and Keyboard
 
 You can use this book in three ways:
@@ -20,9 +16,13 @@ You can use this book in three ways:
 
 * You can __present chapters as slides__ (beta).  This allows for presenting the material in lectures.  Just click on "View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a>
 
-This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
+## Who this Book is for
+
+This work is designed as a _textbook_ for a course in software testing; as _supplementary material_ in a software testing or software engineering course; and as a _resource for software developers_. We cover random fuzzing, mutation-based fuzzing, grammar-based test generation, symbolic testing, and much more, illustrating all techniques with code examples that you can try out yourself.
 
 ## News
+
+This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
 
 <a class="twitter-timeline" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
@@ -86,7 +86,3 @@ Again, we're glad you're here!  See our [Guide for Authors](http://www.fuzzingbo
 ### Do you provide PDFs of your material?
 
 At this point, we do not provide support for PDF versions.  We are working on producing PDF and paper versions once the book is complete.
-
-## License
-
-All work on this site is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
