@@ -426,7 +426,7 @@ check-code: code $(PYS_OUT)
 docs: publish-html publish-code publish-slides $(DOCS_TARGET)index.html README.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
-README.md: $(MARKDOWN_TARGET)About.md
+README.md: $(MARKDOWN_TARGET)index.md
 	cp -pr $< $@
 
 publish: docs

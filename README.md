@@ -2,7 +2,7 @@
 # About this Book
 
 __Welcome to "Generating Software Tests"!__ 
-Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by _automating_ software testing, specifically by _generating tests automatically_.  Recent years have seen the devleopment of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book - even with executable code. 
+Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by _automating_ software testing, specifically by _generating tests automatically_.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book - even with executable code. 
 
 ## Breaking Software for Fun and Profit
 
@@ -12,14 +12,16 @@ This work is designed as a _textbook_ for a course in software testing; as _supp
 
 You can use this book in three ways:
 
-* You can __[read chapters in your browser](http://www.fuzzingbook.org/html/Main.html)__.  Check out the list of chapters in the menu above, or start right away with the [introduction to testing](http://www.fuzzingbook.org/html/Intro_Testing.html) or the [introduction to fuzzing](http://www.fuzzingbook.org/html/Basic_Fuzzing.html).  All code is available for download.
+* You can __read chapters in your browser__.  Check out the list of chapters in the menu above, or start right away with the 
+<a href="https://www.fuzzingbook.org/html/Intro_Testing.html" target=_blank>introduction to testing</a> or the
+<a href="https://www.fuzzingbook.org/html/Basic_Fuzzing.html" target=_blank>introduction to fuzzing</a>.  All code is available for download.
 
-* You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you edit and extend the code, experimenting _live in your browser._  Just click on "Open as Notebook" at the top of each chapter.  [Try interacting with the introduction to fuzzing.](https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Basic_Fuzzing.ipynb)
+* You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you edit and extend the code, experimenting _live in your browser._  Just click on "Open as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Basic_Fuzzing.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
 
-* You can __present chapters as slides__ (beta).  This allows for presenting the material in lectures.  Just click on "View slides" at the top of each chapter. [Try viewing slides on the introduction to fuzzing.](http://www.fuzzingbook.org/slides/Basic_Fuzzing.slides.html)
+* You can __present chapters as slides__ (beta).  This allows for presenting the material in lectures.  Just click on "View slides" at the top of each chapter.  
+<a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a>
 
-This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>. 
-<a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @FuzzingBook on Twitter</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
 
 ## News
 
@@ -80,7 +82,7 @@ We're glad you ask that.  The [development page](https://github.com/uds-se/fuzzi
 
 ### How can I contribute?
 
-Again, we're glad you're here!  See our [Guide for Authors](http://www.fuzzingbook.org/html/Guide_for_Authors.html) for instructions on coding and writing.
+Again, we're glad you're here!  See our [Guide for Authors](http://www.fuzzingbook.org/Guide_for_Authors.html) for instructions on coding and writing.
 
 ### Do you provide PDFs of your material?
 
