@@ -155,6 +155,11 @@ chapter_html = chapter_html \
 if args.site_index:
     chapter_html = chapter_html.replace("custom.css", menu_prefix + "/custom.css")
 
+if not args.site_index:
+    # The official wauy is set a title in document metadata, 
+    # but a) Jupyter Lab can't edit it, and b) the title conflicts with the chapter header
+    chapter_html = re.sub(r"<title>.*</title>", "<title>" + chapter_title + "</title>", chapter_html)
+
 # And write it out again
 print("Writing", chapter_html_file)
 open(chapter_html_file, mode="w", encoding="utf-8").write(chapter_html)
