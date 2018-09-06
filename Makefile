@@ -25,7 +25,7 @@ APPENDICES = \
 	ExpectError.ipynb \
 	Timer.ipynb
 FRONTMATTER = \
-	About.ipynb
+	index.ipynb
 
 # All sources
 SOURCE_FILES = \
@@ -421,9 +421,6 @@ check-code: code $(PYS_OUT)
 docs: publish-html publish-code publish-slides $(DOCS_TARGET)index.html README.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
-$(DOCS_TARGET)index.html: $(HTML_TARGET)About.html
-	cp -pr $< $@
-
 README.md: $(MARKDOWN_TARGET)About.md
 	cp -pr $< $@
 
@@ -436,8 +433,7 @@ publish: docs
 # Add/update HTML code in repository
 publish-html: html
 	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
-	@test -d $(DOCS_TARGET)html || mkdir $(DOCS_TARGET)html
-	cp -pr $(HTML_TARGET) $(DOCS_TARGET)html
+	cp -pr $(HTML_TARGET) $(DOCS_TARGET)
 
 publish-code: code
 	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
