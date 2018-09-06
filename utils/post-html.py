@@ -15,7 +15,7 @@ import sys
 menu_start = r"""
 <div id="cssmenu">
   <ul>
-     <li><a href="http://www.fuzzingbook.org/">Generating Software Tests</a></li>
+     <li><a href="https://www.fuzzingbook.org/">Generating Software Tests</a></li>
      <li class="has-sub"><a href="#"><i class="fa fa-fw fa-bars"></i> Chapters</a>
         <ol>
             <!--
@@ -42,15 +42,15 @@ site_footer_template = ""
 
 chapter_header_template = menu_start + r"""
      <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
-     <li><a href="http://www.fuzzingbook.org/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
-     <li><a href="http://www.fuzzingbook.org/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
+     <li><a href="https://www.fuzzingbook.org/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
+     <li><a href="https://www.fuzzingbook.org/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
      """ + menu_end
 
 chapter_footer_template = r"""
 <p class="imprint">
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 This work is licensed under a
-<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 &bull;
 <a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/__CHAPTER__.ipynb")>Last change: __DATE__</a> &bull; 
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html">Imprint</a>
