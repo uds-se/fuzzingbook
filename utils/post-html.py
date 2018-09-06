@@ -17,7 +17,7 @@ header_template = r"""
   <ul>
      <li><a href="http://www.fuzzingbook.org/">Generating Software Tests</a></li>
      <li class="has-sub"><a href="#"><i class="fa fa-fw fa-bars"></i> Chapters</a>
-        <ul>
+        <ol>
             <!--
            <li class="has-sub"><a href="#">Menu 1</a>
               <ul>
@@ -27,7 +27,7 @@ header_template = r"""
            </li>
             -->
            <__ALL_CHAPTERS_MENU__>
-        </ul>
+        </ol>
      </li>
      <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
      <li><a href="http://www.fuzzingbook.org/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
