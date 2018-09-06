@@ -20,15 +20,8 @@ menu_start = r"""
   <ul>
      <li class="has-sub"><a href="https://www.fuzzingbook.org/"><i class="fa fa-fw fa-bars"></i> Generating Software Tests</a>
         <ol>
-            <!--
-           <li class="has-sub"><a href="#">Menu 1</a>
-              <ul>
-                 <li><a href="#">Menu 1.1</a></li>
-                 <li><a href="#">Menu 1.2</a></li>
-              </ul>
-           </li>
-            -->
-           <__ALL_CHAPTERS_MENU__>
+        <li><a href="https://www.fuzzingbook.org/"><i class="fa fa-fw fa-home"></i> About this book</a>
+        <__ALL_CHAPTERS_MENU__>
         </ol>
      </li>
      """
@@ -46,14 +39,6 @@ site_footer_template = ""
 chapter_header_template = menu_start + r"""
      <li class="has-sub"><a href="https://www.fuzzingbook.org/html/__CHAPTER__.html"><i class="fa fa-fw fa-bars"></i> __CHAPTER_TITLE__</a>
         <ol>
-            <!--
-           <li class="has-sub"><a href="#">Menu 1</a>
-              <ul>
-                 <li><a href="#">Menu 1.1</a></li>
-                 <li><a href="#">Menu 1.2</a></li>
-              </ul>
-           </li>
-            -->
            <__ALL_SECTIONS_MENU__>
         </ol>
      <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
@@ -148,8 +133,8 @@ chapter_html = chapter_html \
     .replace("<__FOOTER__>", footer_template) \
     .replace("__CHAPTER__", chapter) \
     .replace("__CHAPTER_TITLE__", chapter_title) \
-    .replace("__ALL_CHAPTERS_MENU__", all_chapters_menu) \
-    .replace("__ALL_SECTIONS_MENU__", all_sections_menu) \
+    .replace("<__ALL_CHAPTERS_MENU__>", all_chapters_menu) \
+    .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
     .replace("__DATE__", time.asctime(time.localtime(notebook_modification_time)))
 
 if args.site_index:
