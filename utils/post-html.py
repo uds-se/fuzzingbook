@@ -15,8 +15,7 @@ import sys
 menu_start = r"""
 <div id="cssmenu">
   <ul>
-     <li><a href="https://www.fuzzingbook.org/">Generating Software Tests</a></li>
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-bars"></i> Chapters</a>
+     <li class="has-sub"><a href="https://www.fuzzingbook.org/"><i class="fa fa-fw fa-bars"></i> Generating Software Tests</a>
         <ol>
             <!--
            <li class="has-sub"><a href="#">Menu 1</a>
@@ -41,6 +40,18 @@ site_header_template = menu_start + menu_end
 site_footer_template = ""
 
 chapter_header_template = menu_start + r"""
+     <li class="has-sub"><a href="https://www.fuzzingbook.org/html/__CHAPTER__.html"><i class="fa fa-fw fa-bars"></i> __CHAPTER_TITLE__</a>
+        <ol>
+            <!--
+           <li class="has-sub"><a href="#">Menu 1</a>
+              <ul>
+                 <li><a href="#">Menu 1.1</a></li>
+                 <li><a href="#">Menu 1.2</a></li>
+              </ul>
+           </li>
+            -->
+           <__ALL_SECTIONS_MENU__>
+        </ol>
      <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
      <li><a href="https://www.fuzzingbook.org/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
      <li><a href="https://www.fuzzingbook.org/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
@@ -62,6 +73,16 @@ def get_title(notebook):
     contents = open(notebook, encoding="utf-8").read()
     match = re.search(r'"# (.*)"', contents)
     return match.group(1).replace(r'\n', '')
+
+def get_sections(notebook):
+    """Return the section titles from a notebook file"""
+    contents = open(notebook, encoding="utf-8").read()
+    matches = re.findall(r'"## (.*)"', contents)
+    return [match.replace(r'\n', '') for match in matches]
+    
+def anchor(title):
+    """Return an anchor '#a-title' for a title 'A title'"""
+    return '#' + title.replace(' ', '-')
 
 # Process arguments
 parser = argparse.ArgumentParser()
@@ -98,6 +119,17 @@ for menu_ipynb_file in all_chapters:
     item = '<li><a href="%s">%s</a></li>\n' % (menu_html_file, title)
     all_chapters_menu += item
 
+# Construct sections menu
+all_sections_menu = ""
+basename = os.path.splitext(os.path.basename(chapter_html_file))[0]
+chapter_ipynb_file = os.path.join("notebooks", basename + ".ipynb")
+chapter_title = get_title(chapter_ipynb_file)
+sections = get_sections(chapter_ipynb_file)
+all_sections_menu = ""
+for section in sections:
+    item = '<li><a href="%s">%s</a></li>\n' % (anchor(section), section)
+    all_sections_menu += item
+
 # sys.exit(0)
 
 # Read it in
@@ -111,7 +143,9 @@ chapter_html = chapter_html \
     .replace("<__HEADER__>", header_template) \
     .replace("<__FOOTER__>", footer_template) \
     .replace("__CHAPTER__", chapter) \
+    .replace("__CHAPTER_TITLE__", chapter_title) \
     .replace("__ALL_CHAPTERS_MENU__", all_chapters_menu) \
+    .replace("__ALL_SECTIONS_MENU__", all_sections_menu) \
     .replace("__DATE__", time.asctime(time.localtime(notebook_modification_time)))
 
 if args.site_index:
