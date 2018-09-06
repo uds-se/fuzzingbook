@@ -38,15 +38,7 @@ menu_end = r"""
 """
 
 site_header_template = menu_start + menu_end
-site_footer_template = ""
-
-chapter_header_template = menu_start + r"""
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
-     <li><a href="https://www.fuzzingbook.org/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
-     <li><a href="https://www.fuzzingbook.org/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
-     """ + menu_end
-
-chapter_footer_template = r"""
+site_footer_template = r"""
 <p class="imprint">
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 This work is licensed under a
@@ -56,6 +48,14 @@ This work is licensed under a
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html">Imprint</a>
 </p>
 """
+
+chapter_header_template = menu_start + r"""
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
+     <li><a href="https://www.fuzzingbook.org/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
+     <li><a href="https://www.fuzzingbook.org/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
+     """ + menu_end
+
+chapter_footer_template = site_footer_template
 
 def get_title(notebook):
     """Return the title from a notebook file"""
