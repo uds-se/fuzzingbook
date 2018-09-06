@@ -294,9 +294,9 @@ $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-index.html: $(NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
+$(DOCS_TARGET)index.html: $(NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
 	$(CONVERT_TO_HTML) $<
-	mv html/index.html .
+	mv html/index.html $@
 	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --site-index $@ $(PUBLISHED_SOURCES)
 
 $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
@@ -423,16 +423,16 @@ check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Publishing
-docs: publish-html publish-code publish-slides index.html README.md
+docs: publish-html publish-code publish-slides $(DOCS_TARGET)index.html README.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
 README.md: $(MARKDOWN_TARGET)About.md
 	cp -pr $< $@
 
 publish: docs
-	git add $(DOCS_TARGET)* index.html README.md
+	git add $(DOCS_TARGET)* README.md
 	-git status
-	-git commit -m "Doc update" $(DOCS_TARGET) index.html README.md
+	-git commit -m "Doc update" $(DOCS_TARGET) README.md
 	@echo "Now use 'git push' to place docs on website."
 
 # Add/update HTML code in repository
