@@ -136,8 +136,11 @@ print("Reading", chapter_html_file)
 chapter_html = open(chapter_html_file, encoding="utf-8").read()
 
 # Replacement orgy
+# 1. Replace all markdown links to .ipynb by .html, such that cross-chapter links work
+# 2. Fix extra newlines in cell output produced by ipypublish
+# 3. Insert the menus and templates as defined above
 chapter_html = chapter_html \
-    .replace(".ipynb", ".html") \
+    .replace(".ipynb)", ".html)") \
     .replace("\n\n</pre>", "\n</pre>") \
     .replace("<__HEADER__>", header_template) \
     .replace("<__FOOTER__>", footer_template) \
