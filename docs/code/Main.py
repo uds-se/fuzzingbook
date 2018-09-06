@@ -1,8 +1,6 @@
 
 # coding: utf-8
 
-# # Generating Software Tests
-
 # ## Table of Contents
 # 
 # ### Front Matter
