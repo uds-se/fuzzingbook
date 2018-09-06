@@ -2,7 +2,7 @@
 
 # Chapters to include in the book, in this order
 PUBLISHED_CHAPTERS = \
-	Preface.ipynb \
+	About.ipynb \
 	Intro_Testing.ipynb \
 	Basic_Fuzzing.ipynb \
 	Coverage.ipynb \
@@ -419,13 +419,14 @@ check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Publishing
-docs: publish-html publish-code publish-slides $(DOCS_TARGET)index.md
+docs: publish-html publish-code publish-slides $(DOCS_TARGET)index.html README.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
-# TODO: Also remove Twitter scripts
-$(DOCS_TARGET)index.md: README.md
-	echo '<h1>Generating Software Tests</h1>' > $@
-	tail +2 README.md >> $@
+$(DOCS_TARGET)index.html: $(HTML_TARGET)About.html
+	cp -pr $< $@
+
+README.md: $(MARKDOWN_TARGET)About.md
+	cp -pr $< $@
 
 publish: docs
 	git add $(DOCS_TARGET)*
