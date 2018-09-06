@@ -2,16 +2,15 @@
 
 # Chapters to include in the book, in this order
 PUBLISHED_CHAPTERS = \
-	About.ipynb \
 	Intro_Testing.ipynb \
 	Basic_Fuzzing.ipynb \
 	Coverage.ipynb \
 	Mutation_Fuzzing.ipynb \
 	Grammars.ipynb
 
-UNPUBLISHED_CHAPTERS = \
+BETA_CHAPTERS = \
 	
-CHAPTERS = $(PUBLISHED_CHAPTERS) $(UNPUBLISHED_CHAPTERS)
+CHAPTERS = $(PUBLISHED_CHAPTERS) $(BETA_CHAPTERS)
 
 # Coming up next:
 # Parsing?
@@ -26,7 +25,7 @@ APPENDICES = \
 	ExpectError.ipynb \
 	Timer.ipynb
 FRONTMATTER = \
-	Main.ipynb
+	About.ipynb
 
 # All sources
 SOURCE_FILES = \
@@ -431,7 +430,7 @@ README.md: $(MARKDOWN_TARGET)About.md
 publish: docs
 	git add $(DOCS_TARGET)*
 	-git status
-	-git commit -m "Doc update" $(DOCS_TARGET)
+	-git commit -m "Doc update" $(DOCS_TARGET) README.md
 	@echo "Now use 'git push' to place docs on website."
 
 # Add/update HTML code in repository
