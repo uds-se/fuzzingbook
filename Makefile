@@ -298,6 +298,7 @@ $(DOCS_TARGET)index.html: $(NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post
 	$(CONVERT_TO_HTML) $<
 	mv html/index.html $@
 	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --site-index $@ $(PUBLISHED_SOURCES)
+	@cd $(DOCS_TARGET) && $(RM) -r index.nbpub.log index_files
 
 $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
 	$(CONVERT_TO_HTML) $<
