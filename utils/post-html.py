@@ -12,6 +12,8 @@ import time
 import re
 import sys
 
+# For icons, see https://fontawesome.com/cheatsheet
+
 menu_start = r"""
 <div id="cssmenu">
   <ul>
