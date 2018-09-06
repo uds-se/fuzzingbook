@@ -20,8 +20,7 @@
 # 
 # * You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you edit and extend the code, experimenting _live in your browser._  Just click on "Open as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Basic_Fuzzing.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
 # 
-# * You can __present chapters as slides__ (beta).  This allows for presenting the material in lectures.  Just click on "View slides" at the top of each chapter.  
-# <a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a>
+# * You can __present chapters as slides__ (beta).  This allows for presenting the material in lectures.  Just click on "View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a>
 
 # This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
 
