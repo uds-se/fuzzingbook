@@ -1,14 +1,18 @@
 # Fuzzingbook Makefile
 
 # Chapters to include in the book, in this order
-CHAPTERS = \
+PUBLISHED_CHAPTERS = \
 	Preface.ipynb \
 	Intro_Testing.ipynb \
 	Basic_Fuzzing.ipynb \
 	Coverage.ipynb \
 	Mutation_Fuzzing.ipynb \
-	Grammars.ipynb \
+	Grammars.ipynb
+
+UNPUBLISHED_CHAPTERS = \
 	Derivation_Trees.ipynb
+	
+CHAPTERS = $(PUBLISHED_CHAPTERS) $(UNPUBLISHED_CHAPTERS)
 
 # Coming up next:
 # Parsing?
@@ -39,6 +43,7 @@ NOTEBOOKS = notebooks
 
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
+PUBLISHED_SOURCES = $(PUBLISHED_CHAPTERS:%=$(NOTEBOOKS)/%)
 
 # Where to place the pdf, html, slides
 PDF_TARGET      = pdf/
@@ -293,7 +298,7 @@ $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 
 $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
 	$(CONVERT_TO_HTML) $<
-	$(PYTHON) utils/post-html.py $@
+	$(PYTHON) utils/post-html.py $@ $(PUBLISHED_SOURCES)
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
 

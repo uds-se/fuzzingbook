@@ -5,6 +5,8 @@
 import argparse
 import os.path
 import time
+import re
+import sys
 
 header_template = r"""
 <div id="cssmenu">
@@ -20,7 +22,7 @@ header_template = r"""
               </ul>
            </li>
             -->
-           <__ALL_CHAPTERS__>
+           <__ALL_CHAPTERS_MENU__>
         </ul>
      </li>
      <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
@@ -42,16 +44,33 @@ This work is licensed under a
 </p>
 """
 
+def get_title(notebook):
+    """Return the title from a notebook file"""
+    contents = open(notebook, encoding="utf-8").read()
+    match = re.search(r'"# (.*)"', contents)
+    return match.group(1).replace(r'\n', '')
+
+# Process arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("chapter", nargs=1)
 parser.add_argument("all_chapters", nargs='*')
 args = parser.parse_args()
 
+# Get template elements
 all_chapters = args.all_chapters
 chapter_html_file = args.chapter[0]
 chapter = os.path.splitext(os.path.basename(chapter_html_file))[0]
 chapter_notebook_file = os.path.join("notebooks", chapter + ".ipynb")
 notebook_modification_time = os.path.getmtime(chapter_notebook_file)
+
+# Construct chapter menu
+all_chapters_menu = ""
+for menu_ipynb_file in all_chapters:
+    basename = os.path.splitext(os.path.basename(menu_ipynb_file))[0]
+    title = get_title(menu_ipynb_file)
+    menu_html_file = basename + ".html"
+    item = '<li><a href="%s">%s</a></li>\n' % (menu_html_file, title)
+    all_chapters_menu += item
 
 print("Reading", chapter_html_file)
 chapter_html = open(chapter_html_file, encoding="utf-8").read()
@@ -62,6 +81,7 @@ chapter_html = chapter_html \
     .replace("<__FOOTER__>", footer_template) \
     .replace("\n\n</pre>", "\n</pre>") \
     .replace("__CHAPTER__", chapter) \
+    .replace("__ALL_CHAPTERS_MENU__", all_chapters_menu) \
     .replace("__DATE__", time.asctime(time.localtime(notebook_modification_time)))
 
 print("Writing", chapter_html_file)
