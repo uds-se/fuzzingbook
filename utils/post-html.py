@@ -2,6 +2,10 @@
 # Expand HEADER and FOOTER elements in generated HTML
 # Usage: add-header-and-footer.py CHAPTER_NAME CHAPTER_1 CHAPTER_2 ...
 
+# Note: I suppose this could also be done using Jinja2 templates and ipypublish,
+# but this thing here works pretty well.  If you'd like to convert this into some more elegant
+# framework, implement it and send me a pull request -- AZ
+
 import argparse
 import os.path
 import time
@@ -72,17 +76,20 @@ for menu_ipynb_file in all_chapters:
     item = '<li><a href="%s">%s</a></li>\n' % (menu_html_file, title)
     all_chapters_menu += item
 
+# Read it in
 print("Reading", chapter_html_file)
 chapter_html = open(chapter_html_file, encoding="utf-8").read()
 
+# Replacement orgy
 chapter_html = chapter_html \
     .replace(".ipynb", ".html") \
+    .replace("\n\n</pre>", "\n</pre>") \
     .replace("<__HEADER__>", header_template) \
     .replace("<__FOOTER__>", footer_template) \
-    .replace("\n\n</pre>", "\n</pre>") \
     .replace("__CHAPTER__", chapter) \
     .replace("__ALL_CHAPTERS_MENU__", all_chapters_menu) \
     .replace("__DATE__", time.asctime(time.localtime(notebook_modification_time)))
 
+# And write it out again
 print("Writing", chapter_html_file)
 open(chapter_html_file, mode="w", encoding="utf-8").write(chapter_html)
