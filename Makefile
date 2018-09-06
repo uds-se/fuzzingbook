@@ -55,7 +55,7 @@ DOCS_TARGET     = docs/
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
-HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html)
+HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(DOCS_TARGET)/index.html
 SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
 PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py)
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
