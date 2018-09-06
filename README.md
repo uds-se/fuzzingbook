@@ -85,3 +85,7 @@ Again, we're glad you're here!  See our [Guide for Authors](http://www.fuzzingbo
 ### Do you provide PDFs of your material?
 
 At this point, we do not provide support for PDF versions.  We are working on producing PDF and paper versions once the book is complete.
+
+## License
+
+All work on this site is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-nc-sa/4.0/).
