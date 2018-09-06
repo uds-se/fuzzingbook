@@ -15,6 +15,7 @@ import sys
 # For icons, see https://fontawesome.com/cheatsheet
 
 menu_start = r"""
+<nav>
 <div id="cssmenu">
   <ul>
      <li class="has-sub"><a href="https://www.fuzzingbook.org/"><i class="fa fa-fw fa-bars"></i> Generating Software Tests</a>
@@ -36,6 +37,7 @@ menu_end = r"""
      <li><a href="https://github.com/uds-se/fuzzingbook/" target="_blank"><i class="fa fa-fw fa-git"></i> Project Page</a></li>
   </ul>
 </div>
+</nav>
 """
 
 site_header_template = menu_start + menu_end
