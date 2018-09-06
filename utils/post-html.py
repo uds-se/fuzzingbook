@@ -20,7 +20,6 @@ menu_start = r"""
   <ul>
      <li class="has-sub"><a href="https://www.fuzzingbook.org/"><i class="fa fa-fw fa-bars"></i> Generating Software Tests</a>
         <ol>
-        <li><a href="https://www.fuzzingbook.org/"><i class="fa fa-fw fa-home"></i> About this book</a>
         <__ALL_CHAPTERS_MENU__>
         </ol>
      </li>
@@ -75,7 +74,7 @@ def anchor(title):
 
 # Process arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("--site-index", help="omit links to notebook, code, and slides", action='store_true')
+parser.add_argument("--home", help="omit links to notebook, code, and slides", action='store_true')
 parser.add_argument("--menu-prefix", help="prefix to html files in menu")
 parser.add_argument("chapter", nargs=1)
 parser.add_argument("all_chapters", nargs='*')
@@ -92,21 +91,12 @@ menu_prefix = args.menu_prefix
 if menu_prefix is None:
     menu_prefix = ""
 
-if args.site_index :
+if args.home:
     header_template = site_header_template
     footer_template = site_footer_template
 else:
     header_template = chapter_header_template
     footer_template = chapter_footer_template
-
-# Construct chapter menu
-all_chapters_menu = ""
-for menu_ipynb_file in all_chapters:
-    basename = os.path.splitext(os.path.basename(menu_ipynb_file))[0]
-    title = get_title(menu_ipynb_file)
-    menu_html_file = menu_prefix + basename + ".html"
-    item = '<li><a href="%s">%s</a></li>\n' % (menu_html_file, title)
-    all_chapters_menu += item
 
 # Construct sections menu
 all_sections_menu = ""
@@ -118,6 +108,26 @@ all_sections_menu = ""
 for section in sections:
     item = '<li><a href="%s">%s</a></li>\n' % (anchor(section), section)
     all_sections_menu += item
+
+
+# Construct chapter menu
+if args.home:
+    link_class = ' class="this_page"'
+else:
+    link_class = ''
+all_chapters_menu = '<li><a href="https://www.fuzzingbook.org/"%s><i class="fa fa-fw fa-home"></i> About this book</a></li>\n' % link_class
+
+for menu_ipynb_file in all_chapters:
+    basename = os.path.splitext(os.path.basename(menu_ipynb_file))[0]
+    title = get_title(menu_ipynb_file)
+    if menu_ipynb_file == chapter_ipynb_file:
+        link_class = ' class="this_page"'
+    else:
+        link_class = ''
+    menu_html_file = menu_prefix + basename + ".html"
+    item = '<li><a href="%s"%s>%s</a></li>\n' % (menu_html_file, link_class, title)
+    all_chapters_menu += item
+
 
 # sys.exit(0)
 
@@ -137,13 +147,13 @@ chapter_html = chapter_html \
     .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
     .replace("__DATE__", time.asctime(time.localtime(notebook_modification_time)))
 
-if args.site_index:
-    chapter_html = chapter_html.replace("custom.css", menu_prefix + "/custom.css")
+if args.home:
+    chapter_html = chapter_html.replace("custom.css", menu_prefix + "custom.css")
 
-if not args.site_index:
-    # The official wauy is set a title in document metadata, 
-    # but a) Jupyter Lab can't edit it, and b) the title conflicts with the chapter header
-    chapter_html = re.sub(r"<title>.*</title>", "<title>" + chapter_title + "</title>", chapter_html)
+# Get a title
+# The official way is to set a title in document metadata, 
+# but a) Jupyter Lab can't edit it, and b) the title conflicts with the chapter header - AZ
+chapter_html = re.sub(r"<title>.*</title>", "<title>" + chapter_title + "</title>", chapter_html)
 
 # And write it out again
 print("Writing", chapter_html_file)
