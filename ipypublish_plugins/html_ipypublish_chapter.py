@@ -29,9 +29,26 @@ fuzzingbook_tpl_dict = {
     'meta_docstring': 'with fuzzingbook css adaptations',
     
     'html_header': """
-<!-- load Google fonts -->
+<!-- Load Google fonts -->
 <link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
-    """
+
+<!-- Icon library -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    """,
+
+    'overwrite': ['html_body_start', 'html_body_end'],
+
+    'html_body_start': r"""
+    <article>
+   <div tabindex="-1" id="notebook" class="border-box-sizing">
+     <div class="container" id="notebook-container">
+""",
+
+    'html_body_end': r"""
+      </div>
+    </div>
+    </article>
+"""
 }
 
 cell_defaults = {
@@ -75,7 +92,7 @@ template = create_tpl([
     fuzzingbook_tpl_dict,
     content.tpl_dict, content_tagging.tpl_dict,
     mathjax.tpl_dict, widgets.tpl_dict,
-    #    inout_prompt.tpl_dict,
-    toggle_buttons.tpl_dict, toc_sidebar.tpl_dict,
+    # inout_prompt.tpl_dict,
+    # toggle_buttons.tpl_dict, toc_sidebar.tpl_dict,
     latex_doc.tpl_dict
 ])
