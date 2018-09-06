@@ -297,8 +297,8 @@ $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 $(DOCS_TARGET)index.html: $(NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
 	$(CONVERT_TO_HTML) $<
 	mv html/index.html $@
+	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
 	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --home $@ $(PUBLISHED_SOURCES)
-	@cd $(DOCS_TARGET) && $(RM) -r index.nbpub.log index_files
 
 $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
 	$(CONVERT_TO_HTML) $<
