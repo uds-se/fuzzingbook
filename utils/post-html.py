@@ -9,6 +9,7 @@
 import argparse
 import os.path
 import time
+import datetime
 import re
 import sys
 
@@ -42,10 +43,10 @@ site_footer_template = r"""
 <p class="imprint">
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 This work is licensed under a
-<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 &bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/__CHAPTER__.ipynb")>Last change: __DATE__</a> &bull; 
-<a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html">Imprint</a>
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/__CHAPTER__.ipynb" target=_blank)>Last change: __DATE__</a> &bull; 
+<a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
 """
 
@@ -87,6 +88,8 @@ chapter_html_file = args.chapter[0]
 chapter = os.path.splitext(os.path.basename(chapter_html_file))[0]
 chapter_notebook_file = os.path.join("notebooks", chapter + ".ipynb")
 notebook_modification_time = os.path.getmtime(chapter_notebook_file)
+notebook_modification_datetime = datetime.datetime.fromtimestamp(notebook_modification_time) \
+    .astimezone().isoformat(sep=' ', timespec='seconds')
 
 menu_prefix = args.menu_prefix
 if menu_prefix is None:
@@ -149,7 +152,7 @@ chapter_html = chapter_html \
     .replace("__CHAPTER_TITLE__", chapter_title) \
     .replace("<__ALL_CHAPTERS_MENU__>", all_chapters_menu) \
     .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
-    .replace("__DATE__", time.asctime(time.localtime(notebook_modification_time)))
+    .replace("__DATE__", notebook_modification_datetime)
 
 if args.home:
     chapter_html = chapter_html.replace("custom.css", menu_prefix + "custom.css")
