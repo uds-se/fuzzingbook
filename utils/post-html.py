@@ -20,7 +20,12 @@ menu_start = r"""
   <ul>
      <li class="has-sub"><a href="https://www.fuzzingbook.org/"><i class="fa fa-fw fa-bars"></i> Generating Software Tests</a>
         <ol>
-        <__ALL_CHAPTERS_MENU__>
+           <__ALL_CHAPTERS_MENU__>
+        </ol>
+     </li>
+     <li class="has-sub"><a href="https://www.fuzzingbook.org/html/__CHAPTER__.html"><i class="fa fa-fw fa-bars"></i> __CHAPTER_TITLE__</a>
+        <ol>
+           <__ALL_SECTIONS_MENU__>
         </ol>
      </li>
      """
@@ -36,10 +41,6 @@ site_header_template = menu_start + menu_end
 site_footer_template = ""
 
 chapter_header_template = menu_start + r"""
-     <li class="has-sub"><a href="https://www.fuzzingbook.org/html/__CHAPTER__.html"><i class="fa fa-fw fa-bars"></i> __CHAPTER_TITLE__</a>
-        <ol>
-           <__ALL_SECTIONS_MENU__>
-        </ol>
      <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
      <li><a href="https://www.fuzzingbook.org/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
      <li><a href="https://www.fuzzingbook.org/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
