@@ -14,7 +14,7 @@
 # 
 # You can use this book in three ways:
 # 
-# * You can __[read chapters in your browser](http://www.fuzzingbook.org/html/Main.html)__.  Check out the list of chapters in the menu above, or start right away with the [introduction to testing](http://www.fuzzingbook.org/html/Intro_Testing.html) or the [introduction to fuzzing](http://www.fuzzingbook.org/html/Basic_Fuzzing.html).  All code is available for download.
+# * You can __read chapters in your browser__.  Check out the list of chapters in the menu above, or start right away with the [introduction to testing](http://www.fuzzingbook.org/Intro_Testing.html) or the [introduction to fuzzing](http://www.fuzzingbook.org/Basic_Fuzzing.html).  All code is available for download.
 # 
 # * You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you edit and extend the code, experimenting _live in your browser._  Just click on "Open as Notebook" at the top of each chapter.  [Try interacting with the introduction to fuzzing.](https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Basic_Fuzzing.ipynb)
 # 
@@ -82,7 +82,7 @@
 
 # ### How can I contribute?
 # 
-# Again, we're glad you're here!  See our [Guide for Authors](http://www.fuzzingbook.org/html/Guide_for_Authors.html) for instructions on coding and writing.
+# Again, we're glad you're here!  See our [Guide for Authors](http://www.fuzzingbook.org/Guide_for_Authors.html) for instructions on coding and writing.
 
 # ### Do you provide PDFs of your material?
 # 
