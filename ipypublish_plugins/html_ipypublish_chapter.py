@@ -40,8 +40,8 @@ fuzzingbook_tpl_dict = {
     'overwrite': ['html_body_start', 'html_body_end'],
 
     'html_body_start': r"""
-    <article>
     <__HEADER__>
+    <article>
    <div tabindex="-1" id="notebook" class="border-box-sizing">
      <div class="container" id="notebook-container">
 """,
