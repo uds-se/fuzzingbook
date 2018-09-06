@@ -294,6 +294,11 @@ $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
+index.html: $(NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
+	$(CONVERT_TO_HTML) $<
+	mv html/index.html .
+	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --site-index $@ $(PUBLISHED_SOURCES)
+
 $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
 	$(CONVERT_TO_HTML) $<
 	$(PYTHON) utils/post-html.py $@ $(PUBLISHED_SOURCES)
@@ -418,22 +423,23 @@ check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Publishing
-docs: publish-html publish-code publish-slides $(DOCS_TARGET)index.html README.md
+docs: publish-html publish-code publish-slides index.html README.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
 README.md: $(MARKDOWN_TARGET)About.md
 	cp -pr $< $@
 
 publish: docs
-	git add $(DOCS_TARGET)*
+	git add $(DOCS_TARGET)* index.html README.md
 	-git status
-	-git commit -m "Doc update" $(DOCS_TARGET) README.md
+	-git commit -m "Doc update" $(DOCS_TARGET) index.html README.md
 	@echo "Now use 'git push' to place docs on website."
 
 # Add/update HTML code in repository
 publish-html: html
 	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
-	cp -pr $(HTML_TARGET) $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)html || mkdir $(DOCS_TARGET)html
+	cp -pr $(HTML_TARGET) $(DOCS_TARGET)html
 
 publish-code: code
 	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
@@ -444,13 +450,6 @@ publish-slides: slides
 	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)slides || mkdir $(DOCS_TARGET)slides
 	cp -pr $(SLIDES_TARGET) $(DOCS_TARGET)slides
-
-
-# As an alternative, we may also push .md files directly, allowing us to use a theme.
-# However, this loses math rendering and citations
-publish-markdown: markdown
-	cp -pr markdown/* docs
-	cp $(DOCS_TARGET)Main.md $(DOCS_TARGET)index.md
 
 
 # Cleanup

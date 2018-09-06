@@ -12,7 +12,7 @@ import time
 import re
 import sys
 
-header_template = r"""
+menu_start = r"""
 <div id="cssmenu">
   <ul>
      <li><a href="http://www.fuzzingbook.org/">Generating Software Tests</a></li>
@@ -29,15 +29,24 @@ header_template = r"""
            <__ALL_CHAPTERS_MENU__>
         </ol>
      </li>
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
-     <li><a href="http://www.fuzzingbook.org/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
-     <li><a href="http://www.fuzzingbook.org/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
+     """
+
+menu_end = r"""
      <li><a href="https://github.com/uds-se/fuzzingbook/" target="_blank"><i class="fa fa-fw fa-git"></i> Project Page</a></li>
   </ul>
 </div>
 """
 
-footer_template = r"""
+site_header_template = menu_start + menu_end
+site_footer_template = ""
+
+chapter_header_template = menu_start + r"""
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
+     <li><a href="http://www.fuzzingbook.org/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
+     <li><a href="http://www.fuzzingbook.org/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
+     """ + menu_end
+
+chapter_footer_template = r"""
 <p class="imprint">
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 This work is licensed under a
@@ -56,6 +65,8 @@ def get_title(notebook):
 
 # Process arguments
 parser = argparse.ArgumentParser()
+parser.add_argument("--site-index", help="omit links to notebook, code, and slides", action='store_true')
+parser.add_argument("--menu-prefix", help="prefix to html files in menu")
 parser.add_argument("chapter", nargs=1)
 parser.add_argument("all_chapters", nargs='*')
 args = parser.parse_args()
@@ -67,14 +78,27 @@ chapter = os.path.splitext(os.path.basename(chapter_html_file))[0]
 chapter_notebook_file = os.path.join("notebooks", chapter + ".ipynb")
 notebook_modification_time = os.path.getmtime(chapter_notebook_file)
 
+menu_prefix = args.menu_prefix
+if menu_prefix is None:
+    menu_prefix = ""
+
+if args.site_index :
+    header_template = site_header_template
+    footer_template = site_footer_template
+else:
+    header_template = chapter_header_template
+    footer_template = chapter_footer_template
+
 # Construct chapter menu
 all_chapters_menu = ""
 for menu_ipynb_file in all_chapters:
     basename = os.path.splitext(os.path.basename(menu_ipynb_file))[0]
     title = get_title(menu_ipynb_file)
-    menu_html_file = basename + ".html"
+    menu_html_file = menu_prefix + basename + ".html"
     item = '<li><a href="%s">%s</a></li>\n' % (menu_html_file, title)
     all_chapters_menu += item
+
+# sys.exit(0)
 
 # Read it in
 print("Reading", chapter_html_file)
@@ -89,6 +113,9 @@ chapter_html = chapter_html \
     .replace("__CHAPTER__", chapter) \
     .replace("__ALL_CHAPTERS_MENU__", all_chapters_menu) \
     .replace("__DATE__", time.asctime(time.localtime(notebook_modification_time)))
+
+if args.site_index:
+    chapter_html = chapter_html.replace("custom.css", menu_prefix + "/custom.css")
 
 # And write it out again
 print("Writing", chapter_html_file)
