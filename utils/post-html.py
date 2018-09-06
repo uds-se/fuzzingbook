@@ -153,7 +153,7 @@ if args.home:
 # Get a title
 # The official way is to set a title in document metadata, 
 # but a) Jupyter Lab can't edit it, and b) the title conflicts with the chapter header - AZ
-chapter_html = re.sub(r"<title>.*</title>", "<title>" + chapter_title + "</title>", chapter_html)
+chapter_html = re.sub(r"<title>.*</title>", "<title>Generating Software Tests: " + chapter_title + "</title>", chapter_html)
 
 # And write it out again
 print("Writing", chapter_html_file)
