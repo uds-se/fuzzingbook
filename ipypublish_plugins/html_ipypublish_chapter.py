@@ -36,15 +36,18 @@ fuzzingbook_tpl_dict = {
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     """,
 
+# HTML headers and footers are added later by the add-header-and-footer script
     'overwrite': ['html_body_start', 'html_body_end'],
 
     'html_body_start': r"""
     <article>
+    <__HEADER__>
    <div tabindex="-1" id="notebook" class="border-box-sizing">
      <div class="container" id="notebook-container">
 """,
 
     'html_body_end': r"""
+        <__FOOTER__>
       </div>
     </div>
     </article>

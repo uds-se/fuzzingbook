@@ -49,10 +49,6 @@ WORD_TARGET     = word/
 MARKDOWN_TARGET = markdown/
 DOCS_TARGET     = docs/
 
-# Headers for HTML
-HEADER = notebooks/Header.ipynb
-FOOTER = notebooks/Footer.ipynb
-
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
@@ -193,7 +189,7 @@ CONVERT_TO_WORD = $(PANDOC)
 # For Markdown .md files, we use markdown
 # Note: adding --run re-executes all code
 # CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown
-CONVERT_TO_MARKDOWN = $(NBCONVERT) --to markdown
+CONVERT_TO_MARKDOWN = $(NBCONVERT) --to markdown --output-dir=$(MARKDOWN_TARGET)
 
 
 # Short targets
@@ -295,23 +291,11 @@ $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(HEADER) $(FOOTER) $(PUBLISH_PLUGINS)
-	$(eval TMPDIR := $(shell mktemp -d))
-	$(eval CHAPTER := $(basename $(notdir $<)))
-	$(eval DATE := $(shell stat -f '%Sm' -t '%Y-%m-%d %T %Z' $<))
-	$(eval SED_SCRIPT := $(TMPDIR)/script.sed)
-	echo 's/CHAPTER/$(CHAPTER)/g' > $(SED_SCRIPT)
-	echo 's/DATE/$(DATE)/g' >> $(SED_SCRIPT)
-	sed -f $(SED_SCRIPT) $(HEADER) > $(TMPDIR)/Header.ipynb
-	sed -f $(SED_SCRIPT) $(FOOTER) > $(TMPDIR)/Footer.ipynb
-	sed 's/\.ipynb)/\.html)/g' $< > $(TMPDIR)/tmp-$(notdir $<)
-	$(NBMERGE) $(TMPDIR)/Header.ipynb $(TMPDIR)/tmp-$(notdir $<) $(TMPDIR)/Footer.ipynb > $(TMPDIR)/$(notdir $<)
-	cp $(BIB) $(TMPDIR)
-	$(CONVERT_TO_HTML) $(TMPDIR)/$(notdir $<)
-	$(PYTHON) utils/post-html.py < $@ > $@~ && mv $@~ $@
+$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
+	$(CONVERT_TO_HTML) $<
+	$(PYTHON) utils/post-html.py $@
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
-	@-$(RM) -fr $(TMPDIR)
 
 $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 	$(eval TMPDIR := $(shell mktemp -d))
@@ -326,17 +310,8 @@ $(REVEAL_JS):
 	git submodule update --init
 
 $(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
-	$(eval TMPDIR := $(shell mktemp -d))
-	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(HEADER) > $(TMPDIR)/Header.ipynb
-	sed 's/CHAPTER/$(basename $(notdir $<))/g' $(FOOTER) > $(TMPDIR)/Footer.ipynb
-	sed 's/\.ipynb)/\.html)/g' $< > $(TMPDIR)/tmp-$(notdir $<)
-	$(NBMERGE) $(TMPDIR)/Header.ipynb $(TMPDIR)/tmp-$(notdir $<) $(TMPDIR)/Footer.ipynb > $(TMPDIR)/$(notdir $<)
-	cp $(BIB) $(TMPDIR)
-	$(CONVERT_TO_MARKDOWN) $(TMPDIR)/$(notdir $<)
 	$(RM) -r $(MARKDOWN_TARGET)$(basename $(notdir $<)).md $(MARKDOWN_TARGET)$(basename $(notdir $<))_files
-	mv $(TMPDIR)/$(basename $(notdir $<)).md $(MARKDOWN_TARGET)
-	@-mv $(TMPDIR)/$(basename $(notdir $<))_files $(MARKDOWN_TARGET)
-	@-$(RM) -fr $(TMPDIR)
+	$(CONVERT_TO_MARKDOWN) $<
 
 
 # For code, we comment out fuzzingbook imports, 
