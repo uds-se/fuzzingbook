@@ -25,7 +25,7 @@ from ipypublish.preprocessors.split_outputs import SplitOutputs
 
 # Own adaptations -- AZ
 fuzzingbook_tpl_dict = {
-    'meta_docstring': 'with fuzzingbook css adaptations',
+    'meta_docstring': 'with fuzzingbook adaptations',
     
 # Fonts for page and menu
 # See https://designshack.net/articles/css/10-great-google-font-combinations-you-can-copy/
@@ -41,6 +41,18 @@ fuzzingbook_tpl_dict = {
     'overwrite': ['html_body_start', 'html_body_end', 'notebook_input_code', 'notebook_output'],
 
     'html_body_start': r"""
+    <script>
+    function reveal() {
+        var solutions = document.getElementsByClassName("solution");
+        var i;
+        for (i = 0; i < solutions.length; i++)
+            if (solutions[i].style.display === "none") {
+                solutions[i].style.display = "block";
+            } else {
+                solutions[i].style.display = "none";
+        }
+    }
+    </script>
     <__HEADER__>
     <article>
    <div tabindex="-1" id="notebook" class="border-box-sizing">
@@ -54,56 +66,59 @@ fuzzingbook_tpl_dict = {
     </article>
 """,
 
-# Solutions
+## Solutions
+# Markdown cells
     'notebook_input_markdown_pre': r"""
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell_solution2_first -%}
+   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
    <!-- exercise -->
    {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-   <!-- solution -->
+<!-- solution -->
    <div style="display: none;" class="solution">
    {%- endif -%}
 """,
 
     'notebook_input_markdown_post': r"""
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell_solution2_first -%}
+   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
    <!-- end of exercise -->
+   <span style="display:inline-block; width: 10px;"></span>
+   <a class="reveal" onclick="reveal()">Show solution</a>
    {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
    <!-- end of solution -->
    </div>
    {%- endif -%}
 """,
 
+# Code cells
+# FIXME: Revealed input cells are formatted differently
     'notebook_input_code': r"""
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell_solution2_first -%}
+   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
 <!-- exercise -->
-<div class="inner_cell">
    {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
 <!-- solution -->
 <div class="solution" style="display: none;">
    {%- else -%}
-<div class="inner_cell">
    {%- endif -%}
-<div class="input_area">
-{{ cell.source | highlight_code(metadata=cell.metadata) }}
-</div>
-</div>
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell_solution2_first -%}
+   """ + latex_doc.tpl_dict['notebook_input_code'] + """
+   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
 <!-- end of exercise -->
+   <a class="reveal" onclick="reveal()">Show solution</a>
    {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
 <!-- end of solution -->
+</div>
    {%- endif -%}
 """,
 
+# Output cells
+# FIXME: Revealed output cells do not show content
     'notebook_output': r"""
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell_solution2_first -%}
+   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
 <!-- exercise -->
    {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
 <!-- solution -->
 <div class="solution" style="display: none;">
    {%- else -%}
-   {%- endif -%}
- {{ super() }}
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell_solution2_first -%}
+   {%- endif -%}""" + latex_doc.tpl_dict['notebook_output'] + """
+   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
 <!-- end of exercise -->
    {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
 <!-- end of solution -->
