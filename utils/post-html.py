@@ -46,8 +46,39 @@ This work is licensed under a
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 &bull;
 <a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/__CHAPTER__.ipynb" target=_blank)>Last change: __DATE__</a> &bull; 
+<a href="#citation" id="cite" onclick="toggleCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
+
+<script>
+function toggleCitation() {
+    var c = document.getElementById("citation");
+    if (c.style.display === "none") {
+        c.style.display = "block";
+    } else {
+        c.style.display = "none";
+    }
+}
+</script>
+
+<div id="citation" class="citation" style="display: none;">
+<a name="citation"></a>
+<h2>How to Cite this Work</h2>
+<p>
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/slides/__CHAPTER__.html">__CHAPTER_TITLE__</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/slides/__CHAPTER__.html">https://www.fuzzingbook.org/slides/__CHAPTER__.html</a>.  Retrieved __DATE__.
+</p>
+<pre>
+@incollection{fuzzingbook:__CHAPTER__,
+    author = {Andreas Zeller and Rahul Gopinath and Marcel B{\"o}hme and Gordon Fraser and Christian Holler},
+    booktitle = {Generating Software Tests},
+    title = {__CHAPTER_TITLE__},
+    howpublished = {\url{https://www.fuzzingbook.org/slides/__CHAPTER__.html}},
+    note = {Retrieved __DATE__},
+    url = {https://www.fuzzingbook.org/slides/__CHAPTER__.html},
+    urldate = {__DATE__}
+}
+</pre>
+</div>
 """
 
 chapter_header_template = menu_start + r"""
@@ -160,7 +191,7 @@ if args.home:
 # Get a title
 # The official way is to set a title in document metadata, 
 # but a) Jupyter Lab can't edit it, and b) the title conflicts with the chapter header - AZ
-chapter_html = re.sub(r"<title>.*</title>", "<title>Generating Software Tests: " + chapter_title + "</title>", chapter_html)
+chapter_html = re.sub(r"<title>.*</title>", "<title>" + chapter_title + " - Generating Software Tests</title>", chapter_html)
 
 # And write it out again
 print("Writing", chapter_html_file)
