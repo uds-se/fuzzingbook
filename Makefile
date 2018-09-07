@@ -2,6 +2,7 @@
 
 # Chapters to include in the book, in this order
 PUBLISHED_CHAPTERS = \
+	index.ipynb \
 	Intro_Testing.ipynb \
 	Basic_Fuzzing.ipynb \
 	Coverage.ipynb \
@@ -24,8 +25,6 @@ APPENDICES = \
 	Template.ipynb \
 	ExpectError.ipynb \
 	Timer.ipynb
-FRONTMATTER = \
-	index.ipynb
 
 # All sources
 SOURCE_FILES = \

@@ -68,13 +68,15 @@ function toggleCitation() {
 Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/slides/__CHAPTER__.html">__CHAPTER_TITLE__</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/slides/__CHAPTER__.html">https://www.fuzzingbook.org/slides/__CHAPTER__.html</a>.  Retrieved __DATE__.
 </p>
 <pre>
-@incollection{fuzzingbook:__CHAPTER__,
+@incollection{fuzzingbook__YEAR__:__CHAPTER__,
     author = {Andreas Zeller and Rahul Gopinath and Marcel B{\"o}hme and Gordon Fraser and Christian Holler},
     booktitle = {Generating Software Tests},
     title = {__CHAPTER_TITLE__},
-    howpublished = {\url{https://www.fuzzingbook.org/slides/__CHAPTER__.html}},
+    year = {__YEAR__},
+    publisher = {Saarland University},
+    howpublished = {\url{https://www.fuzzingbook.org/html/__CHAPTER__.html}},
     note = {Retrieved __DATE__},
-    url = {https://www.fuzzingbook.org/slides/__CHAPTER__.html},
+    url = {https://www.fuzzingbook.org/html/__CHAPTER__.html},
     urldate = {__DATE__}
 }
 </pre>
@@ -121,6 +123,7 @@ chapter_notebook_file = os.path.join("notebooks", chapter + ".ipynb")
 notebook_modification_time = os.path.getmtime(chapter_notebook_file)
 notebook_modification_datetime = datetime.datetime.fromtimestamp(notebook_modification_time) \
     .astimezone().isoformat(sep=' ', timespec='seconds')
+notebook_modification_year = repr(datetime.datetime.fromtimestamp(notebook_modification_time).year)
 
 menu_prefix = args.menu_prefix
 if menu_prefix is None:
@@ -183,7 +186,8 @@ chapter_html = chapter_html \
     .replace("__CHAPTER_TITLE__", chapter_title) \
     .replace("<__ALL_CHAPTERS_MENU__>", all_chapters_menu) \
     .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
-    .replace("__DATE__", notebook_modification_datetime)
+    .replace("__DATE__", notebook_modification_datetime) \
+    .replace("__YEAR__", notebook_modification_year)
 
 if args.home:
     chapter_html = chapter_html.replace("custom.css", menu_prefix + "custom.css")
