@@ -86,3 +86,7 @@ Again, we're glad you're here!  See our [Guide for Authors](http://www.fuzzingbo
 ### Do you provide PDFs of your material?
 
 At this point, we do not provide support for PDF versions.  We are working on producing PDF and paper versions once the book is complete.
+
+### How do I cite your work?
+
+Thanks for referring to our work!  Once the book is complete, you will be able to cite it in the traditional way.  In the meantime, just click on the "cite" button at the bottom of the Web page for each chapter to get a citation entry.
