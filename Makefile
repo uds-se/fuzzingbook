@@ -26,7 +26,7 @@ APPENDICES = \
 	ExpectError.ipynb \
 	Timer.ipynb
 
-# All sources
+# All source notebooks
 SOURCE_FILES = \
 	$(FRONTMATTER) \
 	$(CHAPTERS) \
@@ -422,8 +422,16 @@ $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
-# Publishing
-docs: publish-html publish-code publish-slides $(DOCS_TARGET)index.html README.md
+# Normalize notebooks
+normalize: utils/nbnormalize.py
+	@for notebook in $(SOURCES); do \
+		echo "Normalizing $$notebook"; \
+		$(PYTHON) utils/nbnormalize.py $$notebook > $$notebook~ && mv $$notebook~ $$notebook; \
+	done
+	
+## Publishing
+
+docs: normalize publish-html publish-code publish-slides $(DOCS_TARGET)index.html README.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
 README.md: $(MARKDOWN_TARGET)index.md
