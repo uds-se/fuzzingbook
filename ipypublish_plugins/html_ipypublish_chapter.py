@@ -38,7 +38,7 @@ fuzzingbook_tpl_dict = {
     """,
 
 # HTML headers and footers are added later by post-html script
-    'overwrite': ['html_body_start', 'html_body_end', 'notebook_input_code'],
+    'overwrite': ['html_body_start', 'html_body_end', 'notebook_input_code', 'notebook_output'],
 
     'html_body_start': r"""
     <__HEADER__>
@@ -79,7 +79,7 @@ fuzzingbook_tpl_dict = {
 <div class="inner_cell">
    {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
 <!-- solution -->
-<div class="inner_cell" style="display: none;">
+<div class="solution" style="display: none;">
    {%- else -%}
 <div class="inner_cell">
    {%- endif -%}
@@ -92,7 +92,25 @@ fuzzingbook_tpl_dict = {
    {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
 <!-- end of solution -->
    {%- endif -%}
-"""
+""",
+
+    'notebook_output': r"""
+   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell_solution2_first -%}
+<!-- exercise -->
+   {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
+<!-- solution -->
+<div class="solution" style="display: none;">
+   {%- else -%}
+   {%- endif -%}
+ {{ super() }}
+   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell_solution2_first -%}
+<!-- end of exercise -->
+   {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
+<!-- end of solution -->
+</div>
+   {%- endif -%}
+""",
+
 }
 
 cell_defaults = {
