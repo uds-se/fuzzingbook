@@ -39,7 +39,7 @@ BIB = fuzzingbook.bib
 NOTEBOOKS = notebooks
 
 # Git repo
-GITHUB = https://github.com/uds-se/fuzzingbook/
+GITHUB_REPO = https://github.com/uds-se/fuzzingbook/
 
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
@@ -466,13 +466,21 @@ publish-slides: slides
 	@test -d $(DOCS_TARGET)slides || mkdir $(DOCS_TARGET)slides
 	cp -pr $(SLIDES_TARGET) $(DOCS_TARGET)slides
 
-	
-## Debugging binder
+
+## Binder services	
+# Debugging binder
 # This is the same system as mybinder uses, but should be easier to debug
 # See https://repo2docker.readthedocs.io/en/latest/
 .PRECIOUS: binder.log
-binder.log:
-	jupyter-repo2docker --debug $(GITHUB) 2>&1 | tee $@
+.FORCE:
+debug-binder: binder/binder.log
+binder/binder.log: .FORCE
+	@echo Writing output to $@
+	jupyter-repo2docker --debug $(GITHUB_REPO) 2>&1 | tee $@
+
+# Force recreation of binder service; avoids long waiting times for first user
+binder: .FORCE
+	open $(GITHUB_REPO)
 
 
 ## Cleanup
