@@ -24,27 +24,6 @@ from ipypublish.preprocessors.latextags_to_html import LatexTagsToHTML
 from ipypublish.preprocessors.split_outputs import SplitOutputs
 
 
-def wrap_solution(key, tpl_dict = latex_doc.tpl_dict):
-    """Hide solutions by default"""
-
-    return """
-       {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
-    {# exercise #}
-       {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-    {# solution #}
-    <span class="solution" style="display: none;">
-       {%- else -%}
-    {# some other cell #}
-       {%- endif -%}""" + tpl_dict[key] + """
-       {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
-    {# end of exercise #}
-       {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-    {# end of solution #}
-    </span>
-       {%- else -%}
-    {# some other cell #}
-       {%- endif -%}
-    """
 
 # Own adaptations -- AZ
 fuzzingbook_tpl_dict = {
@@ -90,12 +69,53 @@ fuzzingbook_tpl_dict = {
 """
 }
 
+
+def hide_solution(key, tpl_dict = latex_doc.tpl_dict):
+    """Hide solutions by default"""
+
+    return """
+       {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
+    {# exercise #}
+       {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
+    {# solution #}
+    <span class="solution" style="display: none;">
+       {%- else -%}
+    {# some other cell #}
+       {%- endif -%}""" + tpl_dict[key] + """
+       {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
+    {# end of exercise #}
+    <__END_OF_EXERCISE__>
+       {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
+    {# end of solution #}
+    </span>
+       {%- else -%}
+    {# some other cell #}
+       {%- endif -%}
+    """
+
 solutions_tpl_dict = {
-    'overwrite': ['notebook_input_markdown', 'notebook_input_code', 'notebook_output'],
+    'overwrite': ['notebook_input_markdown', 'notebook_input_code', 
+                  'notebook_output', 'notebook_all'],
     
-    'notebook_input_markdown': wrap_solution('notebook_input_markdown'),
-    'notebook_input_code': wrap_solution('notebook_input_code'),
-    'notebook_output': wrap_solution('notebook_output'),
+    # Hide solution cells and add some text to last exercise cell
+    'notebook_input_markdown': hide_solution('notebook_input_markdown'),
+    'notebook_input_code': hide_solution('notebook_input_code'),
+    'notebook_output': hide_solution('notebook_output'),
+    
+    # Do not even produce solution cells
+    'notebook_all': r"""
+{%- if cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
+{%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
+    {# exercise #}
+    """ + latex_doc.tpl_dict['notebook_all'] + """
+{%- else -%}
+    {# solution - ignore #}
+{%- endif -%}
+{%- else -%}
+    {# regular cell #}
+    """ + latex_doc.tpl_dict['notebook_all'] + """
+{%- endif -%}
+    """,    
 }
 
 cell_defaults = {

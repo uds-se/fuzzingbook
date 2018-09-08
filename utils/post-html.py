@@ -83,11 +83,13 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
 </div>
 """
 
+notebook_link = "https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb"
+
 chapter_header_template = menu_start + r"""
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/__CHAPTER__.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
+     <li><a href="%s" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
      <li><a href="https://www.fuzzingbook.org/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
      <li><a href="https://www.fuzzingbook.org/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
-     """ + menu_end
+     """ % notebook_link + menu_end
 
 chapter_footer_template = site_footer_template
 
@@ -166,6 +168,9 @@ for menu_ipynb_file in all_chapters:
     item = '<li><a href="%s"%s>%s</a></li>\n' % (menu_html_file, link_class, title)
     all_chapters_menu += item
 
+end_of_exercise = '''
+<p><div class="solution_link"><a href="%s#Exercises" target=_blank>Use the notebook</a> to work on the exercises.</div></p>
+''' % notebook_link
 
 # sys.exit(0)
 
@@ -182,6 +187,7 @@ chapter_html = chapter_html \
     .replace("\n\n</pre>", "\n</pre>") \
     .replace("<__HEADER__>", header_template) \
     .replace("<__FOOTER__>", footer_template) \
+    .replace("<__END_OF_EXERCISE__>", end_of_exercise) \
     .replace("__CHAPTER__", chapter) \
     .replace("__CHAPTER_TITLE__", chapter_title) \
     .replace("<__ALL_CHAPTERS_MENU__>", all_chapters_menu) \
