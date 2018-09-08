@@ -471,7 +471,7 @@ publish-slides: slides
 # Debugging binder
 # This is the same system as mybinder uses, but should be easier to debug
 # See https://repo2docker.readthedocs.io/en/latest/
-.PRECIOUS: binder.log
+.PRECIOUS: binder/binder.log
 .FORCE:
 debug-binder: binder/binder.log
 binder/binder.log: .FORCE
