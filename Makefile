@@ -426,7 +426,9 @@ check-code: code $(PYS_OUT)
 normalize: utils/nbnormalize.py
 	@for notebook in $(SOURCES); do \
 		echo "Normalizing $$notebook"; \
-		$(PYTHON) utils/nbnormalize.py $$notebook > $$notebook~ && mv $$notebook~ $$notebook; \
+		$(PYTHON) utils/nbnormalize.py $$notebook > $$notebook~ || exit 1; \
+		diff $$notebook~ $$notebook || mv $$notebook~ $$notebook; \
+		$(RM) $$notebook~; \
 	done
 	
 ## Publishing
