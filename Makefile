@@ -2,7 +2,6 @@
 
 # Chapters to include in the book, in this order
 PUBLISHED_CHAPTERS = \
-	index.ipynb \
 	Intro_Testing.ipynb \
 	Basic_Fuzzing.ipynb \
 	Coverage.ipynb \
@@ -20,6 +19,8 @@ CHAPTERS = $(PUBLISHED_CHAPTERS) $(BETA_CHAPTERS)
 # - Reducing.ipynb
 
 # Additional notebooks (not to be included)
+FRONTMATTER = \
+	index.ipynb
 APPENDICES = \
 	Guide_for_Authors.ipynb \
 	Template.ipynb \
@@ -344,7 +345,7 @@ $(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
 	mkdir book
 	chapter=0; \
-	for file in $(CHAPTERS); do \
+	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
 	    ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
 		chapter=$$(expr $$chapter + 1); \
@@ -359,7 +360,7 @@ $(HTML_TARGET)book.html: $(SOURCES) $(BIB)
 	-$(RM) -r book
 	mkdir book
 	chapter=0; \
-	for file in $(CHAPTERS); do \
+	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
 	    ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
 		chapter=$$(expr $$chapter + 1); \
@@ -375,7 +376,7 @@ $(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
 	mkdir book
 	chapter=0; \
-	for file in $(CHAPTERS); do \
+	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
 		ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/'$${chnum}'-&/g'); \
 		chapter=$$(expr $$chapter + 1); \
@@ -388,7 +389,7 @@ $(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 $(HTML_TARGET)book.html: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
 	mkdir book
-	for file in $(CHAPTERS); do \
+	for file in $(SOURCE_FILES); do \
 	    ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/[^-0-9]*\([-0-9][0-9]*\)_\(.*\)/\1-\2/g'); \
 	done
 	cd book; $(BOOKBOOK_HTML)
