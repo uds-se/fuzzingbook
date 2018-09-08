@@ -31,19 +31,19 @@
 # * `for i in range(start, end): body` executes `body` in a loop with `i` from `start` to `end` - 1.
 # * `chr(n)` - return a character with ASCII code `n`
 
-# In[94]:
+# In[2]:
 
 
 # import fuzzingbook_utils # only in notebook
 
 
-# In[95]:
+# In[3]:
 
 
 # More code
 
 
-# In[97]:
+# In[4]:
 
 
 # Even more code
@@ -70,13 +70,18 @@
 
 # ## Exercises
 # 
-# _Close the chapter with a few exercises such that people have things to do.  Use the Jupyter `Exercise2` nbextension to add solutions that can be interactively viewed or hidden.  (Alternatively, just copy the exercise and solution cells below with their metadata.)
+# Close the chapter with a few exercises such that people have things to do.  In Jupyter Notebook, use the `exercise2` nbextension to add solutions that can be interactively viewed or hidden:
+# 
+# * Mark the _last_ cell of the exercise (this should be a _text_ cell) as well as _all_ cells of the solution.  (Use the `rubberband` nbextension and use Shift+Drag to mark multiple cells.)
+# * Click on the `solution` button at the top.
+# 
+# (Alternatively, just copy the exercise and solution cells below with their metadata.)
 
 # ### Exercise 1
 # 
 # _Text of the exercise_
 
-# In[3]:
+# In[1]:
 
 
 # Some code that is part of the exercise
