@@ -29,17 +29,20 @@ def wrap_solution(key, tpl_dict = latex_doc.tpl_dict):
 
     return """
        {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
-    <!-- exercise -->
+    {# exercise #}
        {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-    <!-- solution -->
+    {# solution #}
     <span class="solution" style="display: none;">
        {%- else -%}
+    {# some other cell #}
        {%- endif -%}""" + tpl_dict[key] + """
        {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
-    <!-- end of exercise -->
+    {# end of exercise #}
        {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-    <!-- end of solution -->
+    {# end of solution #}
     </span>
+       {%- else -%}
+    {# some other cell #}
        {%- endif -%}
     """
 
@@ -50,10 +53,10 @@ fuzzingbook_tpl_dict = {
 # Fonts for page and menu
 # See https://designshack.net/articles/css/10-great-google-font-combinations-you-can-copy/
     'html_header': """
-<!-- Load Google fonts -->
+{# Load Google fonts #}
 <link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
 
-<!-- Icon library -->
+{# Icon library #}
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     """,
 
