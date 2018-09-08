@@ -2,12 +2,12 @@
 <!-- A html document -->
 <!-- 
 with standard nbconvert css layout
-with fuzzingbook css adaptations
 with standard nbconvert input/output content
 standard html tag wrapping
 with mathjax loaded
 with jupyter wigets
- caption and label elements according to ipub meta tags   -->
+ caption and label elements according to ipub meta tags  
+with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -11753,12 +11753,6 @@ div#notebook {
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
 <link rel="stylesheet" href="custom.css">
 
-<!-- Load Google fonts -->
-<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
-
-<!-- Icon library -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-
 <!-- Load mathjax -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
 <!-- MathJax configuration -->
@@ -11790,9 +11784,25 @@ MathJax.Hub.Config({
 .ipytable { display: -ms-flex; display: -webkit-flex; display: flex;}
 .ipytable>div { flex:1; }
 
-</style></head>
+</style>
+
+<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"></head>
  <body>
 
+    <script>
+    function reveal() {
+        var solutions = document.getElementsByClassName("solution");
+        var i;
+        for (i = 0; i < solutions.length; i++)
+            if (solutions[i].style.display === "none") {
+                solutions[i].style.display = "block";
+            } else {
+                solutions[i].style.display = "none";
+        }
+    }
+    </script>
     
 <nav>
 <div id="cssmenu">
@@ -11833,7 +11843,7 @@ MathJax.Hub.Config({
         </ol>
      </li>
      
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Grammars.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Grammars.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
      <li><a href="https://www.fuzzingbook.org/code/Grammars.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
      <li><a href="https://www.fuzzingbook.org/slides/Grammars.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
      
@@ -11849,10 +11859,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h1 id="Fuzzing-with-Grammars">Fuzzing with Grammars<a class="anchor-link" href="#Fuzzing-with-Grammars">&#182;</a></h1><p>In the chapter on <a href="Mutation_Fuzzing.ipynb">"Mutation-Based Fuzzing"</a>, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a <em>specification</em> of the legal inputs to a program.  These <em>grammars</em> allow for very effective and efficient testing, as we will see in this chapter.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-with-Grammars">Fuzzing with Grammars<a class="anchor-link" href="#Fuzzing-with-Grammars">&#182;</a></h1><p>In the chapter on <a href="Mutation_Fuzzing.ipynb">"Mutation-Based Fuzzing"</a>, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a <em>specification</em> of the legal inputs to a program.  These <em>grammars</em> allow for very effective and efficient testing, as we will see in this chapter.</p>
 </div>
 </div>
 </div>
@@ -11861,14 +11868,11 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p><strong>Prerequisites</strong></p>
+<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
 <ul>
 <li>You should know how basic fuzzing works, e.g. from the <a href="Basic_Fuzzing.ipynb">Chapter introducing fuzzing</a>.</li>
 <li>Knowledge on <a href="Mutation_Fuzzing.ipynb">mutation-based fuzzing</a> and <a href="Coverage.ipynb">coverage</a> is <em>not</em> required yet, but still recommended.</li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -11877,11 +11881,8 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Input-Languages">Input Languages<a class="anchor-link" href="#Input-Languages">&#182;</a></h2><p>All possible behaviors of a program can be triggered by its input.  "Input" here can be a wide range of possible sources: We are talking about data read from files or over the network, data input by the user, or data acquired from interaction with other resources.  The set of all these inputs determines how the program will behave – including its failures.  When testing, it is thus very helpful to think about possible input sources, how to get them under control, and <em>how to systematically test them</em>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Input-Languages">Input Languages<a class="anchor-link" href="#Input-Languages">&#182;</a></h2><p>All possible behaviors of a program can be triggered by its input.  "Input" here can be a wide range of possible sources: We are talking about data read from files or over the network, data input by the user, or data acquired from interaction with other resources.  The set of all these inputs determines how the program will behave – including its failures.  When testing, it is thus very helpful to think about possible input sources, how to get them under control, and <em>how to systematically test them</em>.</p>
 <p>For the sake of simplicity, we will assume for now that the program has only one source of inputs; this is the same assumption we have been using in the previous chapters, too.  The set of valid inputs to a program is called a <em>language</em>.  Languages range from the simple to the complex: the CSV language denotes the set of valid comma-separated inputs, whereas the Python language denotes the set of valid Python programs.  We commonly separate data languages and programming languages, although any program can also be treated as input data (say, to a compiler).  The <a href="https://en.wikipedia.org/wiki/List_of_file_formats">Wikipedia page on file formats</a> lists more than 1,000 different file formats, each of which is its own language.</p>
-
 </div>
 </div>
 </div>
@@ -11890,11 +11891,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Grammars">Grammars<a class="anchor-link" href="#Grammars">&#182;</a></h2>
-
-</div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammars">Grammars<a class="anchor-link" href="#Grammars">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -11902,9 +11899,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Rules-and-Expansions">Rules and Expansions<a class="anchor-link" href="#Rules-and-Expansions">&#182;</a></h3><p>To formally specify input languages, <em>grammars</em> are among the most popular (and best understood) formalisms.  A grammar consists of a <em>start symbol</em> and a set of <em>rules</em> which indicate how the start symbol (and other symbols) can be expanded.  As an example, consider the following grammar, denoting a sequence of two digits:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Rules-and-Expansions">Rules and Expansions<a class="anchor-link" href="#Rules-and-Expansions">&#182;</a></h3><p>To formally specify input languages, <em>grammars</em> are among the most popular (and best understood) formalisms.  A grammar consists of a <em>start symbol</em> and a set of <em>rules</em> which indicate how the start symbol (and other symbols) can be expanded.  As an example, consider the following grammar, denoting a sequence of two digits:</p>
 
 <pre><code>grammar
 &lt;start&gt; ::= &lt;digit&gt;&lt;digit&gt;
@@ -11926,7 +11921,6 @@ MathJax.Hub.Config({
 &lt;integer&gt; ::= &lt;digit&gt; | &lt;digit&gt;&lt;integer&gt;
 &lt;digit&gt;   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
 <p>These rules formally define the language: Anything that can be derived from the start symbol is part of the language; anything that cannot is not.</p>
-
 </div>
 </div>
 </div>
@@ -11935,9 +11929,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Arithmetic-Expressions">Arithmetic Expressions<a class="anchor-link" href="#Arithmetic-Expressions">&#182;</a></h3><p>Let us expand our grammar to cover full <em>arithmetic expressions</em> – a poster child example for a grammar.  We see that an expression (<code>&lt;expr&gt;</code>) is either a sum, or a difference, or a term; a term is either a product or a division, or a factor; and a factor is either a number or a parenthesized expression.  Amost all rules can have recursion, and thus allow arbitrary complex expressions such as <code>(1 + 2) * (3.4 / 5.6 - 789)</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Arithmetic-Expressions">Arithmetic Expressions<a class="anchor-link" href="#Arithmetic-Expressions">&#182;</a></h3><p>Let us expand our grammar to cover full <em>arithmetic expressions</em> – a poster child example for a grammar.  We see that an expression (<code>&lt;expr&gt;</code>) is either a sum, or a difference, or a term; a term is either a product or a division, or a factor; and a factor is either a number or a parenthesized expression.  Amost all rules can have recursion, and thus allow arbitrary complex expressions such as <code>(1 + 2) * (3.4 / 5.6 - 789)</code>.</p>
 
 <pre><code>grammar
 &lt;start&gt;   ::= &lt;expr&gt;
@@ -11947,7 +11939,6 @@ MathJax.Hub.Config({
 &lt;integer&gt; ::= &lt;digit&gt; | &lt;digit&gt;&lt;integer&gt;
 &lt;digit&gt;   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
 <p>In such a grammar, if we start with <code>&lt;start&gt;</code> and then expand one symbol after another, randomly choosing alternatives, we can quickly produce one valid arithmetic expression after another.  Such <em>grammar fuzzing</em> is highly effective as it comes to produce complex inputs, and this is what we will implement in this chapter.</p>
-
 </div>
 </div>
 </div>
@@ -11956,10 +11947,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Representing-Grammars-in-Python">Representing Grammars in Python<a class="anchor-link" href="#Representing-Grammars-in-Python">&#182;</a></h2><p>Our first step in building a grammar fuzzer is to find an appropriate format for grammars.  To make the writing of grammars as simple as possible, we use a mostly format that is mostly based on strings.  Our grammars in Python takes the format of a <em>mapping</em> between symbol names and expansions, where expansions are <em>lists</em> of alternatives.  A one-rule grammar for digits thus takes the form</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Representing-Grammars-in-Python">Representing Grammars in Python<a class="anchor-link" href="#Representing-Grammars-in-Python">&#182;</a></h2><p>Our first step in building a grammar fuzzer is to find an appropriate format for grammars.  To make the writing of grammars as simple as possible, we use a mostly format that is mostly based on strings.  Our grammars in Python takes the format of a <em>mapping</em> between symbol names and expansions, where expansions are <em>lists</em> of alternatives.  A one-rule grammar for digits thus takes the form</p>
 </div>
 </div>
 </div>
@@ -11975,9 +11963,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -11994,19 +11980,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>whereas the full grammar for arithmetic expressions looks like this:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>whereas the full grammar for arithmetic expressions looks like this:</p>
 </div>
 </div>
 </div>
@@ -12040,19 +12021,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>In the grammar, we can access any rule by its symbol...</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>In the grammar, we can access any rule by its symbol...</p>
 </div>
 </div>
 </div>
@@ -12068,9 +12044,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12086,10 +12060,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>....and we can check whether a symbol is in the grammar:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>....and we can check whether a symbol is in the grammar:</p>
 </div>
 </div>
 </div>
@@ -12105,9 +12076,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12123,11 +12092,8 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Hatching-Grammars">Hatching Grammars<a class="anchor-link" href="#Hatching-Grammars">&#182;</a></h2><p>Since grammars are represented as strings, it is fairly easy to introduce errors.  So let us introduce a helper function that checks a grammar for consistency.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Hatching-Grammars">Hatching Grammars<a class="anchor-link" href="#Hatching-Grammars">&#182;</a></h2><p>Since grammars are represented as strings, it is fairly easy to introduce errors.  So let us introduce a helper function that checks a grammar for consistency.</p>
 <p>Frst, this handy <code>nonterminals()</code> function gets us the list of nonterminals in an expansion.</p>
-
 </div>
 </div>
 </div>
@@ -12146,9 +12112,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12163,9 +12127,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12183,19 +12145,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Likewise, <code>is_nonterminal()</code> checks whether some symbol is a nonterminal:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Likewise, <code>is_nonterminal()</code> checks whether some symbol is a nonterminal:</p>
 </div>
 </div>
 </div>
@@ -12212,9 +12169,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12229,19 +12184,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The helper function <code>is_valid_grammar()</code> iterates over a grammar to check whether all used symbols are defined, and vice versa, which is very useful for debugging.  You don't have to dwelve into details here, but as always, it is important to get the input data straight before we make use of it.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The helper function <code>is_valid_grammar()</code> iterates over a grammar to check whether all used symbols are defined, and vice versa, which is very useful for debugging.  You don't have to dwelve into details here, but as always, it is important to get the input data straight before we make use of it.</p>
 </div>
 </div>
 </div>
@@ -12257,9 +12207,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12273,9 +12221,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12316,19 +12262,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Our expression grammar passes the test:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Our expression grammar passes the test:</p>
 </div>
 </div>
 </div>
@@ -12344,19 +12285,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>But these ones don't:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>But these ones don't:</p>
 </div>
 </div>
 </div>
@@ -12372,9 +12308,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12398,9 +12332,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12423,9 +12355,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12448,9 +12378,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12466,10 +12394,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="A-Simple-Grammar-Fuzzer">A Simple Grammar Fuzzer<a class="anchor-link" href="#A-Simple-Grammar-Fuzzer">&#182;</a></h2><p>Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (<code>"&lt;start&gt;"</code>) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (<code>max_symbols</code>) on the number of symbols.  Furthermore, to avoid being stuck in a sitution where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Simple-Grammar-Fuzzer">A Simple Grammar Fuzzer<a class="anchor-link" href="#A-Simple-Grammar-Fuzzer">&#182;</a></h2><p>Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (<code>"&lt;start&gt;"</code>) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (<code>max_symbols</code>) on the number of symbols.  Furthermore, to avoid being stuck in a sitution where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.</p>
 </div>
 </div>
 </div>
@@ -12485,9 +12410,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12502,9 +12425,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12537,19 +12458,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us see how this simple grammar fuzzer obtains an arithmetic expression from the start symbol:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us see how this simple grammar fuzzer obtains an arithmetic expression from the start symbol:</p>
 </div>
 </div>
 </div>
@@ -12565,9 +12481,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12631,9 +12545,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12658,10 +12570,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>\todo{Discuss.}</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>\todo{Discuss.}</p>
 </div>
 </div>
 </div>
@@ -12670,10 +12579,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Note that this fuzzer is rather inefficient due to the large number of search and replace operations.  On the other hand, the implementation is straight-forward and does the job.  For this chapter, we'll stick to it; in the <a href="Derivation_Trees.ipynb">next chapter</a>, we'll show how to build a more efficient one.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Note that this fuzzer is rather inefficient due to the large number of search and replace operations.  On the other hand, the implementation is straight-forward and does the job.  For this chapter, we'll stick to it; in the <a href="Derivation_Trees.ipynb">next chapter</a>, we'll show how to build a more efficient one.</p>
 </div>
 </div>
 </div>
@@ -12682,11 +12588,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Some-Grammars">Some Grammars<a class="anchor-link" href="#Some-Grammars">&#182;</a></h2>
-
-</div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Some-Grammars">Some Grammars<a class="anchor-link" href="#Some-Grammars">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -12694,11 +12596,8 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>With grammars, we can easily specify the format for several of the examples we discussed earlier.  The above arithmetic expressions, for instance, can be directly sent into <code>bc</code> (or any other program that takes arithmetic expressions.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>With grammars, we can easily specify the format for several of the examples we discussed earlier.  The above arithmetic expressions, for instance, can be directly sent into <code>bc</code> (or any other program that takes arithmetic expressions.</p>
 <p>Let us create some more grammars.  Here's one for <code>cgi_decode()</code>:</p>
-
 </div>
 </div>
 </div>
@@ -12737,9 +12636,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12754,9 +12651,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12781,10 +12676,7 @@ a
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Or a URL grammar:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Or a URL grammar:</p>
 </div>
 </div>
 </div>
@@ -12847,9 +12739,7 @@ a
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12864,9 +12754,7 @@ a
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12891,9 +12779,7 @@ ftp://www.google.com:8080/?def=3&amp;abc=abc&amp;x26=64&amp;abc=9&amp;x08=def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="A-More-Efficient-Algorithm">A More Efficient Algorithm<a class="anchor-link" href="#A-More-Efficient-Algorithm">&#182;</a></h2><p>While simple and straight-forward, our grammar production algorithm suffers from two problems:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-More-Efficient-Algorithm">A More Efficient Algorithm<a class="anchor-link" href="#A-More-Efficient-Algorithm">&#182;</a></h2><p>While simple and straight-forward, our grammar production algorithm suffers from two problems:</p>
 <ol>
 <li><p><em>It is inefficient</em>.  With each iteration, this fuzzer would go search the string produced so far for symbols to expand.  This becomes inefficient as the production string grows.</p>
 </li>
@@ -12901,7 +12787,6 @@ ftp://www.google.com:8080/?def=3&amp;abc=abc&amp;x26=64&amp;abc=9&amp;x08=def
 </li>
 </ol>
 <p>Both problems can be easily illustrated by plotting the time required for strings of different lengths.</p>
-
 </div>
 </div>
 </div>
@@ -12917,9 +12802,7 @@ ftp://www.google.com:8080/?def=3&amp;abc=abc&amp;x26=64&amp;abc=9&amp;x08=def
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12945,9 +12828,7 @@ ftp://www.google.com:8080/?def=3&amp;abc=abc&amp;x26=64&amp;abc=9&amp;x08=def
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12975,9 +12856,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12995,10 +12874,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We see that (1) the effort increases quadratically over time, and (2) we can easily produce outputs that are tens of thousands of characters long.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that (1) the effort increases quadratically over time, and (2) we can easily produce outputs that are tens of thousands of characters long.</p>
 </div>
 </div>
 </div>
@@ -13007,11 +12883,8 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Derivation-Trees">Derivation Trees<a class="anchor-link" href="#Derivation-Trees">&#182;</a></h2><p>To both obtain a more efficient algorithm <em>and</em> exercise better control over expansions, we will use a special representation for the strings that our grammar produces.  The general idea is to use a <em>tree</em> structure that will be subsequently expanded – a so-called <em>derivation tree</em>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Derivation-Trees">Derivation Trees<a class="anchor-link" href="#Derivation-Trees">&#182;</a></h2><p>To both obtain a more efficient algorithm <em>and</em> exercise better control over expansions, we will use a special representation for the strings that our grammar produces.  The general idea is to use a <em>tree</em> structure that will be subsequently expanded – a so-called <em>derivation tree</em>.</p>
 <p>The expansion process with derivation trees is illustrated in the following steps.  We use <code>dot</code> as a drawing program; you don't need to look at the code, just at its results.  We start with a single node as root of the tree.</p>
-
 </div>
 </div>
 </div>
@@ -13027,9 +12900,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13046,9 +12917,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13081,10 +12950,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We then traverse the tree, searching for a symbol to expand, and add a new edge from the symbol to its expansion.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We then traverse the tree, searching for a symbol to expand, and add a new edge from the symbol to its expansion.</p>
 </div>
 </div>
 </div>
@@ -13101,9 +12967,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13147,11 +13011,8 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>To construct the actually produced string from the derivation tree, we traverse the tree in order and collect the symbols at the leaves of the tree.  In the case above, we obtain the string <code>&lt;expr&gt;</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>To construct the actually produced string from the derivation tree, we traverse the tree in order and collect the symbols at the leaves of the tree.  In the case above, we obtain the string <code>&lt;expr&gt;</code>.</p>
 <p>To further expand the tree, we choose a symbol to expand, and add a new edge from the symbol to its expansion.  This would get us the string <code>&lt;expr&gt; + &lt;term&gt;</code>.</p>
-
 </div>
 </div>
 </div>
@@ -13170,9 +13031,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13249,10 +13108,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We repeat the process until there are no symbols left to expand:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We repeat the process until there are no symbols left to expand:</p>
 </div>
 </div>
 </div>
@@ -13278,9 +13134,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13456,10 +13310,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We now have a representation for the string <code>2 + 2</code>.  In contrast to the string alone, though, the derivation tree records the entire structure (and production history) of the produced string.  It also allows for simple comparison and manipulation – say, replacing one subtree (substructure) against another.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We now have a representation for the string <code>2 + 2</code>.  In contrast to the string alone, though, the derivation tree records the entire structure (and production history) of the produced string.  It also allows for simple comparison and manipulation – say, replacing one subtree (substructure) against another.</p>
 </div>
 </div>
 </div>
@@ -13468,9 +13319,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Representing-Derivation-Trees">Representing Derivation Trees<a class="anchor-link" href="#Representing-Derivation-Trees">&#182;</a></h2><p>To represent a derivation tree in Python, we use the following format.  A node is a pair</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Representing-Derivation-Trees">Representing Derivation Trees<a class="anchor-link" href="#Representing-Derivation-Trees">&#182;</a></h2><p>To represent a derivation tree in Python, we use the following format.  A node is a pair</p>
 <div class="highlight"><pre><span></span><span class="p">(</span><span class="n">SYMBOL_NAME</span><span class="p">,</span> <span class="n">CHILDREN</span><span class="p">)</span>
 </pre></div>
 <p>where <code>SYMBOL_NAME</code> is a string representing the node (i.e. <code>&lt;start&gt;</code> or <code>+</code>) and <code>CHILDREN</code> is a list of children nodes.</p>
@@ -13480,7 +13329,6 @@ Average time: 0.28545589194080095
 <li><code>[]</code> (i.e., the empty list) to indicate <em>no</em> children.  This means that the node is a <em>terminal symbol</em> that can no longer be expanded.</li>
 </ol>
 <p>Let us take a very simple derivation tree, representing the intermediate step <code>&lt;expr&gt; + &lt;term&gt;</code>, above.</p>
-
 </div>
 </div>
 </div>
@@ -13501,19 +13349,14 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let's visualize this tree!  Again, we use the <code>dot</code> drawing program, but now do this algorithmically, traversing the above structure; as with the above visualizations, only the result counts.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let's visualize this tree!  Again, we use the <code>dot</code> drawing program, but now do this algorithmically, traversing the above structure; as with the above visualizations, only the result counts.</p>
 </div>
 </div>
 </div>
@@ -13529,9 +13372,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13545,9 +13386,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13565,9 +13404,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13583,9 +13420,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13618,19 +13453,14 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>This is what our tree visualizes into:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is what our tree visualizes into:</p>
 </div>
 </div>
 </div>
@@ -13646,9 +13476,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13725,10 +13553,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>To turn the tree into a string, the following function comes in handy:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>To turn the tree into a string, the following function comes in handy:</p>
 </div>
 </div>
 </div>
@@ -13756,9 +13581,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13772,9 +13595,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13790,11 +13611,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Expanding-a-Node">Expanding a Node<a class="anchor-link" href="#Expanding-a-Node">&#182;</a></h2>
-
-</div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Expanding-a-Node">Expanding a Node<a class="anchor-link" href="#Expanding-a-Node">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -13802,10 +13619,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us now develop an algorithm that takes a tree with unexpanded symbols (say, <code>derivation_tree</code>, above), and expands all these symbols onbe after the other.  First, let us define a helper function that constructs a tree with just the start symbol:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now develop an algorithm that takes a tree with unexpanded symbols (say, <code>derivation_tree</code>, above), and expands all these symbols onbe after the other.  First, let us define a helper function that constructs a tree with just the start symbol:</p>
 </div>
 </div>
 </div>
@@ -13822,9 +13636,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13838,9 +13650,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13873,10 +13683,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Next, we will need a helper function that takes an expansion string and converts it into a list of derivation trees:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Next, we will need a helper function that takes an expansion string and converts it into a list of derivation trees:</p>
 </div>
 </div>
 </div>
@@ -13899,9 +13706,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13915,9 +13720,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13933,10 +13736,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The case of an empty expansion needs special treatment:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The case of an empty expansion needs special treatment:</p>
 </div>
 </div>
 </div>
@@ -13952,9 +13752,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13970,10 +13768,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>With this, we can now take some unexpanded node in the tree, choose a random expansion, and return the new tree</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>With this, we can now take some unexpanded node in the tree, choose a random expansion, and return the new tree</p>
 </div>
 </div>
 </div>
@@ -14003,9 +13798,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -14025,9 +13818,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -14115,10 +13906,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Expanding-a-Tree">Expanding a Tree<a class="anchor-link" href="#Expanding-a-Tree">&#182;</a></h2><p>Let us now apply the above node expansion to some node in the tree.  To this end, we first need to search the tree for unexpanded nodes.  <code>possible_expansions()</code> counts how many unexpanded symbols there are in a tree:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Expanding-a-Tree">Expanding a Tree<a class="anchor-link" href="#Expanding-a-Tree">&#182;</a></h2><p>Let us now apply the above node expansion to some node in the tree.  To this end, we first need to search the tree for unexpanded nodes.  <code>possible_expansions()</code> counts how many unexpanded symbols there are in a tree:</p>
 </div>
 </div>
 </div>
@@ -14140,9 +13928,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -14156,9 +13942,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -14174,10 +13958,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p><code>any_possible_expansions()</code> returns True if the tree has any unexpanded nodes.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p><code>any_possible_expansions()</code> returns True if the tree has any unexpanded nodes.</p>
 </div>
 </div>
 </div>
@@ -14197,9 +13978,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -14213,9 +13992,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -14231,12 +14008,9 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Here comes <code>expand_tree_once()</code>, the core method of our tree expansion algorithm.  It first checks whether it is currently being applied on a nonterminal symbol without expansion; if so, it invokes <code>expand_node_randomly()</code> on it as above.  (With the <code>expand_node</code> parameter, we can actually select the function to use for expansion.)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here comes <code>expand_tree_once()</code>, the core method of our tree expansion algorithm.  It first checks whether it is currently being applied on a nonterminal symbol without expansion; if so, it invokes <code>expand_node_randomly()</code> on it as above.  (With the <code>expand_node</code> parameter, we can actually select the function to use for expansion.)</p>
 <p>If the node is already expanded (i.e. has children), it checks the subset of children which still have unexpanded symbols; ranomly selects one of them, and applies itself recursively on that child.</p>
 <p>The <code>expand_tree_once()</code> function replaces the child <em>in place</em>, meaning that it actually mutates the tree being passed as an argument rather than returning a new tree.  This in-place mutation is what makes this function particularly efficient.</p>
-
 </div>
 </div>
 </div>
@@ -14271,19 +14045,14 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let's put it to use, expanding our derivation tree from above twice.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let's put it to use, expanding our derivation tree from above twice.</p>
 </div>
 </div>
 </div>
@@ -14305,9 +14074,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -14392,9 +14159,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -14512,9 +14277,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -14657,10 +14420,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We see that which each step, one more symbol is expanded.  Now all it takes is to apply this again and again, expanding the tree further and further.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that which each step, one more symbol is expanded.  Now all it takes is to apply this again and again, expanding the tree further and further.</p>
 </div>
 </div>
 </div>
@@ -14669,11 +14429,8 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Closing-the-Expansion">Closing the Expansion<a class="anchor-link" href="#Closing-the-Expansion">&#182;</a></h2><p>With <code>expand_tree_once()</code>, we can keep on expanding the tree – but how do we actually stop?  The key idea here, introduced by Luke in [<a href="https://doi.org/10.1109/4235.873237">Luke <em>et al</em>, 2000.</a>], is that after inflating the derivation tree to some maximum size, we <em>only want to apply expansions that increase the size of the tree by a minimum</em>.  For <code>&lt;factor&gt;</code>, for instance, we would prefer an expansion into <code>&lt;integer&gt;</code>, as this will not introduce further recursion (and potential size inflation); for <code>&lt;integer&gt;</code>, likewise, an expansion into <code>&lt;digit&gt;</code> is preferred, as it will less increase tree size than <code>&lt;digit&gt;&lt;integer&gt;</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Closing-the-Expansion">Closing the Expansion<a class="anchor-link" href="#Closing-the-Expansion">&#182;</a></h2><p>With <code>expand_tree_once()</code>, we can keep on expanding the tree – but how do we actually stop?  The key idea here, introduced by Luke in [<a href="https://doi.org/10.1109/4235.873237">Luke <em>et al</em>, 2000.</a>], is that after inflating the derivation tree to some maximum size, we <em>only want to apply expansions that increase the size of the tree by a minimum</em>.  For <code>&lt;factor&gt;</code>, for instance, we would prefer an expansion into <code>&lt;integer&gt;</code>, as this will not introduce further recursion (and potential size inflation); for <code>&lt;integer&gt;</code>, likewise, an expansion into <code>&lt;digit&gt;</code> is preferred, as it will less increase tree size than <code>&lt;digit&gt;&lt;integer&gt;</code>.</p>
 <p>To identify the <em>cost</em> of expanding a symbol, we introduce two functions that mutually rely on each other.  First, <code>symbol_min_cost()</code> returns the minimum cost of all expansions of a symbol, using <code>expansion_min_cost()</code> to compute the cost for each expansion.</p>
-
 </div>
 </div>
 </div>
@@ -14691,19 +14448,14 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The function <code>expansion_min_cost()</code> returns the sum of all expansions in <code>expansions</code>.  If a nonterminal is encountered again during traversal, the cost of the expansion is $\infty$, as this indicates (potential infinite) recursion.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The function <code>expansion_min_cost()</code> returns the sum of all expansions in <code>expansions</code>.  If a nonterminal is encountered again during traversal, the cost of the expansion is $\infty$, as this indicates (potential infinite) recursion.</p>
 </div>
 </div>
 </div>
@@ -14728,19 +14480,14 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Here's two examples: The minimum cost of expanding a digit is 1, since we have to choose between one of its expansions.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's two examples: The minimum cost of expanding a digit is 1, since we have to choose between one of its expansions.</p>
 </div>
 </div>
 </div>
@@ -14756,19 +14503,14 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The minimum number of expansions when expanding <code>&lt;expr&gt;</code>, though, is five, as this is the minimum number of expansions required.  (<code>&lt;expr&gt;</code> → <code>&lt;term&gt;</code> → <code>&lt;factor&gt;</code> → <code>&lt;integer&gt;</code> → <code>&lt;digit&gt;</code> → 1)</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The minimum number of expansions when expanding <code>&lt;expr&gt;</code>, though, is five, as this is the minimum number of expansions required.  (<code>&lt;expr&gt;</code> → <code>&lt;term&gt;</code> → <code>&lt;factor&gt;</code> → <code>&lt;integer&gt;</code> → <code>&lt;digit&gt;</code> → 1)</p>
 </div>
 </div>
 </div>
@@ -14784,19 +14526,14 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Here's now a variant of <code>expand_node_randomly()</code> that takes the above cost into account.  It determines the minimum cost <code>min_cost</code> across all children and then uses the child with the minimum cost.  If multiple children all have the same minimum cost, it chooses randomly between these.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's now a variant of <code>expand_node_randomly()</code> that takes the above cost into account.  It determines the minimum cost <code>min_cost</code> across all children and then uses the child with the minimum cost.  If multiple children all have the same minimum cost, it chooses randomly between these.</p>
 </div>
 </div>
 </div>
@@ -14831,19 +14568,14 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We can now apply this function to close the expansion of our derivation tree, using <code>expand_tree_once()</code> with the above <code>expand_node_min_cost()</code> as expansion function.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can now apply this function to close the expansion of our derivation tree, using <code>expand_tree_once()</code> with the above <code>expand_node_min_cost()</code> as expansion function.</p>
 </div>
 </div>
 </div>
@@ -14863,9 +14595,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -19003,10 +18733,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We see that in each step, <code>expand_node_min_cost()</code> chooses an expansion that does not increase the number of symbols, evantually closing all open expansions.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that in each step, <code>expand_node_min_cost()</code> chooses an expansion that does not increase the number of symbols, evantually closing all open expansions.</p>
 </div>
 </div>
 </div>
@@ -19015,10 +18742,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="All-Together">All Together<a class="anchor-link" href="#All-Together">&#182;</a></h2><p>We can now put both phases together in a single function <code>expand_tree</code> that will expand a tree first with <code>expand_node_randomly()</code> until a limit of <code>max_nonterminals</code> possible expansions is reached, and then use <code>expand_node_min_cost()</code> to close the remaining expansions as quickly as possible.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="All-Together">All Together<a class="anchor-link" href="#All-Together">&#182;</a></h2><p>We can now put both phases together in a single function <code>expand_tree</code> that will expand a tree first with <code>expand_node_randomly()</code> until a limit of <code>max_nonterminals</code> possible expansions is reached, and then use <code>expand_node_min_cost()</code> to close the remaining expansions as quickly as possible.</p>
 </div>
 </div>
 </div>
@@ -19059,9 +18783,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -19084,9 +18806,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -19454,9 +19174,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -19472,10 +19190,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Based on this, we can now create a function <code>grammar_fuzzer()</code> that – like <code>simple_grammar_fuzzer()</code> – simply takes a grammar and produces a string from it, no longer exposing the complexity of derivation trees:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Based on this, we can now create a function <code>grammar_fuzzer()</code> that – like <code>simple_grammar_fuzzer()</code> – simply takes a grammar and produces a string from it, no longer exposing the complexity of derivation trees:</p>
 </div>
 </div>
 </div>
@@ -19506,19 +19221,14 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We can now apply this on all our defined grammars (and visualize the derivation tree along)</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can now apply this on all our defined grammars (and visualize the derivation tree along)</p>
 </div>
 </div>
 </div>
@@ -19534,9 +19244,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -20463,9 +20171,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -20809,9 +20515,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -20906,10 +20610,7 @@ Average time: 0.28545589194080095
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>How do we stack up against <code>simple_grammar_fuzzer()</code>?</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>How do we stack up against <code>simple_grammar_fuzzer()</code>?</p>
 </div>
 </div>
 </div>
@@ -20937,9 +20638,7 @@ Average time: 0.28545589194080095
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -20967,9 +20666,7 @@ Average time: 0.03342591954016825
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -20987,10 +20684,7 @@ Average time: 0.03342591954016825
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Our test generation is much faster, but also our inputs are much smaller.  \todo{(Actually, parts of the time gain may be due to the faster time.)}  We see that with derivation trees, we can get much better control over grammar production.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Our test generation is much faster, but also our inputs are much smaller.  \todo{(Actually, parts of the time gain may be due to the faster time.)}  We see that with derivation trees, we can get much better control over grammar production.</p>
 </div>
 </div>
 </div>
@@ -20999,9 +20693,7 @@ Average time: 0.03342591954016825
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Grammar-Coverage">Grammar Coverage<a class="anchor-link" href="#Grammar-Coverage">&#182;</a></h2><p>At this point, when we produce from grammars, all possible expansions get the same likelihood.  For producing a comprehensive test suite, however, it makes more sense to maximize <em>variety</em> – for instance, by avoiding repeating the same expansions over and over again.  To achieve this, we can track the <em>coverage</em> of individual expansions: If we have seen some expansion already, we can prefer other possible expansions in the future.  The idea of ensuring that each expansion in the grammar is used at least once goes back to Paul Purdom [<a href="https://doi.org/10.1007/BF01932308">Purdom <em>et al</em>, 1972.</a>].</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammar-Coverage">Grammar Coverage<a class="anchor-link" href="#Grammar-Coverage">&#182;</a></h2><p>At this point, when we produce from grammars, all possible expansions get the same likelihood.  For producing a comprehensive test suite, however, it makes more sense to maximize <em>variety</em> – for instance, by avoiding repeating the same expansions over and over again.  To achieve this, we can track the <em>coverage</em> of individual expansions: If we have seen some expansion already, we can prefer other possible expansions in the future.  The idea of ensuring that each expansion in the grammar is used at least once goes back to Paul Purdom [<a href="https://doi.org/10.1007/BF01932308">Purdom <em>et al</em>, 1972.</a>].</p>
 <p>As an example, consider the grammar</p>
 
 <pre><code>grammar
@@ -21009,7 +20701,6 @@ Average time: 0.03342591954016825
 &lt;digit&gt; ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
 <p>Let us assume we have already produced a <code>0</code> in the first expansion of <code>&lt;digit&gt;</code>.  As it comes to expand the next digit, we would mark the <code>0</code> expansion as already covered, and choose one of the yet uncovered alternatives.  Only when we have covered all alternatives would we go back and consider expansions covered before.</p>
 <p>This concept of coverage is very easy to implement.</p>
-
 </div>
 </div>
 </div>
@@ -21027,19 +20718,14 @@ Average time: 0.03342591954016825
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>By returning the set of expansions covered so far, we can invoke the fuzzer multiple times, each time adding to the grammar coverage.  With the <code>DIGIT_EXPR</code> grammar, for instance, this lets the grammar produce one digit after the other:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>By returning the set of expansions covered so far, we can invoke the fuzzer multiple times, each time adding to the grammar coverage.  With the <code>DIGIT_EXPR</code> grammar, for instance, this lets the grammar produce one digit after the other:</p>
 </div>
 </div>
 </div>
@@ -21055,9 +20741,7 @@ Average time: 0.03342591954016825
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -21073,10 +20757,7 @@ Average time: 0.03342591954016825
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>At the end, all expansions are covered:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>At the end, all expansions are covered:</p>
 </div>
 </div>
 </div>
@@ -21092,9 +20773,7 @@ Average time: 0.03342591954016825
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -21110,10 +20789,7 @@ Average time: 0.03342591954016825
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us now create some more expressions:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now create some more expressions:</p>
 </div>
 </div>
 </div>
@@ -21133,19 +20809,14 @@ Average time: 0.03342591954016825
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Again, all expansions are covered:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Again, all expansions are covered:</p>
 </div>
 </div>
 </div>
@@ -21161,9 +20832,7 @@ Average time: 0.03342591954016825
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -21179,11 +20848,8 @@ Average time: 0.03342591954016825
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Alternatives-to-Grammars">Alternatives to Grammars<a class="anchor-link" href="#Alternatives-to-Grammars">&#182;</a></h2><p>To formally describe languages, the field of <em>formal languages</em> has devised a number of <em>language specifications</em> that describe a language.  <em>Regular expressions</em>, for instance, denote sets of strings: The regular expression <code>[a-z]*</code>, for instance, denotes a (possibly empty) sequence of lowercase letters.  <em>Automata theory</em> connects these languages to automata that accept these inputs; <em>finite state machines</em>, for instance, can be used to specify the same language as regular expressions.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Alternatives-to-Grammars">Alternatives to Grammars<a class="anchor-link" href="#Alternatives-to-Grammars">&#182;</a></h2><p>To formally describe languages, the field of <em>formal languages</em> has devised a number of <em>language specifications</em> that describe a language.  <em>Regular expressions</em>, for instance, denote sets of strings: The regular expression <code>[a-z]*</code>, for instance, denotes a (possibly empty) sequence of lowercase letters.  <em>Automata theory</em> connects these languages to automata that accept these inputs; <em>finite state machines</em>, for instance, can be used to specify the same language as regular expressions.</p>
 <p>Regular expressions are great for not-too-complex input formats, and the associated finite state machine have many properties that make them great for reasoning.  To specify more complex inputs, though, they quickly encounter limitations.  On the other hand of the language spectrum, we have <em>universal grammars</em> that denote the language accepted by <em>Turing machines</em>.  A Turing machine can compute anything that can be computed; and with Python being a Turing-complete language, this means that we can also use a Python program $p$ to specify or even enumerate legal inputs.  But then, computer science theory also tells us that each such testing program has to be written specifically for the program to be tested, which is not the level of automation we want.</p>
-
 </div>
 </div>
 </div>
@@ -21192,14 +20858,11 @@ Average time: 0.03342591954016825
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li><em>Lesson one</em></li>
 <li><em>Lesson two</em></li>
 <li><em>Lesson three</em></li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -21208,15 +20871,12 @@ Average time: 0.03342591954016825
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
 <ul>
 <li><a href="Mutation_Fuzzing.ipynb">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
 <li><a href="Grammars.ipynb">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
 <li><a href="Reducing.ipynb">reduce <em>failing inputs</em> for efficient debugging</a></li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -21225,10 +20885,7 @@ Average time: 0.03342591954016825
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p><em>Close the chapter with a few exercises such that people have things to do.  Use the Jupyter <code>Exercise2</code> nbextension to add solutions that can be interactively viewed or hidden.  (Alternatively, just copy the exercise and solution cells below with their metadata.)  We will set up things such that solutions do not appear in the PDF and HTML formats.</em></p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p><em>Close the chapter with a few exercises such that people have things to do.  Use the Jupyter <code>Exercise2</code> nbextension to add solutions that can be interactively viewed or hidden.  (Alternatively, just copy the exercise and solution cells below with their metadata.)  We will set up things such that solutions do not appear in the PDF and HTML formats.</em></p>
 </div>
 </div>
 </div>
@@ -21237,10 +20894,10 @@ Average time: 0.03342591954016825
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p>Speed up things by memoizing.</p>
 
-<h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p>Speed up things by memoizing.</p>
-
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Grammars.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises.</div></p>
 </div>
 </div>
 </div>
@@ -21267,31 +20924,17 @@ Average time: 0.03342591954016825
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p>Speed up things by tracking which children still can be expanded.</p>
 
-<p><em>Solution for the exercise</em></p>
-
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p>Speed up things by tracking which children still can be expanded.</p>
-
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Grammars.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises.</div></p>
 </div>
 </div>
 </div>
@@ -21300,22 +20943,10 @@ Average time: 0.03342591954016825
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-3">Exercise 3<a class="anchor-link" href="#Exercise-3">&#182;</a></h3><p>Introduce a parameter <code>min_symbols</code> that would keep on expanding with <em>maximum</em> cost until <code>min_symbols</code> is reached.</p>
 
-<p><em>Solution for the exercise</em></p>
-
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Exercise-3">Exercise 3<a class="anchor-link" href="#Exercise-3">&#182;</a></h3><p>Introduce a parameter <code>min_symbols</code> that would keep on expanding with <em>maximum</em> cost until <code>min_symbols</code> is reached.</p>
-
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Grammars.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises.</div></p>
 </div>
 </div>
 </div>
@@ -21350,9 +20981,7 @@ Average time: 0.03342591954016825
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -21397,9 +21026,7 @@ Average time: 0.03342591954016825
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -21415,31 +21042,17 @@ Average time: 0.03342591954016825
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-4">Exercise 4<a class="anchor-link" href="#Exercise-4">&#182;</a></h3><p>Introduce Purdom's approach first expanding yet uncovered expansions [<a href="https://doi.org/10.1007/BF01932308">Purdom <em>et al</em>, 1972.</a>] as discussed in <a href="Grammars.ipynb">the "Grammars" chapter</a>.</p>
 
-<h3 id="Exercise-4">Exercise 4<a class="anchor-link" href="#Exercise-4">&#182;</a></h3><p>Introduce Purdom's approach first expanding yet uncovered expansions [<a href="https://doi.org/10.1007/BF01932308">Purdom <em>et al</em>, 1972.</a>] as discussed in <a href="Grammars.ipynb">the "Grammars" chapter</a>.</p>
-
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p><em>Solution for the exercise</em></p>
-
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Grammars.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises.</div></p>
 </div>
 </div>
 </div>
@@ -21451,7 +21064,7 @@ Average time: 0.03342591954016825
 This work is licensed under a
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 &bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-09-06 13:45:52+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-09-08 14:21:06+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="toggleCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -21471,7 +21084,7 @@ function toggleCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/slides/Grammars.html">Fuzzing with Grammars</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/slides/Grammars.html">https://www.fuzzingbook.org/slides/Grammars.html</a>.  Retrieved 2018-09-06 13:45:52+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/slides/Grammars.html">Fuzzing with Grammars</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/slides/Grammars.html">https://www.fuzzingbook.org/slides/Grammars.html</a>.  Retrieved 2018-09-08 14:21:06+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Grammars,
@@ -21481,9 +21094,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/Grammars.html}},
-    note = {Retrieved 2018-09-06 13:45:52+02:00},
+    note = {Retrieved 2018-09-08 14:21:06+02:00},
     url = {https://www.fuzzingbook.org/html/Grammars.html},
-    urldate = {2018-09-06 13:45:52+02:00}
+    urldate = {2018-09-08 14:21:06+02:00}
 }
 </pre>
 </div>

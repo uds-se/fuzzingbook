@@ -2,12 +2,12 @@
 <!-- A html document -->
 <!-- 
 with standard nbconvert css layout
-with fuzzingbook css adaptations
 with standard nbconvert input/output content
 standard html tag wrapping
 with mathjax loaded
 with jupyter wigets
- caption and label elements according to ipub meta tags   -->
+ caption and label elements according to ipub meta tags  
+with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -11753,12 +11753,6 @@ div#notebook {
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
 <link rel="stylesheet" href="custom.css">
 
-<!-- Load Google fonts -->
-<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
-
-<!-- Icon library -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-
 <!-- Load mathjax -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
 <!-- MathJax configuration -->
@@ -11790,9 +11784,25 @@ MathJax.Hub.Config({
 .ipytable { display: -ms-flex; display: -webkit-flex; display: flex;}
 .ipytable>div { flex:1; }
 
-</style></head>
+</style>
+
+<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"></head>
  <body>
 
+    <script>
+    function reveal() {
+        var solutions = document.getElementsByClassName("solution");
+        var i;
+        for (i = 0; i < solutions.length; i++)
+            if (solutions[i].style.display === "none") {
+                solutions[i].style.display = "block";
+            } else {
+                solutions[i].style.display = "none";
+        }
+    }
+    </script>
     
 <nav>
 <div id="cssmenu">
@@ -11826,7 +11836,7 @@ MathJax.Hub.Config({
         </ol>
      </li>
      
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Coverage.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Coverage.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
      <li><a href="https://www.fuzzingbook.org/code/Coverage.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
      <li><a href="https://www.fuzzingbook.org/slides/Coverage.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
      
@@ -11842,10 +11852,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h1 id="Getting-Coverage">Getting Coverage<a class="anchor-link" href="#Getting-Coverage">&#182;</a></h1><p>In the <a href="Basic_Fuzzing.ipynb">previous chapter</a>, we introduced <em>basic fuzzing</em> – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a <em>proxy for the likelihood of a test to uncover a bug.</em>  In this chapter, we introduce the concept of <em>code coverage</em>, measuring which parts of a program are actually executed during a test run.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Getting-Coverage">Getting Coverage<a class="anchor-link" href="#Getting-Coverage">&#182;</a></h1><p>In the <a href="Basic_Fuzzing.ipynb">previous chapter</a>, we introduced <em>basic fuzzing</em> – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a <em>proxy for the likelihood of a test to uncover a bug.</em>  In this chapter, we introduce the concept of <em>code coverage</em>, measuring which parts of a program are actually executed during a test run.</p>
 </div>
 </div>
 </div>
@@ -11854,14 +11861,11 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p><strong>Prerequisites</strong></p>
+<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
 <ul>
 <li>You need basic understanding of how a program is executed.</li>
 <li>You should have learned about basic fuzzing in the <a href="Basic_Fuzzing.ipynb">previous chapter</a>.</li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -11870,16 +11874,13 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="A-CGI-Decoder">A CGI Decoder<a class="anchor-link" href="#A-CGI-Decoder">&#182;</a></h2><p>We start by introducing a simple Python function that decodes a CGI-encoded string.  CGI encoding is used in URLs (i.e., Web addresses) to encode characters that would be invalid in a URL, such as blanks and certain punctuation:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-CGI-Decoder">A CGI Decoder<a class="anchor-link" href="#A-CGI-Decoder">&#182;</a></h2><p>We start by introducing a simple Python function that decodes a CGI-encoded string.  CGI encoding is used in URLs (i.e., Web addresses) to encode characters that would be invalid in a URL, such as blanks and certain punctuation:</p>
 <ul>
 <li>Blanks are replaced by <code>'+'</code></li>
 <li>Other invalid characters are replaced by '<code>%xx</code>', where <code>xx</code> is the two-digit hexadecimal equivalent.</li>
 </ul>
 <p>In CGI encoding, the string <code>"Hello, world!"</code> would thus become <code>"Hello%2c+world%21"</code> where <code>2c</code> and <code>21</code> are the hexadecimal numbers of <code>','</code> and <code>'!'</code>, respectively.</p>
 <p>The function <code>cgi_decode()</code> takes such an encoded string and decodes it back to its original form.  Our implementation replicates the code from [Pezz{`e} <em>et al</em>, 2008.].  (It even including its bugs – but we won't reveal them at this point.)</p>
-
 </div>
 </div>
 </div>
@@ -11926,19 +11927,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Here is an example of how <code>cgi_decode()</code> works:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here is an example of how <code>cgi_decode()</code> works:</p>
 </div>
 </div>
 </div>
@@ -11954,9 +11950,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -11972,10 +11966,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>If we want to systematically test <code>cgi_decode()</code>, how would we proceed?</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we want to systematically test <code>cgi_decode()</code>, how would we proceed?</p>
 </div>
 </div>
 </div>
@@ -11984,10 +11975,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The testing literature distinguishes two ways of deriving tests: <em>Black-box testing</em> and <em>White-box testing.</em></p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The testing literature distinguishes two ways of deriving tests: <em>Black-box testing</em> and <em>White-box testing.</em></p>
 </div>
 </div>
 </div>
@@ -11996,9 +11984,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Black-Box-Testing">Black-Box Testing<a class="anchor-link" href="#Black-Box-Testing">&#182;</a></h2><p>The idea of <em>black-box testing</em> it to derive tests from the <em>specification</em>.  In the above case, we thus would have to test <code>cgi_decode()</code> by the features specified and documented, including</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Black-Box-Testing">Black-Box Testing<a class="anchor-link" href="#Black-Box-Testing">&#182;</a></h2><p>The idea of <em>black-box testing</em> it to derive tests from the <em>specification</em>.  In the above case, we thus would have to test <code>cgi_decode()</code> by the features specified and documented, including</p>
 <ul>
 <li>testing for correct replacement of <code>'+'</code>;</li>
 <li>testing for correct replacement of <code>"%xx"</code>;</li>
@@ -12006,7 +11992,6 @@ MathJax.Hub.Config({
 <li>testing for recognition of illegal inputs.</li>
 </ul>
 <p>Here are four assertions (tests) that cover these four features.  We can see that they all pass:</p>
-
 </div>
 </div>
 </div>
@@ -12030,19 +12015,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The advantage of black-box testing is that it finds errors in the <em>specified</em> behavior.  It is independent from a given implementation, and thus even allows to create test even before implementation.  The downside is that <em>implemented</em> behavior typically covers more ground than <em>specified</em> behavior, and thus tests based on specification alone typically do not cover all implementation details.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The advantage of black-box testing is that it finds errors in the <em>specified</em> behavior.  It is independent from a given implementation, and thus even allows to create test even before implementation.  The downside is that <em>implemented</em> behavior typically covers more ground than <em>specified</em> behavior, and thus tests based on specification alone typically do not cover all implementation details.</p>
 </div>
 </div>
 </div>
@@ -12051,15 +12031,12 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="White-Box-Testing">White-Box Testing<a class="anchor-link" href="#White-Box-Testing">&#182;</a></h2><p>In contrast to black-box testing, white-box testing derives tests from the <em>implementation</em>, notably the internal structure.  White-Box testing is closely tied to the concept of <em>covering</em> structural features of the code.  If a statement in the code is not executed during testing, for instance, this means that an error in this statement cannot be triggered either.  White-Box testing thus introduces a number of <em>coverage criteria</em> that have to be fulfilled before the test can be said to be sufficient.  The most frequently used coverage criteria are</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="White-Box-Testing">White-Box Testing<a class="anchor-link" href="#White-Box-Testing">&#182;</a></h2><p>In contrast to black-box testing, white-box testing derives tests from the <em>implementation</em>, notably the internal structure.  White-Box testing is closely tied to the concept of <em>covering</em> structural features of the code.  If a statement in the code is not executed during testing, for instance, this means that an error in this statement cannot be triggered either.  White-Box testing thus introduces a number of <em>coverage criteria</em> that have to be fulfilled before the test can be said to be sufficient.  The most frequently used coverage criteria are</p>
 <ul>
 <li><strong>Statement testing</strong> – each statement in the code must be executed at least once.</li>
 <li><strong>Branch testing</strong> – each branch in the code must be taken at least once.  (This translates to each <code>if</code> and <code>while</code> decision once being true, and once being false.)</li>
 </ul>
 <p>Besides these, there are far more coverage criteria, including sequences of branches taken, loop iterations taken (zero, one, many), data flows between variable definitions and usages, and many more; [Pezz{`e} <em>et al</em>, 2008.] has a great overview.</p>
-
 </div>
 </div>
 </div>
@@ -12068,9 +12045,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us consider <code>cgi_decode()</code>, above, and reason what we have to do such that each statement of the code is executed at least once.  We'd have to cover</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us consider <code>cgi_decode()</code>, above, and reason what we have to do such that each statement of the code is executed at least once.  We'd have to cover</p>
 <ul>
 <li>The block following <code>if c == '+'</code></li>
 <li>The two blocks following <code>if c == '%'</code> (one for valid input, one for invalid)</li>
@@ -12078,7 +12053,6 @@ MathJax.Hub.Config({
 </ul>
 <p>This results in the same conditions as with black-box testing, above; again, the assertions above indeed would cover every statement in the code.  Such a correspondence is actually pretty common, since programmers tend to implement different behaviors in different code locations; and thus, covering these locations will lead to test cases that cover the different (specified) behaviors.</p>
 <p>The advantage of white-box testing is that it finds errors in <em>implemented</em> behavior.  It can be conducted even in cases where the specification does not provide sufficient details; actually, it helps in identifying (and thus specifying) corner cases in the specification.  The downside is that it may miss <em>non-implemented</em> behavior: If some specified functionality is missing, white-box testing will not find it.</p>
-
 </div>
 </div>
 </div>
@@ -12087,10 +12061,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Tracing-Executions">Tracing Executions<a class="anchor-link" href="#Tracing-Executions">&#182;</a></h2><p>One nice feature of black-box testing is that one can actually automatically assess whether some program feature was covered.  To this end, one <em>instruments</em> the execution of the program such that during execution, a special functionality keeps track of which code was executed.  After testing, this information can be passed to the programmer, who can then focus on writing tests that cover the yet uncovered code.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Tracing-Executions">Tracing Executions<a class="anchor-link" href="#Tracing-Executions">&#182;</a></h2><p>One nice feature of black-box testing is that one can actually automatically assess whether some program feature was covered.  To this end, one <em>instruments</em> the execution of the program such that during execution, a special functionality keeps track of which code was executed.  After testing, this information can be passed to the programmer, who can then focus on writing tests that cover the yet uncovered code.</p>
 </div>
 </div>
 </div>
@@ -12099,10 +12070,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Tracing-Executions-in-Python">Tracing Executions in Python<a class="anchor-link" href="#Tracing-Executions-in-Python">&#182;</a></h3><p>In most programming languages, it is rather difficult to set up programs such that one can trace their execution.  Not so in Python.  The function <code>sys.settrace(f)</code> allows to define a function <code>f()</code> that is called for each and every line executed.  Even better, it gets access to the current function and its name, current variable contents, and more.  It is thus an ideal tool for <em>dynamic analysis</em> – that is, the analysis of what actually happens during an execution.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracing-Executions-in-Python">Tracing Executions in Python<a class="anchor-link" href="#Tracing-Executions-in-Python">&#182;</a></h3><p>In most programming languages, it is rather difficult to set up programs such that one can trace their execution.  Not so in Python.  The function <code>sys.settrace(f)</code> allows to define a function <code>f()</code> that is called for each and every line executed.  Even better, it gets access to the current function and its name, current variable contents, and more.  It is thus an ideal tool for <em>dynamic analysis</em> – that is, the analysis of what actually happens during an execution.</p>
 </div>
 </div>
 </div>
@@ -12111,10 +12079,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>To illustrate how this works, let us again look into a specific execution of <code>cgi_decode()</code>.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>To illustrate how this works, let us again look into a specific execution of <code>cgi_decode()</code>.</p>
 </div>
 </div>
 </div>
@@ -12130,9 +12095,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12148,16 +12111,13 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>To track how the execution proceeds through <code>cgi_decode()</code>, we make use of <code>sys.settrace()</code>.  First, we define the <em>tracing function</em> that will be called for each line.  It has three parameters:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>To track how the execution proceeds through <code>cgi_decode()</code>, we make use of <code>sys.settrace()</code>.  First, we define the <em>tracing function</em> that will be called for each line.  It has three parameters:</p>
 <ul>
 <li>the current <em>frame</em>, allowing access to the current location and variables;</li>
 <li>the current <em>event</em>, a string with values including <code>"line"</code> (a new line has been reached) or <code>"call"</code> (a function is being called)</li>
 <li>an additional <em>argument</em> for some events.</li>
 </ul>
 <p>We use the tracing function for simply reporting the current line executed, which we access through the <code>frame</code> argument.</p>
-
 </div>
 </div>
 </div>
@@ -12173,9 +12133,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12195,19 +12153,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We can switch tracing on and off with <code>sys.settrace()</code>:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can switch tracing on and off with <code>sys.settrace()</code>:</p>
 </div>
 </div>
 </div>
@@ -12223,9 +12176,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12244,19 +12195,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>When we compute <code>cgi_decode("a+b")</code>, we can now see how the execution progresses through <code>cgi_decode()</code>.  After the initialization of <code>hex_values</code>, <code>t</code>, and <code>i</code>, we see that the <code>while</code> loop is taken three times – one for every character in the input.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>When we compute <code>cgi_decode("a+b")</code>, we can now see how the execution progresses through <code>cgi_decode()</code>.  After the initialization of <code>hex_values</code>, <code>t</code>, and <code>i</code>, we see that the <code>while</code> loop is taken three times – one for every character in the input.</p>
 </div>
 </div>
 </div>
@@ -12273,9 +12219,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12315,10 +12259,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Which lines are these, actually?  To this end, we encode the source code into an array <code>cgi_decode_lines</code>.  (An actual coverage tool could also access the source code file directly.)</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Which lines are these, actually?  To this end, we encode the source code into an array <code>cgi_decode_lines</code>.  (An actual coverage tool could also access the source code file directly.)</p>
 </div>
 </div>
 </div>
@@ -12369,19 +12310,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We see that the first line (9) executed is actually the initialization of <code>hex_values</code>...</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that the first line (9) executed is actually the initialization of <code>hex_values</code>...</p>
 </div>
 </div>
 </div>
@@ -12397,9 +12333,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12418,10 +12352,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>... followed by the initialization of <code>t</code>:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>... followed by the initialization of <code>t</code>:</p>
 </div>
 </div>
 </div>
@@ -12437,9 +12368,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12455,10 +12384,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>To see which lines actually have been covered at least once, we can convert <code>coverage</code> into a set:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>To see which lines actually have been covered at least once, we can convert <code>coverage</code> into a set:</p>
 </div>
 </div>
 </div>
@@ -12475,9 +12401,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12493,10 +12417,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us print out the code, annotating lines not covered with '#':</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us print out the code, annotating lines not covered with '#':</p>
 </div>
 </div>
 </div>
@@ -12517,9 +12438,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12566,10 +12485,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We see that a number of lines (notably comments) have not been executed, simply because they are not executable.  However, we also see that the lines under <code>if c == '%'</code> have <em>not</em> been executed yet.  If <code>"a+b"</code> were our only test case so far, this missing coverage would now encourage us to create another test case that actually covers these lines.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that a number of lines (notably comments) have not been executed, simply because they are not executable.  However, we also see that the lines under <code>if c == '%'</code> have <em>not</em> been executed yet.  If <code>"a+b"</code> were our only test case so far, this missing coverage would now encourage us to create another test case that actually covers these lines.</p>
 </div>
 </div>
 </div>
@@ -12578,10 +12494,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="A-Coverage-Class">A Coverage Class<a class="anchor-link" href="#A-Coverage-Class">&#182;</a></h2><p>In this book, we will make use of coverage again and again – to <em>measure</em> the effectiveness of different test generation techniques, but also to <em>guide</em> test generation towards code coverage.  Our previous implementation with a global <code>coverage</code> variable is a bit cumbersome for that.  We therefore implement some functionality that will help us measuring coverage easily.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Coverage-Class">A Coverage Class<a class="anchor-link" href="#A-Coverage-Class">&#182;</a></h2><p>In this book, we will make use of coverage again and again – to <em>measure</em> the effectiveness of different test generation techniques, but also to <em>guide</em> test generation towards code coverage.  Our previous implementation with a global <code>coverage</code> variable is a bit cumbersome for that.  We therefore implement some functionality that will help us measuring coverage easily.</p>
 </div>
 </div>
 </div>
@@ -12590,9 +12503,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The key idea of getting coverage is to make use of the Python <code>with</code> statement.  The general form</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The key idea of getting coverage is to make use of the Python <code>with</code> statement.  The general form</p>
 <div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">OBJECT</span> <span class="p">[</span><span class="k">as</span> <span class="n">VARIABLE</span><span class="p">]:</span>
     <span class="n">BODY</span>
 </pre></div>
@@ -12602,7 +12513,6 @@ MathJax.Hub.Config({
 <span class="n">c</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
 </pre></div>
 <p>Here, tracing is automatically turned on during <code>function_to_be_traced()</code> and turned off again after the <code>with</code> block; afterwards, we can access the set of lines executed.</p>
-
 </div>
 </div>
 </div>
@@ -12611,10 +12521,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Here's the full implementation with all its bells and whistles.  You don't have to get everything; it suffices that you know how to use it:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's the full implementation with all its bells and whistles.  You don't have to get everything; it suffices that you know how to use it:</p>
 </div>
 </div>
 </div>
@@ -12662,19 +12569,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us put this to use:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us put this to use:</p>
 </div>
 </div>
 </div>
@@ -12693,9 +12595,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12711,10 +12611,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>As you can see, the <code>Coverage()</code> class not only keeps track of lines executed, but also of function names.  This is useful if you have a program that spans multiple files.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>As you can see, the <code>Coverage()</code> class not only keeps track of lines executed, but also of function names.  This is useful if you have a program that spans multiple files.</p>
 </div>
 </div>
 </div>
@@ -12723,10 +12620,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Comparing-Coverage">Comparing Coverage<a class="anchor-link" href="#Comparing-Coverage">&#182;</a></h2><p>Since we represent coverage as a set of executed lines, we can also apply <em>set operations</em> on these.  For instance, we can find out which lines are covered by individual test cases, but not others:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Comparing-Coverage">Comparing Coverage<a class="anchor-link" href="#Comparing-Coverage">&#182;</a></h2><p>Since we represent coverage as a set of executed lines, we can also apply <em>set operations</em> on these.  For instance, we can find out which lines are covered by individual test cases, but not others:</p>
 </div>
 </div>
 </div>
@@ -12747,9 +12641,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12765,10 +12657,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>This is the single line in the code that is executed only in the <code>'a+b'</code> input.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is the single line in the code that is executed only in the <code>'a+b'</code> input.</p>
 </div>
 </div>
 </div>
@@ -12777,10 +12666,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We can also compare sets to find out which lines still need to be covered.  Let us define <code>cov_max</code> as the maximum coverage we can achieve. (Here, we do this by executing the "good" test cases we already have.  In practice, one would statically analyze code structure, which we introduce in the chapter on <a href="Static_Analysis.ipynb">"Static Analysis"</a>.)</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can also compare sets to find out which lines still need to be covered.  Let us define <code>cov_max</code> as the maximum coverage we can achieve. (Here, we do this by executing the "good" test cases we already have.  In practice, one would statically analyze code structure, which we introduce in the chapter on <a href="Static_Analysis.ipynb">"Static Analysis"</a>.)</p>
 </div>
 </div>
 </div>
@@ -12796,9 +12682,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12819,19 +12703,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Then, we can easily see which lines are <em>not</em> yet covered by a test case:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Then, we can easily see which lines are <em>not</em> yet covered by a test case:</p>
 </div>
 </div>
 </div>
@@ -12847,9 +12726,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12870,10 +12747,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Again, these would be the lines handling <code>"%xx"</code>, which we have not yet had in the input.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Again, these would be the lines handling <code>"%xx"</code>, which we have not yet had in the input.</p>
 </div>
 </div>
 </div>
@@ -12882,10 +12756,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Coverage-of-Basic-Fuzzing">Coverage of Basic Fuzzing<a class="anchor-link" href="#Coverage-of-Basic-Fuzzing">&#182;</a></h2><p>We can now use our coverage tracing to assess the <em>effectiveness</em> of testing methods – in particular, of course, test <em>generation</em> methods.  Our challenge is to achieve maximum coverage in <code>cgi_decode()</code> just with random inputs.  In principle, we should <em>eventually</em> get there, as eventually, we will have produced every possible string in the universe – but exactly how long is this?  To this end, let us run just one fuzzing iteration on <code>cgi_decode()</code>:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Coverage-of-Basic-Fuzzing">Coverage of Basic Fuzzing<a class="anchor-link" href="#Coverage-of-Basic-Fuzzing">&#182;</a></h2><p>We can now use our coverage tracing to assess the <em>effectiveness</em> of testing methods – in particular, of course, test <em>generation</em> methods.  Our challenge is to achieve maximum coverage in <code>cgi_decode()</code> just with random inputs.  In principle, we should <em>eventually</em> get there, as eventually, we will have produced every possible string in the universe – but exactly how long is this?  To this end, let us run just one fuzzing iteration on <code>cgi_decode()</code>:</p>
 </div>
 </div>
 </div>
@@ -12894,10 +12765,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Here's a sample string we want to decode.  Surely, this will put <code>cgi_decode()</code> to the test...</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's a sample string we want to decode.  Surely, this will put <code>cgi_decode()</code> to the test...</p>
 </div>
 </div>
 </div>
@@ -12913,9 +12781,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12930,9 +12796,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12948,10 +12812,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Here's the invocation and the coverage we achieve.  We wrap <code>cgi_decode()</code> in a <code>try...except</code> block such that we can ignore <code>ValueError</code> exceptions raissed by illegal <code>%xx</code> formats.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's the invocation and the coverage we achieve.  We wrap <code>cgi_decode()</code> in a <code>try...except</code> block such that we can ignore <code>ValueError</code> exceptions raissed by illegal <code>%xx</code> formats.</p>
 </div>
 </div>
 </div>
@@ -12972,9 +12833,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13007,10 +12866,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Is this already the maximum coverage?  Apparently, there are still lines missing:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Is this already the maximum coverage?  Apparently, there are still lines missing:</p>
 </div>
 </div>
 </div>
@@ -13026,9 +12882,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13044,11 +12898,8 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us try again, increasing coverage over 100 random inputs.  We use an array <code>cumulative_coverage</code> to store the coverage achieved over time; <code>cumulative_coverage[0]</code> is the total number of lines covered after input 1, 
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us try again, increasing coverage over 100 random inputs.  We use an array <code>cumulative_coverage</code> to store the coverage achieved over time; <code>cumulative_coverage[0]</code> is the total number of lines covered after input 1, 
 <code>cumulative_coverage[1]</code> is the number of lines covered after inputs 1–2, and so on.</p>
-
 </div>
 </div>
 </div>
@@ -13064,9 +12915,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13093,19 +12942,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Here's how the coverage increases with each input:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's how the coverage increases with each input:</p>
 </div>
 </div>
 </div>
@@ -13125,9 +12969,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13141,9 +12983,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13158,9 +12998,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13177,9 +13015,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13197,10 +13033,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>This is just <em>one</em> run, of course; so let's repeat this a number of times and plot the averages.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is just <em>one</em> run, of course; so let's repeat this a number of times and plot the averages.</p>
 </div>
 </div>
 </div>
@@ -13229,9 +13062,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13248,9 +13079,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13268,10 +13097,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We see that on average, we get full coverage after 40–60 fuzzing inputs.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that on average, we get full coverage after 40–60 fuzzing inputs.</p>
 </div>
 </div>
 </div>
@@ -13280,10 +13106,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Finding-Errors-with-Basic-Fuzzing">Finding Errors with Basic Fuzzing<a class="anchor-link" href="#Finding-Errors-with-Basic-Fuzzing">&#182;</a></h2><p>Given sufficient time, we can indeed cover each and every line within <code>cgi_decode()</code>.  This does not mean that they would be error-free, though.  Since we do not check the result of <code>cgi_decode()</code>, the function could return any value without us checking or noticing.  To catch such errors, we would have to set up a <em>results checker</em> (commonly called an <em>oracle</em>) that would verify test results.  In our case, we could compare against another implementation of <code>cgi_decode()</code> and see whether both produce the same results.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Finding-Errors-with-Basic-Fuzzing">Finding Errors with Basic Fuzzing<a class="anchor-link" href="#Finding-Errors-with-Basic-Fuzzing">&#182;</a></h2><p>Given sufficient time, we can indeed cover each and every line within <code>cgi_decode()</code>.  This does not mean that they would be error-free, though.  Since we do not check the result of <code>cgi_decode()</code>, the function could return any value without us checking or noticing.  To catch such errors, we would have to set up a <em>results checker</em> (commonly called an <em>oracle</em>) that would verify test results.  In our case, we could compare against another implementation of <code>cgi_decode()</code> and see whether both produce the same results.</p>
 </div>
 </div>
 </div>
@@ -13292,10 +13115,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Where fuzzing is great at, though, is in finding <em>internal errors</em> that can be detected even without checking the result.  Actually, if one runs our <code>fuzzer()</code> on <code>cgi_decode()</code>, one quickly finds such an error, as the following code shows:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Where fuzzing is great at, though, is in finding <em>internal errors</em> that can be detected even without checking the result.  Actually, if one runs our <code>fuzzer()</code> on <code>cgi_decode()</code>, one quickly finds such an error, as the following code shows:</p>
 </div>
 </div>
 </div>
@@ -13319,9 +13139,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13342,10 +13160,7 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>So, it is possible to cause <code>cgi_decode()</code> to crash.  Why is that?  Let's take a look at its input:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>So, it is possible to cause <code>cgi_decode()</code> to crash.  Why is that?  Let's take a look at its input:</p>
 </div>
 </div>
 </div>
@@ -13361,9 +13176,7 @@ IndexError: string index out of range
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13379,10 +13192,7 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The problem here is at the end of the string.  After a <code>'%'</code> character, our implementation will always attempt to access two more (hexadecimal) characters, but if these are not there, we will get an <code>IndexError</code> exception.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The problem here is at the end of the string.  After a <code>'%'</code> character, our implementation will always attempt to access two more (hexadecimal) characters, but if these are not there, we will get an <code>IndexError</code> exception.</p>
 </div>
 </div>
 </div>
@@ -13391,15 +13201,12 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>This problem is actually also present in the original implementation [Pezz{`e} <em>et al</em>, 2008.], where the code to access the next two characters reads</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>This problem is actually also present in the original implementation [Pezz{`e} <em>et al</em>, 2008.], where the code to access the next two characters reads</p>
 <div class="highlight"><pre><span></span><span class="kt">int</span> <span class="n">digit_high</span> <span class="o">=</span> <span class="n">Hex_values</span><span class="p">[</span><span class="o">*</span><span class="p">(</span><span class="o">++</span><span class="n">eptr</span><span class="p">)];</span>
 <span class="kt">int</span> <span class="n">digit_low</span>  <span class="o">=</span> <span class="n">Hex_values</span><span class="p">[</span><span class="o">*</span><span class="p">(</span><span class="o">++</span><span class="n">eptr</span><span class="p">)];</span>
 </pre></div>
 <p>Here, <code>eptr</code> is a pointer to the character to be read; <code>++</code> increments it by one character.
 In this C implementation, the problem is actually much worse.  If the <code>'%'</code> character is at the end of the string, the above code will first read a terminating character (<code>'\0'</code> in C strings) and then the following character, which may be any memory content after the string, and which thus may cause the program to fail uncontrollably.  The somewhat good news is that <code>'\0'</code> is not a valid hexadecimal character, and thus, the C version will "only" read one character beyond the end of the string.</p>
-
 </div>
 </div>
 </div>
@@ -13408,10 +13215,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Interestingly enough, none of the manual tests we had designed earlier would catch this bug.  Actually, neither statement nor branch coverage, nor any of the coverage criteria commonly discussed in literature would find it.  However, a simple fuzzing run can identify the error with a few runs.  This definitely calls for more fuzzing!</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Interestingly enough, none of the manual tests we had designed earlier would catch this bug.  Actually, neither statement nor branch coverage, nor any of the coverage criteria commonly discussed in literature would find it.  However, a simple fuzzing run can identify the error with a few runs.  This definitely calls for more fuzzing!</p>
 </div>
 </div>
 </div>
@@ -13420,14 +13224,11 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li>Coverage metrics are a simple and fully automated means to approximate how much functionality of a program is actually executed during a test run.</li>
 <li>A number of coverage metrics exist, the most important ones being statement coverage and branch coverage.</li>
 <li>In Python, it is very easy to access the program state during execution, including the currently executed code.</li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -13436,15 +13237,12 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
 <ul>
 <li><a href="Mutation_Fuzzing.ipynb">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
 <li><a href="Grammars.ipynb">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
 <li><a href="Reducing.ipynb">reduce <em>failing inputs</em> for efficient debugging</a></li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -13453,10 +13251,18 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2></div>
+</div>
+</div>
+</div>
 
-<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p>Create an appropriate test to reproduce the <code>IndexError</code> discussed above.  Fix <code>cgi_decode()</code> to prevent the bug.  Show that your test (and additional <code>fuzzer()</code> runs) no longer expose the bug.</p>
 
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Coverage.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises.</div></p>
 </div>
 </div>
 </div>
@@ -13465,33 +13271,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p>Create an appropriate test to reproduce the <code>IndexError</code> discussed above.  Fix <code>cgi_decode()</code> to prevent the bug.  Show that your test (and additional <code>fuzzer()</code> runs) no longer expose the bug.</p>
-
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p><em>Solution for the exercise</em></p>
-
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p>Besides statement coverage, <em>branch coverage</em> is one of the most frequently used criteria to determine the quality of a test.  In a nutshell, branch coverage measures how many different <em>control decisions</em> are made in code.  In the statement</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p>Besides statement coverage, <em>branch coverage</em> is one of the most frequently used criteria to determine the quality of a test.  In a nutshell, branch coverage measures how many different <em>control decisions</em> are made in code.  In the statement</p>
 <div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">CONDITION</span><span class="p">:</span>
     <span class="n">do_a</span><span class="p">()</span>
 <span class="k">else</span><span class="p">:</span>
@@ -13505,6 +13285,8 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 </pre></div>
 <p>Using statement coverage, a single test case where <code>CONDITION</code> is true suffices to cover the call to <code>do_a()</code>.  Using branch coverage, however, we would also have to create a test case where <code>do_a()</code> is <em>not</em> invoked.</p>
 
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Coverage.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises.</div></p>
 </div>
 </div>
 </div>
@@ -13513,10 +13295,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Using our <code>Coverage</code> infrastructure, we can simulate branch coverage by considering  <em>pairs of subsequent lines executed</em>.  The <code>trace()</code> method gives us the list of lines executed one after the other:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Using our <code>Coverage</code> infrastructure, we can simulate branch coverage by considering  <em>pairs of subsequent lines executed</em>.  The <code>trace()</code> method gives us the list of lines executed one after the other:</p>
 </div>
 </div>
 </div>
@@ -13535,9 +13314,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13578,9 +13355,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Define a function <code>branch_coverage()</code> that takes a trace and returns the set of pairs of subsequent lines in a trace – in the above example, this would be</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Define a function <code>branch_coverage()</code> that takes a trace and returns the set of pairs of subsequent lines in a trace – in the above example, this would be</p>
 <div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">(</span>
 <span class="p">((</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)),</span>
 <span class="p">((</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">11</span><span class="p">)),</span>
@@ -13593,19 +13368,6 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 <li>Does <code>fuzzer()</code> cover all branches, and if so, how long does it take on average?</li>
 </ul>
 <p>Bonus for advanced Python programmers: Define <code>BranchCoverage</code> as subclass of <code>Coverage</code> and make <code>branch_coverage()</code> a method of <code>BranchCoverage</code>.</p>
-
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p><em>Solution for the exercise</em></p>
-
 </div>
 </div>
 </div>
@@ -13617,7 +13379,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 This work is licensed under a
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 &bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Coverage.ipynb" target=_blank)>Last change: 2018-09-06 13:45:23+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Coverage.ipynb" target=_blank)>Last change: 2018-09-08 14:21:05+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="toggleCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13637,7 +13399,7 @@ function toggleCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/slides/Coverage.html">Getting Coverage</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/slides/Coverage.html">https://www.fuzzingbook.org/slides/Coverage.html</a>.  Retrieved 2018-09-06 13:45:23+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/slides/Coverage.html">Getting Coverage</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/slides/Coverage.html">https://www.fuzzingbook.org/slides/Coverage.html</a>.  Retrieved 2018-09-08 14:21:05+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Coverage,
@@ -13647,9 +13409,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/Coverage.html}},
-    note = {Retrieved 2018-09-06 13:45:23+02:00},
+    note = {Retrieved 2018-09-08 14:21:05+02:00},
     url = {https://www.fuzzingbook.org/html/Coverage.html},
-    urldate = {2018-09-06 13:45:23+02:00}
+    urldate = {2018-09-08 14:21:05+02:00}
 }
 </pre>
 </div>

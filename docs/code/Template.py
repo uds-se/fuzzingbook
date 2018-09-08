@@ -70,9 +70,32 @@
 
 # ## Exercises
 # 
-# _Close the chapter with a few exercises such that people have things to do.  Use the Jupyter `Exercise2` nbextension to add solutions that can be interactively viewed or hidden.  (Alternatively, just copy the exercise and solution cells below with their metadata.)  We will set up things such that solutions do not appear in the PDF and HTML formats._
+# _Close the chapter with a few exercises such that people have things to do.  Use the Jupyter `Exercise2` nbextension to add solutions that can be interactively viewed or hidden.  (Alternatively, just copy the exercise and solution cells below with their metadata.)
 
 # ### Exercise 1
+# 
+# _Text of the exercise_
+
+# In[3]:
+
+
+# Some code that is part of the exercise
+
+
+# _Some more text for the exercise_
+
+# _Some text for the solution_
+
+# In[2]:
+
+
+# Some code for the solution
+2 + 2
+
+
+# _Some more text for the solution_
+
+# ### Exercise 2
 # 
 # _Text of the exercise_
 

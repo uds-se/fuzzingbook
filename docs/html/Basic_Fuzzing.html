@@ -2,12 +2,12 @@
 <!-- A html document -->
 <!-- 
 with standard nbconvert css layout
-with fuzzingbook css adaptations
 with standard nbconvert input/output content
 standard html tag wrapping
 with mathjax loaded
 with jupyter wigets
- caption and label elements according to ipub meta tags   -->
+ caption and label elements according to ipub meta tags  
+with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -11753,12 +11753,6 @@ div#notebook {
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
 <link rel="stylesheet" href="custom.css">
 
-<!-- Load Google fonts -->
-<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
-
-<!-- Icon library -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-
 <!-- Load mathjax -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
 <!-- MathJax configuration -->
@@ -11790,9 +11784,25 @@ MathJax.Hub.Config({
 .ipytable { display: -ms-flex; display: -webkit-flex; display: flex;}
 .ipytable>div { flex:1; }
 
-</style></head>
+</style>
+
+<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"></head>
  <body>
 
+    <script>
+    function reveal() {
+        var solutions = document.getElementsByClassName("solution");
+        var i;
+        for (i = 0; i < solutions.length; i++)
+            if (solutions[i].style.display === "none") {
+                solutions[i].style.display = "block";
+            } else {
+                solutions[i].style.display = "none";
+        }
+    }
+    </script>
     
 <nav>
 <div id="cssmenu">
@@ -11823,7 +11833,7 @@ MathJax.Hub.Config({
         </ol>
      </li>
      
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Basic_Fuzzing.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Basic_Fuzzing.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
      <li><a href="https://www.fuzzingbook.org/code/Basic_Fuzzing.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
      <li><a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
      
@@ -11839,10 +11849,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h1 id="Fuzzing:-Breaking-Things-with-Random-Inputs">Fuzzing: Breaking Things with Random Inputs<a class="anchor-link" href="#Fuzzing:-Breaking-Things-with-Random-Inputs">&#182;</a></h1><p>In this chapter, we'll start with one of the simplest test generation techniques.  The key idea of random text generation, also known as "fuzzing", is to feed a <em>string of random characters</em> into a program in the hope to uncover failures.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing:-Breaking-Things-with-Random-Inputs">Fuzzing: Breaking Things with Random Inputs<a class="anchor-link" href="#Fuzzing:-Breaking-Things-with-Random-Inputs">&#182;</a></h1><p>In this chapter, we'll start with one of the simplest test generation techniques.  The key idea of random text generation, also known as "fuzzing", is to feed a <em>string of random characters</em> into a program in the hope to uncover failures.</p>
 </div>
 </div>
 </div>
@@ -11851,13 +11858,10 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p><strong>Prerequisites</strong></p>
+<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
 <ul>
 <li>You should know fundamentals of software testing; for instance, from the chapter <a href="Intro_Testing.ipynb">"Introduction to Software Testing"</a>.</li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -11866,13 +11870,10 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="A-Testing-Assignment">A Testing Assignment<a class="anchor-link" href="#A-Testing-Assignment">&#182;</a></h2><p>Fuzzing was conceived by Bart Miller in 1989 as a programming exercise for his students at the University of Wisconsin-Madison.  The <a href="http://pages.cs.wisc.edu/~bart/fuzz/CS736-Projects-f1988.pdf">assignment</a> read</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Testing-Assignment">A Testing Assignment<a class="anchor-link" href="#A-Testing-Assignment">&#182;</a></h2><p>Fuzzing was conceived by Bart Miller in 1989 as a programming exercise for his students at the University of Wisconsin-Madison.  The <a href="http://pages.cs.wisc.edu/~bart/fuzz/CS736-Projects-f1988.pdf">assignment</a> read</p>
 <blockquote><p>The goal of this project is to evaluate the robustness of various UNIX utility programs, given an unpredictable input stream. [...] First, you will build a <em>fuzz generator</em>. This is a program that will output a random character stream. Second, you will take the fuzz generator and use it to attack as many UNIX utilities as possible, with the goal of trying to break them.</p>
 </blockquote>
 <p>This assignment captures the essence of fuzzing: <em>Create random inputs, and see if they break things.</em>  Just let it run long enough and you'll see.</p>
-
 </div>
 </div>
 </div>
@@ -11881,10 +11882,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="A-Simple-Fuzzer">A Simple Fuzzer<a class="anchor-link" href="#A-Simple-Fuzzer">&#182;</a></h2><p>Let us try to fulfill this assignment and build a fuzz generator.  The idea is to produce random characters, adding them to a buffer string variable (<code>out</code>), and finally returning the string.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Simple-Fuzzer">A Simple Fuzzer<a class="anchor-link" href="#A-Simple-Fuzzer">&#182;</a></h2><p>Let us try to fulfill this assignment and build a fuzz generator.  The idea is to produce random characters, adding them to a buffer string variable (<code>out</code>), and finally returning the string.</p>
 </div>
 </div>
 </div>
@@ -11893,9 +11891,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>This implementation uses the following Python features and functions:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>This implementation uses the following Python features and functions:</p>
 <ul>
 <li><code>random.randrange(start, end)</code> – return a random number [<code>start</code>, <code>end</code>]</li>
 <li><code>range(start, end)</code> – create a list with integers from <code>start</code> to <code>end</code>.  Typically used in iterations.</li>
@@ -11903,7 +11899,6 @@ MathJax.Hub.Config({
 <li><code>for i in range(start, end): body</code> – execute <code>body</code> in a loop with <code>i</code> from <code>start</code> to <code>end</code> - 1.</li>
 <li><code>chr(n)</code> – return a character with ASCII code <code>n</code></li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -11912,10 +11907,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>First, we'll import a standard package required for working in notebooks.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>First, we'll import a standard package required for working in notebooks.</p>
 </div>
 </div>
 </div>
@@ -11931,19 +11923,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Next, we'll need random numbers.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Next, we'll need random numbers.</p>
 </div>
 </div>
 </div>
@@ -11959,19 +11946,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Here comes the actual <code>fuzzer()</code> function.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here comes the actual <code>fuzzer()</code> function.</p>
 </div>
 </div>
 </div>
@@ -11988,9 +11970,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12011,19 +11991,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>With its default arguments, the <code>fuzzer()</code> function returns a string of random characters:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>With its default arguments, the <code>fuzzer()</code> function returns a string of random characters:</p>
 </div>
 </div>
 </div>
@@ -12039,9 +12014,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12057,10 +12030,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Now imagine that this string were the input to a program expecting a specific input format – say, a comma-separated list of values, or an e-mail address.  Would the program be able to process such an input without any problems?</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Now imagine that this string were the input to a program expecting a specific input format – say, a comma-separated list of values, or an e-mail address.  Would the program be able to process such an input without any problems?</p>
 </div>
 </div>
 </div>
@@ -12069,10 +12039,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>If the above fuzzing input already is intriguing, consider that fuzzing can easily be set up to produce other kinds of input.  For instance, we can also have <code>fuzzer()</code> produce a series of upercase letters.  We use <code>ord(c)</code> to return the ASCII code of the character <code>c</code>.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>If the above fuzzing input already is intriguing, consider that fuzzing can easily be set up to produce other kinds of input.  For instance, we can also have <code>fuzzer()</code> produce a series of upercase letters.  We use <code>ord(c)</code> to return the ASCII code of the character <code>c</code>.</p>
 </div>
 </div>
 </div>
@@ -12088,9 +12055,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12106,10 +12071,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Assume a program expects an identifier as its input.  Would it expect such a long identifier?</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Assume a program expects an identifier as its input.  Would it expect such a long identifier?</p>
 </div>
 </div>
 </div>
@@ -12118,10 +12080,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Fuzzing-External-Programs">Fuzzing External Programs<a class="anchor-link" href="#Fuzzing-External-Programs">&#182;</a></h2><p>Let us see what happens if we actually invoke an external program with fuzzed inputs.  To this end, let us proceed in two steps.  First, we create an <em>input file</em> with fuzzed test data; then we feed this input file into a program of choice.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Fuzzing-External-Programs">Fuzzing External Programs<a class="anchor-link" href="#Fuzzing-External-Programs">&#182;</a></h2><p>Let us see what happens if we actually invoke an external program with fuzzed inputs.  To this end, let us proceed in two steps.  First, we create an <em>input file</em> with fuzzed test data; then we feed this input file into a program of choice.</p>
 </div>
 </div>
 </div>
@@ -12130,10 +12089,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Creating-Input-Files">Creating Input Files<a class="anchor-link" href="#Creating-Input-Files">&#182;</a></h3><p>The Python <code>open()</code> function opens a file into which we can then write arbitrary contents.  It is commonly used in conjunction with the <code>with</code> statement, which ensures that the file is closed as soon as it is no longer needed.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Creating-Input-Files">Creating Input Files<a class="anchor-link" href="#Creating-Input-Files">&#182;</a></h3><p>The Python <code>open()</code> function opens a file into which we can then write arbitrary contents.  It is commonly used in conjunction with the <code>with</code> statement, which ensures that the file is closed as soon as it is no longer needed.</p>
 </div>
 </div>
 </div>
@@ -12152,19 +12108,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We can verify that the file was actually created by reading its contents:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can verify that the file was actually created by reading its contents:</p>
 </div>
 </div>
 </div>
@@ -12182,9 +12133,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12200,11 +12149,8 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Invoking-External-Programs">Invoking External Programs<a class="anchor-link" href="#Invoking-External-Programs">&#182;</a></h3><p>Now that we have an input file, we can invoke a program on it.  For the fun of it, let us test the <code>bc</code> calculator program, which takes an arithmetic expression and evaluates it.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Invoking-External-Programs">Invoking External Programs<a class="anchor-link" href="#Invoking-External-Programs">&#182;</a></h3><p>Now that we have an input file, we can invoke a program on it.  For the fun of it, let us test the <code>bc</code> calculator program, which takes an arithmetic expression and evaluates it.</p>
 <p>To invoke <code>bc</code>, let us use the Python <code>subprocess</code> module.  This is how this works:</p>
-
 </div>
 </div>
 </div>
@@ -12221,9 +12167,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12244,19 +12188,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>From the <code>result</code>, we can check the program output, which in this case consists of a set of typesetting commands:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>From the <code>result</code>, we can check the program output, which in this case consists of a set of typesetting commands:</p>
 </div>
 </div>
 </div>
@@ -12272,9 +12211,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12290,10 +12227,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>And we can check the status; a value of 0 indicates the program terminated correctly.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>And we can check the status; a value of 0 indicates the program terminated correctly.</p>
 </div>
 </div>
 </div>
@@ -12309,9 +12243,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12327,10 +12259,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Any error messages would be available in <code>results.stderr</code>:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Any error messages would be available in <code>results.stderr</code>:</p>
 </div>
 </div>
 </div>
@@ -12346,9 +12275,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12364,11 +12291,8 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Instead of <code>bc</code>, you can actually put in any program you like.  Be aware, though, that if your program is able to change or even damage your system, there's quite a risk that the fuzzed input contains appropriate data or commands.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Instead of <code>bc</code>, you can actually put in any program you like.  Be aware, though, that if your program is able to change or even damage your system, there's quite a risk that the fuzzed input contains appropriate data or commands.</p>
 <p>Just for the fun of it, imagine you would test a file removal program.  What is the chance of the fuzzer producing a valid file name?  (Note that <code>.</code> and <code>/</code> may be  valid directory names already.)</p>
-
 </div>
 </div>
 </div>
@@ -12377,10 +12301,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Long-Running-Fuzzing">Long-Running Fuzzing<a class="anchor-link" href="#Long-Running-Fuzzing">&#182;</a></h3><p>Let us now feed a large number of inputs into our tested program, to see whether it might crash on some.  We store all results in the <code>runs</code> variable as pairs of input data and the actual result. (Note: running this may take a while.)</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Long-Running-Fuzzing">Long-Running Fuzzing<a class="anchor-link" href="#Long-Running-Fuzzing">&#182;</a></h3><p>Let us now feed a large number of inputs into our tested program, to see whether it might crash on some.  We store all results in the <code>runs</code> variable as pairs of input data and the actual result. (Note: running this may take a while.)</p>
 </div>
 </div>
 </div>
@@ -12412,19 +12333,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We can now query <code>runs</code> for some statistics.  For instance, we can query how many runs actually passed -- that is, there were no error messages:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can now query <code>runs</code> for some statistics.  For instance, we can query how many runs actually passed -- that is, there were no error messages:</p>
 </div>
 </div>
 </div>
@@ -12440,9 +12356,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12458,10 +12372,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Most inputs apparently are invalid – not a big surprise, as it is unlikely that a random input contains a valid arithmetic expression.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Most inputs apparently are invalid – not a big surprise, as it is unlikely that a random input contains a valid arithmetic expression.</p>
 </div>
 </div>
 </div>
@@ -12470,10 +12381,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us take a look at the first error message:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us take a look at the first error message:</p>
 </div>
 </div>
 </div>
@@ -12493,9 +12401,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12526,10 +12432,7 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Are there any runs with messages other than <code>illegal character</code> or <code>parse error</code>?  (Say, something like <code>crash</code> or <code>you found a fatal bug</code>?)  Not very many:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Are there any runs with messages other than <code>illegal character</code> or <code>parse error</code>?  (Say, something like <code>crash</code> or <code>you found a fatal bug</code>?)  Not very many:</p>
 </div>
 </div>
 </div>
@@ -12548,9 +12451,7 @@ input.txt 1: illegal character: :
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12566,10 +12467,7 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Maybe a crash would be indicated by <code>bc</code> just crashing.  Unfortunately, the return code is never nonzero:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Maybe a crash would be indicated by <code>bc</code> just crashing.  Unfortunately, the return code is never nonzero:</p>
 </div>
 </div>
 </div>
@@ -12585,9 +12483,7 @@ input.txt 1: illegal character: :
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12603,10 +12499,7 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>How about we let the above <code>bc</code> test run for some more?  While it is running, let us take a look on how the state of the art was in 1989.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>How about we let the above <code>bc</code> test run for some more?  While it is running, let us take a look on how the state of the art was in 1989.</p>
 </div>
 </div>
 </div>
@@ -12615,11 +12508,8 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Bugs-Fuzzers-Find">Bugs Fuzzers Find<a class="anchor-link" href="#Bugs-Fuzzers-Find">&#182;</a></h2><p>When Miller and his students ran their first fuzzers in 1989, they found an alarming result: About <strong>a third of the UNIX utilities</strong> they fuzzed had issues – they crashed, hung, or otherwise failed when confronted with fuzzing input [<a href="https://doi.org/10.1145/96267.96279">Miller <em>et al</em>, 1990.</a>].  This also included the <code>bc</code> program, above.  (Apparently, the bugs have now been fixed!)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Bugs-Fuzzers-Find">Bugs Fuzzers Find<a class="anchor-link" href="#Bugs-Fuzzers-Find">&#182;</a></h2><p>When Miller and his students ran their first fuzzers in 1989, they found an alarming result: About <strong>a third of the UNIX utilities</strong> they fuzzed had issues – they crashed, hung, or otherwise failed when confronted with fuzzing input [<a href="https://doi.org/10.1145/96267.96279">Miller <em>et al</em>, 1990.</a>].  This also included the <code>bc</code> program, above.  (Apparently, the bugs have now been fixed!)</p>
 <p>Considering that many of these UNIX utilities were used in scripts that would also process network input, this was an alarming result.  Programmers quickly built and ran their own fuzzers, rushed to fix the reported errors, and learned not to trust external inputs anymore.</p>
-
 </div>
 </div>
 </div>
@@ -12628,10 +12518,7 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>What kind of problems did Miller's fuzzing experiment find?  It turns out that the mistakes programmers made in 1990 are still the same mistakes being made today.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>What kind of problems did Miller's fuzzing experiment find?  It turns out that the mistakes programmers made in 1990 are still the same mistakes being made today.</p>
 </div>
 </div>
 </div>
@@ -12640,14 +12527,11 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Buffer-Overflows">Buffer Overflows<a class="anchor-link" href="#Buffer-Overflows">&#182;</a></h3><p>Many programs have built-in maximum lengths for inputs and input elements.  In languages like C, it is easy to excess these lengths without the program (or the programmer) even noticing, triggering so-called <strong>buffer overflows</strong>.  The following code, for instance, happily copies the <code>input</code> string into a <code>weekday</code> string even if <code>input</code> has more than eight characters:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Buffer-Overflows">Buffer Overflows<a class="anchor-link" href="#Buffer-Overflows">&#182;</a></h3><p>Many programs have built-in maximum lengths for inputs and input elements.  In languages like C, it is easy to excess these lengths without the program (or the programmer) even noticing, triggering so-called <strong>buffer overflows</strong>.  The following code, for instance, happily copies the <code>input</code> string into a <code>weekday</code> string even if <code>input</code> has more than eight characters:</p>
 <div class="highlight"><pre><span></span><span class="kt">char</span> <span class="n">weekday</span><span class="p">[</span><span class="mi">9</span><span class="p">];</span> <span class="c1">// 8 characters + trailing &#39;\0&#39; terminator</span>
 <span class="n">strcpy</span> <span class="p">(</span><span class="n">weekday</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
 </pre></div>
 <p>Ironically, this already fails if <code>input</code> is <code>"Wednesday"</code> (9 characters); any excess characters (here, <code>'y'</code> and the following <code>'\0'</code> string terminator) are simply copied to whatever resides in memory after <code>weekday</code>, triggering arbitrary behavior; maybe some boolean character variable which would be set from <code>'n'</code> to <code>'y'</code>.  With fuzzing, it is very easy to produce arbitrary long inputs and input elements.</p>
-
 </div>
 </div>
 </div>
@@ -12656,10 +12540,7 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We can easily simulate this buffer overflow behavior in a Python function:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can easily simulate this buffer overflow behavior in a Python function:</p>
 </div>
 </div>
 </div>
@@ -12678,19 +12559,14 @@ input.txt 1: illegal character: :
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>And yes, it quickly crashes.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>And yes, it quickly crashes.</p>
 </div>
 </div>
 </div>
@@ -12706,9 +12582,7 @@ input.txt 1: illegal character: :
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12726,9 +12600,7 @@ input.txt 1: illegal character: :
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12749,10 +12621,7 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The <code>with ExpectError()</code> line in the above code ensures that the error message is printed, yet execution continues; this is to differentiate this "expected" error from "unexpected" errors in other code examples.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>with ExpectError()</code> line in the above code ensures that the error message is printed, yet execution continues; this is to differentiate this "expected" error from "unexpected" errors in other code examples.</p>
 </div>
 </div>
 </div>
@@ -12761,9 +12630,7 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Missing-Error-Checks">Missing Error Checks<a class="anchor-link" href="#Missing-Error-Checks">&#182;</a></h3><p>Many programming languages do not have exceptions, but instead have functions return special <strong>error codes</strong> in exceptional circumstances.  The C function <code>getchar()</code>, for instance, normally returns a character from the standard input; if no input is available anymore, it returns the special value <code>EOF</code> (end of file).  Now assume a programmer is scanning the input for the next character, skipping space characters:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Missing-Error-Checks">Missing Error Checks<a class="anchor-link" href="#Missing-Error-Checks">&#182;</a></h3><p>Many programming languages do not have exceptions, but instead have functions return special <strong>error codes</strong> in exceptional circumstances.  The C function <code>getchar()</code>, for instance, normally returns a character from the standard input; if no input is available anymore, it returns the special value <code>EOF</code> (end of file).  Now assume a programmer is scanning the input for the next character, skipping space characters:</p>
 <div class="highlight"><pre><span></span><span class="kt">char</span> <span class="nf">read_next_nonspace</span><span class="p">()</span> <span class="p">{</span>
     <span class="kt">char</span> <span class="n">lastc</span><span class="p">;</span>
 
@@ -12775,7 +12642,6 @@ ValueError
 <span class="p">}</span>
 </pre></div>
 <p>What happens if the input ends prematurely, as would perfectly be feasible with fuzzing?  Well, <code>getchar()</code> returns <code>EOF</code>, and keeps on returning <code>EOF</code> when called again; so the code above simply enters an infinite loop.</p>
-
 </div>
 </div>
 </div>
@@ -12784,10 +12650,7 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Again, we can simulate such missing error checks.  Here's a function that will effectively hang if no space is present in the input:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Again, we can simulate such missing error checks.  Here's a function that will effectively hang if no space is present in the input:</p>
 </div>
 </div>
 </div>
@@ -12809,19 +12672,14 @@ ValueError
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Using the timeout mechanism from our <a href="Intro_Testing.ipynb">Introduction to Testing</a>, we can interrupt this function after some time.  And yes, it does hang after a few fuzzing inputs.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Using the timeout mechanism from our <a href="Intro_Testing.ipynb">Introduction to Testing</a>, we can interrupt this function after some time.  And yes, it does hang after a few fuzzing inputs.</p>
 </div>
 </div>
 </div>
@@ -12837,9 +12695,7 @@ ValueError
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12857,9 +12713,7 @@ ValueError
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12883,10 +12737,7 @@ TimeoutError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The <code>with ExpectTimeout()</code> line in the above code ensures that execution of the enclosed code is interrupted after two seconds, printing the error message.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>with ExpectTimeout()</code> line in the above code ensures that execution of the enclosed code is interrupted after two seconds, printing the error message.</p>
 </div>
 </div>
 </div>
@@ -12895,9 +12746,7 @@ TimeoutError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Rogue-Numbers">Rogue Numbers<a class="anchor-link" href="#Rogue-Numbers">&#182;</a></h3><p>With fuzzing, it is easy to generate <strong>uncommon value</strong> in the input, causing all kinds of interesting behavior.  Consider the following code, again in the C language, which first reads a buffer size from the input, and then allocates a buffer of the given size:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Rogue-Numbers">Rogue Numbers<a class="anchor-link" href="#Rogue-Numbers">&#182;</a></h3><p>With fuzzing, it is easy to generate <strong>uncommon value</strong> in the input, causing all kinds of interesting behavior.  Consider the following code, again in the C language, which first reads a buffer size from the input, and then allocates a buffer of the given size:</p>
 <div class="highlight"><pre><span></span><span class="kt">char</span> <span class="o">*</span><span class="nf">read_input</span><span class="p">()</span> <span class="p">{</span>
     <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="n">read_buffer_size</span><span class="p">();</span>
     <span class="kt">char</span> <span class="o">*</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
@@ -12906,7 +12755,6 @@ TimeoutError
 <span class="p">}</span>
 </pre></div>
 <p>What happens if <code>size</code> is very large, exceeding program memory?  What happens if <code>size</code> is less then the number of characters following?  What happens if <code>size</code> is negative?  By providing a random number here, fuzzing can create all kinds of damages.</p>
-
 </div>
 </div>
 </div>
@@ -12915,10 +12763,7 @@ TimeoutError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Again, we can easily simulate such rogue numbers in Python.  The function <code>collapse_if_too_large()</code> fails if the passed value (a string) is too large after having been converted to an integer.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Again, we can easily simulate such rogue numbers in Python.  The function <code>collapse_if_too_large()</code> fails if the passed value (a string) is too large after having been converted to an integer.</p>
 </div>
 </div>
 </div>
@@ -12936,19 +12781,14 @@ TimeoutError
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We can have <code>fuzzer()</code> create a string of digits:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can have <code>fuzzer()</code> create a string of digits:</p>
 </div>
 </div>
 </div>
@@ -12965,9 +12805,7 @@ TimeoutError
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12983,10 +12821,7 @@ TimeoutError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>If we feed such numbers into <code>collapse_if_too_large()</code>, it will very soon fail.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we feed such numbers into <code>collapse_if_too_large()</code>, it will very soon fail.</p>
 </div>
 </div>
 </div>
@@ -13003,9 +12838,7 @@ TimeoutError
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13026,10 +12859,7 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>If we really wanted to allocate that much memory on a system, having it quickly fail as above actually would be the better option.  In reality, running out of memory may dramatically slow systems down, up to the point that they become totally unresponsive – and restarting is the only option.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we really wanted to allocate that much memory on a system, having it quickly fail as above actually would be the better option.  In reality, running out of memory may dramatically slow systems down, up to the point that they become totally unresponsive – and restarting is the only option.</p>
 </div>
 </div>
 </div>
@@ -13038,11 +12868,8 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Some-Famous-Bugs">Some Famous Bugs<a class="anchor-link" href="#Some-Famous-Bugs">&#182;</a></h2><p>One might argue that these are all problems of bad programming, or of bad programming languages.  But then, there's thousands of people starting to program every day, and all of them make the same mistakes again and again, even today.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Some-Famous-Bugs">Some Famous Bugs<a class="anchor-link" href="#Some-Famous-Bugs">&#182;</a></h2><p>One might argue that these are all problems of bad programming, or of bad programming languages.  But then, there's thousands of people starting to program every day, and all of them make the same mistakes again and again, even today.</p>
 <p>The somewhat better news is that fuzzing can easily detect such mistakes.  Here's a non-comprehensive list of bugs found through Miller's fuzzing approach:</p>
-
 </div>
 </div>
 </div>
@@ -13051,10 +12878,7 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="HeartBleed">HeartBleed<a class="anchor-link" href="#HeartBleed">&#182;</a></h3><p>\todo{expand}</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="HeartBleed">HeartBleed<a class="anchor-link" href="#HeartBleed">&#182;</a></h3><p>\todo{expand}</p>
 </div>
 </div>
 </div>
@@ -13063,13 +12887,10 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li>Randomly generating inputs ("fuzzing") is a simple, cost-effective way to quickly test arbitrary programs for their robustness.</li>
 <li>Bugs fuzzers find are mainly due to errors and deficiencies in input processing.</li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -13078,16 +12899,13 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>From here, you can explore how to</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>From here, you can explore how to</p>
 <ul>
 <li><a href="Mutation_Fuzzing.ipynb">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
 <li><a href="Grammars.ipynb">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
 <li><a href="Reducing.ipynb">reduce <em>failing inputs</em> for efficient debugging</a></li>
 </ul>
 <p>Enjoy the read!</p>
-
 </div>
 </div>
 </div>
@@ -13096,11 +12914,7 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2>
-
-</div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -13111,7 +12925,7 @@ ValueError
 This work is licensed under a
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 &bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Basic_Fuzzing.ipynb" target=_blank)>Last change: 2018-09-06 13:45:34+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Basic_Fuzzing.ipynb" target=_blank)>Last change: 2018-09-08 14:21:04+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="toggleCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13131,7 +12945,7 @@ function toggleCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.html">https://www.fuzzingbook.org/slides/Basic_Fuzzing.html</a>.  Retrieved 2018-09-06 13:45:34+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.html">https://www.fuzzingbook.org/slides/Basic_Fuzzing.html</a>.  Retrieved 2018-09-08 14:21:04+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Basic_Fuzzing,
@@ -13141,9 +12955,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/Basic_Fuzzing.html}},
-    note = {Retrieved 2018-09-06 13:45:34+02:00},
+    note = {Retrieved 2018-09-08 14:21:04+02:00},
     url = {https://www.fuzzingbook.org/html/Basic_Fuzzing.html},
-    urldate = {2018-09-06 13:45:34+02:00}
+    urldate = {2018-09-08 14:21:04+02:00}
 }
 </pre>
 </div>

@@ -2,12 +2,12 @@
 <!-- A html document -->
 <!-- 
 with standard nbconvert css layout
-with fuzzingbook css adaptations
 with standard nbconvert input/output content
 standard html tag wrapping
 with mathjax loaded
 with jupyter wigets
- caption and label elements according to ipub meta tags   -->
+ caption and label elements according to ipub meta tags  
+with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -11753,12 +11753,6 @@ div#notebook {
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
 <link rel="stylesheet" href="custom.css">
 
-<!-- Load Google fonts -->
-<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
-
-<!-- Icon library -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-
 <!-- Load mathjax -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
 <!-- MathJax configuration -->
@@ -11790,9 +11784,25 @@ MathJax.Hub.Config({
 .ipytable { display: -ms-flex; display: -webkit-flex; display: flex;}
 .ipytable>div { flex:1; }
 
-</style></head>
+</style>
+
+<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"></head>
  <body>
 
+    <script>
+    function reveal() {
+        var solutions = document.getElementsByClassName("solution");
+        var i;
+        for (i = 0; i < solutions.length; i++)
+            if (solutions[i].style.display === "none") {
+                solutions[i].style.display = "block";
+            } else {
+                solutions[i].style.display = "none";
+        }
+    }
+    </script>
     
 <nav>
 <div id="cssmenu">
@@ -11823,7 +11833,7 @@ MathJax.Hub.Config({
         </ol>
      </li>
      
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Mutation_Fuzzing.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Open as Notebook</a></li>
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Mutation_Fuzzing.ipynb" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
      <li><a href="https://www.fuzzingbook.org/code/Mutation_Fuzzing.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
      <li><a href="https://www.fuzzingbook.org/slides/Mutation_Fuzzing.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
      
@@ -11839,10 +11849,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h1 id="Mutation-Based-Fuzzing">Mutation-Based Fuzzing<a class="anchor-link" href="#Mutation-Based-Fuzzing">&#182;</a></h1><p>Most <a href="Basic_Fuzzing.ipynb">randomly generated inputs</a> are syntactically <em>invalid</em> and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is by <em>mutating</em> existing valid inputs - that is, introducing small changes that may still keep the input valid, yet exercise new behavior.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Mutation-Based-Fuzzing">Mutation-Based Fuzzing<a class="anchor-link" href="#Mutation-Based-Fuzzing">&#182;</a></h1><p>Most <a href="Basic_Fuzzing.ipynb">randomly generated inputs</a> are syntactically <em>invalid</em> and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is by <em>mutating</em> existing valid inputs - that is, introducing small changes that may still keep the input valid, yet exercise new behavior.</p>
 </div>
 </div>
 </div>
@@ -11851,13 +11858,10 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p><strong>Prerequisites</strong></p>
+<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
 <ul>
 <li>You should know how basic fuzzing works; for instance, from the <a href="Basic_Fuzzing.ipynb">"Fuzzing"</a> chapter.</li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -11866,9 +11870,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Fuzzing-a-URL-Parser">Fuzzing a URL Parser<a class="anchor-link" href="#Fuzzing-a-URL-Parser">&#182;</a></h2><p>Many programs expect their inputs to come in a very specific format before they would actually process them.  As an example, think of a program that accepts a URL (a Web address).  The URL has to be in a valid format (i.e., the URL format) such that the program can deal with it.  When fuzzing with random inputs, what are our chances to actually produce a valid URL?</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Fuzzing-a-URL-Parser">Fuzzing a URL Parser<a class="anchor-link" href="#Fuzzing-a-URL-Parser">&#182;</a></h2><p>Many programs expect their inputs to come in a very specific format before they would actually process them.  As an example, think of a program that accepts a URL (a Web address).  The URL has to be in a valid format (i.e., the URL format) such that the program can deal with it.  When fuzzing with random inputs, what are our chances to actually produce a valid URL?</p>
 <p>To get deeper into the problem, let us explore what URLs are made of.  A URL consists of a number of elements:</p>
 
 <pre><code>scheme://netloc/path?query#fragment
@@ -11883,7 +11885,6 @@ MathJax.Hub.Config({
 <li><code>fragment</code> is a marker for a location in the retrieved document, such as <code>#result</code></li>
 </ul>
 <p>In Python, we can use the <code>urlparse()</code> function to parse and decompose a URL into its parts.</p>
-
 </div>
 </div>
 </div>
@@ -11899,9 +11900,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -11920,9 +11919,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -11938,10 +11935,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We see how the result encodes the individual parts of the URL in different attributes.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see how the result encodes the individual parts of the URL in different attributes.</p>
 </div>
 </div>
 </div>
@@ -11950,10 +11944,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us now assume we have a program that takes a URL as input.  To simplify things, we won't let it do very much; we simply have it check the passed URL for validity.  If the URL is valid, it returns True; otherwise, it raises an exception.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now assume we have a program that takes a URL as input.  To simplify things, we won't let it do very much; we simply have it check the passed URL for validity.  If the URL is valid, it returns True; otherwise, it raises an exception.</p>
 </div>
 </div>
 </div>
@@ -11978,19 +11969,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us now go and fuzz <code>http_program()</code>.  To fuzz, we use the full range of printable ASCII characters, such that <code>:</code>, <code>/</code>, and lowercase letters are included.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now go and fuzz <code>http_program()</code>.  To fuzz, we use the full range of printable ASCII characters, such that <code>:</code>, <code>/</code>, and lowercase letters are included.</p>
 </div>
 </div>
 </div>
@@ -12006,9 +11992,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12022,9 +12006,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12040,10 +12022,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let's try to fuzz with 1000 random inputs and see whether we have some success.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let's try to fuzz with 1000 random inputs and see whether we have some success.</p>
 </div>
 </div>
 </div>
@@ -12065,19 +12044,14 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>What are the chances of actually getting a valid URL?  We need our string to start with <code>"http://"</code> or <code>"https://"</code>.  Let's take the <code>"http://"</code> case first.  That's seven very specific characters we need to start with.  The chances of producing these seven characters randomly (with a character range of 96 different characters) is $1 : 96^7$, or</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>What are the chances of actually getting a valid URL?  We need our string to start with <code>"http://"</code> or <code>"https://"</code>.  Let's take the <code>"http://"</code> case first.  That's seven very specific characters we need to start with.  The chances of producing these seven characters randomly (with a character range of 96 different characters) is $1 : 96^7$, or</p>
 </div>
 </div>
 </div>
@@ -12093,9 +12067,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12111,10 +12083,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The odds of producing a <code>"https://"</code> prefix are even worse, at $1 : 96^8$:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The odds of producing a <code>"https://"</code> prefix are even worse, at $1 : 96^8$:</p>
 </div>
 </div>
 </div>
@@ -12130,9 +12099,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12148,10 +12115,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>which gives us a total chance of</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>which gives us a total chance of</p>
 </div>
 </div>
 </div>
@@ -12168,9 +12132,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12186,10 +12148,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>And this is the number of runs (on average) we'd need to produce a valid URL:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>And this is the number of runs (on average) we'd need to produce a valid URL:</p>
 </div>
 </div>
 </div>
@@ -12205,9 +12164,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12223,10 +12180,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let's measure how long one run of <code>http_program()</code> takes:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let's measure how long one run of <code>http_program()</code> takes:</p>
 </div>
 </div>
 </div>
@@ -12242,9 +12196,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12269,9 +12221,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12287,10 +12237,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>That's pretty fast, isn't it?  Unfortunately, we have a lot of runs to cover.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>That's pretty fast, isn't it?  Unfortunately, we have a lot of runs to cover.</p>
 </div>
 </div>
 </div>
@@ -12307,9 +12254,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12325,10 +12270,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>which translates into</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>which translates into</p>
 </div>
 </div>
 </div>
@@ -12347,9 +12289,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12365,10 +12305,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Even if we parallelize things a lot, we're still in for months to years of waiting.  And that's for getting <em>one</em> successful run that will get deeper into <code>http_program()</code>.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Even if we parallelize things a lot, we're still in for months to years of waiting.  And that's for getting <em>one</em> successful run that will get deeper into <code>http_program()</code>.</p>
 </div>
 </div>
 </div>
@@ -12377,10 +12314,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>What basic fuzzing will do well is to test <code>urlparse()</code>, and if there is an error in this parsing function, it has good chances of uncovering it.  But as long as we cannot produce a valid input, we are out of luck in reaching any deeper functionality.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>What basic fuzzing will do well is to test <code>urlparse()</code>, and if there is an error in this parsing function, it has good chances of uncovering it.  But as long as we cannot produce a valid input, we are out of luck in reaching any deeper functionality.</p>
 </div>
 </div>
 </div>
@@ -12389,10 +12323,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Mutating-Inputs">Mutating Inputs<a class="anchor-link" href="#Mutating-Inputs">&#182;</a></h2><p>The alternative to generating random strings from scratch is to start with a guiven <em>valid</em> input, and then to subsequently <em>mutate</em> it.  A <em>mutation</em> in this context is a simple string manipulation - say, inserting a (random) character, deleting a character, or flipping a bit in a character representation.  Here are some mutations to get you started:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Mutating-Inputs">Mutating Inputs<a class="anchor-link" href="#Mutating-Inputs">&#182;</a></h2><p>The alternative to generating random strings from scratch is to start with a guiven <em>valid</em> input, and then to subsequently <em>mutate</em> it.  A <em>mutation</em> in this context is a simple string manipulation - say, inserting a (random) character, deleting a character, or flipping a bit in a character representation.  Here are some mutations to get you started:</p>
 </div>
 </div>
 </div>
@@ -12408,9 +12339,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12431,9 +12360,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12450,9 +12377,7 @@ MathJax.Hub.Config({
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12489,9 +12414,7 @@ A quick rown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12506,9 +12429,7 @@ A quick rown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12550,9 +12471,7 @@ A quick9 brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12567,9 +12486,7 @@ A quick9 brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12594,10 +12511,7 @@ A quick brown box
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us now create a random mutator that randomly chooses which mutation to apply:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now create a random mutator that randomly chooses which mutation to apply:</p>
 </div>
 </div>
 </div>
@@ -12613,9 +12527,7 @@ A quick brown box
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12633,9 +12545,7 @@ A quick brown box
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12650,9 +12560,7 @@ A quick brown box
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12677,10 +12585,7 @@ A quick_ brown fox
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The idea is now that <em>if</em> we have some valid input(s) to begin with, we may create more input candidates by applying one of the above mutations.  To see how this works, let's get back to URLs.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The idea is now that <em>if</em> we have some valid input(s) to begin with, we may create more input candidates by applying one of the above mutations.  To see how this works, let's get back to URLs.</p>
 </div>
 </div>
 </div>
@@ -12689,11 +12594,7 @@ A quick_ brown fox
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Mutating-URLs">Mutating URLs<a class="anchor-link" href="#Mutating-URLs">&#182;</a></h2>
-
-</div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Mutating-URLs">Mutating URLs<a class="anchor-link" href="#Mutating-URLs">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -12701,10 +12602,7 @@ A quick_ brown fox
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us now get back to our URL parsing problem.  Let us create a function <code>is_valid_url()</code> that checks whether <code>http_program()</code> accepts the input.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now get back to our URL parsing problem.  Let us create a function <code>is_valid_url()</code> that checks whether <code>http_program()</code> accepts the input.</p>
 </div>
 </div>
 </div>
@@ -12725,9 +12623,7 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12742,19 +12638,14 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us now apply the <code>mutate()</code> function on a given URL and see how many valid inputs we obtain.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now apply the <code>mutate()</code> function on a given URL and see how many valid inputs we obtain.</p>
 </div>
 </div>
 </div>
@@ -12777,19 +12668,14 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We can now observe that by <em>mutating</em> the original input, we get a high proportion of valid inputs:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can now observe that by <em>mutating</em> the original input, we get a high proportion of valid inputs:</p>
 </div>
 </div>
 </div>
@@ -12805,9 +12691,7 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12823,10 +12707,7 @@ A quick_ brown fox
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>What are the odds of also producing a <code>https:</code> prefix by mutating a <code>http:</code> sample seed input?  We have to insert ($1 : 3$) the right character <code>'s'</code> ($1 : 96$) into the correct position ($1 : l$), where $l$ is the length of our seed input.  This means that on average, we need this many runs:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>What are the odds of also producing a <code>https:</code> prefix by mutating a <code>http:</code> sample seed input?  We have to insert ($1 : 3$) the right character <code>'s'</code> ($1 : 96$) into the correct position ($1 : l$), where $l$ is the length of our seed input.  This means that on average, we need this many runs:</p>
 </div>
 </div>
 </div>
@@ -12843,9 +12724,7 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12861,10 +12740,7 @@ A quick_ brown fox
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>We can actually afford this.  Let's try:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can actually afford this.  Let's try:</p>
 </div>
 </div>
 </div>
@@ -12880,9 +12756,7 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12903,9 +12777,7 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12921,10 +12793,7 @@ A quick_ brown fox
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Of course, if we wanted to get, say, an <code>"ftp://"</code> prefix, we would need more mutations and more runs – most important, though, we would need to apply <em>multiple</em> mutations.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Of course, if we wanted to get, say, an <code>"ftp://"</code> prefix, we would need more mutations and more runs – most important, though, we would need to apply <em>multiple</em> mutations.</p>
 </div>
 </div>
 </div>
@@ -12933,10 +12802,7 @@ A quick_ brown fox
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Multiple-Mutations">Multiple Mutations<a class="anchor-link" href="#Multiple-Mutations">&#182;</a></h2><p>So far, we have only applied one single mutation on a sample string.  However, we can also apply <em>multiple</em> mutations, further changing it.  What happens, for instance, if we apply, say, 20 mutations on our sample string?</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Multiple-Mutations">Multiple Mutations<a class="anchor-link" href="#Multiple-Mutations">&#182;</a></h2><p>So far, we have only applied one single mutation on a sample string.  However, we can also apply <em>multiple</em> mutations, further changing it.  What happens, for instance, if we apply, say, 20 mutations on our sample string?</p>
 </div>
 </div>
 </div>
@@ -12953,9 +12819,7 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -12973,9 +12837,7 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13000,10 +12862,7 @@ A quick_ brown fox
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>As you see, the original seed input is hardly recognizable anymore.  Mutating the input again and again has the advantage of getting a higher variety in the input, but on the other hand further increases the risk of having an invalid input.  The key to success lies in the idea of <em>guiding</em> these mutations – that is, <em>keeping those that are especially valuable.</em></p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>As you see, the original seed input is hardly recognizable anymore.  Mutating the input again and again has the advantage of getting a higher variety in the input, but on the other hand further increases the risk of having an invalid input.  The key to success lies in the idea of <em>guiding</em> these mutations – that is, <em>keeping those that are especially valuable.</em></p>
 </div>
 </div>
 </div>
@@ -13012,13 +12871,10 @@ A quick_ brown fox
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Guiding-by-Coverage">Guiding by Coverage<a class="anchor-link" href="#Guiding-by-Coverage">&#182;</a></h2><p>To cover as much functionality as possible, one can rely on either <em>specified</em> or <em>implemented</em> functionality, as discussed in the <a href="Coverage.ipynb">"Coverage"</a> chapter.  For now, we will not assume that there is a specification of program behavior (although it <em>definitely</em> would be good to have one!).  We <em>will</em> assume, though, that the program to be tested exists – and that we can leverage its structure to guide test generation.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Guiding-by-Coverage">Guiding by Coverage<a class="anchor-link" href="#Guiding-by-Coverage">&#182;</a></h2><p>To cover as much functionality as possible, one can rely on either <em>specified</em> or <em>implemented</em> functionality, as discussed in the <a href="Coverage.ipynb">"Coverage"</a> chapter.  For now, we will not assume that there is a specification of program behavior (although it <em>definitely</em> would be good to have one!).  We <em>will</em> assume, though, that the program to be tested exists – and that we can leverage its structure to guide test generation.</p>
 <p>Since testing always executes the program at hand, one can always gather information about its execution – the least is the information needed to decide whether a test passes or fails.  Since coverage is frequently measured as well to determine test quality, let us also assume we can retrieve coverage of a test run.  The question is then: <em>How can we leverage coverage to guide test generation?</em></p>
 <p>One particularly successful idea is implemented in the popular fuzzer named <a href="http://lcamtuf.coredump.cx/afl/"><em>American fuzzy lop</em></a>, or AFL for short.  Just like our examples above, AFL evolves test cases that have been successful – but for AFL, "success" means <em>finding a new path through the program execution</em>.  This way, AFL can keep on mutating inputs that so far have found new paths; and if an input finds another path, it will be retained as well.</p>
 <p>We can implement such a strategy by maximizing <em>diversity in coverage</em> in our population.  First, let us create a function <code>create_candidate()</code> which randomly picks some input from a given population, and then applies between <code>min_mutations</code> and <code>max_mutations</code> mutation steps, returning the final result:</p>
-
 </div>
 </div>
 </div>
@@ -13039,20 +12895,15 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Now for the main function.  We maintain a list of inputs (<code>population</code>) and a set of coverages already achieved (<code>coverages_seen</code>).  The <code>fuzz()</code> helper function takes an input and runs the given <code>function()</code> on it.  If its coverage is new (i.e. not in <code>coverages_seen</code>), the input is added to <code>population</code> and the coverage to <code>coverages_seen</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Now for the main function.  We maintain a list of inputs (<code>population</code>) and a set of coverages already achieved (<code>coverages_seen</code>).  The <code>fuzz()</code> helper function takes an input and runs the given <code>function()</code> on it.  If its coverage is new (i.e. not in <code>coverages_seen</code>), the input is added to <code>population</code> and the coverage to <code>coverages_seen</code>.</p>
 <p>The main <code>coverage_fuzzer()</code> function first runs <code>fuzz()</code> on the provided seed population (adding to the population), and then keeps on creating and testing new candidates coming from <code>create_candidate()</code>.</p>
-
 </div>
 </div>
 </div>
@@ -13068,9 +12919,7 @@ A quick_ brown fox
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13139,19 +12988,14 @@ IndexError: string index out of range
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Let us now put this to use:</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now put this to use:</p>
 </div>
 </div>
 </div>
@@ -13170,9 +13014,7 @@ IndexError: string index out of range
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13206,10 +13048,7 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>Success!  In our population, <em>each and every input</em> now is valid and has a different coverage, coming from various combinations of schemes, paths, queries, and fragments.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Success!  In our population, <em>each and every input</em> now is valid and has a different coverage, coming from various combinations of schemes, paths, queries, and fragments.</p>
 </div>
 </div>
 </div>
@@ -13231,19 +13070,14 @@ IndexError: string index out of range
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<p>The nice thing about this strategy is that, applied to larger programs, it will happily explore one path after the other – covering functionality after functionality.  All that is needed is a means to capture the coverage.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>The nice thing about this strategy is that, applied to larger programs, it will happily explore one path after the other – covering functionality after functionality.  All that is needed is a means to capture the coverage.</p>
 </div>
 </div>
 </div>
@@ -13252,13 +13086,10 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li>Randomly generated inputs are frequently invalid – and thus exercise mostly input processing functionality.</li>
 <li>Mutations from existing valid inputs have much higher chances to be valid, and thus to exercise functionality beyond input processing.</li>
 </ul>
-
 </div>
 </div>
 </div>
@@ -13267,9 +13098,7 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>Our aim is still to sufficiently cover functionality.  From here, we can continue with:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>Our aim is still to sufficiently cover functionality.  From here, we can continue with:</p>
 <ol>
 <li><p>Try to cover as much <em>implemented</em> functionality as possible.  To this end, we need to access the program implementation, measure which parts would actually be reached with our inputs, and use this <em>coverage</em> to guide our search.  We will explore this in the next chapter, which discusses <a href="Guided_Mutations.ipynb">guided mutations</a>.</p>
 </li>
@@ -13277,7 +13106,6 @@ IndexError: string index out of range
 </li>
 </ol>
 <p>Finally, the concept of a "population" that is systematically "evolved" through "mutations" will be explored in depth when discussing <a href="Search_Based_Testing.ipynb">search-based testing</a>.  Enjoy!</p>
-
 </div>
 </div>
 </div>
@@ -13286,10 +13114,15 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2></div>
+</div>
+</div>
+</div>
 
-<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2>
-
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p>Apply the above non-guided mutation-based fuzzing technique on <code>bc</code>, using files, as in the chapter <a href="Basic_Fuzzing.ipynb">"Introduction to Fuzzing"</a>.</p>
 </div>
 </div>
 </div>
@@ -13298,22 +13131,7 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p>Apply the above non-guided mutation-based fuzzing technique on <code>bc</code>, using files, as in the chapter <a href="Basic_Fuzzing.ipynb">"Introduction to Fuzzing"</a>.</p>
-
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p>Apply the above guided mutation-based fuzzing technique on <code>cgi_decode()</code> from the <a href="Coverage.ipynb">"Coverage"</a> chapter.  How many trials do you need until you cover all variations of <code>+</code>, <code>%</code> (valid and invalid), and regular characters?</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p>Apply the above guided mutation-based fuzzing technique on <code>cgi_decode()</code> from the <a href="Coverage.ipynb">"Coverage"</a> chapter.  How many trials do you need until you cover all variations of <code>+</code>, <code>%</code> (valid and invalid), and regular characters?</p>
 </div>
 </div>
 </div>
@@ -13329,9 +13147,7 @@ IndexError: string index out of range
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13348,9 +13164,7 @@ IndexError: string index out of range
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13373,9 +13187,7 @@ IndexError: string index out of range
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13389,9 +13201,7 @@ IndexError: string index out of range
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13408,9 +13218,7 @@ IndexError: string index out of range
 </pre></div>
 
 </div>
-</div>
-
-</div>
+</div></div>
 </div>
 </div>
 
@@ -13428,10 +13236,7 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Exercise-3">Exercise 3<a class="anchor-link" href="#Exercise-3">&#182;</a></h3><p>In this <a href="https://lcamtuf.blogspot.com/2014/08/binary-fuzzing-strategies-what-works.html">blog post</a>, the author of <em>American Fuzzy Lop</em> (AFL), a very popular mutation-based fuzzer discusses the efficiency of various mutation operators.  Implement four of them and evaluate their efficiency as in the examples above.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-3">Exercise 3<a class="anchor-link" href="#Exercise-3">&#182;</a></h3><p>In this <a href="https://lcamtuf.blogspot.com/2014/08/binary-fuzzing-strategies-what-works.html">blog post</a>, the author of <em>American Fuzzy Lop</em> (AFL), a very popular mutation-based fuzzer discusses the efficiency of various mutation operators.  Implement four of them and evaluate their efficiency as in the examples above.</p>
 </div>
 </div>
 </div>
@@ -13440,10 +13245,7 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Exercise-4">Exercise 4<a class="anchor-link" href="#Exercise-4">&#182;</a></h3><p>When adding a new element to the list of candidates, AFL does actually not compare the <em>coverage</em>, but adds an element if it exercises a new <em>branch</em>.  Using branch coverage from the exercises of the <a href="Coverage.ipynb">"Coverage"</a> chapter, implement this "branch" strategy and compare it against the "coverage" strategy, above.</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-4">Exercise 4<a class="anchor-link" href="#Exercise-4">&#182;</a></h3><p>When adding a new element to the list of candidates, AFL does actually not compare the <em>coverage</em>, but adds an element if it exercises a new <em>branch</em>.  Using branch coverage from the exercises of the <a href="Coverage.ipynb">"Coverage"</a> chapter, implement this "branch" strategy and compare it against the "coverage" strategy, above.</p>
 </div>
 </div>
 </div>
@@ -13452,10 +13254,7 @@ IndexError: string index out of range
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-
-<h3 id="Exercise-5">Exercise 5<a class="anchor-link" href="#Exercise-5">&#182;</a></h3><p>Design and implement a system that will gather a population of URLs from the Web.  Can you achieve a higher coverage with these samples?  What if you use them as intiial population for further mutation?</p>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-5">Exercise 5<a class="anchor-link" href="#Exercise-5">&#182;</a></h3><p>Design and implement a system that will gather a population of URLs from the Web.  Can you achieve a higher coverage with these samples?  What if you use them as intiial population for further mutation?</p>
 </div>
 </div>
 </div>
@@ -13467,7 +13266,7 @@ IndexError: string index out of range
 This work is licensed under a
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 &bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Mutation_Fuzzing.ipynb" target=_blank)>Last change: 2018-09-06 13:47:56+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Mutation_Fuzzing.ipynb" target=_blank)>Last change: 2018-09-08 14:21:05+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="toggleCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13487,7 +13286,7 @@ function toggleCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/slides/Mutation_Fuzzing.html">Mutation-Based Fuzzing</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/slides/Mutation_Fuzzing.html">https://www.fuzzingbook.org/slides/Mutation_Fuzzing.html</a>.  Retrieved 2018-09-06 13:47:56+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/slides/Mutation_Fuzzing.html">Mutation-Based Fuzzing</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/slides/Mutation_Fuzzing.html">https://www.fuzzingbook.org/slides/Mutation_Fuzzing.html</a>.  Retrieved 2018-09-08 14:21:05+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Mutation_Fuzzing,
@@ -13497,9 +13296,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/Mutation_Fuzzing.html}},
-    note = {Retrieved 2018-09-06 13:47:56+02:00},
+    note = {Retrieved 2018-09-08 14:21:05+02:00},
     url = {https://www.fuzzingbook.org/html/Mutation_Fuzzing.html},
-    urldate = {2018-09-06 13:47:56+02:00}
+    urldate = {2018-09-08 14:21:05+02:00}
 }
 </pre>
 </div>
