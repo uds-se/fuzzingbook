@@ -109,7 +109,7 @@ NOTEDOWN ?= notedown
 
 # Style checks
 PYCODESTYLE = pycodestyle
-PYCODESTYLE_OPTS = --config setup.cfg
+PYCODESTYLE_OPTS = --config code/pycodestyle.cfg
 
 ifndef PUBLISH
 # Determine publishing program
@@ -406,7 +406,7 @@ style check-style checkstyle: $(PYS)
 	@echo "All style checks passed."
 
 # List of Cross References
-crossref check-crossref xref: $(SOURCES)
+check-crossref crossref xref: $(SOURCES)
 	@echo "Referenced notebooks (* = missing)"
 	@files=$$(grep '\.ipynb)' $(SOURCES) | sed 's/.*[(]\([a-zA-Z0-9_][a-zA-Z0-9_]*\.ipynb\)[)].*/\1/' | sort | uniq); \
 	for file in $$files; do \
@@ -424,6 +424,9 @@ $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 
 check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
+
+# All checks
+check check-all: check-style check-code check-crossref
 	
 # Normalize notebooks
 normalize: utils/nbnormalize.py
