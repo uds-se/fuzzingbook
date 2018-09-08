@@ -23,6 +23,26 @@ from ipypublish.preprocessors.latex_doc_links import LatexDocLinks
 from ipypublish.preprocessors.latextags_to_html import LatexTagsToHTML
 from ipypublish.preprocessors.split_outputs import SplitOutputs
 
+
+def wrap_solution(key, tpl_dict = latex_doc.tpl_dict):
+    """Hide solutions by default"""
+
+    return """
+       {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
+    <!-- exercise -->
+       {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
+    <!-- solution -->
+    <span class="solution" style="display: none;">
+       {%- else -%}
+       {%- endif -%}""" + tpl_dict[key] + """
+       {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
+    <!-- end of exercise -->
+       {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
+    <!-- end of solution -->
+    </span>
+       {%- endif -%}
+    """
+
 # Own adaptations -- AZ
 fuzzingbook_tpl_dict = {
     'meta_docstring': 'with fuzzingbook adaptations',
@@ -38,7 +58,7 @@ fuzzingbook_tpl_dict = {
     """,
 
 # HTML headers and footers are added later by post-html script
-    'overwrite': ['html_body_start', 'html_body_end', 'notebook_input_code', 'notebook_output'],
+    'overwrite': ['html_body_start', 'html_body_end'],
 
     'html_body_start': r"""
     <script>
@@ -64,68 +84,15 @@ fuzzingbook_tpl_dict = {
       </div>
     </div>
     </article>
-""",
+"""
+}
 
-## Solutions
-# Markdown cells
-    'notebook_input_markdown_pre': r"""
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
-   <!-- exercise -->
-   {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-<!-- solution -->
-   <div style="display: none;" class="solution">
-   {%- endif -%}
-""",
-
-    'notebook_input_markdown_post': r"""
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
-   <!-- end of exercise -->
-   <span style="display:inline-block; width: 10px;"></span>
-   <a class="reveal" onclick="reveal()">Show solution</a>
-   {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-   <!-- end of solution -->
-   </div>
-   {%- endif -%}
-""",
-
-# Code cells
-# FIXME: Revealed input cells are formatted differently
-    'notebook_input_code': r"""
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
-<!-- exercise -->
-   {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-<!-- solution -->
-<div class="solution" style="display: none;">
-   {%- else -%}
-   {%- endif -%}
-   """ + latex_doc.tpl_dict['notebook_input_code'] + """
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
-<!-- end of exercise -->
-   <a class="reveal" onclick="reveal()">Show solution</a>
-   {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-<!-- end of solution -->
-</div>
-   {%- endif -%}
-""",
-
-# Output cells
-# FIXME: Revealed output cells do not show content
-    'notebook_output': r"""
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
-<!-- exercise -->
-   {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-<!-- solution -->
-<div class="solution" style="display: none;">
-   {%- else -%}
-   {%- endif -%}""" + latex_doc.tpl_dict['notebook_output'] + """
-   {%- if cell.metadata.solution_first or cell.metadata.solution2_first or cell.solution_first or cell.solution2_first -%}
-<!-- end of exercise -->
-   {%- elif cell.metadata.solution == 'hidden' or cell.metadata.solution2 == 'hidden' or cell.solution == 'hidden' or cell.solution2 == 'hidden' -%}
-<!-- end of solution -->
-</div>
-   {%- endif -%}
-""",
-
+solutions_tpl_dict = {
+    'overwrite': ['notebook_input_markdown', 'notebook_input_code', 'notebook_output'],
+    
+    'notebook_input_markdown': wrap_solution('notebook_input_markdown'),
+    'notebook_input_code': wrap_solution('notebook_input_code'),
+    'notebook_output': wrap_solution('notebook_output'),
 }
 
 cell_defaults = {
@@ -172,5 +139,6 @@ template = create_tpl([
     # toggle_buttons.tpl_dict, 
     # toc_sidebar.tpl_dict,
     latex_doc.tpl_dict,
-    fuzzingbook_tpl_dict
+    fuzzingbook_tpl_dict,
+    solutions_tpl_dict
 ])
