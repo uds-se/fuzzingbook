@@ -38,6 +38,9 @@ BIB = fuzzingbook.bib
 # Where the notebooks are
 NOTEBOOKS = notebooks
 
+# Git repo
+GITHUB = https://github.com/uds-se/fuzzingbook/
+
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
 PUBLISHED_SOURCES = $(PUBLISHED_CHAPTERS:%=$(NOTEBOOKS)/%)
@@ -430,7 +433,9 @@ normalize: utils/nbnormalize.py
 		diff $$notebook~ $$notebook || mv $$notebook~ $$notebook; \
 		$(RM) $$notebook~; \
 	done
-	
+
+
+
 ## Publishing
 
 docs: normalize publish-html publish-code publish-slides $(DOCS_TARGET)index.html README.md
@@ -461,8 +466,15 @@ publish-slides: slides
 	@test -d $(DOCS_TARGET)slides || mkdir $(DOCS_TARGET)slides
 	cp -pr $(SLIDES_TARGET) $(DOCS_TARGET)slides
 
+	
+## Debugging binder
+# This is the same system as mybinder uses, but should be easier to debug
+# See https://repo2docker.readthedocs.io/en/latest/
+binder-debug:
+	jupyter-repo2docker --debug $(GITHUB)
 
-# Cleanup
+
+## Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
 	  $(PDF_TARGET)*.aux \
 	  $(PDF_TARGET)*.bbl \
