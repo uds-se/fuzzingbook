@@ -470,8 +470,8 @@ publish-slides: slides
 ## Debugging binder
 # This is the same system as mybinder uses, but should be easier to debug
 # See https://repo2docker.readthedocs.io/en/latest/
-binder-debug:
-	jupyter-repo2docker --debug $(GITHUB)
+binder.log:
+	jupyter-repo2docker --debug $(GITHUB) 2>&1 | tee $@
 
 
 ## Cleanup
