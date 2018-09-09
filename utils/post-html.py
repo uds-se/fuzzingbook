@@ -53,7 +53,7 @@ menu_end = r"""
             <li><a href="__GITHUB_HTML__/issues/" target="_blank"><i class="fa fa-fw fa-commenting"></i> Report an Issue</a></li>
             <li><a href="__SHARE_TWITTER__" target=_blank><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
             <li><a href="__SHARE_FACEBOOK__" target=_blank><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
-            <li><a href="#citation" id="cite" onclick="toggleCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
+            <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
      </li>
   </ul>
@@ -136,18 +136,14 @@ This work is licensed under a
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 &bull;
 <a href="__GITHUB_HTML__/commits/master/notebooks/__CHAPTER__.ipynb" target=_blank)>Last change: __DATE__</a> &bull; 
-<a href="#citation" id="cite" onclick="toggleCitation()">Cite</a> &bull;
+<a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
 
 <script>
-function toggleCitation() {
+function revealCitation() {
     var c = document.getElementById("citation");
-    if (c.style.display === "none") {
-        c.style.display = "block";
-    } else {
-        c.style.display = "none";
-    }
+    c.style.display = "block";
 }
 </script>
 """
