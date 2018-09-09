@@ -9,7 +9,10 @@ PUBLISHED_CHAPTERS = \
 	Grammars.ipynb
 
 BETA_CHAPTERS = \
-	
+	Grammar_Coverage.ipynb \
+	Parsing.ipynb \
+	Probabilistic_Fuzzing.ipynb
+
 CHAPTERS = $(PUBLISHED_CHAPTERS) $(BETA_CHAPTERS)
 
 # Coming up next:
