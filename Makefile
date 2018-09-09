@@ -112,6 +112,9 @@ NOTEDOWN ?= notedown
 PYCODESTYLE = pycodestyle
 PYCODESTYLE_OPTS = --config code/pycodestyle.cfg
 
+# Program to open files after creating, say OPEN=open (default: ignore)
+OPEN ?= #
+
 ifndef PUBLISH
 # Determine publishing program
 OUT := $(shell which $(NBPUBLISH) > /dev/null && echo yes)
@@ -282,6 +285,7 @@ $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm $*.lof $*.lot $*.fls
 	@cd $(PDF_TARGET) && $(RM) -r $*.tex $*_files
 	@echo Created $@
+	@$(OPEN) $@
 else
 # Use LaTeXMK
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
@@ -291,6 +295,7 @@ $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm $*.lof $*.lot $*.fls $*.fdb_latexmk
 	@cd $(PDF_TARGET) && $(RM) -r $*.tex $*_files
 	@echo Created $@
+	@$(OPEN) $@
 endif
 
 $(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
@@ -302,12 +307,14 @@ $(DOCS_TARGET)index.html: $(NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post
 	mv html/index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
 	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --home $@ $(PUBLISHED_SOURCES)
+	@$(OPEN) $@
 
 $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
 	$(CONVERT_TO_HTML) $<
 	$(PYTHON) utils/post-html.py $@ $(PUBLISHED_SOURCES)
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
+	@$(OPEN) $@
 
 $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 	$(eval TMPDIR := $(shell mktemp -d))
