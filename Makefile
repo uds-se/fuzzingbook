@@ -112,8 +112,8 @@ NOTEDOWN ?= notedown
 PYCODESTYLE = pycodestyle
 PYCODESTYLE_OPTS = --config code/pycodestyle.cfg
 
-# Program to open files after creating, say OPEN=open (default: ignore)
-OPEN ?= #
+# Program to open files after creating, say OPEN=open (default: ignore; "true" does nothing)
+OPEN ?= true
 
 ifndef PUBLISH
 # Determine publishing program
