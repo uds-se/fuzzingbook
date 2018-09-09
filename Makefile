@@ -303,9 +303,6 @@ $(DOCS_TARGET)index.html: $(NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
 	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --home $@ $(PUBLISHED_SOURCES)
 
-$(HTML_TARGET)index.html:
-	@echo "See $(DOCS_TARGET)index.html"
-
 $(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
 	$(CONVERT_TO_HTML) $<
 	$(PYTHON) utils/post-html.py $@ $(PUBLISHED_SOURCES)
