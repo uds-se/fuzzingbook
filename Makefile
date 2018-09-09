@@ -457,8 +457,9 @@ normalize: utils/nbnormalize.py
 docs: normalize publish-html publish-code publish-slides $(DOCS_TARGET)index.html README.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
+# github does not like scripts
 README.md: $(MARKDOWN_TARGET)index.md
-	cp -pr $< $@
+	sed 's!<script.*</script>!!g' $< > $@
 
 publish: docs
 	git add $(DOCS_TARGET)* README.md

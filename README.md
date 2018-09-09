@@ -9,8 +9,8 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 You can use this book in three ways:
 
 * You can __read chapters in your browser__.  Check out the list of chapters in the menu above, or start right away with the 
-<a href="https://www.fuzzingbook.org/html/Intro_Testing.html" target=_blank>introduction to testing</a> or the
-<a href="https://www.fuzzingbook.org/html/Basic_Fuzzing.html" target=_blank>introduction to fuzzing</a>.  All code is available for download.
+<a href="https://www.fuzzingbook.org/html/Intro_Testing.html">introduction to testing</a> or the
+<a href="https://www.fuzzingbook.org/html/Basic_Fuzzing.html">introduction to fuzzing</a>.  All code is available for download.
 
 * You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you edit and extend the code, experimenting _live in your browser._  Just click on "Resources → Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Basic_Fuzzing.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
 
@@ -24,7 +24,7 @@ This work is designed as a _textbook_ for a course in software testing; as _supp
 
 This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
 
-<a class="twitter-timeline" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<a class="twitter-timeline" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> 
 
 
 ## About the Authors
