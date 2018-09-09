@@ -181,7 +181,7 @@ def get_title(notebook):
     contents = get_text_contents(notebook)
     match = re.search(r'^# (.*)', contents, re.MULTILINE)
     title = match.group(1).replace(r'\n', '')
-    print("Title", title.encode('utf-8'))
+    # print("Title", title.encode('utf-8'))
     return title
 
 def get_description(notebook):
@@ -191,7 +191,7 @@ def get_description(notebook):
     desc = match.group(1).replace(r'\n', '').replace('\n', '')
     desc = re.sub(r"\]\([^)]*\)", "]", desc).replace('[', '').replace(']', '')
     desc = re.sub(r"[_*]", "", desc)
-    print("Description", desc.encode('utf-8'))
+    # print("Description", desc.encode('utf-8'))
     return desc
 
 def get_sections(notebook):
@@ -206,7 +206,7 @@ def get_sections(notebook):
         matches = re.findall(r'^## (.*)', contents, re.MULTILINE)
         
     sections = [match.replace(r'\n', '') for match in matches]
-    print("Sections", repr(sections).encode('utf-8'))
+    # print("Sections", repr(sections).encode('utf-8'))
     return sections
     
     
