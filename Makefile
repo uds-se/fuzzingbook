@@ -334,7 +334,7 @@ $(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
 $(CODE_TARGET)%.py:	$(NOTEBOOKS)/%.ipynb
 	$(CONVERT_TO_PYTHON) $<
 	sh utils/adjust-py-export.sh < $@ > $@~ && mv $@~ $@
-	
+
 # For word, we convert from the HTML file
 $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
 	$(PANDOC) --css=$(WORD_TARGET)pandoc.css $< -o $@
@@ -359,7 +359,7 @@ $(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	cd $(PDF_TARGET) && $(RM) book.nbpub.log
 	@echo Created $@
 
-$(HTML_TARGET)book.html: $(SOURCES) $(BIB)
+$(HTML_TARGET)book.html: $(SOURCES) $(BIB) utils/post-html.py
 	-$(RM) -r book
 	mkdir book
 	chapter=0; \
@@ -370,7 +370,9 @@ $(HTML_TARGET)book.html: $(SOURCES) $(BIB)
 	done
 	ln -s ../$(BIB) book
 	$(CONVERT_TO_HTML) book
-	$(RM) -r book
+	$(PYTHON) utils/nbmerge.py book/Ch*.ipynb > notebooks/book.ipynb
+	$(PYTHON) utils/post-html.py --home $@ $(PUBLISHED_SOURCES)
+	$(RM) -r book notebooks/book.ipynb
 	cd $(HTML_TARGET) && $(RM) book.nbpub.log book_files/$(BIB)
 	@echo Created $@
 else

@@ -12,6 +12,15 @@ import time
 import datetime
 import re
 import sys
+import io
+
+try:
+    import nbformat
+    have_nbformat = True
+except:
+    have_nbformat = False
+    
+
 
 # Some fixed strings
 booktitle = "Generating Software Tests"
@@ -147,16 +156,44 @@ chapter_footer_template = common_footer_template + chapter_citation_template
 site_footer_template = common_footer_template + site_citation_template
 
 
+def get_text_contents(notebook):
+    if not have_nbformat:
+        contents = open(notebook, encoding="utf-8").read()
+        contents = re.sub(r'^[^"]*"', "", contents)
+        contents = re.sub(r'"^[^"]*$', "", contents)
+        return contents
+
+    with io.open(notebook, 'r', encoding='utf-8') as f:
+        nb = nbformat.read(f, as_version=4)
+
+    contents = ""
+    for cell in nb.cells:
+        if cell.cell_type == 'markdown':
+            contents += "".join(cell.source) + "\n\n"
+            
+    # print("Contents of", notebook, ": ", repr(contents[:100]))
+
+    return contents
+    
+
 def get_title(notebook):
     """Return the title from a notebook file"""
-    contents = open(notebook, encoding="utf-8").read()
-    match = re.search(r'"# (.*)"', contents)
+    contents = get_text_contents(notebook)
+    match = re.search(r'^# (.*)', contents, re.MULTILINE)
     return match.group(1).replace(r'\n', '')
 
 def get_sections(notebook):
     """Return the section titles from a notebook file"""
-    contents = open(notebook, encoding="utf-8").read()
-    matches = re.findall(r'"## (.*)"', contents)
+    contents = get_text_contents(notebook)
+    matches = re.findall(r'^# (.*)', contents, re.MULTILINE)
+    if len(matches) >= 2:
+        # Multiple top sections - use these
+        pass
+    else:
+        # Use sections instead
+        matches = re.findall(r'^## (.*)', contents, re.MULTILINE)
+        
+    print("Sections", repr(matches))
     return [match.replace(r'\n', '') for match in matches]
     
 def anchor(title):
@@ -176,7 +213,7 @@ all_chapters = args.all_chapters
 chapter_html_file = args.chapter[0]
 chapter = os.path.splitext(os.path.basename(chapter_html_file))[0]
 chapter_notebook_file = os.path.join("notebooks", chapter + ".ipynb")
-notebook_modification_time = os.path.getmtime(chapter_notebook_file)
+notebook_modification_time = os.path.getmtime(chapter_notebook_file)    
 notebook_modification_datetime = datetime.datetime.fromtimestamp(notebook_modification_time) \
     .astimezone().isoformat(sep=' ', timespec='seconds')
 notebook_modification_year = repr(datetime.datetime.fromtimestamp(notebook_modification_time).year)
