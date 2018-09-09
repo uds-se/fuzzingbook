@@ -40,10 +40,10 @@ menu_start = r"""
            <__ALL_CHAPTERS_MENU__>
         </ol>
      </li>
-     <li class="has-sub"><a href="__CHAPTER_HTML__"><i class="fa fa-fw fa-bars"></i> __CHAPTER_TITLE__</a>
-        <ol>
+     <li class="has-sub"><a href="__CHAPTER_HTML__"><i class="fa fa-fw fa-list-ul"></i> __CHAPTER_TITLE__</a>
+        <ul>
            <__ALL_SECTIONS_MENU__>
-        </ol>
+        </ul>
      </li>
      """
 
@@ -73,7 +73,7 @@ site_header_template = menu_start + r"""
 chapter_header_template = menu_start + r"""
      <li class="has-sub"><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank"><i class="fa fa-fw fa-cube"></i> Resources</a>
      <ul>
-     <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
+     <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
      <li><a href="__SITE_HTML__/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Download Code</a></li>
      <li><a href="__SITE_HTML__/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
      <li><a href="__GITHUB_HTML__/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
