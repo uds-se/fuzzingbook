@@ -182,8 +182,8 @@ def get_sections(notebook):
     """Return the section titles from a notebook file"""
     contents = get_text_contents(notebook)
     matches = re.findall(r'^# (.*)', contents, re.MULTILINE)
-    if len(matches) >= 2:
-        # Multiple top sections - use these
+    if len(matches) >= 5:
+        # Multiple top sections (book?) - use these
         pass
     else:
         # Use sections instead
