@@ -12,9 +12,9 @@ You can use this book in three ways:
 <a href="https://www.fuzzingbook.org/html/Intro_Testing.html" target=_blank>introduction to testing</a> or the
 <a href="https://www.fuzzingbook.org/html/Basic_Fuzzing.html" target=_blank>introduction to fuzzing</a>.  All code is available for download.
 
-* You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you edit and extend the code, experimenting _live in your browser._  Just click on "Open as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Basic_Fuzzing.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
+* You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you edit and extend the code, experimenting _live in your browser._  Just click on "Resources → Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Basic_Fuzzing.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
 
-* You can __present chapters as slides__ (beta).  This allows for presenting the material in lectures.  Just click on "View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a>
+* You can __present chapters as slides__ (beta).  This allows for presenting the material in lectures.  Just click on "Resources → View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Basic_Fuzzing.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a>
 
 ## Who this Book is for
 
