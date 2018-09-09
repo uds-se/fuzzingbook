@@ -62,7 +62,7 @@ menu_end = r"""
 """
 
 site_header_template = menu_start + r"""
-     <li class="has-sub"><a href="__CHAPTER_NOTEBOOK_HTML__" target="_blank"><i class="fa fa-fw fa-cube"></i> Resources</a>
+     <li class="has-sub"><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank"><i class="fa fa-fw fa-cube"></i> Resources</a>
      <ul>
      <li><a href="__GITHUB_HTML__/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
      </ul>
@@ -71,9 +71,9 @@ site_header_template = menu_start + r"""
 
 # Chapters
 chapter_header_template = menu_start + r"""
-     <li class="has-sub"><a href="__CHAPTER_NOTEBOOK_HTML__" target="_blank"><i class="fa fa-fw fa-cube"></i> Resources</a>
+     <li class="has-sub"><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank"><i class="fa fa-fw fa-cube"></i> Resources</a>
      <ul>
-     <li><a href="__CHAPTER_NOTEBOOK_HTML__" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
+     <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
      <li><a href="__SITE_HTML__/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Download Code</a></li>
      <li><a href="__SITE_HTML__/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
      <li><a href="__GITHUB_HTML__/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
@@ -230,7 +230,7 @@ all_sections_menu = ""
 basename = os.path.splitext(os.path.basename(chapter_html_file))[0]
 chapter_ipynb_file = os.path.join("notebooks", basename + ".ipynb")
 chapter_html = site_html + "/html/" + basename + ".html"
-chapter_notebook_html = notebook_html + "/" + basename + ".html"
+chapter_notebook_ipynb = notebook_html + "/" + basename + ".ipynb"
 
 chapter_title = get_title(chapter_ipynb_file)
 sections = get_sections(chapter_ipynb_file)
@@ -259,7 +259,7 @@ for menu_ipynb_file in all_chapters:
     all_chapters_menu += item
 
 end_of_exercise = '''
-<p><div class="solution_link"><a href="__CHAPTER_NOTEBOOK_HTML__#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+<p><div class="solution_link"><a href="__CHAPTER_NOTEBOOK_IPYNB__#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 '''
 
 # Sharing
@@ -326,7 +326,7 @@ chapter_contents = chapter_contents \
     .replace("__CHAPTER_HTML__", chapter_html) \
     .replace("__SITE_HTML__", site_html) \
     .replace("__NOTEBOOK_HTML__", notebook_html) \
-    .replace("__CHAPTER_NOTEBOOK_HTML__", chapter_notebook_html) \
+    .replace("__CHAPTER_NOTEBOOK_IPYNB__", chapter_notebook_ipynb) \
     .replace("__GITHUB_HTML__", github_html) \
     .replace("__SHARE_TWITTER__", share_twitter) \
     .replace("__SHARE_FACEBOOK__", share_facebook) \
