@@ -59,7 +59,7 @@ fuzzingbook_tpl_dict = {
     <article>
    <div tabindex="-1" id="notebook" class="border-box-sizing">
      <div class="container" id="notebook-container">
-""",
+""" + latex_doc.tpl_dict['html_body_start'],
 
     'html_body_end': r"""
         <__FOOTER__>
