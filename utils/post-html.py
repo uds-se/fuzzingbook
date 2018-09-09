@@ -13,19 +13,20 @@ import datetime
 import re
 import sys
 
-# For icons, see https://fontawesome.com/cheatsheet
-
-# Some fixed sites
+# Some fixed strings
+booktitle = "Generating Software Tests"
+authors = "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler"
 site_html = "https://www.fuzzingbook.org"
 github_html = "https://github.com/uds-se/fuzzingbook"
 notebook_html = "https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks"
 
 # Menus
+# For icons, see https://fontawesome.com/cheatsheet
 menu_start = r"""
 <nav>
 <div id="cssmenu">
   <ul>
-     <li class="has-sub"><a href="__SITE_HTML__/"><i class="fa fa-fw fa-bars"></i> Generating Software Tests</a>
+     <li class="has-sub"><a href="__SITE_HTML__/"><i class="fa fa-fw fa-bars"></i> __BOOKTITLE__</a>
         <ol>
            <__ALL_CHAPTERS_MENU__>
         </ol>
@@ -38,9 +39,9 @@ menu_start = r"""
      """
 
 menu_end = r"""
-     <li><a href="__GITHUB_HTML__/" target="_blank"><i class="fa fa-fw fa-git"></i> Project Page</a></li>
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-share"></i> Share</a>
+     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-comments"></i> Share</a>
         <ul>
+            <li><a href="__GITHUB_HTML__/issues/" target="_blank"><i class="fa fa-fw fa-commenting"></i> Report an Issue</a></li>
             <li><a href="__SHARE_TWITTER__" target=_blank><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
             <li><a href="__SHARE_FACEBOOK__" target=_blank><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
             <li><a href="#citation" id="cite" onclick="toggleCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
@@ -51,10 +52,75 @@ menu_end = r"""
 </nav>
 """
 
-site_header_template = menu_start + menu_end
+site_header_template = menu_start + r"""
+     <li class="has-sub"><a href="__CHAPTER_NOTEBOOK_HTML__" target="_blank"><i class="fa fa-fw fa-cube"></i> Resources</a>
+     <ul>
+     <li><a href="__GITHUB_HTML__/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
+     </ul>
+     </li>
+""" + menu_end
+
+# Chapters
+chapter_header_template = menu_start + r"""
+     <li class="has-sub"><a href="__CHAPTER_NOTEBOOK_HTML__" target="_blank"><i class="fa fa-fw fa-cube"></i> Resources</a>
+     <ul>
+     <li><a href="__CHAPTER_NOTEBOOK_HTML__" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
+     <li><a href="__SITE_HTML__/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Download Code</a></li>
+     <li><a href="__SITE_HTML__/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
+     <li><a href="__GITHUB_HTML__/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
+     </ul>
+     </li>
+     """ + menu_end
+
 
 # Footers
-site_footer_template = r"""
+site_citation_template = r"""
+<div id="citation" class="citation" style="display: none;">
+<a name="citation"></a>
+<h2>How to Cite this Work</h2>
+<p>
+__AUTHORS__: "<a href="__SITE_HTML__">__BOOKTITLE__</a>".  Retrieved __DATE__.
+</p>
+<pre>
+@incollection{fuzzingbook__YEAR__:__CHAPTER__,
+    author = {__AUTHORS_BIBTEX__},
+    booktitle = {__BOOKTITLE__},
+    title = {__BOOKTITLE__},
+    year = {__YEAR__},
+    publisher = {Saarland University},
+    howpublished = {\url{__SITE_HTML__/}},
+    note = {Retrieved __DATE__},
+    url = {__SITE_HTML__/},
+    urldate = {__DATE__}
+}
+</pre>
+</div>
+"""
+
+chapter_citation_template = r"""
+<div id="citation" class="citation" style="display: none;">
+<a name="citation"></a>
+<h2>How to Cite this Work</h2>
+<p>
+__AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__ (eds.), "<a href="__SITE_HTML__/">__BOOKTITLE__</a>", <a href="__CHAPTER_HTML__">__CHAPTER_HTML__</a>.  Retrieved __DATE__.
+</p>
+<pre>
+@incollection{fuzzingbook__YEAR__:__CHAPTER__,
+    author = {__AUTHORS__},
+    booktitle = {__BOOKTITLE__},
+    title = {__CHAPTER_TITLE__},
+    year = {__YEAR__},
+    publisher = {Saarland University},
+    howpublished = {\url{__CHAPTER_HTML__}},
+    note = {Retrieved __DATE__},
+    url = {__CHAPTER_HTML__},
+    urldate = {__DATE__}
+}
+</pre>
+</div>
+"""
+
+common_footer_template = r"""
 <p class="imprint">
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 This work is licensed under a
@@ -75,36 +141,11 @@ function toggleCitation() {
     }
 }
 </script>
-
-<div id="citation" class="citation" style="display: none;">
-<a name="citation"></a>
-<h2>How to Cite this Work</h2>
-<p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In Zeller, Gopinath, Böhme, Fraser, and Holler (eds.), "<a href="__SITE_HTML__/">Generating Software Tests</a>", <a href="__CHAPTER_HTML__">__CHAPTER_HTML__</a>.  Retrieved __DATE__.
-</p>
-<pre>
-@incollection{fuzzingbook__YEAR__:__CHAPTER__,
-    author = {Andreas Zeller and Rahul Gopinath and Marcel B{\"o}hme and Gordon Fraser and Christian Holler},
-    booktitle = {Generating Software Tests},
-    title = {__CHAPTER_TITLE__},
-    year = {__YEAR__},
-    publisher = {Saarland University},
-    howpublished = {\url{__CHAPTER_HTML__}},
-    note = {Retrieved __DATE__},
-    url = {__CHAPTER_HTML__},
-    urldate = {__DATE__}
-}
-</pre>
-</div>
 """
 
-chapter_header_template = menu_start + r"""
-     <li><a href="__CHAPTER_NOTEBOOK_HTML__" target="_blank"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
-     <li><a href="__SITE_HTML__/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Code</a></li>
-     <li><a href="__SITE_HTML__/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> Slides</a></li>
-     """ + menu_end
+chapter_footer_template = common_footer_template + chapter_citation_template
+site_footer_template = common_footer_template + site_citation_template
 
-chapter_footer_template = site_footer_template
 
 def get_title(notebook):
     """Return the title from a notebook file"""
@@ -192,22 +233,39 @@ end_of_exercise = '''
 def cgi_escape(text):
     """Produce entities within text."""
     cgi_escape_table = {
-        " ": "%20",
-        "&": "%26",
-        '"': "%22",
-        "'": "%27",
-        ">": "%3e",
-        "<": "%3c",
-        ":": "%3a",
-        "/": "%2f",
-        "?": "%3f",
-        "=": "%3d",
+        " ": r"%20",
+        "&": r"%26",
+        '"': r"%22",
+        "'": r"%27",
+        ">": r"%3e",
+        "<": r"%3c",
+        ":": r"%3a",
+        "/": r"%2f",
+        "?": r"%3f",
+        "=": r"%3d",
     }
     return "".join(cgi_escape_table.get(c,c) for c in text)
 
 share_twitter = "https://twitter.com/intent/tweet?text=" + \
     cgi_escape(r'I just read "' + chapter_title + '" (part of @FuzzingBook) at ' + chapter_html)
 share_facebook = "https://www.facebook.com/sharer/sharer.php?u=" + cgi_escape(chapter_html)
+
+
+# Authors
+def bibtex_escape(authors):
+    """Return list of authors in BibTeX-friendly form"""
+    tex_escape_table = {
+        "ä": r'{\"a}',
+        "ö": r'{\"o}',
+        "ü": r'{\"u}',
+        "Ä": r'{\"A}',
+        "Ö": r'{\"O}',
+        "Ü": r'{\"U}',
+        "ß": r'{\ss}'
+    }
+    return "".join(tex_escape_table.get(c,c) for c in authors)
+
+authors_bibtex = bibtex_escape(authors).replace(", and ", " and ").replace(", ", " and ")
 
 # sys.exit(0)
 
@@ -227,6 +285,9 @@ chapter_contents = chapter_contents \
     .replace("<__ALL_CHAPTERS_MENU__>", all_chapters_menu) \
     .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
     .replace("<__END_OF_EXERCISE__>", end_of_exercise) \
+    .replace("__BOOKTITLE__", booktitle) \
+    .replace("__AUTHORS__", authors) \
+    .replace("__AUTHORS_BIBTEX__", authors_bibtex) \
     .replace("__CHAPTER__", chapter) \
     .replace("__CHAPTER_TITLE__", chapter_title) \
     .replace("__CHAPTER_HTML__", chapter_html) \
@@ -245,7 +306,9 @@ if args.home:
 # Get a title
 # The official way is to set a title in document metadata, 
 # but a) Jupyter Lab can't edit it, and b) the title conflicts with the chapter header - AZ
-chapter_contents = re.sub(r"<title>.*</title>", "<title>" + chapter_title + " - Generating Software Tests</title>", chapter_contents)
+chapter_contents = re.sub(r"<title>.*</title>", 
+    "<title>" + chapter_title + " - " + booktitle + "</title>", 
+    chapter_contents)
 
 # And write it out again
 print("Writing", chapter_html_file)
