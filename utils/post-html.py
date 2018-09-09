@@ -72,7 +72,7 @@ menu_end = r"""
 """
 
 site_header_template = menu_start + r"""
-     <li class="has-sub"><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank"><i class="fa fa-fw fa-cube"></i> Resources</a>
+     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-cube"></i> Resources</a>
      <ul>
      <li><a href="__GITHUB_HTML__/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
      </ul>
@@ -81,7 +81,7 @@ site_header_template = menu_start + r"""
 
 # Chapters
 chapter_header_template = menu_start + r"""
-     <li class="has-sub"><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank"><i class="fa fa-fw fa-cube"></i> Resources</a>
+     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-cube"></i> Resources</a>
      <ul>
      <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
      <li><a href="__SITE_HTML__/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Download Code</a></li>
