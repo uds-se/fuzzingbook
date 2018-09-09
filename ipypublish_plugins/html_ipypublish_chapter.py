@@ -41,7 +41,7 @@ fuzzingbook_tpl_dict = {
 {# Open Graph Tags #}
 <meta property="og:url" content="__CHAPTER_HTML__/" />
 <meta property="og:type" content="article" />
-<meta property="og:title" content="__CHAPTER_TITLE__" />
+<meta property="og:title" content="__PAGE_TITLE__" />
 <meta property="og:description" content="__DESCRIPTION__" />
 <meta property="og:image" content="__BOOKIMAGE__" />
     """,

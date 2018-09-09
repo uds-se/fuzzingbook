@@ -247,7 +247,10 @@ else:
 all_sections_menu = ""
 basename = os.path.splitext(os.path.basename(chapter_html_file))[0]
 chapter_ipynb_file = os.path.join("notebooks", basename + ".ipynb")
-chapter_html = site_html + "/html/" + basename + ".html"
+if args.home:
+    chapter_html = site_html
+else:
+    chapter_html = site_html + "/html/" + basename + ".html"
 chapter_notebook_ipynb = notebook_html + "/" + basename + ".ipynb"
 
 chapter_title = get_title(chapter_ipynb_file)
@@ -322,6 +325,12 @@ def bibtex_escape(authors):
 
 authors_bibtex = bibtex_escape(authors).replace(", and ", " and ").replace(", ", " and ")
 
+# Page title
+if args.home:
+    page_title = booktitle
+else:
+    page_title = chapter_title + " - " + booktitle
+
 # sys.exit(0)
 
 # Read it in
@@ -340,6 +349,7 @@ chapter_contents = chapter_contents \
     .replace("<__ALL_CHAPTERS_MENU__>", all_chapters_menu) \
     .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
     .replace("<__END_OF_EXERCISE__>", end_of_exercise) \
+    .replace("__PAGE_TITLE__", page_title) \
     .replace("__BOOKTITLE__", booktitle) \
     .replace("__BOOKIMAGE__", bookimage) \
     .replace("__DESCRIPTION__", description) \
@@ -364,8 +374,7 @@ if args.home:
 # The official way is to set a title in document metadata, 
 # but a) Jupyter Lab can't edit it, and b) the title conflicts with the chapter header - AZ
 chapter_contents = re.sub(r"<title>.*</title>", 
-    "<title>" + chapter_title + " - " + booktitle + "</title>", 
-    chapter_contents)
+    "<title>" + page_title + "</title>", chapter_contents)
 
 # And write it out again
 print("Writing", chapter_html_file)
