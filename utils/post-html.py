@@ -189,7 +189,7 @@ def get_sections(notebook):
         # Use sections instead
         matches = re.findall(r'^## (.*)', contents, re.MULTILINE)
         
-    print("Sections", repr(matches))
+    # print("Sections", repr(matches))
     return [match.replace(r'\n', '') for match in matches]
     
 def anchor(title):
