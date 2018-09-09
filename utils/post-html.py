@@ -13,6 +13,7 @@ import datetime
 import re
 import sys
 import io
+import html
 
 try:
     import nbformat
@@ -28,6 +29,9 @@ authors = "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Chr
 site_html = "https://www.fuzzingbook.org"
 github_html = "https://github.com/uds-se/fuzzingbook"
 notebook_html = "https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks"
+
+# Book image
+bookimage = site_html + "/html/PICS/wordcloud.png"
 
 # Menus
 # For icons, see https://fontawesome.com/cheatsheet
@@ -176,7 +180,19 @@ def get_title(notebook):
     """Return the title from a notebook file"""
     contents = get_text_contents(notebook)
     match = re.search(r'^# (.*)', contents, re.MULTILINE)
-    return match.group(1).replace(r'\n', '')
+    title = match.group(1).replace(r'\n', '')
+    print("Title", title.encode('utf-8'))
+    return title
+
+def get_description(notebook):
+    """Return the first 2-4 sentences from a notebook file, after the title"""
+    contents = get_text_contents(notebook)
+    match = re.search(r'^# .*$([^#]*)^#', contents, re.MULTILINE)
+    desc = match.group(1).replace(r'\n', '').replace('\n', '')
+    desc = re.sub(r"\]\([^)]*\)", "]", desc).replace('[', '').replace(']', '')
+    desc = re.sub(r"[_*]", "", desc)
+    print("Description", desc.encode('utf-8'))
+    return desc
 
 def get_sections(notebook):
     """Return the section titles from a notebook file"""
@@ -189,8 +205,10 @@ def get_sections(notebook):
         # Use sections instead
         matches = re.findall(r'^## (.*)', contents, re.MULTILINE)
         
-    # print("Sections", repr(matches))
-    return [match.replace(r'\n', '') for match in matches]
+    sections = [match.replace(r'\n', '') for match in matches]
+    print("Sections", repr(sections).encode('utf-8'))
+    return sections
+    
     
 def anchor(title):
     """Return an anchor '#a-title' for a title 'A title'"""
@@ -258,6 +276,10 @@ for menu_ipynb_file in all_chapters:
     item = '<li><a href="%s"%s>%s</a></li>\n' % (menu_html_file, link_class, title)
     all_chapters_menu += item
 
+# Description
+description = html.escape(get_description(chapter_ipynb_file))
+
+# Exercises
 end_of_exercise = '''
 <p><div class="solution_link"><a href="__CHAPTER_NOTEBOOK_IPYNB__#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 '''
@@ -319,6 +341,8 @@ chapter_contents = chapter_contents \
     .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
     .replace("<__END_OF_EXERCISE__>", end_of_exercise) \
     .replace("__BOOKTITLE__", booktitle) \
+    .replace("__BOOKIMAGE__", bookimage) \
+    .replace("__DESCRIPTION__", description) \
     .replace("__AUTHORS__", authors) \
     .replace("__AUTHORS_BIBTEX__", authors_bibtex) \
     .replace("__CHAPTER__", chapter) \
