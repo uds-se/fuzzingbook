@@ -71,13 +71,13 @@
 # 
 # Our first step in building a grammar fuzzer is to find an appropriate format for grammars.  To make the writing of grammars as simple as possible, we use a mostly format that is mostly based on strings.  Our grammars in Python takes the format of a _mapping_ between symbol names and expansions, where expansions are _lists_ of alternatives.  A one-rule grammar for digits thus takes the form
 
-# In[79]:
+# In[1]:
 
 
 # import fuzzingbook_utils # only in notebook
 
 
-# In[80]:
+# In[2]:
 
 
 DIGIT_GRAMMAR = {
@@ -88,7 +88,7 @@ DIGIT_GRAMMAR = {
 
 # whereas the full grammar for arithmetic expressions looks like this:
 
-# In[81]:
+# In[3]:
 
 
 EXPR_GRAMMAR = {
@@ -96,16 +96,16 @@ EXPR_GRAMMAR = {
         ["<expr>"],
 
     "<expr>":
-        ["<expr> + <term>", "<expr> - <term>", "<term>"],
+        ["<term> + <term>", "<term> - <term>", "<term>"],
 
     "<term>":
-        ["<term> * <factor>", "<term> / <factor>", "<factor>"],
+        ["<factor> * <term>", "<factor> / <term>", "<factor>"],
 
     "<factor>":
         ["+<factor>", "-<factor>", "(<expr>)", "<integer>", "<integer>.<integer>"],
 
     "<integer>":
-        ["<integer><digit>", "<digit>"],
+        ["<digit><integer>", "<digit>"],
 
     "<digit>":
         ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
@@ -114,7 +114,7 @@ EXPR_GRAMMAR = {
 
 # In the grammar, we can access any rule by its symbol...
 
-# In[82]:
+# In[4]:
 
 
 EXPR_GRAMMAR["<digit>"]
@@ -122,7 +122,7 @@ EXPR_GRAMMAR["<digit>"]
 
 # ....and we can check whether a symbol is in the grammar:
 
-# In[83]:
+# In[5]:
 
 
 "<identifier>" in EXPR_GRAMMAR
@@ -134,7 +134,7 @@ EXPR_GRAMMAR["<digit>"]
 # 
 # Frst, this handy `nonterminals()` function gets us the list of nonterminals in an expansion.  
 
-# In[84]:
+# In[6]:
 
 
 import re
@@ -143,14 +143,19 @@ import re
 RE_NONTERMINAL = re.compile(r'(<[^<> ]*>)')
 
 
-# In[85]:
+# In[7]:
 
 
 def nonterminals(expansion):
+    # In later chapters, we allow expansions to be tuples, 
+    # with the expansion being the first element
+    if isinstance(expansion, tuple):
+        expansion = expansion[0]
+
     return re.findall(RE_NONTERMINAL, expansion)
 
 
-# In[86]:
+# In[8]:
 
 
 assert nonterminals("<term> * <factor>") == ["<term>", "<factor>"]
@@ -158,18 +163,19 @@ assert nonterminals("<digit><integer>") == ["<digit>", "<integer>"]
 assert nonterminals("1 < 3 > 2") == []
 assert nonterminals("1 <3> 2") == ["<3>"]
 assert nonterminals("1 + 2") == []
+assert nonterminals(("<1>", {'option': 'value'})) == ["<1>"]
 
 
 # Likewise, `is_nonterminal()` checks whether some symbol is a nonterminal:
 
-# In[87]:
+# In[9]:
 
 
 def is_nonterminal(s):
     return re.match(RE_NONTERMINAL, s)
 
 
-# In[88]:
+# In[10]:
 
 
 assert is_nonterminal("<abc>")
@@ -178,19 +184,19 @@ assert not is_nonterminal("+")
 
 # The helper function `is_valid_grammar()` iterates over a grammar to check whether all used symbols are defined, and vice versa, which is very useful for debugging.  You don't have to dwelve into details here, but as always, it is important to get the input data straight before we make use of it.
 
-# In[89]:
+# In[11]:
 
 
 import sys
 
 
-# In[90]:
+# In[12]:
 
 
 START_SYMBOL = "<start>"
 
 
-# In[91]:
+# In[13]:
 
 
 def is_valid_grammar(grammar, start_symbol=START_SYMBOL):
@@ -208,6 +214,8 @@ def is_valid_grammar(grammar, start_symbol=START_SYMBOL):
             return False
 
         for expansion in expansions:
+            if isinstance(expansion, tuple):
+                expansion = expansion[0]
             if not isinstance(expansion, str):
                 print(repr(defined_nonterminal) + ": " + repr(expansion) + ": not a string", file=sys.stderr)
                 return False
@@ -225,7 +233,7 @@ def is_valid_grammar(grammar, start_symbol=START_SYMBOL):
 
 # Our expression grammar passes the test:
 
-# In[92]:
+# In[14]:
 
 
 assert is_valid_grammar(EXPR_GRAMMAR)
@@ -233,25 +241,25 @@ assert is_valid_grammar(EXPR_GRAMMAR)
 
 # But these ones don't:
 
-# In[93]:
+# In[15]:
 
 
 assert not is_valid_grammar({"<start>": ["<x>"], "<y>": ["1"]})
 
 
-# In[94]:
+# In[16]:
 
 
 assert not is_valid_grammar({"<start>": "123"})
 
 
-# In[95]:
+# In[17]:
 
 
 assert not is_valid_grammar({"<start>": []})
 
 
-# In[96]:
+# In[18]:
 
 
 assert not is_valid_grammar({"<start>": [1, 2, 3]})
@@ -261,23 +269,25 @@ assert not is_valid_grammar({"<start>": [1, 2, 3]})
 # 
 # Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (`"<start>"`) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (`max_symbols`) on the number of symbols.  Furthermore, to avoid being stuck in a sitution where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.
 
-# In[97]:
+# In[19]:
 
 
 import random
 
 
-# In[98]:
+# In[20]:
 
 
 class ExpansionError(Exception):
     pass
 
 
-# In[99]:
+# In[21]:
 
 
-def simple_grammar_fuzzer(grammar, start_symbol=START_SYMBOL, max_nonterminals=10, max_expansion_trials=100, log=False):
+def simple_grammar_fuzzer(grammar, start_symbol=START_SYMBOL, 
+                          max_nonterminals=10, max_expansion_trials=100,
+                          log=False):
     term = start_symbol
     expansion_trials = 0
 
@@ -301,13 +311,13 @@ def simple_grammar_fuzzer(grammar, start_symbol=START_SYMBOL, max_nonterminals=1
 
 # Let us see how this simple grammar fuzzer obtains an arithmetic expression from the start symbol:
 
-# In[100]:
+# In[22]:
 
 
 simple_grammar_fuzzer(grammar=EXPR_GRAMMAR, max_nonterminals=3, log=True)
 
 
-# In[101]:
+# In[23]:
 
 
 for i in range(10):
@@ -324,7 +334,7 @@ for i in range(10):
 # 
 # Let us create some more grammars.  Here's one for `cgi_decode()`:
 
-# In[102]:
+# In[24]:
 
 
 CGI_GRAMMAR = {
@@ -353,7 +363,7 @@ CGI_GRAMMAR = {
 assert is_valid_grammar(CGI_GRAMMAR)
 
 
-# In[103]:
+# In[25]:
 
 
 for i in range(10):
@@ -362,7 +372,7 @@ for i in range(10):
 
 # Or a URL grammar:
 
-# In[104]:
+# In[26]:
 
 
 URL_GRAMMAR = {
@@ -415,7 +425,7 @@ URL_GRAMMAR = {
 assert is_valid_grammar(URL_GRAMMAR)
 
 
-# In[105]:
+# In[27]:
 
 
 for i in range(10):
@@ -432,13 +442,13 @@ for i in range(10):
 # 
 # Both problems can be easily illustrated by plotting the time required for strings of different lengths.
 
-# In[106]:
+# In[28]:
 
 
 from Timer import Timer
 
 
-# In[107]:
+# In[29]:
 
 
 trials = 100
@@ -456,7 +466,7 @@ print()
 print("Average time:", average_time)
 
 
-# In[108]:
+# In[30]:
 
 
 # get_ipython().run_line_magic('matplotlib', 'inline') # only in notebook
@@ -474,13 +484,13 @@ plt.title('Time required for generating an output');
 # 
 # The expansion process with derivation trees is illustrated in the following steps.  We use `dot` as a drawing program; you don't need to look at the code, just at its results.  We start with a single node as root of the tree.
 
-# In[109]:
+# In[31]:
 
 
 from graphviz import Digraph
 
 
-# In[110]:
+# In[32]:
 
 
 dot = Digraph("root")
@@ -491,7 +501,7 @@ dot
 
 # We then traverse the tree, searching for a symbol to expand, and add a new edge from the symbol to its expansion.
 
-# In[111]:
+# In[33]:
 
 
 dot.edge(r"\<start\>", r"\<expr\>")
@@ -502,7 +512,7 @@ dot
 # 
 # To further expand the tree, we choose a symbol to expand, and add a new edge from the symbol to its expansion.  This would get us the string `<expr> + <term>`.
 
-# In[112]:
+# In[34]:
 
 
 dot.edge(r"\<expr\>", r"\<expr\> ")
@@ -513,7 +523,7 @@ dot
 
 # We repeat the process until there are no symbols left to expand:
 
-# In[113]:
+# In[35]:
 
 
 dot.edge(r"\<expr\> ", r"\<term\> ")
@@ -548,7 +558,7 @@ dot
 # 
 # Let us take a very simple derivation tree, representing the intermediate step `<expr> + <term>`, above.
 
-# In[114]:
+# In[36]:
 
 
 derivation_tree = ("<start>", 
@@ -561,19 +571,19 @@ derivation_tree = ("<start>",
 
 # Let's visualize this tree!  Again, we use the `dot` drawing program, but now do this algorithmically, traversing the above structure; as with the above visualizations, only the result counts.
 
-# In[115]:
+# In[37]:
 
 
 from IPython.display import display
 
 
-# In[116]:
+# In[38]:
 
 
 import re
 
 
-# In[117]:
+# In[39]:
 
 
 def dot_escape(s):
@@ -583,7 +593,7 @@ def dot_escape(s):
     return s
 
 
-# In[118]:
+# In[40]:
 
 
 assert dot_escape("hello") == "hello"
@@ -591,7 +601,7 @@ assert dot_escape("<hello>, world") == "\\<hello\\>\\, world"
 assert dot_escape("\\n") == "\\\\n"
 
 
-# In[119]:
+# In[41]:
 
 
 def display_tree(derivation_tree):
@@ -618,7 +628,7 @@ def display_tree(derivation_tree):
 
 # This is what our tree visualizes into:
 
-# In[120]:
+# In[42]:
 
 
 display_tree(derivation_tree)
@@ -626,7 +636,7 @@ display_tree(derivation_tree)
 
 # To turn the tree into a string, the following function comes in handy:
 
-# In[121]:
+# In[43]:
 
 
 def all_terminals(tree):
@@ -644,7 +654,7 @@ def all_terminals(tree):
     return ''.join([all_terminals(c) for c in children])
 
 
-# In[122]:
+# In[44]:
 
 
 all_terminals(derivation_tree)
@@ -654,14 +664,14 @@ all_terminals(derivation_tree)
 
 # Let us now develop an algorithm that takes a tree with unexpanded symbols (say, `derivation_tree`, above), and expands all these symbols onbe after the other.  First, let us define a helper function that constructs a tree with just the start symbol:
 
-# In[123]:
+# In[45]:
 
 
 def init_tree(start_symbol=START_SYMBOL):
     return (start_symbol, None)
 
 
-# In[124]:
+# In[46]:
 
 
 display_tree(init_tree())
@@ -669,20 +679,26 @@ display_tree(init_tree())
 
 # Next, we will need a helper function that takes an expansion string and converts it into a list of derivation trees:
 
-# In[125]:
+# In[47]:
 
 
 def expansion_to_children(expansion):
     # print("Converting " + repr(expansion))
     # strings contains all substrings -- both terminals and non-terminals such
     # that ''.join(strings) == expansion
+
+    # See nonterminals(), above
+    if isinstance(expansion, tuple):
+        expansion = expansion[0]
+
     if expansion == "":  # Special case: empty expansion
         return [("", [])]
+
     strings  = re.split(RE_NONTERMINAL, expansion)
     return [(s, None) if is_nonterminal(s) else (s, []) for s in strings if len(s) > 0]
 
 
-# In[126]:
+# In[48]:
 
 
 expansion_to_children("<term> + <expr>")
@@ -690,35 +706,35 @@ expansion_to_children("<term> + <expr>")
 
 # The case of an empty expansion needs special treatment:
 
-# In[127]:
+# In[49]:
 
 
 expansion_to_children("")
 
 
-# With this, we can now take some unexpanded node in the tree, choose a random expansion, and return the new tree
+# With this, we can now take some unexpanded node in the tree, choose a random expansion, and return the new tree.
 
-# In[128]:
+# In[50]:
 
 
 def expand_node_randomly(node, grammar):
     (symbol, children) = node
     assert children is None
+    
+    # print("Expanding", all_terminals(node), "randomly")
 
     # Fetch the possible expansions from grammar...
     expansions = grammar[symbol]
-
     possible_children = [expansion_to_children(expansion) for expansion in expansions]
 
-    # TODO: Consider preferring children not expanded yet,
-    # and other forms of grammar coverage (or code coverage)
+    # ... and select a random expansion
     children = random.choice(possible_children)
 
     # Return with new children
     return (symbol, children)
 
 
-# In[129]:
+# In[51]:
 
 
 print("Before:")
@@ -734,7 +750,7 @@ display_tree(tree)
 # 
 # Let us now apply the above node expansion to some node in the tree.  To this end, we first need to search the tree for unexpanded nodes.  `possible_expansions()` counts how many unexpanded symbols there are in a tree:
 
-# In[130]:
+# In[52]:
 
 
 def possible_expansions(tree):
@@ -746,7 +762,7 @@ def possible_expansions(tree):
     return number_of_expansions
 
 
-# In[131]:
+# In[53]:
 
 
 print(possible_expansions(derivation_tree))
@@ -754,7 +770,7 @@ print(possible_expansions(derivation_tree))
 
 # `any_possible_expansions()` returns True if the tree has any unexpanded nodes.
 
-# In[132]:
+# In[54]:
 
 
 def any_possible_expansions(tree):
@@ -764,7 +780,7 @@ def any_possible_expansions(tree):
     return any(any_possible_expansions(c) for c in children)
 
 
-# In[133]:
+# In[55]:
 
 
 print(any_possible_expansions(derivation_tree))
@@ -776,7 +792,7 @@ print(any_possible_expansions(derivation_tree))
 # 
 # The `expand_tree_once()` function replaces the child _in place_, meaning that it actually mutates the tree being passed as an argument rather than returning a new tree.  This in-place mutation is what makes this function particularly efficient.
 
-# In[134]:
+# In[56]:
 
 
 def expand_tree_once_randomly(tree, grammar, expand_node=expand_node_randomly):
@@ -796,14 +812,15 @@ def expand_tree_once_randomly(tree, grammar, expand_node=expand_node_randomly):
     child_to_be_expanded = random.choice(expandable_children)
 
     # Expand in place
-    children[child_to_be_expanded] = expand_tree_once_randomly(children[child_to_be_expanded], grammar, expand_node)
+    children[child_to_be_expanded] = expand_tree_once_randomly(children[child_to_be_expanded], 
+                                                               grammar, expand_node=expand_node)
 
     return tree
 
 
 # Let's put it to use, expanding our derivation tree from above twice.
 
-# In[135]:
+# In[57]:
 
 
 derivation_tree = ("<start>", 
@@ -815,14 +832,14 @@ derivation_tree = ("<start>",
 display_tree(derivation_tree)
 
 
-# In[136]:
+# In[58]:
 
 
 derivation_tree = expand_tree_once_randomly(derivation_tree, EXPR_GRAMMAR)
 display_tree(derivation_tree)
 
 
-# In[137]:
+# In[59]:
 
 
 derivation_tree = expand_tree_once_randomly(derivation_tree, EXPR_GRAMMAR)
@@ -837,7 +854,7 @@ display_tree(derivation_tree)
 # 
 # To identify the _cost_ of expanding a symbol, we introduce two functions that mutually rely on each other.  First, `symbol_min_cost()` returns the minimum cost of all expansions of a symbol, using `expansion_min_cost()` to compute the cost for each expansion.
 
-# In[138]:
+# In[60]:
 
 
 def symbol_min_cost(symbol, grammar, seen=set()):
@@ -847,7 +864,7 @@ def symbol_min_cost(symbol, grammar, seen=set()):
 
 # The function `expansion_min_cost()` returns the sum of all expansions in `expansions`.  If a nonterminal is encountered again during traversal, the cost of the expansion is $\infty$, as this indicates (potential infinite) recursion.
 
-# In[139]:
+# In[61]:
 
 
 def expansion_min_cost(expansion, grammar, seen=set()):
@@ -864,7 +881,7 @@ def expansion_min_cost(expansion, grammar, seen=set()):
 
 # Here's two examples: The minimum cost of expanding a digit is 1, since we have to choose between one of its expansions.
 
-# In[140]:
+# In[62]:
 
 
 assert symbol_min_cost("<digit>", EXPR_GRAMMAR) == 1
@@ -872,7 +889,7 @@ assert symbol_min_cost("<digit>", EXPR_GRAMMAR) == 1
 
 # The minimum number of expansions when expanding `<expr>`, though, is five, as this is the minimum number of expansions required.  (`<expr>` → `<term>` → `<factor>` → `<integer>` → `<digit>` → 1)
 
-# In[141]:
+# In[63]:
 
 
 assert symbol_min_cost("<expr>", EXPR_GRAMMAR) == 5
@@ -880,7 +897,7 @@ assert symbol_min_cost("<expr>", EXPR_GRAMMAR) == 5
 
 # Here's now a variant of `expand_node_randomly()` that takes the above cost into account.  It determines the minimum cost `min_cost` across all children and then uses the child with the minimum cost.  If multiple children all have the same minimum cost, it chooses randomly between these.
 
-# In[142]:
+# In[64]:
 
 
 def expand_node_min_cost(node, grammar):
@@ -907,13 +924,14 @@ def expand_node_min_cost(node, grammar):
 
 # We can now apply this function to close the expansion of our derivation tree, using `expand_tree_once()` with the above `expand_node_min_cost()` as expansion function.
 
-# In[143]:
+# In[65]:
 
 
 display_tree(derivation_tree)
 
 while any_possible_expansions(derivation_tree):
-    derivation_tree = expand_tree_once_randomly(derivation_tree, EXPR_GRAMMAR, expand_node=expand_node_min_cost)
+    derivation_tree = expand_tree_once_randomly(derivation_tree, EXPR_GRAMMAR, 
+                                                expand_node=expand_node_min_cost)
     display_tree(derivation_tree)
 
 
@@ -921,15 +939,18 @@ while any_possible_expansions(derivation_tree):
 
 # ## All Together
 # 
-# We can now put both phases together in a single function `expand_tree` that will expand a tree first with `expand_node_randomly()` until a limit of `max_nonterminals` possible expansions is reached, and then use `expand_node_min_cost()` to close the remaining expansions as quickly as possible.
+# We can now put both phases together in a single function `expand_tree()` that will expand a tree first with `expand_node_randomly()` until a limit of `max_nonterminals` possible expansions is reached, and then use `expand_node_min_cost()` to close the remaining expansions as quickly as possible.
 
-# In[144]:
+# In[66]:
 
 
-def expand_tree(tree, grammar, max_nonterminals=10, expand_tree_once=expand_tree_once_randomly, disp=False, log=False):
-    
+def expand_tree(tree, grammar, max_nonterminals=10,
+                expand_tree_once=expand_tree_once_randomly,
+                expand_node=expand_node_randomly,
+                disp=False, log=False):
+
     def _expand_tree_once(tree, grammar, expand_node, disp, log):
-        tree = expand_tree_once(tree, grammar, expand_node)
+        tree = expand_tree_once(tree, grammar, expand_node=expand_node)
         if disp:
             display_tree(tree)
             print(possible_expansions(tree), "possible expansion(s) left")
@@ -941,20 +962,20 @@ def expand_tree(tree, grammar, max_nonterminals=10, expand_tree_once=expand_tree
         print("Stage 1: Expanding until we reach", max_nonterminals, "unexpanded symbols")
 
     while 0 < possible_expansions(tree) < max_nonterminals:
-        tree = _expand_tree_once(tree, grammar, expand_node_randomly, disp, log)
+        tree = _expand_tree_once(tree, grammar, expand_node, disp, log)
 
     if disp or log:
         print("Stage 2: Keep on expanding using shortest expansions only")
 
     while any_possible_expansions(tree):
         tree = _expand_tree_once(tree, grammar, expand_node_min_cost, disp, log)
-        
+
     assert possible_expansions(tree) == 0
 
     return tree
 
 
-# In[145]:
+# In[67]:
 
 
 derivation_tree = ("<start>", 
@@ -969,7 +990,7 @@ print("Final tree")
 display_tree(derivation_tree)
 
 
-# In[146]:
+# In[68]:
 
 
 all_terminals(derivation_tree)
@@ -977,17 +998,22 @@ all_terminals(derivation_tree)
 
 # Based on this, we can now create a function `grammar_fuzzer()` that – like `simple_grammar_fuzzer()` – simply takes a grammar and produces a string from it, no longer exposing the complexity of derivation trees:
 
-# In[147]:
+# In[69]:
 
 
-def grammar_fuzzer(grammar, max_nonterminals=10, start_symbol=START_SYMBOL, expand_tree_once=expand_tree_once_randomly, 
+def grammar_fuzzer(grammar, max_nonterminals=10, start_symbol=START_SYMBOL, 
+                   expand_tree_once=expand_tree_once_randomly,
+                   expand_node=expand_node_randomly,
                    disp=False, log=False):
+
     # Create an initial derivation tree
     tree = init_tree(start_symbol)
     # print(tree)
 
     # Expand all nonterminals
-    tree = expand_tree(tree, grammar, max_nonterminals, expand_tree_once)
+    tree = expand_tree(tree, grammar, max_nonterminals, 
+                       expand_tree_once=expand_tree_once,
+                       expand_node=expand_node)
     if disp:
         print(repr(all_terminals(tree)))
         display_tree(tree)
@@ -1000,19 +1026,19 @@ def grammar_fuzzer(grammar, max_nonterminals=10, start_symbol=START_SYMBOL, expa
 
 # We can now apply this on all our defined grammars (and visualize the derivation tree along)
 
-# In[148]:
+# In[70]:
 
 
 grammar_fuzzer(EXPR_GRAMMAR, disp=True)
 
 
-# In[149]:
+# In[71]:
 
 
 grammar_fuzzer(URL_GRAMMAR, disp=True)
 
 
-# In[150]:
+# In[72]:
 
 
 grammar_fuzzer(CGI_GRAMMAR, disp=True)
@@ -1020,7 +1046,7 @@ grammar_fuzzer(CGI_GRAMMAR, disp=True)
 
 # How do we stack up against `simple_grammar_fuzzer()`?
 
-# In[151]:
+# In[73]:
 
 
 trials = 100
@@ -1038,7 +1064,7 @@ print()
 print("Average time:", average_time)
 
 
-# In[152]:
+# In[74]:
 
 
 # get_ipython().run_line_magic('matplotlib', 'inline') # only in notebook
@@ -1049,65 +1075,6 @@ plt.title('Time required for generating an output');
 
 
 # Our test generation is much faster, but also our inputs are much smaller.  \todo{(Actually, parts of the time gain may be due to the faster time.)}  We see that with derivation trees, we can get much better control over grammar production.
-
-# ## Grammar Coverage
-# 
-# At this point, when we produce from grammars, all possible expansions get the same likelihood.  For producing a comprehensive test suite, however, it makes more sense to maximize _variety_ – for instance, by avoiding repeating the same expansions over and over again.  To achieve this, we can track the _coverage_ of individual expansions: If we have seen some expansion already, we can prefer other possible expansions in the future.  The idea of ensuring that each expansion in the grammar is used at least once goes back to Paul Purdom \cite{purdom1972}.
-# 
-# As an example, consider the grammar
-# 
-# ```grammar
-# <start> ::= <digit><digit>
-# <digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-# ```
-# 
-# Let us assume we have already produced a `0` in the first expansion of `<digit>`.  As it comes to expand the next digit, we would mark the `0` expansion as already covered, and choose one of the yet uncovered alternatives.  Only when we have covered all alternatives would we go back and consider expansions covered before.
-# 
-# This concept of coverage is very easy to implement.
-
-# In[153]:
-
-
-covered_expansions = set()
-
-# TODO: Have two functions that hook into choosing children and choosing nodes.
-
-
-# By returning the set of expansions covered so far, we can invoke the fuzzer multiple times, each time adding to the grammar coverage.  With the `DIGIT_EXPR` grammar, for instance, this lets the grammar produce one digit after the other:
-
-# In[154]:
-
-
-grammar_fuzzer(DIGIT_GRAMMAR)
-
-
-# At the end, all expansions are covered:
-
-# In[155]:
-
-
-covered_expansions
-
-
-# Let us now create some more expressions:
-
-# In[158]:
-
-
-# covered_expansions = set()
-# for i in range(10):
-#     term, covered_expansions = \
-#         grammar_fuzzer(grammar=EXPR_GRAMMAR, max_nonterminals=3, covered_expansions=covered_expansions)
-#     print(term)
-
-
-# Again, all expansions are covered:
-
-# In[159]:
-
-
-covered_expansions
-
 
 # ## Alternatives to Grammars
 # 
@@ -1140,7 +1107,7 @@ covered_expansions
 # 
 # Speed up things by memoizing.
 
-# In[ ]:
+# In[75]:
 
 
 # cache the function calls. We only cache a given call based on the
@@ -1169,10 +1136,10 @@ def memoize(argnum):
 # 
 # Introduce a parameter `min_symbols` that would keep on expanding with _maximum_ cost until `min_symbols` is reached.
 
-# In[ ]:
+# In[76]:
 
 
-def expand_max_expansions(node, grammar):
+def expand_node_max_cost(node, grammar):
     (symbol, children) = node
     # print("Expanding " + repr(symbol))
     assert children is None
@@ -1181,23 +1148,26 @@ def expand_max_expansions(node, grammar):
     expansions = grammar[symbol]
 
     possible_children_with_cost = [(expansion_to_children(expansion),
-                                    min_expansions(expansion, grammar, {symbol}))
+                                    expansion_min_cost(expansion, grammar, {symbol}))
                                   for expansion in expansions]
 
-    max_cost = max(cost for (child, cost) in possible_children_with_cost)
-    children_with_max_cost = [child for (child, child_cost) in possible_children_with_cost
-                              if child_cost == max_cost]
+    min_cost = max(cost for (child, cost) in possible_children_with_cost)
+    children_with_min_cost = [child for (child, child_cost) in possible_children_with_cost
+                              if child_cost == min_cost]
 
-    children = random.choice(children_with_max_cost)
+    children = random.choice(children_with_min_cost)
 
     # Return with a new list
     return (symbol, children)
 
 
-# In[ ]:
+# In[77]:
 
 
-def expand_tree_minmax(tree, grammar, min_symbols=0, max_symbols=10, disp=False, log=False):
+def expand_tree_minmax(tree, grammar, min_nonterminals=10, max_nonterminals=10,
+                expand_tree_once=expand_tree_once_randomly,
+                expand_node=expand_node_randomly,
+                disp=False, log=False):
     
     def _expand_tree_once(tree, grammar, expand_node, disp, log):
         tree = expand_tree_once(tree, grammar, expand_node)
@@ -1209,32 +1179,32 @@ def expand_tree_minmax(tree, grammar, min_symbols=0, max_symbols=10, disp=False,
         return tree
 
     if disp or log:
-        print("Stage 0: Expanding until we reach", max_symbols, "unexpanded symbols")
+        print("Stage 0: Expanding until we reach", max_nonterminals, "unexpanded nonterminals")
 
-    while 0 < possible_expansions(tree) < min_symbols:
-        tree = _expand_tree_once(tree, grammar, expand_max_expansions, disp, log)
+    while 0 < possible_expansions(tree) < min_nonterminals:
+        tree = _expand_tree_once(tree, grammar, expand_node_max_cost, disp, log)
     
     if disp or log:
-        print("Stage 1: Expanding until we reach", max_symbols, "unexpanded symbols")
+        print("Stage 1: Expanding until we reach", max_nonterminals, "unexpanded nonterminals")
 
-    while 0 < possible_expansions(tree) < max_symbols:
+    while 0 < possible_expansions(tree) < max_nonterminals:
         tree = _expand_tree_once(tree, grammar, expand_random_node, disp, log)
 
     if disp or log:
         print("Stage 2: Keep on expanding using shortest expansions only")
 
     while any_possible_expansions(tree):
-        tree = _expand_tree_once(tree, grammar, expand_min_expansions, disp, log)
+        tree = _expand_tree_once(tree, grammar, expand_node_min_cost, disp, log)
         
     assert possible_expansions(tree) == 0
 
     return tree
 
 
-# In[ ]:
+# In[79]:
 
 
-expanded_tree = expand_tree_minmax(init_tree(), EXPR_GRAMMAR, min_symbols=10, max_symbols=10)
+expanded_tree = expand_tree_minmax(init_tree(), EXPR_GRAMMAR, min_nonterminals=10, max_nonterminals=10)
 print(repr(all_terminals(expanded_tree)))
 display_tree(expanded_tree)
 

@@ -4,8 +4,6 @@
 # # _Title_
 # 
 # _Brief abstract/introduction/motivation.  State what the chapter is about in 1-2 paragraphs._
-# 
-# _If you set a title here, also set it up in the notebook metadata, such that it also appears in the PDF cover._
 
 # **Prerequisites**
 # 
