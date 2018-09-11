@@ -11916,7 +11916,7 @@ a.anchor-link {
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Prerequisites</strong></p>
 <ul>
-<li>You should know how basic fuzzing works, e.g. from the <a href="Basic_Fuzzing.slides.html">Chapter introducing fuzzing</a>.</li>
+<li>You should know how basic fuzzing works, e.g. from the <a href="Fuzzer.slides.html">Chapter introducing fuzzing</a>.</li>
 <li>Knowledge on <a href="Mutation_Fuzzing.slides.html">mutation-based fuzzing</a> and <a href="Coverage.slides.html">coverage</a> is <em>not</em> required yet, but still recommended.</li>
 </ul>
 
@@ -11927,7 +11927,7 @@ a.anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Input-Languages">Input Languages<a class="anchor-link" href="#Input-Languages">&#182;</a></h2><p>All possible behaviors of a program can be triggered by its input.  "Input" here can be a wide range of possible sources: We are talking about data read from files or over the network, data input by the user, or data acquired from interaction with other resources.  The set of all these inputs determines how the program will behave – including its failures.  When testing, it is thus very helpful to think about possible input sources, how to get them under control, and <em>how to systematically test them</em>.</p>
+<h2 id="Input-Languages">Input Languages<a class="anchor-link" href="#Input-Languages">&#182;</a></h2><p>All possible behaviors of a program can be triggered by its input.  "Input" here can be a wide range of possible sources: We are talking about data read from files, from the environment, or over the network, data input by the user, or data acquired from interaction with other resources.  The set of all these inputs determines how the program will behave – including its failures.  When testing, it is thus very helpful to think about possible input sources, how to get them under control, and <em>how to systematically test them</em>.</p>
 <p>For the sake of simplicity, we will assume for now that the program has only one source of inputs; this is the same assumption we have been using in the previous chapters, too.  The set of valid inputs to a program is called a <em>language</em>.  Languages range from the simple to the complex: the CSV language denotes the set of valid comma-separated inputs, whereas the Python language denotes the set of valid Python programs.  We commonly separate data languages and programming languages, although any program can also be treated as input data (say, to a compiler).  The <a href="https://en.wikipedia.org/wiki/List_of_file_formats">Wikipedia page on file formats</a> lists more than 1,000 different file formats, each of which is its own language.</p>
 
 </div>
@@ -11947,22 +11947,19 @@ a.anchor-link {
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Rules-and-Expansions">Rules and Expansions<a class="anchor-link" href="#Rules-and-Expansions">&#182;</a></h3><p>To formally specify input languages, <em>grammars</em> are among the most popular (and best understood) formalisms.  A grammar consists of a <em>start symbol</em> and a set of <em>rules</em> which indicate how the start symbol (and other symbols) can be expanded.  As an example, consider the following grammar, denoting a sequence of two digits:</p>
 
-<pre><code>grammar
-&lt;start&gt; ::= &lt;digit&gt;&lt;digit&gt;
+<pre><code>&lt;start&gt; ::= &lt;digit&gt;&lt;digit&gt;
 &lt;digit&gt; ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
 <p>To read such a grammar, start with the starting symbol (<code>&lt;start&gt;</code>).  A rule <code>&lt;A&gt; ::= &lt;B&gt;</code> means that the symbol on the left side (<code>&lt;A&gt;</code>) can be replaced by the string on the right side (<code>&lt;B&gt;</code>).  In the above grammar, <code>&lt;start&gt;</code> would be replaced by <code>&lt;digit&gt;&lt;digit&gt;</code>.</p>
 <p>In this string again, <code>&lt;digit&gt;</code> would be replaced by the string on the right side of the <code>&lt;digit&gt;</code> rule.  The special operator <code>|</code> denotes <em>alternatives</em>, meaning that any of the digits can be chosen for an expansion.  Each <code>&lt;digit&gt;</code> thus would be expanded into one of the given digits, eventually yielding a string between <code>00</code> and <code>99</code>.  There are no further expansions for <code>0</code> to <code>9</code>, so we are all set.</p>
 <p>The interesting thing about grammars is that they can be <em>recursive</em>. That is, expansions can make use of symbols expanded earlier – which would then be expanded again.  As an example, consider a grammar that describes integers:</p>
 
-<pre><code>grammar
-&lt;start&gt;  ::= &lt;integer&gt;
+<pre><code>&lt;start&gt;  ::= &lt;integer&gt;
 &lt;integer&gt; ::= &lt;digit&gt; | &lt;digit&gt;&lt;integer&gt;
 &lt;digit&gt;   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
 <p>Here, a <code>&lt;integer&gt;</code> is either a single digit, or a digit followed by another integer.  The number <code>1234</code> thus would be represented as a single digit <code>1</code>, followed by the integer <code>234</code>, which in turn is a digit <code>2</code>, followed by the integer <code>34</code>.</p>
 <p>If we wanted to express that an integer can be preceded by a sign (<code>+</code> or <code>-</code>), we would write the grammar as</p>
 
-<pre><code>grammar
-&lt;start&gt;   ::= &lt;number&gt;
+<pre><code>&lt;start&gt;   ::= &lt;number&gt;
 &lt;number&gt;  ::= &lt;integer&gt; | +&lt;integer&gt; | -&lt;integer&gt;
 &lt;integer&gt; ::= &lt;digit&gt; | &lt;digit&gt;&lt;integer&gt;
 &lt;digit&gt;   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
@@ -11977,8 +11974,7 @@ a.anchor-link {
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Arithmetic-Expressions">Arithmetic Expressions<a class="anchor-link" href="#Arithmetic-Expressions">&#182;</a></h3><p>Let us expand our grammar to cover full <em>arithmetic expressions</em> – a poster child example for a grammar.  We see that an expression (<code>&lt;expr&gt;</code>) is either a sum, or a difference, or a term; a term is either a product or a division, or a factor; and a factor is either a number or a parenthesized expression.  Amost all rules can have recursion, and thus allow arbitrary complex expressions such as <code>(1 + 2) * (3.4 / 5.6 - 789)</code>.</p>
 
-<pre><code>grammar
-&lt;start&gt;   ::= &lt;expr&gt;
+<pre><code>&lt;start&gt;   ::= &lt;expr&gt;
 &lt;expr&gt;    ::= &lt;expr&gt; + &lt;term&gt; | &lt;expr&gt; - &lt;term&gt; | &lt;term&gt;
 &lt;term&gt;    ::= &lt;term&gt; * &lt;factor&gt; | &lt;term&gt; / &lt;factor&gt; | &lt;factor&gt;
 &lt;factor&gt;  ::= +&lt;factor&gt; | -&lt;factor&gt; | (&lt;expr&gt;) | &lt;integer&gt; | &lt;integer&gt;.&lt;integer&gt;
@@ -12127,7 +12123,7 @@ a.anchor-link {
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Hatching-Grammars">Hatching Grammars<a class="anchor-link" href="#Hatching-Grammars">&#182;</a></h2><p>Since grammars are represented as strings, it is fairly easy to introduce errors.  So let us introduce a helper function that checks a grammar for consistency.</p>
-<p>Frst, this handy <code>nonterminals()</code> function gets us the list of nonterminals in an expansion.</p>
+<p>First, this handy <code>nonterminals()</code> function gets us the list of nonterminals in an expansion.</p>
 
 </div>
 </div>
@@ -12226,7 +12222,7 @@ a.anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The helper function <code>is_valid_grammar()</code> iterates over a grammar to check whether all used symbols are defined, and vice versa, which is very useful for debugging.  You don't have to dwelve into details here, but as always, it is important to get the input data straight before we make use of it.</p>
+<p>The helper function <code>is_valid_grammar()</code> iterates over a grammar to check whether all used symbols are defined, and vice versa, which is very useful for debugging.  You don't have to delve into details here, but as always, it is important to get the input data straight before we make use of it.</p>
 
 </div>
 </div>
@@ -12459,7 +12455,7 @@ a.anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="A-Simple-Grammar-Fuzzer">A Simple Grammar Fuzzer<a class="anchor-link" href="#A-Simple-Grammar-Fuzzer">&#182;</a></h2><p>Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (<code>"&lt;start&gt;"</code>) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (<code>max_symbols</code>) on the number of symbols.  Furthermore, to avoid being stuck in a sitution where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.</p>
+<h2 id="A-Simple-Grammar-Fuzzer">A Simple Grammar Fuzzer<a class="anchor-link" href="#A-Simple-Grammar-Fuzzer">&#182;</a></h2><p>Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (<code>"&lt;start&gt;"</code>) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (<code>max_symbols</code>) on the number of symbols.  Furthermore, to avoid being stuck in a situation where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.</p>
 
 </div>
 </div>
@@ -12657,7 +12653,7 @@ a.anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Note that this fuzzer is rather inefficient due to the large number of search and replace operations.  On the other hand, the implementation is straight-forward and does the job.  For this chapter, we'll stick to it; in the <a href="Derivation_Trees.slides.html">next chapter</a>, we'll show how to build a more efficient one.</p>
+<p>Note that this fuzzer is rather inefficient due to the large number of search and replace operations.  On the other hand, the implementation is straightforward and does the job.  For this chapter, we'll stick to it; in the <a href="Derivation_Trees.slides.html">next chapter</a>, we'll show how to build a more efficient one.</p>
 
 </div>
 </div>
@@ -14257,7 +14253,7 @@ Average time: 0.039678219691559206
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Here comes <code>expand_tree_once()</code>, the core method of our tree expansion algorithm.  It first checks whether it is currently being applied on a nonterminal symbol without expansion; if so, it invokes <code>expand_node_randomly()</code> on it as above.  (With the <code>expand_node</code> parameter, we can actually select the function to use for expansion.)</p>
-<p>If the node is already expanded (i.e. has children), it checks the subset of children which still have unexpanded symbols; ranomly selects one of them, and applies itself recursively on that child.</p>
+<p>If the node is already expanded (i.e. has children), it checks the subset of children which still have unexpanded symbols; randomly selects one of them, and applies itself recursively on that child.</p>
 <p>The <code>expand_tree_once()</code> function replaces the child <em>in place</em>, meaning that it actually mutates the tree being passed as an argument rather than returning a new tree.  This in-place mutation is what makes this function particularly efficient.</p>
 
 </div>
@@ -17002,7 +16998,7 @@ Average time: 0.039678219691559206
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We see that in each step, <code>expand_node_min_cost()</code> chooses an expansion that does not increase the number of symbols, evantually closing all open expansions.</p>
+<p>We see that in each step, <code>expand_node_min_cost()</code> chooses an expansion that does not increase the number of symbols, eventually closing all open expansions.</p>
 
 </div>
 </div>

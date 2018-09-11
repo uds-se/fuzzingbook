@@ -3,11 +3,11 @@
 
 # # Mutation-Based Fuzzing
 # 
-# Most [randomly generated inputs](Basic_Fuzzing.ipynb) are syntactically _invalid_ and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is by _mutating_ existing valid inputs - that is, introducing small changes that may still keep the input valid, yet exercise new behavior.
+# Most [randomly generated inputs](Fuzzer.ipynb) are syntactically _invalid_ and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is by _mutating_ existing valid inputs - that is, introducing small changes that may still keep the input valid, yet exercise new behavior.
 
 # **Prerequisites**
 # 
-# * You should know how basic fuzzing works; for instance, from the ["Fuzzing"](Basic_Fuzzing.ipynb) chapter.
+# * You should know how basic fuzzing works; for instance, from the ["Fuzzing"](Fuzzer.ipynb) chapter.
 
 # ## Fuzzing a URL Parser
 # 
@@ -67,7 +67,7 @@ def http_program(url):
 # In[5]:
 
 
-from Basic_Fuzzing import fuzzer
+from Fuzzer import fuzzer
 
 
 # In[6]:
@@ -174,7 +174,7 @@ years_until_success
 
 # ## Mutating Inputs
 # 
-# The alternative to generating random strings from scratch is to start with a guiven _valid_ input, and then to subsequently _mutate_ it.  A _mutation_ in this context is a simple string manipulation - say, inserting a (random) character, deleting a character, or flipping a bit in a character representation.  Here are some mutations to get you started:
+# The alternative to generating random strings from scratch is to start with a given _valid_ input, and then to subsequently _mutate_ it.  A _mutation_ in this context is a simple string manipulation - say, inserting a (random) character, deleting a character, or flipping a bit in a character representation.  Here are some mutations to get you started:
 
 # In[18]:
 
@@ -492,7 +492,7 @@ plt.ylabel('lines covered');
 
 # ### Exercise 1
 # 
-# Apply the above non-guided mutation-based fuzzing technique on `bc`, using files, as in the chapter ["Introduction to Fuzzing"](Basic_Fuzzing.ipynb).
+# Apply the above non-guided mutation-based fuzzing technique on `bc`, using files, as in the chapter ["Introduction to Fuzzing"](Fuzzer.ipynb).
 
 # ### Exercise 2
 # 
@@ -544,4 +544,4 @@ plt.ylabel('lines covered');
 
 # ### Exercise 5
 # 
-# Design and implement a system that will gather a population of URLs from the Web.  Can you achieve a higher coverage with these samples?  What if you use them as intiial population for further mutation?
+# Design and implement a system that will gather a population of URLs from the Web.  Can you achieve a higher coverage with these samples?  What if you use them as initial population for further mutation?

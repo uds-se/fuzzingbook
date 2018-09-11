@@ -3,12 +3,12 @@
 
 # # Getting Coverage
 # 
-# In the [previous chapter](Basic_Fuzzing.ipynb), we introduced _basic fuzzing_ – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a _proxy for the likelihood of a test to uncover a bug._  In this chapter, we introduce the concept of _code coverage_, measuring which parts of a program are actually executed during a test run.
+# In the [previous chapter](Fuzzer.ipynb), we introduced _basic fuzzing_ – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a _proxy for the likelihood of a test to uncover a bug._  In this chapter, we introduce the concept of _code coverage_, measuring which parts of a program are actually executed during a test run.
 
 # **Prerequisites**
 # 
 # * You need basic understanding of how a program is executed.
-# * You should have learned about basic fuzzing in the [previous chapter](Basic_Fuzzing.ipynb).
+# * You should have learned about basic fuzzing in the [previous chapter](Fuzzer.ipynb).
 
 # ## A CGI Decoder
 # 
@@ -118,7 +118,7 @@ except ValueError:
 
 # ## Tracing Executions
 # 
-# One nice feature of black-box testing is that one can actually automatically assess whether some program feature was covered.  To this end, one _instruments_ the execution of the program such that during execution, a special functionality keeps track of which code was executed.  After testing, this information can be passed to the programmer, who can then focus on writing tests that cover the yet uncovered code.
+# One nice feature of white-box testing is that one can actually automatically assess whether some program feature was covered.  To this end, one _instruments_ the execution of the program such that during execution, a special functionality keeps track of which code was executed.  After testing, this information can be passed to the programmer, who can then focus on writing tests that cover the yet uncovered code.
 
 # ### Tracing Executions in Python
 # 
@@ -400,7 +400,7 @@ cov_max.coverage() - cov_plus.coverage()
 # In[52]:
 
 
-from Basic_Fuzzing import fuzzer
+from Fuzzer import fuzzer
 
 
 # In[53]:
@@ -410,7 +410,7 @@ s = fuzzer()
 s
 
 
-# Here's the invocation and the coverage we achieve.  We wrap `cgi_decode()` in a `try...except` block such that we can ignore `ValueError` exceptions raissed by illegal `%xx` formats.
+# Here's the invocation and the coverage we achieve.  We wrap `cgi_decode()` in a `try...except` block such that we can ignore `ValueError` exceptions raised by illegal `%xx` formats.
 
 # In[54]:
 

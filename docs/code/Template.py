@@ -7,7 +7,7 @@
 
 # **Prerequisites**
 # 
-# * _Refer to earlier chapters as notebooks here, as here:_ [Earlier Chapter](Basic_Fuzzing.ipynb).
+# * _Refer to earlier chapters as notebooks here, as here:_ [Earlier Chapter](Fuzzer.ipynb).
 
 # ## _Section 1_
 # 

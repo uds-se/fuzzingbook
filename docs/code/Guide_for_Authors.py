@@ -18,7 +18,7 @@
 # * consist of letters and underscores (`_`) only
 # * should use underscores (`_`) to separate words.
 # 
-# All non-notebook files and folders come with lowercase letters; this may make it easier to differentiate them.
+# All non-notebook files and folders come with lowercase letters; this may make it easier to differentiate them.  The special notebook `index.ipynb` gets converted into the home pages `index.html` (on fuzzingbook.org) and `README.md` (on GitHub).
 # 
 # Notebooks are stored in the `notebooks` folder.
 
@@ -43,9 +43,9 @@
 # 
 # The derived material for the book ends up in the `docs/` folder, from where it is eventually pushed to the [fuzzingbook website](http://www.fuzzingbook.org/).  This site allows to read the chapters online, can launch Jupyter notebooks using the binder service, and provides access to code and slide formats.  Use `make publish` to create and update the site.
 
-# ### The Book
+# ### The Book PDF
 # 
-# The book is compiled automatically from the individual notebooks.  Each notebook becomes a chapter; references are compiled in the final chapter.  Use `make book` to create the book.
+# The book PDF is compiled automatically from the individual notebooks.  Each notebook becomes a chapter; references are compiled in the final chapter.  Use `make book` to create the book.
 
 # ## Creating and Building
 
@@ -55,13 +55,13 @@
 # 
 # 1. Jupyter notebook.  The easiest way to install this is via the [Anaconda distribution](https://www.anaconda.com/download/).
 # 
-# 2. Once you have the Jupyter notebook installed, you can start editing and coding right away by starting `jupyter notebook` (or `jupyter lab`) in the topmost folder.
+# 2. Once you have the Jupyter notebook installed, you can start editing and coding right away by starting `jupyter notebook` (or `jupyter lab`) in the topmost project folder.
 # 
 # 3. If (like me) you don't like the Jupyter Notebook interface, there's two alternatives I can recommend:
 #     * [Jupyter Lab](https://jupyterlab.readthedocs.io/en/stable/) is the designated successor to Jupyter Notebook.  Invoke it as `jupyter lab`.  It comes with a much more modern interface, but misses autocompletion and a couple of extensions.  I am running it [as a Desktop application](http://christopherroach.com/articles/jupyterlab-desktop-app/) which gets rid of all the browser toolbars.
 #     * On the Mac, the [Pineapple app](https://nwhitehead.github.io/pineapple/) integrates a nice editor with a local server.  This is easy to use, but misses a few features; also, it hasn't seen updates since 2015.
 # 
-# 4. To create the entire book (with citations, references, and all), you also need the [ipybublish](https://github.com/chrisjsewell/ipypublish) package.  This allows you to merge multiple chapters into a single PDF or HTML file, create slides, and more.  A Makefile provides the essential tools for creation.
+# 4. To create the entire book (with citations, references, and all), you also need the [ipybublish](https://github.com/chrisjsewell/ipypublish) package.  This allows you to create the HTML files, merge multiple chapters into a single PDF or HTML file, create slides, and more.  The Makefile provides the essential tools for creation.
 # 
 
 # ### Version Control
@@ -93,13 +93,28 @@
 # 
 # 4. Add it to the git repository.
 
+# ## Teaching a Topic
+# 
+# Each chapter should be devoted to a central concept and a small set of lessons to be learned.  I recommend the following structure:
+# 
+# * Introduce the problem ("We want to parse inputs")
+# * Illustrate it with some code examples ("Here's some input I'd like to parse")
+# * Develop a first (possibly quick and dirty) solution ("A PEG parser is short and often does the job"_
+# * Show that it works and how it works ("Here's a neat derivation tree.  Look how we can use this to mutate and combine expressions!")
+# * Develop a second, more elaborated solution, which should then become the main contribution.  ("Here's a general LR(1) parser that does not require a special grammar format.  (You can skip it if you're not interested)")
+# * Offload non-essential extensions to later sections or to exercises.  ("Implement a universal parser, using the Dragon Book")
+# 
+# The key idea is that readers should be able to grasp the essentials of the problem and the solution in the beginning of the chapter, and get further into details as they progress through it.  Make it easy for readers to be drawn in, providing insights of value quickly.  If they are interested to understand how things work, they will get deeper into the topic.  If they just want to use the technique (because they may be more interested in later chapters), having them read only the first few examples should be fine for them, too.
+# 
+# Whatever you introduce should be motivated first, and illustrated after.  Motivate the code you'll be writing, and use plenty of examples to show what the code just introduced is doing.  Remember that readers should have fun interacting with your code and your examples.  Show and tell again and again and again.
+
 # ## Coding
 
 # ### Set up
 # 
 # The first code block in each notebook should be
 
-# In[2]:
+# In[1]:
 
 
 # import fuzzingbook_utils # only in notebook
@@ -122,23 +137,17 @@
 # Beyond simple syntactical things, here's a [very nice guide](https://docs.python-guide.org/writing/style/) to get you started writing "pythonic" code.
 # 
 
-# ### Design and Architecture
-# 
-# Stick to simple functions and data types.  We want our readers to focus on functionality, not Python.  You are encouraged to write in a "pythonic" style, making use of elegant Python features such as list comprehensions, sets, and more; however, if you do so, be sure to explain the code such that readers familiar with, say, C or Java can still understand things.
-# 
-# Avoid object orientation – in notebooks, you can only define classes as a whole, which clashes with the notebook style of incrementally developing a program.
-
 # ### Importing Code from Notebooks
 # 
 # To import the code of individual notebooks, you can import directly from .ipynb notebook files.
 
+# In[2]:
+
+
+from Fuzzer import fuzzer
+
+
 # In[3]:
-
-
-from Basic_Fuzzing import fuzzer
-
-
-# In[4]:
 
 
 fuzzer(100, ord('0'), 10)
@@ -156,6 +165,69 @@ fuzzer(100, ord('0'), 10)
 # The exported Python code will import from the respective .py file instead.  (There's no filtering here as with notebooks, so you'll see plenty of output when importing.)
 
 # Import modules only as you need them, such that you can motivate them well in the text.
+
+# ### Design and Architecture
+# 
+# Stick to simple functions and data types.  We want our readers to focus on functionality, not Python.  You are encouraged to write in a "pythonic" style, making use of elegant Python features such as list comprehensions, sets, and more; however, if you do so, be sure to explain the code such that readers familiar with, say, C or Java can still understand things.
+
+# ### Introducing Classes
+# 
+# Defining _classes_ can be a bit tricky, since all of a class must fit into a single cell.  This defeats the incremental style preferred for notebooks.  By defining a class _as a subclass of itself_, though, you can avoid this problem.
+
+# Here's an example.  We introduce a class `Foo`:
+
+# In[4]:
+
+
+class Foo:
+    def __init__(self):
+        pass
+    def bar(self):
+        pass
+
+
+# Now we could discuss what `__init__()` and `bar()` do, or give an example of how to use them:
+
+# In[5]:
+
+
+f = Foo()
+f.bar()
+
+
+# We now can introduce a new `Foo` method by subclassing from `Foo` into a class which is _also_ called `Foo`:
+
+# In[6]:
+
+
+class Foo(Foo):
+    def baz(self):
+        pass
+
+
+# This is the same as if we had subclassed `Foo` into `Foo_1` with `Foo` then becoming an alias for `Foo_1`.  The original `Foo` class is overshadowed by the new one:
+
+# In[7]:
+
+
+new_f = Foo()
+new_f.baz()
+
+
+# Note, though, that _existing_ objects keep their original class:
+
+# In[8]:
+
+
+from ExpectError import ExpectError
+
+
+# In[9]:
+
+
+with ExpectError():
+    f.baz()
+
 
 # ## Helpers
 # 
@@ -323,13 +395,13 @@ fuzzer(100, ord('0'), 10)
 # 
 # * To refer to cells (e.g. equations or figures), you can define a label as cell metadata.  See [Floating Elements and References](#Floating-Elements-and-References) for details.
 # 
-# * To refer to other notebooks, use a Markdown cross-reference to the notebook file, e.g. [the "Fuzzing" chapter](Basic_Fuzzing.ipynb).  A special script will be run to take care of these links.  Reference chapters by name, not by number.
+# * To refer to other notebooks, use a Markdown cross-reference to the notebook file, e.g. [the "Fuzzing" chapter](Fuzzer.ipynb).  A special script will be run to take care of these links.  Reference chapters by name, not by number.
 
 # ### Citations
 # 
 # To cite papers, cite in LaTeX style.  The text
 
-# In[1]:
+# In[10]:
 
 
 print(r"\cite{purdom1972}")
@@ -355,7 +427,7 @@ print(r"\cite{purdom1972}")
 
 # If you want to produce tables from Python data, the `PrettyTable` package (included in the book) allows to [produce tables with LaTeX-style formatting.](http://blog.juliusschulz.de/blog/ultimate-ipython-notebook)
 
-# In[4]:
+# In[11]:
 
 
 import numpy as np
@@ -369,7 +441,7 @@ pt.PrettyTable(data, [r"$\frac{a}{b}$", r"$b$", r"$c$"], print_latex_longtable=F
 # 
 # It is possible to include plots in notebooks.  Here is an example of plotting a function:
 
-# In[5]:
+# In[12]:
 
 
 # get_ipython().run_line_magic('matplotlib', 'inline') # only in notebook
@@ -383,7 +455,7 @@ plt.title('A simple chirp');
 
 # And here's an example of plotting data:
 
-# In[6]:
+# In[13]:
 
 
 # get_ipython().run_line_magic('matplotlib', 'inline') # only in notebook

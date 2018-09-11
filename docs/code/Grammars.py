@@ -7,12 +7,12 @@
 
 # **Prerequisites**
 # 
-# * You should know how basic fuzzing works, e.g. from the [Chapter introducing fuzzing](Basic_Fuzzing.ipynb).
+# * You should know how basic fuzzing works, e.g. from the [Chapter introducing fuzzing](Fuzzer.ipynb).
 # * Knowledge on [mutation-based fuzzing](Mutation_Fuzzing.ipynb) and [coverage](Coverage.ipynb) is _not_ required yet, but still recommended.
 
 # ## Input Languages
 # 
-# All possible behaviors of a program can be triggered by its input.  "Input" here can be a wide range of possible sources: We are talking about data read from files or over the network, data input by the user, or data acquired from interaction with other resources.  The set of all these inputs determines how the program will behave – including its failures.  When testing, it is thus very helpful to think about possible input sources, how to get them under control, and _how to systematically test them_.
+# All possible behaviors of a program can be triggered by its input.  "Input" here can be a wide range of possible sources: We are talking about data read from files, from the environment, or over the network, data input by the user, or data acquired from interaction with other resources.  The set of all these inputs determines how the program will behave – including its failures.  When testing, it is thus very helpful to think about possible input sources, how to get them under control, and _how to systematically test them_.
 # 
 # For the sake of simplicity, we will assume for now that the program has only one source of inputs; this is the same assumption we have been using in the previous chapters, too.  The set of valid inputs to a program is called a _language_.  Languages range from the simple to the complex: the CSV language denotes the set of valid comma-separated inputs, whereas the Python language denotes the set of valid Python programs.  We commonly separate data languages and programming languages, although any program can also be treated as input data (say, to a compiler).  The [Wikipedia page on file formats](https://en.wikipedia.org/wiki/List_of_file_formats) lists more than 1,000 different file formats, each of which is its own language.
 
@@ -22,7 +22,7 @@
 # 
 # To formally specify input languages, _grammars_ are among the most popular (and best understood) formalisms.  A grammar consists of a _start symbol_ and a set of _rules_ which indicate how the start symbol (and other symbols) can be expanded.  As an example, consider the following grammar, denoting a sequence of two digits:
 # 
-# ```grammar
+# ```
 # <start> ::= <digit><digit>
 # <digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 # ```
@@ -33,7 +33,7 @@
 # 
 # The interesting thing about grammars is that they can be _recursive_. That is, expansions can make use of symbols expanded earlier – which would then be expanded again.  As an example, consider a grammar that describes integers:
 # 
-# ```grammar
+# ```
 # <start>  ::= <integer>
 # <integer> ::= <digit> | <digit><integer>
 # <digit>   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
@@ -43,7 +43,7 @@
 # 
 # If we wanted to express that an integer can be preceded by a sign (`+` or `-`), we would write the grammar as
 # 
-# ```grammar
+# ```
 # <start>   ::= <number>
 # <number>  ::= <integer> | +<integer> | -<integer>
 # <integer> ::= <digit> | <digit><integer>
@@ -56,7 +56,7 @@
 # 
 # Let us expand our grammar to cover full _arithmetic expressions_ – a poster child example for a grammar.  We see that an expression (`<expr>`) is either a sum, or a difference, or a term; a term is either a product or a division, or a factor; and a factor is either a number or a parenthesized expression.  Amost all rules can have recursion, and thus allow arbitrary complex expressions such as `(1 + 2) * (3.4 / 5.6 - 789)`.
 # 
-# ```grammar
+# ```
 # <start>   ::= <expr>
 # <expr>    ::= <expr> + <term> | <expr> - <term> | <term>
 # <term>    ::= <term> * <factor> | <term> / <factor> | <factor>
@@ -132,7 +132,7 @@ EXPR_GRAMMAR["<digit>"]
 # 
 # Since grammars are represented as strings, it is fairly easy to introduce errors.  So let us introduce a helper function that checks a grammar for consistency.
 # 
-# Frst, this handy `nonterminals()` function gets us the list of nonterminals in an expansion.  
+# First, this handy `nonterminals()` function gets us the list of nonterminals in an expansion.  
 
 # In[6]:
 
@@ -182,7 +182,7 @@ assert is_nonterminal("<abc>")
 assert not is_nonterminal("+")
 
 
-# The helper function `is_valid_grammar()` iterates over a grammar to check whether all used symbols are defined, and vice versa, which is very useful for debugging.  You don't have to dwelve into details here, but as always, it is important to get the input data straight before we make use of it.
+# The helper function `is_valid_grammar()` iterates over a grammar to check whether all used symbols are defined, and vice versa, which is very useful for debugging.  You don't have to delve into details here, but as always, it is important to get the input data straight before we make use of it.
 
 # In[11]:
 
@@ -267,7 +267,7 @@ assert not is_valid_grammar({"<start>": [1, 2, 3]})
 
 # ## A Simple Grammar Fuzzer
 # 
-# Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (`"<start>"`) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (`max_symbols`) on the number of symbols.  Furthermore, to avoid being stuck in a sitution where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.
+# Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (`"<start>"`) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (`max_symbols`) on the number of symbols.  Furthermore, to avoid being stuck in a situation where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.
 
 # In[19]:
 
@@ -326,7 +326,7 @@ for i in range(10):
 
 # \todo{Discuss.}
 
-# Note that this fuzzer is rather inefficient due to the large number of search and replace operations.  On the other hand, the implementation is straight-forward and does the job.  For this chapter, we'll stick to it; in the [next chapter](Derivation_Trees.ipynb), we'll show how to build a more efficient one.
+# Note that this fuzzer is rather inefficient due to the large number of search and replace operations.  On the other hand, the implementation is straightforward and does the job.  For this chapter, we'll stick to it; in the [next chapter](Derivation_Trees.ipynb), we'll show how to build a more efficient one.
 
 # ## Some Grammars
 
@@ -788,7 +788,7 @@ print(any_possible_expansions(derivation_tree))
 
 # Here comes `expand_tree_once()`, the core method of our tree expansion algorithm.  It first checks whether it is currently being applied on a nonterminal symbol without expansion; if so, it invokes `expand_node_randomly()` on it as above.  (With the `expand_node` parameter, we can actually select the function to use for expansion.)
 # 
-# If the node is already expanded (i.e. has children), it checks the subset of children which still have unexpanded symbols; ranomly selects one of them, and applies itself recursively on that child.
+# If the node is already expanded (i.e. has children), it checks the subset of children which still have unexpanded symbols; randomly selects one of them, and applies itself recursively on that child.
 # 
 # The `expand_tree_once()` function replaces the child _in place_, meaning that it actually mutates the tree being passed as an argument rather than returning a new tree.  This in-place mutation is what makes this function particularly efficient.
 
@@ -935,7 +935,7 @@ while any_possible_expansions(derivation_tree):
     display_tree(derivation_tree)
 
 
-# We see that in each step, `expand_node_min_cost()` chooses an expansion that does not increase the number of symbols, evantually closing all open expansions.
+# We see that in each step, `expand_node_min_cost()` chooses an expansion that does not increase the number of symbols, eventually closing all open expansions.
 
 # ## All Together
 # 
