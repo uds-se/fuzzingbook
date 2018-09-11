@@ -348,7 +348,6 @@ chapter_contents = open(chapter_html_file, encoding="utf-8").read()
 # 2. Fix extra newlines in cell output produced by ipypublish
 # 3. Insert the menus and templates as defined above
 chapter_contents = chapter_contents \
-    .replace(".ipynb)", ".html)") \
     .replace("\n\n</pre>", "\n</pre>") \
     .replace("<__HEADER__>", header_template) \
     .replace("<__FOOTER__>", footer_template) \
@@ -372,6 +371,10 @@ chapter_contents = chapter_contents \
     .replace("__SHARE_FACEBOOK__", share_facebook) \
     .replace("__DATE__", notebook_modification_datetime) \
     .replace("__YEAR__", notebook_modification_year)
+
+# Fix simple .ipynb links within text
+chapter_contents = re.sub(r'<a href="([a-zA-Z0-9_]*)\.ipynb">', 
+    r'<a href="\1.html">', chapter_contents)
 
 if args.home:
     chapter_contents = chapter_contents.replace("custom.css", menu_prefix + "custom.css")
