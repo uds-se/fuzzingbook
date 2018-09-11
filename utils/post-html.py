@@ -329,7 +329,37 @@ def bibtex_escape(authors):
     }
     return "".join(tex_escape_table.get(c,c) for c in authors)
 
+assert bibtex_escape("Böhme") == r'B{\"o}hme'
+
 authors_bibtex = bibtex_escape(authors).replace(", and ", " and ").replace(", ", " and ")
+
+
+# The other way round
+# Use "grep '\\' fuzzingbook.bib" to see accents currently in use
+def bibtex_unescape(contents):
+    """Fix TeX escapes introduced by BibTeX"""
+    tex_unescape_table = {
+        r'{\"a}': "ä",
+        r'{\"o}': "ö",
+        r'{\"u}': "ü",
+        r'{\"i}': "ï",
+        r'{\"e}': "ë",
+        r'{\"A}': "Ä",
+        r'{\"O}': "Ö",
+        r'{\"U}': "Ü",
+        r'{\ss}': "ß",
+        r'{\`e}': "è",
+        r'{\'e}': "é",
+        r'{\`a}': "à",
+        r'{\'a}': "á"
+    }
+    for key in tex_unescape_table:
+        contents = contents.replace(key, tex_unescape_table[key])
+    return contents
+
+assert bibtex_unescape(r"B{\"o}hme") == 'Böhme'
+assert bibtex_unescape(r"P{\`e}zze") == 'Pèzze'
+
 
 # Page title
 if args.home:
@@ -375,6 +405,9 @@ chapter_contents = chapter_contents \
 # Fix simple .ipynb links within text
 chapter_contents = re.sub(r'<a href="([a-zA-Z0-9_]*)\.ipynb">', 
     r'<a href="\1.html">', chapter_contents)
+    
+# Recode TeX accents imported from fuzzingbook.bib
+chapter_contents = bibtex_unescape(chapter_contents)
 
 if args.home:
     chapter_contents = chapter_contents.replace("custom.css", menu_prefix + "custom.css")
