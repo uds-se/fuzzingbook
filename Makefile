@@ -3,7 +3,7 @@
 # Chapters to include in the book, in this order
 PUBLISHED_CHAPTERS = \
 	Intro_Testing.ipynb \
-	Basic_Fuzzing.ipynb \
+	Fuzzer.ipynb \
 	Coverage.ipynb \
 	Mutation_Fuzzing.ipynb \
 	Grammars.ipynb
