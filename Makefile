@@ -16,9 +16,6 @@ BETA_CHAPTERS = \
 
 CHAPTERS = $(PUBLISHED_CHAPTERS) $(BETA_CHAPTERS)
 
-# Coming up next:
-# Parsing?
-
 # Later
 # - Reducing.ipynb
 
