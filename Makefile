@@ -187,10 +187,15 @@ PUBLISH_PLUGINS =
 endif
 endif
 
-# For Python, we can always use the standard Jupyter tools
-CONVERT_TO_PYTHON = $(NBCONVERT) --to python --output-dir=$(CODE_TARGET)
+# For Python, we use our own script that takes care of distinguishing 
+# main (script) code from definitions to be imported
+EXPORT_NOTEBOOK_CODE = notebooks/fuzzingbook_utils/export_notebook_code.py 
+CONVERT_TO_PYTHON = $(PYTHON) $(EXPORT_NOTEBOOK_CODE)
 
-# For slides, we also use the standard Jupyter tools
+# This would be the Jupyter alternative
+# CONVERT_TO_PYTHON = $(NBCONVERT) --to python --output-dir=$(CODE_TARGET)
+
+# For slides, we use the standard Jupyter tools
 # Main reason: Jupyter has a neat interface to control slides/sub-slides/etc
 CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
 REVEAL_JS = $(SLIDES_TARGET)reveal.js
@@ -338,9 +343,9 @@ $(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
 
 # For code, we comment out fuzzingbook imports, 
 # ensuring we import a .py and not the .ipynb file
-$(CODE_TARGET)%.py:	$(NOTEBOOKS)/%.ipynb
-	$(CONVERT_TO_PYTHON) $<
-	sh utils/adjust-py-export.sh < $@ > $@~ && mv $@~ $@
+$(CODE_TARGET)%.py:	$(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
+	$(CONVERT_TO_PYTHON) $< > $@~ && mv $@~ $@
+	-chmod +x $@
 
 # For word, we convert from the HTML file
 $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
