@@ -435,16 +435,27 @@ check-crossref crossref xref: $(SOURCES)
 		fi \
 	done
 
-# Run all code
+# Run all code.  This should produce no failures.
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
 $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 	$(PYTHON) $< > $@ 2>&1 || (echo "Error while running $(PYTHON)" >> $@; tail $@; exit 1)
 
 check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
+	
+# Import all code.  This should produce no output (or error messages).
+check-import: $(CODE_TARGET)import_all.py
+	$(PYTHON) $< 2>&1 | tee $<.out
+	@test ! -s $<.out && echo "All import checks passed."
+
+IMPORTS = $(subst .ipynb,,$(SOURCE_FILES))
+$(CODE_TARGET)import_all.py: Makefile
+	echo "#!/usr/bin/env $(PYTHON)" > $@
+	(for file in $(IMPORTS); do echo import $$file; done) >> $@
+	-chmod +x $@
 
 # All checks
-check check-all: check-style check-code check-crossref
+check check-all: check-code check-import check-style check-crossref
 	
 # Normalize notebooks
 normalize: utils/nbnormalize.py
