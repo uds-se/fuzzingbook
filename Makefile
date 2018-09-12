@@ -5,8 +5,9 @@ PUBLISHED_CHAPTERS = \
 	Intro_Testing.ipynb \
 	Fuzzer.ipynb \
 	Coverage.ipynb \
-	Mutation_Fuzzing.ipynb \
-	Grammars.ipynb
+	MutationFuzzer.ipynb \
+	Grammars.ipynb \
+	GrammarFuzzer.ipynb
 
 BETA_CHAPTERS = \
 	Grammar_Coverage.ipynb \
