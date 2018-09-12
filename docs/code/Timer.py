@@ -1,17 +1,22 @@
+#!/usr/bin/env python
 
-# coding: utf-8
+# This code is part of "Generating Software Tests"
+# (https://www.fuzzingbook.org/)
+# It is licensed under a Creative Commons
+# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 # # Timer
 # 
 # The code in this notebook helps with measuring time.
-
+# 
 # **Prerequisites**
 # 
 # * This notebook needs some understanding on advanced concepts in Python, notably 
 #     * classes
 #     * the Python `with` statement
 #     * measuring time
-
+# 
 # ## Measuring Time
 # 
 # The class `Timer` allows to measure the elapsed time during some code execution.  A typical usage looks as follows:
@@ -25,31 +30,15 @@
 # print(t.elapsed_time())
 # ```
 # 
-
-# In[4]:
-
-
-# import fuzzingbook_utils # only in notebook
-
-
-# In[5]:
-
-
+# import fuzzingbook_utils
+# 
 import time
-
-
-# In[6]:
-
 
 def clock():
     try:
         return time.perf_counter()  # Python 3
     except:
         return time.clock()         # Python 2
-
-
-# In[7]:
-
 
 class Timer(object):
     # Begin of `with` block
@@ -70,34 +59,24 @@ class Timer(object):
         else:
             return self.end_time - self.start_time
 
-
 # Here's an example:
-
-# In[8]:
-
-
+# 
 def some_long_running_function():
     i = 1000000
     while i > 0:
         i -= 1
 
-
-# In[9]:
-
-
-print("Stopping total time:")
-with Timer() as t:
-    some_long_running_function()
-print(t.elapsed_time())
-
-
-# In[11]:
-
-
-print("Stopping time in between:")
-with Timer() as t:
-    for i in range(10):
-        print(t.elapsed_time())
-
-
+if __name__ == "__main__":
+    print("Stopping total time:")
+    with Timer() as t:
+        some_long_running_function()
+    print(t.elapsed_time())
+    
+if __name__ == "__main__":
+    print("Stopping time in between:")
+    with Timer() as t:
+        for i in range(10):
+            print(t.elapsed_time())
+    
 # That's it, folks – enjoy!
+# 

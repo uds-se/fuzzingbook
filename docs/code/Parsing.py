@@ -1,28 +1,22 @@
+#!/usr/bin/env python
 
-# coding: utf-8
+# This code is part of "Generating Software Tests"
+# (https://www.fuzzingbook.org/)
+# It is licensed under a Creative Commons
+# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 # # Parsing and Recombining Inputs
 # 
 # In this chapter, we use grammars to parse and decompose inputs, allowing us to recombine them arbitrarily.  \todo{Work in progress.}
-
+# 
 # **Prerequisites**
 # 
 # * You should have read the [chapter on grammars](Grammars.ipynb).
-
-# In[1]:
-
-
-# import fuzzingbook_utils # only in notebook
-
-
-# In[14]:
-
-
+# 
+# import fuzzingbook_utils
+# 
 from Grammars import EXPR_GRAMMAR, START_SYMBOL, display_tree
-
-
-# In[15]:
-
 
 import functools
 import re
@@ -61,34 +55,26 @@ class PEGParser:
             results.append(res)
         return cursor, results
 
-
-# In[16]:
-
-
 def parse(text, grammar, start_symbol=START_SYMBOL):
     def readall(fn): return ''.join([f for f in open(fn, 'r')]).strip()
 
     result = PEGParser(grammar).unify_key(start_symbol, text)
     return result
 
-
-# In[19]:
-
-
-cursor, tree = parse("1 + 2 * 3", EXPR_GRAMMAR)
-display_tree(tree)
-
-
+if __name__ == "__main__":
+    cursor, tree = parse("1 + 2 * 3", EXPR_GRAMMAR)
+    display_tree(tree)
+    
 # ## _Section 4_
 # 
 # \todo{Add}
-
+# 
 # ## Lessons Learned
 # 
 # * _Lesson one_
 # * _Lesson two_
 # * _Lesson three_
-
+# 
 # ## Next Steps
 # 
 # _Link to subsequent chapters (notebooks) here, as in:_
@@ -97,7 +83,6 @@ display_tree(tree)
 # * [use _grammars_ (i.e., a specification of the input format) to get even more valid inputs](Grammars.ipynb)
 # * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
 # 
-
 # ## Exercises
 # 
 # Close the chapter with a few exercises such that people have things to do.  In Jupyter Notebook, use the `exercise2` nbextension to add solutions that can be interactively viewed or hidden:
@@ -106,32 +91,28 @@ display_tree(tree)
 # * Click on the `solution` button at the top.
 # 
 # (Alternatively, just copy the exercise and solution cells below with their metadata.)
-
+# 
 # ### Exercise 1
 # 
 # _Text of the exercise_
-
-# In[6]:
-
-
-# Some code that is part of the exercise
-
-
+# 
+if __name__ == "__main__":
+    # Some code that is part of the exercise
+    pass
+    
 # _Some more text for the exercise_
-
+# 
 # _Some text for the solution_
-
-# In[7]:
-
-
-# Some code for the solution
-2 + 2
-
-
+# 
+if __name__ == "__main__":
+    # Some code for the solution
+    2 + 2
+    
 # _Some more text for the solution_
-
+# 
 # ### Exercise 2
 # 
 # _Text of the exercise_
-
+# 
 # _Solution for the exercise_
+# 

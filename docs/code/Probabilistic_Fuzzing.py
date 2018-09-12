@@ -1,37 +1,27 @@
+#!/usr/bin/env python
 
-# coding: utf-8
+# This code is part of "Generating Software Tests"
+# (https://www.fuzzingbook.org/)
+# It is licensed under a Creative Commons
+# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 # # Probabilistic Grammar Fuzzing
 # 
 # Let us give grammars even more power by assigning probabilities to individual expansions.  This allows us to control how many of each element should be produced.  \todo{Work in progress.}
-
+# 
 # **Prerequisites**
 # 
 # * You should have read the [chapter on grammars](Grammars.ipynb).
-
-# In[1]:
-
-
-# import fuzzingbook_utils # only in notebook
-
-
-# In[2]:
-
-
+# 
+# import fuzzingbook_utils
+# 
 from Grammars import grammar_fuzzer, is_valid_grammar
 
-
 # We introduce a little helper function that will allow us to add arbitrary options to an expansion.
-
-# In[3]:
-
-
+# 
 def opts(**kwargs):
     return kwargs
-
-
-# In[8]:
-
 
 PROBABILISTIC_EXPR_GRAMMAR = {
     "<start>":
@@ -78,23 +68,19 @@ PROBABILISTIC_EXPR_GRAMMAR = {
 
 assert is_valid_grammar(PROBABILISTIC_EXPR_GRAMMAR)
 
-
-# In[10]:
-
-
-grammar_fuzzer(PROBABILISTIC_EXPR_GRAMMAR)
-
-
+if __name__ == "__main__":
+    grammar_fuzzer(PROBABILISTIC_EXPR_GRAMMAR)
+    
 # ## _Section 4_
 # 
 # \todo{Add}
-
+# 
 # ## Lessons Learned
 # 
 # * _Lesson one_
 # * _Lesson two_
 # * _Lesson three_
-
+# 
 # ## Next Steps
 # 
 # _Link to subsequent chapters (notebooks) here, as in:_
@@ -103,7 +89,6 @@ grammar_fuzzer(PROBABILISTIC_EXPR_GRAMMAR)
 # * [use _grammars_ (i.e., a specification of the input format) to get even more valid inputs](Grammars.ipynb)
 # * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
 # 
-
 # ## Exercises
 # 
 # Close the chapter with a few exercises such that people have things to do.  In Jupyter Notebook, use the `exercise2` nbextension to add solutions that can be interactively viewed or hidden:
@@ -112,32 +97,28 @@ grammar_fuzzer(PROBABILISTIC_EXPR_GRAMMAR)
 # * Click on the `solution` button at the top.
 # 
 # (Alternatively, just copy the exercise and solution cells below with their metadata.)
-
+# 
 # ### Exercise 1
 # 
 # _Text of the exercise_
-
-# In[6]:
-
-
-# Some code that is part of the exercise
-
-
+# 
+if __name__ == "__main__":
+    # Some code that is part of the exercise
+    pass
+    
 # _Some more text for the exercise_
-
+# 
 # _Some text for the solution_
-
-# In[7]:
-
-
-# Some code for the solution
-2 + 2
-
-
+# 
+if __name__ == "__main__":
+    # Some code for the solution
+    2 + 2
+    
 # _Some more text for the solution_
-
+# 
 # ### Exercise 2
 # 
 # _Text of the exercise_
-
+# 
 # _Solution for the exercise_
+# 

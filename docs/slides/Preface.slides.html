@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-<title>Parsing slides</title>
+<title>Preface slides</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -11905,485 +11905,89 @@ a.anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Parsing-and-Recombining-Inputs">Parsing and Recombining Inputs<a class="anchor-link" href="#Parsing-and-Recombining-Inputs">&#182;</a></h1><p>In this chapter, we use grammars to parse and decompose inputs, allowing us to recombine them arbitrarily.  \todo{Work in progress.}</p>
-
+<h1 id="Preface">Preface<a class="anchor-link" href="#Preface">&#182;</a></h1>
 </div>
 </div>
-</div>
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Prerequisites</strong></p>
+<p>Software has bugs.  This book addresses this problem by automated software testing, specifically by showing how to <em>generate tests automatically</em>.  Such generated tests can be extended into ordinary tests, by adding code that checks for correct behavior; or be used for "fuzzing", that is, finding inputs that cause a program to crash, hang, or otherwise malfunction.  The aim is to exercise a maximum of functionality with a minimum of effort.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The book is designed as a textbook for a course in software testing; or as supplementary material in a software testing or software engineering course; and as a resource for software developers.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The main characteristics of this book are:</p>
 <ul>
-<li>You should have read the <a href="Grammars.slides.html">chapter on grammars</a>.</li>
+<li><p>It assumes that the reader's goal is to achieve a maximum of software reliability with a minimum of cost, automating test generation and execution as much as possible;</p>
+</li>
+<li><p>It presents a set of practical techniques that can be immediately put to use on a large variety of software, presenting and discussing executable source code for all techniques;</p>
+</li>
+<li><p>It places software test generation techniques in a coherent framework, allowing the techniques to dovetail and integrate with each other.</p>
+</li>
 </ul>
 
 </div>
 </div>
-</div></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">import</span> <span class="nn">re</span>
-
-<span class="n">RE_NONTERMINAL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(&lt;[a-zA-Z_]*&gt;)&#39;</span><span class="p">)</span>
-
-<span class="k">class</span> <span class="nc">PEGParser</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">rule</span><span class="p">):</span> <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">RE_NONTERMINAL</span><span class="p">,</span> <span class="n">rule</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:[</span><span class="n">split</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">rules</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-
-    <span class="k">def</span> <span class="nf">literal_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">cursor</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">cursor</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">),</span> <span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="p">[]))</span> <span class="k">if</span> <span class="n">text</span><span class="p">[</span><span class="n">cursor</span><span class="p">:]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-
-    <span class="c1"># memoize repeated calls.</span>
-    <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">unify_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="n">rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-        <span class="c1"># make a generator for matching rules. We dont want a list because</span>
-        <span class="c1"># we want to be lazy and evaluate only until the first matching</span>
-        <span class="n">rets</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unify_line</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">cursor</span><span class="p">)</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">)</span>
-        <span class="c1"># return the first non null (matching) rule&#39;s cursor and res</span>
-        <span class="n">cursor</span><span class="p">,</span> <span class="n">res</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">ret</span> <span class="k">for</span> <span class="n">ret</span> <span class="ow">in</span> <span class="n">rets</span> <span class="k">if</span> <span class="n">ret</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span> <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">unify_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parts</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">cursor</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">is_symbol</span><span class="p">(</span><span class="n">v</span><span class="p">):</span> <span class="k">return</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&lt;&#39;</span>
-
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
-            <span class="c1"># get the matcher function</span>
-            <span class="n">matcher</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unify_key</span> <span class="k">if</span> <span class="n">is_symbol</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">literal_match</span><span class="p">)</span>
-            <span class="c1"># compute the cursor, and the result from it.</span>
-            <span class="n">cursor</span><span class="p">,</span> <span class="n">res</span> <span class="o">=</span> <span class="n">matcher</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">cursor</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">cursor</span><span class="p">,</span> <span class="n">results</span>
-</pre></div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Why-this-book?">Why this book?<a class="anchor-link" href="#Why-this-book?">&#182;</a></h2><p>Software test generation brings software quality to a new level.  Not only are we talking about automatically <em>executing</em> software tests (as with unit testing), but actually <em>producing</em> software tests automatically.  In contrast to the simple generation of random inputs (or "fuzzing"), we discuss test generation techniques that adhere to the input language, that systematically cover code structure, and that even are able to automatically learn the input language of the program under test.  These novel techniques lead to dramatic improvements in test generation and software testing, and they now are mature enough to be assembled in a book - even with executable code.</p>
 
 </div>
 </div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">readall</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)])</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-    <span class="n">result</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span><span class="o">.</span><span class="n">unify_key</span><span class="p">(</span><span class="n">start_symbol</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">result</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cursor</span><span class="p">,</span> <span class="n">tree</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="s2">&quot;1 + 2 * 3&quot;</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-
-<div class="output_svg output_subarea ">
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
- "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
- -->
-<!-- Title: %3 Pages: 1 -->
-<svg width="231pt" height="380pt"
- viewBox="0.00 0.00 231.00 380.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 376)">
-<title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-376 227,-376 227,4 -4,4"/>
-<!-- 0 -->
-<g id="node1" class="node">
-<title>0</title>
-<text text-anchor="middle" x="94.5" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
-</g>
-<!-- 1 -->
-<g id="node2" class="node">
-<title>1</title>
-<text text-anchor="middle" x="94.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
-</g>
-<!-- 0&#45;&gt;1 -->
-<g id="edge1" class="edge">
-<title>0&#45;&gt;1</title>
-<path fill="none" stroke="#000000" d="M94.5,-356.9748C94.5,-350.195 94.5,-339.966 94.5,-331.1331"/>
-<polygon fill="#000000" stroke="#000000" points="98.0001,-331.0561 94.5,-321.0561 91.0001,-331.0561 98.0001,-331.0561"/>
-</g>
-<!-- 2 -->
-<g id="node3" class="node">
-<title>2</title>
-<text text-anchor="middle" x="41.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
-</g>
-<!-- 1&#45;&gt;2 -->
-<g id="edge2" class="edge">
-<title>1&#45;&gt;2</title>
-<path fill="none" stroke="#000000" d="M86.6797,-305.9748C78.8511,-298.4417 66.5974,-286.6503 56.8255,-277.2472"/>
-<polygon fill="#000000" stroke="#000000" points="58.985,-274.4679 49.3524,-270.0561 54.1313,-279.5119 58.985,-274.4679"/>
-</g>
-<!-- 7 -->
-<g id="node8" class="node">
-<title>7</title>
-<text text-anchor="middle" x="94.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000"> + </text>
-</g>
-<!-- 1&#45;&gt;7 -->
-<g id="edge7" class="edge">
-<title>1&#45;&gt;7</title>
-<path fill="none" stroke="#000000" d="M94.5,-305.9748C94.5,-299.195 94.5,-288.966 94.5,-280.1331"/>
-<polygon fill="#000000" stroke="#000000" points="98.0001,-280.0561 94.5,-270.0561 91.0001,-280.0561 98.0001,-280.0561"/>
-</g>
-<!-- 8 -->
-<g id="node9" class="node">
-<title>8</title>
-<text text-anchor="middle" x="144.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
-</g>
-<!-- 1&#45;&gt;8 -->
-<g id="edge8" class="edge">
-<title>1&#45;&gt;8</title>
-<path fill="none" stroke="#000000" d="M101.8777,-305.9748C109.2631,-298.4417 120.8232,-286.6503 130.042,-277.2472"/>
-<polygon fill="#000000" stroke="#000000" points="132.5906,-279.6471 137.0921,-270.0561 127.5921,-274.7466 132.5906,-279.6471"/>
-</g>
-<!-- 3 -->
-<g id="node4" class="node">
-<title>3</title>
-<text text-anchor="middle" x="30.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
-</g>
-<!-- 2&#45;&gt;3 -->
-<g id="edge3" class="edge">
-<title>2&#45;&gt;3</title>
-<path fill="none" stroke="#000000" d="M39.8769,-254.9748C38.3984,-248.1196 36.1592,-237.7383 34.2398,-228.8392"/>
-<polygon fill="#000000" stroke="#000000" points="37.6595,-228.0934 32.1297,-219.0561 30.8169,-229.5693 37.6595,-228.0934"/>
-</g>
-<!-- 4 -->
-<g id="node5" class="node">
-<title>4</title>
-<text text-anchor="middle" x="27.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
-</g>
-<!-- 3&#45;&gt;4 -->
-<g id="edge4" class="edge">
-<title>3&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M30.0573,-203.9748C29.6585,-197.195 29.0568,-186.966 28.5372,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="32.0258,-177.8333 27.9445,-168.0561 25.0378,-178.2444 32.0258,-177.8333"/>
-</g>
-<!-- 5 -->
-<g id="node6" class="node">
-<title>5</title>
-<text text-anchor="middle" x="27.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 4&#45;&gt;5 -->
-<g id="edge5" class="edge">
-<title>4&#45;&gt;5</title>
-<path fill="none" stroke="#000000" d="M27.5,-152.9748C27.5,-146.195 27.5,-135.966 27.5,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="31.0001,-127.0561 27.5,-117.0561 24.0001,-127.0561 31.0001,-127.0561"/>
-</g>
-<!-- 6 -->
-<g id="node7" class="node">
-<title>6</title>
-<text text-anchor="middle" x="27.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">1</text>
-</g>
-<!-- 5&#45;&gt;6 -->
-<g id="edge6" class="edge">
-<title>5&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M27.5,-101.9748C27.5,-95.195 27.5,-84.966 27.5,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="31.0001,-76.0561 27.5,-66.0561 24.0001,-76.0561 31.0001,-76.0561"/>
-</g>
-<!-- 9 -->
-<g id="node10" class="node">
-<title>9</title>
-<text text-anchor="middle" x="98.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
-</g>
-<!-- 8&#45;&gt;9 -->
-<g id="edge9" class="edge">
-<title>8&#45;&gt;9</title>
-<path fill="none" stroke="#000000" d="M137.7125,-254.9748C130.9859,-247.517 120.495,-235.8857 112.0564,-226.53"/>
-<polygon fill="#000000" stroke="#000000" points="114.612,-224.1376 105.3153,-219.0561 109.414,-228.826 114.612,-224.1376"/>
-</g>
-<!-- 13 -->
-<g id="node14" class="node">
-<title>13</title>
-<text text-anchor="middle" x="148.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000"> * </text>
-</g>
-<!-- 8&#45;&gt;13 -->
-<g id="edge13" class="edge">
-<title>8&#45;&gt;13</title>
-<path fill="none" stroke="#000000" d="M145.0902,-254.9748C145.622,-248.195 146.4242,-237.966 147.117,-229.1331"/>
-<polygon fill="#000000" stroke="#000000" points="150.6146,-229.2992 147.9074,-219.0561 143.6361,-228.7518 150.6146,-229.2992"/>
-</g>
-<!-- 14 -->
-<g id="node15" class="node">
-<title>14</title>
-<text text-anchor="middle" x="195.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
-</g>
-<!-- 8&#45;&gt;14 -->
-<g id="edge14" class="edge">
-<title>8&#45;&gt;14</title>
-<path fill="none" stroke="#000000" d="M152.0252,-254.9748C159.5583,-247.4417 171.3497,-235.6503 180.7528,-226.2472"/>
-<polygon fill="#000000" stroke="#000000" points="183.3477,-228.6021 187.9439,-219.0561 178.3979,-223.6523 183.3477,-228.6021"/>
-</g>
-<!-- 10 -->
-<g id="node11" class="node">
-<title>10</title>
-<text text-anchor="middle" x="100.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
-</g>
-<!-- 9&#45;&gt;10 -->
-<g id="edge10" class="edge">
-<title>9&#45;&gt;10</title>
-<path fill="none" stroke="#000000" d="M98.7951,-203.9748C99.061,-197.195 99.4621,-186.966 99.8085,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="103.309,-178.1856 100.2037,-168.0561 96.3144,-177.9112 103.309,-178.1856"/>
-</g>
-<!-- 11 -->
-<g id="node12" class="node">
-<title>11</title>
-<text text-anchor="middle" x="100.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 10&#45;&gt;11 -->
-<g id="edge11" class="edge">
-<title>10&#45;&gt;11</title>
-<path fill="none" stroke="#000000" d="M100.5,-152.9748C100.5,-146.195 100.5,-135.966 100.5,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="104.0001,-127.0561 100.5,-117.0561 97.0001,-127.0561 104.0001,-127.0561"/>
-</g>
-<!-- 12 -->
-<g id="node13" class="node">
-<title>12</title>
-<text text-anchor="middle" x="100.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
-</g>
-<!-- 11&#45;&gt;12 -->
-<g id="edge12" class="edge">
-<title>11&#45;&gt;12</title>
-<path fill="none" stroke="#000000" d="M100.5,-101.9748C100.5,-95.195 100.5,-84.966 100.5,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="104.0001,-76.0561 100.5,-66.0561 97.0001,-76.0561 104.0001,-76.0561"/>
-</g>
-<!-- 15 -->
-<g id="node16" class="node">
-<title>15</title>
-<text text-anchor="middle" x="195.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
-</g>
-<!-- 14&#45;&gt;15 -->
-<g id="edge15" class="edge">
-<title>14&#45;&gt;15</title>
-<path fill="none" stroke="#000000" d="M195.5,-203.9748C195.5,-197.195 195.5,-186.966 195.5,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="199.0001,-178.0561 195.5,-168.0561 192.0001,-178.0561 199.0001,-178.0561"/>
-</g>
-<!-- 16 -->
-<g id="node17" class="node">
-<title>16</title>
-<text text-anchor="middle" x="195.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
-</g>
-<!-- 15&#45;&gt;16 -->
-<g id="edge16" class="edge">
-<title>15&#45;&gt;16</title>
-<path fill="none" stroke="#000000" d="M195.5,-152.9748C195.5,-146.195 195.5,-135.966 195.5,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="199.0001,-127.0561 195.5,-117.0561 192.0001,-127.0561 199.0001,-127.0561"/>
-</g>
-<!-- 17 -->
-<g id="node18" class="node">
-<title>17</title>
-<text text-anchor="middle" x="195.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 16&#45;&gt;17 -->
-<g id="edge17" class="edge">
-<title>16&#45;&gt;17</title>
-<path fill="none" stroke="#000000" d="M195.5,-101.9748C195.5,-95.195 195.5,-84.966 195.5,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="199.0001,-76.0561 195.5,-66.0561 192.0001,-76.0561 199.0001,-76.0561"/>
-</g>
-<!-- 18 -->
-<g id="node19" class="node">
-<title>18</title>
-<text text-anchor="middle" x="195.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
-</g>
-<!-- 17&#45;&gt;18 -->
-<g id="edge18" class="edge">
-<title>17&#45;&gt;18</title>
-<path fill="none" stroke="#000000" d="M195.5,-50.9748C195.5,-44.195 195.5,-33.966 195.5,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="199.0001,-25.0561 195.5,-15.0561 192.0001,-25.0561 199.0001,-25.0561"/>
-</g>
-</g>
-</svg>
-
-</div>
-
-</div>
-
-</div>
-</div>
-
 </div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Section-4"><em>Section 4</em><a class="anchor-link" href="#Section-4">&#182;</a></h2><p>\todo{Add}</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
-<li><em>Lesson one</em></li>
-<li><em>Lesson two</em></li>
-<li><em>Lesson three</em></li>
+<h2 id="Who-is-this-book-for?">Who is this book for?<a class="anchor-link" href="#Who-is-this-book-for?">&#182;</a></h2><ul>
+<li><em>Students</em> who read this book will gain a deep understanding of common practices in software test generation, and may use these techniques to extend and adapt them as part of their research.</li>
+<li><em>Developers</em> who read this book will not only gain the same understanding, but will also be able to use the techniques for their own projects, adapting and extending the code samples provided.</li>
+<li><em>Technical managers</em> will get insights into the capabilities (and limitations) of software test and test generation, and may want to integrate test generation into their own testing workflows.</li>
 </ul>
 
 </div>
 </div>
-</div>
+</div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
-<ul>
-<li><a href="Mutation_Fuzzing.slides.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
-<li><a href="Grammars.slides.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
-<li><a href="Reducing.slides.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
-</ul>
+<h2 id="Book-formats">Book formats<a class="anchor-link" href="#Book-formats">&#182;</a></h2><p>This book comes in four formats:</p>
+<ol>
+<li>As a set of <em>HTML pages</em> to view in your browser.</li>
+<li>As a set of <em>Python modules</em> to try out examples yourself.</li>
+<li>As a set of <em>Jupyter notebooks</em>, which you can edit, interact with, and derive the above formats from, as well as others such as slides or Word files.</li>
+<li>As a <em>printed book or PDF</em> (once it is complete).</li>
+</ol>
+<p>For self-teaching, the HTML pages may be fine; for offline reading, we'd rather recommend the printed book or PDF.  For teaching, we recommend the Notebook format, as you can easily interact with them, and extend the material for your own purposes.</p>
 
 </div>
 </div>
-</div>
+</div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p>Close the chapter with a few exercises such that people have things to do.  In Jupyter Notebook, use the <code>exercise2</code> nbextension to add solutions that can be interactively viewed or hidden:</p>
-<ul>
-<li>Mark the <em>last</em> cell of the exercise (this should be a <em>text</em> cell) as well as <em>all</em> cells of the solution.  (Use the <code>rubberband</code> nbextension and use Shift+Drag to mark multiple cells.)</li>
-<li>Click on the <code>solution</code> button at the top.</li>
-</ul>
-<p>(Alternatively, just copy the exercise and solution cells below with their metadata.)</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p><em>Text of the exercise</em></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Some code that is part of the exercise</span>
-<span class="k">pass</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><em>Some more text for the exercise</em></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><em>Some text for the solution</em></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Some code for the solution</span>
-<span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt output_prompt">Out[7]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>4</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><em>Some more text for the solution</em></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p><em>Text of the exercise</em></p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><em>Solution for the exercise</em></p>
+<h2 id="How-to-read-this-book">How to read this book<a class="anchor-link" href="#How-to-read-this-book">&#182;</a></h2><p>This book allows for selective reading.  There are a few units in the beginning that define central concepts (and code modules) for others; but after that, units are set to be as independent as possible from each other.</p>
+<p>\todo{Add possible paths thorugh the book once all chapters are there.}</p>
 
 </div>
 </div>
