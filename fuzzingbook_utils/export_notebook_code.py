@@ -13,6 +13,7 @@ RE_IGNORE = re.compile(r'^import fuzzingbook_utils$|^get_ipython().*')
 
 # Common header for all code
 HEADER = """#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 # This code is part of "Generating Software Tests"
 # (https://www.fuzzingbook.org/)
