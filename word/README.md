@@ -1,0 +1,1 @@
+This is the folder in which generated Word files are stored.

@@ -54,8 +54,9 @@ PDF_TARGET      = pdf/
 HTML_TARGET     = html/
 SLIDES_TARGET   = slides/
 CODE_TARGET     = code/
-WORD_TARGET     = word/
 MARKDOWN_TARGET = markdown/
+WORD_TARGET     = word/
+EPUB_TARGET     = epub/
 DOCS_TARGET     = docs/
 
 # Various derived files
@@ -66,6 +67,7 @@ SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
 PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py)
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
 MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
+EPUBS     = $(SOURCE_FILES:%.ipynb=$(EPUB_TARGET)%.epub)
 
 CHAPTER_PYS = $(CHAPTERS:%.ipynb=$(CODE_TARGET)%.py)
 
@@ -225,6 +227,7 @@ python code:	$(PYS)
 slides:	$(SLIDES) $(REVEAL_JS)
 word doc docx: $(WORDS)
 md markdown: $(MARKDOWNS)
+epub: $(EPUBS)
 
 book-pdf:  ipypublish-book $(BOOK_PDF)
 book-html: ipypublish-book $(BOOK_HTML)
@@ -350,6 +353,10 @@ $(CODE_TARGET)%.py:	$(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 # For word, we convert from the HTML file
 $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
 	$(PANDOC) --css=$(WORD_TARGET)pandoc.css $< -o $@
+
+# Epub comes from the markdown file
+$(EPUB_TARGET)%.epub: $(MARKDOWN_TARGET)%.md
+	cd $(MARKDOWN_TARGET); $(PANDOC) -o ../$@ ../$<
 
 # Conversion rules - entire book
 # We create a book/ folder with the chapters ordered by number, 
