@@ -42,6 +42,7 @@ NOTEBOOKS = notebooks
 
 # Git repo
 GITHUB_REPO = https://github.com/uds-se/fuzzingbook/
+BINDER_URL = https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks
 
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
@@ -518,7 +519,7 @@ binder/binder.log: .FORCE
 
 # Force recreation of binder service; avoids long waiting times for first user
 binder: .FORCE
-	open $(GITHUB_REPO)
+	open $(BINDER_URL)
 
 
 ## Cleanup
