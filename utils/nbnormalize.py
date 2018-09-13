@@ -43,7 +43,9 @@ def normalize_notebooks(filename):
     }
     
     # Write out
-    sys.stdout.buffer.write(nbformat.writes(nb).encode('utf-8'))
+    # Include a newline at the end, as Jupyterlab does
+    notebook_content = nbformat.writes(nb) + '\n'
+    sys.stdout.buffer.write(notebook_content.encode('utf-8'))
 
     
 if __name__ == '__main__':
