@@ -11819,8 +11819,9 @@ MathJax.Hub.Config({
 <li><a href="Intro_Testing.html">Introduction to Software Testing</a></li>
 <li><a href="Fuzzer.html" class="this_page">Fuzzing: Breaking Things with Random Inputs</a></li>
 <li><a href="Coverage.html">Getting Coverage</a></li>
-<li><a href="Mutation_Fuzzing.html">Mutation-Based Fuzzing</a></li>
+<li><a href="MutationFuzzer.html">Mutation-Based Fuzzing</a></li>
 <li><a href="Grammars.html">Fuzzing with Grammars</a></li>
+<li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing</a></li>
 
         </ol>
      </li>
@@ -12626,6 +12627,20 @@ input.txt 1: illegal character: :
 </div>
 </div>
 
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-29-f83db3d59a06&gt;&#34;, line 5, in &lt;module&gt;
+    crash_if_too_long(s)
+  File &#34;&lt;ipython-input-27-928c2d2de976&gt;&#34;, line 4, in crash_if_too_long
+    raise ValueError
+ValueError
+</pre>
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -12725,6 +12740,23 @@ input.txt 1: illegal character: :
 </div>
 </div>
 
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-32-8e40f7d62a1b&gt;&#34;, line 5, in &lt;module&gt;
+    hang_if_no_space(s)
+  File &#34;&lt;ipython-input-30-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
+    if i &lt; len(s):
+  File &#34;&lt;ipython-input-30-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
+    if i &lt; len(s):
+  File &#34;&lt;string&gt;&#34;, line 14, in check_time
+TimeoutError
+</pre>
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -12800,6 +12832,15 @@ input.txt 1: illegal character: :
 </div>
 </div>
 
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>94394591889846996523697890091447449974450471606008648032510936038368
+</pre>
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -12822,6 +12863,20 @@ input.txt 1: illegal character: :
 </div>
 </div></div>
 </div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-35-7a1817f3dbfc&gt;&#34;, line 2, in &lt;module&gt;
+    collapse_if_too_large(long_number)
+  File &#34;&lt;ipython-input-33-2c22a83a4dca&gt;&#34;, line 3, in collapse_if_too_large
+    raise ValueError
+ValueError
+</pre>
+</div>
+
 </div>
 
 <div class="input_markdown">
@@ -12864,8 +12919,8 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Consumers">Consumers<a class="anchor-link" href="#Consumers">&#182;</a></h3><p>The first thing we introduce is the notion of a <code>Consumer</code> – that is, an object whose job it is to receive an input it can process (or <em>consume</em>).  A consumer typically is some program or function under test, but we can also have simpler consumers.</p>
-<p>Let us start with a base class for consumers.  A consumer essentially provides a method <code>run(input)</code> that is used to pass <code>input</code> (a string) to the consumer.  <code>run()</code> returns a result; by default, this is the input.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Runner">Runner<a class="anchor-link" href="#Runner">&#182;</a></h3><p>The first thing we introduce is the notion of a <code>Runner</code> – that is, an object whose job it is to execute some object with a given input.  A runner typically is some program or function under test, but we can also have simpler runners.</p>
+<p>Let us start with a base class for runners.  A runner essentially provides a method <code>run(input)</code> that is used to pass <code>input</code> (a string) to the runner.  <code>run()</code> returns a result; by default, this is the input.</p>
 </div>
 </div>
 </div>
@@ -12877,7 +12932,7 @@ input.txt 1: illegal character: :
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Consumer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Runner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize&quot;&quot;&quot;</span>
         <span class="k">pass</span>
@@ -12895,7 +12950,7 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>A more interesting class is <code>PrintConsumer</code>, which simply prints out everything that is given to it.  This is the default consumer in many cases.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>A more interesting class is <code>PrintRunner</code>, which simply prints out everything that is given to it.  This is the default runner in many situations.</p>
 </div>
 </div>
 </div>
@@ -12907,7 +12962,7 @@ input.txt 1: illegal character: :
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PrintConsumer</span><span class="p">(</span><span class="n">Consumer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PrintRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Print the given input&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
@@ -12925,7 +12980,7 @@ input.txt 1: illegal character: :
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">PrintConsumer</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">PrintRunner</span><span class="p">()</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;Some input&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -12969,7 +13024,7 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>ProgramConsumer</code> class sends the input to the standard input of a program instead.  The program is specified when creating a <code>ProgramConsumer</code> object.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>ProgramRunner</code> class sends the input to the standard input of a program instead.  The program is specified when creating a <code>ProgramRunner</code> object.</p>
 </div>
 </div>
 </div>
@@ -12981,7 +13036,7 @@ input.txt 1: illegal character: :
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProgramConsumer</span><span class="p">(</span><span class="n">Consumer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProgramRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize.  `program` is a program spec as passed to `subprocess.run()`&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">program</span>
@@ -13004,7 +13059,7 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let us demonstrate a <code>ProgramConsumer</code> using the <code>cat</code> program – a program that copies its input to its output.
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us demonstrate a <code>ProgramRunner</code> using the <code>cat</code> program – a program that copies its input to its output.
 We see that the output of <code>cat</code> is the same as its input:</p>
 </div>
 </div>
@@ -13017,7 +13072,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cat</span> <span class="o">=</span> <span class="n">ProgramConsumer</span><span class="p">(</span><span class="n">program</span><span class="o">=</span><span class="s2">&quot;cat&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cat</span> <span class="o">=</span> <span class="n">ProgramRunner</span><span class="p">(</span><span class="n">program</span><span class="o">=</span><span class="s2">&quot;cat&quot;</span><span class="p">)</span>
 <span class="n">cat</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
 </pre></div>
 
@@ -13058,13 +13113,13 @@ We see that the output of <code>cat</code> is the same as its input:</p>
         <span class="sd">&quot;&quot;&quot;Return fuzz input&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">consumer</span><span class="o">=</span><span class="n">PrintConsumer</span><span class="p">()):</span>
-        <span class="sd">&quot;&quot;&quot;Run `consumer` with fuzz input&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">consumer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="n">Runner</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;Run `runner` with fuzz input&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">runs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">consumer</span><span class="o">=</span><span class="n">PrintConsumer</span><span class="p">(),</span> <span class="n">trials</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Run `consumer` with fuzz input, `trials` times&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">consumer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">)]</span>
+    <span class="k">def</span> <span class="nf">runs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="n">PrintRunner</span><span class="p">(),</span> <span class="n">trials</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run `runner` with fuzz input, `trials` times&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">)]</span>
 </pre></div>
 
 </div>
@@ -13137,16 +13192,16 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>-$:$4!3,?91!=&amp;.4#+:+
-6,.&amp;1(&gt;62%&#34;*2#&amp;60/#)
-+8&lt;:,?530129*!-8:)2)
-.$7&#34;&gt;?!30;1!&lt;:22;3;5
-.1%2- )3-04$,/%&gt;.&#39;,3
-/-$&#34;()-0.##-?5&amp;5&#39;&amp;14
-0&#39;8-+;10&#34;&#39;2$2%&#34;5!255
-5,.:9$14$-$  136&gt;+*5
--#2)7&#39;*0/3,$&#34;4+/?++1
-353&lt;?2/&#34;,??5,/51(?#3
+<pre>8+&#39;4&lt;$&lt;?0&#34;1.&#39;*&amp;?27=)
+,()&#39;5,!.6-(3,6%7!533
+8 )0&#39;51*659:-*(6=?:*
+&#39;13#,0.48$:#63!?,93=
+%1=1(?+0&#34;% /:*!;%?.!
+(715)&#34;&#39;)*04*8&#39;&#34;2.$6!
+(20.&gt;9#/0(3!-&#39;.92?&gt;&#39;
+%.?)%;,0(/3)+4.?4&#34;:;
++:=;/7&#34;801&amp;&#39;&gt;:??$!*:
+9?;5&amp;-?6(!5.&gt;608;,.%
 </pre>
 </div>
 
@@ -13155,7 +13210,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We can now send such generated inputs to our previously defined <code>cat</code> consumer, verifying that <code>cat</code> actually does copy its (fuzzed) input to its output.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can now send such generated inputs to our previously defined <code>cat</code> runner, verifying that <code>cat</code> actually does copy its (fuzzed) input to its output.</p>
 </div>
 </div>
 </div>
@@ -13180,7 +13235,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Combining a <code>Fuzzer</code> with a <code>Consumer</code>, however, is so common that we can use the <code>run()</code> method supplied by the <code>Fuzzer</code> class for this purpose:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Combining a <code>Fuzzer</code> with a <code>Runner</code>, however, is so common that we can use the <code>run()</code> method supplied by the <code>Fuzzer</code> class for this purpose:</p>
 </div>
 </div>
 </div>
@@ -13203,7 +13258,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;(&gt;0!.32:;9(71:7(-82;&#39;, stderr=&#39;&#39;)
+<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;%8&gt;\&#39;040&#34; -.;02#\&#39;(7&#34;;&#39;, stderr=&#39;&#39;)
 </pre>
 </div>
 
@@ -13235,16 +13290,16 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;47$8$&#39;+6770/05#7.:-*&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;;!&#34;/7/*15,-3*#;, 957&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;)*)#5+2-$&gt;:=?=-)#;-1&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;-?$&amp;&amp;3&amp;!(&gt;=47%*&gt;//0?&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;/8-&lt;1/ =+&amp;7 &#34;&#34;&amp;(/91&gt;&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;4%)= 4&lt;&lt;*6!1$,,+6.&#39;*&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&gt;55\&#39;&#34;(*%+3851-//9.4,&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&gt;+# ?9&amp;/,982$6&#34;6,!-&amp;&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;(!;2#),\&#39;&#34;&#34;%41!6\&#39;,,9%&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;8$&#39;,%7(=44-1?5$5$(* &#34;, stderr=&#39;&#39;)]
+<pre>[CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;* ; &lt;&#34;4:%\&#39;16)8#: 5=!&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;62-)=&lt;?(2&lt;)3&gt;6&gt;34,0;&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;69- *(=&#39;-8%=:)6%.=5%&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&amp;2=7:&#34;,:34&#34;(,.!$+&lt;&gt;)&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;#&#34;-06.$!&amp;748:0%,=%&lt;!&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&gt;&lt;668!88-&lt;.5!267//8)&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;?4%/#&lt;!02:33/ 8=&lt;,?-&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;.-5848&lt;7.%)5*3516( #&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;*\&#39;8**1:6$&amp;- :1 %1&#34;!%&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;:%3&#34;$3#&#34;75$,6&lt;$5,$8\&#39;&#39;, stderr=&#39;&#39;)]
 </pre>
 </div>
 
@@ -13276,7 +13331,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>From here, you can explore how to</p>
 <ul>
-<li><a href="Mutation_Fuzzing.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
+<li><a href="MutationFuzzer.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
 <li><a href="Grammars.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
 <li><a href="Reducing.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
 </ul>
@@ -13300,7 +13355,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 This work is licensed under a
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 &bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2018-09-11 19:59:35+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2018-09-13 16:14:34+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13316,7 +13371,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Fuzzer.html">https://www.fuzzingbook.org/html/Fuzzer.html</a>.  Retrieved 2018-09-11 19:59:35+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Fuzzer.html">https://www.fuzzingbook.org/html/Fuzzer.html</a>.  Retrieved 2018-09-13 16:14:34+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Fuzzer,
@@ -13326,9 +13381,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/Fuzzer.html}},
-    note = {Retrieved 2018-09-11 19:59:35+02:00},
+    note = {Retrieved 2018-09-13 16:14:34+02:00},
     url = {https://www.fuzzingbook.org/html/Fuzzer.html},
-    urldate = {2018-09-11 19:59:35+02:00}
+    urldate = {2018-09-13 16:14:34+02:00}
 }
 </pre>
 </div>

@@ -306,13 +306,13 @@ if __name__ == "__main__":
 # 
 # Since we'd like to reuse some parts of this chapter in the following ones, let us define things in a way that are easier to reuse, and in particular easier to _extend_.  To this end, we introduce a number of _classes_ that encapsulate the functionality above in a reusable way. 
 # 
-# ### Consumers
+# ### Runner
 # 
-# The first thing we introduce is the notion of a `Consumer` – that is, an object whose job it is to receive an input it can process (or _consume_).  A consumer typically is some program or function under test, but we can also have simpler consumers.
+# The first thing we introduce is the notion of a `Runner` – that is, an object whose job it is to execute some object with a given input.  A runner typically is some program or function under test, but we can also have simpler runners.
 # 
-# Let us start with a base class for consumers.  A consumer essentially provides a method `run(input)` that is used to pass `input` (a string) to the consumer.  `run()` returns a result; by default, this is the input.
+# Let us start with a base class for runners.  A runner essentially provides a method `run(input)` that is used to pass `input` (a string) to the runner.  `run()` returns a result; by default, this is the input.
 # 
-class Consumer(object):
+class Runner(object):
     def __init__(self):
         """Initialize"""
         pass
@@ -321,24 +321,24 @@ class Consumer(object):
         """Run the consumer with the given input"""
         return inp
 
-# A more interesting class is `PrintConsumer`, which simply prints out everything that is given to it.  This is the default consumer in many cases.
+# A more interesting class is `PrintRunner`, which simply prints out everything that is given to it.  This is the default runner in many situations.
 # 
-class PrintConsumer(Consumer):
+class PrintRunner(Runner):
     def run(self, inp):
         """Print the given input"""
         print(inp)
         return inp
 
 if __name__ == "__main__":
-    p = PrintConsumer()
+    p = PrintRunner()
     result = p.run("Some input")
     
 if __name__ == "__main__":
     result
     
-# The `ProgramConsumer` class sends the input to the standard input of a program instead.  The program is specified when creating a `ProgramConsumer` object.
+# The `ProgramRunner` class sends the input to the standard input of a program instead.  The program is specified when creating a `ProgramRunner` object.
 # 
-class ProgramConsumer(Consumer):
+class ProgramRunner(Runner):
     def __init__(self, program):
         """Initialize.  `program` is a program spec as passed to `subprocess.run()`"""
         self.program = program
@@ -352,11 +352,11 @@ class ProgramConsumer(Consumer):
                         universal_newlines=True)
         return self.result
 
-# Let us demonstrate a `ProgramConsumer` using the `cat` program – a program that copies its input to its output.
+# Let us demonstrate a `ProgramRunner` using the `cat` program – a program that copies its input to its output.
 # We see that the output of `cat` is the same as its input:
 # 
 if __name__ == "__main__":
-    cat = ProgramConsumer(program="cat")
+    cat = ProgramRunner(program="cat")
     cat.run("hello")
     
 # ### Fuzzers
@@ -371,13 +371,13 @@ class Fuzzer(object):
         """Return fuzz input"""
         return ""
 
-    def run(self, consumer=PrintConsumer()):
-        """Run `consumer` with fuzz input"""
-        return consumer.run(self.fuzz())
+    def run(self, runner=Runner()):
+        """Run `runner` with fuzz input"""
+        return runner.run(self.fuzz())
     
-    def runs(self, consumer=PrintConsumer(), trials=10):
-        """Run `consumer` with fuzz input, `trials` times"""
-        return [consumer.run(self.fuzz()) for i in range(trials)]
+    def runs(self, runner=PrintRunner(), trials=10):
+        """Run `runner` with fuzz input, `trials` times"""
+        return [runner.run(self.fuzz()) for i in range(trials)]
 
 # By default, `Fuzzer` objects do not do much, as their `fuzz()` function is merley an abstract placeholder.  The subclass `RandomFuzzer`, however, implements the functionality of the `fuzzer()` function, above, adding an additional parameter `min_length` to specify a minimum length.
 # 
@@ -404,14 +404,14 @@ if __name__ == "__main__":
     for i in range(10):
         print(random_fuzzer.fuzz())
     
-# We can now send such generated inputs to our previously defined `cat` consumer, verifying that `cat` actually does copy its (fuzzed) input to its output.
+# We can now send such generated inputs to our previously defined `cat` runner, verifying that `cat` actually does copy its (fuzzed) input to its output.
 # 
 if __name__ == "__main__":
     for i in range(10):
         inp = random_fuzzer.fuzz()
         assert cat.run(inp).stdout == inp
     
-# Combining a `Fuzzer` with a `Consumer`, however, is so common that we can use the `run()` method supplied by the `Fuzzer` class for this purpose:
+# Combining a `Fuzzer` with a `Runner`, however, is so common that we can use the `run()` method supplied by the `Fuzzer` class for this purpose:
 # 
 if __name__ == "__main__":
     random_fuzzer.run(cat)
@@ -432,7 +432,7 @@ if __name__ == "__main__":
 # 
 # From here, you can explore how to
 # 
-# * [use _mutations_ on existing inputs to get more valid inputs](Mutation_Fuzzing.ipynb)
+# * [use _mutations_ on existing inputs to get more valid inputs](MutationFuzzer.ipynb)
 # * [use _grammars_ (i.e., a specification of the input format) to get even more valid inputs](Grammars.ipynb)
 # * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
 # 

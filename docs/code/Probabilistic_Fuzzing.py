@@ -86,7 +86,7 @@ if __name__ == "__main__":
 # 
 # _Link to subsequent chapters (notebooks) here, as in:_
 # 
-# * [use _mutations_ on existing inputs to get more valid inputs](Mutation_Fuzzing.ipynb)
+# * [use _mutations_ on existing inputs to get more valid inputs](MutationFuzzer.ipynb)
 # * [use _grammars_ (i.e., a specification of the input format) to get even more valid inputs](Grammars.ipynb)
 # * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
 # 

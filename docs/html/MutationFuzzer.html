@@ -1,64 +1,17 @@
 
+<!-- A html document -->
+<!-- 
+with standard nbconvert css layout
+with standard nbconvert input/output content
+standard html tag wrapping
+with mathjax loaded
+with jupyter wigets
+ caption and label elements according to ipub meta tags  
+with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
-
-<meta charset="utf-8" />
-<meta http-equiv="X-UA-Compatible" content="chrome=1" />
-
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-
-<title>Fuzzer slides</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-
-<!-- General and theme style sheets -->
-<link rel="stylesheet" href="reveal.js/css/reveal.css">
-<link rel="stylesheet" href="reveal.js/css/theme/simple.css" id="theme">
-
-<!-- If the query includes 'print-pdf', include the PDF print sheet -->
-<script>
-if( window.location.search.match( /print-pdf/gi ) ) {
-        var link = document.createElement( 'link' );
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = 'reveal.js/css/print/pdf.css';
-        document.getElementsByTagName( 'head' )[0].appendChild( link );
-}
-
-</script>
-
-<!--[if lt IE 9]>
-<script src="reveal.js/lib/js/html5shiv.js"></script>
-<![endif]-->
-
-<!-- Loading the mathjax macro -->
-<!-- Load mathjax -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
-    <!-- MathJax configuration -->
-    <script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-            processEscapes: true,
-            processEnvironments: true
-        },
-        // Center justify equations in code and markdown cells. Elsewhere
-        // we use CSS to left justify single line equations in code cells.
-        displayAlign: 'center',
-        "HTML-CSS": {
-            styles: {'.MathJax_Display': {"margin": 0}},
-            linebreaks: { automatic: true }
-        }
-    });
-    </script>
-    <!-- End of mathjax configuration -->
-
-<!-- Get Font-awesome from cdn -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.css">
+<meta charset="utf-8" /><title>Mutation-Based Fuzzing - Generating Software Tests</title>
 
 <style type="text/css">
     /*!
@@ -11732,7 +11685,7 @@ ul.typeahead-list > li > a {
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
     </style>
 <style type="text/css">
-    
+
 /* Temporary definitions which will become obsolete with Notebook release 5.0 */
 .ansi-black-fg { color: #3E424D; }
 .ansi-black-bg { background-color: #3E424D; }
@@ -11771,1746 +11724,1759 @@ ul.typeahead-list > li > a {
 
     </style>
 
-
 <style type="text/css">
 /* Overrides of notebook CSS for static HTML export */
-.reveal {
-  font-size: 160%;
+body {
+  overflow: visible;
+  padding: 8px;
 }
-.reveal pre {
-  width: inherit;
-  padding: 0.4em;
-  margin: 0px;
-  font-family: monospace, sans-serif;
-  font-size: 80%;
-  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
-}
-.reveal pre code {
-  padding: 0px;
-}
-.reveal section img {
-  border: 0px solid black;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0);
-}
-.reveal i {
-  font-style: normal;
-  font-family: FontAwesome;
-  font-size: 2em;
-}
-.reveal .slides {
-  text-align: left;
-}
-.reveal.fade {
-  opacity: 1;
-}
-.reveal .progress {
-  position: static;
-}
-.reveal .controls .navigate-left,
-.reveal .controls .navigate-left.enabled {
-  border-right-color: #727272;
-}
-.reveal .controls .navigate-left.enabled:hover,
-.reveal .controls .navigate-left.enabled.enabled:hover {
-  border-right-color: #dfdfdf;
-}
-.reveal .controls .navigate-right,
-.reveal .controls .navigate-right.enabled {
-  border-left-color: #727272;
-}
-.reveal .controls .navigate-right.enabled:hover,
-.reveal .controls .navigate-right.enabled.enabled:hover {
-  border-left-color: #dfdfdf;
-}
-.reveal .controls .navigate-up,
-.reveal .controls .navigate-up.enabled {
-  border-bottom-color: #727272;
-}
-.reveal .controls .navigate-up.enabled:hover,
-.reveal .controls .navigate-up.enabled.enabled:hover {
-  border-bottom-color: #dfdfdf;
-}
-.reveal .controls .navigate-down,
-.reveal .controls .navigate-down.enabled {
-  border-top-color: #727272;
-}
-.reveal .controls .navigate-down.enabled:hover,
-.reveal .controls .navigate-down.enabled.enabled:hover {
-  border-top-color: #dfdfdf;
-}
-.reveal .progress span {
-  background: #727272;
-}
-div.input_area {
-  padding: 0.06em;
-}
-div.code_cell {
-  background-color: transparent;
-}
-div.prompt {
-  width: 11ex;
-  padding: 0.4em;
-  margin: 0px;
-  font-family: monospace, sans-serif;
-  font-size: 80%;
-  text-align: right;
-}
-div.output_area pre {
-  font-family: monospace, sans-serif;
-  font-size: 80%;
-}
-div.output_prompt {
-  /* 5px right shift to account for margin in parent container */
-  margin: 5px 5px 0 0;
-}
-div.text_cell.rendered .rendered_html {
-  /* The H1 height seems miscalculated, we are just hidding the scrollbar */
-  overflow-y: hidden;
-}
-a.anchor-link {
-  /* There is still an anchor, we are only hidding it */
-  display: none;
-}
-.rendered_html p {
-  text-align: inherit;
-}
-::-webkit-scrollbar
-{
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar *
-{
-  background:transparent;
-}
-::-webkit-scrollbar-thumb
-{
-  background: #727272 !important;
+
+div#notebook {
+  overflow: visible;
+  border-top: none;
+}@media print {
+  div.cell {
+    display: block;
+    page-break-inside: avoid;
+  }
+  div.output_wrapper {
+    display: block;
+    page-break-inside: avoid;
+  }
+  div.output {
+    display: block;
+    page-break-inside: avoid;
+  }
 }
 </style>
 
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
 <link rel="stylesheet" href="custom.css">
 
-</head>
+<!-- Load mathjax -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+<!-- MathJax configuration -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true,
+        processEnvironments: true
+    },
+    // Center justify equations in code and markdown cells. Elsewhere
+    // we use CSS to left justify single line equations in code cells.
+    displayAlign: 'center',
+    "HTML-CSS": {
+        styles: {'.MathJax_Display': {"margin": 0}},
+        linebreaks: { automatic: true }
+    }
+});
+</script>
+<!-- End of mathjax configuration --><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
+<!--[if IE lte 8]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-<body>
+<style type="text/css">
+.ipyfigure { display: -ms-flex; display: -webkit-flex; display: flex;}
+.ipyfigure>div { flex:1; }
+.ipytable { display: -ms-flex; display: -webkit-flex; display: flex;}
+.ipytable>div { flex:1; }
 
+</style>
 
-<div class="reveal">
-<div class="slides">
-<section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+
+<meta property="og:url" content="https://www.fuzzingbook.org/html/MutationFuzzer.html/" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Mutation-Based Fuzzing - Generating Software Tests" />
+<meta property="og:description" content="Most randomly generated inputs are syntactically invalid and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is by mutating existing valid inputs – that is, introducing small changes that may still keep the input valid, yet exercise new behavior.Prerequisites You should know how basic fuzzing works; for instance, from the &quot;Fuzzing&quot; chapter." />
+<meta property="og:image" content="https://www.fuzzingbook.org/html/PICS/wordcloud.png" /></head>
+ <body>
+
+    <script>
+    function reveal() {
+        var solutions = document.getElementsByClassName("solution");
+        var i;
+        for (i = 0; i < solutions.length; i++)
+            if (solutions[i].style.display === "none") {
+                solutions[i].style.display = "block";
+            } else {
+                solutions[i].style.display = "none";
+        }
+    }
+    </script>
+    
+<nav>
+<div id="cssmenu">
+  <ul>
+     <li class="has-sub"><a href="https://www.fuzzingbook.org/"><i class="fa fa-fw fa-bars"></i> Generating Software Tests</a>
+        <ol>
+           <li><a href="https://www.fuzzingbook.org/"><i class="fa fa-fw fa-home"></i> About this book</a></li>
+<li><a href="Intro_Testing.html">Introduction to Software Testing</a></li>
+<li><a href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
+<li><a href="Coverage.html">Getting Coverage</a></li>
+<li><a href="MutationFuzzer.html" class="this_page">Mutation-Based Fuzzing</a></li>
+<li><a href="Grammars.html">Fuzzing with Grammars</a></li>
+<li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing</a></li>
+
+        </ol>
+     </li>
+     <li class="has-sub"><a href="https://www.fuzzingbook.org/html/MutationFuzzer.html"><i class="fa fa-fw fa-list-ul"></i> Mutation-Based Fuzzing</a>
+        <ul>
+           <li><a href="#Fuzzing-a-URL-Parser">Fuzzing a URL Parser</a></li>
+<li><a href="#Mutating-Inputs">Mutating Inputs</a></li>
+<li><a href="#Mutating-URLs">Mutating URLs</a></li>
+<li><a href="#Multiple-Mutations">Multiple Mutations</a></li>
+<li><a href="#Guiding-by-Coverage">Guiding by Coverage</a></li>
+<li><a href="#With-Classes">With Classes</a></li>
+<li><a href="#Lessons-Learned">Lessons Learned</a></li>
+<li><a href="#Next-Steps">Next Steps</a></li>
+<li><a href="#Exercises">Exercises</a></li>
+
+        </ul>
+     </li>
+     
+     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-cube"></i> Resources</a>
+     <ul>
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/MutationFuzzer.ipynb" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
+     <li><a href="https://www.fuzzingbook.org/code/MutationFuzzer.py"><i class="fa fa-fw fa-download"></i> Download Code</a></li>
+     <li><a href="https://www.fuzzingbook.org/slides/MutationFuzzer.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
+     <li><a href="https://github.com/uds-se/fuzzingbook/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
+     </ul>
+     </li>
+     
+     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-comments"></i> Share</a>
+        <ul>
+            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Mutation-Based%20Fuzzing%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fMutationFuzzer.html" target=_blank><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
+            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fMutationFuzzer.html" target=_blank><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
+            <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
+        </ul>
+     </li>
+     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-question-circle"></i> Help</a>
+        <ul>
+          <li><a href="https://docs.python.org/3/tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Python Tutorial</a>
+          <li><a href="https://www.dataquest.io/blog/jupyter-notebook-tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Jupyter Notebook Tutorial</a>
+          <li><a href="https://github.com/uds-se/fuzzingbook/issues/" target="_blank"><i class="fa fa-fw fa-commenting"></i> Report an Issue</a></li>
+        </ul>
+     </li>
+  </ul>
 </div>
+</nav>
+
+    <article>
+   <div tabindex="-1" id="notebook" class="border-box-sizing">
+     <div class="container" id="notebook-container">
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Fuzzing:-Breaking-Things-with-Random-Inputs">Fuzzing: Breaking Things with Random Inputs<a class="anchor-link" href="#Fuzzing:-Breaking-Things-with-Random-Inputs">&#182;</a></h1><p>In this chapter, we'll start with one of the simplest test generation techniques.  The key idea of random text generation, also known as "fuzzing", is to feed a <em>string of random characters</em> into a program in the hope to uncover failures.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Mutation-Based-Fuzzing">Mutation-Based Fuzzing<a class="anchor-link" href="#Mutation-Based-Fuzzing">&#182;</a></h1><p>Most <a href="Fuzzer.html">randomly generated inputs</a> are syntactically <em>invalid</em> and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is by <em>mutating</em> existing valid inputs – that is, introducing small changes that may still keep the input valid, yet exercise new behavior.</p>
+</div>
+</div>
+</div>
+</div>
 
-</div>
-</div>
-</div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="A-Testing-Assignment">A Testing Assignment<a class="anchor-link" href="#A-Testing-Assignment">&#182;</a></h2><p>Fuzzing was conceived by Bart Miller in 1989 as a programming exercise for his students at the University of Wisconsin-Madison.  The <a href="http://pages.cs.wisc.edu/~bart/fuzz/CS736-Projects-f1988.pdf">assignment</a> read</p>
-<blockquote><p>The goal of this project is to evaluate the robustness of various UNIX utility programs, given an unpredictable input stream. [...] First, you will build a <em>fuzz generator</em>. This is a program that will output a random character stream. Second, you will take the fuzz generator and use it to attack as many UNIX utilities as possible, with the goal of trying to break them.</p>
-</blockquote>
-<p>This assignment captures the essence of fuzzing: <em>Create random inputs, and see if they break things.</em>  Just let it run long enough and you'll see.</p>
-
-</div>
-</div>
-</div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="A-Simple-Fuzzer">A Simple Fuzzer<a class="anchor-link" href="#A-Simple-Fuzzer">&#182;</a></h2><p>Let us try to fulfill this assignment and build a fuzz generator.  The idea is to produce random characters, adding them to a buffer string variable (<code>out</code>), and finally returning the string.</p>
-
-</div>
-</div>
-</div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>This implementation uses the following Python features and functions:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
 <ul>
-<li><code>random.randrange(start, end)</code> – return a random number $[$ <code>start</code>, <code>end</code> $)$</li>
-<li><code>range(start, end)</code> – create a list with integers from <code>start</code> to <code>end</code>.  Typically used in iterations.</li>
-<li><code>for elem in list: body</code> – execute <code>body</code> in a loop with <code>elem</code> taking each value from <code>list</code>.</li>
-<li><code>for i in range(start, end): body</code> – execute <code>body</code> in a loop with <code>i</code> from <code>start</code> to <code>end</code> $-$ 1.</li>
-<li><code>chr(n)</code> – return a character with ASCII code <code>n</code></li>
+<li>You should know how basic fuzzing works; for instance, from the <a href="Fuzzer.html">"Fuzzing"</a> chapter.</li>
 </ul>
+</div>
+</div>
+</div>
+</div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Fuzzing-a-URL-Parser">Fuzzing a URL Parser<a class="anchor-link" href="#Fuzzing-a-URL-Parser">&#182;</a></h2><p>Many programs expect their inputs to come in a very specific format before they would actually process them.  As an example, think of a program that accepts a URL (a Web address).  The URL has to be in a valid format (i.e., the URL format) such that the program can deal with it.  When fuzzing with random inputs, what are our chances to actually produce a valid URL?</p>
+<p>To get deeper into the problem, let us explore what URLs are made of.  A URL consists of a number of elements:</p>
+
+<pre><code>scheme://netloc/path?query#fragment
+
+</code></pre>
+<p>where</p>
+<ul>
+<li><code>scheme</code> is the protocol to be used, including <code>http</code>, <code>https</code>, <code>ftp</code>, <code>file</code>...</li>
+<li><code>netloc</code> is the name of the host to connect to, such as <code>www.google.com</code></li>
+<li><code>path</code> is the path on that very host, such as <code>search</code></li>
+<li><code>query</code> is a list of key/value pairs, such as <code>q=fuzzing</code></li>
+<li><code>fragment</code> is a marker for a location in the retrieved document, such as <code>#result</code></li>
+</ul>
+<p>In Python, we can use the <code>urlparse()</code> function to parse and decompose a URL into its parts.</p>
 </div>
 </div>
-</div><div class="fragment">
+</div>
+</div>
+
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fuzzer</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">char_start</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">char_range</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;A string of up to `max_length` characters </span>
-<span class="sd">       in the range [`char_start`, `char_start` + `char_range`]&quot;&quot;&quot;</span>
-    <span class="n">string_length</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">string_length</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="n">char_start</span><span class="p">,</span> <span class="n">char_start</span> <span class="o">+</span> <span class="n">char_range</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">out</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">fuzzingbook_utils</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>With its default arguments, the <code>fuzzer()</code> function returns a string of random characters:</p>
-
-</div>
-</div>
-</div><div class="fragment">
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span><span class="p">()</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urlparse</span> <span class="k">import</span> <span class="n">urlparse</span>      <span class="c1"># Python 2</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlparse</span>  <span class="c1"># Python 3</span>
+
+<span class="n">urlparse</span><span class="p">(</span><span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
-
-<div class="output_wrapper">
-<div class="output">
-
 
 <div class="output_area">
-
-<div class="prompt output_prompt">Out[13]:</div>
-
-
-
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;0(!#4&lt;3&amp;4)03*%640&lt;1#==(8+ =65:7=459+26\&#39;=/&gt;*!74)-&#34;?8.%2#1!;5557:7\&#39;-/39;/)#/9&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Now imagine that this string was the input to a program expecting a specific input format – say, a comma-separated list of values, or an e-mail address.  Would the program be able to process such an input without any problems?</p>
-
-</div>
-</div>
-</div></div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>If the above fuzzing input already is intriguing, consider that fuzzing can easily be set up to produce other kinds of input.  For instance, we can also have <code>fuzzer()</code> produce a series of uppercase letters.  We use <code>ord(c)</code> to return the ASCII code of the character <code>c</code>.</p>
-
-</div>
-</div>
-</div></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">),</span> <span class="mi">26</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt output_prompt">Out[14]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;scvhpzgvfhnrojipujqdzwzhohlwveabmmgebxrgsfphewhcohzztgtgmvxhrtkqcqsnltrvyahdnjppyprzibityfmzxqnpvyejjjgrrhfcfqtccqyrukdmxugnumoeghlgldjouruigrtdvnhoytzhzppdwaovaddpwyhoubcuvwtotblkyrkwblimmbusivchzltvsaizxrubghadjrzidwaafeqkagfltxdfnhayhjhaktzignrkcfhcsiugijidslokcmzyxtgjvdkozqhaeyhcqyxamviblvyomcemsasmimxrxrfeagvqyrhpmaksnmvwsqyjdyrusfqrpzzxgvwbdamasxplztulfkkshoyktcepzhauwbtssuiipxgwyflnecnojqowqadhdfmbwyqxjocypgebrstuntjoryiksoawnmchdnnlrovzwvgddvfzpckplajptvfdzmopntydlwefscbcdrcplijnkabgajvfbidisdnphkwbjstaanmfmeoheheghcdybpyfbunhnyyxkbxddkmwlgzewxepkwlllhundtrogexokpdkprdxbxdaosztrthgyctoazsozvdqsexqypfphohqgtetinhwtfgtmffydrpidpzwmwpdnalxjixssappxtiofprduxovkebgzhnwaozpshurpdrgfzvphzftdqvcpniajswuimakebbvkqzxuphbnrlymejxarpsthcpclnwuehmuriaovtozuifrrflkbvihcmoojnrnukoansvwjqiqqtdumbdzmbcwtyjeeyfqgqpjydtkhztluurqjgquojzxcercidqkxivftdflwncsjgsparsbyugbjfmmzprmgembwhybnblodxqukezwuinixtfskzaolxnourbujwbxhxzbnyhnghgyiuybnussfjgydsmpgljdaiulkmjbkxptmyggspug&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Assume a program expects an identifier as its input.  Would it expect such a long identifier?</p>
-
-</div>
-</div>
-</div></div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Fuzzing-External-Programs">Fuzzing External Programs<a class="anchor-link" href="#Fuzzing-External-Programs">&#182;</a></h2><p>Let us see what happens if we actually invoke an external program with fuzzed inputs.  To this end, let us proceed in two steps.  First, we create an <em>input file</em> with fuzzed test data; then we feed this input file into a program of choice.</p>
-
-</div>
-</div>
-</div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Creating-Input-Files">Creating Input Files<a class="anchor-link" href="#Creating-Input-Files">&#182;</a></h3><p>The Python <code>open()</code> function opens a file into which we can then write arbitrary contents.  It is commonly used in conjunction with the <code>with</code> statement, which ensures that the file is closed as soon as it is no longer needed.</p>
-
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">FILE</span> <span class="o">=</span> <span class="s2">&quot;input.txt&quot;</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We can verify that the file was actually created by reading its contents:</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">contents</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
-<span class="k">assert</span><span class="p">(</span><span class="n">contents</span> <span class="o">==</span> <span class="n">data</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>/)=04-?: &lt;&#34;?*?5658&gt;6!%&lt;!8/
+<pre>ParseResult(scheme=&#39;http&#39;, netloc=&#39;www.google.com&#39;, path=&#39;/search&#39;, params=&#39;&#39;, query=&#39;q=fuzzing&#39;, fragment=&#39;&#39;)
 </pre>
 </div>
-</div>
 
 </div>
-</div>
 
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Invoking-External-Programs">Invoking External Programs<a class="anchor-link" href="#Invoking-External-Programs">&#182;</a></h3><p>Now that we have an input file, we can invoke a program on it.  For the fun of it, let us test the <code>bc</code> calculator program, which takes an arithmetic expression and evaluates it.</p>
-<p>To invoke <code>bc</code>, let us use the Python <code>subprocess</code> module.  This is how this works:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see how the result encodes the individual parts of the URL in different attributes.</p>
+</div>
+</div>
+</div>
+</div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now assume we have a program that takes a URL as input.  To simplify things, we won't let it do very much; we simply have it check the passed URL for validity.  If the URL is valid, it returns True; otherwise, it raises an exception.</p>
 </div>
 </div>
-</div><div class="fragment">
+</div>
+</div>
+
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">http_program</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="n">supported_schemes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;http&quot;</span><span class="p">,</span> <span class="s2">&quot;https&quot;</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_schemes</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Scheme must be one of &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">supported_schemes</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">netloc</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Host must be non-empty&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Do something with the URL</span>
+    <span class="k">return</span> <span class="kc">True</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-</div></div><div class="fragment">
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now go and fuzz <code>http_program()</code>.  To fuzz, we use the full range of printable ASCII characters, such that <code>:</code>, <code>/</code>, and lowercase letters are included.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">program</span> <span class="o">=</span> <span class="s2">&quot;bc&quot;</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;2 + 2</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">program</span><span class="p">,</span> <span class="s2">&quot;input.txt&quot;</span><span class="p">],</span>
-                        <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
-                        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-                        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-                        <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">Fuzzer</span> <span class="k">import</span> <span class="n">fuzzer</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>From the <code>result</code>, we can check the program output, which in this case consists of a set of typesetting commands:</p>
-
-</div>
-</div>
-</div><div class="fragment">
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span><span class="p">(</span><span class="n">char_start</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">char_range</span><span class="o">=</span><span class="mi">96</span><span class="p">)</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
-
-<div class="output_wrapper">
-<div class="output">
-
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[19]:</div>
-
-
-
-
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;4\n&#39;</pre>
+<pre>&#39;&gt;=npM0u[z8oxj]@JU%nG]-hp$:~Nk(&#39;
+</pre>
 </div>
 
 </div>
 
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We can also check the status. A value of 0 indicates that the program terminated correctly.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let's try to fuzz with 1000 random inputs and see whether we have some success.</p>
+</div>
+</div>
+</div>
+</div>
 
-</div>
-</div>
-</div></div><div class="fragment">
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">returncode</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">http_program</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Success!&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt output_prompt">Out[20]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>0</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Any error messages would be available in <code>results.stderr</code>:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>What are the chances of actually getting a valid URL?  We need our string to start with <code>"http://"</code> or <code>"https://"</code>.  Let's take the <code>"http://"</code> case first.  That's seven very specific characters we need to start with.  The chances of producing these seven characters randomly (with a character range of 96 different characters) is $1 : 96^7$, or</p>
+</div>
+</div>
+</div>
+</div>
 
-</div>
-</div>
-</div></div><div class="fragment">
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="mi">96</span> <span class="o">**</span> <span class="mi">7</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
-
-<div class="output_wrapper">
-<div class="output">
-
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[21]:</div>
-
-
-
-
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;&#39;</pre>
+<pre>75144747810816
+</pre>
 </div>
 
 </div>
 
-</div>
-</div>
-
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Instead of <code>bc</code>, you can actually put in any program you like.  Be aware, though, that if your program is able to change or even damage your system, there's quite a risk that the fuzzed input contains data or commands that do precisely this.</p>
-<p>Just for the fun of it, imagine you would test a file removal program.  What is the chance of the fuzzer producing a valid file name?  (Note that <code>.</code> and <code>/</code> may be  valid directory names already.)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The odds of producing a <code>"https://"</code> prefix are even worse, at $1 : 96^8$:</p>
+</div>
+</div>
+</div>
+</div>
 
-</div>
-</div>
-</div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Long-Running-Fuzzing">Long-Running Fuzzing<a class="anchor-link" href="#Long-Running-Fuzzing">&#182;</a></h3><p>Let us now feed a large number of inputs into our tested program, to see whether it might crash on some.  We store all results in the <code>runs</code> variable as pairs of input data and the actual result. (Note: running this may take a while.)</p>
-
-</div>
-</div>
-</div><div class="fragment">
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="n">program</span> <span class="o">=</span> <span class="s2">&quot;bc&quot;</span>
 
-<span class="n">runs</span> <span class="o">=</span> <span class="p">[]</span>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="mi">96</span> <span class="o">**</span> <span class="mi">8</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>7213895789838336
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>which gives us a total chance of</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">likelihood</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">96</span> <span class="o">**</span> <span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">96</span> <span class="o">**</span> <span class="mi">8</span><span class="p">)</span>
+<span class="n">likelihood</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>1.344627131107667e-14
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>And this is the number of runs (on average) we'd need to produce a valid URL:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="mi">1</span> <span class="o">/</span> <span class="n">likelihood</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>74370059689055.02
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let's measure how long one run of <code>http_program()</code> takes:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">Timer</span> <span class="k">import</span> <span class="n">Timer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">http_program</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Success!&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+<span class="n">duration_per_run_in_seconds</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span> <span class="o">/</span> <span class="n">trials</span>
+<span class="n">duration_per_run_in_seconds</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0.00013576018200001273
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>That's pretty fast, isn't it?  Unfortunately, we have a lot of runs to cover.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">seconds_until_success</span> <span class="o">=</span> <span class="n">duration_per_run_in_seconds</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">likelihood</span><span class="p">)</span>
+<span class="n">seconds_until_success</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>10096492838.737919
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>which translates into</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">hours_until_success</span> <span class="o">=</span> <span class="n">seconds_until_success</span> <span class="o">/</span> <span class="mi">3600</span>
+<span class="n">days_until_success</span> <span class="o">=</span> <span class="n">hours_until_success</span> <span class="o">/</span> <span class="mi">24</span>
+<span class="n">years_until_success</span> <span class="o">=</span> <span class="n">days_until_success</span> <span class="o">/</span> <span class="mf">365.25</span>
+<span class="n">years_until_success</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>319.93855168764156
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Even if we parallelize things a lot, we're still in for months to years of waiting.  And that's for getting <em>one</em> successful run that will get deeper into <code>http_program()</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>What basic fuzzing will do well is to test <code>urlparse()</code>, and if there is an error in this parsing function, it has good chances of uncovering it.  But as long as we cannot produce a valid input, we are out of luck in reaching any deeper functionality.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Mutating-Inputs">Mutating Inputs<a class="anchor-link" href="#Mutating-Inputs">&#182;</a></h2><p>The alternative to generating random strings from scratch is to start with a given <em>valid</em> input, and then to subsequently <em>mutate</em> it.  A <em>mutation</em> in this context is a simple string manipulation - say, inserting a (random) character, deleting a character, or flipping a bit in a character representation.  Here are some mutations to get you started:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">random</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">delete_random_character</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns s with a random character deleted&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># print(&quot;Deleting&quot;, repr(s[pos]), &quot;at&quot;, pos)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">[:</span><span class="n">pos</span><span class="p">]</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;A quick brown fox&quot;</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">delete_random_character</span><span class="p">(</span><span class="n">seed_input</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>A quickbrown fox
+Aquick brown fox
+A quick brown fo
+A quick rown fox
+A quick brown ox
+A quick bron fox
+A quick brown fo
+A quick brown fx
+A quick rown fox
+A quick brwn fox
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">insert_random_character</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns s with a random character inserted&quot;&quot;&quot;</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="n">random_character</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">128</span><span class="p">))</span>
+    <span class="c1"># print(&quot;Inserting&quot;, repr(random_character), &quot;at&quot;, pos)</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">[:</span><span class="n">pos</span><span class="p">]</span> <span class="o">+</span> <span class="n">random_character</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">pos</span><span class="p">:]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">insert_random_character</span><span class="p">(</span><span class="n">seed_input</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>A quick bhrown fox
+A quicJk brown fox
+A quick brown ffox
+A quick brow3n fox
+A quick (brown fox
+A &#34;quick brown fox
+A quick lbrown fox
+A quick brownh fox
+A quick br@own fox
+A quic7k brown fox
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">flip_random_character</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns s with a random bit flipped in a random position&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span>
+    <span class="n">bit</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">new_c</span> <span class="o">=</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">^</span> <span class="n">bit</span><span class="p">)</span>
+    <span class="c1"># print(&quot;Flipping&quot;, bit, &quot;in&quot;, repr(c) + &quot;, giving&quot;, repr(new_c))</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">[:</span><span class="n">pos</span><span class="p">]</span> <span class="o">+</span> <span class="n">new_c</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">flip_random_character</span><span class="p">(</span><span class="n">seed_input</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>A qui#k brown fox
+@ quick brown fox
+A quico brown fox
+A 1uick brown fox
+A quigk brown fox
+A quick$brown fox
+A(quick brown fox
+A quick$brown fox
+A suick brown fox
+A quick brown gox
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now create a random mutator that randomly chooses which mutation to apply:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mutators</span> <span class="o">=</span> <span class="p">[</span><span class="n">delete_random_character</span><span class="p">,</span> <span class="n">insert_random_character</span><span class="p">,</span> <span class="n">flip_random_character</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return s with a random mutation applied&quot;&quot;&quot;</span>
+    <span class="n">mutator</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">mutators</span><span class="p">)</span>
+    <span class="c1"># print(mutator)</span>
+    <span class="k">return</span> <span class="n">mutator</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">mutate</span><span class="p">(</span><span class="s2">&quot;A quick brown fox&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>A qick brown fox
+A quick brown ox
+A quick brown[ fox
+A qui?ck brown fox
+A quigk brown fox
+A quick brUown fox
+A!quick brown fox
+A qick brown fox
+A quNick brown fox
+A quick$brown fox
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The idea is now that <em>if</em> we have some valid input(s) to begin with, we may create more input candidates by applying one of the above mutations.  To see how this works, let's get back to URLs.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Mutating-URLs">Mutating URLs<a class="anchor-link" href="#Mutating-URLs">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now get back to our URL parsing problem.  Let us create a function <code>is_valid_url()</code> that checks whether <code>http_program()</code> accepts the input.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">is_valid_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">http_program</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_url</span><span class="p">(</span><span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_url</span><span class="p">(</span><span class="s2">&quot;xyzzy&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now apply the <code>mutate()</code> function on a given URL and see how many valid inputs we obtain.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="n">valid_inputs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="n">trials</span> <span class="o">=</span> <span class="mi">20</span>
 
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">program</span><span class="p">,</span> <span class="s2">&quot;input.txt&quot;</span><span class="p">],</span>
-                            <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
-                            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-                            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-                            <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">runs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">))</span>
-
-<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">)</span>
+    <span class="n">inp</span> <span class="o">=</span> <span class="n">mutate</span><span class="p">(</span><span class="n">seed_input</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_valid_url</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+        <span class="n">valid_inputs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We can now query <code>runs</code> for some statistics.  For instance, we can query how many runs actually passed -- that is, there were no error messages:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can now observe that by <em>mutating</em> the original input, we get a high proportion of valid inputs:</p>
+</div>
+</div>
+</div>
+</div>
 
-</div>
-</div>
-</div><div class="fragment">
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="n">runs</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">valid_inputs</span><span class="p">)</span> <span class="o">/</span> <span class="n">trials</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
-
-<div class="output_wrapper">
-<div class="output">
-
 
 <div class="output_area">
-
-<div class="prompt output_prompt">Out[23]:</div>
-
-
-
 
 <div class="output_text output_subarea output_execute_result">
-<pre>5</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Most inputs apparently are invalid – not a big surprise, as it is unlikely that a random input contains a valid arithmetic expression.</p>
-
-</div>
-</div>
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Let us take a look at the first error message:</p>
-
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">errors</span> <span class="o">=</span> <span class="p">[(</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="n">runs</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
-<span class="p">(</span><span class="n">first_data</span><span class="p">,</span> <span class="n">first_result</span><span class="p">)</span> <span class="o">=</span> <span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">first_data</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">first_result</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>&#39;%,%\&#39;:,0\&#39;918*143:*-2&amp;35$06!((;&lt;61&lt;:6%!?6+-))/-;65-2.;&#34;8&gt;6-87 7:9)!+?&#34;&amp;)6&#34;71*#.-+&lt;2&amp;:&#34;*(!;-/:5&#34;2%&#34;1!5&#39;
-input.txt 1: parse error
-input.txt 1: illegal character: &#39;
-input.txt 1: illegal character: :
-input.txt 1: illegal character: &#39;
-input.txt 1: illegal character: :
-input.txt 1: illegal character: &amp;
-input.txt 1: parse error
-input.txt 1: illegal character: $
-input.txt 1: parse error
-input.txt 1: illegal character: :
-input.txt 1: illegal character: ?
-input.txt 1: parse error
-input.txt 1: illegal character: &amp;
-input.txt 1: parse error
-input.txt 1: illegal character: :
-
+<pre>0.8
 </pre>
 </div>
-</div>
 
 </div>
-</div>
 
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Are there any runs with messages other than <code>illegal character</code> or <code>parse error</code>?  (Say, something like <code>crash</code> or <code>you found a fatal bug</code>?)  Not very many:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>What are the odds of also producing a <code>https:</code> prefix by mutating a <code>http:</code> sample seed input?  We have to insert ($1 : 3$) the right character <code>'s'</code> ($1 : 96$) into the correct position ($1 : l$), where $l$ is the length of our seed input.  This means that on average, we need this many runs:</p>
+</div>
+</div>
+</div>
+</div>
 
-</div>
-</div>
-</div><div class="fragment">
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span> <span class="k">for</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="n">runs</span> <span class="k">if</span> 
- <span class="n">result</span><span class="o">.</span><span class="n">stderr</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> 
- <span class="ow">and</span> <span class="s2">&quot;illegal character&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span>
- <span class="ow">and</span> <span class="s2">&quot;parse error&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">]</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="mi">96</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">seed_input</span><span class="p">)</span>
+<span class="n">trials</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
-
-<div class="output_wrapper">
-<div class="output">
-
 
 <div class="output_area">
-
-<div class="prompt output_prompt">Out[25]:</div>
-
-
-
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;EOF encountered in a comment.\n&#39;]</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Maybe a crash would be indicated by <code>bc</code> just crashing.  Unfortunately, the return code is never nonzero:</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="n">runs</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt output_prompt">Out[26]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>0</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>How about we let the above <code>bc</code> test run for some more?  While it is running, let us take a look on how the state of the art was in 1989.</p>
-
-</div>
-</div>
-</div></div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Bugs-Fuzzers-Find">Bugs Fuzzers Find<a class="anchor-link" href="#Bugs-Fuzzers-Find">&#182;</a></h2><p>When Miller and his students ran their first fuzzers in 1989, they found an alarming result: About <strong>a third of the UNIX utilities</strong> they fuzzed had issues – they crashed, hung, or otherwise failed when confronted with fuzzing input \cite{Miller1990}.  This also included the <code>bc</code> program, above.  (Apparently, the bugs have now been fixed!)</p>
-<p>Considering that many of these UNIX utilities were used in scripts that would also process network input, this was an alarming result.  Programmers quickly built and ran their own fuzzers, rushed to fix the reported errors, and learned not to trust external inputs anymore.</p>
-
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>What kind of problems did Miller's fuzzing experiment find?  It turns out that the mistakes programmers made in 1990 are still the same mistakes being made today.</p>
-
-</div>
-</div>
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Buffer-Overflows">Buffer Overflows<a class="anchor-link" href="#Buffer-Overflows">&#182;</a></h3><p>Many programs have built-in maximum lengths for inputs and input elements.  In languages like C, it is easy to excess these lengths without the program (or the programmer) even noticing, triggering so-called <strong>buffer overflows</strong>.  The following code, for instance, happily copies the <code>input</code> string into a <code>weekday</code> string even if <code>input</code> has more than eight characters:</p>
-<div class="highlight"><pre><span></span><span class="kt">char</span> <span class="n">weekday</span><span class="p">[</span><span class="mi">9</span><span class="p">];</span> <span class="c1">// 8 characters + trailing &#39;\0&#39; terminator</span>
-<span class="n">strcpy</span> <span class="p">(</span><span class="n">weekday</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
-</pre></div>
-<p>Ironically, this already fails if <code>input</code> is <code>"Wednesday"</code> (9 characters); any excess characters (here, <code>'y'</code> and the following <code>'\0'</code> string terminator) are simply copied to whatever resides in memory after <code>weekday</code>, triggering arbitrary behavior; maybe some boolean character variable which would be set from <code>'n'</code> to <code>'y'</code>.  With fuzzing, it is very easy to produce arbitrary long inputs and input elements.</p>
-
-</div>
-</div>
-</div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We can easily simulate this buffer overflow behavior in a Python function:</p>
-
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[27]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">crash_if_too_long</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="n">buffer</span> <span class="o">=</span> <span class="s2">&quot;Thursday&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>And yes, it quickly crashes.</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ExpectError</span> <span class="k">import</span> <span class="n">ExpectError</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[29]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
-        <span class="n">crash_if_too_long</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-29-f83db3d59a06&gt;&#34;, line 5, in &lt;module&gt;
-    crash_if_too_long(s)
-  File &#34;&lt;ipython-input-27-928c2d2de976&gt;&#34;, line 4, in crash_if_too_long
-    raise ValueError
-ValueError
+<pre>10944
 </pre>
 </div>
-</div>
 
 </div>
-</div>
 
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Missing-Error-Checks">Missing Error Checks<a class="anchor-link" href="#Missing-Error-Checks">&#182;</a></h3><p>Many programming languages do not have exceptions, but instead have functions return special <strong>error codes</strong> in exceptional circumstances.  The C function <code>getchar()</code>, for instance, normally returns a character from the standard input; if no input is available anymore, it returns the special value <code>EOF</code> (end of file).  Now assume a programmer is scanning the input for the next character, skipping space characters:</p>
-<div class="highlight"><pre><span></span><span class="kt">char</span> <span class="nf">read_next_nonspace</span><span class="p">()</span> <span class="p">{</span>
-    <span class="kt">char</span> <span class="n">lastc</span><span class="p">;</span>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can actually afford this.  Let's try:</p>
+</div>
+</div>
+</div>
+</div>
 
-    <span class="k">do</span> <span class="p">{</span>
-        <span class="n">lastc</span> <span class="o">=</span> <span class="n">getchar</span><span class="p">();</span>
-    <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">lastc</span> <span class="o">!=</span> <span class="sc">&#39; &#39;</span><span class="p">);</span>
-
-    <span class="k">return</span> <span class="p">(</span><span class="n">lastc</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-<p>What happens if the input ends prematurely, as would perfectly be feasible with fuzzing?  Well, <code>getchar()</code> returns <code>EOF</code>, and keeps on returning <code>EOF</code> when called again; so the code above simply enters an infinite loop.</p>
-
-</div>
-</div>
-</div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Again, we can simulate such missing error checks.  Here's a function that will effectively hang if no space is present in the input:</p>
-
-</div>
-</div>
-</div><div class="fragment">
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">hang_if_no_space</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">Timer</span> <span class="k">import</span> <span class="n">Timer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
-                <span class="k">break</span>
-        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">trials</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">inp</span> <span class="o">=</span> <span class="n">mutate</span><span class="p">(</span><span class="n">seed_input</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inp</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;https://&quot;</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Success after&quot;</span><span class="p">,</span> <span class="n">trials</span><span class="p">,</span> <span class="s2">&quot;trials in&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">(),</span> <span class="s2">&quot;seconds&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Success after 42891 trials in 0.24927699700003814 seconds
+</pre>
 </div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Using the timeout mechanism from our <a href="Intro_Testing.slides.html">Introduction to Testing</a>, we can interrupt this function after some time.  And yes, it does hang after a few fuzzing inputs.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Of course, if we wanted to get, say, an <code>"ftp://"</code> prefix, we would need more mutations and more runs – most important, though, we would need to apply <em>multiple</em> mutations.</p>
+</div>
+</div>
+</div>
+</div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Multiple-Mutations">Multiple Mutations<a class="anchor-link" href="#Multiple-Mutations">&#182;</a></h2><p>So far, we have only applied one single mutation on a sample string.  However, we can also apply <em>multiple</em> mutations, further changing it.  What happens, for instance, if we apply, say, 20 mutations on our sample string?</p>
 </div>
 </div>
-</div><div class="fragment">
+</div>
+</div>
+
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ExpectError</span> <span class="k">import</span> <span class="n">ExpectTimeout</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="n">mutations</span> <span class="o">=</span> <span class="mi">50</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-</div></div><div class="fragment">
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inp</span> <span class="o">=</span> <span class="n">seed_input</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mutations</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">5</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;mutations:&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
+    <span class="n">inp</span> <span class="o">=</span> <span class="n">mutate</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0 mutations: &#39;http://www.google.com/search?q=fuzzing&#39;
+5 mutations: &#39;http://w+wRw.google.com%/seach?q=fuzing&#39;
+10 mutations: &#39;htktp://w+wRw.google.o4%seach?q=fuzing&#39;
+15 mutations: &#34;hetktpc:&#39;/w+wRw.oogle.o4%saach?q=fuzing&#34;
+20 mutations: &#34;hetkUtpc:&#39;/w+wRw.oogle*o4%saac~h?q=u:ing&#34;
+25 mutations: &#39;hmtkUtpc:g/w+wRw.oogle*o4%saacG~H?q=u:fing&#39;
+30 mutations: &#39;h\x7fmtjUtpc:g/w+wRw.omgRle#*o4%saacG~H?q=u:fing&#39;
+35 mutations: &#39;hR\x7fmtjUtp:g/w+wRw.omgRle#*o4%saacGzH?qu:fin&#39;
+40 mutations: &#39;hR\x7fmtjUtp:c/w+wRw7.omgRle#*o4%saczH?qu:fn&#39;
+45 mutations: &#39;hRp\x7fmtjUtp:c/:w+wRw7.olgRle#*o4%*sacH?qu:fn&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As you see, the original seed input is hardly recognizable anymore.  Mutating the input again and again has the advantage of getting a higher variety in the input, but on the other hand further increases the risk of having an invalid input.  The key to success lies in the idea of <em>guiding</em> these mutations – that is, <em>keeping those that are especially valuable.</em></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Guiding-by-Coverage">Guiding by Coverage<a class="anchor-link" href="#Guiding-by-Coverage">&#182;</a></h2><p>To cover as much functionality as possible, one can rely on either <em>specified</em> or <em>implemented</em> functionality, as discussed in the <a href="Coverage.html">"Coverage"</a> chapter.  For now, we will not assume that there is a specification of program behavior (although it <em>definitely</em> would be good to have one!).  We <em>will</em> assume, though, that the program to be tested exists – and that we can leverage its structure to guide test generation.</p>
+<p>Since testing always executes the program at hand, one can always gather information about its execution – the least is the information needed to decide whether a test passes or fails.  Since coverage is frequently measured as well to determine test quality, let us also assume we can retrieve coverage of a test run.  The question is then: <em>How can we leverage coverage to guide test generation?</em></p>
+<p>One particularly successful idea is implemented in the popular fuzzer named <a href="http://lcamtuf.coredump.cx/afl/"><em>American fuzzy lop</em></a>, or AFL for short.  Just like our examples above, AFL evolves test cases that have been successful – but for AFL, "success" means <em>finding a new path through the program execution</em>.  This way, AFL can keep on mutating inputs that so far have found new paths; and if an input finds another path, it will be retained as well.</p>
+<p>We can implement such a strategy by maximizing <em>diversity in coverage</em> in our population.  First, let us create a function <code>create_candidate()</code> which randomly picks some input from a given population, and then applies between <code>min_mutations</code> and <code>max_mutations</code> mutation steps, returning the final result:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">create_candidate</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">min_mutations</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_mutations</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">candidate</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+    <span class="n">trials</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">min_mutations</span><span class="p">,</span> <span class="n">max_mutations</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
-        <span class="n">hang_if_no_space</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">mutate</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">candidate</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Now for the main function.  We maintain a list of inputs (<code>population</code>) and a set of coverages already achieved (<code>coverages_seen</code>).  The <code>fuzz()</code> helper function takes an input and runs the given <code>function()</code> on it.  If its coverage is new (i.e. not in <code>coverages_seen</code>), the input is added to <code>population</code> and the coverage to <code>coverages_seen</code>.</p>
+<p>The main <code>coverage_fuzzer()</code> function first runs <code>fuzz()</code> on the provided seed population (adding to the population), and then keeps on creating and testing new candidates coming from <code>create_candidate()</code>.</p>
+</div>
+</div>
+</div>
+</div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">Coverage</span> <span class="k">import</span> <span class="n">Coverage</span><span class="p">,</span> <span class="n">population_coverage</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">coverage_fuzzer</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">population</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">coverages_seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">fuzz</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run function(inp) while tracking coverage.  </span>
+<span class="sd">           If we reach new coverage, </span>
+<span class="sd">           add inp to population and its coverage to population_coverage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">nonlocal</span> <span class="n">population</span>  <span class="c1"># Access &quot;outer&quot; variables</span>
+        <span class="k">nonlocal</span> <span class="n">coverages_seen</span>
+
+        <span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">function</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+                <span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># print(repr(inp))</span>
+
+        <span class="n">new_coverage</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">valid</span> <span class="ow">and</span> <span class="n">new_coverage</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coverages_seen</span><span class="p">:</span>
+            <span class="c1"># We have new coverage</span>
+            <span class="n">population</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+            <span class="n">coverages_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_coverage</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">seed</span><span class="p">:</span>
+        <span class="n">fuzz</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">create_candidate</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+        <span class="n">fuzz</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">population</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now put this to use:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="n">population</span> <span class="o">=</span> <span class="n">coverage_fuzzer</span><span class="p">(</span>
+    <span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">],</span> <span class="n">function</span><span class="o">=</span><span class="n">http_program</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">population</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
 
 <div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-32-8e40f7d62a1b&gt;&#34;, line 5, in &lt;module&gt;
-    hang_if_no_space(s)
-  File &#34;&lt;ipython-input-30-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
-    if i &lt; len(s):
-  File &#34;&lt;ipython-input-30-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
-    if i &lt; len(s):
-  File &#34;&lt;string&gt;&#34;, line 14, in check_time
-TimeoutError
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The <code>with ExpectTimeout()</code> line in the above code ensures that execution of the enclosed code is interrupted after two seconds, printing the error message.</p>
-
-</div>
-</div>
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Rogue-Numbers">Rogue Numbers<a class="anchor-link" href="#Rogue-Numbers">&#182;</a></h3><p>With fuzzing, it is easy to generate <strong>uncommon value</strong> in the input, causing all kinds of interesting behavior.  Consider the following code, again in the C language, which first reads a buffer size from the input, and then allocates a buffer of the given size:</p>
-<div class="highlight"><pre><span></span><span class="kt">char</span> <span class="o">*</span><span class="nf">read_input</span><span class="p">()</span> <span class="p">{</span>
-    <span class="kt">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">read_buffer_size</span><span class="p">();</span>
-    <span class="kt">char</span> <span class="o">*</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
-    <span class="c1">// fill buffer</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
-<span class="p">}</span>
-</pre></div>
-<p>What happens if <code>size</code> is very large, exceeding program memory?  What happens if <code>size</code> is less than the number of characters following?  What happens if <code>size</code> is negative?  By providing a random number here, fuzzing can create all kinds of damages.</p>
-
-</div>
-</div>
-</div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Again, we can easily simulate such rogue numbers in Python.  The function <code>collapse_if_too_large()</code> fails if the passed value (a string) is too large after having been converted to an integer.</p>
-
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">collapse_if_too_large</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We can have <code>fuzzer()</code> create a string of digits:</p>
-
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">long_number</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">),</span> <span class="mi">10</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">long_number</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>94394591889846996523697890091447449974450471606008648032510936038368
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>If we feed such numbers into <code>collapse_if_too_large()</code>, it will very soon fail.</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-    <span class="n">collapse_if_too_large</span><span class="p">(</span><span class="n">long_number</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-35-7a1817f3dbfc&gt;&#34;, line 2, in &lt;module&gt;
-    collapse_if_too_large(long_number)
-  File &#34;&lt;ipython-input-33-2c22a83a4dca&gt;&#34;, line 3, in collapse_if_too_large
-    raise ValueError
-ValueError
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>If we really wanted to allocate that much memory on a system, having it quickly fail as above actually would be the better option.  In reality, running out of memory may dramatically slow systems down, up to the point that they become totally unresponsive – and restarting is the only option.</p>
-
-</div>
-</div>
-</div></div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="HeartBleed">HeartBleed<a class="anchor-link" href="#HeartBleed">&#182;</a></h3><p>One might argue that these are all problems of bad programming, or of bad programming languages.  But then, there's thousands of people starting to program every day, and all of them make the same mistakes again and again, even today.</p>
-<p>The somewhat better news is that fuzzing can easily detect such mistakes.  Here's a non-comprehensive list of bugs found through Miller's fuzzing approach:</p>
-
-</div>
-</div>
-</div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>\todo{expand}</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="A-Fuzzing-Architecture">A Fuzzing Architecture<a class="anchor-link" href="#A-Fuzzing-Architecture">&#182;</a></h2><p>Since we'd like to reuse some parts of this chapter in the following ones, let us define things in a way that are easier to reuse, and in particular easier to <em>extend</em>.  To this end, we introduce a number of <em>classes</em> that encapsulate the functionality above in a reusable way.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Runner">Runner<a class="anchor-link" href="#Runner">&#182;</a></h3><p>The first thing we introduce is the notion of a <code>Runner</code> – that is, an object whose job it is to execute some object with a given input.  A runner typically is some program or function under test, but we can also have simpler runners.</p>
-<p>Let us start with a base class for runners.  A runner essentially provides a method <code>run(input)</code> that is used to pass <code>input</code> (a string) to the runner.  <code>run()</code> returns a result; by default, this is the input.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Runner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize&quot;&quot;&quot;</span>
-        <span class="k">pass</span>
-    
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Run the consumer with the given input&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">inp</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>A more interesting class is <code>PrintRunner</code>, which simply prints out everything that is given to it.  This is the default runner in many situations.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PrintRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Print the given input&quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">inp</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">PrintRunner</span><span class="p">()</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;Some input&quot;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Some input
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt output_prompt">Out[39]:</div>
-
-
-
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;Some input&#39;</pre>
+<pre>[&#39;http://www.google.com/search?q=fuzzing&#39;,
+ &#39;http://www.google.ojm/8se`rch?q&lt;}f/uzzing&#39;,
+ &#39;http://www.goole.omQ/8se`rch=q&lt;}f/qzzin&#39;,
+ &#39;http://ww.oogl.ojm/8se`r#h?dq&lt;}f/uzzi\x7fn&#39;,
+ &#39;http://ww.oogl.oj/8se`r#h?dq&lt;}Sf/uZzi\x7fn&#39;,
+ &#39;httP://w.ooglkojm-8se`r#h?dq&lt;}f/uzzi\x7fn&#39;,
+ &#39;http://www.goole.omQ/8sekrch=q&lt;}f/qzzin&#39;,
+ &#34;Http://ww.os\x7fgl.o?jm&#39;8se`r#hd&lt;C}f/uzzi\x7fn&#34;,
+ &#39;httP://wT$.ooglkojm8e`r+h?dq&lt;}v/uzzh\x7fn&#39;,
+ &#34;Http://ww.os\x7fgl.?m&#39;8se`r#hd&lt;C|f/uzzi\x7fn&#34;,
+ &#34;Http://ww.os\x7fgl.o?jm&#39;8se`rhd&lt;C}f/uzzi\x7fn&#34;,
+ &#39;httP://w.ooglkohm-8se`r#h?dq&lt;}f/uzi\x7fn&#39;,
+ &#34;http://ww.os\x7fgl.?&#39;8s|e`r#hd&lt;C|f/uzzij&#34;]
+</pre>
 </div>
 
 </div>
 
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The <code>ProgramRunner</code> class sends the input to the standard input of a program instead.  The program is specified when creating a <code>ProgramRunner</code> object.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Success!  In our population, <em>each and every input</em> now is valid and has a different coverage, coming from various combinations of schemes, paths, queries, and fragments.</p>
+</div>
+</div>
+</div>
+</div>
 
-</div>
-</div>
-</div>
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProgramRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialize.  `program` is a program spec as passed to `subprocess.run()`&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">program</span>
 
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Run the program with `inp` as input.  Return result of `subprocess.run()`.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">,</span>
-                        <span class="nb">input</span><span class="o">=</span><span class="n">inp</span><span class="p">,</span>
-                        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-                        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-                        <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cumulative_coverage</span> <span class="o">=</span> <span class="n">population_coverage</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">http_program</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_coverage</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Coverage of urlparse() with random inputs&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;# of inputs&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;lines covered&#39;</span><span class="p">);</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Let us demonstrate a <code>ProgramRunner</code> using the <code>cat</code> program – a program that copies its input to its output.
-We see that the output of <code>cat</code> is the same as its input:</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cat</span> <span class="o">=</span> <span class="n">ProgramRunner</span><span class="p">(</span><span class="n">program</span><span class="o">=</span><span class="s2">&quot;cat&quot;</span><span class="p">)</span>
-<span class="n">cat</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[41]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;hello&#39;, stderr=&#39;&#39;)</pre>
-</div>
+<div class="output_image output_png output_subarea ">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYIAAAEWCAYAAABrDZDcAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADl0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uIDIuMi4yLCBodHRwOi8vbWF0cGxvdGxpYi5vcmcvhp/UCwAAIABJREFUeJzt3XmcHHWd//HXO/dNEjIJ5CKQhCAolxFB8EROUXAV13PxRF0UWVc0uq66rooHHri6sniBiiiCKOIPFkTQ9cCHSQghBDITQiBnzySEZCbXZGY+vz+qhjTDTKbnqKnp7vfz8ehHd1XX8anq6v50fb/f+pYiAjMzq15D8g7AzMzy5URgZlblnAjMzKqcE4GZWZVzIjAzq3JOBGZmVc6JwDIh6bWS1klqknRCPyzv7ZL+1B+x9TdJf27fRkmXSvpiPyxzdrrvhh5gmpA0r6/r6g+S5qTxDBuAdT0k6WVZr6eaOBH0E0lvlrQ4/fJuknS7pNPyjitHVwIfiIhxEXF/3sFkRdKrgcaibbwGeKukqX1ZbkQ8ke671nQ990p6dx/DrQgRcUxE3Jv1eiRdK+lzWa9nMHAi6AeSPgx8A/gCMA2YDfw3cP4AxiBJg+nzPAx4qD8WlOW/zH5Y9vuAH7cPRMQe4Hbgn/q43EwNxD93KyMR4UcfHsBBQBNw4QGmGUmSKDamj28AI9P3HgbOK5p2GLAFODEdPhn4C/AU8ADwsqJp7wU+D/wZ2A3MA96RLrMRWAO8t0MsHwU2pXG8GwhgXlGcVwJPAAXgamB0F9s0BPgk8DhQD/wo3Rcj0/0RwE7g0U7mnZO+P6zDtrw7ff32dJu+DjwJfC4d96ei6QO4NN3GLcBXgCHpe3OB3wNb0/euByYWzbsW+BiwHNib7vOPARvS/bYKOL1oOxcBj6bLuxGYnL43It3vMzts31uAe7rYb/8B/Ff6eni6j76cDo8G9gCTivdR+hm3pu81Ad8q2gfvA+qAbcC3AXWx3s8ANwE/AXakn/1JwF9Jjq1NwLeAER32cafLB4amx8qW9DO4pPgzBaYDt6af32rgPR1i+UUaSyPwIHAk8HGSY2kdcOYBvk9rgVcWLetGkuOvkeTPx8IO034cWJluww+BUUXH2Z86LDtIvkcXA/uA5nSf/yZ9v9PjpNwfuQdQ7g/gbKCFoh+1Tqb5LHAfMBWoIflh/8/0vU8B1xdN+yrgkfT1DJIfn3NJfpDOSIdr0vfvJfnRPib9wRiezj8XEPBSYBf7k8rZwOZ0+jEk/2SLE8E30i/vZGA88Bvgii626Z3pF/wIYBzwS+DHRe8/vdxO5p1D94mgBfhgul2jO35p0/nvSWOdDdQWzT8v3Vcj0/39R+AbRfOuBZYBs9JlLyD58ZleFN/c9PVl6Wc3M13e/wA3pO8dA+zsZPtOBJ7sYttfATyYvn4RSYL5W9F7D3S2j4r3T4d9cBswMd0HDcDZXaz3MyQ/bBeQHEujgeeT/NEYlq7vYeCyUpZPkiAeSffh5PSzKI73DyRnxaOA49N5Ty+KZQ9wVrruHwGPAf9Gcgy/B3jsAN+ntTwzEewh+Y4MBa4A7usw7YqiOP8MfK7oOOs0EaSvr22fNh3u8jgp90fuAZT7g+Tf3+ZupnkUOLdo+Cxgbfp6Hsm/izHp8PXAp9LXH6PoxzUd97/ARenre4HPdrPuXwEfSl//gKIf9nTd7f+ARPLvdG7R+6d09YUE7gb+uWh4AckPTfsPQV8TwRMd5nnGlzad/+yi4X8G7u5ifRcA9xcNrwXe2WE/1AOvBIZ3mPdhiv71AYe2bydwamefPTAfaO0ilvZ//QeTnGl8AlhPkkz/A/hmZ/uIrhPBaUXDNwKLuljvZ4A/dnOsXAbcUsrySc643lf03pnsP4OZRXIGM77o/SuAa4tiuavovVeT/Osemg6PT5c1sYs41/LMRPC7oveOBnZ3mLY4znNJz1I7HlMdj1uenQi6PE7K/TGYypTL1VZgSjdlrtNJilDaPZ6OIyJWk/zYvFrSGOA1wE/T6Q4DLpT0VPsDOI3kx6jduuIVSTpH0n2SnkynPxeYUhTHui7mrSE5S1hStK470vGlbtMwkjqS/rCu+0meMc3T+1TSVEk/k7RB0g6SIogpXc2bfgaXkfyo1KfzTk/fPgy4pWifPEzyIzeNpKhhfCdxjQe2dxZwROwGFpOcrb2E5J/zX0iSykvT4Z7YXPR6F0lC6UrHY+VISbdJ2pzupy/w7P3U1fI7HkvFx8J0kjOixg7vzygaLhS93g1sibRiPB2mm205UIyjOnwfOz1Oeqqb46SsORH03V9J/uFdcIBpNpL8oLSbnY5rdwPwJpLK5ZXpAQfJAfzjiJhY9BgbEcXNE6P9haSRwM0kZbfTImIi8P9I/u1DUg48s2jeWUWvt5B8AY8pWtdBEdHVl7GzbWrhmV/wruxMn8cUjTukwzRB94rjL96nV6TzHxsRE4C3sn8fdLr8iPhpRJxGsk0BfCl9ax1wTofPYFREbCApO5ekGTzTc0jqc7ryB5JioBOAv6fDZ5GU2f+xi3lK2R/d6biM75AU78xP99MnePZ+6somnr3/220EJksa3+H9DT0Lt990dZzspOgYlNTtMXiA46SsORH0UURsJynn/7akCySNkTQ8/Wf+5XSyG4BPSqqRNCWd/idFi/kZyan1+9l/NkA6zaslnSVpqKRRkl4mqfjHvNgIknLsBqBF0jnpctvdCLxD0nPSs49PFW1HG/Bd4OvtTR8lzZB0VhfrugH4F0mHSxpH8m/y5xHRcqD9la6rgeRH4a3pdr2TpF6jpy6XNEnSLOBDwM/T8eNJihqeSn+kLz/QQiQtkPSKNJHuIUmI7f9OrwY+L+mwdNoaSeen27EP+B3JP/liLyVpOdSVP5C0KloZEc2kxT4kxXANXcxTIKmP6U/jSSqOmyQdRXL8lepG4FJJMyVNIinmAiAi1pGc5VyRHrPHAu8iKfbMwyVpnJNJkl37cfIAcIyk4yWNIvmnX+wZ+7yb46SsORH0g4j4GvBhklY0DST/Ij9AUj4PSauXxSStVB4Elqbj2uffRHJm8SL2H6TtX6jzSQ7e9uVeThefW3oqfinJl3Qb8GaSyt/2928HvklSsbc6XSckLWcgqZNYDdyXFhX8jqTsvzM/IKls/iNJRd8eksrdUr0n3ZatJJWuf+nBvO1+DSwhqfj9LfD9dPx/kFTYbk/H/7Kb5YwEvkhyVrSZpFL/E+l7V5HswzslNZJUHL+waN7/Ad7WPpD+oJwLXHeA9f2FpK6g/d//SpL919XZQHscr5e0TdI3u9meUn2E5BhpJPkT8PMDT/4M3yWpr3qA5HjuuI/fRFLPsRG4Bfh0RNzVx3h766fAnSStm9aQfvciopakIcfvSM7uOl6w+H3g6LRY8Fcc+Dgpa+1NwawKSXoOSYuKkaX8kx9MJAVJkcbqbifOPpY/AR+MiPslfRCYFREfzTsuA0lrSSrZf5d3LIOZLyqpMpJeS/IveSxJ+eZvyi0JDDZpmXH76//KMxaz3nDRUPV5L0kx06Mk5Zs9KRc2swqUWdGQpAU8s8zxCJLKyR+l4+eQtPF9Q0RsyyQIMzPr1oDUEaQ9KG4gqWS7hKSN8RclLQImRcTHMg/CzMw6NVCJ4EySVgOnSlpF0l/OJkmHAvdGRFctUwCYMmVKzJkzJ/M4zcwqyZIlS7ZERFcXhT5toCqL30jS7hySC502QdJssqvueiVdTNLxE7Nnz2bx4sUDEqiZWaWQ9Hj3Uw1AZbGkESTdJvyiJ/NFxDURsTAiFtbUdJvQzMyslwai1dA5wNKIaO96oJAWCZE+1w9ADGZm1oWBSARvYn+xECRXaV6Uvr6I5OpQMzPLSaaJIO3P5gyeefn5F4EzJNWl7/X5/q5mZtZ7mVYWR8Qukn7Xi8dtBU7Pcr1mZlY6X1lsZlblnAjMzKqcO50zG8Q2PLWb2x/cxI7d+/IOxXLy2hNncviUsZmuw4nAbJDZubeFO1Zs5ual6/nrmq1EgEq9b5hVnBMPm+REYFYN2tqC+9Zs5aal67ljxWZ2Nbdy2MFjuOz0I/mHE2cwa/KY7hdi1ktOBGY5emzLTm5esp5b7t/Ahqd2M37kMF5z3HRe9/yZLDxsEvKpgA0AJwKzAbZ99z5+u3wTNy9dz5LHtzFEcNr8Gj569gLOOuYQRg0fmneIVmWcCMwGQEtrG/+3egs3L1nPnSsLNLe0MX/qOBadcxSvPWEG0yaMyjtEq2JOBGYZWrW5kZuXJkU/DY17mTRmOG96wSxe9/yZPG/GQS76sUHBicCsn21t2sutD2zk5qXrWbFhB8OGiJcfNZXXnTiTVxw1lRHDfPmODS5OBGb9oLmljd8/Us/NS9dzzyP1tLQFz50xgU+/+mhec9x0Dh43Mu8QzbrkRGAVqaW1jSd3NWe+no1P7eGWpeu59YGNbNu1j5rxI3nnaYfzuhNnsuCQ8Zmv36w/OBFYRXr/9Uu5a2Wh+wn7wYhhQzjz6Gm87vkzefG8KQwb6qIfKy9OBFZxIoLFa5/k5CMmc96x0zNd17iRw3j5UVM5aPTwTNdjliUnAqs4W5qa2bZrH2ccfQhvPfmwvMMxG/R8DmsVp67QCMCR08blHIlZeXAisIpT+3QicGWtWSmcCKzi1NY3cdDo4Uwd7yabZqVwIrCKU1do5Mhp43zVrlmJnAisokQEtYUm5rtYyKxkTgRWURoa97J99z6OnOqKYrNSORFYRVnlimKzHnMisIpSW2gCcNGQWQ84EVhFqSs0MmnMcKaMG5F3KGZlw4nAKkptoZH508a7xZBZDzgRWMWICOoKTb6i2KyHnAisYmzesYfGvS0scP2AWY84EVjFcEWxWe84EVjFqHPTUbNecSKwilFbaGTKuBFMHusWQ2Y94URgFWNVoYn5U302YNZTTgRWESKC1Wlnc2bWM04EVhE2PLWbnc2trig26wUnAqsIdWmLIVcUm/WcE4FVhFrfntKs15wIrCLUFpqYOn4kE8e4xZBZTzkRWEWoq290sZBZLzkRWNlra0v6GJrvYiGzXsk0EUiaKOkmSY9IeljSKZI+I2mDpGXp49wsY7DKt+Gp3eze1+ozArNeGpbx8q8C7oiI10saAYwBzgK+HhFXZrxuqxKrNrui2KwvMksEkiYALwHeDhARzUCz+4m3/lZbnySCeb6q2KxXsiwaOgJoAH4o6X5J35M0Nn3vA5KWS/qBpEmdzSzpYkmLJS1uaGjIMEwrd3WFJg6ZMIqDRg/POxSzspRlIhgGnAh8JyJOAHYCi4DvAHOB44FNwFc7mzkiromIhRGxsKamJsMwrdwldyVzsZBZb2WZCNYD6yPib+nwTcCJEVGIiNaIaAO+C5yUYQxW4VrbgtX1Ta4oNuuDzBJBRGwG1klakI46HVgp6dCiyV4LrMgqBqt8657cxd6WNt+VzKwPsm419EHg+rTF0BrgHcA3JR0PBLAWeG/GMVgFa+9awkVDZr2XaSKIiGXAwg6j35blOq261NX79pRmfeUri62s1RYamTFxNONGZn1ya1a5nAisrK3a7BZDZn3lRGBlq6W1jTUNO91iyKyPnAisbD3+5C6aW9uYP9VnBGZ94URgZavu6ZvR+IzArC+cCKxs1aa3p5znMwKzPnEisLJVW2hk1uTRjHWLIbM+cSKwslVXaOJI9zhq1mdOBFaW9rW2sWZLky8kM+sHTgRWlh7fupN9reGb0Zj1AycCK0urNicVxW4xZNZ3TgRWlmoLjUgwt8ZnBGZ95URgZamuvpHZk8cwesTQvEMxK3tOBFaWagtNzHeLIbN+4URgZae5pY21W3a6otisnzgRWNl5bMtOWtqCBYf4jMCsPzgRWNl5+q5kLhoy6xdOBFZ26gqNDBEcUTM271DMKoITgZWd2kITcw4ey6jhbjFk1h+cCKzs1BZ8VzKz/uREYGVlz75W1m71XcnM+pMTgZWVNQ07aQvc2ZxZP3IisLJSV99+VzIXDZn1FycCKyu1hUaGDhGHT3GLIbP+0uWtnSQ9CERX70fEsZlEZHYAtYUmDp8ylpHD3GLIrL8c6B5/56XPl6TPP06f3wLsyiwiswOoKzRy9PQJeYdhVlG6LBqKiMcj4nHg1Ij4aEQ8mD4WAWcNXIhmiT37Wnn8yV2+otisn5VSRzBW0mntA5JeBLiA1gbc6vomInwzGrP+dqCioXbvAn4g6SCSOoPtwDszjcqsE+19DLnFkFn/6jYRRMQS4DhJEwBFxPbswzJ7ttpCE8OHijluMWTWr7otGpI0TdL3gZ9HxHZJR0t61wDEZvYMdYVGDp8yluFD3erZrD+V8o26FvhfYHo6XAtcllVAZl2prW/0FcVmGSglEUyJiBuBNoCIaAFaM43KrINdzS2se3I3R7rFkFm/KyUR7JR0MOnFZZJOJqkwNhswq+ubAFhwiCuKzfpbKa2GPgzcCsyV9GegBnh9plGZdVBbSBKBi4bM+t8BE4GkIcAo4KXAAkDAqojYNwCxmT2trtDIiKFDOGzymLxDMas4B0wEEdEm6asRcQrw0ADFZPYstYVGjqgZyzC3GDLrd6V8q+6U9DpJyjwasy7UFpp8RbFZRkpJBB8GfgE0S9ohqVHSjlIWLmmipJskPSLpYUmnSJos6S5JdenzpD5tgVW8pr0tbHhqt68oNstIt4kgIsZHxJCIGB4RE9LhUrt/vAq4IyKOAo4DHgYWAXdHxHzg7nTYrEt1adcSrig2y0YpVxZL0lsl/Xs6PEvSSSXMNwF4CfB9gIhojoingPOB69LJrgMu6G3wVh3q0hZDLhoyy0YpRUP/DZwCvDkdbgK+XcJ8RwANwA8l3S/pe5LGAtMiYhNA+jy1s5klXSxpsaTFDQ0NJazOKlVtoZGRw4Yw2y2GzDJRSiJ4YURcAuwBiIhtwIgS5hsGnAh8JyJOAHbSg2KgiLgmIhZGxMKamppSZ7MKVFvfxLyp4xg6xO0VzLJQSiLYJ2ko+68sriHtbqIb64H1EfG3dPgmksRQkHRouqxDgfoeR21Vpa7Q6GIhswyVkgi+CdwCTJX0eeBPwBe6mykiNgPrJC1IR50OrCS5SvmidNxFwK97GrRVjx179rFp+x7mu8WQWWZKuR/B9ZKWkPyQC7ggIh4ucfkfBK6XNAJYA7yDJPncmHZl/QRwYa8it6rwdEWxO5szy0y3iUDSVST3IiilgvgZImIZsLCTt07v6bKsOu2/K5kTgVlWSikaWgp8UtJqSV+R1NkPu1kmaguNjB4+lJmTRucdilnFKuWCsusi4lzgJJKb0nxJUl3mkZmRFA3NmzqOIW4xZJaZnvTgNQ84CpgDPJJJNGYd1BYaXVFslrFSrixuPwP4LEkPpM+PiFdnHplVve279lHfuNf1A2YZK+XGNI8Bp0TElqyDMStWW59UFC9wIjDLVCnNR6+W9BpJL0lH/SEifpNxXGZPtxhy0ZBZtkopGroC+BDJxWArgUvTcWaZqis0MXbEUGZMdIshsyyVUjT0KuD4iGgDkHQdcD/w8SwDM6stNDJv2nh8TySzbJXaamhi0euDsgjErKPaQiNHTnWxkFnWSjkjuAK4X9I9JF1MvASfDVjGntzZzJamZrcYMhsApVQW3yDpXuAFJIngY2mHcmaZcUWx2cAppbL4tcCuiLg1In4N7JHku4pZpurcx5DZgCmljuDTEbG9fSC93eSnswvJDGoLTYwfOYxDDxqVdyhmFa+URNDZNKXULZj1WnvXEm4xZJa9UhLBYklfkzRX0hGSvg4syTowq2519U0uFjIbIKUkgg8CzcDPgRuB3cAlWQZl1W1L016e3NnMfCcCswFRSquhHt103qyv9t+Mxi2GzAZCT7qhNhsQtZvdYshsIDkR2KBTW9/EhFHDmDp+ZN6hmFUFJwIbdOoKjRzpPobMBkwpF5R9WdIEScMl3S1pi6S3DkRwVn0igtpCkyuKzQZQKWcEZ0bEDuA8YD1wJHB5plFZ1Wpo3Mv23ftcUWw2gEpJBMPT53OBGyLiyQzjsSpXW2gCfFcys4FUyhXCv5H0CMn1A/8sqQbYk21YVq32dzbnRGA2ULo9I4iIRcApwMKI2AfsAs7POjCrTnX1jUwaM5wp40bkHYpZ1SilsngMyZXE30lHTQcWZhmUVa/2imK3GDIbOKXUEfyQpIuJF6XD64HPZRaRVa2IoHZzoyuKzQZYKYlgbkR8GdgHEBG7SW5QY9avNu/YQ+PeFl9RbDbASkkEzZJGAwEgaS6wN9OorCq1txiaP9WJwGwgldJq6NPAHcAsSdcDpwJvzzIoq0517mzOLBel9D56l6SlwMkkRUIfiogtmUdmVae20MjBY0dw8Dj3MWQ2kEq909goYFs6/dGSiIg/ZheWVaPagm9GY5aHbhOBpC8B/wg8BLSlowNwIrB+ExGsrm/idSfOyDsUs6pTyhnBBcCCiHAFsWVm4/Y9NO1t8RXFZjkopdXQGvb3N2SWif13JXMiMBtopZwR7AKWSbqbomajEXFpZlFZ1dl/VzK3GDIbaKUkglvTh1lmagtN1IwfycQx7mPIbKCV0nz0uoEIxKpbXb27ljDLS5d1BJJuTJ8flLS846OUhUtam86/TNLidNxnJG1Ixy2TdG7/bIqVq7a2oK7Q5CuKzXJyoDOCD6XP5/VxHS/v5AK0r0fElX1crlWIDU/tZve+VlcUm+Wky0QQEZvS58cHLhyrRu0thhYc4qIhszwcqGioUdKOTh6NknaUuPwA7pS0RNLFReM/kBYx/UDSpC7Wf7GkxZIWNzQ09GCTrNy0dzY3z0VDZrnoMhFExPiImNDJY3xETChx+adGxInAOcAlkl5CcoObucDxwCbgq12s/5qIWBgRC2tqanq2VVZW6gqNHDJhFAeN9uUqZnko5YKyXouIjelzPXALcFJEFCKiNSLagO8CJ2UZgw1+tfWNzHeLIbPcZJYIJI2VNL79NXAmsELSoUWTvRZYkVUMNvi1pi2GXFFslp9Sex/tjWnALem9Z4cBP42IOyT9WNLxJPUHa4H3ZhiDDXLrntzF3pY2X0NglqPMEkFErAGO62T827Jap5Wf9hZD7mzOLD+Z1hGYdaeuvv32lD4jMMuLE4HlqrbQyPSDRjF+lFsMmeXFicByVVto4shDXCxklicnAstNa1vwaINbDJnlzYnAcvP41p00t7S5fsAsZ04Elpv2riV8RmCWLycCy01709F5PiMwy5UTgeWmttDIzEmjGTsyy+sazaw7TgSWG3ctYTY4OBFYLva1trFmS5M7mzMbBJwILBePb93JvtbgSN+DwCx3TgSWi/YWQwt8MZlZ7pwILBe1hUYkmFvjoiGzvDkRWC7qCk3MnjyG0SOG5h2KWdVzIrBc1BYame/6AbNBwYnABlxzSxuPbdnpm9GYDRJOBDbgHtuyk5a28DUEZoOEE4ENuP13JfMZgdlg4ERgA66u0MgQtxgyGzScCGzA1RaaOOzgsYwa7hZDZoOBE4ENuNr6RlcUmw0i7vbRnlbYsYebl66ntTUyW0cAj2/dxaued2hm6zCznnEiMABaWtt4z48Ws3z99szXNWyIOPmIgzNfj5mVxonAALj6D4+yfP12vvXmEzj7mEMyXZckhg5Rpusws9I5ERgrN+7gqrvrOO/YQznv2Ol5h2NmA8yVxVWuuaWNj/ziAQ4aPYL/PP+5eYdjZjnwGUGV+9Y9q1m5aQfXvO35TBo7Iu9wzCwHPiOoYis2bOfb96zmH06YwZkZ1wuY2eDlRFCl9ra08q83PsCUcSP49KuPyTscM8uRi4aq1FW/q2NVoZEfvv0FHDRmeN7hmFmOfEZQhZate4qr//Aob1g4k5cfNTXvcMwsZ04EVWbPvlb+9cZlHDJhFJ887+i8wzGzQcBFQ1Xma3fV8mjDTn78rpOYMMpFQmbmM4Kqsnjtk3z3/9bw5hfO5sXza/IOx8wGCSeCKrG7uZWP/OIBZkwczSfOfU7e4ZjZIOKioSrxpTseYe3WXfz0PS9k3Eh/7Ga2n88IqsB9a7Zy7V/W8vYXzeFFc6fkHY6ZDTJOBBVu594WLr/pAeYcPIaPnr0g73DMbBDKtIxA0lqgEWgFWiJioaTJwM+BOcBa4A0RsS3LOKrZFbc/zPptu7nxvacwZoSLhMzs2QbijODlEXF8RCxMhxcBd0fEfODudNgy8Ke6Lfzkvid416mH84I5k/MOx8wGqTyKhs4HrktfXwdckEMMFa9xzz4+dvNyjqgZy0fOcpGQmXUt60QQwJ2Slki6OB03LSI2AaTPnfZxIOliSYslLW5oaMg4zMrz+d8+zKbtu7nywuMYNXxo3uGY2SCWdaHxqRGxUdJU4C5Jj5Q6Y0RcA1wDsHDhwuzupl6B7llVz8/+vo73vXQuJ86elHc4ZjbIZXpGEBEb0+d64BbgJKAg6VCA9Lk+yxiqzfZd+1h083KOnDaOfzljft7hmFkZyCwRSBoraXz7a+BMYAVwK3BROtlFwK+ziqEaffa2lWxpauarFx7PyGEuEjKz7mVZNDQNuEVS+3p+GhF3SPo7cKOkdwFPABdmGENVuWtlgZuXrufSV8zjeTMPyjscMysTmSWCiFgDHNfJ+K3A6Vmtt1pt29nMJ255kOccOoEPvMJFQmZWOl9hVCE+fetDbNvZzHXvOIkRw3zBuJmVzr8YFeD2Bzdx6wMbufT0+Rw9fULe4ZhZmXEiKHNbm/byyV+t4HkzDuL9L5ubdzhmVoacCMpYRPDJX62gcU8LV154HMOH+uM0s57zL0cZu235Jm5fsZnLzpjPgkPG5x2OmZUpJ4IyVd+4h3//9QqOnzWRi198RN7hmFkZcyIoQxHBv92ygt3NrVx54XEMc5GQmfWBf0HK0C33b+CulQUuP2sB86aOyzscMytzTgRlZvP2PXzm1odYeNgk3nHq4XmHY2YVwImgjEQEi365nObWNq688DiGDlHeIZlZBXAiKCO/WLyee1c1sOjso5gzZWze4ZhZhXAiKBMbntrNZ29byclHTOafTpmTdzhmVkEquq+h/7q7jlsf2Jh3GP1i265mIoKvvP44hrhIyMz6UUUngprxI5k/rXJa1bxh4SxmTR6TdxhmVmEqOhG88aTjLUF7AAAGW0lEQVTZvPGk2XmHYWY2qLmOwMysyjkRmJlVOScCM7Mq50RgZlblnAjMzKqcE4GZWZVzIjAzq3JOBGZmVU4RkXcM3ZLUADzey9mnAFv6MZw8eVsGn0rZDvC2DFZ92ZbDIqKmu4nKIhH0haTFEbEw7zj6g7dl8KmU7QBvy2A1ENvioiEzsyrnRGBmVuWqIRFck3cA/cjbMvhUynaAt2WwynxbKr6OwMzMDqwazgjMzOwAnAjMzKpcRScCSWdLWiVptaRFecfTG5JmSbpH0sOSHpL0obxj6itJQyXdL+m2vGPpC0kTJd0k6ZH08zkl75h6S9K/pMfXCkk3SBqVd0ylkvQDSfWSVhSNmyzpLkl16fOkPGMsRRfb8ZX0+Fou6RZJE7NYd8UmAklDgW8D5wBHA2+SdHS+UfVKC/CvEfEc4GTgkjLdjmIfAh7OO4h+cBVwR0QcBRxHmW6TpBnApcDCiHguMBR4Y75R9ci1wNkdxi0C7o6I+cDd6fBgdy3P3o67gOdGxLFALfDxLFZcsYkAOAlYHRFrIqIZ+Blwfs4x9VhEbIqIpenrRpIfmxn5RtV7kmYCrwK+l3csfSFpAvAS4PsAEdEcEU/lG1WfDANGSxoGjAE25hxPySLij8CTHUafD1yXvr4OuGBAg+qFzrYjIu6MiJZ08D5gZhbrruREMANYVzS8njL+AQWQNAc4AfhbvpH0yTeAjwJteQfSR0cADcAP02Ku70kam3dQvRERG4ArgSeATcD2iLgz36j6bFpEbILkzxQwNed4+sM7gduzWHAlJwJ1Mq5s28pKGgfcDFwWETvyjqc3JJ0H1EfEkrxj6QfDgBOB70TECcBOyqP44VnS8vPzgcOB6cBYSW/NNyorJunfSIqJr89i+ZWcCNYDs4qGZ1JGp7vFJA0nSQLXR8Qv846nD04FXiNpLUlR3Ssk/STfkHptPbA+ItrPzm4iSQzl6JXAYxHREBH7gF8CL8o5pr4qSDoUIH2uzzmeXpN0EXAe8JbI6MKvSk4EfwfmSzpc0giSyq9bc46pxySJpBz64Yj4Wt7x9EVEfDwiZkbEHJLP4/cRUZb/PCNiM7BO0oJ01OnAyhxD6osngJMljUmPt9Mp04rvIrcCF6WvLwJ+nWMsvSbpbOBjwGsiYldW66nYRJBWsHwA+F+Sg/rGiHgo36h65VTgbST/npelj3PzDsoA+CBwvaTlwPHAF3KOp1fSs5qbgKXAgyS/C2XTRYOkG4C/AgskrZf0LuCLwBmS6oAz0uFBrYvt+BYwHrgr/e5fncm63cWEmVl1q9gzAjMzK40TgZlZlXMiMDOrck4EZmZVzonAzKzKORFYRZN0haSXSbqgpz3QSqqR9Le0C4kXd3jve1l0/ifpE/29TLPuuPmoVTRJvyfp5O4LwE0R8ecezPtG4JyIuKjbifuJpKaIGDdQ6zMDnxFYhUr7cV8OvIDkIp13A9+R9KlOpj1M0t1pn+93S5ot6Xjgy8C56YU8ozvMc6+khenrJkmfl/SApPskTUvHXyvpakn/J6k27WsJSW+X9K2iZd2WnrV8kaQH0GWSrpc0VtJv0+WukPSPGe0uq3JOBFaRIuJykh//a0mSwfKIODYiPtvJ5N8CfpT2+X498M2IWAZ8Cvh5RBwfEbsPsLqxwH0RcRzwR+A9Re/NAV5KclZy9YFu+BIRi4Dd6freQtI3/caIOC69T8AdpWy7WU85EVglOwFYBhzFgfsBOgX4afr6x8BpPVxPM9B+t7UlJD/+7W6MiLaIqAPWpLGU6kHglZK+JOnFEbG9h3GZlWRY3gGY9be0WOdakh5nt5DcaEWSlgGndPPvHnreXfm+ol4hW3nm96rjsoKkO+HiP2GdniVERK2k5wPnAldIurOLMxqzPvEZgVWciFgWEceT3NrvaOD3wFkHKOL5C/tvzfgW4E/9GM6FkoZImktyM5tVwFrg+HT8LJK76bXbl3Y7jqTpwK6I+AnJjWPKtZtrG+R8RmAVSVINsC0i2iQdFREHKhq6FPiBpMtJ7jr2jn4MZRXwB2Aa8L6I2CPpz8BjJEU/K0h6/Wx3DbBc0lLgR8BXJLUB+4D392NcZk9z81GzjEi6FrgtIm7KOxazA3HRkJlZlfMZgZlZlfMZgZlZlXMiMDOrck4EZmZVzonAzKzKORGYmVW5/w+dj5vyn4KslQAAAABJRU5ErkJggg==
+"
+>
 
 </div>
 
 </div>
-</div>
 
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Fuzzers">Fuzzers<a class="anchor-link" href="#Fuzzers">&#182;</a></h3><p>Let us now define <em>fuzzers</em> that actually feed data into a consumer.  The base class for fuzzers provides one central method <code>fuzz()</code> that creates some input.  The <code>run()</code> function then sends the fuzz() input to a consumer, returning the result; <code>runs()</code> does this for a given number (<code>trials</code>) of times.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The nice thing about this strategy is that, applied to larger programs, it will happily explore one path after the other – covering functionality after functionality.  All that is needed is a means to capture the coverage.</p>
+</div>
+</div>
+</div>
+</div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="With-Classes">With Classes<a class="anchor-link" href="#With-Classes">&#182;</a></h2><p>\todo{Expand}</p>
 </div>
 </div>
 </div>
+</div>
+
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Fuzzer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">Fuzzer</span> <span class="k">import</span> <span class="n">Fuzzer</span><span class="p">,</span> <span class="n">Runner</span>
+
+<span class="k">class</span> <span class="nc">FunctionRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize.  `function` is a function to be executed&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">FunctionCoverageRunner</span><span class="p">(</span><span class="n">FunctionRunner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_valid_input</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_valid_input</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coverage</span>
+
+    <span class="k">def</span> <span class="nf">valid_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_input</span>
+
+<span class="k">class</span> <span class="nc">MutationFuzzer</span><span class="p">(</span><span class="n">Fuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">min_mutations</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_mutations</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_mutations</span> <span class="o">=</span> <span class="n">min_mutations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_mutations</span> <span class="o">=</span> <span class="n">max_mutations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">population</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coverages_seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">mutate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mutate</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">create_candidate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">)</span>
+        <span class="n">trials</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_mutations</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_mutations</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mutate</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">candidate</span>
 
     <span class="k">def</span> <span class="nf">fuzz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return fuzz input&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed_index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">):</span>
+            <span class="c1"># Still seeding</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">seed_index</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">seed_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Mutating</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_candidate</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inp</span>  
 
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="n">Runner</span><span class="p">()):</span>
-        <span class="sd">&quot;&quot;&quot;Run `runner` with fuzz input&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
-    
-    <span class="k">def</span> <span class="nf">runs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="n">PrintRunner</span><span class="p">(),</span> <span class="n">trials</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Run `runner` with fuzz input, `trials` times&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">)]</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run function(inp) while tracking coverage.  </span>
+<span class="sd">           If we reach new coverage, </span>
+<span class="sd">           add inp to population and its coverage to population_coverage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">MutationFuzzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">runner</span><span class="p">)</span>
+        <span class="n">new_coverage</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">coverage</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">runner</span><span class="o">.</span><span class="n">valid_input</span><span class="p">()</span> <span class="ow">and</span> <span class="n">new_coverage</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">coverages_seen</span><span class="p">:</span>
+            <span class="c1"># We have new coverage</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inp</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coverages_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_coverage</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>By default, <code>Fuzzer</code> objects do not do much, as their <code>fuzz()</code> function is merley an abstract placeholder.  The subclass <code>RandomFuzzer</code>, however, implements the functionality of the <code>fuzzer()</code> function, above, adding an additional parameter <code>min_length</code> to specify a minimum length.</p>
-
-</div>
-</div>
-</div>
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[44]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">RandomFuzzer</span><span class="p">(</span><span class="n">Fuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">char_start</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">char_range</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">min_length</span> <span class="o">=</span> <span class="n">min_length</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">=</span> <span class="n">max_length</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">char_start</span> <span class="o">=</span> <span class="n">char_start</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">char_range</span> <span class="o">=</span> <span class="n">char_range</span>
 
-    <span class="k">def</span> <span class="nf">fuzz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;A string of `min_length` to `max_length` characters </span>
-<span class="sd">           in the range [`char_start`, `char_start` + `char_range`]&quot;&quot;&quot;</span>
-        <span class="n">string_length</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">string_length</span><span class="p">):</span>
-            <span class="n">out</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">char_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_range</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">out</span>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>With <code>RandomFuzzer</code>, we can now create a fuzzer whose configuration needs to be specified only once when creating the fuzzer.</p>
-
-</div>
-</div>
-</div>
+<div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[45]:</div>
+
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">random_fuzzer</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlparse_runner</span> <span class="o">=</span> <span class="n">FunctionCoverageRunner</span><span class="p">(</span><span class="n">urlparse</span><span class="p">)</span>
 </pre></div>
 
 </div>
+</div></div>
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
 
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">urlparse_runner</span><span class="p">)</span>
+
+<span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">population</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
 
 <div class="output_area">
 
-<div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>8+&#39;4&lt;$&lt;?0&#34;1.&#39;*&amp;?27=)
-,()&#39;5,!.6-(3,6%7!533
-8 )0&#39;51*659:-*(6=?:*
-&#39;13#,0.48$:#63!?,93=
-%1=1(?+0&#34;% /:*!;%?.!
-(715)&#34;&#39;)*04*8&#39;&#34;2.$6!
-(20.&gt;9#/0(3!-&#39;.92?&gt;&#39;
-%.?)%;,0(/3)+4.?4&#34;:;
-+:=;/7&#34;801&amp;&#39;&gt;:??$!*:
-9?;5&amp;-?6(!5.&gt;608;,.%
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;http://www.google.com/search?q=fuzzing&#39;,
+ &#39;`ttpP//www.goghe.com/seal?q=fzzig&#39;,
+ &#39;http/:\x0f/wBwwH.google.com/sarch?q=fuzing&#39;,
+ &#39;htp;//www.google.com/searc(Vq=fuzzing&#39;,
+ &#39;ttp::=/www.google.coGm/sgaurch?q=fuzzhng&#39;,
+ &#39;http:&#34;//www.google.com/searc(?q-vuzzinc&#39;,
+ &#39;htt:/+wwwgoogle.com/search?qfuzijgo&#39;,
+ &#39;htp:&#34;//wgw.ooglecomsearc(q-vuzz]i2nc&#39;,
+ &#39;htp:&#34;//wgw.ooglecomsearc(q-vuzz]i2nc&#39;,
+ &#39;htp//www.googe.com/eavc(V#q=fuzzing&#39;,
+ &#34;ht_p//ww7.googe.cm/eavc(V&#39;q=fuzSzing&#34;,
+ &#39;htr;:/+wwwgoogle,c~m/sd8arch?qbuzijOgo&#39;,
+ &#39;tt`;8=/Www.g&lt;ogle.cGm/s.gaurch?q5fuzzhng&#39;,
+ &#39;http:/www.goge.cJom/s&lt;ear#h?q=uzing&#39;,
+ &#39;htp:&#34;//www.ooglecomsearcY(q-vuzz]i2nc&#39;,
+ &#34;`ttppr//wwwgoglen&#39;co/sel?=fxzig&#34;,
+ &#39;htp;//www.googQle.cm/eabc(Vq=fuzzing&#39;]
 </pre>
 </div>
-</div>
 
 </div>
-</div>
 
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We can now send such generated inputs to our previously defined <code>cat</code> runner, verifying that <code>cat</code> actually does copy its (fuzzed) input to its output.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="n">inp</span> <span class="o">=</span> <span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-    <span class="k">assert</span> <span class="n">cat</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span><span class="o">.</span><span class="n">stdout</span> <span class="o">==</span> <span class="n">inp</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Combining a <code>Fuzzer</code> with a <code>Runner</code>, however, is so common that we can use the <code>run()</code> method supplied by the <code>Fuzzer</code> class for this purpose:</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[49]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">random_fuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt output_prompt">Out[49]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;%8&gt;\&#39;040&#34; -.;02#\&#39;(7&#34;;&#39;, stderr=&#39;&#39;)</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>With <code>runs()</code>, we can repeat a fuzzing run a number of times, obtaining a list of results.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[50]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">random_fuzzer</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-<div class="prompt output_prompt">Out[50]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>[CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;* ; &lt;&#34;4:%\&#39;16)8#: 5=!&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;62-)=&lt;?(2&lt;)3&gt;6&gt;34,0;&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;69- *(=&#39;-8%=:)6%.=5%&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&amp;2=7:&#34;,:34&#34;(,.!$+&lt;&gt;)&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;#&#34;-06.$!&amp;748:0%,=%&lt;!&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&gt;&lt;668!88-&lt;.5!267//8)&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;?4%/#&lt;!02:33/ 8=&lt;,?-&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;.-5848&lt;7.%)5*3516( #&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;*\&#39;8**1:6$&amp;- :1 %1&#34;!%&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;:%3&#34;$3#&#34;75$,6&lt;$5,$8\&#39;&#39;, stderr=&#39;&#39;)]</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>With this, we have all in place to create fuzzers – starting with the simple random fuzzers introduced in this chapter, but even far more advanced ones.  Stay tuned!</p>
-
-</div>
-</div>
-</div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
-<li>Randomly generating inputs ("fuzzing") is a simple, cost-effective way to quickly test arbitrary programs for their robustness.</li>
-<li>Bugs fuzzers find are mainly due to errors and deficiencies in input processing.</li>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<li>Randomly generated inputs are frequently invalid – and thus exercise mostly input processing functionality.</li>
+<li>Mutations from existing valid inputs have much higher chances to be valid, and thus to exercise functionality beyond input processing.</li>
 </ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>Our aim is still to sufficiently cover functionality.  From here, we can continue with:</p>
+<ol>
+<li><p>Try to cover as much <em>implemented</em> functionality as possible.  To this end, we need to access the program implementation, measure which parts would actually be reached with our inputs, and use this <em>coverage</em> to guide our search.  We will explore this in the next chapter, which discusses <a href="Guided_Mutations.html">guided mutations</a>.</p>
+</li>
+<li><p>Try to cover as much <em>specified</em> functionality as possible.  Here, we would need a <em>specification of the input format,</em> distinguishing between individual input elements such as (in our case) numbers, operators, comments, and strings – and attempting to cover as many of these as possible.  We will explore this as it comes to <a href="Grammar_Testing.html">grammar-based testing</a>, and especially in <a href="Grammar_Mutations.html">grammar-based mutations</a>.</p>
+</li>
+</ol>
+<p>Finally, the concept of a "population" that is systematically "evolved" through "mutations" will be explored in depth when discussing <a href="Search_Based_Testing.html">search-based testing</a>.  Enjoy!</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p>Apply the above non-guided mutation-based fuzzing technique on <code>bc</code>, using files, as in the chapter <a href="Fuzzer.html">"Introduction to Fuzzing"</a>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p>Apply the above guided mutation-based fuzzing technique on <code>cgi_decode()</code> from the <a href="Coverage.html">"Coverage"</a> chapter.  How many trials do you need until you cover all variations of <code>+</code>, <code>%</code> (valid and invalid), and regular characters?</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">Coverage</span> <span class="k">import</span> <span class="n">cgi_decode</span>
+</pre></div>
 
 </div>
+</div></div>
 </div>
-</div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;Hello World&quot;</span>
+<span class="n">population</span> <span class="o">=</span> <span class="n">coverage_fuzzer</span><span class="p">(</span>
+    <span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">],</span> <span class="n">function</span><span class="o">=</span><span class="n">cgi_decode</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">population</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
 </div>
 </div>
-</div></section></section>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[&#39;Hello World&#39;, &#39;Helluo:(Wo+B,d&#39;, &#39;Hllo WIor%d2&#39;, &#39;Hlmo WIo+r%d2&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cumulative_coverage</span> <span class="o">=</span> <span class="n">population_coverage</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">cgi_decode</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
 </div>
 </div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_coverage</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Coverage of cgi_decode() with random inputs&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;# of inputs&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;lines covered&#39;</span><span class="p">);</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_png output_subarea ">
+<img src="data:image/png;base64,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
+"
+>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-3">Exercise 3<a class="anchor-link" href="#Exercise-3">&#182;</a></h3><p>In this <a href="https://lcamtuf.blogspot.com/2014/08/binary-fuzzing-strategies-what-works.html">blog post</a>, the author of <em>American Fuzzy Lop</em> (AFL), a very popular mutation-based fuzzer discusses the efficiency of various mutation operators.  Implement four of them and evaluate their efficiency as in the examples above.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-4">Exercise 4<a class="anchor-link" href="#Exercise-4">&#182;</a></h3><p>When adding a new element to the list of candidates, AFL does actually not compare the <em>coverage</em>, but adds an element if it exercises a new <em>branch</em>.  Using branch coverage from the exercises of the <a href="Coverage.html">"Coverage"</a> chapter, implement this "branch" strategy and compare it against the "coverage" strategy, above.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-5">Exercise 5<a class="anchor-link" href="#Exercise-5">&#182;</a></h3><p>Design and implement a system that will gather a population of URLs from the Web.  Can you achieve a higher coverage with these samples?  What if you use them as initial population for further mutation?</p>
+</div>
+</div>
+</div>
+</div>
+
+        
+<p class="imprint">
+<img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
+This work is licensed under a
+<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
+&bull;
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/MutationFuzzer.ipynb" target=_blank)>Last change: 2018-09-13 16:14:35+02:00</a> &bull; 
+<a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
+<a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
+</p>
 
 <script>
-
-require(
-    {
-      // it makes sense to wait a little bit when you are loading
-      // reveal from a cdn in a slow connection environment
-      waitSeconds: 15
-    },
-    [
-      "reveal.js/lib/js/head.min.js",
-      "reveal.js/js/reveal.js"
-    ],
-
-    function(head, Reveal){
-
-        // Full list of configuration options available here: https://github.com/hakimel/reveal.js#configuration
-        Reveal.initialize({
-            controls: true,
-            progress: true,
-            history: true,
-
-            transition: "slide",
-
-            // Optional libraries used to extend on reveal.js
-            dependencies: [
-                { src: "reveal.js/lib/js/classList.js",
-                  condition: function() { return !document.body.classList; } },
-                { src: "reveal.js/plugin/notes/notes.js",
-                  async: true,
-                  condition: function() { return !!document.body.classList; } }
-            ]
-        });
-
-        var update = function(event){
-          if(MathJax.Hub.getAllJax(Reveal.getCurrentSlide())){
-            MathJax.Hub.Rerender(Reveal.getCurrentSlide());
-          }
-        };
-
-        Reveal.addEventListener('slidechanged', update);
-
-        function setScrollingSlide() {
-            var scroll = false
-            if (scroll === true) {
-              var h = $('.reveal').height() * 0.95;
-              $('section.present').find('section')
-                .filter(function() {
-                  return $(this).height() > h;
-                })
-                .css('height', 'calc(95vh)')
-                .css('overflow-y', 'scroll')
-                .css('margin-top', '20px');
-            }
-        }
-
-        // check and set the scrolling slide every time the slide change
-        Reveal.addEventListener('slidechanged', setScrollingSlide);
-
-    }
-
-);
+function revealCitation() {
+    var c = document.getElementById("citation");
+    c.style.display = "block";
+}
 </script>
 
-</body>
+<div id="citation" class="citation" style="display: none;">
+<a name="citation"></a>
+<h2>How to Cite this Work</h2>
+<p>
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/MutationFuzzer.html">Mutation-Based Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/MutationFuzzer.html">https://www.fuzzingbook.org/html/MutationFuzzer.html</a>.  Retrieved 2018-09-13 16:14:35+02:00.
+</p>
+<pre>
+@incollection{fuzzingbook2018:MutationFuzzer,
+    author = {Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler},
+    booktitle = {Generating Software Tests},
+    title = {Mutation-Based Fuzzing},
+    year = {2018},
+    publisher = {Saarland University},
+    howpublished = {\url{https://www.fuzzingbook.org/html/MutationFuzzer.html}},
+    note = {Retrieved 2018-09-13 16:14:35+02:00},
+    url = {https://www.fuzzingbook.org/html/MutationFuzzer.html},
+    urldate = {2018-09-13 16:14:35+02:00}
+}
+</pre>
+</div>
 
+      </div>
+    </div>
+    </article>
+
+ </body>
 
 </html>

@@ -17,13 +17,13 @@
 # 
 # Each chapter comes in its own _Jupyter notebook_.  A single notebook (= a chapter) should cover the material (text and code, possibly slides) for a 90-minute lecture.
 # 
-# A chapter notebook should be named `Topic.ipynb`, where `Topic` is the topic.  `Topic` must be usable as a Python module, so `Topic` should:
+# A chapter notebook should be named `Topic.ipynb`, where `Topic` is the topic.  `Topic` must be usable as a Python module and should characterize the main contribution.  If the main contribution of your chapter is a class `FooFuzzer`, for instance, then your topic (and notebook name) should be `FooFuzzer`, such that users can state
 # 
-# * start with an upercase letter
-# * consist of letters and underscores (`_`) only
-# * should use underscores (`_`) to separate words.
+# ```python
+# from FooFuzzer import FooFuzzer
+# ```
 # 
-# All non-notebook files and folders come with lowercase letters; this may make it easier to differentiate them.  The special notebook `index.ipynb` gets converted into the home pages `index.html` (on fuzzingbook.org) and `README.md` (on GitHub).
+# Since class and module names should start with uppercase letters, all non-notebook files and folders start with lowercase letters. this may make it easier to differentiate them.  The special notebook `index.ipynb` gets converted into the home pages `index.html` (on fuzzingbook.org) and `README.md` (on GitHub).
 # 
 # Notebooks are stored in the `notebooks` folder.
 # 
@@ -414,7 +414,7 @@ pt.PrettyTable(data, [r"$\frac{a}{b}$", r"$b$", r"$c$"], print_latex_longtable=F
 # plt.plot(data)
 # plt.title('Increase in data');
 # 
-# Plots are available in all derived versions (HTML, PDF, etc.)
+# Plots are available in all derived versions (HTML, PDF, etc.)  Plots with `plotly` are even nicer (and interactive, even in HTML),  However, at this point, we cannot export them to PDF, so `matplotlib` it is.
 # 
 # ## Slides
 # 
