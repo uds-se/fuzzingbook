@@ -10,7 +10,7 @@ PUBLISHED_CHAPTERS = \
 	GrammarFuzzer.ipynb
 
 BETA_CHAPTERS = \
-	# Grammar_Coverage.ipynb \
+	GrammarCoverageFuzzer.ipynb \
 	# Parsing.ipynb \
 	# Probabilistic_Fuzzing.ipynb
 
