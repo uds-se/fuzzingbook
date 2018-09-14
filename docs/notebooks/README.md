@@ -1,1 +1,0 @@
-This is the folder in which generated notebooks (with output cells) are stored.
