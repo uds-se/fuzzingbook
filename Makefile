@@ -225,7 +225,7 @@ chapters default run: html code
 # The book is recreated after any change to any source
 book:	book-html book-pdf
 all:	chapters pdf code slides book
-and more:	word markdown
+and more:	word markdown epub
 
 # Individual targets
 html:	ipypublish-chapters $(HTMLS)
@@ -352,6 +352,7 @@ $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 $(REVEAL_JS):
 	git submodule update --init
 
+# Markdown
 $(MARKDOWN_TARGET)%.md:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 	$(RM) -r $(MARKDOWN_TARGET)$(basename $(notdir $<)).md $(MARKDOWN_TARGET)$(basename $(notdir $<))_files
 	$(CONVERT_TO_MARKDOWN) $<
