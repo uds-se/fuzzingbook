@@ -1,1 +1,1 @@
-This is the folder in generated PDF files are stored.
+This is the folder where generated PDF files are stored.
