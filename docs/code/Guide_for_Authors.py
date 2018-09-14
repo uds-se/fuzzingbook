@@ -9,6 +9,9 @@
 
 # # Guide for Authors
 # 
+if __name__ == "__main__":
+    print('Welcome to "Generating Software Tests"!')
+    
 # This notebook compiles the most important conventions for all chapters (notebooks) of "Generating Software Tests".
 # 
 # ## Organization of this Book
