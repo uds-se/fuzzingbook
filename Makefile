@@ -60,6 +60,7 @@ MARKDOWN_TARGET = markdown/
 WORD_TARGET     = word/
 EPUB_TARGET     = epub/
 DOCS_TARGET     = docs/
+DEPEND_TARGET   = .depend/
 
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
@@ -71,6 +72,7 @@ WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
 MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 EPUBS     = $(SOURCE_FILES:%.ipynb=$(EPUB_TARGET)%.epub)
 FULLS     = $(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb)
+DEPENDS   = $(SOURCE_FILES:%.ipynb=$(DEPEND_TARGET)%.ipynb_depend)
 
 CHAPTER_PYS = $(CHAPTERS:%.ipynb=$(CODE_TARGET)%.py)
 
@@ -290,7 +292,7 @@ help:
 	@echo "  (default: automatic)"
 	
 # Run a notebook, (re)creating all output cells
-$(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb
+$(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.ipynb_depend
 	$(EXECUTE_NOTEBOOK) $<
 	$(PYTHON) utils/nbnormalize.py $@ > $@~ && mv $@~ $@
 
@@ -299,7 +301,7 @@ ifeq ($(LATEX),pdflatex)
 # Use PDFLaTeX
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@echo Running LaTeX...
-	@-test -L $(PDF_TARGET)/pics || ln -s ../pics $(PDF_TARGET)
+	@-test -L $(PDF_TARGET)PICS || ln -s ../PICS $(PDF_TARGET)
 	cd $(PDF_TARGET) && $(PDFLATEX) $*
 	-cd $(PDF_TARGET) && $(BIBTEX) $*
 	cd $(PDF_TARGET) && $(PDFLATEX) $*
@@ -312,7 +314,7 @@ else
 # Use LaTeXMK
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@echo Running LaTeXMK...
-	@-test -L $(PDF_TARGET)/pics || ln -s ../pics $(PDF_TARGET)
+	@-test -L $(PDF_TARGET)PICS || ln -s ../PICS $(PDF_TARGET)
 	cd $(PDF_TARGET) && $(LATEXMK) $(LATEXMK_OPTS) $*
 	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm $*.lof $*.lot $*.fls $*.fdb_latexmk
 	@cd $(PDF_TARGET) && $(RM) -r $*.tex $*_files
@@ -335,7 +337,7 @@ $(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/
 	$(CONVERT_TO_HTML) $<
 	$(PYTHON) utils/post-html.py $@ $(PUBLISHED_SOURCES)
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
+	@-test -L $(HTML_TARGET)PICS || ln -s ../PICS $(HTML_TARGET)
 	@$(OPEN) $@
 
 $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
@@ -343,7 +345,7 @@ $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 	sed 's/\.ipynb)/\.slides\.html)/g' $< > $(TMPDIR)/$(notdir $<)
 	$(CONVERT_TO_SLIDES) $(TMPDIR)/$(notdir $<)
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
+	@-test -L $(HTML_TARGET)PICS || ln -s ../PICS $(HTML_TARGET)
 	@-$(RM) -fr $(TMPDIR)
 
 # Reconstructing the reveal.js dir
@@ -433,6 +435,8 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 	$(RM) -r book
 	@echo Created $@
 endif
+
+
 
 ## Some checks
 
@@ -592,3 +596,21 @@ realclean: clean
 	cd $(WORD_TARGET); $(RM) *.docx
 	cd $(MARKDOWN_TARGET); $(RM) *.md
 	@echo "All old files deleted"
+
+
+
+## Dependencies - should come at the very end
+# See http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/ for inspiration
+NBDEPEND = $(PYTHON) utils/nbdepend.py
+$(DEPEND_TARGET)%.ipynb_depend: $(NOTEBOOKS)/%.ipynb
+	@echo "Rebuilding $@"
+	@test -d $(DEPEND_TARGET) || mkdir $(DEPEND_TARGET)
+	@for import in `$(NBDEPEND) $<`; do \
+		if [ -f $(NOTEBOOKS)/$$import.ipynb ]; then \
+			echo '$$''(FULL_NOTEBOOKS)/$(notdir $<): $$''(NOTEBOOKS)/'"$$import.ipynb"; \
+		fi; \
+	done > $@
+	
+depend: $(DEPENDS)
+
+include $(wildcard $(DEPENDS))
