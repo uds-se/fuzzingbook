@@ -548,7 +548,7 @@ binder: .FORCE
 
 
 ## Cleanup
-AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
+AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot *.fls *.fdb_latexmk \
 	  $(PDF_TARGET)*.aux \
 	  $(PDF_TARGET)*.bbl \
 	  $(PDF_TARGET)*.blg \
@@ -557,7 +557,9 @@ AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot \
 	  $(PDF_TARGET)*.toc \
 	  $(PDF_TARGET)*.frm \
 	  $(PDF_TARGET)*.lof \
-	  $(PDF_TARGET)*.lot
+	  $(PDF_TARGET)*.lot \
+	  $(PDF_TARGET)*.fls \
+	  $(PDF_TARGET)*.fdb_latexmk
 
 clean-code:
 	$(RM) $(PYS) $(PYS_OUT)
@@ -570,7 +572,7 @@ clean-book:
 	$(RM) $(BOOK_TEX) $(BOOK_PDF) $(BOOK_HTML)
 	$(RM) -r $(BOOK_HTML_FILES) $(BOOK_PDF_FILES)
 
-clean-aux:
+clean-aux clean-pdf:
 	$(RM) $(AUX)
 	
 clean-full-notebooks clean-full clean-fulls:
