@@ -273,11 +273,15 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     f.expansion_to_children(("+<term>", ["extra_data"]))
     
-# With this, we can now take some unexpanded node in the tree, choose a random expansion, and return the new tree.  This is what the method `expand_node_randomly()` does.
+# With this, we can now take some unexpanded node in the tree, choose a random expansion, and return the new tree.  This is what the method `expand_node_randomly()` does, using a helper function `choose_node_expansion()` to randomly pick an index from an array of possible children.  (`choose_node_expansion()` can be overloaded in subclasses.)
 # 
 import random
 
 class GrammarFuzzer(GrammarFuzzer):
+    def choose_node_expansion(self, node, possible_children):
+        """Return index of expansion in `possible_children` to be selected.  Defaults to random."""
+        return random.randrange(0, len(possible_children))
+
     def expand_node_randomly(self, node):
         (symbol, children) = node
         assert children is None
@@ -287,10 +291,11 @@ class GrammarFuzzer(GrammarFuzzer):
 
         # Fetch the possible expansions from grammar...
         expansions = self.grammar[symbol]
-        possible_children = [f.expansion_to_children(expansion) for expansion in expansions]
+        possible_children = [self.expansion_to_children(expansion) for expansion in expansions]
 
         # ... and select a random expansion
-        children = random.choice(possible_children)
+        index = self.choose_node_expansion(node, possible_children)
+        children = possible_children[index]
 
         # Return with new children
         return (symbol, children)
@@ -349,9 +354,13 @@ if __name__ == "__main__":
 # 
 # If the node is already expanded (i.e. has children), it checks the subset of children which still have unexpanded symbols; randomly selects one of them, and applies itself recursively on that child.
 # 
-# The `expand_tree_once()` function replaces the child _in place_, meaning that it actually mutates the tree being passed as an argument rather than returning a new tree.  This in-place mutation is what makes this function particularly efficient.
+# The `expand_tree_once()` method replaces the child _in place_, meaning that it actually mutates the tree being passed as an argument rather than returning a new tree.  This in-place mutation is what makes this function particularly efficient.  Again, we use a helper method (`choose_tree_expansion()`) to return the chosen index from a list of children that can be expanded.
 # 
 class GrammarFuzzer(GrammarFuzzer):
+    def choose_tree_expansion(self, tree, children):
+        """Return index of subtree in `children` to be selected for expansion.  Defaults to random."""
+        return random.randrange(0, len(children))
+
     def expand_tree_once(self, tree):
         # print("Expanding " + repr(tree))
 
@@ -361,17 +370,19 @@ class GrammarFuzzer(GrammarFuzzer):
             return self.expand_node(tree)
 
         # Find all children with possible expansions
-        expandable_children = [i for (i, c) in enumerate(children) if self.any_possible_expansions(c)]
+        expandable_children = [c for c in children if self.any_possible_expansions(c)]
+        
+        # `index_map` translates an index in `expandable_children` back into the original index in `children`
+        index_map = [i for (i, c) in enumerate(children) if self.any_possible_expansions(c)]
+        
+        # print("expandable_children =", expandable_children)
+        # print("index_map =", index_map)
 
         # Select a random child
-        # TODO: Various heuristics for choosing a child here,
-        # e.g. grammar or code coverage
-        child_to_be_expanded = random.choice(expandable_children)
-
-        # print("Expanding child", child_to_be_expanded)
+        child_to_be_expanded = self.choose_tree_expansion(tree, expandable_children)
         
         # Expand in place
-        children[child_to_be_expanded] = self.expand_tree_once(children[child_to_be_expanded])
+        children[index_map[child_to_be_expanded]] =             self.expand_tree_once(expandable_children[child_to_be_expanded])
 
         return tree
 

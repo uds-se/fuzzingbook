@@ -151,7 +151,7 @@ if __name__ == "__main__":
     seed_input = "A quick brown fox"
     for i in range(10):
         x = delete_random_character(seed_input)
-        print(x)
+        print(repr(x))
     
 def insert_random_character(s):
     """Returns s with a random character inserted"""
@@ -162,7 +162,7 @@ def insert_random_character(s):
 
 if __name__ == "__main__":
     for i in range(10):
-        print(insert_random_character(seed_input))
+        print(repr(insert_random_character(seed_input)))
     
 def flip_random_character(s):
     """Returns s with a random bit flipped in a random position"""
@@ -178,7 +178,7 @@ def flip_random_character(s):
 
 if __name__ == "__main__":
     for i in range(10):
-        print(flip_random_character(seed_input))
+        print(repr(flip_random_character(seed_input)))
     
 # Let us now create a random mutator that randomly chooses which mutation to apply:
 # 
@@ -193,7 +193,7 @@ def mutate(s):
 
 if __name__ == "__main__":
     for i in range(10):
-        print(mutate("A quick brown fox"))
+        print(repr(mutate("A quick brown fox")))
     
 # The idea is now that _if_ we have some valid input(s) to begin with, we may create more input candidates by applying one of the above mutations.  To see how this works, let's get back to URLs.
 # 
