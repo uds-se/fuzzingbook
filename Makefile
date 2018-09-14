@@ -505,7 +505,8 @@ publish: docs
 	git add $(DOCS_TARGET)* README.md
 	-git status
 	-git commit -m "Doc update" $(DOCS_TARGET) README.md
-	@echo "Now use 'git push' to place docs on website."
+	@echo "Now use 'git push' to place docs on website,"
+	@echo "and then 'make binder' to speed up binder startup"
 
 # Add/update HTML code in repository
 publish-html: html
