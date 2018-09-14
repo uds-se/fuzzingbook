@@ -23,7 +23,7 @@
 # 
 # 2. *It is hard to control.*  Even while limiting the number of symbols, it is still possible to obtain very long strings.
 # 
-# Both problems can be easily illustrated by plotting the time required for strings of different lengths.
+# Let us illustrate both problems by plotting the time required for strings of different lengths.
 # 
 # import fuzzingbook_utils
 # 
@@ -60,9 +60,12 @@ if __name__ == "__main__":
 # 
 # To both obtain a more efficient algorithm _and_ exercise better control over expansions, we will use a special representation for the strings that our grammar produces.  The general idea is to use a _tree_ structure that will be subsequently expanded – a so-called _derivation tree_.
 # 
-# The expansion process with derivation trees is illustrated in the following steps.  We start with a single node as root of the tree.
+# Like other trees used in programming, a derivation tree consists of _nodes_ which have other nodes as their _children_.  The tree starts with one node that has no parent; this is called the _root node_; a node without children is called a _leaf_.
 # 
-# We use `dot` as a drawing program; you don't need to look at the code, just at its results.  
+# The grammar expansion process with derivation trees is illustrated in the following steps, using the arithmetic grammar [from
+# the chapter on grammars](Grammars.ipynb).  We start with a single node as root of the tree, representing the _start symbol_ – in our case `<start>`.
+# 
+# (We use `dot` as a drawing program; you don't need to look at the code, just at its results.)
 # 
 from graphviz import Digraph
 
@@ -74,7 +77,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     tree
     
-# We then traverse the tree, searching for a symbol to expand, and add a new edge from the symbol to its expansion.
+# To expand the tree, we traverse it, searching for a symbol $S$ without children to expand, and chose an expansion for $S$ from the grammar.  Then, we add the expansion as a new child of $S$.  In the case of our start symbol `<start>`, its only expansion is `<expr>`, so we add this as a child.
 # 
 if __name__ == "__main__":
     tree.edge(r"\<start\>", r"\<expr\>")
@@ -82,9 +85,9 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     tree
     
-# To construct the actually produced string from the derivation tree, we traverse the tree in order and collect the symbols at the leaves of the tree.  In the case above, we obtain the string `<expr>`.
+# To construct the produced string from a derivation tree, we traverse the tree in order and collect the symbols at the leaves of the tree.  In the case above, we obtain the string `"<expr>"`.
 # 
-# To further expand the tree, we choose a symbol to expand, and add a new edge from the symbol to its expansion.  This would get us the string `<expr> + <term>`.
+# To further expand the tree, we choose another symbol to expand, and add its expansion as new children.  This would get us the `<expr>` symbol, which gets expanded into `<expr> + <term>`, adding three children.
 # 
 if __name__ == "__main__":
     tree.edge(r"\<expr\>", r"\<expr\> ")
@@ -94,7 +97,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     tree
     
-# We repeat the process until there are no symbols left to expand:
+# We repeat the expansion until there are no symbols left to expand:
 # 
 if __name__ == "__main__":
     tree.edge(r"\<expr\> ", r"\<term\> ")
@@ -111,7 +114,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     tree
     
-# We now have a representation for the string `2 + 2`.  In contrast to the string alone, though, the derivation tree records the entire structure (and production history) of the produced string.  It also allows for simple comparison and manipulation – say, replacing one subtree (substructure) against another.
+# We now have a representation for the string `2 + 2`.  In contrast to the string alone, though, the derivation tree records _the entire structure_ (and production history, or _derivation_ history) of the produced string.  It also allows for simple comparison and manipulation – say, replacing one subtree (substructure) against another.
 # 
 # ## Representing Derivation Trees
 # 
@@ -121,7 +124,7 @@ if __name__ == "__main__":
 # (SYMBOL_NAME, CHILDREN)
 # ```
 # 
-# where `SYMBOL_NAME` is a string representing the node (i.e. `<start>` or `+`) and `CHILDREN` is a list of children nodes.
+# where `SYMBOL_NAME` is a string representing the node (i.e. `"<start>"` or `"+"`) and `CHILDREN` is a list of children nodes.
 # 
 # `CHILDREN` can take some special values:
 # 
@@ -138,7 +141,7 @@ if __name__ == "__main__":
                ("<term>", None)]
              )])
     
-# Let's visualize this tree!  We use the `dot` drawing program from the `graphviz` package algorithmically, traversing the above structure.  (Unless you're deeply interested in tree visualization, you can directly skip to the example below.)
+# To better understand the structure of this tree, let us introduce a function that visualizes this tree.  We use the `dot` drawing program from the `graphviz` package algorithmically, traversing the above structure.  (Unless you're deeply interested in tree visualization, you can directly skip to the example below.)
 # 
 from graphviz import Digraph
 
@@ -183,7 +186,7 @@ def display_tree(derivation_tree):
 if __name__ == "__main__":
     display_tree(derivation_tree)
     
-# To turn the tree into a string, the following function comes in handy:
+# To turn the tree into a string, the following `all_terminals()` function comes in handy:
 # 
 def all_terminals(tree):
     (symbol, children) = tree
@@ -204,7 +207,7 @@ if __name__ == "__main__":
     
 # ## Expanding a Node
 # 
-# Let us now develop an algorithm that takes a tree with unexpanded symbols (say, `derivation_tree`, above), and expands all these symbols onbe after the other.  First, let us define a helper function that constructs a tree with just the start symbol:
+# Let us now develop an algorithm that takes a tree with unexpanded symbols (say, `derivation_tree`, above), and expands all these symbols one after the other.  As with earlier fuzzers, we create a special subclass of `Fuzzer` – in this case, `GrammarFuzzer`.  A `GrammarFuzzer` gets a grammar and a start symbol; the other parameters will be used later to further control creation and to support debugging.
 # 
 from Fuzzer import Fuzzer
 
@@ -218,6 +221,19 @@ class GrammarFuzzer(Fuzzer):
         self.disp = disp
         self.log = log
 
+# In the following, we will add further methods to `GrammarFuzzer`.  The Python language requires us to define an entire class with all methods as a single, continuous unit; however, we would like to introduce one method after another.  To avoid this problem, we use a special hack: Whenever we want to introduce a new method to some class `C`, we use the construct
+# 
+# ```python
+# class C(C):
+#     def new_method(self, args):
+#         pass
+# ```
+# 
+# This seems to define `C` as a subclass of itself, which would make no sense – but actually, it introduces a new `C` class as subclass of the old `C` class, and then shadowing the old `C` definition.  What this gets us is a `C` class with `new_method()` as a method, which is just what we want.  (`C` objects defined earlier will retain the earlier `C` definition, though, and thus must be rebuilt.)
+# 
+# Using this hack, let us define a helper method `init_tree()` that constructs a tree with just the start symbol:
+# 
+class GrammarFuzzer(GrammarFuzzer):
     def init_tree(self):
         return (self.start_symbol, None)
 
@@ -225,7 +241,7 @@ if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR)
     display_tree(f.init_tree())
     
-# Next, we will need a helper function that takes an expansion string and converts it into a list of derivation trees:
+# Next, we will need a helper method `expansion_to_children()` that takes an expansion string and converts it into a list of derivation trees.  It uses the `re.split()` method to split an expansion string into a list of children nodes:
 # 
 class GrammarFuzzer(GrammarFuzzer):
     def expansion_to_children(self, expansion):
@@ -233,7 +249,7 @@ class GrammarFuzzer(GrammarFuzzer):
         # strings contains all substrings -- both terminals and non-terminals such
         # that ''.join(strings) == expansion
 
-        # See nonterminals(), above
+        # See nonterminals() in Grammars.py
         if isinstance(expansion, tuple):
             expansion = expansion[0]
 
@@ -252,7 +268,12 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     f.expansion_to_children("")
     
-# With this, we can now take some unexpanded node in the tree, choose a random expansion, and return the new tree.
+# Just like `nonterminals()` in the [chapter on Grammars](Grammars.ipynb), we provide for future extensions, allowing the expansion to be a tuple with extra data (which will be ignored).
+# 
+if __name__ == "__main__":
+    f.expansion_to_children(("+<term>", ["extra_data"]))
+    
+# With this, we can now take some unexpanded node in the tree, choose a random expansion, and return the new tree.  This is what the method `expand_node_randomly()` does.
 # 
 import random
 
@@ -274,10 +295,14 @@ class GrammarFuzzer(GrammarFuzzer):
         # Return with new children
         return (symbol, children)
 
+# The generic `expand_node()` method can later be used to select different expansion strategies; as of now, it only uses `expand_node_randomly()`.
+# 
 class GrammarFuzzer(GrammarFuzzer):
     def expand_node(self, node):
         return self.expand_node_randomly(node)
 
+# This is how `expand_node_randomly()` works:
+# 
 if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
     
@@ -378,7 +403,7 @@ if __name__ == "__main__":
 # 
 # To identify the _cost_ of expanding a symbol, we introduce two functions that mutually rely on each other.  First, `symbol_cost()` returns the minimum cost of all expansions of a symbol, using `expansion_cost()` to compute the cost for each expansion.
 # 
-# The function `expansion_cost()` returns the sum of all expansions in `expansions`.  If a nonterminal is encountered again during traversal, the cost of the expansion is $\infty$, as this indicates (potential infinite) recursion.
+# The method `expansion_cost()` returns the sum of all expansions in `expansions`.  If a nonterminal is encountered again during traversal, the cost of the expansion is $\infty$, as this indicates (potential infinite) recursion.
 # 
 class GrammarFuzzer(GrammarFuzzer):
     def symbol_cost(self, symbol, seen=set()):
@@ -407,7 +432,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     assert f.symbol_cost("<expr>") == 5
     
-# Here's now a variant of `expand_node()` that takes the above cost into account.  It determines the minimum cost `min_cost` across all children and then uses the child with the minimum cost.  If multiple children all have the same minimum cost, it chooses randomly between these.
+# Here's now a variant of `expand_node()` that takes the above cost into account.  It determines the minimum cost `cost` across all children and then chooses a child from the list using the `choose` function, which by default is the minimum cost.  If multiple children all have the same minimum cost, it chooses randomly between these.
 # 
 class GrammarFuzzer(GrammarFuzzer):
     def expand_node_by_cost(self, node, choose=min):
@@ -429,72 +454,52 @@ class GrammarFuzzer(GrammarFuzzer):
         children = random.choice(children_with_chosen_cost)
 
         # Return with a new list
-        return (symbol, children)
-    
+        return (symbol, children)   
+
+# The shortcut `expand_node_min_cost()` passes `min()` as the `choose` function, which makes it expand nodes at minimum cost.
+# 
+class GrammarFuzzer(GrammarFuzzer):
     def expand_node_min_cost(self, node):
         if self.log:
             print("Expanding", all_terminals(node), "at minimum cost")
 
         return self.expand_node_by_cost(node, min)
 
-    def expand_node_randomly(self, node):
-        if self.log:
-            print("Expanding", all_terminals(node), "randomly")
-            
-        return self.expand_node_by_cost(node, random.choice)
-    
+# We can now apply this function to close the expansion of our derivation tree, using `expand_tree_once()` with the above `expand_node_min_cost()` as expansion function.
+# 
+class GrammarFuzzer(GrammarFuzzer):
     def expand_node(self, node):
         return self.expand_node_min_cost(node)
 
-# We can now apply this function to close the expansion of our derivation tree, using `expand_tree_once()` with the above `expand_node_min_cost()` as expansion function.
-# 
 if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
     display_tree(derivation_tree)
     
+    step = 1
     while f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
-        display_tree(derivation_tree)
+        if step < 3:
+            display_tree(derivation_tree)
+        step += 1
     
 # We see that in each step, `expand_node_min_cost()` chooses an expansion that does not increase the number of symbols, eventually closing all open expansions.
 # 
-# ## All Together
+# ## Node Inflation
 # 
-# We can now put both phases together in a single function `expand_tree()` that will expand a tree first with `expand_node_randomly()` until a limit of `max_nonterminals` possible expansions is reached, and then use `expand_node_min_cost()` to close the remaining expansions as quickly as possible.
+# Especially at the beginning of an expansion, we may be interested in getting _as many nodes as possible_ – that is, we'd like to prefer expansions that give us _more_ nonterminals to expand.  This is actually the exact opposite from what `expand_node_min_cost()` gives us, and we can implement a method `expand_node_max_cost()` that will always choose among the nodes with the _highest_ cost:
 # 
 class GrammarFuzzer(GrammarFuzzer):
-    RANDOM_EXPANSION   = 1
-    MIN_COST_EXPANSION = 2
-
-    def expand_node(self, node):
-        if self.expansion_mode == self.RANDOM_EXPANSION:
-            return self.expand_node_randomly(node)
-        elif self.expansion_mode == self.MIN_COST_EXPANSION:
-            return self.expand_node_min_cost(node)
-        else:
-            assert False, "invalid mode"
-
-    def log_tree(self, tree):
+    def expand_node_max_cost(self, node):
         if self.log:
-            print("Tree:", all_terminals(tree))
-            if self.disp:
-                display_tree(tree)
-            # print(self.possible_expansions(tree), "possible expansion(s) left")
+            print("Expanding", all_terminals(node), "at maximum cost")
 
-    def expand_tree(self, tree):
-        self.log_tree(tree)
-        self.expansion_mode = self.RANDOM_EXPANSION
-    
-        while self.any_possible_expansions(tree):
-            if self.possible_expansions(tree) >= self.max_nonterminals:
-                self.expansion_mode = self.MIN_COST_EXPANSION
+        return self.expand_node_by_cost(node, max)
 
-            tree = self.expand_tree_once(tree)
-            self.log_tree(tree)
-
-        assert self.possible_expansions(tree) == 0
-
-        return tree
+# To illustrate `expand_node_max_cost()`, we can again redefine `expand_node()` to use it, and then use `expand_tree_once()` to show a few expansion steps:
+# 
+class GrammarFuzzer(GrammarFuzzer):
+    def expand_node(self, node):
+        return self.expand_node_max_cost(node)
 
 if __name__ == "__main__":
     derivation_tree = ("<start>", 
@@ -504,19 +509,76 @@ if __name__ == "__main__":
                ("<term>", None)]
              )])
     
-    # print("Initial tree")
-    # display_tree(derivation_tree)
+    f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
+    display_tree(derivation_tree)
     
-    f = GrammarFuzzer(EXPR_GRAMMAR, max_nonterminals=3, log=True)
+    step = 1
+    while step < 3 and f.any_possible_expansions(derivation_tree):
+        derivation_tree = f.expand_tree_once(derivation_tree)
+        display_tree(derivation_tree)
+        step += 1
+    
+# We see that with each step, the number of nonterminals increases.  Obviously, we have to put a limit on this number.
+# 
+# ## Three Expansion Phases
+# 
+# We can now put all three phases together in a single function `expand_tree()` which will work as follows:
+# 
+# 1. **Max cost expansion.** Expand the tree using expansions with maximum cost until we have at least `min_nonterminals` nonterminals.  This phase can be easily skipped by setting `min_nonterminals` to zero.
+# 2. **Random expansion.**  Keep on expanding the tree randomly until we reach `max_nonterminals` nonterminals.
+# 3. **Min cost expansion.** Close the expansion with minimum cost.
+# 
+# We implement these three phases by having `expand_node` reference the expansion method to apply.  This is controlled by setting `expand_node` (the method reference) to first `expand_node_max_cost` (i.e., calling `expand_node()` invokes `expand_node_max_cost()`), then `expand_node_randomly`, and finally `expand_node_min_cost`.  In the first two phases, we also set a maximum limit of `min_nonterminals` and `max_nonterminals`, respectively.
+# 
+class GrammarFuzzer(GrammarFuzzer):
+    def log_tree(self, tree):
+        """Output a tree if self.log is set; if self.display is also set, show the tree structure"""
+        if self.log:
+            print("Tree:", all_terminals(tree))
+            if self.disp:
+                display_tree(tree)
+            # print(self.possible_expansions(tree), "possible expansion(s) left")
+
+    def expand_tree_with_strategy(self, tree, expand_node_method, limit=None):
+        """Expand tree using `expand_node_method` as node expansion function 
+        until the number of possible expansions reaches `limit`."""
+        self.expand_node = expand_node_method
+        while (limit is None or self.possible_expansions(tree) < limit) and self.any_possible_expansions(tree):
+            tree = self.expand_tree_once(tree)
+            self.log_tree(tree)
+        return tree
+            
+    def expand_tree(self, tree):
+        """Expand `tree` in a three-phase strategy until all expansions are complete."""
+        self.log_tree(tree)
+        tree = self.expand_tree_with_strategy(tree, self.expand_node_max_cost, self.min_nonterminals)
+        tree = self.expand_tree_with_strategy(tree, self.expand_node_randomly, self.max_nonterminals)
+        tree = self.expand_tree_with_strategy(tree, self.expand_node_min_cost)
+
+        assert self.possible_expansions(tree) == 0
+
+        return tree
+
+# Let us try this out on our example.
+# 
+if __name__ == "__main__":
+    derivation_tree = ("<start>", 
+            [("<expr>", 
+              [("<expr>", None),
+               (" + ", []),
+               ("<term>", None)]
+             )])
+    
+    f = GrammarFuzzer(EXPR_GRAMMAR, min_nonterminals=3, max_nonterminals=5, log=True)
     derivation_tree = f.expand_tree(derivation_tree)
-    
-    print("Final tree")
     display_tree(derivation_tree)
     
 if __name__ == "__main__":
     all_terminals(derivation_tree)
     
-# Based on this, we can now create a function `grammar_fuzzer()` that – like `simple_grammar_fuzzer()` – simply takes a grammar and produces a string from it, no longer exposing the complexity of derivation trees:
+# ## Putting it all Together
+# 
+# Based on this, we can now define a function `fuzz()` that – like `simple_grammar_fuzzer()` – simply takes a grammar and produces a string from it.  It thus no longer exposes the complexity of derivation trees.
 # 
 class GrammarFuzzer(GrammarFuzzer):
     def fuzz_tree(self):
@@ -542,9 +604,13 @@ if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR)
     f.fuzz()
     
+# After calling `fuzz()`, the produced derivation tree is accessible in the `derivation_tree` attribute:
+# 
 if __name__ == "__main__":
     display_tree(f.derivation_tree)
     
+# Let us try out the grammar fuzzer (and its trees) on other grammar formats.
+# 
 if __name__ == "__main__":
     f = GrammarFuzzer(URL_GRAMMAR)
     f.fuzz()
@@ -553,7 +619,7 @@ if __name__ == "__main__":
     display_tree(f.derivation_tree)
     
 if __name__ == "__main__":
-    f = GrammarFuzzer(CGI_GRAMMAR)
+    f = GrammarFuzzer(CGI_GRAMMAR, min_nonterminals=3, max_nonterminals=5)
     f.fuzz()
     
 if __name__ == "__main__":
@@ -631,62 +697,17 @@ if __name__ == "__main__":
 # 
 # ### Exercise 3
 # 
-# Introduce a parameter `min_symbols` that would keep on expanding with _maximum_ cost until `min_symbols` is reached.
+# We could define `expand_node_randomly()` such that it simply invokes `expand_node_by_cost(node, random.choice)`:
 # 
-class GrammarFuzzer(GrammarFuzzer):
-    def expand_node_max_cost(self, node):
+class ExerciseGrammarFuzzer(GrammarFuzzer):
+    def expand_node_randomly(self, node):
         if self.log:
-            print("Expanding", all_terminals(node), "at maximum cost")
+            print("Expanding", all_terminals(node), "randomly by cost")
 
-        return self.expand_node_by_cost(node, max)
+        return self.expand_node_by_cost(node, random.choice)
 
-class GrammarFuzzer(GrammarFuzzer):
-    MAX_COST_EXPANSION = 0
-
-    def expand_node(self, node):
-        if self.expansion_mode == self.MAX_COST_EXPANSION:
-            return self.expand_node_max_cost(node)
-        elif self.expansion_mode == self.RANDOM_EXPANSION:
-            return self.expand_node_randomly(node)
-        elif self.expansion_mode == self.MIN_COST_EXPANSION:
-            return self.expand_node_min_cost(node)
-        else:
-            assert False, "invalid mode"
-
-    def expand_tree(self, tree):
-        self.log_tree(tree)
-        self.expansion_mode = self.MAX_COST_EXPANSION
-        if self.log:
-            print("Now expanding with maximal cost")
-    
-        while True:
-            possible_expansions = self.possible_expansions(tree)
-            if possible_expansions == 0:
-                break
-                
-            if (self.expansion_mode == self.MAX_COST_EXPANSION and 
-                possible_expansions >= self.max_nonterminals):
-                if self.log:
-                    print("Now expanding randomly")
-                self.expansion_mode = self.RANDOM_EXPANSION
-                
-            if (self.expansion_mode == self.RANDOM_EXPANSION and
-                possible_expansions >= self.max_nonterminals):
-                if self.log:
-                    print("Now expanding with minimal cost")
-                self.expansion_mode = self.MIN_COST_EXPANSION
-
-            tree = self.expand_tree_once(tree)
-            self.log_tree(tree)
-
-        assert self.possible_expansions(tree) == 0
-
-        return tree
-
-if __name__ == "__main__":
-    f = GrammarFuzzer(EXPR_GRAMMAR, min_nonterminals=10, max_nonterminals=10, log=True)
-    f.fuzz()
-    
+# get_ipython().set_next_input('What is the difference between the original implementation and this alternative');get_ipython().run_line_magic('pinfo', 'alternative')
+# 
 # _Solution for the exercise_
 # 
 # ### Exercise 4

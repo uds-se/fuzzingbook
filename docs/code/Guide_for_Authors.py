@@ -9,7 +9,7 @@
 
 # # Guide for Authors
 # 
-# This workbook compiles the most important conventions for all book chapters.
+# This notebook compiles the most important conventions for all chapters (notebooks) of "Generating Software Tests".
 # 
 # ## Organization of this Book
 # 
@@ -74,11 +74,25 @@
 # 
 # The Github repo thus will typically reflect work in progress.  If you reach a stable milestone, you can push things on the fuzzingbook.org web site, using `make publish`.
 # 
-# The [nbdime](https://github.com/jupyter/nbdime) package gives you tools such as `nbdiff` (and even better, `nbdiff-web`) to compare notebooks against each other; this ensures that cell _contents_ are compared rather than the binary format.
+# #### nbdime
 # 
+# The [nbdime](https://github.com/jupyter/nbdime) package gives you tools such as `nbdiff` (and even better, `nbdiff-web`) to compare notebooks against each other; this ensures that cell _contents_ are compared rather than the binary format.
 # 
 # `nbdime config-git --enable` integrates nbdime with git such that `git diff` runs the above tools; merging should also be notebook-specific.
 # 
+# #### nbstripout
+# 
+# Notebooks in version control _should not contain output cells,_ as these tend to change a lot.  (Hey, we're talking random output generation here!)  To have output cells automatically stripped during commit, install the [nbstripout](https://github.com/kynan/nbstripout) package and use
+# 
+# ```
+# nbstripout --install --attributes .gitattributes
+# ```
+# 
+# in the `notebooks` folder to set it up as a git filter.  As an example, the following cell should not have its output included in the git repo:
+# 
+import random
+random.random()
+
 # ### Creating Derived Formats (HTML, PDF, code, ...)
 # 
 # The [Makefile](../Makefile) provides rules for all targets.  Type `make help` for instructions.
@@ -90,12 +104,8 @@
 # To create a new chapter for the book,
 # 
 # 1. Set up a new `.ipynb` notebook file as copy of [Template.ipynb](Template.ipynb).
-# 
 # 2. Include it in the `CHAPTERS` list in the `Makefile`.
-# 
-# 3. Include it in the table of contents in [Main.ipynb](Main.ipynb).
-# 
-# 4. Add it to the git repository.
+# 3. Add it to the git repository.
 # 
 # ## Teaching a Topic
 # 
@@ -122,9 +132,11 @@
 # 
 # This sets up stuff such that notebooks can import each other's code (see below). This import statement is removed in the exported Python code, as the .py files would import each other directly.
 # 
+# Importing `fuzzingbook_utils` also sets a fixed _seed_ for random number generation.  This way, whenever you execute a notebook from scratch (restarting the kernel), you get the exact same results; these results will also end up in the derived HTML and PDF files.  (If you run a notebook or a cell for the second time, you will get more random results.)
+# 
 # ### Coding Style and Consistency
 # 
-# We use Python 3 (specifically, Python 3.5) for all code.  If you can, try to write code that can be easily backported to Python 2.
+# We use Python 3 (specifically, Python 3.6) for all code.  If you can, try to write code that can be easily backported to Python 2.
 # 
 # We use standard Python coding conventions according to [PEP 8](https://www.python.org/dev/peps/pep-0008/).
 # 
@@ -264,7 +276,7 @@ if __name__ == "__main__":
 # 
 # ```python
 # s = "Python syntax highlighting"
-# print s
+# print(s)
 # ```
 # 
 # ## Images
@@ -368,7 +380,8 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     print(r"\cite{purdom1972}")
     
-# is expanded to \cite{purdom1972}.  The keys refer to BibTeX entries in [fuzzingbook.bib](fuzzingbook.bib).  
+# is expanded to \cite{purdom1972}, which in HTML and PDF should be a nice reference.
+# The keys refer to BibTeX entries in [fuzzingbook.bib](fuzzingbook.bib).  
 # * LaTeX/PDF output will have a "References" section appended.
 # * HTML output will link to the URL field from the BibTeX entry. Be sure it points to the DOI.
 # 

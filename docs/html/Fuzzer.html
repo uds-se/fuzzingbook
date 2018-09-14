@@ -12112,7 +12112,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Creating-Input-Files">Creating Input Files<a class="anchor-link" href="#Creating-Input-Files">&#182;</a></h3><p>The Python <code>open()</code> function opens a file into which we can then write arbitrary contents.  It is commonly used in conjunction with the <code>with</code> statement, which ensures that the file is closed as soon as it is no longer needed.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Creating-Input-Files">Creating Input Files<a class="anchor-link" href="#Creating-Input-Files">&#182;</a></h3><p>Let us obtain a temporary file name such that we do not clutter the file system.</p>
 </div>
 </div>
 </div>
@@ -12124,8 +12124,56 @@ MathJax.Hub.Config({
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">FILE</span> <span class="o">=</span> <span class="s2">&quot;input.txt&quot;</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">tempfile</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">basename</span> <span class="o">=</span> <span class="s2">&quot;input.txt&quot;</span>
+<span class="n">tempdir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+<span class="n">FILE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempdir</span><span class="p">,</span> <span class="n">basename</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FILE</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can now open this file for writing.  The Python <code>open()</code> function opens a file into which we can then write arbitrary contents.  It is commonly used in conjunction with the <code>with</code> statement, which ensures that the file is closed as soon as it is no longer needed.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
@@ -12201,9 +12249,9 @@ MathJax.Hub.Config({
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">program</span> <span class="o">=</span> <span class="s2">&quot;bc&quot;</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;2 + 2</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">program</span><span class="p">,</span> <span class="s2">&quot;input.txt&quot;</span><span class="p">],</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">program</span><span class="p">,</span> <span class="n">FILE</span><span class="p">],</span>
                         <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
                         <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                         <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
@@ -12343,16 +12391,14 @@ MathJax.Hub.Config({
 
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">program</span><span class="p">,</span> <span class="s2">&quot;input.txt&quot;</span><span class="p">],</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">program</span><span class="p">,</span> <span class="n">FILE</span><span class="p">],</span>
                             <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
                             <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                             <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                             <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">runs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">))</span>
-
-<span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12432,21 +12478,21 @@ MathJax.Hub.Config({
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>&#39;%,%\&#39;:,0\&#39;918*143:*-2&amp;35$06!((;&lt;61&lt;:6%!?6+-))/-;65-2.;&#34;8&gt;6-87 7:9)!+?&#34;&amp;)6&#34;71*#.-+&lt;2&amp;:&#34;*(!;-/:5&#34;2%&#34;1!5&#39;
-input.txt 1: parse error
-input.txt 1: illegal character: &#39;
-input.txt 1: illegal character: :
-input.txt 1: illegal character: &#39;
-input.txt 1: illegal character: :
-input.txt 1: illegal character: &amp;
-input.txt 1: parse error
-input.txt 1: illegal character: $
-input.txt 1: parse error
-input.txt 1: illegal character: :
-input.txt 1: illegal character: ?
-input.txt 1: parse error
-input.txt 1: illegal character: &amp;
-input.txt 1: parse error
-input.txt 1: illegal character: :
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: illegal character: &#39;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: illegal character: :
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: illegal character: &#39;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: illegal character: :
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: illegal character: :
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: illegal character: ?
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmptztvw7ty/input.txt 1: illegal character: :
 </pre>
 </div>
 
@@ -12531,7 +12577,7 @@ input.txt 1: illegal character: :
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Bugs-Fuzzers-Find">Bugs Fuzzers Find<a class="anchor-link" href="#Bugs-Fuzzers-Find">&#182;</a></h2><p>When Miller and his students ran their first fuzzers in 1989, they found an alarming result: About <strong>a third of the UNIX utilities</strong> they fuzzed had issues – they crashed, hung, or otherwise failed when confronted with fuzzing input [<a href="https://doi.org/10.1145/96267.96279">Miller <em>et al</em>, 1990.</a>].  This also included the <code>bc</code> program, above.  (Apparently, the bugs have now been fixed!)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Bugs-Fuzzers-Find">Bugs Fuzzers Find<a class="anchor-link" href="#Bugs-Fuzzers-Find">&#182;</a></h2><p>When Miller and his students ran their first fuzzers in 1989, they found an alarming result: About <strong>a third of the UNIX utilities</strong> they fuzzed had issues – they crashed, hung, or otherwise failed when confronted with fuzzing input [Unresolved citation: Miller1990.].  This also included the <code>bc</code> program, above.  (Apparently, the bugs have now been fixed!)</p>
 <p>Considering that many of these UNIX utilities were used in scripts that would also process network input, this was an alarming result.  Programmers quickly built and ran their own fuzzers, rushed to fix the reported errors, and learned not to trust external inputs anymore.</p>
 </div>
 </div>
@@ -12631,9 +12677,9 @@ input.txt 1: illegal character: :
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-29-f83db3d59a06&gt;&#34;, line 5, in &lt;module&gt;
+  File &#34;&lt;ipython-input-23-f83db3d59a06&gt;&#34;, line 5, in &lt;module&gt;
     crash_if_too_long(s)
-  File &#34;&lt;ipython-input-27-928c2d2de976&gt;&#34;, line 4, in crash_if_too_long
+  File &#34;&lt;ipython-input-21-928c2d2de976&gt;&#34;, line 4, in crash_if_too_long
     raise ValueError
 ValueError
 </pre>
@@ -12744,12 +12790,12 @@ ValueError
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-32-8e40f7d62a1b&gt;&#34;, line 5, in &lt;module&gt;
+  File &#34;&lt;ipython-input-26-8e40f7d62a1b&gt;&#34;, line 5, in &lt;module&gt;
     hang_if_no_space(s)
-  File &#34;&lt;ipython-input-30-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
-    if i &lt; len(s):
-  File &#34;&lt;ipython-input-30-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
-    if i &lt; len(s):
+  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 7, in hang_if_no_space
+    i += 1
+  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 7, in hang_if_no_space
+    i += 1
   File &#34;&lt;string&gt;&#34;, line 14, in check_time
 TimeoutError
 </pre>
@@ -12869,9 +12915,9 @@ TimeoutError
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-35-7a1817f3dbfc&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-29-7a1817f3dbfc&gt;&#34;, line 2, in &lt;module&gt;
     collapse_if_too_large(long_number)
-  File &#34;&lt;ipython-input-33-2c22a83a4dca&gt;&#34;, line 3, in collapse_if_too_large
+  File &#34;&lt;ipython-input-27-2c22a83a4dca&gt;&#34;, line 3, in collapse_if_too_large
     raise ValueError
 ValueError
 </pre>
@@ -13258,7 +13304,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;%8&gt;\&#39;040&#34; -.;02#\&#39;(7&#34;;&#39;, stderr=&#39;&#39;)
+<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;=5248=&amp;58500!-9&#34;%626&#39;, stderr=&#39;&#39;)
 </pre>
 </div>
 
@@ -13290,16 +13336,16 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;* ; &lt;&#34;4:%\&#39;16)8#: 5=!&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;62-)=&lt;?(2&lt;)3&gt;6&gt;34,0;&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;69- *(=&#39;-8%=:)6%.=5%&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&amp;2=7:&#34;,:34&#34;(,.!$+&lt;&gt;)&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;#&#34;-06.$!&amp;748:0%,=%&lt;!&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&gt;&lt;668!88-&lt;.5!267//8)&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;?4%/#&lt;!02:33/ 8=&lt;,?-&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;.-5848&lt;7.%)5*3516( #&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;*\&#39;8**1:6$&amp;- :1 %1&#34;!%&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;:%3&#34;$3#&#34;75$,6&lt;$5,$8\&#39;&#39;, stderr=&#39;&#39;)]
+<pre>[CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;7/%&#34;%=86&lt;6,&#34;$67&gt;-&amp;.?&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;3?-?,/$7=07&#39;:4?&lt;2!&gt;%&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;(%$:89:9#0*#!%%!/!2/&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;/06)169&#39;)%)%$#=+.&amp;.3&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;055 8#29&gt;?,&gt;2-)&lt;+?)?&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;;582&#39;=#&lt;&gt;(0&gt;3!2)6 ,4&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;=&lt;!.,=*;4)) 3?\&#39;2%32&#34;&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;720-7)892%&lt;9+7(2&#34;&amp;42&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;?#&gt;%#&#39;):#05!3 1!:698&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;0?(/%+\&#39;7//3&gt; ?&amp;,-0&#34;1&#39;, stderr=&#39;&#39;)]
 </pre>
 </div>
 
@@ -13323,6 +13369,30 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 </ul>
 </div>
 </div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We're done, so don't forget to clean up:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">FILE</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">removedirs</span><span class="p">(</span><span class="n">tempdir</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
 </div>
 </div>
 
@@ -13355,7 +13425,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 This work is licensed under a
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 &bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2018-09-13 16:14:34+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2018-09-14 12:06:05+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13371,7 +13441,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Fuzzer.html">https://www.fuzzingbook.org/html/Fuzzer.html</a>.  Retrieved 2018-09-13 16:14:34+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Fuzzer.html">https://www.fuzzingbook.org/html/Fuzzer.html</a>.  Retrieved 2018-09-14 12:06:05+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Fuzzer,
@@ -13381,9 +13451,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/Fuzzer.html}},
-    note = {Retrieved 2018-09-13 16:14:34+02:00},
+    note = {Retrieved 2018-09-14 12:06:05+02:00},
     url = {https://www.fuzzingbook.org/html/Fuzzer.html},
-    urldate = {2018-09-13 16:14:34+02:00}
+    urldate = {2018-09-14 12:06:05+02:00}
 }
 </pre>
 </div>

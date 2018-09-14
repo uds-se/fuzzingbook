@@ -77,13 +77,23 @@ if __name__ == "__main__":
 # 
 # ### Creating Input Files
 # 
-# The Python `open()` function opens a file into which we can then write arbitrary contents.  It is commonly used in conjunction with the `with` statement, which ensures that the file is closed as soon as it is no longer needed.
+# Let us obtain a temporary file name such that we do not clutter the file system.
 # 
-FILE = "input.txt"
-data = fuzzer()
-with open(FILE, "w") as f:
-    f.write(data)
+import os, tempfile
 
+if __name__ == "__main__":
+    basename = "input.txt"
+    tempdir = tempfile.mkdtemp()
+    FILE = os.path.join(tempdir, basename)
+    print(FILE)
+    
+# We can now open this file for writing.  The Python `open()` function opens a file into which we can then write arbitrary contents.  It is commonly used in conjunction with the `with` statement, which ensures that the file is closed as soon as it is no longer needed.
+# 
+if __name__ == "__main__":
+    data = fuzzer()
+    with open(FILE, "w") as f:
+        f.write(data)
+    
 # We can verify that the file was actually created by reading its contents:
 # 
 if __name__ == "__main__":
@@ -102,9 +112,9 @@ import subprocess
 
 if __name__ == "__main__":
     program = "bc"
-    with open("input.txt", "w") as f:
+    with open(FILE, "w") as f:
         f.write("2 + 2\n")
-    result = subprocess.run([program, "input.txt"],
+    result = subprocess.run([program, FILE],
                             stdin=subprocess.DEVNULL,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
@@ -141,16 +151,14 @@ if __name__ == "__main__":
     
     for i in range(trials):
         data = fuzzer()
-        with open("input.txt", "w") as f:
+        with open(FILE, "w") as f:
             f.write(data)
-        result = subprocess.run([program, "input.txt"],
+        result = subprocess.run([program, FILE],
                                 stdin=subprocess.DEVNULL,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 universal_newlines=True)
         runs.append((data, result))
-    
-    os.remove("input.txt")
     
 # We can now query `runs` for some statistics.  For instance, we can query how many runs actually passed -- that is, there were no error messages:
 # 
@@ -428,6 +436,12 @@ if __name__ == "__main__":
 # * Randomly generating inputs ("fuzzing") is a simple, cost-effective way to quickly test arbitrary programs for their robustness.
 # * Bugs fuzzers find are mainly due to errors and deficiencies in input processing.
 # 
+# We're done, so don't forget to clean up:
+# 
+if __name__ == "__main__":
+    os.remove(FILE)
+    os.removedirs(tempdir)
+    
 # ## Next Steps
 # 
 # From here, you can explore how to
