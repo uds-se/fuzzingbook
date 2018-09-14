@@ -194,7 +194,7 @@ endif
 
 # For Python, we use our own script that takes care of distinguishing 
 # main (script) code from definitions to be imported
-EXPORT_NOTEBOOK_CODE = notebooks/fuzzingbook_utils/export_notebook_code.py 
+EXPORT_NOTEBOOK_CODE = fuzzingbook_utils/export_notebook_code.py 
 CONVERT_TO_PYTHON = $(PYTHON) $(EXPORT_NOTEBOOK_CODE)
 
 # This would be the Jupyter alternative
