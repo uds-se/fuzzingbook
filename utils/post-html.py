@@ -28,7 +28,7 @@ booktitle = "Generating Software Tests"
 authors = "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler"
 site_html = "https://www.fuzzingbook.org"
 github_html = "https://github.com/uds-se/fuzzingbook"
-notebook_html = "https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks"
+notebook_html = "https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks"
 
 # Book image
 bookimage = site_html + "/html/PICS/wordcloud.png"
