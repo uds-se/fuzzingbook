@@ -292,6 +292,7 @@ help:
 # Run a notebook, (re)creating all output cells
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb
 	$(EXECUTE_NOTEBOOK) $<
+	$(PYTHON) utils/nbnormalize.py $@ > $@~ && mv $@~ $@
 
 # Conversion rules - chapters
 ifeq ($(LATEX),pdflatex)
@@ -474,7 +475,7 @@ $(CODE_TARGET)import_all.py: Makefile
 # All checks
 check check-all: check-code check-import check-style check-crossref
 	
-# Normalize notebooks
+# Normalize notebooks (add table of contents, bib reference, etc.)
 normalize: utils/nbnormalize.py
 	@for notebook in $(SOURCES); do \
 		echo "Normalizing $$notebook"; \
@@ -487,10 +488,11 @@ normalize: utils/nbnormalize.py
 
 ## Publishing
 
-docs: normalize publish-html publish-code publish-slides $(DOCS_TARGET)index.html README.md
+docs: publish-notebooks publish-html publish-code publish-slides publish-pics \
+	$(DOCS_TARGET)index.html README.md
 	@echo "Now use 'make publish' to commit changes to docs."
 
-# github does not like scripts
+# github does not like script tags
 README.md: $(MARKDOWN_TARGET)index.md
 	sed 's!<script.*</script>!!g' $< > $@
 
@@ -515,7 +517,19 @@ publish-slides: slides
 	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)slides || mkdir $(DOCS_TARGET)slides
 	cp -pr $(SLIDES_TARGET) $(DOCS_TARGET)slides
+	
+publish-notebooks: full-notebooks
+	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)notebooks || mkdir $(DOCS_TARGET)notebooks
+	cp -pr $(FULL_NOTEBOOKS)/* $(DOCS_TARGET)notebooks
 
+publish-pics: PICS
+	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)PICS || mkdir $(DOCS_TARGET)PICS
+	cp -pr PICS/* $(DOCS_TARGET)PICS
+	$(RM) -fr $(DOCS_TARGET)notebooks/PICS; ln -s ../PICS $(DOCS_TARGET)notebooks
+	$(RM) -fr $(DOCS_TARGET)html/PICS; ln -s ../PICS $(DOCS_TARGET)html
+	$(RM) -fr $(DOCS_TARGET)slides/PICS; ln -s ../PICS $(DOCS_TARGET)slides
 
 ## Binder services	
 # Debugging binder
