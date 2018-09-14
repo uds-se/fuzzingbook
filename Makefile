@@ -10,9 +10,9 @@ PUBLISHED_CHAPTERS = \
 	GrammarFuzzer.ipynb
 
 BETA_CHAPTERS = \
-	Grammar_Coverage.ipynb \
-	Parsing.ipynb \
-	Probabilistic_Fuzzing.ipynb
+	# Grammar_Coverage.ipynb \
+	# Parsing.ipynb \
+	# Probabilistic_Fuzzing.ipynb
 
 CHAPTERS = $(PUBLISHED_CHAPTERS) $(BETA_CHAPTERS)
 
@@ -39,6 +39,9 @@ BIB = fuzzingbook.bib
 
 # Where the notebooks are
 NOTEBOOKS = notebooks
+
+# Derived versions with output cells
+FULL_NOTEBOOKS = full_notebooks
 
 # Git repo
 GITHUB_REPO = https://github.com/uds-se/fuzzingbook/
@@ -67,6 +70,7 @@ PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py)
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
 MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 EPUBS     = $(SOURCE_FILES:%.ipynb=$(EPUB_TARGET)%.epub)
+FULLS     = $(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb)
 
 CHAPTER_PYS = $(CHAPTERS:%.ipynb=$(CODE_TARGET)%.py)
 
@@ -209,6 +213,8 @@ CONVERT_TO_WORD = $(PANDOC)
 # CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown
 CONVERT_TO_MARKDOWN = $(NBCONVERT) --to markdown --output-dir=$(MARKDOWN_TARGET)
 
+# Run
+EXECUTE_NOTEBOOK = $(NBCONVERT) --to notebook --execute --output-dir=$(FULL_NOTEBOOKS)
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
@@ -227,6 +233,7 @@ slides:	$(SLIDES) $(REVEAL_JS)
 word doc docx: $(WORDS)
 md markdown: $(MARKDOWNS)
 epub: $(EPUBS)
+full-notebooks full: $(FULLS)
 
 book-pdf:  ipypublish-book $(BOOK_PDF)
 book-html: ipypublish-book $(BOOK_HTML)
@@ -281,6 +288,10 @@ help:
 	@echo "Settings:"
 	@echo "* Use make PUBLISH=(nbconvert|nbpublish|bookbook) to choose a converter"
 	@echo "  (default: automatic)"
+	
+# Run a notebook, (re)creating all output cells
+$(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb
+	$(EXECUTE_NOTEBOOK) $<
 
 # Conversion rules - chapters
 ifeq ($(LATEX),pdflatex)
@@ -308,25 +319,25 @@ $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@$(OPEN) $@
 endif
 
-$(PDF_TARGET)%.tex:	$(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
+$(PDF_TARGET)%.tex:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-$(DOCS_TARGET)index.html: $(NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
+$(DOCS_TARGET)index.html: $(FULL_NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
 	$(CONVERT_TO_HTML) $<
 	mv html/index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
 	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --home $@ $(PUBLISHED_SOURCES)
 	@$(OPEN) $@
 
-$(HTML_TARGET)%.html: $(NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
+$(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
 	$(CONVERT_TO_HTML) $<
 	$(PYTHON) utils/post-html.py $@ $(PUBLISHED_SOURCES)
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)/pics || ln -s ../pics $(HTML_TARGET)
 	@$(OPEN) $@
 
-$(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
+$(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 	$(eval TMPDIR := $(shell mktemp -d))
 	sed 's/\.ipynb)/\.slides\.html)/g' $< > $(TMPDIR)/$(notdir $<)
 	$(CONVERT_TO_SLIDES) $(TMPDIR)/$(notdir $<)
@@ -338,7 +349,7 @@ $(SLIDES_TARGET)%.slides.html: $(NOTEBOOKS)/%.ipynb $(BIB)
 $(REVEAL_JS):
 	git submodule update --init
 
-$(MARKDOWN_TARGET)%.md:	$(NOTEBOOKS)/%.ipynb $(BIB)
+$(MARKDOWN_TARGET)%.md:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 	$(RM) -r $(MARKDOWN_TARGET)$(basename $(notdir $<)).md $(MARKDOWN_TARGET)$(basename $(notdir $<))_files
 	$(CONVERT_TO_MARKDOWN) $<
 
@@ -362,13 +373,13 @@ $(EPUB_TARGET)%.epub: $(MARKDOWN_TARGET)%.md
 # and let the book converters run on this
 ifeq ($(PUBLISH),nbpublish)
 # With nbpublish
-$(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
+$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
 	mkdir book
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
-	    ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
+	    ln -s ../$(FULL_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
 		chapter=$$(expr $$chapter + 1); \
 	done
 	ln -s ../$(BIB) book
@@ -377,13 +388,13 @@ $(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	cd $(PDF_TARGET) && $(RM) book.nbpub.log
 	@echo Created $@
 
-$(HTML_TARGET)book.html: $(SOURCES) $(BIB) utils/post-html.py
+$(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post-html.py
 	-$(RM) -r book
 	mkdir book
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
-	    ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
+	    ln -s ../$(FULL_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
 		chapter=$$(expr $$chapter + 1); \
 	done
 	ln -s ../$(BIB) book
@@ -395,13 +406,13 @@ $(HTML_TARGET)book.html: $(SOURCES) $(BIB) utils/post-html.py
 	@echo Created $@
 else
 # With bookbook
-$(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
+$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
 	mkdir book
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
-		ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/'$${chnum}'-&/g'); \
+		ln -s ../$(FULL_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/'$${chnum}'-&/g'); \
 		chapter=$$(expr $$chapter + 1); \
 	done
 	cd book; $(BOOKBOOK_LATEX)
@@ -409,11 +420,11 @@ $(PDF_TARGET)book.tex: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
 	$(RM) -r book
 	@echo Created $@
 
-$(HTML_TARGET)book.html: $(SOURCES) $(BIB) $(PUBLISH_PLUGINS)
+$(HTML_TARGET)book.html: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
 	mkdir book
 	for file in $(SOURCE_FILES); do \
-	    ln -s ../$(NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/[^-0-9]*\([-0-9][0-9]*\)_\(.*\)/\1-\2/g'); \
+	    ln -s ../$(FULL_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/[^-0-9]*\([-0-9][0-9]*\)_\(.*\)/\1-\2/g'); \
 	done
 	cd book; $(BOOKBOOK_HTML)
 	mv book/html/index.html $@
@@ -548,10 +559,13 @@ clean-book:
 clean-aux:
 	$(RM) $(AUX)
 	
+clean-full-notebooks clean-full clean-fulls:
+	$(RM) $(FULLS)
+
 clean-docs:
 	$(RM) -r $(DOCS_TARGET)*.md $(DOCS_TARGET)html $(DOCS_TARGET)code $(DOCS_TARGET)slides
 
-clean: clean-code clean-chapters clean-book clean-aux clean-docs
+clean: clean-code clean-chapters clean-book clean-aux clean-docs clean-fulls
 	@echo "All derived files deleted"
 
 realclean: clean
