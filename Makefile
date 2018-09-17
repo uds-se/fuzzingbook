@@ -49,6 +49,7 @@ BINDER_URL = https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=noteb
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
 PUBLIC_SOURCES = $(PUBLIC_CHAPTERS:%=$(NOTEBOOKS)/%)
+BETA_SOURCES = $(BETA_CHAPTERS:%=$(NOTEBOOKS)/%)
 
 # Where to place the pdf, html, slides
 PDF_TARGET      = pdf/
@@ -67,6 +68,7 @@ DOCS_TARGET    := docs/beta/
 HTML_TARGET    := $(HTML_TARGET)beta/
 SLIDES_TARGET  := $(SLIDES_TARGET)beta/
 CODE_TARGET    := $(CODE_TARGET)beta/
+BETA_FLAG = "--include-beta"
 endif
 
 
@@ -344,7 +346,7 @@ $(DOCS_TARGET)index.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
-	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --home \
+	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --home $(BETA_FLAG) \
 		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
 	@$(OPEN) $@
 
@@ -353,7 +355,7 @@ $(HTML_TARGET)%.html: \
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	$(PYTHON) utils/post-html.py \
+	$(PYTHON) utils/post-html.py $(BETA_FLAG) \
 		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
 	@-test -L $(HTML_TARGET)PICS || ln -s ../PICS $(HTML_TARGET)
 	@$(OPEN) $@

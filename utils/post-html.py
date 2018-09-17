@@ -220,7 +220,7 @@ def anchor(title):
 # Process arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--home", help="omit links to notebook, code, and slides", action='store_true')
-parser.add_argument("--beta", help="mark links as beta")
+parser.add_argument("--include-beta", help="include beta chapters", action='store_true')
 parser.add_argument("--menu-prefix", help="prefix to html files in menu")
 parser.add_argument("--public-chapters", help="List of public chapters")
 parser.add_argument("--beta-chapters", help="List of beta chapters")
@@ -237,15 +237,15 @@ notebook_modification_datetime = datetime.datetime.fromtimestamp(notebook_modifi
 notebook_modification_year = repr(datetime.datetime.fromtimestamp(notebook_modification_time).year)
 
 # Get list of chapters
-if args.public_chapters is None:
-    public_chapters = []
-else:
+if args.public_chapters is not None:
     public_chapters = args.public_chapters.split()
-
-if args.beta_chapters is None:
-    beta_chapters = []
 else:
+    public_chapters = []
+
+if args.include_beta and args.beta_chapters is not None:
     beta_chapters = args.beta_chapters.split()
+else:
+    beta_chapters = []
 
 all_chapters = public_chapters + beta_chapters
 
@@ -261,7 +261,7 @@ else:
     footer_template = chapter_footer_template
     
 # Set base names
-if args.beta:
+if args.include_beta:
     site_html += "/beta"
 
 # Book image
@@ -299,8 +299,12 @@ for menu_ipynb_file in all_chapters:
         link_class = ' class="this_page"'
     else:
         link_class = ''
+    if menu_ipynb_file in beta_chapters:
+        beta_indicator = ' <i class="fa fa-fw fa-wrench"></i>'
+    else:
+        beta_indicator = ''
     menu_html_file = menu_prefix + basename + ".html"
-    item = '<li><a href="%s"%s>%s</a></li>\n' % (menu_html_file, link_class, title)
+    item = '<li><a href="%s"%s>%s%s</a></li>\n' % (menu_html_file, link_class, title, beta_indicator)
     all_chapters_menu += item
 
 # Description
