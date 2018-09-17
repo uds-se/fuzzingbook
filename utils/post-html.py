@@ -30,9 +30,6 @@ site_html = "https://www.fuzzingbook.org"
 github_html = "https://github.com/uds-se/fuzzingbook"
 notebook_html = "https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks"
 
-# Book image
-bookimage = site_html + "/html/PICS/wordcloud.png"
-
 # Menus
 # For icons, see https://fontawesome.com/cheatsheet
 menu_start = r"""
@@ -223,13 +220,14 @@ def anchor(title):
 # Process arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--home", help="omit links to notebook, code, and slides", action='store_true')
+parser.add_argument("--beta", help="mark links as beta")
 parser.add_argument("--menu-prefix", help="prefix to html files in menu")
+parser.add_argument("--public-chapters", help="List of public chapters")
+parser.add_argument("--beta-chapters", help="List of beta chapters")
 parser.add_argument("chapter", nargs=1)
-parser.add_argument("all_chapters", nargs='*')
 args = parser.parse_args()
 
 # Get template elements
-all_chapters = args.all_chapters
 chapter_html_file = args.chapter[0]
 chapter = os.path.splitext(os.path.basename(chapter_html_file))[0]
 chapter_notebook_file = os.path.join("notebooks", chapter + ".ipynb")
@@ -237,6 +235,19 @@ notebook_modification_time = os.path.getmtime(chapter_notebook_file)
 notebook_modification_datetime = datetime.datetime.fromtimestamp(notebook_modification_time) \
     .astimezone().isoformat(sep=' ', timespec='seconds')
 notebook_modification_year = repr(datetime.datetime.fromtimestamp(notebook_modification_time).year)
+
+# Get list of chapters
+if args.public_chapters is None:
+    public_chapters = []
+else:
+    public_chapters = args.public_chapters.split()
+
+if args.beta_chapters is None:
+    beta_chapters = []
+else:
+    beta_chapters = args.beta_chapters.split()
+
+all_chapters = public_chapters + beta_chapters
 
 menu_prefix = args.menu_prefix
 if menu_prefix is None:
@@ -248,6 +259,13 @@ if args.home:
 else:
     header_template = chapter_header_template
     footer_template = chapter_footer_template
+    
+# Set base names
+if args.beta:
+    site_html += "/beta"
+
+# Book image
+bookimage = site_html + "/html/PICS/wordcloud.png"
 
 # Construct sections menu
 all_sections_menu = ""
@@ -272,7 +290,7 @@ if args.home:
     link_class = ' class="this_page"'
 else:
     link_class = ''
-all_chapters_menu = '<li><a href="https://www.fuzzingbook.org/"%s><i class="fa fa-fw fa-home"></i> About this book</a></li>\n' % link_class
+all_chapters_menu = '<li><a href="%s"%s><i class="fa fa-fw fa-home"></i> About this book</a></li>\n' % (site_html, link_class)
 
 for menu_ipynb_file in all_chapters:
     basename = os.path.splitext(os.path.basename(menu_ipynb_file))[0]

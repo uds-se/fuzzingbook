@@ -1,23 +1,22 @@
 # Fuzzingbook Makefile
 
 # Chapters to include in the book, in this order
-PUBLISHED_CHAPTERS = \
+PUBLIC_CHAPTERS = \
 	Intro_Testing.ipynb \
 	Fuzzer.ipynb \
 	Coverage.ipynb \
-	MutationFuzzer.ipynb \
-	Grammars.ipynb \
-	GrammarFuzzer.ipynb
 
 BETA_CHAPTERS = \
+	MutationFuzzer.ipynb \
+	Grammars.ipynb \
+	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
+
 	# Parsing.ipynb \
 	# Probabilistic_Fuzzing.ipynb
+	# Reducing.ipynb
 
-CHAPTERS = $(PUBLISHED_CHAPTERS) $(BETA_CHAPTERS)
-
-# Later
-# - Reducing.ipynb
+CHAPTERS = $(PUBLIC_CHAPTERS) $(BETA_CHAPTERS)
 
 # Additional notebooks (not to be included)
 FRONTMATTER = \
@@ -49,7 +48,7 @@ BINDER_URL = https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=noteb
 
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
-PUBLISHED_SOURCES = $(PUBLISHED_CHAPTERS:%=$(NOTEBOOKS)/%)
+PUBLIC_SOURCES = $(PUBLIC_CHAPTERS:%=$(NOTEBOOKS)/%)
 
 # Where to place the pdf, html, slides
 PDF_TARGET      = pdf/
@@ -59,13 +58,22 @@ CODE_TARGET     = code/
 MARKDOWN_TARGET = markdown/
 WORD_TARGET     = word/
 EPUB_TARGET     = epub/
-DOCS_TARGET     = docs/
 DEPEND_TARGET   = .depend/
+DOCS_TARGET     = docs/
+
+# If BETA=y, we create different files
+ifdef BETA
+DOCS_TARGET    := docs/beta/
+HTML_TARGET    := $(HTML_TARGET)beta/
+SLIDES_TARGET  := $(SLIDES_TARGET)beta/
+CODE_TARGET    := $(CODE_TARGET)beta/
+endif
+
 
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
-HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(DOCS_TARGET)/index.html
+HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(DOCS_TARGET)index.html
 SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
 PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py)
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
@@ -124,6 +132,9 @@ PYCODESTYLE_OPTS = --config code/pycodestyle.cfg
 
 # Program to open files after creating, say OPEN=open (default: ignore; "true" does nothing)
 OPEN ?= true
+
+# Make directory
+MKDIR = mkdir -p
 
 ifndef PUBLISH
 # Determine publishing program
@@ -326,21 +337,29 @@ $(PDF_TARGET)%.tex:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
 	$(CONVERT_TO_TEX) $<
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
-$(DOCS_TARGET)index.html: $(FULL_NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
+$(DOCS_TARGET)index.html: \
+	$(FULL_NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
+	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
+	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
-	mv html/index.html $@
+	mv $(HTML_TARGET)index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
-	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --home $@ $(PUBLISHED_SOURCES)
+	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --home \
+		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
 	@$(OPEN) $@
 
-$(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
+$(HTML_TARGET)%.html: \
+	$(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
+	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
-	$(PYTHON) utils/post-html.py $@ $(PUBLISHED_SOURCES)
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
+	$(PYTHON) utils/post-html.py \
+		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
 	@-test -L $(HTML_TARGET)PICS || ln -s ../PICS $(HTML_TARGET)
 	@$(OPEN) $@
 
 $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
+	@test -d $(SLIDES_TARGET) || $(MKDIR) $(SLIDES_TARGET)
 	$(eval TMPDIR := $(shell mktemp -d))
 	sed 's/\.ipynb)/\.slides\.html)/g' $< > $(TMPDIR)/$(notdir $<)
 	$(CONVERT_TO_SLIDES) $(TMPDIR)/$(notdir $<)
@@ -352,17 +371,19 @@ $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 $(REVEAL_JS):
 	git submodule update --init
 
+
+# For code, we comment out fuzzingbook imports, 
+# ensuring we import a .py and not the .ipynb file
+$(CODE_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
+	@test -d $(CODE_TARGET) || $(MKDIR) $(CODE_TARGET)
+	$(CONVERT_TO_PYTHON) $< > $@~ && mv $@~ $@
+	-chmod +x $@
+
+
 # Markdown
 $(MARKDOWN_TARGET)%.md:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 	$(RM) -r $(MARKDOWN_TARGET)$(basename $(notdir $<)).md $(MARKDOWN_TARGET)$(basename $(notdir $<))_files
 	$(CONVERT_TO_MARKDOWN) $<
-
-
-# For code, we comment out fuzzingbook imports, 
-# ensuring we import a .py and not the .ipynb file
-$(CODE_TARGET)%.py:	$(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
-	$(CONVERT_TO_PYTHON) $< > $@~ && mv $@~ $@
-	-chmod +x $@
 
 # For word, we convert from the HTML file
 $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
@@ -379,7 +400,7 @@ ifeq ($(PUBLISH),nbpublish)
 # With nbpublish
 $(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
-	mkdir book
+	$(MKDIR) book
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
@@ -394,7 +415,7 @@ $(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 
 $(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post-html.py
 	-$(RM) -r book
-	mkdir book
+	$(MKDIR) book
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
@@ -404,7 +425,7 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post-html.py
 	ln -s ../$(BIB) book
 	$(CONVERT_TO_HTML) book
 	$(PYTHON) utils/nbmerge.py book/Ch*.ipynb > notebooks/book.ipynb
-	$(PYTHON) utils/post-html.py --home $@ $(PUBLISHED_SOURCES)
+	$(PYTHON) utils/post-html.py --home $@ $(PUBLIC_SOURCES)
 	$(RM) -r book notebooks/book.ipynb
 	cd $(HTML_TARGET) && $(RM) book.nbpub.log book_files/$(BIB)
 	@echo Created $@
@@ -412,7 +433,7 @@ else
 # With bookbook
 $(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
-	mkdir book
+	$(MKDIR) book
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
@@ -426,7 +447,7 @@ $(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 
 $(HTML_TARGET)book.html: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 	-$(RM) -r book
-	mkdir book
+	$(MKDIR) book
 	for file in $(SOURCE_FILES); do \
 	    ln -s ../$(FULL_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/[^-0-9]*\([-0-9][0-9]*\)_\(.*\)/\1-\2/g'); \
 	done
@@ -510,28 +531,28 @@ publish: docs
 
 # Add/update HTML code in repository
 publish-html: html
-	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
-	@test -d $(DOCS_TARGET)html || mkdir $(DOCS_TARGET)html
+	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)html || $(MKDIR) $(DOCS_TARGET)html
 	cp -pr $(HTML_TARGET) $(DOCS_TARGET)html
 
 publish-code: code
-	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
-	@test -d $(DOCS_TARGET)code || mkdir $(DOCS_TARGET)code
+	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)code || $(MKDIR) $(DOCS_TARGET)code
 	cp -pr $(CODE_TARGET) $(DOCS_TARGET)code
 
 publish-slides: slides
-	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
-	@test -d $(DOCS_TARGET)slides || mkdir $(DOCS_TARGET)slides
+	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)slides || $(MKDIR) $(DOCS_TARGET)slides
 	cp -pr $(SLIDES_TARGET) $(DOCS_TARGET)slides
 	
 publish-notebooks: full-notebooks
-	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
-	@test -d $(DOCS_TARGET)notebooks || mkdir $(DOCS_TARGET)notebooks
+	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)notebooks || $(MKDIR) $(DOCS_TARGET)notebooks
 	cp -pr $(FULL_NOTEBOOKS)/* $(DOCS_TARGET)notebooks
 
 publish-pics: PICS
-	@test -d $(DOCS_TARGET) || mkdir $(DOCS_TARGET)
-	@test -d $(DOCS_TARGET)PICS || mkdir $(DOCS_TARGET)PICS
+	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)PICS || $(MKDIR) $(DOCS_TARGET)PICS
 	cp -pr PICS/* $(DOCS_TARGET)PICS
 	$(RM) -fr $(DOCS_TARGET)notebooks/PICS; ln -s ../PICS $(DOCS_TARGET)notebooks
 	$(RM) -fr $(DOCS_TARGET)html/PICS; ln -s ../PICS $(DOCS_TARGET)html
@@ -606,7 +627,7 @@ realclean: clean
 NBDEPEND = $(PYTHON) utils/nbdepend.py
 $(DEPEND_TARGET)%.ipynb_depend: $(NOTEBOOKS)/%.ipynb
 	@echo "Rebuilding $@"
-	@test -d $(DEPEND_TARGET) || mkdir $(DEPEND_TARGET)
+	@test -d $(DEPEND_TARGET) || $(MKDIR) $(DEPEND_TARGET)
 	@for import in `$(NBDEPEND) $<`; do \
 		if [ -f $(NOTEBOOKS)/$$import.ipynb ]; then \
 			echo '$$''(FULL_NOTEBOOKS)/$(notdir $<): $$''(NOTEBOOKS)/'"$$import.ipynb"; \
