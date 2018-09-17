@@ -65,9 +65,9 @@ DOCS_TARGET     = docs/
 # If BETA=y, we create different files
 ifdef BETA
 DOCS_TARGET    := docs/beta/
-HTML_TARGET    := $(HTML_TARGET)beta/
-SLIDES_TARGET  := $(SLIDES_TARGET)beta/
-CODE_TARGET    := $(CODE_TARGET)beta/
+HTML_TARGET    := beta/$(HTML_TARGET)
+SLIDES_TARGET  := beta/$(SLIDES_TARGET)
+CODE_TARGET    := beta/$(CODE_TARGET)
 BETA_FLAG = "--include-beta"
 endif
 

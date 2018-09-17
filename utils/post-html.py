@@ -262,7 +262,7 @@ else:
     
 # Set base names
 if args.include_beta:
-    site_html += "/beta"
+    site_html += "beta/"
 
 # Book image
 bookimage = site_html + "/html/PICS/wordcloud.png"
