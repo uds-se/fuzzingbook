@@ -351,7 +351,7 @@ $(DOCS_TARGET)index.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
-	$(PYTHON) utils/post-html.py --menu-prefix=$(HTML_TARGET) --home $(BETA_FLAG) \
+	$(PYTHON) utils/post-html.py --menu-prefix=html/ --home $(BETA_FLAG) \
 		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
 	@$(OPEN) $@
 
@@ -377,6 +377,9 @@ $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 # Rules for beta targets
 ifndef BETA
 beta/%:
+	$(MAKE) BETA=beta $(@:beta/=)
+
+$(DOCS_TARGET)beta/%:
 	$(MAKE) BETA=beta $(@:beta/=)
 
 %-beta:
