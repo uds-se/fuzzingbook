@@ -62,18 +62,17 @@ fuzzingbook_tpl_dict = {
         }
     }
     
-    /* When the user scrolls down, hide the navbar. When the user scrolls up, show the navbar */
-    /* Source: https://www.w3schools.com/howto/howto_js_navbar_hide_scroll.asp */
     var prevScrollpos = window.pageYOffset;
     window.onscroll = function() {
-      var currentScrollPos = window.pageYOffset;
-      if (currentScrollPos < 5 || currentScrollPos < prevScrollpos) {
-        document.getElementById("cssmenu").style.top = "5px";
-      } else {
-        document.getElementById("cssmenu").style.top = "-50px";
-      }
-      prevScrollpos = currentScrollPos;
-    }
+        var currentScrollPos = window.pageYOffset;
+        if (currentScrollPos > 10 && currentScrollPos > prevScrollpos) {
+            document.getElementById("cssmenu").style.opacity = 0;
+        }
+        else {
+            document.getElementById("cssmenu").style.opacity = 1;
+        }
+        prevScrollpos = currentScrollPos;
+    };
     </script>
     <__HEADER__>
     <article>
