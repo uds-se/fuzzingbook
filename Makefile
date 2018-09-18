@@ -62,7 +62,7 @@ EPUB_TARGET     = epub/
 DEPEND_TARGET   = .depend/
 DOCS_TARGET     = docs/
 
-# If BETA=y, we create different files
+# If BETA=y, we create files in the "beta" subdir.  Use 'make docs-beta', 'make html-beta' to invoke
 ifdef BETA
 DOCS_TARGET    := docs/beta/
 HTML_TARGET    := beta/$(HTML_TARGET)
@@ -300,6 +300,11 @@ help:
 	@echo "* PDFs -> '$(PDF_TARGET)', HTML -> '$(HTML_TARGET)', Python code -> '$(CODE_TARGET)', Slides -> '$(SLIDES_TARGET)'"
 	@echo "* Web site files -> '$(DOCS_TARGET)'"
 	@echo ""
+	@echo "Publish:"
+	@echo "* make docs -> Create public version of current documents" 
+	@echo "* make beta -> Create beta version of current documents" 
+	@echo "* make publish -> Add docs to git, preparing for publication" 
+	@echo ""
 	@echo "Settings:"
 	@echo "* Use make PUBLISH=(nbconvert|nbpublish|bookbook) to choose a converter"
 	@echo "  (default: automatic)"
@@ -368,6 +373,18 @@ $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)PICS || ln -s ../PICS $(HTML_TARGET)
 	@-$(RM) -fr $(TMPDIR)
+
+# Rules for beta targets
+ifndef BETA
+beta/%:
+	$(MAKE) BETA=beta $(@:beta/=)
+
+%-beta:
+	$(MAKE) BETA=beta $(@:-beta=)
+
+beta: docs-beta
+endif
+
 
 # Reconstructing the reveal.js dir
 $(REVEAL_JS):
