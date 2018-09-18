@@ -329,8 +329,7 @@ class GrammarFuzzer(GrammarFuzzer):
         if children is None:
             return 1
 
-        number_of_expansions = sum(self.possible_expansions(c) for c in children)
-        return number_of_expansions
+        return sum(self.possible_expansions(c) for c in children)
 
 if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR)
@@ -414,7 +413,7 @@ if __name__ == "__main__":
 # 
 # To identify the _cost_ of expanding a symbol, we introduce two functions that mutually rely on each other.  First, `symbol_cost()` returns the minimum cost of all expansions of a symbol, using `expansion_cost()` to compute the cost for each expansion.
 # 
-# The method `expansion_cost()` returns the sum of all expansions in `expansions`.  If a nonterminal is encountered again during traversal, the cost of the expansion is $\infty$, as this indicates (potential infinite) recursion.
+# The method `expansion_cost()` returns the sum of all expansions in `expansions`.  If a nonterminal is encountered again during traversal, the cost of the expansion is $\infty$, indicating (potentially infinite) recursion.
 # 
 class GrammarFuzzer(GrammarFuzzer):
     def symbol_cost(self, symbol, seen=set()):
@@ -422,15 +421,15 @@ class GrammarFuzzer(GrammarFuzzer):
         return min(self.expansion_cost(e, seen | {symbol}) for e in expansions)
 
     def expansion_cost(self, expansion, seen=set()):
-        syms = nonterminals(expansion)
-        if len(syms) == 0:
+        symbols = nonterminals(expansion)
+        if len(symbols) == 0:
             return 1  # no symbol
 
-        if any(s in seen for s in syms):
+        if any(s in seen for s in symbols):
             return float('inf')
 
         # the value of a expansion is the sum of all expandable variables inside + 1
-        return sum(self.symbol_cost(s, seen) for s in syms) + 1
+        return sum(self.symbol_cost(s, seen) for s in symbols) + 1
 
 # Here's two examples: The minimum cost of expanding a digit is 1, since we have to choose between one of its expansions.
 # 
@@ -462,10 +461,10 @@ class GrammarFuzzer(GrammarFuzzer):
         children_with_chosen_cost = [child for (child, child_cost) in possible_children_with_cost
                                   if child_cost == chosen_cost]
 
-        children = random.choice(children_with_chosen_cost)
+        index = self.choose_node_expansion(node, children_with_chosen_cost)
 
         # Return with a new list
-        return (symbol, children)   
+        return (symbol, children_with_chosen_cost[index])
 
 # The shortcut `expand_node_min_cost()` passes `min()` as the `choose` function, which makes it expand nodes at minimum cost.
 # 
@@ -492,6 +491,7 @@ if __name__ == "__main__":
         if step < 3:
             display_tree(derivation_tree)
         step += 1
+    display_tree(derivation_tree)
     
 # We see that in each step, `expand_node_min_cost()` chooses an expansion that does not increase the number of symbols, eventually closing all open expansions.
 # 
