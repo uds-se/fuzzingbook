@@ -39,6 +39,7 @@ menu_start = r"""
      <li class="has-sub"><a href="__SITE_HTML__/"><i class="fa fa-fw fa-bars"></i> __BOOKTITLE__</a>
         <ol>
            <__ALL_CHAPTERS_MENU__>
+           <li><a href="__SITE_HTML__#News" class="more_coming">More Chapters Coming</a></li>
         </ol>
      </li>
      <li class="has-sub"><a href="__CHAPTER_HTML__"><i class="fa fa-fw fa-list-ul"></i> __CHAPTER_TITLE_BETA__</a>
