@@ -41,7 +41,7 @@ menu_start = r"""
            <__ALL_CHAPTERS_MENU__>
         </ol>
      </li>
-     <li class="has-sub"><a href="__CHAPTER_HTML__"><i class="fa fa-fw fa-list-ul"></i> __CHAPTER_TITLE__</a>
+     <li class="has-sub"><a href="__CHAPTER_HTML__"><i class="fa fa-fw fa-list-ul"></i> __CHAPTER_TITLE_BETA__</a>
         <ul>
            <__ALL_SECTIONS_MENU__>
         </ul>
@@ -262,7 +262,7 @@ else:
     
 # Set base names
 if args.include_beta:
-    site_html += "beta/"
+    site_html += "/beta"
 
 # Book image
 bookimage = site_html + "/html/PICS/wordcloud.png"
@@ -277,7 +277,13 @@ else:
     chapter_html = site_html + "/html/" + basename + ".html"
 chapter_notebook_ipynb = notebook_html + "/" + basename + ".ipynb"
 
+beta_suffix = '<i class="fa fa-fw fa-wrench"></i>'
 chapter_title = get_title(chapter_ipynb_file)
+chapter_title_beta = chapter_title
+is_beta_chapter = args.include_beta and chapter_ipynb_file in beta_chapters
+if is_beta_chapter:
+    chapter_title_beta += " " + beta_suffix
+
 sections = get_sections(chapter_ipynb_file)
 all_sections_menu = ""
 for section in sections:
@@ -300,7 +306,7 @@ for menu_ipynb_file in all_chapters:
     else:
         link_class = ''
     if menu_ipynb_file in beta_chapters:
-        beta_indicator = ' <i class="fa fa-fw fa-wrench"></i>'
+        beta_indicator = "&nbsp;" + beta_suffix
     else:
         beta_indicator = ''
     menu_html_file = menu_prefix + basename + ".html"
@@ -414,6 +420,7 @@ chapter_contents = chapter_contents \
     .replace("__AUTHORS_BIBTEX__", authors_bibtex) \
     .replace("__CHAPTER__", chapter) \
     .replace("__CHAPTER_TITLE__", chapter_title) \
+    .replace("__CHAPTER_TITLE_BETA__", chapter_title_beta) \
     .replace("__CHAPTER_HTML__", chapter_html) \
     .replace("__SITE_HTML__", site_html) \
     .replace("__NOTEBOOK_HTML__", notebook_html) \
@@ -439,6 +446,10 @@ if args.home:
 # but a) Jupyter Lab can't edit it, and b) the title conflicts with the chapter header - AZ
 chapter_contents = re.sub(r"<title>.*</title>", 
     "<title>" + page_title + "</title>", chapter_contents)
+
+if is_beta_chapter:
+    beta_warning = '<p><em class="beta">' + beta_suffix + '&nbsp;This chapter is work in progress (beta).  It is incomplete and may change at any time.</em></p>'
+    chapter_contents = chapter_contents.replace("</h1>", "</h1>" + beta_warning)
 
 # And write it out again
 print("Writing", chapter_html_file)
