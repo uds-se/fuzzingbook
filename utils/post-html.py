@@ -449,7 +449,7 @@ chapter_contents = re.sub(r"<title>.*</title>",
     "<title>" + page_title + "</title>", chapter_contents)
 
 if is_beta_chapter:
-    beta_warning = '<p><em class="beta">' + beta_suffix + '&nbsp;This chapter is work in progress (beta).  It is incomplete and may change at any time.</em></p>'
+    beta_warning = '<p><em class="beta">' + beta_suffix + '&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p>'
     chapter_contents = chapter_contents.replace("</h1>", "</h1>" + beta_warning)
 
 # And write it out again
