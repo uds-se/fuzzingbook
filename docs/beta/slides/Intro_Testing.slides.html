@@ -1,17 +1,64 @@
 
-<!-- A html document -->
-<!-- 
-with standard nbconvert css layout
-with standard nbconvert input/output content
-standard html tag wrapping
-with mathjax loaded
-with jupyter wigets
- caption and label elements according to ipub meta tags  
-with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" /><title>Generating Software Tests</title>
+
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="chrome=1" />
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<title>Intro_Testing slides</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- General and theme style sheets -->
+<link rel="stylesheet" href="reveal.js/css/reveal.css">
+<link rel="stylesheet" href="reveal.js/css/theme/simple.css" id="theme">
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+}
+
+</script>
+
+<!--[if lt IE 9]>
+<script src="reveal.js/lib/js/html5shiv.js"></script>
+<![endif]-->
+
+<!-- Loading the mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+<!-- Get Font-awesome from cdn -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.css">
 
 <style type="text/css">
     /*!
@@ -11685,7 +11732,7 @@ ul.typeahead-list > li > a {
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
     </style>
 <style type="text/css">
-
+    
 /* Temporary definitions which will become obsolete with Notebook release 5.0 */
 .ansi-black-fg { color: #3E424D; }
 .ansi-black-bg { background-color: #3E424D; }
@@ -11724,354 +11771,1492 @@ ul.typeahead-list > li > a {
 
     </style>
 
+
 <style type="text/css">
 /* Overrides of notebook CSS for static HTML export */
-body {
-  overflow: visible;
-  padding: 8px;
+.reveal {
+  font-size: 160%;
 }
-
-div#notebook {
-  overflow: visible;
-  border-top: none;
-}@media print {
-  div.cell {
-    display: block;
-    page-break-inside: avoid;
-  }
-  div.output_wrapper {
-    display: block;
-    page-break-inside: avoid;
-  }
-  div.output {
-    display: block;
-    page-break-inside: avoid;
-  }
+.reveal pre {
+  width: inherit;
+  padding: 0.4em;
+  margin: 0px;
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+}
+.reveal pre code {
+  padding: 0px;
+}
+.reveal section img {
+  border: 0px solid black;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+}
+.reveal i {
+  font-style: normal;
+  font-family: FontAwesome;
+  font-size: 2em;
+}
+.reveal .slides {
+  text-align: left;
+}
+.reveal.fade {
+  opacity: 1;
+}
+.reveal .progress {
+  position: static;
+}
+.reveal .controls .navigate-left,
+.reveal .controls .navigate-left.enabled {
+  border-right-color: #727272;
+}
+.reveal .controls .navigate-left.enabled:hover,
+.reveal .controls .navigate-left.enabled.enabled:hover {
+  border-right-color: #dfdfdf;
+}
+.reveal .controls .navigate-right,
+.reveal .controls .navigate-right.enabled {
+  border-left-color: #727272;
+}
+.reveal .controls .navigate-right.enabled:hover,
+.reveal .controls .navigate-right.enabled.enabled:hover {
+  border-left-color: #dfdfdf;
+}
+.reveal .controls .navigate-up,
+.reveal .controls .navigate-up.enabled {
+  border-bottom-color: #727272;
+}
+.reveal .controls .navigate-up.enabled:hover,
+.reveal .controls .navigate-up.enabled.enabled:hover {
+  border-bottom-color: #dfdfdf;
+}
+.reveal .controls .navigate-down,
+.reveal .controls .navigate-down.enabled {
+  border-top-color: #727272;
+}
+.reveal .controls .navigate-down.enabled:hover,
+.reveal .controls .navigate-down.enabled.enabled:hover {
+  border-top-color: #dfdfdf;
+}
+.reveal .progress span {
+  background: #727272;
+}
+div.input_area {
+  padding: 0.06em;
+}
+div.code_cell {
+  background-color: transparent;
+}
+div.prompt {
+  width: 11ex;
+  padding: 0.4em;
+  margin: 0px;
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+  text-align: right;
+}
+div.output_area pre {
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+}
+div.output_prompt {
+  /* 5px right shift to account for margin in parent container */
+  margin: 5px 5px 0 0;
+}
+div.text_cell.rendered .rendered_html {
+  /* The H1 height seems miscalculated, we are just hidding the scrollbar */
+  overflow-y: hidden;
+}
+a.anchor-link {
+  /* There is still an anchor, we are only hidding it */
+  display: none;
+}
+.rendered_html p {
+  text-align: inherit;
+}
+::-webkit-scrollbar
+{
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar *
+{
+  background:transparent;
+}
+::-webkit-scrollbar-thumb
+{
+  background: #727272 !important;
 }
 </style>
 
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
-<link rel="stylesheet" href="beta/html/custom.css">
+<link rel="stylesheet" href="custom.css">
 
-<!-- Load mathjax -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
-<!-- MathJax configuration -->
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-    tex2jax: {
-        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-        processEscapes: true,
-        processEnvironments: true
-    },
-    // Center justify equations in code and markdown cells. Elsewhere
-    // we use CSS to left justify single line equations in code cells.
-    displayAlign: 'center',
-    "HTML-CSS": {
-        styles: {'.MathJax_Display': {"margin": 0}},
-        linebreaks: { automatic: true }
-    }
-});
-</script>
-<!-- End of mathjax configuration --><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+</head>
 
-<!--[if IE lte 8]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-<style type="text/css">
-.ipyfigure { display: -ms-flex; display: -webkit-flex; display: flex;}
-.ipyfigure>div { flex:1; }
-.ipytable { display: -ms-flex; display: -webkit-flex; display: flex;}
-.ipytable>div { flex:1; }
+<body>
 
-</style>
 
-<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
-
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-
-<meta property="og:url" content="https://www.fuzzingbook.org/beta/" />
-<meta property="og:type" content="article" />
-<meta property="og:title" content="Generating Software Tests" />
-<meta property="og:description" content="Welcome to &quot;Generating Software Tests&quot;! Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by automating software testing, specifically by generating tests automatically.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code. " />
-<meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" /></head>
- <body>
-
-    <script>
-    function reveal() {
-        var solutions = document.getElementsByClassName("solution");
-        var i;
-        for (i = 0; i < solutions.length; i++)
-            if (solutions[i].style.display === "none") {
-                solutions[i].style.display = "block";
-            } else {
-                solutions[i].style.display = "none";
-        }
-    }
-    </script>
-    
-<nav>
-<div id="cssmenu">
-  <ul>
-     <li class="has-sub"><a href="https://www.fuzzingbook.org/beta/"><i class="fa fa-fw fa-bars"></i> Generating Software Tests</a>
-        <ol>
-           <li><a href="https://www.fuzzingbook.org/beta" class="this_page"><i class="fa fa-fw fa-home"></i> About this book</a></li>
-<li><a href="beta/html/Intro_Testing.html">Introduction to Software Testing</a></li>
-<li><a href="beta/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
-<li><a href="beta/html/Coverage.html">Getting Coverage</a></li>
-<li><a href="beta/html/MutationFuzzer.html">Mutation-Based Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="beta/html/Grammars.html">Fuzzing with Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="beta/html/GrammarFuzzer.html">Efficient Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="beta/html/GrammarCoverageFuzzer.html">Grammar Coverage&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-
-        </ol>
-     </li>
-     <li class="has-sub"><a href="https://www.fuzzingbook.org/beta"><i class="fa fa-fw fa-list-ul"></i> About this Book</a>
-        <ul>
-           <li><a href="#A-Textbook-for-Paper,-Screen,-and-Keyboard">A Textbook for Paper, Screen, and Keyboard</a></li>
-<li><a href="#Who-this-Book-is-for">Who this Book is for</a></li>
-<li><a href="#News">News</a></li>
-<li><a href="#About-the-Authors">About the Authors</a></li>
-<li><a href="#Frequently-Asked-Questions">Frequently Asked Questions</a></li>
-
-        </ul>
-     </li>
-     
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-cube"></i> Resources</a>
-     <ul>
-     <li><a href="https://github.com/uds-se/fuzzingbook/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
-     </ul>
-     </li>
-
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-comments"></i> Share</a>
-        <ul>
-            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22About%20this%20Book%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta" target=_blank><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
-            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta" target=_blank><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
-            <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
-        </ul>
-     </li>
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-question-circle"></i> Help</a>
-        <ul>
-          <li><a href="https://docs.python.org/3/tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Python Tutorial</a>
-          <li><a href="https://www.dataquest.io/blog/jupyter-notebook-tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Jupyter Notebook Tutorial</a>
-          <li><a href="https://github.com/uds-se/fuzzingbook/issues/" target="_blank"><i class="fa fa-fw fa-commenting"></i> Report an Issue</a></li>
-        </ul>
-     </li>
-  </ul>
+<div class="reveal">
+<div class="slides">
+<section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
-</nav>
-
-    <article>
-   <div tabindex="-1" id="notebook" class="border-box-sizing">
-     <div class="container" id="notebook-container"><section><h1>Generating Software Tests</h1><h3>Breaking Software for Fun and Profit</h3><b>by Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler</b></section>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="About-this-Book">About this Book<a class="anchor-link" href="#About-this-Book">&#182;</a></h1><p><strong>Welcome to "Generating Software Tests"!</strong> 
-Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by <em>automating</em> software testing, specifically by <em>generating tests automatically</em>.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code.</p>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Introduction-to-Software-Testing">Introduction to Software Testing<a class="anchor-link" href="#Introduction-to-Software-Testing">&#182;</a></h1><p>Before we get to the central parts of the book, let us introduce essential concepts of software testing.  Why is it necessary to test software at all?  How does one test software?  How can one tell whether a test has been successful?  How does one know if one has tested enough?  In this unit, let us recall the most important concepts.</p>
+
 </div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Simple-Testing">Simple Testing<a class="anchor-link" href="#Simple-Testing">&#182;</a></h2><p>Let's start with a simple example.  Your co-worker has been asked to implement a square root function.  (Let's assume for a moment that the environment does  not already have one.)  After studying <em>Newton's method</em>, she comes up with the following program, claiming that, in fact, this <code>my_sqrt()</code> function computes square roots:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes the square root of x, using Newton&#39;s method&quot;&quot;&quot;</span>
+    <span class="n">approx</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">guess</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">while</span> <span class="n">approx</span> <span class="o">!=</span> <span class="n">guess</span><span class="p">:</span>
+        <span class="n">approx</span> <span class="o">=</span> <span class="n">guess</span>
+        <span class="n">guess</span> <span class="o">=</span> <span class="p">(</span><span class="n">approx</span> <span class="o">+</span> <span class="n">x</span> <span class="o">/</span> <span class="n">approx</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">approx</span>
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Textbook-for-Paper,-Screen,-and-Keyboard">A Textbook for Paper, Screen, and Keyboard<a class="anchor-link" href="#A-Textbook-for-Paper,-Screen,-and-Keyboard">&#182;</a></h2><p>You can use this book in three ways:</p>
-<ul>
-<li><p>You can <strong>read chapters in your browser</strong>.  Check out the list of chapters in the menu above, or start right away with the 
-<a href="https://www.fuzzingbook.org/html/Intro_Testing.html">introduction to testing</a> or the
-<a href="https://www.fuzzingbook.org/html/Fuzzer.html">introduction to fuzzing</a>.  All code is available for download.</p>
-</li>
-<li><p>You can <strong>interact with chapters as Jupyter Notebooks</strong> (beta).  This allows you edit and extend the code, experimenting <em>live in your browser.</em>  Just click on "Resources → Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a></p>
-</li>
-<li><p>You can <strong>present chapters as slides</strong> (beta).  This allows for presenting the material in lectures.  Just click on "Resources → View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a></p>
-</li>
-</ul>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Your job is now to find out whether this function actually does what it claims to do.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To find our whether <code>my_sqrt()</code> works correctly, you can <em>test</em> it with a few values.  For <code>x = 4</code>, for instance, it produces the correct value:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_sqrt</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Who-this-Book-is-for">Who this Book is for<a class="anchor-link" href="#Who-this-Book-is-for">&#182;</a></h2><p>This work is designed as a <em>textbook</em> for a course in software testing; as <em>supplementary material</em> in a software testing or software engineering course; and as a <em>resource for software developers</em>. We cover random fuzzing, mutation-based fuzzing, grammar-based test generation, symbolic testing, and much more, illustrating all techniques with code examples that you can try out yourself.</p>
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[3]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>2.0</pre>
 </div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>as it does for <code>x = 2.0</code>, apparently:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="News">News<a class="anchor-link" href="#News">&#182;</a></h2><p>This book is <em>work in progress,</em> with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.</p>
-<p><a class="twitter-timeline" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[4]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>1.414213562373095</pre>
 </div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can easily verify whether this value is correct by exploiting that $\sqrt{x}$ squared again has to be $x$, or in other words $\sqrt{x} \times \sqrt{x} = x$.  Let's take a look:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="About-the-Authors">About the Authors<a class="anchor-link" href="#About-the-Authors">&#182;</a></h2><p>This book is written by <em>Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler</em>.  All of us are long-standing experts in software testing and test generation; and we have written or contributed to some of the most important test generators and fuzzers on the planet.  As an example, if you are reading this in a Firefox, Chrome, or Edge Web browser, you can do so safely partly because of us, as <em>the very techniques listed in this book have found more than 2,600 bugs in their JavaScript interpreters so far.</em>  We are happy to share our expertise and making it accessible to the public.</p>
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[5]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>1.9999999999999996</pre>
 </div>
+
 </div>
+
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Frequently-Asked-Questions">Frequently Asked Questions<a class="anchor-link" href="#Frequently-Asked-Questions">&#182;</a></h2></div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Okay, we do have some rounding error, but otherwise, this seems just fine.</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Which-content-will-be-coming-up?">Which content will be coming up?<a class="anchor-link" href="#Which-content-will-be-coming-up?">&#182;</a></h3><p>The contents of this book will include topics such as:</p>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>What we have done now is that we have <em>tested</em> the above program: We have <em>executed</em> it on a given input and <em>checked</em> its result whether it is correct or not.  Such a test is the bare minimum of quality assurance before a program goes into production.</p>
+
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Automating-Test-Execution">Automating Test Execution<a class="anchor-link" href="#Automating-Test-Execution">&#182;</a></h2><p>So far, we have tested the above program <em>manually</em>, that is, running it by hand and checking its results by hand.  This is a very flexible way of testing, but in the long run, it is rather inefficient:</p>
 <ol>
-<li>Introduction to Testing</li>
-<li>Basic Fuzzing</li>
-<li>Coverage</li>
-<li>Mutation-Based Fuzzing</li>
-<li>Grammar-Based Fuzzing</li>
-<li>Fuzzing Function Calls</li>
-<li>Fuzzing User Interfaces</li>
-<li>Parsing and Mutating Inputs</li>
-<li>Search-Based Testing</li>
-<li>Symbolic Testing</li>
-<li>Mining Grammars</li>
-<li>Probabilistic Testing</li>
-<li>Carving Unit Tests</li>
-<li>Fuzzing and Invariants</li>
-<li>Protection and Repair</li>
+<li>Manually, you can only check a very limited number of executions and their results</li>
+<li>After any change to the program, you have to repeat the testing process</li>
 </ol>
-<p>See the table of contents in the menu above for those chapters that are already done.</p>
-</div>
-</div>
-</div>
-</div>
+<p>This is why it is very useful to <em>automate</em> tests.  One simple way of doing so is to let the computer first do the computation, and then have it check the results.</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Why-does-it-take-so-long-to-start-an-interactive-notebook?">Why does it take so long to start an interactive notebook?<a class="anchor-link" href="#Why-does-it-take-so-long-to-start-an-interactive-notebook?">&#182;</a></h3><p>We use the <a href="https://mybinder.org">binder</a> service, which runs notebooks on their own servers.  Starting Jupyter through binder normally takes about 30 seconds. If, however, you are the first to invoke binder after a book update, binder recreates its environment, which can take a few minutes.  Note, though, that binder is officially in beta and we do not have control over binder.</p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For instance, this piece of code automatically tests whether $\sqrt{4} = 2$ holds:</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="I-have-a-comment-or-a-suggestion.--What-do-I-do?">I have a comment or a suggestion.  What do I do?<a class="anchor-link" href="#I-have-a-comment-or-a-suggestion.--What-do-I-do?">&#182;</a></h3><p>Report an issue on the <a href="https://github.com/uds-se/fuzzingbook/issues">development page</a>.</p>
-</div>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">expected_result</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="n">expected_result</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test passed&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test failed&quot;</span><span class="p">)</span>
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="I-have-reported-an-issue-two-weeks-ago.--When-will-it-be-addressed?">I have reported an issue two weeks ago.  When will it be addressed?<a class="anchor-link" href="#I-have-reported-an-issue-two-weeks-ago.--When-will-it-be-addressed?">&#182;</a></h3><p>We prioritize issues as follows:</p>
-<ol>
-<li>Bugs in code published on fuzzingbook.org</li>
-<li>Bugs in text published on fuzzingbook.org</li>
-<li>Writing missing chapters</li>
-<li>Issues in yet unpublished code or text</li>
-<li>Issues related to development or construction</li>
-<li>Things marked as "beta"</li>
-<li>Everything else</li>
-</ol>
-</div>
-</div>
-</div>
-</div>
+<div class="output_wrapper">
+<div class="output">
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="How-can-I-solve-problems-myself?">How can I solve problems myself?<a class="anchor-link" href="#How-can-I-solve-problems-myself?">&#182;</a></h3><p>We're glad you ask that.  The <a href="https://github.com/uds-se/fuzzingbook/">development page</a> has all sources and some supplementary material.  Pull requests that fix issues are very welcome.</p>
-</div>
-</div>
-</div>
-</div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="How-can-I-contribute?">How can I contribute?<a class="anchor-link" href="#How-can-I-contribute?">&#182;</a></h3><p>Again, we're glad you're here!  See our <a href="http://www.fuzzingbook.org/Guide_for_Authors.html">Guide for Authors</a> for instructions on coding and writing.</p>
-</div>
-</div>
-</div>
-</div>
+<div class="output_area">
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Do-you-provide-PDFs-of-your-material?">Do you provide PDFs of your material?<a class="anchor-link" href="#Do-you-provide-PDFs-of-your-material?">&#182;</a></h3><p>At this point, we do not provide support for PDF versions.  We are working on producing PDF and paper versions once the book is complete.</p>
-</div>
-</div>
-</div>
-</div>
+<div class="prompt"></div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="How-do-I-cite-your-work?">How do I cite your work?<a class="anchor-link" href="#How-do-I-cite-your-work?">&#182;</a></h3><p>Thanks for referring to our work!  Once the book is complete, you will be able to cite it in the traditional way.  In the meantime, just click on the "cite" button at the bottom of the Web page for each chapter to get a citation entry.</p>
-</div>
-</div>
-</div>
-</div>
 
-        
-<p class="imprint">
-<img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
-This work is licensed under a
-<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
-&bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/index.ipynb" target=_blank)>Last change: 2018-09-13 16:14:33+02:00</a> &bull; 
-<a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
-<a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
-</p>
-
-<script>
-function revealCitation() {
-    var c = document.getElementById("citation");
-    c.style.display = "block";
-}
-</script>
-
-<div id="citation" class="citation" style="display: none;">
-<a name="citation"></a>
-<h2>How to Cite this Work</h2>
-<p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta">Generating Software Tests</a>".  Retrieved 2018-09-13 16:14:33+02:00.
-</p>
-<pre>
-@incollection{fuzzingbook2018:index,
-    author = {Andreas Zeller and Rahul Gopinath and Marcel Böhme and Gordon Fraser and Christian Holler},
-    booktitle = {Generating Software Tests},
-    title = {Generating Software Tests},
-    year = {2018},
-    publisher = {Saarland University},
-    howpublished = {\url{https://www.fuzzingbook.org/beta/}},
-    note = {Retrieved 2018-09-13 16:14:33+02:00},
-    url = {https://www.fuzzingbook.org/beta/},
-    urldate = {2018-09-13 16:14:33+02:00}
-}
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Test passed
 </pre>
 </div>
+</div>
 
-      </div>
-    </div>
-    </article>
+</div>
+</div>
 
- </body>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The nice thing about this test is that we can run it again and again, thus ensuring that at least the square root of 4 is computed correctly.  But there are still a number of issues, though:</p>
+<ol>
+<li>We need <em>five lines of code</em> for a single test</li>
+<li>We do not care for rounding errors</li>
+<li>We only check a single input (and a single result)</li>
+</ol>
+<p>Let us address these issues one by one.  First, let's make the test a bit more compact.  Almost all programming languages do have a means to automatically check whether a condition holds, and stop execution if it does not.  This is called an <em>assertion</em>, and it is immensely useful for testing.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In Python, the <code>assert</code> statement takes a condition, and if the condition is true, nothing happens.  (If everything works as it should, you should not be bothered.)  If the condition evaluates to false, though, <code>assert</code> raises an exception, indicating that a test just failed.</p>
+<p>In our example, we can use <code>assert</code> to easily check whether <code>my_sqrt()</code> yields the expected result as above:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As you execute this line of code, nothing happens: We just have shown (or asserted) that our implementation indeed produces $\sqrt{4} = 2$.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Remember, though, that floating-point computations may induce rounding errors.  So we cannot simply compare two floating-point values with equality; rather, we would ensure that the difference between them stays below a certain threshold value, typically denoted as $\epsilon$ or <code>epsilon</code>.  This is how we can do it:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">EPSILON</span> <span class="o">=</span> <span class="mf">1e-8</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">abs</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">x</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">my_sqrt</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">EPSILON</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can also introduce a special function for this purpose, and now do more tests for concrete values:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">assertEquals</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">epsilon</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">assertEquals</span><span class="p">(</span><span class="n">my_sqrt</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="n">my_sqrt</span><span class="p">(</span><span class="mi">9</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="n">my_sqrt</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Seems to work, right?  If we know the expected results of a computation, we can use such assertions again and again to ensure our program works correctly.</p>
+
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Generating-Tests">Generating Tests<a class="anchor-link" href="#Generating-Tests">&#182;</a></h2><p>Remember that the property $\sqrt{x} \times \sqrt{x} = x$ universally holds?  We can also explicitly test this with a few values:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">assertEquals</span><span class="p">(</span><span class="n">my_sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="n">my_sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">*</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">assertEquals</span><span class="p">(</span><span class="n">my_sqrt</span><span class="p">(</span><span class="mf">42.11</span><span class="p">)</span> <span class="o">*</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mf">42.11</span><span class="p">),</span> <span class="mf">42.11</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Still seems to work, right?  Most importantly, though, $\sqrt{x} \times \sqrt{x} = x$ is something we can very easily test for thousands of values:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">):</span>
+    <span class="n">assertEquals</span><span class="p">(</span><span class="n">my_sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>How much time does it take to test <code>my_sqrt()</code> with 100 values?  Let's see:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">Timer</span> <span class="k">import</span> <span class="n">Timer</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">):</span>
+        <span class="n">assertEquals</span><span class="p">(</span><span class="n">my_sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">n</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0.00018039302085526288
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>100 values take about a a hundredth of a second, so a single execution of <code>my_sqrt()</code> takes 1/10000 second, or about 100 microseconds.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let's repeat this with 10,000 values, and let's pick them at random.  The Python <code>random.random()</code> function returns a random value between 0.0 and 1.0:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">Timer</span> <span class="k">import</span> <span class="n">Timer</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000000</span>
+        <span class="n">assertEquals</span><span class="p">(</span><span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0.04520791198592633
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Within a second, we have now tested 10,000 random values, and each time, the square root was actually computed correctly.  We can repeat this test with every single change to <code>my_sqrt()</code>, each time reinforcing our confidence that <code>my_sqrt()</code> works as it should.  Note, though, that while a random function is <em>unbiased</em> in producing random values, it is unlikely to generate special values that drastically alter program behavior.  We will discuss this later below.</p>
+
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Run-Time-Verification">Run-Time Verification<a class="anchor-link" href="#Run-Time-Verification">&#182;</a></h2><p>Instead of writing and running tests for <code>my_aqrt()</code>, we can also go and <em>integrate the check right into the implementation.</em>  This way, <em>each and every</em> invocation of <code>my_sqrt()</code> will be automatically checked.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Such an <em>automatic run-time check</em> is very easy to implement:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">my_sqrt_checked</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">assertEquals</span><span class="p">(</span><span class="n">root</span> <span class="o">*</span> <span class="n">root</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">root</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now, whenever we compute a root with <code>my_sqrt_checked()</code>$\dots$</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_sqrt_checked</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[20]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>1.414213562373095</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>we already know that the result is correct, and will so for every new successful computation.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Automatic run-time checks, as above, assume two things, though:</p>
+<ul>
+<li><p>One has to be able to <em>formulate</em> such run-time checks.  Having concrete values to check against should always be possible, but formulating desired properties in an abstract fashion can be very complex.  In practice, you need to decide which properties are most crucial, and design appropriate checks for them.  Plus, run-time checks may depend not only on local properties, but on several properties of the program state, whcih all have to be identified.</p>
+</li>
+<li><p>One has to be able to <em>afford</em> such run-time checks.  In the case of <code>my_sqrt()</code>, the check is not very expensive; but if we have to check, say, a large data structure even after a simple operation, the cost of the check may soon be prohibitive.  In practice, run-time checks will typically be disabled during production, trading reliability for efficiency.  On the other hand, a comprehensive suite of run-time checks is a great way to find errors and quickly debug them; you need to decide how many such capabilities you would still want during production.</p>
+</li>
+</ul>
+
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="System-Input-vs-Function-Input">System Input vs Function Input<a class="anchor-link" href="#System-Input-vs-Function-Input">&#182;</a></h2>
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>At this point, we may make <code>my_sqrt()</code> available to other programmers, who may then embed it in their code.  At some point, it will have to process input that comes from <em>third parties</em>, i.e. is not under control by the programmer.  Let us simulate this <em>system input</em> by assuming a function <code>exposed_sqrt()</code> whose input is a string under third-party control:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exposed_sqrt</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The root of&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can easily invoke <code>exposed_sqrt()</code> with some system input:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;4&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The root of 4 is 2.0
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>What's the problem?  Well, the problem is that we do not check external inputs for validity.  Try invoking <code>exposed_sqrt(-1)</code>, for instance.  What happens?</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Indeed, if you invoke <code>my_sqrt()</code> with a negative number, it enters an infinite loop.  For technical reasons, we cannot have infinite loops in this chapter (unless we'd want the code to run forever); so we use a special <code>with ExpectTimeOut(1)</code> construct to interrupt execution after one second.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ExpectError</span> <span class="k">import</span> <span class="n">ExpectTimeout</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The root of&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-24-51d1d547b921&gt;&#34;, line 3, in &lt;module&gt;
+    print(&#39;The root of&#39;, x, &#39;is&#39;, my_sqrt(x))
+  File &#34;&lt;ipython-input-2-40bf7650432c&gt;&#34;, line 6, in my_sqrt
+    approx = guess
+  File &#34;&lt;ipython-input-2-40bf7650432c&gt;&#34;, line 6, in my_sqrt
+    approx = guess
+  File &#34;&lt;string&gt;&#34;, line 14, in check_time
+TimeoutError
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Consequently, when accepting external input, we must ensure that it is properly validated.  We may write, for instance:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exposed_sqrt</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Illegal Input&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The root of&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>and then we can be sure that <code>my_sqrt()</code> is only invoked according to its specification.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;-1&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Illegal Input
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>But wait!  What happens if <code>exposed_sqrt()</code> is not invoked with a number?  Then we would try to convert a non-number string, which would also result in a runtime error:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ExpectError</span> <span class="k">import</span> <span class="n">ExpectError</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;xyzzy&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-28-15370172e011&gt;&#34;, line 2, in &lt;module&gt;
+    exposed_sqrt(&#34;xyzzy&#34;)
+  File &#34;&lt;ipython-input-25-d67197e636a7&gt;&#34;, line 2, in exposed_sqrt
+    x = int(s)
+ValueError: invalid literal for int() with base 10: &#39;xyzzy&#39;
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here's a version which also checks for bad inputs:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exposed_sqrt</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Illegal Input&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Illegal Number&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The root of&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;4&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The root of 4 is 2.0
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;-1&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Illegal Number
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;xyzzy&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Illegal Input
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We have now seen that at the system level, the program must be able to handle any kind of input gracefully without ever entering an uncontrolled state.  This, of course, is a burden for programmers, who must struggle to make their programs robust for all circumstances.  This burden, however, becomes a <em>benefit</em> when generating software tests: If a program can handle any kind of input (possibly with well-defined error messages), we can also <em>send it any kind of input</em>.  When calling a function with generated values, though, we have to <em>know</em> its precise preconditions.</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="The-Limits-of-Testing">The Limits of Testing<a class="anchor-link" href="#The-Limits-of-Testing">&#182;</a></h2><p>Despite best efforts in testing, keep in mind that you are always checking functionality for a <em>finite</em> set of inputs.  Thus, there may always be <em>untested</em> inputs for which the function may still fail.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the case of <code>my_sqrt()</code>, for instance, computing $\sqrt{0}$ results in a division by zero:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-33-24ede1f53910&gt;&#34;, line 2, in &lt;module&gt;
+    root = my_sqrt(0)
+  File &#34;&lt;ipython-input-2-40bf7650432c&gt;&#34;, line 7, in my_sqrt
+    guess = (approx + x / approx) / 2
+ZeroDivisionError: float division by zero
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In our tests so far, we have not checked this condition, meaning that a program which builds on $\sqrt{0} = 0$ will surprisingly fail.  But even if we had set up our random generator to produce inputs in the range of 0–1000000 rather than 1–1000000, the chances of it producing a zero value by chance would still have been one in a million.  If the behavior of a function is radically different for few individual values, plain random testign has few chances to produce these.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can, of course, fix the function accordingly, documenting the accepted values for <code>x</code> and handling the special case <code>x = 0</code>:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">my_sqrt_fixed</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">x</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>With this, we can now correctly compute $\sqrt{0} = 0$:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">my_sqrt_fixed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Illegal values now result in an exception:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">my_sqrt_fixed</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-36-55b1caf1586a&gt;&#34;, line 2, in &lt;module&gt;
+    root = my_sqrt_fixed(-1)
+  File &#34;&lt;ipython-input-34-f3e21e80ddfb&gt;&#34;, line 2, in my_sqrt_fixed
+    assert 0 &lt;= x
+AssertionError
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Still, we have to remember that while extensive testing may give us a high confidence into the correctness of a program, it does not provide a guarantee that all future executions will be correct.  Even run-time verification, which checks every result, can only guarantee that <em>if</em> it produces a result, the result will be correct; but there is no guarantee that future executions may not lead to a failing check.  As I am writing this, I <em>believe</em> that <code>my_sqrt_fixed(x)</code> is a correct implementation of $\sqrt{x}$, but I cannot be 100% certain.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>With Newton's method, we may still have a good chance of actually <em>proving</em> that the implementation is correct: The implementation is simple, the math is well-understood.  Alas, this is only the case for few domains.  If we do not want to go into full-fledged correctness proofs, our best chance with testing is to</p>
+<ol>
+<li>Test the program on several, well-chosen inputs; and</li>
+<li>Check results extensively and automatically.</li>
+</ol>
+<p>This is what we do in the remainder of this course: Devise techniques that help us to thoroughly test a program, as well as techniques that help us checking its state for correctness.  Enjoy!</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<li>The aim of testing is to execute a program such that we find bugs.</li>
+<li>Test execution, test generation, and checking test results can be automated.</li>
+<li>Testing is <em>incomplete</em>; it provides no 100% guarantee that the code is free of errors.</li>
+</ul>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2>
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Shellsort">Shellsort<a class="anchor-link" href="#Shellsort">&#182;</a></h3><p>Consider the following implementation of a shellsort function.  \todo{Expand it}</p>
+
+</div>
+</div>
+</div></section></section>
+</div>
+</div>
+
+<script>
+
+require(
+    {
+      // it makes sense to wait a little bit when you are loading
+      // reveal from a cdn in a slow connection environment
+      waitSeconds: 15
+    },
+    [
+      "reveal.js/lib/js/head.min.js",
+      "reveal.js/js/reveal.js"
+    ],
+
+    function(head, Reveal){
+
+        // Full list of configuration options available here: https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: true,
+
+            transition: "slide",
+
+            // Optional libraries used to extend on reveal.js
+            dependencies: [
+                { src: "reveal.js/lib/js/classList.js",
+                  condition: function() { return !document.body.classList; } },
+                { src: "reveal.js/plugin/notes/notes.js",
+                  async: true,
+                  condition: function() { return !!document.body.classList; } }
+            ]
+        });
+
+        var update = function(event){
+          if(MathJax.Hub.getAllJax(Reveal.getCurrentSlide())){
+            MathJax.Hub.Rerender(Reveal.getCurrentSlide());
+          }
+        };
+
+        Reveal.addEventListener('slidechanged', update);
+
+        function setScrollingSlide() {
+            var scroll = false
+            if (scroll === true) {
+              var h = $('.reveal').height() * 0.95;
+              $('section.present').find('section')
+                .filter(function() {
+                  return $(this).height() > h;
+                })
+                .css('height', 'calc(95vh)')
+                .css('overflow-y', 'scroll')
+                .css('margin-top', '20px');
+            }
+        }
+
+        // check and set the scrolling slide every time the slide change
+        Reveal.addEventListener('slidechanged', setScrollingSlide);
+
+    }
+
+);
+</script>
+
+</body>
+
 
 </html>

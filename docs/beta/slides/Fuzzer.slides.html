@@ -1,17 +1,64 @@
 
-<!-- A html document -->
-<!-- 
-with standard nbconvert css layout
-with standard nbconvert input/output content
-standard html tag wrapping
-with mathjax loaded
-with jupyter wigets
- caption and label elements according to ipub meta tags  
-with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" /><title>Generating Software Tests</title>
+
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="chrome=1" />
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<title>Fuzzer slides</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- General and theme style sheets -->
+<link rel="stylesheet" href="reveal.js/css/reveal.css">
+<link rel="stylesheet" href="reveal.js/css/theme/simple.css" id="theme">
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+}
+
+</script>
+
+<!--[if lt IE 9]>
+<script src="reveal.js/lib/js/html5shiv.js"></script>
+<![endif]-->
+
+<!-- Loading the mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+<!-- Get Font-awesome from cdn -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.css">
 
 <style type="text/css">
     /*!
@@ -11685,7 +11732,7 @@ ul.typeahead-list > li > a {
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
     </style>
 <style type="text/css">
-
+    
 /* Temporary definitions which will become obsolete with Notebook release 5.0 */
 .ansi-black-fg { color: #3E424D; }
 .ansi-black-bg { background-color: #3E424D; }
@@ -11724,354 +11771,1822 @@ ul.typeahead-list > li > a {
 
     </style>
 
+
 <style type="text/css">
 /* Overrides of notebook CSS for static HTML export */
-body {
-  overflow: visible;
-  padding: 8px;
+.reveal {
+  font-size: 160%;
 }
-
-div#notebook {
-  overflow: visible;
-  border-top: none;
-}@media print {
-  div.cell {
-    display: block;
-    page-break-inside: avoid;
-  }
-  div.output_wrapper {
-    display: block;
-    page-break-inside: avoid;
-  }
-  div.output {
-    display: block;
-    page-break-inside: avoid;
-  }
+.reveal pre {
+  width: inherit;
+  padding: 0.4em;
+  margin: 0px;
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+}
+.reveal pre code {
+  padding: 0px;
+}
+.reveal section img {
+  border: 0px solid black;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+}
+.reveal i {
+  font-style: normal;
+  font-family: FontAwesome;
+  font-size: 2em;
+}
+.reveal .slides {
+  text-align: left;
+}
+.reveal.fade {
+  opacity: 1;
+}
+.reveal .progress {
+  position: static;
+}
+.reveal .controls .navigate-left,
+.reveal .controls .navigate-left.enabled {
+  border-right-color: #727272;
+}
+.reveal .controls .navigate-left.enabled:hover,
+.reveal .controls .navigate-left.enabled.enabled:hover {
+  border-right-color: #dfdfdf;
+}
+.reveal .controls .navigate-right,
+.reveal .controls .navigate-right.enabled {
+  border-left-color: #727272;
+}
+.reveal .controls .navigate-right.enabled:hover,
+.reveal .controls .navigate-right.enabled.enabled:hover {
+  border-left-color: #dfdfdf;
+}
+.reveal .controls .navigate-up,
+.reveal .controls .navigate-up.enabled {
+  border-bottom-color: #727272;
+}
+.reveal .controls .navigate-up.enabled:hover,
+.reveal .controls .navigate-up.enabled.enabled:hover {
+  border-bottom-color: #dfdfdf;
+}
+.reveal .controls .navigate-down,
+.reveal .controls .navigate-down.enabled {
+  border-top-color: #727272;
+}
+.reveal .controls .navigate-down.enabled:hover,
+.reveal .controls .navigate-down.enabled.enabled:hover {
+  border-top-color: #dfdfdf;
+}
+.reveal .progress span {
+  background: #727272;
+}
+div.input_area {
+  padding: 0.06em;
+}
+div.code_cell {
+  background-color: transparent;
+}
+div.prompt {
+  width: 11ex;
+  padding: 0.4em;
+  margin: 0px;
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+  text-align: right;
+}
+div.output_area pre {
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+}
+div.output_prompt {
+  /* 5px right shift to account for margin in parent container */
+  margin: 5px 5px 0 0;
+}
+div.text_cell.rendered .rendered_html {
+  /* The H1 height seems miscalculated, we are just hidding the scrollbar */
+  overflow-y: hidden;
+}
+a.anchor-link {
+  /* There is still an anchor, we are only hidding it */
+  display: none;
+}
+.rendered_html p {
+  text-align: inherit;
+}
+::-webkit-scrollbar
+{
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar *
+{
+  background:transparent;
+}
+::-webkit-scrollbar-thumb
+{
+  background: #727272 !important;
 }
 </style>
 
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
-<link rel="stylesheet" href="beta/html/custom.css">
+<link rel="stylesheet" href="custom.css">
 
-<!-- Load mathjax -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
-<!-- MathJax configuration -->
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-    tex2jax: {
-        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-        processEscapes: true,
-        processEnvironments: true
-    },
-    // Center justify equations in code and markdown cells. Elsewhere
-    // we use CSS to left justify single line equations in code cells.
-    displayAlign: 'center',
-    "HTML-CSS": {
-        styles: {'.MathJax_Display': {"margin": 0}},
-        linebreaks: { automatic: true }
-    }
-});
-</script>
-<!-- End of mathjax configuration --><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+</head>
 
-<!--[if IE lte 8]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-<style type="text/css">
-.ipyfigure { display: -ms-flex; display: -webkit-flex; display: flex;}
-.ipyfigure>div { flex:1; }
-.ipytable { display: -ms-flex; display: -webkit-flex; display: flex;}
-.ipytable>div { flex:1; }
+<body>
 
-</style>
 
-<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
-
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-
-<meta property="og:url" content="https://www.fuzzingbook.org/beta/" />
-<meta property="og:type" content="article" />
-<meta property="og:title" content="Generating Software Tests" />
-<meta property="og:description" content="Welcome to &quot;Generating Software Tests&quot;! Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by automating software testing, specifically by generating tests automatically.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code. " />
-<meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" /></head>
- <body>
-
-    <script>
-    function reveal() {
-        var solutions = document.getElementsByClassName("solution");
-        var i;
-        for (i = 0; i < solutions.length; i++)
-            if (solutions[i].style.display === "none") {
-                solutions[i].style.display = "block";
-            } else {
-                solutions[i].style.display = "none";
-        }
-    }
-    </script>
-    
-<nav>
-<div id="cssmenu">
-  <ul>
-     <li class="has-sub"><a href="https://www.fuzzingbook.org/beta/"><i class="fa fa-fw fa-bars"></i> Generating Software Tests</a>
-        <ol>
-           <li><a href="https://www.fuzzingbook.org/beta" class="this_page"><i class="fa fa-fw fa-home"></i> About this book</a></li>
-<li><a href="beta/html/Intro_Testing.html">Introduction to Software Testing</a></li>
-<li><a href="beta/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
-<li><a href="beta/html/Coverage.html">Getting Coverage</a></li>
-<li><a href="beta/html/MutationFuzzer.html">Mutation-Based Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="beta/html/Grammars.html">Fuzzing with Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="beta/html/GrammarFuzzer.html">Efficient Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="beta/html/GrammarCoverageFuzzer.html">Grammar Coverage&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-
-        </ol>
-     </li>
-     <li class="has-sub"><a href="https://www.fuzzingbook.org/beta"><i class="fa fa-fw fa-list-ul"></i> About this Book</a>
-        <ul>
-           <li><a href="#A-Textbook-for-Paper,-Screen,-and-Keyboard">A Textbook for Paper, Screen, and Keyboard</a></li>
-<li><a href="#Who-this-Book-is-for">Who this Book is for</a></li>
-<li><a href="#News">News</a></li>
-<li><a href="#About-the-Authors">About the Authors</a></li>
-<li><a href="#Frequently-Asked-Questions">Frequently Asked Questions</a></li>
-
-        </ul>
-     </li>
-     
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-cube"></i> Resources</a>
-     <ul>
-     <li><a href="https://github.com/uds-se/fuzzingbook/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
-     </ul>
-     </li>
-
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-comments"></i> Share</a>
-        <ul>
-            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22About%20this%20Book%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta" target=_blank><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
-            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta" target=_blank><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
-            <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
-        </ul>
-     </li>
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-question-circle"></i> Help</a>
-        <ul>
-          <li><a href="https://docs.python.org/3/tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Python Tutorial</a>
-          <li><a href="https://www.dataquest.io/blog/jupyter-notebook-tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Jupyter Notebook Tutorial</a>
-          <li><a href="https://github.com/uds-se/fuzzingbook/issues/" target="_blank"><i class="fa fa-fw fa-commenting"></i> Report an Issue</a></li>
-        </ul>
-     </li>
-  </ul>
+<div class="reveal">
+<div class="slides">
+<section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
-</nav>
-
-    <article>
-   <div tabindex="-1" id="notebook" class="border-box-sizing">
-     <div class="container" id="notebook-container"><section><h1>Generating Software Tests</h1><h3>Breaking Software for Fun and Profit</h3><b>by Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler</b></section>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="About-this-Book">About this Book<a class="anchor-link" href="#About-this-Book">&#182;</a></h1><p><strong>Welcome to "Generating Software Tests"!</strong> 
-Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by <em>automating</em> software testing, specifically by <em>generating tests automatically</em>.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code.</p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Fuzzing:-Breaking-Things-with-Random-Inputs">Fuzzing: Breaking Things with Random Inputs<a class="anchor-link" href="#Fuzzing:-Breaking-Things-with-Random-Inputs">&#182;</a></h1><p>In this chapter, we'll start with one of the simplest test generation techniques.  The key idea of random text generation, also known as "fuzzing", is to feed a <em>string of random characters</em> into a program in the hope to uncover failures.</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Textbook-for-Paper,-Screen,-and-Keyboard">A Textbook for Paper, Screen, and Keyboard<a class="anchor-link" href="#A-Textbook-for-Paper,-Screen,-and-Keyboard">&#182;</a></h2><p>You can use this book in three ways:</p>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="A-Testing-Assignment">A Testing Assignment<a class="anchor-link" href="#A-Testing-Assignment">&#182;</a></h2><p>Fuzzing was conceived by Bart Miller in 1989 as a programming exercise for his students at the University of Wisconsin-Madison.  The <a href="http://pages.cs.wisc.edu/~bart/fuzz/CS736-Projects-f1988.pdf">assignment</a> read</p>
+<blockquote><p>The goal of this project is to evaluate the robustness of various UNIX utility programs, given an unpredictable input stream. [...] First, you will build a <em>fuzz generator</em>. This is a program that will output a random character stream. Second, you will take the fuzz generator and use it to attack as many UNIX utilities as possible, with the goal of trying to break them.</p>
+</blockquote>
+<p>This assignment captures the essence of fuzzing: <em>Create random inputs, and see if they break things.</em>  Just let it run long enough and you'll see.</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="A-Simple-Fuzzer">A Simple Fuzzer<a class="anchor-link" href="#A-Simple-Fuzzer">&#182;</a></h2><p>Let us try to fulfill this assignment and build a fuzz generator.  The idea is to produce random characters, adding them to a buffer string variable (<code>out</code>), and finally returning the string.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This implementation uses the following Python features and functions:</p>
 <ul>
-<li><p>You can <strong>read chapters in your browser</strong>.  Check out the list of chapters in the menu above, or start right away with the 
-<a href="https://www.fuzzingbook.org/html/Intro_Testing.html">introduction to testing</a> or the
-<a href="https://www.fuzzingbook.org/html/Fuzzer.html">introduction to fuzzing</a>.  All code is available for download.</p>
-</li>
-<li><p>You can <strong>interact with chapters as Jupyter Notebooks</strong> (beta).  This allows you edit and extend the code, experimenting <em>live in your browser.</em>  Just click on "Resources → Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a></p>
-</li>
-<li><p>You can <strong>present chapters as slides</strong> (beta).  This allows for presenting the material in lectures.  Just click on "Resources → View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a></p>
-</li>
+<li><code>random.randrange(start, end)</code> – return a random number $[$ <code>start</code>, <code>end</code> $)$</li>
+<li><code>range(start, end)</code> – create a list with integers from <code>start</code> to <code>end</code>.  Typically used in iterations.</li>
+<li><code>for elem in list: body</code> – execute <code>body</code> in a loop with <code>elem</code> taking each value from <code>list</code>.</li>
+<li><code>for i in range(start, end): body</code> – execute <code>body</code> in a loop with <code>i</code> from <code>start</code> to <code>end</code> $-$ 1.</li>
+<li><code>chr(n)</code> – return a character with ASCII code <code>n</code></li>
 </ul>
-</div>
-</div>
-</div>
-</div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Who-this-Book-is-for">Who this Book is for<a class="anchor-link" href="#Who-this-Book-is-for">&#182;</a></h2><p>This work is designed as a <em>textbook</em> for a course in software testing; as <em>supplementary material</em> in a software testing or software engineering course; and as a <em>resource for software developers</em>. We cover random fuzzing, mutation-based fuzzing, grammar-based test generation, symbolic testing, and much more, illustrating all techniques with code examples that you can try out yourself.</p>
-</div>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fuzzer</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">char_start</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">char_range</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A string of up to `max_length` characters </span>
+<span class="sd">       in the range [`char_start`, `char_start` + `char_range`]&quot;&quot;&quot;</span>
+    <span class="n">string_length</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">string_length</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="n">char_start</span><span class="p">,</span> <span class="n">char_start</span> <span class="o">+</span> <span class="n">char_range</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="News">News<a class="anchor-link" href="#News">&#182;</a></h2><p>This book is <em>work in progress,</em> with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.</p>
-<p><a class="twitter-timeline" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>With its default arguments, the <code>fuzzer()</code> function returns a string of random characters:</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="About-the-Authors">About the Authors<a class="anchor-link" href="#About-the-Authors">&#182;</a></h2><p>This book is written by <em>Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler</em>.  All of us are long-standing experts in software testing and test generation; and we have written or contributed to some of the most important test generators and fuzzers on the planet.  As an example, if you are reading this in a Firefox, Chrome, or Edge Web browser, you can do so safely partly because of us, as <em>the very techniques listed in this book have found more than 2,600 bugs in their JavaScript interpreters so far.</em>  We are happy to share our expertise and making it accessible to the public.</p>
-</div>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span><span class="p">()</span>
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[5]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;0(!#4&lt;3&amp;4)03*%640&lt;1#==(8+ =65:7=459+26\&#39;=/&gt;*!74)-&#34;?8.%2#1!;5557:7\&#39;-/39;/)#/9&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Frequently-Asked-Questions">Frequently Asked Questions<a class="anchor-link" href="#Frequently-Asked-Questions">&#182;</a></h2></div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now imagine that this string was the input to a program expecting a specific input format – say, a comma-separated list of values, or an e-mail address.  Would the program be able to process such an input without any problems?</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Which-content-will-be-coming-up?">Which content will be coming up?<a class="anchor-link" href="#Which-content-will-be-coming-up?">&#182;</a></h3><p>The contents of this book will include topics such as:</p>
-<ol>
-<li>Introduction to Testing</li>
-<li>Basic Fuzzing</li>
-<li>Coverage</li>
-<li>Mutation-Based Fuzzing</li>
-<li>Grammar-Based Fuzzing</li>
-<li>Fuzzing Function Calls</li>
-<li>Fuzzing User Interfaces</li>
-<li>Parsing and Mutating Inputs</li>
-<li>Search-Based Testing</li>
-<li>Symbolic Testing</li>
-<li>Mining Grammars</li>
-<li>Probabilistic Testing</li>
-<li>Carving Unit Tests</li>
-<li>Fuzzing and Invariants</li>
-<li>Protection and Repair</li>
-</ol>
-<p>See the table of contents in the menu above for those chapters that are already done.</p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If the above fuzzing input already is intriguing, consider that fuzzing can easily be set up to produce other kinds of input.  For instance, we can also have <code>fuzzer()</code> produce a series of uppercase letters.  We use <code>ord(c)</code> to return the ASCII code of the character <code>c</code>.</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Why-does-it-take-so-long-to-start-an-interactive-notebook?">Why does it take so long to start an interactive notebook?<a class="anchor-link" href="#Why-does-it-take-so-long-to-start-an-interactive-notebook?">&#182;</a></h3><p>We use the <a href="https://mybinder.org">binder</a> service, which runs notebooks on their own servers.  Starting Jupyter through binder normally takes about 30 seconds. If, however, you are the first to invoke binder after a book update, binder recreates its environment, which can take a few minutes.  Note, though, that binder is officially in beta and we do not have control over binder.</p>
-</div>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">),</span> <span class="mi">26</span><span class="p">)</span>
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[6]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;scvhpzgvfhnrojipujqdzwzhohlwveabmmgebxrgsfphewhcohzztgtgmvxhrtkqcqsnltrvyahdnjppyprzibityfmzxqnpvyejjjgrrhfcfqtccqyrukdmxugnumoeghlgldjouruigrtdvnhoytzhzppdwaovaddpwyhoubcuvwtotblkyrkwblimmbusivchzltvsaizxrubghadjrzidwaafeqkagfltxdfnhayhjhaktzignrkcfhcsiugijidslokcmzyxtgjvdkozqhaeyhcqyxamviblvyomcemsasmimxrxrfeagvqyrhpmaksnmvwsqyjdyrusfqrpzzxgvwbdamasxplztulfkkshoyktcepzhauwbtssuiipxgwyflnecnojqowqadhdfmbwyqxjocypgebrstuntjoryiksoawnmchdnnlrovzwvgddvfzpckplajptvfdzmopntydlwefscbcdrcplijnkabgajvfbidisdnphkwbjstaanmfmeoheheghcdybpyfbunhnyyxkbxddkmwlgzewxepkwlllhundtrogexokpdkprdxbxdaosztrthgyctoazsozvdqsexqypfphohqgtetinhwtfgtmffydrpidpzwmwpdnalxjixssappxtiofprduxovkebgzhnwaozpshurpdrgfzvphzftdqvcpniajswuimakebbvkqzxuphbnrlymejxarpsthcpclnwuehmuriaovtozuifrrflkbvihcmoojnrnukoansvwjqiqqtdumbdzmbcwtyjeeyfqgqpjydtkhztluurqjgquojzxcercidqkxivftdflwncsjgsparsbyugbjfmmzprmgembwhybnblodxqukezwuinixtfskzaolxnourbujwbxhxzbnyhnghgyiuybnussfjgydsmpgljdaiulkmjbkxptmyggspug&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="I-have-a-comment-or-a-suggestion.--What-do-I-do?">I have a comment or a suggestion.  What do I do?<a class="anchor-link" href="#I-have-a-comment-or-a-suggestion.--What-do-I-do?">&#182;</a></h3><p>Report an issue on the <a href="https://github.com/uds-se/fuzzingbook/issues">development page</a>.</p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Assume a program expects an identifier as its input.  Would it expect such a long identifier?</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="I-have-reported-an-issue-two-weeks-ago.--When-will-it-be-addressed?">I have reported an issue two weeks ago.  When will it be addressed?<a class="anchor-link" href="#I-have-reported-an-issue-two-weeks-ago.--When-will-it-be-addressed?">&#182;</a></h3><p>We prioritize issues as follows:</p>
-<ol>
-<li>Bugs in code published on fuzzingbook.org</li>
-<li>Bugs in text published on fuzzingbook.org</li>
-<li>Writing missing chapters</li>
-<li>Issues in yet unpublished code or text</li>
-<li>Issues related to development or construction</li>
-<li>Things marked as "beta"</li>
-<li>Everything else</li>
-</ol>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Fuzzing-External-Programs">Fuzzing External Programs<a class="anchor-link" href="#Fuzzing-External-Programs">&#182;</a></h2><p>Let us see what happens if we actually invoke an external program with fuzzed inputs.  To this end, let us proceed in two steps.  First, we create an <em>input file</em> with fuzzed test data; then we feed this input file into a program of choice.</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="How-can-I-solve-problems-myself?">How can I solve problems myself?<a class="anchor-link" href="#How-can-I-solve-problems-myself?">&#182;</a></h3><p>We're glad you ask that.  The <a href="https://github.com/uds-se/fuzzingbook/">development page</a> has all sources and some supplementary material.  Pull requests that fix issues are very welcome.</p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Creating-Input-Files">Creating Input Files<a class="anchor-link" href="#Creating-Input-Files">&#182;</a></h3><p>Let us obtain a temporary file name such that we do not clutter the file system.</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="How-can-I-contribute?">How can I contribute?<a class="anchor-link" href="#How-can-I-contribute?">&#182;</a></h3><p>Again, we're glad you're here!  See our <a href="http://www.fuzzingbook.org/Guide_for_Authors.html">Guide for Authors</a> for instructions on coding and writing.</p>
-</div>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">tempfile</span>
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Do-you-provide-PDFs-of-your-material?">Do you provide PDFs of your material?<a class="anchor-link" href="#Do-you-provide-PDFs-of-your-material?">&#182;</a></h3><p>At this point, we do not provide support for PDF versions.  We are working on producing PDF and paper versions once the book is complete.</p>
-</div>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">basename</span> <span class="o">=</span> <span class="s2">&quot;input.txt&quot;</span>
+<span class="n">tempdir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+<span class="n">FILE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tempdir</span><span class="p">,</span> <span class="n">basename</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">FILE</span><span class="p">)</span>
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="How-do-I-cite-your-work?">How do I cite your work?<a class="anchor-link" href="#How-do-I-cite-your-work?">&#182;</a></h3><p>Thanks for referring to our work!  Once the book is complete, you will be able to cite it in the traditional way.  In the meantime, just click on the "cite" button at the bottom of the Web page for each chapter to get a citation entry.</p>
-</div>
-</div>
-</div>
-</div>
+<div class="output_wrapper">
+<div class="output">
 
-        
-<p class="imprint">
-<img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
-This work is licensed under a
-<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
-&bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/index.ipynb" target=_blank)>Last change: 2018-09-13 16:14:33+02:00</a> &bull; 
-<a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
-<a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
-</p>
 
-<script>
-function revealCitation() {
-    var c = document.getElementById("citation");
-    c.style.display = "block";
-}
-</script>
+<div class="output_area">
 
-<div id="citation" class="citation" style="display: none;">
-<a name="citation"></a>
-<h2>How to Cite this Work</h2>
-<p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta">Generating Software Tests</a>".  Retrieved 2018-09-13 16:14:33+02:00.
-</p>
-<pre>
-@incollection{fuzzingbook2018:index,
-    author = {Andreas Zeller and Rahul Gopinath and Marcel Böhme and Gordon Fraser and Christian Holler},
-    booktitle = {Generating Software Tests},
-    title = {Generating Software Tests},
-    year = {2018},
-    publisher = {Saarland University},
-    howpublished = {\url{https://www.fuzzingbook.org/beta/}},
-    note = {Retrieved 2018-09-13 16:14:33+02:00},
-    url = {https://www.fuzzingbook.org/beta/},
-    urldate = {2018-09-13 16:14:33+02:00}
-}
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt
 </pre>
 </div>
+</div>
 
-      </div>
-    </div>
-    </article>
+</div>
+</div>
 
- </body>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can now open this file for writing.  The Python <code>open()</code> function opens a file into which we can then write arbitrary contents.  It is commonly used in conjunction with the <code>with</code> statement, which ensures that the file is closed as soon as it is no longer needed.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can verify that the file was actually created by reading its contents:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">contents</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span>
+<span class="k">assert</span><span class="p">(</span><span class="n">contents</span> <span class="o">==</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>/)=04-?: &lt;&#34;?*?5658&gt;6!%&lt;!8/
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Invoking-External-Programs">Invoking External Programs<a class="anchor-link" href="#Invoking-External-Programs">&#182;</a></h3><p>Now that we have an input file, we can invoke a program on it.  For the fun of it, let us test the <code>bc</code> calculator program, which takes an arithmetic expression and evaluates it.</p>
+<p>To invoke <code>bc</code>, let us use the Python <code>subprocess</code> module.  This is how this works:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">program</span> <span class="o">=</span> <span class="s2">&quot;bc&quot;</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;2 + 2</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">program</span><span class="p">,</span> <span class="n">FILE</span><span class="p">],</span>
+                        <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+                        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                        <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>From the <code>result</code>, we can check the program output, which in this case consists of a set of typesetting commands:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[13]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;4\n&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can also check the status. A value of 0 indicates that the program terminated correctly.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">returncode</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[14]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Any error messages would be available in <code>results.stderr</code>:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[15]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Instead of <code>bc</code>, you can actually put in any program you like.  Be aware, though, that if your program is able to change or even damage your system, there's quite a risk that the fuzzed input contains data or commands that do precisely this.</p>
+<p>Just for the fun of it, imagine you would test a file removal program.  What is the chance of the fuzzer producing a valid file name?  (Note that <code>.</code> and <code>/</code> may be  valid directory names already.)</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Long-Running-Fuzzing">Long-Running Fuzzing<a class="anchor-link" href="#Long-Running-Fuzzing">&#182;</a></h3><p>Let us now feed a large number of inputs into our tested program, to see whether it might crash on some.  We store all results in the <code>runs</code> variable as pairs of input data and the actual result. (Note: running this may take a while.)</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">program</span> <span class="o">=</span> <span class="s2">&quot;bc&quot;</span>
+
+<span class="n">runs</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">FILE</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="n">program</span><span class="p">,</span> <span class="n">FILE</span><span class="p">],</span>
+                            <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+                            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                            <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">runs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can now query <code>runs</code> for some statistics.  For instance, we can query how many runs actually passed -- that is, there were no error messages:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="n">runs</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[17]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>5</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Most inputs apparently are invalid – not a big surprise, as it is unlikely that a random input contains a valid arithmetic expression.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us take a look at the first error message:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">errors</span> <span class="o">=</span> <span class="p">[(</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="n">runs</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
+<span class="p">(</span><span class="n">first_data</span><span class="p">,</span> <span class="n">first_result</span><span class="p">)</span> <span class="o">=</span> <span class="n">errors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">first_data</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">first_result</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>&#39;%,%\&#39;:,0\&#39;918*143:*-2&amp;35$06!((;&lt;61&lt;:6%!?6+-))/-;65-2.;&#34;8&gt;6-87 7:9)!+?&#34;&amp;)6&#34;71*#.-+&lt;2&amp;:&#34;*(!;-/:5&#34;2%&#34;1!5&#39;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: illegal character: &#39;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: illegal character: :
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: illegal character: &#39;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: illegal character: :
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: illegal character: :
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: illegal character: ?
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpjcfmm6kr/input.txt 1: illegal character: :
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Are there any runs with messages other than <code>illegal character</code> or <code>parse error</code>?  (Say, something like <code>crash</code> or <code>you found a fatal bug</code>?)  Not very many:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span> <span class="k">for</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="n">runs</span> <span class="k">if</span> 
+ <span class="n">result</span><span class="o">.</span><span class="n">stderr</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> 
+ <span class="ow">and</span> <span class="s2">&quot;illegal character&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span>
+ <span class="ow">and</span> <span class="s2">&quot;parse error&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[19]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;EOF encountered in a comment.\n&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Maybe a crash would be indicated by <code>bc</code> just crashing.  Unfortunately, the return code is never nonzero:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="n">runs</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[20]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>How about we let the above <code>bc</code> test run for some more?  While it is running, let us take a look on how the state of the art was in 1989.</p>
+
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Bugs-Fuzzers-Find">Bugs Fuzzers Find<a class="anchor-link" href="#Bugs-Fuzzers-Find">&#182;</a></h2><p>When Miller and his students ran their first fuzzers in 1989, they found an alarming result: About <strong>a third of the UNIX utilities</strong> they fuzzed had issues – they crashed, hung, or otherwise failed when confronted with fuzzing input \cite{Miller1990}.  This also included the <code>bc</code> program, above.  (Apparently, the bugs have now been fixed!)</p>
+<p>Considering that many of these UNIX utilities were used in scripts that would also process network input, this was an alarming result.  Programmers quickly built and ran their own fuzzers, rushed to fix the reported errors, and learned not to trust external inputs anymore.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>What kind of problems did Miller's fuzzing experiment find?  It turns out that the mistakes programmers made in 1990 are still the same mistakes being made today.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Buffer-Overflows">Buffer Overflows<a class="anchor-link" href="#Buffer-Overflows">&#182;</a></h3><p>Many programs have built-in maximum lengths for inputs and input elements.  In languages like C, it is easy to excess these lengths without the program (or the programmer) even noticing, triggering so-called <strong>buffer overflows</strong>.  The following code, for instance, happily copies the <code>input</code> string into a <code>weekday</code> string even if <code>input</code> has more than eight characters:</p>
+<div class="highlight"><pre><span></span><span class="kt">char</span> <span class="n">weekday</span><span class="p">[</span><span class="mi">9</span><span class="p">];</span> <span class="c1">// 8 characters + trailing &#39;\0&#39; terminator</span>
+<span class="n">strcpy</span> <span class="p">(</span><span class="n">weekday</span><span class="p">,</span> <span class="n">input</span><span class="p">);</span>
+</pre></div>
+<p>Ironically, this already fails if <code>input</code> is <code>"Wednesday"</code> (9 characters); any excess characters (here, <code>'y'</code> and the following <code>'\0'</code> string terminator) are simply copied to whatever resides in memory after <code>weekday</code>, triggering arbitrary behavior; maybe some boolean character variable which would be set from <code>'n'</code> to <code>'y'</code>.  With fuzzing, it is very easy to produce arbitrary long inputs and input elements.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can easily simulate this buffer overflow behavior in a Python function:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">crash_if_too_long</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="s2">&quot;Thursday&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And yes, it quickly crashes.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ExpectError</span> <span class="k">import</span> <span class="n">ExpectError</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
+        <span class="n">crash_if_too_long</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-23-f83db3d59a06&gt;&#34;, line 5, in &lt;module&gt;
+    crash_if_too_long(s)
+  File &#34;&lt;ipython-input-21-928c2d2de976&gt;&#34;, line 4, in crash_if_too_long
+    raise ValueError
+ValueError
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Missing-Error-Checks">Missing Error Checks<a class="anchor-link" href="#Missing-Error-Checks">&#182;</a></h3><p>Many programming languages do not have exceptions, but instead have functions return special <strong>error codes</strong> in exceptional circumstances.  The C function <code>getchar()</code>, for instance, normally returns a character from the standard input; if no input is available anymore, it returns the special value <code>EOF</code> (end of file).  Now assume a programmer is scanning the input for the next character, skipping space characters:</p>
+<div class="highlight"><pre><span></span><span class="kt">char</span> <span class="nf">read_next_nonspace</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">char</span> <span class="n">lastc</span><span class="p">;</span>
+
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="n">lastc</span> <span class="o">=</span> <span class="n">getchar</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">while</span> <span class="p">(</span><span class="n">lastc</span> <span class="o">!=</span> <span class="sc">&#39; &#39;</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">lastc</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>What happens if the input ends prematurely, as would perfectly be feasible with fuzzing?  Well, <code>getchar()</code> returns <code>EOF</code>, and keeps on returning <code>EOF</code> when called again; so the code above simply enters an infinite loop.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Again, we can simulate such missing error checks.  Here's a function that will effectively hang if no space is present in the input:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">hang_if_no_space</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39; &#39;</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Using the timeout mechanism from our <a href="Intro_Testing.slides.html">Introduction to Testing</a>, we can interrupt this function after some time.  And yes, it does hang after a few fuzzing inputs.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ExpectError</span> <span class="k">import</span> <span class="n">ExpectTimeout</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
+        <span class="n">hang_if_no_space</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-26-8e40f7d62a1b&gt;&#34;, line 5, in &lt;module&gt;
+    hang_if_no_space(s)
+  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 7, in hang_if_no_space
+    i += 1
+  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 7, in hang_if_no_space
+    i += 1
+  File &#34;&lt;string&gt;&#34;, line 14, in check_time
+TimeoutError
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>with ExpectTimeout()</code> line in the above code ensures that execution of the enclosed code is interrupted after two seconds, printing the error message.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Rogue-Numbers">Rogue Numbers<a class="anchor-link" href="#Rogue-Numbers">&#182;</a></h3><p>With fuzzing, it is easy to generate <strong>uncommon value</strong> in the input, causing all kinds of interesting behavior.  Consider the following code, again in the C language, which first reads a buffer size from the input, and then allocates a buffer of the given size:</p>
+<div class="highlight"><pre><span></span><span class="kt">char</span> <span class="o">*</span><span class="nf">read_input</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">read_buffer_size</span><span class="p">();</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+    <span class="c1">// fill buffer</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">buffer</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>What happens if <code>size</code> is very large, exceeding program memory?  What happens if <code>size</code> is less than the number of characters following?  What happens if <code>size</code> is negative?  By providing a random number here, fuzzing can create all kinds of damages.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Again, we can easily simulate such rogue numbers in Python.  The function <code>collapse_if_too_large()</code> fails if the passed value (a string) is too large after having been converted to an integer.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">collapse_if_too_large</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1000</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can have <code>fuzzer()</code> create a string of digits:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">long_number</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">),</span> <span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">long_number</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>94394591889846996523697890091447449974450471606008648032510936038368
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If we feed such numbers into <code>collapse_if_too_large()</code>, it will very soon fail.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="n">collapse_if_too_large</span><span class="p">(</span><span class="n">long_number</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-29-7a1817f3dbfc&gt;&#34;, line 2, in &lt;module&gt;
+    collapse_if_too_large(long_number)
+  File &#34;&lt;ipython-input-27-2c22a83a4dca&gt;&#34;, line 3, in collapse_if_too_large
+    raise ValueError
+ValueError
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If we really wanted to allocate that much memory on a system, having it quickly fail as above actually would be the better option.  In reality, running out of memory may dramatically slow systems down, up to the point that they become totally unresponsive – and restarting is the only option.</p>
+
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="HeartBleed">HeartBleed<a class="anchor-link" href="#HeartBleed">&#182;</a></h3><p>One might argue that these are all problems of bad programming, or of bad programming languages.  But then, there's thousands of people starting to program every day, and all of them make the same mistakes again and again, even today.</p>
+<p>The somewhat better news is that fuzzing can easily detect such mistakes.  Here's a non-comprehensive list of bugs found through Miller's fuzzing approach:</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>\todo{expand}</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="A-Fuzzing-Architecture">A Fuzzing Architecture<a class="anchor-link" href="#A-Fuzzing-Architecture">&#182;</a></h2><p>Since we'd like to reuse some parts of this chapter in the following ones, let us define things in a way that are easier to reuse, and in particular easier to <em>extend</em>.  To this end, we introduce a number of <em>classes</em> that encapsulate the functionality above in a reusable way.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Runner">Runner<a class="anchor-link" href="#Runner">&#182;</a></h3><p>The first thing we introduce is the notion of a <code>Runner</code> – that is, an object whose job it is to execute some object with a given input.  A runner typically is some program or function under test, but we can also have simpler runners.</p>
+<p>Let us start with a base class for runners.  A runner essentially provides a method <code>run(input)</code> that is used to pass <code>input</code> (a string) to the runner.  <code>run()</code> returns a result; by default, this is the input.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Runner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+    
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run the consumer with the given input&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">inp</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A more interesting class is <code>PrintRunner</code>, which simply prints out everything that is given to it.  This is the default runner in many situations.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PrintRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Print the given input&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">inp</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">PrintRunner</span><span class="p">()</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;Some input&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Some input
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[33]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;Some input&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>ProgramRunner</code> class sends the input to the standard input of a program instead.  The program is specified when creating a <code>ProgramRunner</code> object.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProgramRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize.  `program` is a program spec as passed to `subprocess.run()`&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">program</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run the program with `inp` as input.  Return result of `subprocess.run()`.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">,</span>
+                        <span class="nb">input</span><span class="o">=</span><span class="n">inp</span><span class="p">,</span>
+                        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                        <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us demonstrate a <code>ProgramRunner</code> using the <code>cat</code> program – a program that copies its input to its output.
+We see that the output of <code>cat</code> is the same as its input:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cat</span> <span class="o">=</span> <span class="n">ProgramRunner</span><span class="p">(</span><span class="n">program</span><span class="o">=</span><span class="s2">&quot;cat&quot;</span><span class="p">)</span>
+<span class="n">cat</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[35]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;hello&#39;, stderr=&#39;&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Fuzzers">Fuzzers<a class="anchor-link" href="#Fuzzers">&#182;</a></h3><p>Let us now define <em>fuzzers</em> that actually feed data into a consumer.  The base class for fuzzers provides one central method <code>fuzz()</code> that creates some input.  The <code>run()</code> function then sends the fuzz() input to a consumer, returning the result; <code>runs()</code> does this for a given number (<code>trials</code>) of times.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Fuzzer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">fuzz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return fuzz input&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="n">Runner</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;Run `runner` with fuzz input&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+    
+    <span class="k">def</span> <span class="nf">runs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="o">=</span><span class="n">PrintRunner</span><span class="p">(),</span> <span class="n">trials</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run `runner` with fuzz input, `trials` times&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">)]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>By default, <code>Fuzzer</code> objects do not do much, as their <code>fuzz()</code> function is merley an abstract placeholder.  The subclass <code>RandomFuzzer</code>, however, implements the functionality of the <code>fuzzer()</code> function, above, adding an additional parameter <code>min_length</code> to specify a minimum length.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">RandomFuzzer</span><span class="p">(</span><span class="n">Fuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">char_start</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">char_range</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_length</span> <span class="o">=</span> <span class="n">min_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">=</span> <span class="n">max_length</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">char_start</span> <span class="o">=</span> <span class="n">char_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">char_range</span> <span class="o">=</span> <span class="n">char_range</span>
+
+    <span class="k">def</span> <span class="nf">fuzz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A string of `min_length` to `max_length` characters </span>
+<span class="sd">           in the range [`char_start`, `char_start` + `char_range`]&quot;&quot;&quot;</span>
+        <span class="n">string_length</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">string_length</span><span class="p">):</span>
+            <span class="n">out</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">char_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">char_range</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>With <code>RandomFuzzer</code>, we can now create a fuzzer whose configuration needs to be specified only once when creating the fuzzer.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">random_fuzzer</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>8+&#39;4&lt;$&lt;?0&#34;1.&#39;*&amp;?27=)
+,()&#39;5,!.6-(3,6%7!533
+8 )0&#39;51*659:-*(6=?:*
+&#39;13#,0.48$:#63!?,93=
+%1=1(?+0&#34;% /:*!;%?.!
+(715)&#34;&#39;)*04*8&#39;&#34;2.$6!
+(20.&gt;9#/0(3!-&#39;.92?&gt;&#39;
+%.?)%;,0(/3)+4.?4&#34;:;
++:=;/7&#34;801&amp;&#39;&gt;:??$!*:
+9?;5&amp;-?6(!5.&gt;608;,.%
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can now send such generated inputs to our previously defined <code>cat</code> runner, verifying that <code>cat</code> actually does copy its (fuzzed) input to its output.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">inp</span> <span class="o">=</span> <span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="n">cat</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span><span class="o">.</span><span class="n">stdout</span> <span class="o">==</span> <span class="n">inp</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Combining a <code>Fuzzer</code> with a <code>Runner</code>, however, is so common that we can use the <code>run()</code> method supplied by the <code>Fuzzer</code> class for this purpose:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">random_fuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[40]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;=5248=&amp;58500!-9&#34;%626&#39;, stderr=&#39;&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>With <code>runs()</code>, we can repeat a fuzzing run a number of times, obtaining a list of results.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">random_fuzzer</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[41]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;7/%&#34;%=86&lt;6,&#34;$67&gt;-&amp;.?&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;3?-?,/$7=07&#39;:4?&lt;2!&gt;%&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;(%$:89:9#0*#!%%!/!2/&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;/06)169&#39;)%)%$#=+.&amp;.3&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;055 8#29&gt;?,&gt;2-)&lt;+?)?&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;;582&#39;=#&lt;&gt;(0&gt;3!2)6 ,4&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;=&lt;!.,=*;4)) 3?\&#39;2%32&#34;&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;720-7)892%&lt;9+7(2&#34;&amp;42&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;?#&gt;%#&#39;):#05!3 1!:698&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;0?(/%+\&#39;7//3&gt; ?&amp;,-0&#34;1&#39;, stderr=&#39;&#39;)]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>With this, we have all in place to create fuzzers – starting with the simple random fuzzers introduced in this chapter, but even far more advanced ones.  Stay tuned!</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<li>Randomly generating inputs ("fuzzing") is a simple, cost-effective way to quickly test arbitrary programs for their robustness.</li>
+<li>Bugs fuzzers find are mainly due to errors and deficiencies in input processing.</li>
+</ul>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We're done, so don't forget to clean up:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">FILE</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">removedirs</span><span class="p">(</span><span class="n">tempdir</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2>
+</div>
+</div>
+</div></section></section>
+</div>
+</div>
+
+<script>
+
+require(
+    {
+      // it makes sense to wait a little bit when you are loading
+      // reveal from a cdn in a slow connection environment
+      waitSeconds: 15
+    },
+    [
+      "reveal.js/lib/js/head.min.js",
+      "reveal.js/js/reveal.js"
+    ],
+
+    function(head, Reveal){
+
+        // Full list of configuration options available here: https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: true,
+
+            transition: "slide",
+
+            // Optional libraries used to extend on reveal.js
+            dependencies: [
+                { src: "reveal.js/lib/js/classList.js",
+                  condition: function() { return !document.body.classList; } },
+                { src: "reveal.js/plugin/notes/notes.js",
+                  async: true,
+                  condition: function() { return !!document.body.classList; } }
+            ]
+        });
+
+        var update = function(event){
+          if(MathJax.Hub.getAllJax(Reveal.getCurrentSlide())){
+            MathJax.Hub.Rerender(Reveal.getCurrentSlide());
+          }
+        };
+
+        Reveal.addEventListener('slidechanged', update);
+
+        function setScrollingSlide() {
+            var scroll = false
+            if (scroll === true) {
+              var h = $('.reveal').height() * 0.95;
+              $('section.present').find('section')
+                .filter(function() {
+                  return $(this).height() > h;
+                })
+                .css('height', 'calc(95vh)')
+                .css('overflow-y', 'scroll')
+                .css('margin-top', '20px');
+            }
+        }
+
+        // check and set the scrolling slide every time the slide change
+        Reveal.addEventListener('slidechanged', setScrollingSlide);
+
+    }
+
+);
+</script>
+
+</body>
+
 
 </html>

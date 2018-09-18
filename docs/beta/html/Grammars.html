@@ -11,7 +11,7 @@ with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" /><title>Generating Software Tests</title>
+<meta charset="utf-8" /><title>Fuzzing with Grammars - Generating Software Tests</title>
 
 <style type="text/css">
     /*!
@@ -11751,7 +11751,7 @@ div#notebook {
 </style>
 
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
-<link rel="stylesheet" href="beta/html/custom.css">
+<link rel="stylesheet" href="custom.css">
 
 <!-- Load mathjax -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
@@ -11790,10 +11790,10 @@ MathJax.Hub.Config({
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
-<meta property="og:url" content="https://www.fuzzingbook.org/beta/" />
+<meta property="og:url" content="https://www.fuzzingbook.org/beta/html/Grammars.html/" />
 <meta property="og:type" content="article" />
-<meta property="og:title" content="Generating Software Tests" />
-<meta property="og:description" content="Welcome to &quot;Generating Software Tests&quot;! Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by automating software testing, specifically by generating tests automatically.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code. " />
+<meta property="og:title" content="Fuzzing with Grammars - Generating Software Tests" />
+<meta property="og:description" content="In the chapter on &quot;Mutation-Based Fuzzing&quot;, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a specification of the legal inputs to a program.  These grammars allow for very effective and efficient testing, as we will see in this chapter.Prerequisites You should know how basic fuzzing works, e.g. from the Chapter introducing fuzzing. Knowledge on mutation-based fuzzing and coverage is not required yet, but still recommended." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" /></head>
  <body>
 
@@ -11815,38 +11815,50 @@ MathJax.Hub.Config({
   <ul>
      <li class="has-sub"><a href="https://www.fuzzingbook.org/beta/"><i class="fa fa-fw fa-bars"></i> Generating Software Tests</a>
         <ol>
-           <li><a href="https://www.fuzzingbook.org/beta" class="this_page"><i class="fa fa-fw fa-home"></i> About this book</a></li>
-<li><a href="beta/html/Intro_Testing.html">Introduction to Software Testing</a></li>
-<li><a href="beta/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
-<li><a href="beta/html/Coverage.html">Getting Coverage</a></li>
-<li><a href="beta/html/MutationFuzzer.html">Mutation-Based Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="beta/html/Grammars.html">Fuzzing with Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="beta/html/GrammarFuzzer.html">Efficient Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="beta/html/GrammarCoverageFuzzer.html">Grammar Coverage&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+           <li><a href="https://www.fuzzingbook.org/beta"><i class="fa fa-fw fa-home"></i> About this book</a></li>
+<li><a href="Intro_Testing.html">Introduction to Software Testing</a></li>
+<li><a href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
+<li><a href="Coverage.html">Getting Coverage</a></li>
+<li><a href="MutationFuzzer.html">Mutation-Based Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="Grammars.html" class="this_page">Fuzzing with Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="GrammarCoverageFuzzer.html">Grammar Coverage&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 
         </ol>
      </li>
-     <li class="has-sub"><a href="https://www.fuzzingbook.org/beta"><i class="fa fa-fw fa-list-ul"></i> About this Book</a>
+     <li class="has-sub"><a href="https://www.fuzzingbook.org/beta/html/Grammars.html"><i class="fa fa-fw fa-list-ul"></i> Fuzzing with Grammars <i class="fa fa-fw fa-wrench"></i></a>
         <ul>
-           <li><a href="#A-Textbook-for-Paper,-Screen,-and-Keyboard">A Textbook for Paper, Screen, and Keyboard</a></li>
-<li><a href="#Who-this-Book-is-for">Who this Book is for</a></li>
-<li><a href="#News">News</a></li>
-<li><a href="#About-the-Authors">About the Authors</a></li>
-<li><a href="#Frequently-Asked-Questions">Frequently Asked Questions</a></li>
+           <li><a href="#Input-Languages">Input Languages</a></li>
+<li><a href="#Grammars">Grammars</a></li>
+<li><a href="#Representing-Grammars-in-Python">Representing Grammars in Python</a></li>
+<li><a href="#Some-Definitions">Some Definitions</a></li>
+<li><a href="#A-Simple-Grammar-Fuzzer">A Simple Grammar Fuzzer</a></li>
+<li><a href="#Some-Grammars">Some Grammars</a></li>
+<li><a href="#Hatching-Grammars">Hatching Grammars</a></li>
+<li><a href="#Building-a-Grammar">Building a Grammar</a></li>
+<li><a href="#Alternatives-to-Grammars">Alternatives to Grammars</a></li>
+<li><a href="#Lessons-Learned">Lessons Learned</a></li>
+<li><a href="#Next-Steps">Next Steps</a></li>
+<li><a href="#Exercises">Exercises</a></li>
+<li><a href="#Exercise-1">Exercise 1</a></li>
+<li><a href="#Exercise-2">Exercise 2</a></li>
 
         </ul>
      </li>
      
      <li class="has-sub"><a href="#"><i class="fa fa-fw fa-cube"></i> Resources</a>
      <ul>
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/Grammars.ipynb" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
+     <li><a href="https://www.fuzzingbook.org/beta/code/Grammars.py"><i class="fa fa-fw fa-download"></i> Download Code</a></li>
+     <li><a href="https://www.fuzzingbook.org/beta/slides/Grammars.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
      <li><a href="https://github.com/uds-se/fuzzingbook/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
      </ul>
      </li>
-
+     
      <li class="has-sub"><a href="#"><i class="fa fa-fw fa-comments"></i> Share</a>
         <ul>
-            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22About%20this%20Book%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta" target=_blank><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
-            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta" target=_blank><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
+            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Fuzzing%20with%20Grammars%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fGrammars.html" target=_blank><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
+            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fGrammars.html" target=_blank><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
             <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
      </li>
@@ -11863,13 +11875,12 @@ MathJax.Hub.Config({
 
     <article>
    <div tabindex="-1" id="notebook" class="border-box-sizing">
-     <div class="container" id="notebook-container"><section><h1>Generating Software Tests</h1><h3>Breaking Software for Fun and Profit</h3><b>by Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler</b></section>
+     <div class="container" id="notebook-container">
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="About-this-Book">About this Book<a class="anchor-link" href="#About-this-Book">&#182;</a></h1><p><strong>Welcome to "Generating Software Tests"!</strong> 
-Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by <em>automating</em> software testing, specifically by <em>generating tests automatically</em>.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-with-Grammars">Fuzzing with Grammars<a class="anchor-link" href="#Fuzzing-with-Grammars">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-wrench"></i>&nbsp;This chapter is work in progress (beta).  It is incomplete and may change at any time.</em></p><p>In the chapter on <a href="MutationFuzzer.html">"Mutation-Based Fuzzing"</a>, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a <em>specification</em> of the legal inputs to a program.  These <em>grammars</em> allow for very effective and efficient testing, as we will see in this chapter.</p>
 </div>
 </div>
 </div>
@@ -11878,16 +11889,10 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Textbook-for-Paper,-Screen,-and-Keyboard">A Textbook for Paper, Screen, and Keyboard<a class="anchor-link" href="#A-Textbook-for-Paper,-Screen,-and-Keyboard">&#182;</a></h2><p>You can use this book in three ways:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
 <ul>
-<li><p>You can <strong>read chapters in your browser</strong>.  Check out the list of chapters in the menu above, or start right away with the 
-<a href="https://www.fuzzingbook.org/html/Intro_Testing.html">introduction to testing</a> or the
-<a href="https://www.fuzzingbook.org/html/Fuzzer.html">introduction to fuzzing</a>.  All code is available for download.</p>
-</li>
-<li><p>You can <strong>interact with chapters as Jupyter Notebooks</strong> (beta).  This allows you edit and extend the code, experimenting <em>live in your browser.</em>  Just click on "Resources → Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a></p>
-</li>
-<li><p>You can <strong>present chapters as slides</strong> (beta).  This allows for presenting the material in lectures.  Just click on "Resources → View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a></p>
-</li>
+<li>You should know how basic fuzzing works, e.g. from the <a href="Fuzzer.html">Chapter introducing fuzzing</a>.</li>
+<li>Knowledge on <a href="MutationFuzzer.html">mutation-based fuzzing</a> and <a href="Coverage.html">coverage</a> is <em>not</em> required yet, but still recommended.</li>
 </ul>
 </div>
 </div>
@@ -11897,7 +11902,8 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Who-this-Book-is-for">Who this Book is for<a class="anchor-link" href="#Who-this-Book-is-for">&#182;</a></h2><p>This work is designed as a <em>textbook</em> for a course in software testing; as <em>supplementary material</em> in a software testing or software engineering course; and as a <em>resource for software developers</em>. We cover random fuzzing, mutation-based fuzzing, grammar-based test generation, symbolic testing, and much more, illustrating all techniques with code examples that you can try out yourself.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Input-Languages">Input Languages<a class="anchor-link" href="#Input-Languages">&#182;</a></h2><p>All possible behaviors of a program can be triggered by its input.  "Input" here can be a wide range of possible sources: We are talking about data read from files, from the environment, or over the network, data input by the user, or data acquired from interaction with other resources.  The set of all these inputs determines how the program will behave – including its failures.  When testing, it is thus very helpful to think about possible input sources, how to get them under control, and <em>how to systematically test them</em>.</p>
+<p>For the sake of simplicity, we will assume for now that the program has only one source of inputs; this is the same assumption we have been using in the previous chapters, too.  The set of valid inputs to a program is called a <em>language</em>.  Languages range from the simple to the complex: the CSV language denotes the set of valid comma-separated inputs, whereas the Python language denotes the set of valid Python programs.  We commonly separate data languages and programming languages, although any program can also be treated as input data (say, to a compiler).  The <a href="https://en.wikipedia.org/wiki/List_of_file_formats">Wikipedia page on file formats</a> lists more than 1,000 different file formats, each of which is its own language.</p>
 </div>
 </div>
 </div>
@@ -11906,8 +11912,33 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="News">News<a class="anchor-link" href="#News">&#182;</a></h2><p>This book is <em>work in progress,</em> with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.</p>
-<p><a class="twitter-timeline" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammars">Grammars<a class="anchor-link" href="#Grammars">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Rules-and-Expansions">Rules and Expansions<a class="anchor-link" href="#Rules-and-Expansions">&#182;</a></h3><p>To formally specify input languages, <em>grammars</em> are among the most popular (and best understood) formalisms.  A grammar consists of a <em>start symbol</em> and a set of <em>rules</em> which indicate how the start symbol (and other symbols) can be expanded.  As an example, consider the following grammar, denoting a sequence of two digits:</p>
+
+<pre><code>&lt;start&gt; ::= &lt;digit&gt;&lt;digit&gt;
+&lt;digit&gt; ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
+<p>To read such a grammar, start with the starting symbol (<code>&lt;start&gt;</code>).  A rule <code>&lt;A&gt; ::= &lt;B&gt;</code> means that the symbol on the left side (<code>&lt;A&gt;</code>) can be replaced by the string on the right side (<code>&lt;B&gt;</code>).  In the above grammar, <code>&lt;start&gt;</code> would be replaced by <code>&lt;digit&gt;&lt;digit&gt;</code>.</p>
+<p>In this string again, <code>&lt;digit&gt;</code> would be replaced by the string on the right side of the <code>&lt;digit&gt;</code> rule.  The special operator <code>|</code> denotes <em>alternatives</em>, meaning that any of the digits can be chosen for an expansion.  Each <code>&lt;digit&gt;</code> thus would be expanded into one of the given digits, eventually yielding a string between <code>00</code> and <code>99</code>.  There are no further expansions for <code>0</code> to <code>9</code>, so we are all set.</p>
+<p>The interesting thing about grammars is that they can be <em>recursive</em>. That is, expansions can make use of symbols expanded earlier – which would then be expanded again.  As an example, consider a grammar that describes integers:</p>
+
+<pre><code>&lt;start&gt;  ::= &lt;integer&gt;
+&lt;integer&gt; ::= &lt;digit&gt; | &lt;digit&gt;&lt;integer&gt;
+&lt;digit&gt;   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
+<p>Here, a <code>&lt;integer&gt;</code> is either a single digit, or a digit followed by another integer.  The number <code>1234</code> thus would be represented as a single digit <code>1</code>, followed by the integer <code>234</code>, which in turn is a digit <code>2</code>, followed by the integer <code>34</code>.</p>
+<p>If we wanted to express that an integer can be preceded by a sign (<code>+</code> or <code>-</code>), we would write the grammar as</p>
+
+<pre><code>&lt;start&gt;   ::= &lt;number&gt;
+&lt;number&gt;  ::= &lt;integer&gt; | +&lt;integer&gt; | -&lt;integer&gt;
+&lt;integer&gt; ::= &lt;digit&gt; | &lt;digit&gt;&lt;integer&gt;
+&lt;digit&gt;   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
+<p>These rules formally define the language: Anything that can be derived from the start symbol is part of the language; anything that cannot is not.</p>
 </div>
 </div>
 </div>
@@ -11916,7 +11947,15 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="About-the-Authors">About the Authors<a class="anchor-link" href="#About-the-Authors">&#182;</a></h2><p>This book is written by <em>Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler</em>.  All of us are long-standing experts in software testing and test generation; and we have written or contributed to some of the most important test generators and fuzzers on the planet.  As an example, if you are reading this in a Firefox, Chrome, or Edge Web browser, you can do so safely partly because of us, as <em>the very techniques listed in this book have found more than 2,600 bugs in their JavaScript interpreters so far.</em>  We are happy to share our expertise and making it accessible to the public.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Arithmetic-Expressions">Arithmetic Expressions<a class="anchor-link" href="#Arithmetic-Expressions">&#182;</a></h3><p>Let us expand our grammar to cover full <em>arithmetic expressions</em> – a poster child example for a grammar.  We see that an expression (<code>&lt;expr&gt;</code>) is either a sum, or a difference, or a term; a term is either a product or a division, or a factor; and a factor is either a number or a parenthesized expression.  Amost all rules can have recursion, and thus allow arbitrary complex expressions such as <code>(1 + 2) * (3.4 / 5.6 - 789)</code>.</p>
+
+<pre><code>&lt;start&gt;   ::= &lt;expr&gt;
+&lt;expr&gt;    ::= &lt;term&gt; + &lt;expr&gt; | &lt;term&gt; - &lt;expr&gt; | &lt;term&gt;
+&lt;term&gt;    ::= &lt;term&gt; * &lt;factor&gt; | &lt;term&gt; / &lt;factor&gt; | &lt;factor&gt;
+&lt;factor&gt;  ::= +&lt;factor&gt; | -&lt;factor&gt; | (&lt;expr&gt;) | &lt;integer&gt; | &lt;integer&gt;.&lt;integer&gt;
+&lt;integer&gt; ::= &lt;digit&gt;&lt;integer&gt; | &lt;digit&gt;
+&lt;digit&gt;   ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
+<p>In such a grammar, if we start with <code>&lt;start&gt;</code> and then expand one symbol after another, randomly choosing alternatives, we can quickly produce one valid arithmetic expression after another.  Such <em>grammar fuzzing</em> is highly effective as it comes to produce complex inputs, and this is what we will implement in this chapter.</p>
 </div>
 </div>
 </div>
@@ -11925,7 +11964,152 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Frequently-Asked-Questions">Frequently Asked Questions<a class="anchor-link" href="#Frequently-Asked-Questions">&#182;</a></h2></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Representing-Grammars-in-Python">Representing Grammars in Python<a class="anchor-link" href="#Representing-Grammars-in-Python">&#182;</a></h2><p>Our first step in building a grammar fuzzer is to find an appropriate format for grammars.  To make the writing of grammars as simple as possible, we use a mostly format that is mostly based on strings.  Our grammars in Python takes the format of a <em>mapping</em> between symbol names and expansions, where expansions are <em>lists</em> of alternatives.  A one-rule grammar for digits thus takes the form</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">fuzzingbook_utils</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">DIGIT_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>whereas the full grammar for arithmetic expressions looks like this:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">EXPR_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;term&gt; + &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;term&gt; - &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;factor&gt; * &lt;term&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;factor&gt; / &lt;term&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;+&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;integer&gt;.&lt;integer&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>In the grammar, we can access any rule by its symbol...</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>....and we can check whether a symbol is in the grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="s2">&quot;&lt;identifier&gt;&quot;</span> <span class="ow">in</span> <span class="n">EXPR_GRAMMAR</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>False
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Some-Definitions">Some Definitions<a class="anchor-link" href="#Some-Definitions">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -11933,25 +12117,312 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Which-content-will-be-coming-up?">Which content will be coming up?<a class="anchor-link" href="#Which-content-will-be-coming-up?">&#182;</a></h3><p>The contents of this book will include topics such as:</p>
-<ol>
-<li>Introduction to Testing</li>
-<li>Basic Fuzzing</li>
-<li>Coverage</li>
-<li>Mutation-Based Fuzzing</li>
-<li>Grammar-Based Fuzzing</li>
-<li>Fuzzing Function Calls</li>
-<li>Fuzzing User Interfaces</li>
-<li>Parsing and Mutating Inputs</li>
-<li>Search-Based Testing</li>
-<li>Symbolic Testing</li>
-<li>Mining Grammars</li>
-<li>Probabilistic Testing</li>
-<li>Carving Unit Tests</li>
-<li>Fuzzing and Invariants</li>
-<li>Protection and Repair</li>
-</ol>
-<p>See the table of contents in the menu above for those chapters that are already done.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We assume that the canonical start symbol is <code>&lt;start&gt;</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">START_SYMBOL</span> <span class="o">=</span> <span class="s2">&quot;&lt;start&gt;&quot;</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The handy <code>nonterminals()</code> function extracts the list of nonterminal symbols (i.e., anything between <code>&lt;</code> and <code>&gt;</code>) from an expansion.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">re</span>
+
+<span class="c1"># As a symbol, we can have anything between &lt;...&gt; except spaces.</span>
+<span class="n">RE_NONTERMINAL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(&lt;[^&lt;&gt; ]*&gt;)&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">nonterminals</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+    <span class="c1"># In later chapters, we allow expansions to be tuples, </span>
+    <span class="c1"># with the expansion being the first element</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">expansion</span> <span class="o">=</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">RE_NONTERMINAL</span><span class="p">,</span> <span class="n">expansion</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">nonterminals</span><span class="p">(</span><span class="s2">&quot;&lt;term&gt; * &lt;factor&gt;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">nonterminals</span><span class="p">(</span><span class="s2">&quot;&lt;digit&gt;&lt;integer&gt;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">nonterminals</span><span class="p">(</span><span class="s2">&quot;1 &lt; 3 &gt; 2&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]</span>
+<span class="k">assert</span> <span class="n">nonterminals</span><span class="p">(</span><span class="s2">&quot;1 &lt;3&gt; 2&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;&lt;3&gt;&quot;</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">nonterminals</span><span class="p">(</span><span class="s2">&quot;1 + 2&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="p">[]</span>
+<span class="k">assert</span> <span class="n">nonterminals</span><span class="p">((</span><span class="s2">&quot;&lt;1&gt;&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;option&#39;</span><span class="p">:</span> <span class="s1">&#39;value&#39;</span><span class="p">}))</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;&lt;1&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Likewise, <code>is_nonterminal()</code> checks whether some symbol is a nonterminal:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">is_nonterminal</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">RE_NONTERMINAL</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_nonterminal</span><span class="p">(</span><span class="s2">&quot;&lt;abc&gt;&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="ow">not</span> <span class="n">is_nonterminal</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Simple-Grammar-Fuzzer">A Simple Grammar Fuzzer<a class="anchor-link" href="#A-Simple-Grammar-Fuzzer">&#182;</a></h2><p>Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (<code>"&lt;start&gt;"</code>) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (<code>max_symbols</code>) on the number of symbols.  Furthermore, to avoid being stuck in a situation where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">random</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ExpansionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">,</span> 
+                          <span class="n">max_nonterminals</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_expansion_trials</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                          <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">term</span> <span class="o">=</span> <span class="n">start_symbol</span>
+    <span class="n">expansion_trials</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">nonterminals</span><span class="p">(</span><span class="n">term</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">symbol_to_expand</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">nonterminals</span><span class="p">(</span><span class="n">term</span><span class="p">))</span>
+        <span class="n">expansion</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol_to_expand</span><span class="p">])</span>
+        <span class="n">new_term</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">symbol_to_expand</span><span class="p">,</span> <span class="n">expansion</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nonterminals</span><span class="p">(</span><span class="n">new_term</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">max_nonterminals</span><span class="p">:</span>
+            <span class="n">term</span> <span class="o">=</span> <span class="n">new_term</span>
+            <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%-40s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">symbol_to_expand</span> <span class="o">+</span> <span class="s2">&quot; -&gt; &quot;</span> <span class="o">+</span> <span class="n">expansion</span><span class="p">),</span> <span class="n">term</span><span class="p">)</span>
+            <span class="n">expansion_trials</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">expansion_trials</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">expansion_trials</span> <span class="o">&gt;=</span> <span class="n">max_expansion_trials</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ExpansionError</span><span class="p">(</span><span class="s2">&quot;Cannot expand &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">term</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">term</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us see how this simple grammar fuzzer obtains an arithmetic expression from the start symbol:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">grammar</span><span class="o">=</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">max_nonterminals</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>&lt;start&gt; -&gt; &lt;expr&gt;                        &lt;expr&gt;
+&lt;expr&gt; -&gt; &lt;term&gt; + &lt;expr&gt;                &lt;term&gt; + &lt;expr&gt;
+&lt;term&gt; -&gt; &lt;factor&gt;                       &lt;factor&gt; + &lt;expr&gt;
+&lt;factor&gt; -&gt; (&lt;expr&gt;)                     (&lt;expr&gt;) + &lt;expr&gt;
+&lt;expr&gt; -&gt; &lt;term&gt;                         (&lt;term&gt;) + &lt;expr&gt;
+&lt;term&gt; -&gt; &lt;factor&gt;                       (&lt;factor&gt;) + &lt;expr&gt;
+&lt;factor&gt; -&gt; &lt;integer&gt;                    (&lt;integer&gt;) + &lt;expr&gt;
+&lt;expr&gt; -&gt; &lt;term&gt;                         (&lt;integer&gt;) + &lt;term&gt;
+&lt;term&gt; -&gt; &lt;factor&gt;                       (&lt;integer&gt;) + &lt;factor&gt;
+&lt;factor&gt; -&gt; +&lt;factor&gt;                    (&lt;integer&gt;) + +&lt;factor&gt;
+&lt;integer&gt; -&gt; &lt;digit&gt;                     (&lt;digit&gt;) + +&lt;factor&gt;
+&lt;factor&gt; -&gt; -&lt;factor&gt;                    (&lt;digit&gt;) + +-&lt;factor&gt;
+&lt;factor&gt; -&gt; (&lt;expr&gt;)                     (&lt;digit&gt;) + +-(&lt;expr&gt;)
+&lt;digit&gt; -&gt; 7                             (7) + +-(&lt;expr&gt;)
+&lt;expr&gt; -&gt; &lt;term&gt; + &lt;expr&gt;                (7) + +-(&lt;term&gt; + &lt;expr&gt;)
+&lt;expr&gt; -&gt; &lt;term&gt;                         (7) + +-(&lt;term&gt; + &lt;term&gt;)
+&lt;term&gt; -&gt; &lt;factor&gt;                       (7) + +-(&lt;factor&gt; + &lt;term&gt;)
+&lt;factor&gt; -&gt; &lt;integer&gt;                    (7) + +-(&lt;integer&gt; + &lt;term&gt;)
+&lt;integer&gt; -&gt; &lt;digit&gt;                     (7) + +-(&lt;digit&gt; + &lt;term&gt;)
+&lt;digit&gt; -&gt; 3                             (7) + +-(3 + &lt;term&gt;)
+&lt;term&gt; -&gt; &lt;factor&gt;                       (7) + +-(3 + &lt;factor&gt;)
+&lt;factor&gt; -&gt; &lt;integer&gt;.&lt;integer&gt;          (7) + +-(3 + &lt;integer&gt;.&lt;integer&gt;)
+&lt;integer&gt; -&gt; &lt;digit&gt;                     (7) + +-(3 + &lt;digit&gt;.&lt;integer&gt;)
+&lt;digit&gt; -&gt; 7                             (7) + +-(3 + 7.&lt;integer&gt;)
+&lt;integer&gt; -&gt; &lt;digit&gt;&lt;integer&gt;            (7) + +-(3 + 7.&lt;digit&gt;&lt;integer&gt;)
+&lt;digit&gt; -&gt; 1                             (7) + +-(3 + 7.1&lt;integer&gt;)
+&lt;integer&gt; -&gt; &lt;digit&gt;&lt;integer&gt;            (7) + +-(3 + 7.1&lt;digit&gt;&lt;integer&gt;)
+&lt;digit&gt; -&gt; 3                             (7) + +-(3 + 7.13&lt;integer&gt;)
+&lt;integer&gt; -&gt; &lt;digit&gt;&lt;integer&gt;            (7) + +-(3 + 7.13&lt;digit&gt;&lt;integer&gt;)
+&lt;integer&gt; -&gt; &lt;digit&gt;                     (7) + +-(3 + 7.13&lt;digit&gt;&lt;digit&gt;)
+&lt;digit&gt; -&gt; 3                             (7) + +-(3 + 7.133&lt;digit&gt;)
+&lt;digit&gt; -&gt; 8                             (7) + +-(3 + 7.1338)
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;(7) + +-(3 + 7.1338)&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">grammar</span><span class="o">=</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">max_nonterminals</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>+9 / 7 / -(+4) - (+(8)) + -++((-+1 - 5) / 1) / +2 * (+9 + (+(+(+1 + +3420 / -33) * +-6 / 2)))
+(8) * (+3 * (19) - ++--+-+-(4 * +93) + 69.28024) - 1.0 - 8
+74.5 * (((-+(-0 * +(----+-(+((+-930 / 1))))))) / (+-(-+++-(+(-1 + 4)))) * 8 * -(--5.52) * 5)
+0 / (+0) / 3 - --(+((+(((0)))))) - +--5 / (--+-+(2) / +7) + +((5.6 + (+8.7 + 7.6 / ((((-(+-0))) + +-9) * ------((-++7.5)) * +--+-((47 / 34 * ((1) / 4 + +-+(-+9) + 9.1))) - +67))) * 8)
+(+9) + +-6 / +(--3 * +(20)) + ++---(+((+--+(8) - (-6) + ((((9) + 35 - -+5.7) * (-(961.4 - -4 * +5.994))))) - ((-+8 * +8)))) / -7
++++--((-((++0)) + (0 * 9 + (63) / 9))) * +(-6) / 9 - -(+-81.7)
+9 * --70 - 1 - 56
+2 / 5 * +8 / --+--+--+--+-((-+((-2 / (-+4)) / 4 * 9692.2) / -9 + 5 * 62)) - +9 - -8 - 7
+8.7 - 25.3 + -20.8
++-+(+(8)) * (1.4) + --(+---1.4 * -+5.901 * -+(++7 + -+5 - --7.0 - (6 + 6 * +24) * -3)) - +8
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>\todo{Discuss.}</p>
 </div>
 </div>
 </div>
@@ -11960,7 +12431,7 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Why-does-it-take-so-long-to-start-an-interactive-notebook?">Why does it take so long to start an interactive notebook?<a class="anchor-link" href="#Why-does-it-take-so-long-to-start-an-interactive-notebook?">&#182;</a></h3><p>We use the <a href="https://mybinder.org">binder</a> service, which runs notebooks on their own servers.  Starting Jupyter through binder normally takes about 30 seconds. If, however, you are the first to invoke binder after a book update, binder recreates its environment, which can take a few minutes.  Note, though, that binder is officially in beta and we do not have control over binder.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Note that this fuzzer is rather inefficient due to the large number of search and replace operations.  On the other hand, the implementation is straightforward and does the job.  For this chapter, we'll stick to it; in the <a href="Derivation_Trees.html">next chapter</a>, we'll show how to build a more efficient one.</p>
 </div>
 </div>
 </div>
@@ -11969,7 +12440,195 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="I-have-a-comment-or-a-suggestion.--What-do-I-do?">I have a comment or a suggestion.  What do I do?<a class="anchor-link" href="#I-have-a-comment-or-a-suggestion.--What-do-I-do?">&#182;</a></h3><p>Report an issue on the <a href="https://github.com/uds-se/fuzzingbook/issues">development page</a>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Some-Grammars">Some Grammars<a class="anchor-link" href="#Some-Grammars">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>With grammars, we can easily specify the format for several of the examples we discussed earlier.  The above arithmetic expressions, for instance, can be directly sent into <code>bc</code> (or any other program that takes arithmetic expressions.</p>
+<p>Let us create some more grammars.  Here's one for <code>cgi_decode()</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CGI_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;letter&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;letter&gt;&lt;string&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;letter&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;plus&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;percent&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;other&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;plus&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;percent&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;%&lt;hexdigit&gt;&lt;hexdigit&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;hexdigit&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="s2">&quot;f&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;other&gt;&quot;</span><span class="p">:</span>  <span class="c1"># Actually, could be _all_ letters</span>
+        <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;e&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">grammar</span><span class="o">=</span><span class="n">CGI_GRAMMAR</span><span class="p">,</span> <span class="n">max_nonterminals</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>%0e_++++ae
++
+%bf
+2
+5
+1
++
++%98
+++
++%5b%51
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Or a URL grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">URL_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;call&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;call&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;url&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;url&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;scheme&gt;://&lt;authority&gt;&lt;path&gt;&lt;query&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;scheme&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;http&quot;</span><span class="p">,</span> <span class="s2">&quot;https&quot;</span><span class="p">,</span> <span class="s2">&quot;ftp&quot;</span><span class="p">,</span> <span class="s2">&quot;ftps&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;authority&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;host&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;host&gt;:&lt;port&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;userinfo&gt;@&lt;host&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;userinfo&gt;@&lt;host&gt;:&lt;port&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;host&gt;&quot;</span><span class="p">:</span>  <span class="c1"># Just a few</span>
+        <span class="p">[</span><span class="s2">&quot;cispa.saarland&quot;</span><span class="p">,</span> <span class="s2">&quot;www.google.com&quot;</span><span class="p">,</span> <span class="s2">&quot;fuzzingbook.com&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;port&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;80&quot;</span><span class="p">,</span> <span class="s2">&quot;8080&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;nat&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;nat&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;userinfo&gt;&quot;</span><span class="p">:</span>  <span class="c1"># Just one</span>
+        <span class="p">[</span><span class="s2">&quot;user:password&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;path&gt;&quot;</span><span class="p">:</span>  <span class="c1"># Just a few</span>
+        <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="s2">&quot;/&lt;id&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;id&gt;&quot;</span><span class="p">:</span>  <span class="c1"># Just a few</span>
+        <span class="p">[</span><span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="s2">&quot;def&quot;</span><span class="p">,</span> <span class="s2">&quot;x&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;query&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;?&lt;params&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;params&gt;&quot;</span><span class="p">:</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;param&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;param&gt;&amp;&lt;params&gt;&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;&lt;param&gt;&quot;</span><span class="p">:</span>  <span class="c1"># Just a few</span>
+        <span class="p">[</span><span class="s2">&quot;&lt;id&gt;=&lt;id&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;id&gt;=&lt;nat&gt;&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">grammar</span><span class="o">=</span><span class="n">URL_GRAMMAR</span><span class="p">,</span> <span class="n">max_nonterminals</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>ftp://www.google.com/?def=39
+ftps://user:password@www.google.com:8080/abc
+ftp://fuzzingbook.com:8080/abc?x25=abc
+https://user:password@cispa.saarland/abc
+https://fuzzingbook.com:78/
+https://user:password@cispa.saarland/?abc=x45&amp;x91=37&amp;def=92&amp;x78=def&amp;abc=16&amp;x43=x47
+http://user:password@www.google.com:80
+ftps://fuzzingbook.com:8?abc=50
+ftps://cispa.saarland/abc
+https://user:password@cispa.saarland:80/
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Hatching-Grammars">Hatching Grammars<a class="anchor-link" href="#Hatching-Grammars">&#182;</a></h2><p>Since grammars are represented as strings, it is fairly easy to introduce errors.  So let us introduce a helper function that checks a grammar for consistency.</p>
+<p>First, this handy <code>nonterminals()</code> function gets us the list of nonterminals in an expansion.</p>
 </div>
 </div>
 </div>
@@ -11978,16 +12637,200 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="I-have-reported-an-issue-two-weeks-ago.--When-will-it-be-addressed?">I have reported an issue two weeks ago.  When will it be addressed?<a class="anchor-link" href="#I-have-reported-an-issue-two-weeks-ago.--When-will-it-be-addressed?">&#182;</a></h3><p>We prioritize issues as follows:</p>
-<ol>
-<li>Bugs in code published on fuzzingbook.org</li>
-<li>Bugs in text published on fuzzingbook.org</li>
-<li>Writing missing chapters</li>
-<li>Issues in yet unpublished code or text</li>
-<li>Issues related to development or construction</li>
-<li>Things marked as "beta"</li>
-<li>Everything else</li>
-</ol>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The helper function <code>is_valid_grammar()</code> iterates over a grammar to check whether all used symbols are defined, and vice versa, which is very useful for debugging.  You don't have to delve into details here, but as always, it is important to get the input data straight before we make use of it.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">is_valid_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">):</span>
+    <span class="n">used_nonterminals</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">start_symbol</span><span class="p">])</span>
+    <span class="n">defined_nonterminals</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">defined_nonterminal</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
+        <span class="n">defined_nonterminals</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">defined_nonterminal</span><span class="p">)</span>
+        <span class="n">expansions</span> <span class="o">=</span> <span class="n">grammar</span><span class="p">[</span><span class="n">defined_nonterminal</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansions</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">defined_nonterminal</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: expansion is not a list&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">expansions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">defined_nonterminal</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: expansion list empty&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="n">expansions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">expansion</span> <span class="o">=</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">defined_nonterminal</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: not a string&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+            <span class="k">for</span> <span class="n">used_nonterminal</span> <span class="ow">in</span> <span class="n">nonterminals</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+                <span class="n">used_nonterminals</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">used_nonterminal</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">unused_nonterminal</span> <span class="ow">in</span> <span class="n">defined_nonterminals</span> <span class="o">-</span> <span class="n">used_nonterminals</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">unused_nonterminal</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: defined, but not used&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">undefined_nonterminal</span> <span class="ow">in</span> <span class="n">used_nonterminals</span> <span class="o">-</span> <span class="n">defined_nonterminals</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">undefined_nonterminal</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: used, but not defined&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">used_nonterminals</span> <span class="o">==</span> <span class="n">defined_nonterminals</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Our grammars defined above pass the test:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">URL_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>But these ones don't:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;x&gt;&quot;</span><span class="p">],</span> <span class="s2">&quot;&lt;y&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">]})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>&#39;&lt;y&gt;&#39;: defined, but not used
+&#39;&lt;x&gt;&#39;: used, but not defined
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;123&quot;</span><span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>&#39;&lt;start&gt;&#39;: expansion is not a list
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[]})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>&#39;&lt;start&gt;&#39;: expansion list empty
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>&#39;&lt;start&gt;&#39;: 1: not a string
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Building-a-Grammar">Building a Grammar<a class="anchor-link" href="#Building-a-Grammar">&#182;</a></h2><p>\todo{Add more material here.}</p>
 </div>
 </div>
 </div>
@@ -11996,7 +12839,8 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="How-can-I-solve-problems-myself?">How can I solve problems myself?<a class="anchor-link" href="#How-can-I-solve-problems-myself?">&#182;</a></h3><p>We're glad you ask that.  The <a href="https://github.com/uds-se/fuzzingbook/">development page</a> has all sources and some supplementary material.  Pull requests that fix issues are very welcome.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Alternatives-to-Grammars">Alternatives to Grammars<a class="anchor-link" href="#Alternatives-to-Grammars">&#182;</a></h2><p>To formally describe languages, the field of <em>formal languages</em> has devised a number of <em>language specifications</em> that describe a language.  <em>Regular expressions</em>, for instance, denote sets of strings: The regular expression <code>[a-z]*</code>, for instance, denotes a (possibly empty) sequence of lowercase letters.  <em>Automata theory</em> connects these languages to automata that accept these inputs; <em>finite state machines</em>, for instance, can be used to specify the same language as regular expressions.</p>
+<p>Regular expressions are great for not-too-complex input formats, and the associated finite state machine have many properties that make them great for reasoning.  To specify more complex inputs, though, they quickly encounter limitations.  On the other hand of the language spectrum, we have <em>universal grammars</em> that denote the language accepted by <em>Turing machines</em>.  A Turing machine can compute anything that can be computed; and with Python being a Turing-complete language, this means that we can also use a Python program $p$ to specify or even enumerate legal inputs.  But then, computer science theory also tells us that each such testing program has to be written specifically for the program to be tested, which is not the level of automation we want.</p>
 </div>
 </div>
 </div>
@@ -12005,7 +12849,11 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="How-can-I-contribute?">How can I contribute?<a class="anchor-link" href="#How-can-I-contribute?">&#182;</a></h3><p>Again, we're glad you're here!  See our <a href="http://www.fuzzingbook.org/Guide_for_Authors.html">Guide for Authors</a> for instructions on coding and writing.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<li><em>Lesson one</em></li>
+<li><em>Lesson two</em></li>
+<li><em>Lesson three</em></li>
+</ul>
 </div>
 </div>
 </div>
@@ -12014,7 +12862,12 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Do-you-provide-PDFs-of-your-material?">Do you provide PDFs of your material?<a class="anchor-link" href="#Do-you-provide-PDFs-of-your-material?">&#182;</a></h3><p>At this point, we do not provide support for PDF versions.  We are working on producing PDF and paper versions once the book is complete.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
+<ul>
+<li><a href="MutationFuzzer.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
+<li><a href="Grammars.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
+<li><a href="Reducing.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
+</ul>
 </div>
 </div>
 </div>
@@ -12023,7 +12876,77 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="How-do-I-cite-your-work?">How do I cite your work?<a class="anchor-link" href="#How-do-I-cite-your-work?">&#182;</a></h3><p>Thanks for referring to our work!  Once the book is complete, you will be able to cite it in the traditional way.  In the meantime, just click on the "cite" button at the bottom of the Web page for each chapter to get a citation entry.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p><em>Close the chapter with a few exercises such that people have things to do.  Use the Jupyter <code>Exercise2</code> nbextension to add solutions that can be interactively viewed or hidden.  (Alternatively, just copy the exercise and solution cells below with their metadata.)  We will set up things such that solutions do not appear in the PDF and HTML formats.</em></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h2><p>Build a grammar for XX \todo{Expand.}  Use <code>assert is_valid_grammar()</code>to ensure the grammar is valid.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h2><p>Introduce <em>extended</em> grammars with <code>*</code>, <code>+</code>, and <code>?</code> qualifiers.  <a href="http://lampwww.epfl.ch/teaching/archive/compilation-ssc/2000/part4/parsing/node3.html">Here's how to convert EBNF to BNF</a></p>
+<p>Convert a grammar</p>
+
+<pre><code>{"&lt;A&gt;": ["&lt;B&gt;?"]}</code></pre>
+<p>becomes</p>
+
+<pre><code>{"&lt;A&gt;": ["", "&lt;B&gt;"]}</code></pre>
+
+<pre><code>{"&lt;A&gt;": ["&lt;B&gt;+"]}</code></pre>
+<p>becomes</p>
+
+<pre><code>{"&lt;A&gt;": ["&lt;B&gt;", "&lt;A&gt;&lt;B&gt;"]}</code></pre>
+
+<pre><code>{"&lt;A&gt;": ["&lt;B&gt;*"]}</code></pre>
+<p>becomes</p>
+
+<pre><code>{"&lt;A&gt;": ["", "&lt;A&gt;&lt;B&gt;"]}</code></pre>
+<p>These expansions should also take into account further alternatives.</p>
+
+<pre><code>{"&lt;A&gt;": ["&lt;B&gt;*&lt;C&gt;*"]}</code></pre>
+<p>becomes</p>
+
+<pre><code>{"&lt;A&gt;": ["", "&lt;A&gt;&lt;B&gt;", "&lt;A&gt;&lt;C&gt;"]}</code></pre>
+<p>Write a converter <code>ebnf()</code> that takes an extended grammar as above and converts it to a BNF grammar.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p>Python 3.7 and later allow the use of <em>annotations</em> to attach Python snippets to arbitrary syntactic elements.  You can make use of such annotations to produce even nicer grammars, using <code>|</code> to separate alternatives:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="k">class</span> <span class="nc">expression_grammar</span><span class="p">:</span>
+   <span class="n">start</span><span class="p">:</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span>
+   <span class="n">expr</span><span class="p">:</span> <span class="s2">&quot;&lt;term&gt; + &lt;expr&gt;&quot;</span> <span class="o">|</span> <span class="s2">&quot;&lt;term&gt; - &lt;expr&gt;&quot;</span>
+   <span class="n">term</span><span class="p">:</span> <span class="s2">&quot;&lt;factor&gt; * &lt;term&gt;&quot;</span> <span class="o">|</span> <span class="s2">&quot;&lt;factor&gt; / &lt;term&gt;&quot;</span> <span class="o">|</span> <span class="s2">&quot;&lt;factor&gt;&quot;</span>
+   <span class="n">factor</span><span class="p">:</span> <span class="s2">&quot;+&lt;factor&gt;&quot;</span> <span class="o">|</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span> <span class="o">|</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span> <span class="o">|</span> <span class="s2">&quot;&lt;integer&gt;&quot;</span> <span class="o">|</span> <span class="s2">&quot;&lt;integer&gt;.&lt;integer&gt;&quot;</span>
+   <span class="n">integer</span><span class="p">:</span> <span class="s2">&quot;&lt;digit&gt; &lt;integer&gt;&quot;</span> <span class="o">|</span> <span class="s2">&quot;&lt;digit&gt;&quot;</span>
+   <span class="n">digit</span><span class="p">:</span> <span class="s1">&#39;0&#39;</span> <span class="o">|</span> <span class="s1">&#39;1&#39;</span> <span class="o">|</span> <span class="s1">&#39;2&#39;</span> <span class="o">|</span> <span class="s1">&#39;3&#39;</span> <span class="o">|</span> <span class="s1">&#39;4&#39;</span> <span class="o">|</span> <span class="s1">&#39;5&#39;</span> <span class="o">|</span> <span class="s1">&#39;6&#39;</span> <span class="o">|</span> <span class="s1">&#39;7&#39;</span> <span class="o">|</span> <span class="s1">&#39;8&#39;</span> <span class="o">|</span> <span class="s1">&#39;9&#39;</span>
+</pre></div>
+<p>The annotation can be accessed using the <code>__annotations__</code> attribute:</p>
+<div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">expression_grammar</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">)</span>
+<span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="s2">&quot;&#39;&lt;expr&gt;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;expr&#39;</span><span class="p">:</span> <span class="s2">&quot;&#39;&lt;term&gt; + &lt;expr&gt;&#39; | &#39;&lt;term&gt; - &lt;expr&gt;&#39;&quot;</span><span class="p">,</span> 
+ <span class="s1">&#39;term&#39;</span><span class="p">:</span> <span class="s2">&quot;&#39;&lt;factor&gt; * &lt;term&gt;&#39; | &#39;&lt;factor&gt; / &lt;term&gt;&#39; | &#39;&lt;factor&gt;&#39;&quot;</span><span class="p">,</span> 
+ <span class="o">...</span><span class="p">}</span>
+</pre></div>
+<p>Using Python 3.7 or later, write a converter that takes a grammar class using the above syntax and convert it to the "portable" format described in this chapter.</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/Grammars.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 </div>
 </div>
 </div>
@@ -12035,7 +12958,7 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 This work is licensed under a
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 &bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/index.ipynb" target=_blank)>Last change: 2018-09-13 16:14:33+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-09-15 16:51:12+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -12051,19 +12974,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta">Generating Software Tests</a>".  Retrieved 2018-09-13 16:14:33+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2018-09-15 16:51:12+02:00.
 </p>
 <pre>
-@incollection{fuzzingbook2018:index,
-    author = {Andreas Zeller and Rahul Gopinath and Marcel Böhme and Gordon Fraser and Christian Holler},
+@incollection{fuzzingbook2018:Grammars,
+    author = {Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler},
     booktitle = {Generating Software Tests},
-    title = {Generating Software Tests},
+    title = {Fuzzing with Grammars},
     year = {2018},
     publisher = {Saarland University},
-    howpublished = {\url{https://www.fuzzingbook.org/beta/}},
-    note = {Retrieved 2018-09-13 16:14:33+02:00},
-    url = {https://www.fuzzingbook.org/beta/},
-    urldate = {2018-09-13 16:14:33+02:00}
+    howpublished = {\url{https://www.fuzzingbook.org/beta/html/Grammars.html}},
+    note = {Retrieved 2018-09-15 16:51:12+02:00},
+    url = {https://www.fuzzingbook.org/beta/html/Grammars.html},
+    urldate = {2018-09-15 16:51:12+02:00}
 }
 </pre>
 </div>
