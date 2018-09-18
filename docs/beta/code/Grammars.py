@@ -197,7 +197,7 @@ if __name__ == "__main__":
     
 # \todo{Discuss.}
 # 
-# Note that this fuzzer is rather inefficient due to the large number of search and replace operations.  On the other hand, the implementation is straightforward and does the job.  For this chapter, we'll stick to it; in the [next chapter](Derivation_Trees.ipynb), we'll show how to build a more efficient one.
+# Note that this fuzzer is rather inefficient due to the large number of search and replace operations.  On the other hand, the implementation is straightforward and does the job.  For this chapter, we'll stick to it; in the [next chapter](GrammarFuzzer.ipynb), we'll show how to build a more efficient one.
 # 
 # ## Some Grammars
 # 
