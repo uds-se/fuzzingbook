@@ -51,17 +51,7 @@ fuzzingbook_tpl_dict = {
 
     'html_body_start': r"""
     <script>
-    function reveal() {
-        var solutions = document.getElementsByClassName("solution");
-        var i;
-        for (i = 0; i < solutions.length; i++)
-            if (solutions[i].style.display === "none") {
-                solutions[i].style.display = "block";
-            } else {
-                solutions[i].style.display = "none";
-        }
-    }
-    
+    // Let navbar fade away when scrolling down
     var prevScrollpos = window.pageYOffset;
     window.onscroll = function() {
         var currentScrollPos = window.pageYOffset;
