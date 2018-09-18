@@ -32,7 +32,7 @@
 # 
 # This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
 # 
-# <a class="twitter-timeline" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+# <a class="twitter-timeline" data-width="500" data-chrome="noheader nofooter noborders transparent" data-link-color="#A93226" data-align="center" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 # 
 # ## About the Authors
 # 
