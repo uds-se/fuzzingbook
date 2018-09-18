@@ -14,7 +14,7 @@
 # **Prerequisites**
 # 
 # * You should have read the [chapter on grammars](Grammars.ipynb).
-# * You should have read the [chapter on efficient grammar fuzzing](GrammarFuzzing.ipynb).
+# * You should have read the [chapter on efficient grammar fuzzing](GrammarFuzzer.ipynb).
 # 
 # ## Covering Grammar Elements
 # 
