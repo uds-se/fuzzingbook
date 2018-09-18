@@ -44,6 +44,10 @@ fuzzingbook_tpl_dict = {
 <meta property="og:title" content="__PAGE_TITLE__" />
 <meta property="og:description" content="__DESCRIPTION__" />
 <meta property="og:image" content="__BOOKIMAGE__" />
+
+{# Be more mobile-friendly #}
+{# https://nipunbatra.github.io/blog/2017/Jupyter-powered-blog.html #}
+<meta name="viewport" content="width=device-width, initial-scale=1">
     """,
 
 # HTML headers and footers are added later by post-html script
