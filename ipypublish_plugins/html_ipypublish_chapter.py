@@ -55,14 +55,49 @@ fuzzingbook_tpl_dict = {
 
     'html_body_start': r"""
     <script>
+    var close_menus = function() {
+        /* doesn't work yet - AZ
+        console.log("Closing menus")
+        var cssmenu = document.getElementById("cssmenu")
+        var all_items = cssmenu.getElementsByTagName("li");
+        var i;
+        for (i = 0; i < all_items.length; i++) {
+            item = all_items[i];
+            // console.log("<li>: ")
+            // console.log(item.innerHTML);
+            var j;
+            var all_ul = item.getElementsByTagName("ul");
+            for (j = 0; j < all_ul.length; j++) {
+                console.log("<ul>: ")
+                console.log(all_ul[j].innerHTML);
+                all_ul[j].style.display = "none";
+            }
+            var all_ol = item.getElementsByTagName("ol");
+            for (j = 0; j < all_ol.length; j++) {
+                console.log("<ol>: ")
+                console.log(all_ol[j].innerHTML);
+                all_ol[j].style.display = "none";
+            }
+        }
+        */
+    };
+
+    $( document ).ready( close_menus );
+
     // Let navbar fade away when scrolling down
     var prevScrollpos = window.pageYOffset;
     window.onscroll = function() {
         var currentScrollPos = window.pageYOffset;
         if (currentScrollPos > 10 && currentScrollPos > prevScrollpos) {
-            document.getElementById("cssmenu").style.opacity = 0;
+            // Hide navbar
+            var cssmenu = document.getElementById("cssmenu")
+            cssmenu.style.opacity = 0;
+            
+            // When scrolling, also close all sub-menus
+            close_menus();
         }
         else {
+            // Make navbar visible
             document.getElementById("cssmenu").style.opacity = 1;
         }
         prevScrollpos = currentScrollPos;
