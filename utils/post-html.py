@@ -441,6 +441,7 @@ chapter_contents = bibtex_unescape(chapter_contents)
 
 if args.home:
     chapter_contents = chapter_contents.replace("custom.css", "html/custom.css")
+    chapter_contents = chapter_contents.replace("favicon/", "html/favicon/")
 
 # Get a title
 # The official way is to set a title in document metadata, 
