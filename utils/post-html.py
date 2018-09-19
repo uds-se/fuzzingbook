@@ -36,7 +36,7 @@ menu_start = r"""
 <nav>
 <div id="cssmenu">
   <ul>
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-bars"></i> <span class="menu_1">__BOOKTITLE__</span></a>
+     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-bars"></i> <span class="menu_1">__BOOKTITLE_BETA__</span></a>
         <ol>
            <__ALL_CHAPTERS_MENU__>
            <li><a href="__SITE_HTML__#News" class="more_coming">More Chapters Coming!</a></li>
@@ -250,6 +250,11 @@ else:
 
 all_chapters = public_chapters + beta_chapters
 
+booktitle_beta = booktitle
+beta_suffix = '<i class="fa fa-fw fa-wrench"></i>'
+if args.include_beta:
+    booktitle_beta += "&nbsp;" + beta_suffix
+
 menu_prefix = args.menu_prefix
 if menu_prefix is None:
     menu_prefix = ""
@@ -278,7 +283,6 @@ else:
     chapter_html = site_html + "/html/" + basename + ".html"
 chapter_notebook_ipynb = notebook_html + "/" + basename + ".ipynb"
 
-beta_suffix = '<i class="fa fa-fw fa-wrench"></i>'
 chapter_title = get_title(chapter_ipynb_file)
 chapter_title_beta = chapter_title
 is_beta_chapter = args.include_beta and chapter_ipynb_file in beta_chapters
@@ -414,6 +418,7 @@ chapter_contents = chapter_contents \
     .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
     .replace("<__END_OF_EXERCISE__>", end_of_exercise) \
     .replace("__PAGE_TITLE__", page_title) \
+    .replace("__BOOKTITLE_BETA__", booktitle_beta) \
     .replace("__BOOKTITLE__", booktitle) \
     .replace("__BOOKIMAGE__", bookimage) \
     .replace("__DESCRIPTION__", description) \
