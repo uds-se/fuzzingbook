@@ -310,9 +310,10 @@ help:
 	@echo "  (default: automatic)"
 	
 # Run a notebook, (re)creating all output cells
-$(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.ipynb_depend
+ADD_METADATA = utils/add-metadata.py
+$(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.ipynb_depend $(ADD_METADATA)
 	$(EXECUTE_NOTEBOOK) $<
-	$(PYTHON) utils/nbnormalize.py $@ > $@~ && mv $@~ $@
+	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
 
 # Conversion rules - chapters
 ifeq ($(LATEX),pdflatex)
@@ -523,12 +524,17 @@ $(CODE_TARGET)import_all.py: Makefile
 # All checks
 check check-all: check-code check-import check-style check-crossref
 	
-# Normalize notebooks (add table of contents, bib reference, etc.)
-normalize: utils/nbnormalize.py
+# Add notebook metadata (add table of contents, bib reference, etc.)
+metadata: $(ADD_METADATA)
 	@for notebook in $(SOURCES); do \
-		echo "Normalizing $$notebook"; \
-		$(PYTHON) utils/nbnormalize.py $$notebook > $$notebook~ || exit 1; \
-		diff $$notebook~ $$notebook || mv $$notebook~ $$notebook; \
+		echo "Adding metadata to $$notebook...\c"; \
+		$(PYTHON) $(ADD_METADATA) $$notebook > $$notebook~ || exit 1; \
+		if diff $$notebook~ $$notebook; then \
+			echo "unchanged."; \
+		else \
+		    mv $$notebook~ $$notebook; \
+			echo "done."; \
+		fi; \
 		$(RM) $$notebook~; \
 	done
 
