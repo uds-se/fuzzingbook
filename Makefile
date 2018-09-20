@@ -529,7 +529,7 @@ metadata: $(ADD_METADATA)
 	@for notebook in $(SOURCES); do \
 		echo "Adding metadata to $$notebook...\c"; \
 		$(PYTHON) $(ADD_METADATA) $$notebook > $$notebook~ || exit 1; \
-		if diff $$notebook~ $$notebook; then \
+		if diff $$notebook $$notebook~; then \
 			echo "unchanged."; \
 		else \
 		    mv $$notebook~ $$notebook; \
