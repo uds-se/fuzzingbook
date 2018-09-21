@@ -14,6 +14,7 @@
 # **Prerequisites**
 # 
 # * You should know fundamentals of software testing; for instance, from the chapter ["Introduction to Software Testing"](Intro_Testing.ipynb).
+# * You should have a decent understanding of Python; for instance, from the [Python tutorial](https://docs.python.org/3/tutorial/).
 # 
 # ## A Testing Assignment
 # 
@@ -39,13 +40,10 @@
 # 
 # import fuzzingbook_utils
 # 
-# Next, we'll need random numbers.  We set a specific _seed_ to obtain the same sequence of random numbers each time; if you run this notebook interactively, thoguh, you will get different (well, random) results with each new invocation.
+# Next, we'll need random numbers.
 # 
 import random
 
-if __name__ == "__main__":
-    random.seed(53727895348829)
-    
 # Here comes the actual `fuzzer()` function.
 # 
 def fuzzer(max_length=100, char_start=32, char_range=32):
@@ -160,7 +158,7 @@ if __name__ == "__main__":
                                 universal_newlines=True)
         runs.append((data, result))
     
-# We can now query `runs` for some statistics.  For instance, we can query how many runs actually passed -- that is, there were no error messages:
+# We can now query `runs` for some statistics.  For instance, we can query how many runs actually passed -- that is, there were no error messages.  We use a _list comprehension_ here: The form _expression_ `for` _element_ `in` _list_ `if` _condition_ returns a list of evaluated _expressions_ in which each _element_ comes from _list_ if the _condition_ was true.  Here, we have the _expression_ be 1 for all elements where _condition_ holds, and we use `sum()` to sum over all elements in the list.
 # 
 if __name__ == "__main__":
     sum(1 for (data, result) in runs if result.stderr == "")
@@ -270,7 +268,7 @@ if __name__ == "__main__":
 # 
 # ### Rogue Numbers
 # 
-# With fuzzing, it is easy to generate **uncommon value** in the input, causing all kinds of interesting behavior.  Consider the following code, again in the C language, which first reads a buffer size from the input, and then allocates a buffer of the given size:
+# With fuzzing, it is easy to generate **uncommon values** in the input, causing all kinds of interesting behavior.  Consider the following code, again in the C language, which first reads a buffer size from the input, and then allocates a buffer of the given size:
 # ```c
 # char *read_input() {
 #     size_t size = read_buffer_size();
@@ -301,20 +299,262 @@ if __name__ == "__main__":
     
 # If we really wanted to allocate that much memory on a system, having it quickly fail as above actually would be the better option.  In reality, running out of memory may dramatically slow systems down, up to the point that they become totally unresponsive – and restarting is the only option.
 # 
-# ### HeartBleed
-# 
 # One might argue that these are all problems of bad programming, or of bad programming languages.  But then, there's thousands of people starting to program every day, and all of them make the same mistakes again and again, even today.  
 # 
-# The somewhat better news is that fuzzing can easily detect such mistakes.  Here's a non-comprehensive list of bugs found through Miller's fuzzing approach:
+# ## Catching Errors
 # 
+# When Miller and his students built their first fuzzer, they could identify errors simply because the program would crash or hang – two conditions that are easy to identify.  If the failures are more subtle, though, we need to come up with additional checks.
 # 
-# \todo{expand}
+# ### Generic Checkers
+# Buffer overflows, as [discussed above](#Buffer-Overflows), are a particular instance of a more general problem: In languages like C, a program can access arbitrary parts of its memory – even those parts that are uninitialized and possibly not even meant to be accessed.  This is necessary if you want to write an operating system, and great if you want a maximum of performance or control, but pretty bad if you want to avoid mistakes.  Fortunately, there are tools that help catching such issues at runtime, and they are great when combined with fuzzing.
+# 
+# To catch problematic memory accesses during testing, one can run C programs in special _memory-checking_ environments; at runtime, these check for each and every memory read whether it accesses valid and initialized memory.  A popular example of such a tool is the [LLVM Memory Sanitizer](https://clang.llvm.org/docs/MemorySanitizer.html).  Compiling a C program with
+# 
+# ```sh
+# $ clang -fsanitize=memory -o program program.c
+# ```
+# 
+# can then reveal errors during execution:
+# ```sh
+# $ ./program
+# WARNING: MemorySanitizer: use-of-uninitialized-value
+#     #0 0x7f45944b418a in main umr.cc:6
+#     #1 0x7f45938b676c in __libc_start_main libc-start.c:226
+# ```
+# 
+# If you want to find errors in a C program, turning on memory checking during fuzzing is a non-brainer.  It will slow down execution by a certain factor (typical values are 3–5$\times$) and also consume more memory, but CPU cycles are dead cheap compared to the human effort it takes to find these bugs – not to speak of the potential _damage_ they cause.
+# 
+# Let us illustrate this "damage" by only one example.  The [HeartBleed bug](https://en.wikipedia.org/wiki/Heartbleed) was a security bug in the OpenSSL library, implementing cryptographic protocols that provide communications security over a computer network.  (If you read this text in a browser, it is likely encrypted using these protocols.)
+# 
+# The HeartBleed bug was exploited by sending a specially crafted command to the SSL _heartbeat_ service.  A heartbeat service is used to check if the server on the other end is still alive.  A client would send the service a string like
+# 
+# ```
+# BIRD (4 letters)
+# ```
+# 
+# to which the server would reply with `BIRD`, and the client would know the server is alive.
+# 
+# Unfortunately, this service could be exploited by asking the server to reply with _more_ than the requested set of letters.  This is very well explained in this [XKCD comic](https://xkcd.com/1354/):
+# 
+# get_ipython().system('[XKCD Comic](https://imgs.xkcd.com/comics/heartbleed_explanation.png){height=100%}')
+# 
+# We can actually simulate the bug in a Python program.  To start with, let us create some program memory filled with actual data and random data:
+# 
+if __name__ == "__main__":
+    s = ("<space for reply>" + fuzzer(100) 
+        + "<secret-certificate>" + fuzzer(100) 
+        + "<secret-key>" + fuzzer(100) + "<other-secrets>")
+    
+# We add more "memory" characters to `s`, filled with `"deadbeef"` as marker for uninitialized memory:
+# 
+if __name__ == "__main__":
+    uninitialized_memory_marker = "deadbeef"
+    while len(s) < 2048:
+        s += uninitialized_memory_marker
+    
+# We now convert this string into a modifiable list of characters.  (In C, both would be the same.)
+# 
+if __name__ == "__main__":
+    memory = []
+    for c in s:
+        memory.append(c)
+    
+# The heartbeat service would now take a reply to be sent back, as well as a length.  It would store the reply to be sent in memory, and then send it back with the given length.
+# 
+def heartbeat(reply, length):
+    global memory
+    
+    # Store reply in memory
+    for i in range(len(reply)):
+        memory[i] = reply[i]
+    memory[i + 1] = '\n'
+
+    # Send back heartbeat
+    s = ""
+    for i in range(length):
+        s += memory[i]
+    return s
+
+# This perfectly works for standard strings:
+# 
+if __name__ == "__main__":
+    heartbeat("potato", 6)
+    
+if __name__ == "__main__":
+    heartbeat("bird", 4)
+    
+# However, if the length is greater than the length of the reply string, additional contents of memory spill out:
+# 
+if __name__ == "__main__":
+    heartbeat("hat", 500)
+    
+# In the OpenSSL implementation, these memory contents could involve cryptographic certificates, private keys, and more – and worse, no one would notice that this memory just had been accessed.  When the HeartBleed bug was discovered, it had been around for many years, and none would know whether and which secrets had already leaked.  The quickly set up [HeartBleed announcement page](http://heartbleed.com/) said it all:
+# 
+# get_ipython().system('[Heartbleed Announcement](PICS/Heartbleed-announce.png)')
+# 
+# But how was HeartBleed discovered?  Very simple.  Researchers both at the Codenomicon company as well as with Google compiled the OpenSSL library with a memory sanitizer, and then happily flooded it with fuzzed commands.  The memory sanitizer would then notice whether uninitialized memory had been accessed – and actually, it would very quickly discover this.
+# 
+# We can again simulate this in our Python example.  Let us simply assume that if some string contains the uninitilaized memory marker, we have been accessing memory out of bounds:
+# 
+from ExpectError import ExpectError
+
+if __name__ == "__main__":
+    with ExpectError():
+        for i in range(10):
+            s = heartbeat(fuzzer(), random.randint(1, 500))
+            assert not s.find(uninitialized_memory_marker)
+    
+# In combination with a memory checker, this indeed would find the bug within seconds.  If only OpenSSL had been fuzzed right before release...
+# 
+# As a rule of thumb, you should always _enable as many automatic checkers as possible_ during fuzzing.  CPU cycles are cheap, and errors are expensive.  If you only execute the program without an option to actually detect errors, you will be missing several opportunities.
+# 
+# ### Program-Specific Checkers
+# Besides generic checkers that apply to _all_ programs on a given platform or in a given language, you can also devise _specific_ checkers that apply to your program, or a subsystem.  In the [chapter on testing](Intro_Testing.ipynb), we already have hinted at techniques of [runtime verification](Intro_Testing.ipynb#Runtime-Verification) that check function results at runtime for correctness.
+# 
+# One key concept for detecting errors early is _assertions_ that check the input (precondition) and result (postcondition) of important functions.  The more assertions you have in your program, the higher your chances to detect errors during execution that would go undetected by generic checkers – notably during fuzzing.  If you worry about the impact of assertions on performance, keep in mind that assertions can be turned off in production code (although it can be helpful to leave the most critical checks active).
+# 
+# One of the most important use of assertions for finding errors is _checking the integrity of complex data structures._  Let us illustrate the concept using a simple example.  Suppose we have a mapping of airport codes to airports, as in
+# 
+if __name__ == "__main__":
+    airport_codes = {
+        "YVR": "Vancouver",
+        "JFK": "New York-JFK",
+        "CDG": "Paris-Charles de Gaulle",
+        "CAI": "Cairo",
+        "LED": "St. Petersburg",
+        "PEK": "Beijing",
+        "HND": "Tokyo-Haneda",
+        "AKL": "Auckland"
+    } # plus many more
+    
+if __name__ == "__main__":
+    airport_codes["YVR"]
+    
+if __name__ == "__main__":
+    "AKL" in airport_codes
+    
+# This list of airport codes may be pretty critical: If we have a spelling mistake in any of the airport codes, this may impact whatever application we have.  We therefore introduce a function that checks the list for consistency.  The consistency condition is called a _representation invariant_, and functions (or methods) that check it are therefore typically named `repOK()` for "the representation is ok".
+# 
+# First, let's have a checker for individual airport codes.  The checker fails if the code is inconsistent.
+# 
+def code_repOK(code):
+    assert len(code) == 3, "Airport code must have three characters: " + repr(code)
+    for c in code:
+        assert c.isalpha(), "Non-letter in airport code: " + repr(code)
+        assert c.isupper(), "Lowercase letter in airport code: " + repr(code)
+    return True
+
+if __name__ == "__main__":
+    assert code_repOK("SEA")
+    
+# We can now use `code_repOK()` to check all elements in the list:
+# 
+def airport_codes_repOK():
+    for code in airport_codes:
+        assert code_repOK(code)
+    return True
+
+if __name__ == "__main__":
+    with ExpectError():
+        assert airport_codes_repOK()
+    
+# If we add an invalid element to the list, our check would fail:
+# 
+if __name__ == "__main__":
+    airport_codes["YMML"] = "Melbourne"
+    
+if __name__ == "__main__":
+    with ExpectError():
+        assert airport_codes_repOK()
+    
+# Of course, rather than manipulating the list directly, we'd have a special function for adding elements; this could then also check whether the code is valid:
+# 
+def add_new_airport(code, city):
+    assert code_repOK(code)
+    airport_codes[code] = city
+
+if __name__ == "__main__":
+    with ExpectError():  # For BER, ExpectTimeout would be more appropriate
+        add_new_airport("BER", "Berlin")
+    
+# This check also allows us to find out errors in argument lists:
+# 
+if __name__ == "__main__":
+    with ExpectError():
+        add_new_airport("London-Heathrow", "LHR")
+    
+# For maximum checking, though, the `add_new_airport()` function would also ensure the correct representation of the list of airport codes – _before_ and _after_ changing it.
+# 
+def add_new_airport(code, city):
+    assert code_repOK(code)
+    assert airport_codes_repOK()
+    airport_codes[code] = city
+    assert airport_codes_repOK()
+
+# This catches the inconsistency introduced earlier:
+# 
+if __name__ == "__main__":
+    with ExpectError():
+        add_new_airport("IST", "Istanbul Yeni Havalimanı")
+    
+# The more `repOK()` assertions exist in your code, the more errors you will catch – even those specific to only your domain and problem.  On top, such assertions document the _assumptions you made_ during programming and thus help other programmers to understand your code and prevent errors.
+# 
+# As a final example, let us consider a rather complex data structure – a [red-black tree](https://en.wikipedia.org/wiki/Red–black_tree), a self-balancing binary search tree.  Implementing a red-black tree is not too hard, but getting it correct can be a task of several hours even for experienced programmers.  A `repOK()` method, however, documents all the assumptions and checks them as well:
+# 
+class RedBlackTree:
+    def repOK(self):
+        assert self.rootHasNoParent()
+        assert self.rootIsBlack()
+        assert self.rootNodesHaveOnlyBlackChildren()
+        assert self.treeIsAcyclic()
+        assert self.parentsAreConsistent()
+        return True
+    
+    def rootIsBlack(self):
+        if self.parent is None:
+            assert self.color == BLACK
+        return True
+        
+    def add_element(self, elem):
+        assert self.repOK()
+        # Add the element
+        assert self.repOK()
+
+    def delete_element(self, elem):
+        assert self.repOK()
+        # Delete the element
+        assert self.repOK()
+
+# Here, `repOK()` is a method that runs on an object of the `RedBlackTree` class.  It runs five different checks, all of which have their own assertions.  Whenever an element is added or deleted, all these consistency checks are run automatically.  If you have an error in any of these, the checkers will find them – if you run the tree through sufficiently many fuzzed inputs, of course.
+# 
+# ### Static Code Checkers
+# 
+# Many of the benefits from `repOK()` assertions can also be obtained by using _static type checkers_ on your code.  In Python, for instance, the [MyPy](http://mypy-lang.org) static checker can find type errors as soon as types of arguments are properly declared:
+# 
+from typing import Dict
+
+airport_codes = {
+    "YVR": "Vancouver", # etc
+} # type: Dict[str, str]
+
+# If we now add a key with a non-string type, as in
+# 
+if __name__ == "__main__":
+    airport_codes[1] = "First"
+    
+# this would be caught by MyPy immediately:
+# ```sh
+# $ mypy airports.py
+# airports.py: error: Invalid index type "int" for "Dict[str, str]"; expected type "str"
+# ```
+# 
+# Statically checking more advanced properties such as the airport code consisting of exactly three upper-case characters or a tree being acyclic, however, quickly reach the limits of static checking.  Your `repOK()` assertions will still be needed – best in conjunction with a good test generator.
 # 
 # ## A Fuzzing Architecture
 # 
 # Since we'd like to reuse some parts of this chapter in the following ones, let us define things in a way that are easier to reuse, and in particular easier to _extend_.  To this end, we introduce a number of _classes_ that encapsulate the functionality above in a reusable way. 
 # 
-# ### Runner
+# ### Runner Classes
 # 
 # The first thing we introduce is the notion of a `Runner` – that is, an object whose job it is to execute some object with a given input.  A runner typically is some program or function under test, but we can also have simpler runners.
 # 
@@ -359,6 +599,16 @@ class ProgramRunner(Runner):
                         stderr=subprocess.PIPE,
                         universal_newlines=True)
         return self.result
+    
+
+class BinaryProgramRunner(ProgramRunner):
+    def run(self, inp):
+        """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
+        self.result = subprocess.run(self.program,
+                        input=inp.encode(),
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
+        return self.result
 
 # Let us demonstrate a `ProgramRunner` using the `cat` program – a program that copies its input to its output.
 # We see that the output of `cat` is the same as its input:
@@ -367,7 +617,7 @@ if __name__ == "__main__":
     cat = ProgramRunner(program="cat")
     cat.run("hello")
     
-# ### Fuzzers
+# ### Fuzzer Classes
 # 
 # Let us now define _fuzzers_ that actually feed data into a consumer.  The base class for fuzzers provides one central method `fuzz()` that creates some input.  The `run()` function then sends the fuzz() input to a consumer, returning the result; `runs()` does this for a given number (`trials`) of times.
 # 
@@ -434,7 +684,8 @@ if __name__ == "__main__":
 # ## Lessons Learned
 # 
 # * Randomly generating inputs ("fuzzing") is a simple, cost-effective way to quickly test arbitrary programs for their robustness.
-# * Bugs fuzzers find are mainly due to errors and deficiencies in input processing.
+# * Bugs fuzzers find are mainly due to errors and deficiencies in _input processing_.
+# * To catch errors, have as many _consistency checkers_ as possible.
 # 
 # We're done, so don't forget to clean up:
 # 
@@ -447,10 +698,138 @@ if __name__ == "__main__":
 # From here, you can explore how to
 # 
 # * [use _mutations_ on existing inputs to get more valid inputs](MutationFuzzer.ipynb)
-# * [use _grammars_ (i.e., a specification of the input format) to get even more valid inputs](Grammars.ipynb)
+# * [use _grammars_ to specify the input format and thus get many more valid inputs](Grammars.ipynb)
 # * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
 # 
 # Enjoy the read!
 # 
 # ## Exercises
+# 
+# One of the errors found by Miller et al. \cite{Miller1990} involves the _troff_ typesetting system.  _Troff_ takes as input a text consisting of lines; a line beginning with a dot (`.`) includes typesetting commands, as in
+# 
+# ```
+# .NH
+# Some Heading
+# .LP
+# Some paragraph
+# ```
+# 
+# which would produce (using `nroff -ms`) the text
+# 
+# ```
+# 1.  Some Heading
+# 
+# Some paragraph
+# ```
+# 
+# At the time of Miller et al., _troff_ would fail if its input included
+# 
+# 1. The input sequence `\D` (backslash + D) followed by a non-printable character
+# 2. A single character of 8-bit input, followed by a newline character
+# 3. A single dot (`.`), followed by a newline character.
+# 
+# ### Exercise 1: Simulate Troff
+# 
+# For each of the above, write a Python function `f(s)` that fails if `s` fulfills the failure criterion.
+# 
+# **Solution**.  Here's three functions that check their input for `troff` bugs:
+# 
+import string
+
+def no_backslash_d(inp):
+    pattern = "\\D"
+    index = inp.find(pattern)
+    if index < 0 or index + len(pattern) >= len(inp):
+        return True
+    c = inp[index + len(pattern)]
+    assert c in string.printable
+
+if __name__ == "__main__":
+    with ExpectError():
+        no_backslash_d("\\D\0")
+    
+def no_8bit(inp):
+    for i in range(len(inp) - 1):
+        assert ord(inp[i]) <= 127 or inp[i + 1] != '\n'
+    return True
+
+if __name__ == "__main__":
+    with ExpectError():
+        no_8bit("ä\n")
+    
+def no_dot(inp):
+    assert ".\n" not in inp
+    return True
+
+# ### Exercise 2: Run Simulated Troff
+# 
+# Create a class `TroffRunner` as subclass of `Runner` that checks for the above predicates.  Run it with `Fuzzer`.  Be sure to have the `Fuzzer` object produce the entire range of characters.  Count how frequently the individual predicates fail.
+# 
+# **Solution.** Here's a simple example:
+# 
+class TroffRunner(Runner):
+    def __init__(self):
+        self.no_backslash_d_failures = 0
+        self.no_8bit_failures = 0
+        self.no_dot_failures = 0
+        
+    def run(self, inp):
+        try:
+            no_backslash_d(inp)
+        except AssertionError:
+            self.no_backslash_d_failures += 1
+        
+        try:
+            no_8bit(inp)
+        except AssertionError:
+            self.no_8bit_failures += 1
+
+        try:
+            no_dot(inp)
+        except:
+            self.no_dot_failures += 1
+
+        return inp
+
+if __name__ == "__main__":
+    random_fuzzer = RandomFuzzer(char_start=0, char_range=256, max_length=10)
+    troff_runner = TroffRunner()
+    
+    trials = 100000
+    for i in range(trials):
+        random_fuzzer.run(troff_runner)
+    
+if __name__ == "__main__":
+    troff_runner.no_backslash_d_failures
+    
+if __name__ == "__main__":
+    troff_runner.no_8bit_failures
+    
+if __name__ == "__main__":
+    troff_runner.no_dot_failures
+    
+# get_ipython().run_line_magic('matplotlib', 'inline')
+# 
+# ys = [troff_runner.no_backslash_d_failures, 
+#       troff_runner.no_8bit_failures,
+#       troff_runner.no_dot_failures]
+# 
+# import matplotlib.pyplot as plt
+# plt.bar(["\\D", "8bit", "dot"], ys)
+# plt.title("Occurrences of error classes");
+# 
+# ### Exercise 3: Run Real Troff
+# 
+# Using `BinaryProgramRunner`, apply the fuzzer you configured on the real `troff` program.  Check if you can produce any run whose output code is non-zero, indicating a failure or a crash.
+# 
+# **Solution.** This is just a matter of putting pieces together.
+# 
+if __name__ == "__main__":
+    real_troff_runner = BinaryProgramRunner("troff")
+    for i in range(100):
+        result = random_fuzzer.run(real_troff_runner)
+        if result.returncode != 0:
+            print(result)
+    
+# Unfortunately, it is very unlikely that you'll find a bug in `troff` at this point.  Like most other open source code, it has been fuzzed this way before – and all errors found are already fixed.
 # 

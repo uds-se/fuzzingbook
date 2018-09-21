@@ -221,7 +221,7 @@ if __name__ == "__main__":
 # 
 # ### Quality Assurance
 # 
-# In your code, make use of plenty of assertions that allow to catch errors quickly.
+# In your code, make use of plenty of assertions that allow to catch errors quickly.  These assertions also help your readers understand the code.
 # 
 # ### Issue Tracker
 # 

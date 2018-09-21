@@ -9,13 +9,11 @@
 
 # # Introduction to Software Testing
 # 
-# Before we get to the central parts of the book, let us introduce essential concepts of software testing.  Why is it necessary to test software at all?  How does one test software?  How can one tell whether a test has been successful?  How does one know if one has tested enough?  In this unit, let us recall the most important concepts.
+# Before we get to the central parts of the book, let us introduce essential concepts of software testing.  Why is it necessary to test software at all?  How does one test software?  How can one tell whether a test has been successful?  How does one know if one has tested enough?  In this unit, let us recall the most important concepts, and at the same time get acquainted with Python and interactive notebooks.
 # 
 # ## Simple Testing
 # 
-# Let's start with a simple example.  Your co-worker has been asked to implement a square root function.  (Let's assume for a moment that the environment does  not already have one.)  After studying _Newton's method_, she comes up with the following program, claiming that, in fact, this `my_sqrt()` function computes square roots:
-# 
-# import fuzzingbook_utils
+# Let's start with a simple example.  Your co-worker has been asked to implement a square root function $\sqrt{x}$.  (Let's assume for a moment that the environment does  not already have one.)  After studying [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method), she comes up with the following Python code, claiming that, in fact, this `my_sqrt()` function computes square roots.
 # 
 def my_sqrt(x):
     """Computes the square root of x, using Newton's method"""
@@ -28,17 +26,29 @@ def my_sqrt(x):
 
 # Your job is now to find out whether this function actually does what it claims to do.
 # 
-# To find our whether `my_sqrt()` works correctly, you can _test_ it with a few values.  For `x = 4`, for instance, it produces the correct value:
+# If you're new to Python, you might first have to understand what the above code does.  We very much recommend the [Python tutorial](https://docs.python.org/3/tutorial/) to get an idea on how Python works.  The most important things for you to understand the above code are these three:
+# 
+# 1. Python structures programs through _indentation_, so the function and `while` bodies are defined by being indented;
+# 2. Python is _dynamically typed_, meaning that the type of variables like `x`, `approx`, or `guess` is determined at run-time.
+# 3. Most of Python's syntactic features are inspired by other common languages, such as control structures (`while`, `if`), assignments (`=`), or comparisons (`==`, `!=`, `<`).
+# 
+# With that, you can already understand what the above code does: Starting with a `guess` of `x / 2`, it computes better and better approximations in `approx` until the value of `approx` no longer changes.  This is the vaue that finally is returned.
+# 
+# To find our whether `my_sqrt()` works correctly, we can _test_ it with a few values.  For `x = 4`, for instance, it produces the correct value:
 # 
 if __name__ == "__main__":
     my_sqrt(4)
     
-# as it does for `x = 2.0`, apparently:
+# The upper part above `my_sqrt(4)` (a so-called _cell_) is an input to the Python interpreter, which by default _evaluates_ it.  The lower part (`2.0`) is its output.  We can see that `my_sqrt(4)` produces the correct value.
+# 
+# The same holds for `x = 2.0`, apparently, too:
 # 
 if __name__ == "__main__":
     my_sqrt(2)
     
-# We can easily verify whether this value is correct by exploiting that $\sqrt{x}$ squared again has to be $x$, or in other words $\sqrt{x} \times \sqrt{x} = x$.  Let's take a look:
+# If you are reading this in the interactive notebook, you can try out `my_sqrt()` with other values as well.  Click on one of the above cells with invocations of `my_sqrt()` and change the value – say, to `my_sqrt(1)`.  Press Shift+Enter (or click on the play symbol) to execute it and see the result.  If you get an error message, go to the above cell with the definition of `my_sqrt()` and execute this first.  You can also run _all_ cells at once; see the Notebook menu for details.  (You can actually also change the text by cicking on it, and corect mistaks such as in this sentence.)
+# 
+# Is the above value of `my_sqrt(2)` actually correct?  We can easily verify by exploiting that $\sqrt{x}$ squared again has to be $x$, or in other words $\sqrt{x} \times \sqrt{x} = x$.  Let's take a look:
 # 
 if __name__ == "__main__":
     my_sqrt(2) * my_sqrt(2)
@@ -123,7 +133,11 @@ if __name__ == "__main__":
     for n in range(1, 1000):
         assertEquals(my_sqrt(n) * my_sqrt(n), n)
     
-# How much time does it take to test `my_sqrt()` with 100 values?  Let's see:
+# How much time does it take to test `my_sqrt()` with 100 values?  Let's see.
+# 
+# We use our own `Timer` module to measure elapsed time.  To be able to use `Timer`, we first import our own utility module, which allows us to import other notebooks.
+# 
+# import fuzzingbook_utils
 # 
 from Timer import Timer
 
@@ -138,7 +152,6 @@ if __name__ == "__main__":
 # Let's repeat this with 10,000 values, and let's pick them at random.  The Python `random.random()` function returns a random value between 0.0 and 1.0:
 # 
 import random
-from Timer import Timer
 
 if __name__ == "__main__":
     with Timer() as t:
@@ -197,7 +210,9 @@ if __name__ == "__main__":
         x = -1
         print('The root of', x, 'is', my_sqrt(x))
     
-# Consequently, when accepting external input, we must ensure that it is properly validated.  We may write, for instance:
+# The above message is an _error message_, indicating that something went wrong.  It lists the _call stack_ of functions and lines that were active at the time of the error.  The line at the very bottom is the line last executed; the lines above represent function invocations – in our case, up to `my_sqrt(x)`.
+# 
+# We don't want our code terminating with an exception.  Consequently, when accepting external input, we must ensure that it is properly validated.  We may write, for instance:
 # 
 def exposed_sqrt(s):
     x = int(s)
@@ -299,7 +314,193 @@ if __name__ == "__main__":
 # 
 # ## Exercises
 # 
-# ### Shellsort
+# ### Exercise 1: Testing Shellsort
 # 
-# Consider the following implementation of a shellsort function.  \todo{Expand it}
+# Consider the following implementation of a [Shellsort](https://en.wikipedia.org/wiki/Shellsort) function, taking a list of elements and (presumably) sorting it.
+# 
+def shellsort(elems):
+    sorted_elems = elems.copy()
+    gaps = [701, 301, 132, 57, 23, 10, 4, 1]
+    for gap in gaps:
+        for i in range(gap, len(sorted_elems)):
+            temp = sorted_elems[i]
+            j = i
+            while j >= gap and sorted_elems[j - gap] > temp:
+                sorted_elems[j] = sorted_elems[j - gap]
+                j -= gap
+            sorted_elems[j] = temp
+
+    return sorted_elems
+
+# A first test indicates that `shellsort()` might actually work:
+# 
+if __name__ == "__main__":
+    shellsort([3, 2, 1])
+    
+# The implementation uses a _list_ as argument `elems` (which it copies into `sorted_elems`) as well as for the fixed list `gaps`.  Lists work like _arrays_ in other languages:
+# 
+if __name__ == "__main__":
+    a = [5, 6, 99, 7]
+    print("First element:", a[0], "length:", len(a))
+    
+# The `range()` function returns an iterable list of elements.  It is often used in conjunction with `for` loops, as in the above implementation.
+# 
+if __name__ == "__main__":
+    for x in range(1, 5):
+        print(x)
+    
+# #### Part 1: Manual Test Cases
+# 
+# Your job is now to thoroughly test `shellsort()` with a variety of inputs.
+# 
+# First, set up `assert` statements with a number of manually written test cases.  Select your test cases such that extreme cases are covered.  Use `==` to compare two lists.
+# 
+# **Solution.** Here's a few selected test cases:
+# 
+if __name__ == "__main__":
+    # Standard lists
+    assert shellsort([3, 2, 1]) == [1, 2, 3]
+    assert shellsort([1, 2, 3, 4]) == [1, 2, 3, 4]
+    assert shellsort([6, 5]) == [5, 6]
+    
+if __name__ == "__main__":
+    # Check for duplicates
+    assert shellsort([2, 2, 1]) == [1, 2, 2]
+    
+if __name__ == "__main__":
+    # Empty list
+    assert shellsort([]) == []
+    
+# #### Part 2: Random Inputs
+# 
+# Second, create random lists as arguments to `shellsort()`.   Make use of the following helper predicates to check whether the result is (a) sorted, and (b) a permutation of the original.
+# 
+def is_sorted(elems):
+    return all(elems[i] <= elems[i + 1] for i in range(len(elems) - 1))
+
+is_sorted([3, 5, 9])
+
+def is_permutation(a, b):
+    return all(a.count(elem) == b.count(elem) for elem in a)
+
+is_permutation([3, 2, 1], [1, 3, 2])
+
+# Start with a random list generator, using `[]` as the empty list and `elems.append(x)` to append an element `x` to the list `elems`.  Use the above helper functions to assess the results.  Generate and test 1,000 lists.
+# 
+# **Solution.** Here's a simple random list generator:
+# 
+def random_list():
+    length = random.randint(1, 10)
+    elems = []
+    for i in range(length):
+        elems.append(random.randint(0, 100))
+    return elems
+
+if __name__ == "__main__":
+    random_list()
+    
+if __name__ == "__main__":
+    elems = random_list()
+    print(elems)
+    
+if __name__ == "__main__":
+    sorted_elems = shellsort(elems)
+    print(sorted_elems)
+    
+if __name__ == "__main__":
+    assert is_sorted(sorted_elems) and is_permutation(sorted_elems, elems)
+    
+# Here's the test for 1,000 lists:
+# 
+if __name__ == "__main__":
+    for i in range(1000):
+        elems = random_list()
+        sorted_elems = shellsort(elems)
+        assert is_sorted(sorted_elems) and is_permutation(sorted_elems, elems)
+    
+# ### Exercise 2: Quadratic Solver
+# 
+# Given an equation $ax^2 + bx + c = 0$, we want to find solutions for $x$ given the values of $a$, $b$, and $c$.  The following code is supposed to do this, using the equation $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
+# 
+def quadratic_solver(a, b, c):
+    q = b * b - 4 * a * c
+    solution_1 = (-b + my_sqrt_fixed(q)) / (2 * a)
+    solution_2 = (-b - my_sqrt_fixed(q)) / (2 * a)
+    return (solution_1, solution_2)
+
+if __name__ == "__main__":
+    quadratic_solver(3, 4, 1)
+    
+# The above implementation is incomplete, though.  You can trigger 
+# 
+# 1. a division by zero; and
+# 2. violate the precondition of `my_sqrt_fixed()`.
+# 
+# get_ipython().set_next_input('How does one do that, and how can one prevent this');get_ipython().run_line_magic('pinfo', 'this')
+# 
+# #### Part 1: Find bug-triggering inputs
+# 
+# For each of the two cases above, identify values for `a`, `b`, `c` that trigger the bug.
+# 
+# **Solution**.  Here are two inputs that trigger the bugs:
+# 
+if __name__ == "__main__":
+    with ExpectError():
+        print(quadratic_solver(3, 2, 1))
+    
+if __name__ == "__main__":
+    with ExpectError():
+        print(quadratic_solver(0, 0, 1))
+    
+# #### Part 2: Fix the problem
+# 
+# Extend the code appropriately such that the cases are handled.  Return `None` for nonexistent values.
+# 
+# **Solution.** Here is an approriate extension of `quadratic_solver()` that takes care of all the corner cases:
+# 
+def quadratic_solver_fixed(a, b, c):
+    if a == 0:
+        if b == 0:
+            return (-c, None)
+        return (-c / b, None)
+
+    q = b * b - 4 * a * c
+    if q < 0:
+        return (None, None)
+
+    if q == 0:
+        solution = -b / 2 * a
+        return (solution, None)
+    
+    solution_1 = (-b + my_sqrt_fixed(q)) / (2 * a)
+    solution_2 = (-b - my_sqrt_fixed(q)) / (2 * a)
+    return (solution_1, solution_2)
+
+if __name__ == "__main__":
+    with ExpectError():
+        print(quadratic_solver_fixed(3, 2, 1))
+    
+if __name__ == "__main__":
+    with ExpectError():
+        print(quadratic_solver_fixed(0, 0, 1))
+    
+# #### Part 3: Odds and Ends
+# 
+# get_ipython().set_next_input('What are the chances of discovering these conditions with random inputs?  Assuming one can do a billion tests per second, how long would one have to wait on average until a bug gets triggered');get_ipython().run_line_magic('pinfo', 'triggered')
+# 
+# **Solution.**  Consider the code above.  If we choose the full range of 32-bit integers for `a`, `b`, and `c`, then the first condition alone, both `a` and `b` being zero, has a chance of $p = 1 / (2^{32} * 2^{32})$; that is, one in 18.4 quintillions:
+# 
+if __name__ == "__main__":
+    combinations = 2 ** 32 * 2 ** 32
+    combinations
+    
+# get_ipython().set_next_input('If we can do a billion tests per second, how many years would we have to wait');get_ipython().run_line_magic('pinfo', 'wait')
+# 
+if __name__ == "__main__":
+    tests_per_second = 1000000000
+    seconds_per_year = 60 * 60 * 24 * 365.25
+    tests_per_year = tests_per_second * seconds_per_year
+    combinations / tests_per_year
+    
+# We see that on average, we'd have to wait for 584 years.  Clearly, pure random choices are not sufficient as sole testing strategy.
 # 
