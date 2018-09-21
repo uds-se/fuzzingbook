@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Install and enable Jupyter nbextensions
+# https://github.com/binder-examples/jupyter-extension
+# https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/install.html
+jupyter contrib nbextension install --user
+jupyter nbextension enable toc2/main --user
+jupyter nbextension enable exercise2/main --user
+
+# run matplotlib once to generate the font cache
+python -c "import matplotlib as mpl; mpl.use('Agg'); import pylab as plt; fig, ax = plt.subplots(); fig.savefig('test.png')"
+
+test -e test.png && rm test.png
+
+# Trust notebooks such that users can see their HTML and JS output
+jupyter trust notebooks/*.ipynb docs/notebooks/*.ipynb
+
+# Create custom.css
+CUSTOM_PATH=$HOME/.jupyter/custom
+mkdir -p $CUSTOM_PATH
+cat <<END > $CUSTOM_PATH/custom.css

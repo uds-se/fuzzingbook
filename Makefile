@@ -543,7 +543,7 @@ metadata: $(ADD_METADATA)
 ## Publishing
 
 docs: publish-notebooks publish-html publish-code publish-slides publish-pics \
-	$(DOCS_TARGET)index.html README.md
+	$(DOCS_TARGET)index.html README.md binder/postBuild
 	@echo "Now use 'make publish' to commit changes to docs."
 
 # github does not like script tags
@@ -586,7 +586,13 @@ publish-pics: PICS
 	$(RM) -fr $(DOCS_TARGET)html/PICS; ln -s ../PICS $(DOCS_TARGET)html
 	$(RM) -fr $(DOCS_TARGET)slides/PICS; ln -s ../PICS $(DOCS_TARGET)slides
 
-## Binder services	
+## Binder services
+# custom.css
+binder/postBuild: binder/postBuild.template $(HTML_TARGET)custom.css
+	cat binder/postBuild.template $(HTML_TARGET)custom.css > $@
+	echo END >> $@
+	chmod +x $@
+
 # Debugging binder
 # This is the same system as mybinder uses, but should be easier to debug
 # See https://repo2docker.readthedocs.io/en/latest/
