@@ -36,13 +36,13 @@ menu_start = r"""
 <nav>
 <div id="cssmenu">
   <ul>
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-bars"></i> <span class="menu_1">__BOOKTITLE_BETA__</span></a>
+     <li class="has-sub"><a href="#"><span title="__BOOKTITLE__"><i class="fa fa-fw fa-bars"></i> </span><span class="menu_1">__BOOKTITLE_BETA__</span></a>
         <ol>
            <__ALL_CHAPTERS_MENU__>
            <li><a href="__SITE_HTML__#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
      </li>
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-list-ul"></i> <span class="menu_2">__CHAPTER_TITLE_BETA__</span></a>
+     <li class="has-sub"><a href="#"><span title="__CHAPTER_TITLE__"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">__CHAPTER_TITLE_BETA__</span></a>
         <ul>
            <__ALL_SECTIONS_MENU__>
         </ul>
@@ -50,14 +50,14 @@ menu_start = r"""
      """
 
 menu_end = r"""
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-comments"></i>  <span class="menu_4">Share</span></a>
+     <li class="has-sub"><a href="#"><span title="Share"><i class="fa fa-fw fa-comments"></i> </span> <span class="menu_4">Share</span></a>
         <ul>
             <li><a href="__SHARE_TWITTER__" target=_blank><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
             <li><a href="__SHARE_FACEBOOK__" target=_blank><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
             <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
      </li>
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-question-circle"></i> <span class="menu_5">Help</span></a>
+     <li class="has-sub"><a href="#"><span title="Help"><i class="fa fa-fw fa-question-circle"></i></span> <span class="menu_5">Help</span></a>
         <ul>
           <li><a href="https://docs.python.org/3/tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Python Tutorial</a>
           <li><a href="https://www.dataquest.io/blog/jupyter-notebook-tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Jupyter Notebook Tutorial</a>
@@ -70,7 +70,7 @@ menu_end = r"""
 """
 
 site_header_template = menu_start + r"""
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-cube"></i> <span class="menu_3">Resources</span></a>
+     <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
      <li><a href="__GITHUB_HTML__/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
      </ul>
@@ -79,7 +79,7 @@ site_header_template = menu_start + r"""
 
 # Chapters
 chapter_header_template = menu_start + r"""
-     <li class="has-sub"><a href="#"><i class="fa fa-fw fa-cube"></i> <span class="menu_3">Resources</span></a>
+     <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
      <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
      <li><a href="__SITE_HTML__/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Download Code</a></li>
