@@ -340,15 +340,15 @@ if __name__ == "__main__":
 from Fuzzer import fuzzer
 
 if __name__ == "__main__":
-    s = fuzzer()
-    s
+    sample = fuzzer()
+    sample
     
 # Here's the invocation and the coverage we achieve.  We wrap `cgi_decode()` in a `try...except` block such that we can ignore `ValueError` exceptions raised by illegal `%xx` formats.
 # 
 if __name__ == "__main__":
     with Coverage() as cov_fuzz:
         try:
-            cgi_decode(s)
+            cgi_decode(sample)
         except:
             pass
     cov_fuzz.coverage()
@@ -470,11 +470,9 @@ if __name__ == "__main__":
 # 
 # ## Next Steps
 # 
-# Coverage is a great tool to _
+# Coverage is not only a tool to _measure_ test effectiveness, but also a great tool to _guide_ test generation towards specific goals – in particular uncovered code.  We use coverage to
 # 
-# * [use _mutations_ on existing inputs to get more valid inputs](MutationFuzzer.ipynb)
-# * [use _grammars_ (i.e., a specification of the input format) to get even more valid inputs](Grammars.ipynb)
-# * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
+# * [guide _mutations_ of existing inputs towards better coverage in the chapter on mutation fuzzing](MutationFuzzer.ipynb)
 # 
 # ## Exercises
 # 
@@ -596,5 +594,81 @@ if __name__ == "__main__":
 # 
 # Bonus for advanced Python programmers: Define `BranchCoverage` as subclass of `Coverage` and make `branch_coverage()` a method of `BranchCoverage`.
 # 
-# **Solution.**
+# **Solution.**  Here's a simple definition of `branch_coverage()`:
 # 
+def branch_coverage(trace):
+    coverage = set()
+    past_line = None
+    for line in trace:
+        if past_line is not None:
+            coverage.add((past_line, line))
+        past_line = line
+
+    return coverage
+
+if __name__ == "__main__":
+    branch_coverage(trace)
+    
+# Here's a definition as a class:
+# 
+class BranchCoverage(Coverage):
+    def coverage(self):
+        """The set of executed line pairs"""
+        coverage = set()
+        past_line = None
+        for line in self.trace():
+            if past_line is not None:
+                coverage.add((past_line, line))
+            past_line = line
+
+        return coverage
+
+# Let's repeat the above experiments with `BranchCoverage`:
+# 
+if __name__ == "__main__":
+    with BranchCoverage() as cov:
+        cgi_decode("a+b")
+    
+    print(cov.coverage())
+    
+if __name__ == "__main__":
+    
+    
+if __name__ == "__main__":
+    with BranchCoverage() as cov_plus:
+        cgi_decode("a+b")
+    with BranchCoverage() as cov_standard:
+        cgi_decode("abc")
+    
+    cov_plus.coverage() - cov_standard.coverage()
+    
+if __name__ == "__main__":
+    with BranchCoverage() as cov_max:
+        cgi_decode('+')
+        cgi_decode('%20')
+        cgi_decode('abc')
+        try:
+            cgi_decode('%?a')
+        except:
+            pass
+    
+if __name__ == "__main__":
+    cov_max.coverage() - cov_plus.coverage()
+    
+if __name__ == "__main__":
+    sample
+    
+if __name__ == "__main__":
+    with BranchCoverage() as cov_fuzz:
+        try:
+            cgi_decode(s)
+        except:
+            pass
+    cov_fuzz.coverage()
+    
+if __name__ == "__main__":
+    cov_max.coverage() - cov_fuzz.coverage()
+    
+if __name__ == "__main__":
+    
+    
