@@ -336,7 +336,11 @@ if __name__ == "__main__":
 # 
 # Unfortunately, this service could be exploited by asking the server to reply with _more_ than the requested set of letters.  This is very well explained in this [XKCD comic](https://xkcd.com/1354/):
 # 
-# get_ipython().system('[XKCD Comic](https://imgs.xkcd.com/comics/heartbleed_explanation.png){height=100%}')
+# get_ipython().system('[XKCD Comic](PICS/xkcd_heartbleed_1.png)')
+# 
+# get_ipython().system('[XKCD Comic](PICS/xkcd_heartbleed_2.png)')
+# 
+# get_ipython().system('[XKCD Comic](PICS/xkcd_heartbleed_3.png)')
 # 
 # We can actually simulate the bug in a Python program.  To start with, let us create some program memory filled with actual data and random data:
 # 
@@ -601,6 +605,8 @@ class ProgramRunner(Runner):
         return self.result
     
 
+# Here's a variant for binary (i.e., non-textual) input and output.
+# 
 class BinaryProgramRunner(ProgramRunner):
     def run(self, inp):
         """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
