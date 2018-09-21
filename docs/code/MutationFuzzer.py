@@ -338,7 +338,7 @@ if __name__ == "__main__":
 # Success!  In our population, _each and every input_ now is valid and has a different coverage, coming from various combinations of schemes, paths, queries, and fragments.
 # 
 if __name__ == "__main__":
-    cumulative_coverage = population_coverage(population, http_program)
+    all_coverage, cumulative_coverage = population_coverage(population, http_program)
     
     import matplotlib.pyplot as plt
     plt.plot(cumulative_coverage)
@@ -473,7 +473,7 @@ if __name__ == "__main__":
     print(population)
     
 if __name__ == "__main__":
-    cumulative_coverage = population_coverage(population, cgi_decode)
+    all_coverage, cumulative_coverage = population_coverage(population, cgi_decode)
     
 import matplotlib.pyplot as plt
 

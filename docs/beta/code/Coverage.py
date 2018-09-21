@@ -377,7 +377,7 @@ def population_coverage(population, function):
         all_coverage |= cov.coverage()
         cumulative_coverage.append(len(all_coverage))
 
-    return cumulative_coverage
+    return all_coverage, cumulative_coverage
 
 # Here's how the coverage increases with each input:
 # 
@@ -388,7 +388,7 @@ def hundred_inputs():
     return population
 
 if __name__ == "__main__":
-    cumulative_coverage = population_coverage(hundred_inputs(), cgi_decode)
+    all_coverage, cumulative_coverage = population_coverage(hundred_inputs(), cgi_decode)
     
 # get_ipython().run_line_magic('matplotlib', 'inline')
 # 
@@ -409,7 +409,7 @@ if __name__ == "__main__":
     sum_coverage = [0] * trials
     
     for run in range(runs):
-        coverage = population_coverage(hundred_inputs(), cgi_decode)
+        all_coverage, coverage = population_coverage(hundred_inputs(), cgi_decode)
         assert len(coverage) == trials
         for i in range(trials):
             sum_coverage[i] += coverage[i]
@@ -578,6 +578,8 @@ if __name__ == "__main__":
     trace = cov.trace()
     trace
     
+# #### Part 1: Compute branch coverage
+# 
 # Define a function `branch_coverage()` that takes a trace and returns the set of pairs of subsequent lines in a trace – in the above example, this would be 
 # 
 # ```python
@@ -588,11 +590,7 @@ if __name__ == "__main__":
 # )
 # ```
 # 
-# Use `branch_coverage()` to repeat the experiments in this chapter with branch coverage rather than statement coverage.  In particular:
-# * Do the manually written test cases cover all branches?  
-# get_ipython().set_next_input('* Does `fuzzer()` cover all branches, and if so, how long does it take on average');get_ipython().run_line_magic('pinfo', 'average')
-# 
-# Bonus for advanced Python programmers: Define `BranchCoverage` as subclass of `Coverage` and make `branch_coverage()` a method of `BranchCoverage`.
+# Bonus for advanced Python programmers: Define `BranchCoverage` as subclass of `Coverage` and make `branch_coverage()` as above a `coverage()` method of `BranchCoverage`.
 # 
 # **Solution.**  Here's a simple definition of `branch_coverage()`:
 # 
@@ -623,7 +621,11 @@ class BranchCoverage(Coverage):
 
         return coverage
 
-# Let's repeat the above experiments with `BranchCoverage`:
+# #### Part 2: Comparing statement coverage and branch coverage
+# 
+# get_ipython().set_next_input('Use `branch_coverage()` to repeat the experiments in this chapter with branch coverage rather than statement coverage.  Do the manually written test cases cover all branches');get_ipython().run_line_magic('pinfo', 'branches')
+# 
+# **Solution.** Let's repeat the above experiments with `BranchCoverage`:
 # 
 if __name__ == "__main__":
     with BranchCoverage() as cov:
@@ -669,6 +671,74 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     cov_max.coverage() - cov_fuzz.coverage()
     
+def population_branch_coverage(population, function):
+    cumulative_coverage = []
+    all_coverage = set()
+
+    for s in population:
+        with BranchCoverage() as cov:
+            try:
+                function(s)
+            except:
+                pass
+        all_coverage |= cov.coverage()
+        cumulative_coverage.append(len(all_coverage))
+
+    return all_coverage, cumulative_coverage
+
 if __name__ == "__main__":
+    all_branch_coverage, cumulative_branch_coverage = population_branch_coverage(hundred_inputs(), cgi_decode)
     
+# get_ipython().run_line_magic('matplotlib', 'inline')
+# 
+import matplotlib.pyplot as plt
+
+if __name__ == "__main__":
+    plt.plot(cumulative_branch_coverage)
+    plt.title('Branch coverage of cgi_decode() with random inputs')
+    plt.xlabel('# of inputs')
+    plt.ylabel('line pairs covered');
     
+if __name__ == "__main__":
+    len(cov_max.coverage())
+    
+if __name__ == "__main__":
+    all_branch_coverage - cov_max.coverage()
+    
+# The additional coverage comes from the exception raised via an illegal input (say, `%g`).
+# 
+if __name__ == "__main__":
+    cov_max.coverage() - all_branch_coverage
+    
+# This is an artefact coming from the subsequent execution of `cgi_decode()` when computing `cov_max`.
+# 
+# #### Part 3: Average coverage
+# 
+# get_ipython().set_next_input('Again, repeat the above experiments with branch coverage.  Does `fuzzer()` cover all branches, and if so, how many tests does it take on average');get_ipython().run_line_magic('pinfo', 'average')
+# 
+# **Solution.** We repeat the experiments we ran with line coverage with branch coverage.
+# 
+if __name__ == "__main__":
+    runs = 100
+    
+    # Create an array with TRIALS elements, all zero
+    sum_coverage = [0] * trials
+    
+    for run in range(runs):
+        all_branch_coverage, coverage = population_branch_coverage(hundred_inputs(), cgi_decode)
+        assert len(coverage) == trials
+        for i in range(trials):
+            sum_coverage[i] += coverage[i]
+    
+    average_coverage = []
+    for i in range(trials):
+        average_coverage.append(sum_coverage[i] / runs)
+    
+if __name__ == "__main__":
+    plt.plot(average_coverage)
+    plt.title('Average branch coverage of cgi_decode() with random inputs');
+    plt.xlabel('# of inputs')
+    plt.ylabel('line pairs covered');
+    
+# We see that achieving branch coverage takes longer than statement coverage; it simply is a more difficult criterion to satisfy with random inputs.
+# 
