@@ -11793,7 +11793,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/html/Fuzzer.html/" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Fuzzing: Breaking Things with Random Inputs - Generating Software Tests" />
-<meta property="og:description" content="In this chapter, we&#x27;ll start with one of the simplest test generation techniques.  The key idea of random text generation, also known as &quot;fuzzing&quot;, is to feed a string of random characters into a program in the hope to uncover failures.Prerequisites You should know fundamentals of software testing; for instance, from the chapter &quot;Introduction to Software Testing&quot;." />
+<meta property="og:description" content="In this chapter, we&#x27;ll start with one of the simplest test generation techniques.  The key idea of random text generation, also known as &quot;fuzzing&quot;, is to feed a string of random characters into a program in the hope to uncover failures.Prerequisites You should know fundamentals of software testing; for instance, from the chapter &quot;Introduction to Software Testing&quot;. You should have a decent understanding of Python; for instance, from the Python tutorial." />
 <meta property="og:image" content="https://www.fuzzingbook.org/html/PICS/wordcloud.png" />
 
 <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-touch-icon.png">
@@ -11878,6 +11878,7 @@ MathJax.Hub.Config({
 <li><a href="#A-Simple-Fuzzer">A Simple Fuzzer</a></li>
 <li><a href="#Fuzzing-External-Programs">Fuzzing External Programs</a></li>
 <li><a href="#Bugs-Fuzzers-Find">Bugs Fuzzers Find</a></li>
+<li><a href="#Catching-Errors">Catching Errors</a></li>
 <li><a href="#A-Fuzzing-Architecture">A Fuzzing Architecture</a></li>
 <li><a href="#Lessons-Learned">Lessons Learned</a></li>
 <li><a href="#Next-Steps">Next Steps</a></li>
@@ -11932,6 +11933,7 @@ MathJax.Hub.Config({
 <div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
 <ul>
 <li>You should know fundamentals of software testing; for instance, from the chapter <a href="Intro_Testing.html">"Introduction to Software Testing"</a>.</li>
+<li>You should have a decent understanding of Python; for instance, from the <a href="https://docs.python.org/3/tutorial/">Python tutorial</a>.</li>
 </ul>
 </div>
 </div>
@@ -12001,7 +12003,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Next, we'll need random numbers.  We set a specific <em>seed</em> to obtain the same sequence of random numbers each time; if you run this notebook interactively, thoguh, you will get different (well, random) results with each new invocation.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Next, we'll need random numbers.</p>
 </div>
 </div>
 </div>
@@ -12014,20 +12016,6 @@ MathJax.Hub.Config({
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">random</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">53727895348829</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12091,7 +12079,7 @@ MathJax.Hub.Config({
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;0(!#4&lt;3&amp;4)03*%640&lt;1#==(8+ =65:7=459+26\&#39;=/&gt;*!74)-&#34;?8.%2#1!;5557:7\&#39;-/39;/)#/9&#39;
+<pre>&#39;!7#%&#34;*#0=)$;%6*;&gt;638:*&gt;80&#34;=&lt;/&gt;(/*:-(2&lt;4 !:5*6856&amp;?&#34;&#34;11&lt;7+%&lt;%7,4.8,*+&amp;,,$,.&#34;&#39;
 </pre>
 </div>
 
@@ -12132,7 +12120,7 @@ MathJax.Hub.Config({
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;scvhpzgvfhnrojipujqdzwzhohlwveabmmgebxrgsfphewhcohzztgtgmvxhrtkqcqsnltrvyahdnjppyprzibityfmzxqnpvyejjjgrrhfcfqtccqyrukdmxugnumoeghlgldjouruigrtdvnhoytzhzppdwaovaddpwyhoubcuvwtotblkyrkwblimmbusivchzltvsaizxrubghadjrzidwaafeqkagfltxdfnhayhjhaktzignrkcfhcsiugijidslokcmzyxtgjvdkozqhaeyhcqyxamviblvyomcemsasmimxrxrfeagvqyrhpmaksnmvwsqyjdyrusfqrpzzxgvwbdamasxplztulfkkshoyktcepzhauwbtssuiipxgwyflnecnojqowqadhdfmbwyqxjocypgebrstuntjoryiksoawnmchdnnlrovzwvgddvfzpckplajptvfdzmopntydlwefscbcdrcplijnkabgajvfbidisdnphkwbjstaanmfmeoheheghcdybpyfbunhnyyxkbxddkmwlgzewxepkwlllhundtrogexokpdkprdxbxdaosztrthgyctoazsozvdqsexqypfphohqgtetinhwtfgtmffydrpidpzwmwpdnalxjixssappxtiofprduxovkebgzhnwaozpshurpdrgfzvphzftdqvcpniajswuimakebbvkqzxuphbnrlymejxarpsthcpclnwuehmuriaovtozuifrrflkbvihcmoojnrnukoansvwjqiqqtdumbdzmbcwtyjeeyfqgqpjydtkhztluurqjgquojzxcercidqkxivftdflwncsjgsparsbyugbjfmmzprmgembwhybnblodxqukezwuinixtfskzaolxnourbujwbxhxzbnyhnghgyiuybnussfjgydsmpgljdaiulkmjbkxptmyggspug&#39;
+<pre>&#39;zskscocrxllosagkvaszlngpysurezehvcqcghygphnhonehczraznkibltfmocxddoxcmrvatcleysksodzlwmzdndoxrjfqigjhqjxkblyrtoaydlwwisrvxtxsejhfbnforvlfisojqaktcxpmjqsfsycisoexjctydzxzzutukdztxvdpqbjuqmsectwjvylvbixzfmqiabdnihqagsvlyxwxxconminadcaqjdzcnzfjlwccyudmdfceiepwvyggepjxoeqaqbjzvmjdlebxqvehkmlevoofjlilegieeihmetjappbisqgrjhglzgffqrdqcwfmmwqecxlqfpvgtvcddvmwkplmwadgiyckrfjddxnegvmxravaunzwhpfpyzuyyavwwtgykwfszasvlbwojetvcygectelwkputfczgsfsbclnkzzcjfywitooygjwqujseflqyvqgyzpvknddzemkegrjjrshbouqxcmixnqhgsgdwgzwzmgzfajymbcfezqxndbmzwnxjeevgtpjtcwgbzptozflrwvuopohbvpmpaifnyyfvbzzdsdlznusarkmmtazptbjbqdkrsnrpgdffemnpehoapiiudokczwrvpsonybfpaeyorrgjdmgvkvupdtkrequicexqkoikygepawmwsdcrhivoegynnhodfhryeqbebtbqnwhogdfrsrksntqjbocvislhgrgchkhpaiugpbdygwkhrtyniufabdnqhtnwreiascfvmuhettfpbowbjadfxnbtzhobnxsnf&#39;
 </pre>
 </div>
 
@@ -12199,7 +12187,7 @@ MathJax.Hub.Config({
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt
+<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp83796ujn/input.txt
 </pre>
 </div>
 
@@ -12258,7 +12246,7 @@ MathJax.Hub.Config({
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>/)=04-?: &lt;&#34;?*?5658&gt;6!%&lt;!8/
+<pre>!6&#34;*-2,$994,%*:&#34;$25!2=!+!2#&#39;&#39;6/3&#39;4!6%7056&#39;??2#7;75&gt;27&#39;15#-4.?*&lt;?6&amp;&#34; !3&#39;7-5&gt;18%
 </pre>
 </div>
 
@@ -12456,7 +12444,7 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We can now query <code>runs</code> for some statistics.  For instance, we can query how many runs actually passed -- that is, there were no error messages:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can now query <code>runs</code> for some statistics.  For instance, we can query how many runs actually passed -- that is, there were no error messages.  We use a <em>list comprehension</em> here: The form <em>expression</em> <code>for</code> <em>element</em> <code>in</code> <em>list</em> <code>if</code> <em>condition</em> returns a list of evaluated <em>expressions</em> in which each <em>element</em> comes from <em>list</em> if the <em>condition</em> was true.  Here, we have the <em>expression</em> be 1 for all elements where <em>condition</em> holds, and we use <code>sum()</code> to sum over all elements in the list.</p>
 </div>
 </div>
 </div>
@@ -12479,7 +12467,7 @@ MathJax.Hub.Config({
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>5
+<pre>4
 </pre>
 </div>
 
@@ -12524,22 +12512,16 @@ MathJax.Hub.Config({
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>&#39;%,%\&#39;:,0\&#39;918*143:*-2&amp;35$06!((;&lt;61&lt;:6%!?6+-))/-;65-2.;&#34;8&gt;6-87 7:9)!+?&#34;&amp;)6&#34;71*#.-+&lt;2&amp;:&#34;*(!;-/:5&#34;2%&#34;1!5&#39;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: illegal character: &#39;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: illegal character: :
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: illegal character: &#39;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: illegal character: :
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: illegal character: :
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: illegal character: ?
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp2_98p5ls/input.txt 1: illegal character: :
+<pre>&#39;5*,55&amp;8&gt;&#34;86,?&#34;/7!1%5-**&amp;-$&amp;)$91;&#34;21(\&#39;8&#34;(%$&#39;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp83796ujn/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp83796ujn/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp83796ujn/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp83796ujn/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp83796ujn/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp83796ujn/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp83796ujn/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp83796ujn/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp83796ujn/input.txt 1: illegal character: $
 </pre>
 </div>
 
@@ -12574,7 +12556,7 @@ MathJax.Hub.Config({
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;EOF encountered in a comment.\n&#39;]
+<pre>[]
 </pre>
 </div>
 
@@ -12724,9 +12706,9 @@ MathJax.Hub.Config({
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-23-f83db3d59a06&gt;&#34;, line 5, in &lt;module&gt;
+  File &#34;&lt;ipython-input-22-f83db3d59a06&gt;&#34;, line 5, in &lt;module&gt;
     crash_if_too_long(s)
-  File &#34;&lt;ipython-input-21-928c2d2de976&gt;&#34;, line 4, in crash_if_too_long
+  File &#34;&lt;ipython-input-20-928c2d2de976&gt;&#34;, line 4, in crash_if_too_long
     raise ValueError
 ValueError
 </pre>
@@ -12837,11 +12819,11 @@ ValueError
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-26-8e40f7d62a1b&gt;&#34;, line 5, in &lt;module&gt;
+  File &#34;&lt;ipython-input-25-8e40f7d62a1b&gt;&#34;, line 5, in &lt;module&gt;
     hang_if_no_space(s)
-  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
+  File &#34;&lt;ipython-input-23-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
     if i &lt; len(s):
-  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
+  File &#34;&lt;ipython-input-23-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
     if i &lt; len(s):
   File &#34;&lt;string&gt;&#34;, line 14, in check_time
 TimeoutError
@@ -12862,7 +12844,7 @@ TimeoutError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Rogue-Numbers">Rogue Numbers<a class="anchor-link" href="#Rogue-Numbers">&#182;</a></h3><p>With fuzzing, it is easy to generate <strong>uncommon value</strong> in the input, causing all kinds of interesting behavior.  Consider the following code, again in the C language, which first reads a buffer size from the input, and then allocates a buffer of the given size:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Rogue-Numbers">Rogue Numbers<a class="anchor-link" href="#Rogue-Numbers">&#182;</a></h3><p>With fuzzing, it is easy to generate <strong>uncommon values</strong> in the input, causing all kinds of interesting behavior.  Consider the following code, again in the C language, which first reads a buffer size from the input, and then allocates a buffer of the given size:</p>
 <div class="highlight"><pre><span></span><span class="kt">char</span> <span class="o">*</span><span class="nf">read_input</span><span class="p">()</span> <span class="p">{</span>
     <span class="kt">size_t</span> <span class="n">size</span> <span class="o">=</span> <span class="n">read_buffer_size</span><span class="p">();</span>
     <span class="kt">char</span> <span class="o">*</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
@@ -12928,7 +12910,7 @@ TimeoutError
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>94394591889846996523697890091447449974450471606008648032510936038368
+<pre>7056414967099541967374507745748918952640135045
 </pre>
 </div>
 
@@ -12962,9 +12944,9 @@ TimeoutError
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-29-7a1817f3dbfc&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-28-7a1817f3dbfc&gt;&#34;, line 2, in &lt;module&gt;
     collapse_if_too_large(long_number)
-  File &#34;&lt;ipython-input-27-2c22a83a4dca&gt;&#34;, line 3, in collapse_if_too_large
+  File &#34;&lt;ipython-input-26-2c22a83a4dca&gt;&#34;, line 3, in collapse_if_too_large
     raise ValueError
 ValueError
 </pre>
@@ -12984,8 +12966,7 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="HeartBleed">HeartBleed<a class="anchor-link" href="#HeartBleed">&#182;</a></h3><p>One might argue that these are all problems of bad programming, or of bad programming languages.  But then, there's thousands of people starting to program every day, and all of them make the same mistakes again and again, even today.</p>
-<p>The somewhat better news is that fuzzing can easily detect such mistakes.  Here's a non-comprehensive list of bugs found through Miller's fuzzing approach:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>One might argue that these are all problems of bad programming, or of bad programming languages.  But then, there's thousands of people starting to program every day, and all of them make the same mistakes again and again, even today.</p>
 </div>
 </div>
 </div>
@@ -12994,7 +12975,900 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>\todo{expand}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Catching-Errors">Catching Errors<a class="anchor-link" href="#Catching-Errors">&#182;</a></h2><p>When Miller and his students built their first fuzzer, they could identify errors simply because the program would crash or hang – two conditions that are easy to identify.  If the failures are more subtle, though, we need to come up with additional checks.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Generic-Checkers">Generic Checkers<a class="anchor-link" href="#Generic-Checkers">&#182;</a></h3><p>Buffer overflows, as <a href="#Buffer-Overflows">discussed above</a>, are a particular instance of a more general problem: In languages like C, a program can access arbitrary parts of its memory – even those parts that are uninitialized and possibly not even meant to be accessed.  This is necessary if you want to write an operating system, and great if you want a maximum of performance or control, but pretty bad if you want to avoid mistakes.  Fortunately, there are tools that help catching such issues at runtime, and they are great when combined with fuzzing.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To catch problematic memory accesses during testing, one can run C programs in special <em>memory-checking</em> environments; at runtime, these check for each and every memory read whether it accesses valid and initialized memory.  A popular example of such a tool is the <a href="https://clang.llvm.org/docs/MemorySanitizer.html">LLVM Memory Sanitizer</a>.  Compiling a C program with</p>
+<div class="highlight"><pre><span></span>$ clang -fsanitize<span class="o">=</span>memory -o program program.c
+</pre></div>
+<p>can then reveal errors during execution:</p>
+<div class="highlight"><pre><span></span>$ ./program
+WARNING: MemorySanitizer: use-of-uninitialized-value
+    <span class="c1">#0 0x7f45944b418a in main umr.cc:6</span>
+    <span class="c1">#1 0x7f45938b676c in __libc_start_main libc-start.c:226</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If you want to find errors in a C program, turning on memory checking during fuzzing is a non-brainer.  It will slow down execution by a certain factor (typical values are 3–5$\times$) and also consume more memory, but CPU cycles are dead cheap compared to the human effort it takes to find these bugs – not to speak of the potential <em>damage</em> they cause.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us illustrate this "damage" by only one example.  The <a href="https://en.wikipedia.org/wiki/Heartbleed">HeartBleed bug</a> was a security bug in the OpenSSL library, implementing cryptographic protocols that provide communications security over a computer network.  (If you read this text in a browser, it is likely encrypted using these protocols.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The HeartBleed bug was exploited by sending a specially crafted command to the SSL <em>heartbeat</em> service.  A heartbeat service is used to check if the server on the other end is still alive.  A client would send the service a string like</p>
+
+<pre><code>BIRD (4 letters)</code></pre>
+<p>to which the server would reply with <code>BIRD</code>, and the client would know the server is alive.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Unfortunately, this service could be exploited by asking the server to reply with <em>more</em> than the requested set of letters.  This is very well explained in this <a href="https://xkcd.com/1354/">XKCD comic</a>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p><img src="https://imgs.xkcd.com/comics/heartbleed_explanation.png" alt="XKCD Comic">{height=100%}</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can actually simulate the bug in a Python program.  To start with, let us create some program memory filled with actual data and random data:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;&lt;space for reply&gt;&quot;</span> <span class="o">+</span> <span class="n">fuzzer</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> 
+    <span class="o">+</span> <span class="s2">&quot;&lt;secret-certificate&gt;&quot;</span> <span class="o">+</span> <span class="n">fuzzer</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> 
+    <span class="o">+</span> <span class="s2">&quot;&lt;secret-key&gt;&quot;</span> <span class="o">+</span> <span class="n">fuzzer</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&lt;other-secrets&gt;&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We add more "memory" characters to <code>s</code>, filled with <code>"deadbeef"</code> as marker for uninitialized memory:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">uninitialized_memory_marker</span> <span class="o">=</span> <span class="s2">&quot;deadbeef&quot;</span>
+<span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2048</span><span class="p">:</span>
+    <span class="n">s</span> <span class="o">+=</span> <span class="n">uninitialized_memory_marker</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We now convert this string into a modifiable list of characters.  (In C, both would be the same.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">memory</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+    <span class="n">memory</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The heartbeat service would now take a reply to be sent back, as well as a length.  It would store the reply to be sent in memory, and then send it back with the given length.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">heartbeat</span><span class="p">(</span><span class="n">reply</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">memory</span>
+
+    <span class="c1"># Store reply in memory</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reply</span><span class="p">)):</span>
+        <span class="n">memory</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">reply</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">memory</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="c1"># Send back heartbeat</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="n">memory</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">s</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This perfectly works for standard strings:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">heartbeat</span><span class="p">(</span><span class="s2">&quot;potato&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;potato&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">heartbeat</span><span class="p">(</span><span class="s2">&quot;bird&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;bird&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>However, if the length is greater than the length of the reply string, additional contents of memory spill out:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">heartbeat</span><span class="p">(</span><span class="s2">&quot;hat&quot;</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;hat\n\no\nfor reply&gt;#,,!3?30&gt;#61)$4--8=&lt;7)4 )03/%,5+! &#34;4)0?.9+?3();&lt;42?=?0&lt;secret-certificate&gt;7(+/+((1)#/0\&#39;4!&gt;/&lt;#=78%6$!!$&lt;-&#34;3&#34;\&#39;-?1?85!05629%/); *)1\&#39;/=9%&lt;secret-key&gt;.(#.4%&lt;other-secrets&gt;deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadb&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>In the OpenSSL implementation, these memory contents could involve cryptographic certificates, private keys, and more – and worse, no one would notice that this memory just had been accessed.  When the HeartBleed bug was discovered, it had been around for many years, and none would know whether and which secrets had already leaked.  The quickly set up <a href="http://heartbleed.com/">HeartBleed announcement page</a> said it all:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p><img src="PICS/Heartbleed-announce.png" alt="Heartbleed Announcement"></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>But how was HeartBleed discovered?  Very simple.  Researchers both at the Codenomicon company as well as with Google compiled the OpenSSL library with a memory sanitizer, and then happily flooded it with fuzzed commands.  The memory sanitizer would then notice whether uninitialized memory had been accessed – and actually, it would very quickly discover this.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can again simulate this in our Python example.  Let us simply assume that if some string contains the uninitilaized memory marker, we have been accessing memory out of bounds:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ExpectError</span> <span class="k">import</span> <span class="n">ExpectError</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">heartbeat</span><span class="p">(</span><span class="n">fuzzer</span><span class="p">(),</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">500</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">uninitialized_memory_marker</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-37-acbbca5ca20f&gt;&#34;, line 4, in &lt;module&gt;
+    assert not s.find(uninitialized_memory_marker)
+AssertionError
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>In combination with a memory checker, this indeed would find the bug within seconds.  If only OpenSSL had been fuzzed right before release...</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As a rule of thumb, you should always <em>enable as many automatic checkers as possible</em> during fuzzing.  CPU cycles are cheap, and errors are expensive.  If you only execute the program without an option to actually detect errors, you will be missing several opportunities.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Program-Specific-Checkers">Program-Specific Checkers<a class="anchor-link" href="#Program-Specific-Checkers">&#182;</a></h3><p>Besides generic checkers that apply to <em>all</em> programs on a given platform or in a given language, you can also devise <em>specific</em> checkers that apply to your program, or a subsystem.  In the <a href="Intro_Testing.html">chapter on testing</a>, we already have hinted at techniques of <a href="Intro_Testing.ipynb#Runtime-Verification">runtime verification</a> that check function results at runtime for correctness.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>One key concept for detecting errors early is <em>assertions</em> that check the input (precondition) and result (postcondition) of important functions.  The more assertions you have in your program, the higher your chances to detect errors during execution that would go undetected by generic checkers – notably during fuzzing.  If you worry about the impact of assertions on performance, keep in mind that assertions can be turned off in production code (although it can be helpful to leave the most critical checks active).</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>One of the most important use of assertions for finding errors is <em>checking the integrity of complex data structures.</em>  Let us illustrate the concept using a simple example.  Suppose we have a mapping of airport codes to airports, as in</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">airport_codes</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;YVR&quot;</span><span class="p">:</span> <span class="s2">&quot;Vancouver&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;JFK&quot;</span><span class="p">:</span> <span class="s2">&quot;New York-JFK&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CDG&quot;</span><span class="p">:</span> <span class="s2">&quot;Paris-Charles de Gaulle&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CAI&quot;</span><span class="p">:</span> <span class="s2">&quot;Cairo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LED&quot;</span><span class="p">:</span> <span class="s2">&quot;St. Petersburg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PEK&quot;</span><span class="p">:</span> <span class="s2">&quot;Beijing&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;HND&quot;</span><span class="p">:</span> <span class="s2">&quot;Tokyo-Haneda&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AKL&quot;</span><span class="p">:</span> <span class="s2">&quot;Auckland&quot;</span>
+<span class="p">}</span> <span class="c1"># plus many more</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">airport_codes</span><span class="p">[</span><span class="s2">&quot;YVR&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;Vancouver&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="s2">&quot;AKL&quot;</span> <span class="ow">in</span> <span class="n">airport_codes</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>True
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This list of airport codes may be pretty critical: If we have a spelling mistake in any of the airport codes, this may impact whatever application we have.  We therefore introduce a function that checks the list for consistency.  The consistency condition is called a <em>representation invariant</em>, and functions (or methods) that check it are therefore typically named <code>repOK()</code> for "the representation is ok".</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>First, let's have a checker for individual airport codes.  The checker fails if the code is inconsistent.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">code_repOK</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">code</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Airport code must have three characters: &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">code</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">isalpha</span><span class="p">(),</span> <span class="s2">&quot;Non-letter in airport code: &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">c</span><span class="o">.</span><span class="n">isupper</span><span class="p">(),</span> <span class="s2">&quot;Lowercase letter in airport code: &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">code_repOK</span><span class="p">(</span><span class="s2">&quot;SEA&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can now use <code>code_repOK()</code> to check all elements in the list:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">airport_codes_repOK</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">airport_codes</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">code_repOK</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">airport_codes_repOK</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we add an invalid element to the list, our check would fail:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">airport_codes</span><span class="p">[</span><span class="s2">&quot;YMML&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Melbourne&quot;</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">airport_codes_repOK</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-46-21eb3b08ef3e&gt;&#34;, line 2, in &lt;module&gt;
+    assert airport_codes_repOK()
+  File &#34;&lt;ipython-input-43-f8128f7dc918&gt;&#34;, line 3, in airport_codes_repOK
+    assert code_repOK(code)
+  File &#34;&lt;ipython-input-41-345123a45730&gt;&#34;, line 2, in code_repOK
+    assert len(code) == 3, &#34;Airport code must have three characters: &#34; + repr(code)
+AssertionError: Airport code must have three characters: &#39;YMML&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Of course, rather than manipulating the list directly, we'd have a special function for adding elements; this could then also check whether the code is valid:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">add_new_airport</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">city</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">code_repOK</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="n">airport_codes</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">city</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>  <span class="c1"># For BER, ExpectTimeout would be more appropriate</span>
+    <span class="n">add_new_airport</span><span class="p">(</span><span class="s2">&quot;BER&quot;</span><span class="p">,</span> <span class="s2">&quot;Berlin&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This check also allows us to find out errors in argument lists:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="n">add_new_airport</span><span class="p">(</span><span class="s2">&quot;London-Heathrow&quot;</span><span class="p">,</span> <span class="s2">&quot;LHR&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-49-6aeb45bf2b91&gt;&#34;, line 2, in &lt;module&gt;
+    add_new_airport(&#34;London-Heathrow&#34;, &#34;LHR&#34;)
+  File &#34;&lt;ipython-input-47-f4d30ab4bf9e&gt;&#34;, line 2, in add_new_airport
+    assert code_repOK(code)
+  File &#34;&lt;ipython-input-41-345123a45730&gt;&#34;, line 2, in code_repOK
+    assert len(code) == 3, &#34;Airport code must have three characters: &#34; + repr(code)
+AssertionError: Airport code must have three characters: &#39;London-Heathrow&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>For maximum checking, though, the <code>add_new_airport()</code> function would also ensure the correct representation of the list of airport codes – <em>before</em> and <em>after</em> changing it.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">add_new_airport</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">city</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">code_repOK</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">airport_codes_repOK</span><span class="p">()</span>
+    <span class="n">airport_codes</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">city</span>
+    <span class="k">assert</span> <span class="n">airport_codes_repOK</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This catches the inconsistency introduced earlier:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="n">add_new_airport</span><span class="p">(</span><span class="s2">&quot;IST&quot;</span><span class="p">,</span> <span class="s2">&quot;Istanbul Yeni Havalimanı&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-51-a80a619d120e&gt;&#34;, line 2, in &lt;module&gt;
+    add_new_airport(&#34;IST&#34;, &#34;Istanbul Yeni Havalimanı&#34;)
+  File &#34;&lt;ipython-input-50-93da9120109e&gt;&#34;, line 3, in add_new_airport
+    assert airport_codes_repOK()
+  File &#34;&lt;ipython-input-43-f8128f7dc918&gt;&#34;, line 3, in airport_codes_repOK
+    assert code_repOK(code)
+  File &#34;&lt;ipython-input-41-345123a45730&gt;&#34;, line 2, in code_repOK
+    assert len(code) == 3, &#34;Airport code must have three characters: &#34; + repr(code)
+AssertionError: Airport code must have three characters: &#39;YMML&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The more <code>repOK()</code> assertions exist in your code, the more errors you will catch – even those specific to only your domain and problem.  On top, such assertions document the <em>assumptions you made</em> during programming and thus help other programmers to understand your code and prevent errors.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As a final example, let us consider a rather complex data structure – a <a href="https://en.wikipedia.org/wiki/Red–black_tree">red-black tree</a>, a self-balancing binary search tree.  Implementing a red-black tree is not too hard, but getting it correct can be a task of several hours even for experienced programmers.  A <code>repOK()</code> method, however, documents all the assumptions and checks them as well:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">RedBlackTree</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">repOK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootHasNoParent</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootIsBlack</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNodesHaveOnlyBlackChildren</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">treeIsAcyclic</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">parentsAreConsistent</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">rootIsBlack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">==</span> <span class="n">BLACK</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">add_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">repOK</span><span class="p">()</span>
+        <span class="c1"># Add the element</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">repOK</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">delete_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">repOK</span><span class="p">()</span>
+        <span class="c1"># Delete the element</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">repOK</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here, <code>repOK()</code> is a method that runs on an object of the <code>RedBlackTree</code> class.  It runs five different checks, all of which have their own assertions.  Whenever an element is added or deleted, all these consistency checks are run automatically.  If you have an error in any of these, the checkers will find them – if you run the tree through sufficiently many fuzzed inputs, of course.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Static-Code-Checkers">Static Code Checkers<a class="anchor-link" href="#Static-Code-Checkers">&#182;</a></h3><p>Many of the benefits from <code>repOK()</code> assertions can also be obtained by using <em>static type checkers</em> on your code.  In Python, for instance, the <a href="http://mypy-lang.org">MyPy</a> static checker can find type errors as soon as types of arguments are properly declared:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">Dict</span>
+
+<span class="n">airport_codes</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;YVR&quot;</span><span class="p">:</span> <span class="s2">&quot;Vancouver&quot;</span><span class="p">,</span> <span class="c1"># etc</span>
+<span class="p">}</span> <span class="c1"># type: Dict[str, str]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we now add a key with a non-string type, as in</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">airport_codes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;First&quot;</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>this would be caught by MyPy immediately:</p>
+<div class="highlight"><pre><span></span>$ mypy airports.py
+airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">&quot;int&quot;</span> <span class="k">for</span> <span class="s2">&quot;Dict[str, str]&quot;</span><span class="p">;</span> expected <span class="nb">type</span> <span class="s2">&quot;str&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Statically checking more advanced properties such as the airport code consisting of exactly three upper-case characters or a tree being acyclic, however, quickly reach the limits of static checking.  Your <code>repOK()</code> assertions will still be needed – best in conjunction with a good test generator.</p>
 </div>
 </div>
 </div>
@@ -13012,7 +13886,7 @@ ValueError
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Runner">Runner<a class="anchor-link" href="#Runner">&#182;</a></h3><p>The first thing we introduce is the notion of a <code>Runner</code> – that is, an object whose job it is to execute some object with a given input.  A runner typically is some program or function under test, but we can also have simpler runners.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Runner-Classes">Runner Classes<a class="anchor-link" href="#Runner-Classes">&#182;</a></h3><p>The first thing we introduce is the notion of a <code>Runner</code> – that is, an object whose job it is to execute some object with a given input.  A runner typically is some program or function under test, but we can also have simpler runners.</p>
 <p>Let us start with a base class for runners.  A runner essentially provides a method <code>run(input)</code> that is used to pass <code>input</code> (a string) to the runner.  <code>run()</code> returns a result; by default, this is the input.</p>
 </div>
 </div>
@@ -13149,6 +14023,27 @@ ValueError
 </div>
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">BinaryProgramRunner</span><span class="p">(</span><span class="n">ProgramRunner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run the program with `inp` as input.  Return result of `subprocess.run()`.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">,</span>
+                        <span class="nb">input</span><span class="o">=</span><span class="n">inp</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span>
+                        <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                        <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -13186,7 +14081,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Fuzzers">Fuzzers<a class="anchor-link" href="#Fuzzers">&#182;</a></h3><p>Let us now define <em>fuzzers</em> that actually feed data into a consumer.  The base class for fuzzers provides one central method <code>fuzz()</code> that creates some input.  The <code>run()</code> function then sends the fuzz() input to a consumer, returning the result; <code>runs()</code> does this for a given number (<code>trials</code>) of times.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Fuzzer-Classes">Fuzzer Classes<a class="anchor-link" href="#Fuzzer-Classes">&#182;</a></h3><p>Let us now define <em>fuzzers</em> that actually feed data into a consumer.  The base class for fuzzers provides one central method <code>fuzz()</code> that creates some input.  The <code>run()</code> function then sends the fuzz() input to a consumer, returning the result; <code>runs()</code> does this for a given number (<code>trials</code>) of times.</p>
 </div>
 </div>
 </div>
@@ -13285,16 +14180,16 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>8+&#39;4&lt;$&lt;?0&#34;1.&#39;*&amp;?27=)
-,()&#39;5,!.6-(3,6%7!533
-8 )0&#39;51*659:-*(6=?:*
-&#39;13#,0.48$:#63!?,93=
-%1=1(?+0&#34;% /:*!;%?.!
-(715)&#34;&#39;)*04*8&#39;&#34;2.$6!
-(20.&gt;9#/0(3!-&#39;.92?&gt;&#39;
-%.?)%;,0(/3)+4.?4&#34;:;
-+:=;/7&#34;801&amp;&#39;&gt;:??$!*:
-9?;5&amp;-?6(!5.&gt;608;,.%
+<pre>&#39;&gt;23&gt;33)(&amp;&#34;09.377.*3
+*+:5 ? (?1$4&lt;&gt;!?3&gt;.&#39;
+4+3/(3 (0%!&gt;!(+9%,#$
+/51$2964&gt;;)2417&lt;9&#34;2&amp;
+907.. !7:&amp;--&#34;=$7&#39;,7*
+(5=5&#39;.!*+&amp;&gt;&#34;)6%9)=,/
+?:&amp;5) &#34;;.0!=6&gt;3+&gt;)=,
+6&amp;,?:!#2))- ?:)=63&#39;-
+,)9#839%)?&amp;(0&lt;6(&#34;*;)
+4?!(49+8=-&#39;&amp;499%?&lt; &#39;
 </pre>
 </div>
 
@@ -13351,7 +14246,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;=5248=&amp;58500!-9&#34;%626&#39;, stderr=&#39;&#39;)
+<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;?:+= % &lt;1&lt;6$:(&gt;=:9)5&#39;, stderr=&#39;&#39;)
 </pre>
 </div>
 
@@ -13383,16 +14278,16 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;7/%&#34;%=86&lt;6,&#34;$67&gt;-&amp;.?&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;3?-?,/$7=07&#39;:4?&lt;2!&gt;%&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;(%$:89:9#0*#!%%!/!2/&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;/06)169&#39;)%)%$#=+.&amp;.3&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;055 8#29&gt;?,&gt;2-)&lt;+?)?&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;;582&#39;=#&lt;&gt;(0&gt;3!2)6 ,4&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;=&lt;!.,=*;4)) 3?\&#39;2%32&#34;&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;720-7)892%&lt;9+7(2&#34;&amp;42&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;?#&gt;%#&#39;):#05!3 1!:698&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;0?(/%+\&#39;7//3&gt; ?&amp;,-0&#34;1&#39;, stderr=&#39;&#39;)]
+<pre>[CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;3976%%&amp;+%6=(1)3&amp;3:&lt;9&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;33$#42$ 11=*%$20=&lt;.-&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&#34;?&lt;\&#39;#8 &lt;/:*%9.--\&#39;97!&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;/0-#(03/!#60&#39;+6&gt;&amp;&amp;72&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;=,+:,6&#39;5:950+&gt;&lt;3(*()&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34; 379+0?&#39;%3137=2:4605&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;02&gt;!$&lt;/&#39;*81.#&lt;/22&gt;+:&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;=-&lt;&#39;3-#88*%&amp;*9&lt; +1&amp;&amp;&#34;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;2;;0=3&amp;6=8&amp;30&amp;&lt;-;?*;&#39;, stderr=&#39;&#39;),
+ CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;/#05=*3($&gt;::#7!0=12+&#39;, stderr=&#39;&#39;)]
 </pre>
 </div>
 
@@ -13412,7 +14307,8 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li>Randomly generating inputs ("fuzzing") is a simple, cost-effective way to quickly test arbitrary programs for their robustness.</li>
-<li>Bugs fuzzers find are mainly due to errors and deficiencies in input processing.</li>
+<li>Bugs fuzzers find are mainly due to errors and deficiencies in <em>input processing</em>.</li>
+<li>To catch errors, have as many <em>consistency checkers</em> as possible.</li>
 </ul>
 </div>
 </div>
@@ -13449,7 +14345,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>From here, you can explore how to</p>
 <ul>
 <li><a href="MutationFuzzer.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
-<li><a href="Grammars.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
+<li><a href="Grammars.html">use <em>grammars</em> to specify the input format and thus get many more valid inputs</a></li>
 <li><a href="Reducing.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
 </ul>
 <p>Enjoy the read!</p>
@@ -13466,13 +14362,90 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>One of the errors found by Miller et al. [<a href="https://doi.org/10.1145/96267.96279">Miller <em>et al</em>, 1990.</a>] involves the <em>troff</em> typesetting system.  <em>Troff</em> takes as input a text consisting of lines; a line beginning with a dot (<code>.</code>) includes typesetting commands, as in</p>
+
+<pre><code>.NH
+Some Heading
+.LP
+Some paragraph</code></pre>
+<p>which would produce (using <code>nroff -ms</code>) the text</p>
+
+<pre><code>1.  Some Heading
+
+Some paragraph</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>At the time of Miller et al., <em>troff</em> would fail if its input included</p>
+<ol>
+<li>The input sequence <code>\D</code> (backslash + D) followed by a non-printable character</li>
+<li>A single character of 8-bit input, followed by a newline character</li>
+<li>A single dot (<code>.</code>), followed by a newline character.</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Simulate-Troff">Exercise 1: Simulate Troff<a class="anchor-link" href="#Exercise-1:-Simulate-Troff">&#182;</a></h3><p>For each of the above, write a Python function <code>f(s)</code> that fails if <code>s</code> fulfills the failure criterion.</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/Fuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-Run-Simulated-Troff">Exercise 2: Run Simulated Troff<a class="anchor-link" href="#Exercise-2:-Run-Simulated-Troff">&#182;</a></h3><p>Create a class <code>TroffRunner</code> as subclass of <code>Runner</code> that checks for the above predicates.  Run it with <code>Fuzzer</code>.  Be sure to have the <code>Fuzzer</code> object produce the entire range of characters.  Count how frequently the individual predicates fail.</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/Fuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-3:-Run-Real-Troff">Exercise 3: Run Real Troff<a class="anchor-link" href="#Exercise-3:-Run-Real-Troff">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Using <code>BinaryProgramRunner</code>, apply the fuzzer you configured on the real <code>troff</code> program.  Check if you can produce any run whose output code is non-zero, indicating a failure or a crash.</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/Fuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
         
 <p class="imprint">
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 This work is licensed under a
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>
 &bull;
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2018-09-18 16:22:02+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2018-09-21 16:23:31+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13488,7 +14461,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Fuzzer.html">https://www.fuzzingbook.org/html/Fuzzer.html</a>.  Retrieved 2018-09-18 16:22:02+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Fuzzer.html">https://www.fuzzingbook.org/html/Fuzzer.html</a>.  Retrieved 2018-09-21 16:23:31+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Fuzzer,
@@ -13498,9 +14471,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/Fuzzer.html}},
-    note = {Retrieved 2018-09-18 16:22:02+02:00},
+    note = {Retrieved 2018-09-21 16:23:31+02:00},
     url = {https://www.fuzzingbook.org/html/Fuzzer.html},
-    urldate = {2018-09-18 16:22:02+02:00}
+    urldate = {2018-09-21 16:23:31+02:00}
 }
 </pre>
 </div>

@@ -65,14 +65,17 @@ if __name__ == "__main__":
 # 
 # ## Exercises
 # 
-# Close the chapter with a few exercises such that people have things to do.  In Jupyter Notebook, use the `exercise2` nbextension to add solutions that can be interactively viewed or hidden:
+# Close the chapter with a few exercises such that people have things to do.  To make the solutions hidden (to be revealed by the user), have them start with
 # 
-# * Mark the _last_ cell of the exercise (this should be a _text_ cell) as well as _all_ cells of the solution.  (Use the `rubberband` nbextension and use Shift+Drag to mark multiple cells.)
-# * Click on the `solution` button at the top.
+# ```markdown
+# **Solution.**
+# ```
 # 
-# (Alternatively, just copy the exercise and solution cells below with their metadata.)
+# Your solution can then extend up to the next title (i.e., any markdown cell starting with `#`).
 # 
-# ### Exercise 1
+# Running `make metadata` will automatically add metadata to the cells such that the cells will be hidden by default, and can be uncovered by the user.  The button will be introduced above the solution.
+# 
+# ### Exercise 1: _Title_
 # 
 # _Text of the exercise_
 # 
@@ -82,7 +85,7 @@ if __name__ == "__main__":
     
 # _Some more text for the exercise_
 # 
-# _Some text for the solution_
+# **Solution.** _Some text for the solution_
 # 
 if __name__ == "__main__":
     # Some code for the solution
@@ -90,9 +93,9 @@ if __name__ == "__main__":
     
 # _Some more text for the solution_
 # 
-# ### Exercise 2
+# ### Exercise 2: _Title_
 # 
 # _Text of the exercise_
 # 
-# _Solution for the exercise_
+# **Solution.** _Solution for the exercise_
 # 
