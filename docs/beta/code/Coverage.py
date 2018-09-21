@@ -470,21 +470,84 @@ if __name__ == "__main__":
 # 
 # ## Next Steps
 # 
-# _Link to subsequent chapters (notebooks) here, as in:_
+# Coverage is not only a tool to _measure_ test effectiveness, but also a great tool to _guide_ test generation towards specific goals – in particular uncovered code.  We use coverage to
 # 
-# * [use _mutations_ on existing inputs to get more valid inputs](MutationFuzzer.ipynb)
-# * [use _grammars_ (i.e., a specification of the input format) to get even more valid inputs](Grammars.ipynb)
-# * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
+# * [guide _mutations_ of existing inputs towards better coverage in the chapter on mutation fuzzing](MutationFuzzer.ipynb)
 # 
 # ## Exercises
 # 
-# ### Exercise 1
+# ### Exercise 1: Fixing cgi_decode
 # 
 # Create an appropriate test to reproduce the `IndexError` discussed above.  Fix `cgi_decode()` to prevent the bug.  Show that your test (and additional `fuzzer()` runs) no longer expose the bug.
 # 
-# _Solution for the exercise_
+# **Solution.**  Here's a test case:
 # 
-# ### Exercise 2
+if __name__ == "__main__":
+    with ExpectError():
+        assert cgi_decode('%') == '%'
+    
+if __name__ == "__main__":
+    with ExpectError():
+        assert cgi_decode('%4') == '%4'
+    
+if __name__ == "__main__":
+    assert cgi_decode('%40') == '@'
+    
+# Here's a fix:
+# 
+def fixed_cgi_decode(s):
+    """Decode the CGI-encoded string `s`:
+       * replace "+" by " "
+       * replace "%xx" by the character with hex number xx.
+       Return the decoded string.  Raise `ValueError` for invalid inputs."""
+
+    # Mapping of hex digits to their integer values
+    hex_values = {
+        '0': 0, '1': 1, '2': 2, '3': 3, '4': 4, 
+        '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 
+        'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
+        'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
+    }
+
+    t = ""
+    i = 0
+    while i < len(s):
+        c = s[i]
+        if c == '+':
+            t += ' '
+        elif c == '%' and i + 2 < len(s):  # <--- *** FIX ***
+            digit_high, digit_low = s[i + 1], s[i + 2]
+            i += 2
+            if digit_high in hex_values and digit_low in hex_values:
+                v = hex_values[digit_high] * 16 + hex_values[digit_low]
+                t += chr(v)
+            else:
+                raise ValueError("Invalid encoding")
+        else:
+            t += c
+        i += 1
+    return t
+
+if __name__ == "__main__":
+    assert fixed_cgi_decode('%') == '%'
+    
+if __name__ == "__main__":
+    assert fixed_cgi_decode('%4') == '%4'
+    
+if __name__ == "__main__":
+    assert fixed_cgi_decode('%40') == '@'
+    
+# Here's the test:
+# 
+if __name__ == "__main__":
+    for i in range(trials):
+        try:
+            s = fuzzer()
+            fixed_cgi_decode(s)
+        except ValueError:
+            pass
+    
+# ### Exercise 2: Branch Coverage
 # 
 # Besides statement coverage, _branch coverage_ is one of the most frequently used criteria to determine the quality of a test.  In a nutshell, branch coverage measures how many different _control decisions_ are made in code.  In the statement
 # 
@@ -531,5 +594,5 @@ if __name__ == "__main__":
 # 
 # Bonus for advanced Python programmers: Define `BranchCoverage` as subclass of `Coverage` and make `branch_coverage()` a method of `BranchCoverage`.
 # 
-# _Solution for the exercise_
+# **Solution.**
 # 

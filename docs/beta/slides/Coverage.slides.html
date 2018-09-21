@@ -11776,7 +11776,7 @@ ul.typeahead-list > li > a {
 /* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
 
 /* Loading fonts in Jupyter */
-@import url(http://fonts.googleapis.com/css?family=Patua+One|Open+Sans|Source+Code+Pro:400,700);
+@import url(http://fonts.googleapis.com/css?family=Patua+One|Open+Sans|Source+Code+Pro);
 
 /* Fonts and sizes */
 h1, h2, h3, h4, h5 {
@@ -13143,7 +13143,7 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{(&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 19)}
+<pre>{(&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 20), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 32)}
 </pre>
 </div>
 </div>
@@ -13842,7 +13842,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p>Create an appropriate test to reproduce the <code>IndexError</code> discussed above.  Fix <code>cgi_decode()</code> to prevent the bug.  Show that your test (and additional <code>fuzzer()</code> runs) no longer expose the bug.</p>
+<h3 id="Exercise-1:-Fixing-cgi_decode">Exercise 1: Fixing cgi_decode<a class="anchor-link" href="#Exercise-1:-Fixing-cgi_decode">&#182;</a></h3><p>Create an appropriate test to reproduce the <code>IndexError</code> discussed above.  Fix <code>cgi_decode()</code> to prevent the bug.  Show that your test (and additional <code>fuzzer()</code> runs) no longer expose the bug.</p>
 
 </div>
 </div>
@@ -13851,16 +13851,222 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><em>Solution for the exercise</em></p>
+<p><strong>Solution.</strong>  Here's a test case:</p>
 
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-37-11dfaa12d229&gt;&#34;, line 2, in &lt;module&gt;
+    assert cgi_decode(&#39;%&#39;) == &#39;%&#39;
+  File &#34;&lt;ipython-input-1-46709804f7f9&gt;&#34;, line 22, in cgi_decode
+    digit_high, digit_low = s[i + 1], s[i + 2]
+IndexError: string index out of range
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;%4&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;%4&#39;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-38-ef9edd8b32b3&gt;&#34;, line 2, in &lt;module&gt;
+    assert cgi_decode(&#39;%4&#39;) == &#39;%4&#39;
+  File &#34;&lt;ipython-input-1-46709804f7f9&gt;&#34;, line 22, in cgi_decode
+    digit_high, digit_low = s[i + 1], s[i + 2]
+IndexError: string index out of range
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;%40&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here's a fix:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fixed_cgi_decode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decode the CGI-encoded string `s`:</span>
+<span class="sd">       * replace &quot;+&quot; by &quot; &quot;</span>
+<span class="sd">       * replace &quot;%xx&quot; by the character with hex number xx.</span>
+<span class="sd">       Return the decoded string.  Raise `ValueError` for invalid inputs.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Mapping of hex digits to their integer values</span>
+    <span class="n">hex_values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;0&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> 
+        <span class="s1">&#39;5&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;7&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span> 
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+        <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
+        <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="c1"># &lt;--- *** FIX ***</span>
+            <span class="n">digit_high</span><span class="p">,</span> <span class="n">digit_low</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+            <span class="k">if</span> <span class="n">digit_high</span> <span class="ow">in</span> <span class="n">hex_values</span> <span class="ow">and</span> <span class="n">digit_low</span> <span class="ow">in</span> <span class="n">hex_values</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">hex_values</span><span class="p">[</span><span class="n">digit_high</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span> <span class="o">+</span> <span class="n">hex_values</span><span class="p">[</span><span class="n">digit_low</span><span class="p">]</span>
+                <span class="n">t</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">+=</span> <span class="n">c</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">t</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%4&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;%4&#39;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%40&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here's the test:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
+        <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
 </div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p>Besides statement coverage, <em>branch coverage</em> is one of the most frequently used criteria to determine the quality of a test.  In a nutshell, branch coverage measures how many different <em>control decisions</em> are made in code.  In the statement</p>
+<h3 id="Exercise-2:-Branch-Coverage">Exercise 2: Branch Coverage<a class="anchor-link" href="#Exercise-2:-Branch-Coverage">&#182;</a></h3><p>Besides statement coverage, <em>branch coverage</em> is one of the most frequently used criteria to determine the quality of a test.  In a nutshell, branch coverage measures how many different <em>control decisions</em> are made in code.  In the statement</p>
 <div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">CONDITION</span><span class="p">:</span>
     <span class="n">do_a</span><span class="p">()</span>
 <span class="k">else</span><span class="p">:</span>
@@ -13888,7 +14094,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
@@ -13907,7 +14113,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[37]:</div>
+<div class="prompt output_prompt">Out[45]:</div>
 
 
 
@@ -13972,7 +14178,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><em>Solution for the exercise</em></p>
+<p><strong>Solution.</strong></p>
 
 </div>
 </div>
