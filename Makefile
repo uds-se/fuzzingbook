@@ -551,7 +551,7 @@ README.md: $(MARKDOWN_TARGET)index.md
 	sed 's!<script.*</script>!!g' $< > $@
 
 publish: docs
-	git add $(DOCS_TARGET)* binder/* README.md
+	git add $(DOCS_TARGET)* binder/postBuild README.md
 	-git status
 	-git commit -m "Doc update" $(DOCS_TARGET) binder README.md
 	@echo "Now use 'git push' to place docs on website,"
