@@ -308,7 +308,7 @@ help:
 	@echo "Publish:"
 	@echo "* make docs -> Create public version of current documents" 
 	@echo "* make beta -> Create beta version of current documents" 
-	@echo "* make publish -> Add docs to git, preparing for publication" 
+	@echo "* make publish-all -> Add docs to git, preparing for publication" 
 	@echo ""
 	@echo "Settings:"
 	@echo "* Use make PUBLISH=(nbconvert|nbpublish|bookbook) to choose a converter"
@@ -390,6 +390,9 @@ $(DOCS_TARGET)beta/%:
 
 %-beta:
 	$(MAKE) BETA=beta $(@:-beta=)
+
+%-all: % %-beta
+	@true
 
 beta: docs-beta
 endif
