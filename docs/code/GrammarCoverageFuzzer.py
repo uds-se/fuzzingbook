@@ -42,10 +42,10 @@ class GrammarCoverageFuzzer(GrammarFuzzer):
         # invoke superclass __init__(), passing all arguments
         super().__init__(*args, **kwargs)
         self.reset_coverage()
-        
+
     def reset_coverage(self):
         self.covered_expansions = set()
-    
+
     def expansion_coverage(self):
         return self.covered_expansions
 
@@ -95,7 +95,7 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
         # Save the expansion as covered
         key = self.expansion_key(symbol, new_children)
         assert key not in self.covered_expansions
-        
+
         if self.log:
             print("Now covered:", key)
         self.covered_expansions.add(key)
@@ -167,7 +167,7 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
                             symbols_seen |= new_symbols_seen
 
         return (cov, symbols_seen)
-    
+
     def max_symbol_expansion_coverage(self, symbol, max_depth=float('inf')):
         cov, symbols_seen = self._max_symbol_expansion_coverage(symbol, max_depth, set(), set())
         return cov
@@ -189,7 +189,7 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
             if c_symbol in self.grammar:
                 new_cov |= self.max_symbol_expansion_coverage(c_symbol, max_depth)
         return new_cov
-    
+
     def new_child_coverage(self, symbol, children, max_depth):
         new_cov = self._new_child_coverage(children, max_depth)
         for c in children:
@@ -202,7 +202,7 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
         # Prefer uncovered expansions
         (symbol, children) = node
         # print("Possible children:", possible_children)
-        
+
         # Find maximum depth at which we discover uncovered nodes
         for max_depth in range(len(self.grammar)):
             new_coverages = [self.new_child_coverage(symbol, c, max_depth) for c in possible_children]
@@ -220,7 +220,7 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
             print("New coverages at depth", max_depth)
             for i in range(len(possible_children)):
                 print(i, possible_children[i], new_coverages[i], len(new_coverages[i]))
-        
+
         children_with_max_new_coverage = [(i, c) for (i, c) in enumerate(possible_children)
                                           if len(new_coverages[i]) == max_new_coverage]
         if self.log:
@@ -232,7 +232,7 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
 
         # Save the expansion as covered
         key = self.expansion_key(symbol, new_children)
-     
+
         if self.log:
             print("Now covered:", key)
         self.covered_expansions.add(key)
@@ -274,7 +274,7 @@ def match_path(path, tree):
         (path_symbol, path_children) = path
         if symbol != path_symbol:
             return False
-        
+
         if path_children is not None and len(path_children) > 0:
             if len(children) > 1:
                 # Multiple children given; must all match
@@ -293,11 +293,11 @@ def match_path(path, tree):
 
 if __name__ == "__main__":
     derivation_tree = ("<start>", 
-            [("<expr>", 
-              [("<expr>", None),
-               (" + ", []),
-               ("<term>", None)]
-             )])
+                       [("<expr>", 
+                         [("<expr>", None),
+                          (" + ", []),
+                             ("<term>", None)]
+                         )])
     display_tree(derivation_tree)
     
 if __name__ == "__main__":
@@ -345,7 +345,7 @@ class CombinatorialCoverageFuzzer(GrammarFuzzer):
         # invoke superclass __init__(), passing all arguments
         super().__init__(*args, **kwargs)
         self.reset_coverage()
-    
+
     def reset_coverage(self):
         self._current_depth = 0
         self.covered_expansions = set()
@@ -367,7 +367,7 @@ class CombinatorialCoverageFuzzer(CombinatorialCoverageFuzzer):
         (symbol, children) = tree
         if id(tree) == id(node):
             return node
-        
+
         if children is None:
             return None
 
@@ -380,11 +380,11 @@ class CombinatorialCoverageFuzzer(CombinatorialCoverageFuzzer):
 
 if __name__ == "__main__":
     derivation_tree = ("<start>", 
-            [("<expr>", 
-              [("<expr>", None),
-               (" + ", []),
-               ("<term>", None)]
-             )])
+                       [("<expr>", 
+                         [("<expr>", None),
+                          (" + ", []),
+                             ("<term>", None)]
+                         )])
     display_tree(derivation_tree)
     
 if __name__ == "__main__":
@@ -412,7 +412,7 @@ class CombinatorialCoverageFuzzer(CombinatorialCoverageFuzzer):
                 return ((symbol, [subpath]), subheight + 1)
             else:
                 return (subpath, subheight)
-        
+
         subpath, subheight = _subpath(path, height)
         return subpath
 
@@ -474,7 +474,7 @@ class CombinatorialCoverageFuzzer(CombinatorialCoverageFuzzer):
                 assert key not in self.covered_expansions
                 self.covered_expansions.add(key)
                 return index
-        
+
         if self.log:
             print("All combinations covered")
         return super().choose_node_expansion(node, possible_children)

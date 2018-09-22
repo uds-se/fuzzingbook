@@ -43,7 +43,7 @@ if __name__ == "__main__":
         xs.append(len(s))
         ys.append(t.elapsed_time())
         print(i, end=" ")
-        
+    
     average_time = sum(ys) / trials
     print()
     print("Average time:", average_time)
@@ -135,11 +135,11 @@ if __name__ == "__main__":
 # 
 if __name__ == "__main__":
     derivation_tree = ("<start>", 
-            [("<expr>", 
-              [("<expr>", None),
-               (" + ", []),
-               ("<term>", None)]
-             )])
+                       [("<expr>", 
+                         [("<expr>", None),
+                          (" + ", []),
+                             ("<term>", None)]
+                         )])
     
 # To better understand the structure of this tree, let us introduce a function that visualizes this tree.  We use the `dot` drawing program from the `graphviz` package algorithmically, traversing the above structure.  (Unless you're deeply interested in tree visualization, you can directly skip to the example below.)
 # 
@@ -162,12 +162,13 @@ if __name__ == "__main__":
     
 def display_tree(derivation_tree):
     """Visualize a derivation tree as SVG using the graphviz/dot package."""
-    
+
     counter = 0
+
     def traverse_tree(dot, tree, id=0):
         (symbol, children) = tree
         dot.node(repr(id), dot_escape(symbol))
-        
+
         if children is not None:
             for child in children:
                 nonlocal counter  # Assign each node a unique identifier
@@ -256,7 +257,7 @@ class GrammarFuzzer(GrammarFuzzer):
         if expansion == "":  # Special case: empty expansion
             return [("", [])]
 
-        strings  = re.split(RE_NONTERMINAL, expansion)
+        strings = re.split(RE_NONTERMINAL, expansion)
         return [(s, None) if is_nonterminal(s) else (s, []) for s in strings if len(s) > 0]
 
 if __name__ == "__main__":
@@ -285,7 +286,7 @@ class GrammarFuzzer(GrammarFuzzer):
     def expand_node_randomly(self, node):
         (symbol, children) = node
         assert children is None
-        
+
         if self.log:
             print("Expanding", all_terminals(node), "randomly")
 
@@ -370,16 +371,16 @@ class GrammarFuzzer(GrammarFuzzer):
 
         # Find all children with possible expansions
         expandable_children = [c for c in children if self.any_possible_expansions(c)]
-        
+
         # `index_map` translates an index in `expandable_children` back into the original index in `children`
         index_map = [i for (i, c) in enumerate(children) if self.any_possible_expansions(c)]
-        
+
         # print("expandable_children =", expandable_children)
         # print("index_map =", index_map)
 
         # Select a random child
         child_to_be_expanded = self.choose_tree_expansion(tree, expandable_children)
-        
+
         # Expand in place
         children[index_map[child_to_be_expanded]] =             self.expand_tree_once(expandable_children[child_to_be_expanded])
 
@@ -389,11 +390,11 @@ class GrammarFuzzer(GrammarFuzzer):
 # 
 if __name__ == "__main__":
     derivation_tree = ("<start>", 
-            [("<expr>", 
-              [("<expr>", None),
-               (" + ", []),
-               ("<term>", None)]
-             )])
+                       [("<expr>", 
+                         [("<expr>", None),
+                          (" + ", []),
+                             ("<term>", None)]
+                         )])
     display_tree(derivation_tree)
     
 if __name__ == "__main__":
@@ -454,12 +455,12 @@ class GrammarFuzzer(GrammarFuzzer):
 
         possible_children_with_cost = [(self.expansion_to_children(expansion),
                                         self.expansion_cost(expansion, {symbol}))
-                                      for expansion in expansions]
+                                       for expansion in expansions]
 
         costs = [cost for (child, cost) in possible_children_with_cost]
         chosen_cost = choose(costs)
         children_with_chosen_cost = [child for (child, child_cost) in possible_children_with_cost
-                                  if child_cost == chosen_cost]
+                                     if child_cost == chosen_cost]
 
         index = self.choose_node_expansion(node, children_with_chosen_cost)
 
@@ -514,11 +515,11 @@ class GrammarFuzzer(GrammarFuzzer):
 
 if __name__ == "__main__":
     derivation_tree = ("<start>", 
-            [("<expr>", 
-              [("<expr>", None),
-               (" + ", []),
-               ("<term>", None)]
-             )])
+                       [("<expr>", 
+                         [("<expr>", None),
+                          (" + ", []),
+                             ("<term>", None)]
+                         )])
     
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
     display_tree(derivation_tree)
@@ -558,7 +559,7 @@ class GrammarFuzzer(GrammarFuzzer):
             tree = self.expand_tree_once(tree)
             self.log_tree(tree)
         return tree
-            
+
     def expand_tree(self, tree):
         """Expand `tree` in a three-phase strategy until all expansions are complete."""
         self.log_tree(tree)
@@ -574,11 +575,11 @@ class GrammarFuzzer(GrammarFuzzer):
 # 
 if __name__ == "__main__":
     derivation_tree = ("<start>", 
-            [("<expr>", 
-              [("<expr>", None),
-               (" + ", []),
-               ("<term>", None)]
-             )])
+                       [("<expr>", 
+                         [("<expr>", None),
+                          (" + ", []),
+                             ("<term>", None)]
+                         )])
     
     f = GrammarFuzzer(EXPR_GRAMMAR, min_nonterminals=3, max_nonterminals=5, log=True)
     derivation_tree = f.expand_tree(derivation_tree)
@@ -687,17 +688,20 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     # cache the function calls. We only cache a given call based on the
     # indicated argument number per function.
-    def memoize(argnum):
-        def fn_wrap(function):
-            memo = {}
-            def wrapper(*args):
-                if args[argnum] in memo: return memo[args[argnum]]
-                rv = function(*args)
-                memo[args[argnum]] = rv
-                return rv
-            return wrapper
-        return fn_wrap
     
+def memoize(argnum):
+    def fn_wrap(function):
+        memo = {}
+
+        def wrapper(*args):
+            if args[argnum] in memo:
+                return memo[args[argnum]]
+            rv = function(*args)
+            memo[args[argnum]] = rv
+            return rv
+        return wrapper
+    return fn_wrap
+
 # _Solution for the exercise_
 # 
 # ### Exercise 2
