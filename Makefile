@@ -249,7 +249,7 @@ slides:	$(SLIDES) $(REVEAL_JS)
 word doc docx: $(WORDS)
 md markdown: $(MARKDOWNS)
 epub: $(EPUBS)
-full-notebooks full: $(FULLS)
+full-notebooks full fulls: $(FULLS)
 
 book-pdf:  ipypublish-book $(BOOK_PDF)
 book-html: ipypublish-book $(BOOK_HTML)
@@ -494,7 +494,7 @@ style check-style checkstyle: $(PYS) $(PYCODESTYLE_CFG)
 # Automatic formatting
 autopep8 reformat: $(PYCODESTYLE_CFG)
 	$(NBAUTOPEP8) --global-config $(PYCODESTYLE_CFG) --aggressive --in-place $(SOURCES)
-	@echo "Code reformatting complete."
+	@echo "Code reformatting complete.  Use 'make full' to re-execute and test notebooks."
 
 
 # List of Cross References
