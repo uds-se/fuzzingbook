@@ -378,13 +378,15 @@ if __name__ == "__main__":
 def is_sorted(elems):
     return all(elems[i] <= elems[i + 1] for i in range(len(elems) - 1))
 
-is_sorted([3, 5, 9])
-
+if __name__ == "__main__":
+    is_sorted([3, 5, 9])
+    
 def is_permutation(a, b):
     return all(a.count(elem) == b.count(elem) for elem in a)
 
-is_permutation([3, 2, 1], [1, 3, 2])
-
+if __name__ == "__main__":
+    is_permutation([3, 2, 1], [1, 3, 2])
+    
 # Start with a random list generator, using `[]` as the empty list and `elems.append(x)` to append an element `x` to the list `elems`.  Use the above helper functions to assess the results.  Generate and test 1,000 lists.
 # 
 # **Solution.** Here's a simple random list generator:
@@ -471,7 +473,7 @@ def quadratic_solver_fixed(a, b, c):
     if q == 0:
         solution = -b / 2 * a
         return (solution, None)
-    
+
     solution_1 = (-b + my_sqrt_fixed(q)) / (2 * a)
     solution_2 = (-b - my_sqrt_fixed(q)) / (2 * a)
     return (solution_1, solution_2)

@@ -358,7 +358,7 @@ class FunctionRunner(Runner):
     def __init__(self, function):
         """Initialize.  `function` is a function to be executed"""
         self.function = function
-    
+
     def run(self, inp):
         return self.function(inp)
 
@@ -373,26 +373,25 @@ class FunctionCoverageRunner(FunctionRunner):
                 self._valid_input = False
         self._coverage = cov.coverage()
         return result
-    
+
     def coverage(self):
         return self._coverage
 
     def valid_input(self):
         return self._valid_input
 
-    
 class MutationFuzzer(Fuzzer):
     def __init__(self, seed, min_mutations=2, max_mutations=10):
         self.seed = seed
         self.min_mutations = min_mutations
         self.max_mutations = max_mutations
         self.reset()
-        
+
     def reset(self):
         self.population = []
         self.coverages_seen = set()
         self.seed_index = 0
-        
+
     def mutate(self, inp):
         return mutate(inp)
 
@@ -402,7 +401,7 @@ class MutationFuzzer(Fuzzer):
         for i in range(trials):
             candidate = self.mutate(candidate)
         return candidate
-        
+
     def fuzz(self):
         if self.seed_index < len(self.seed):
             # Still seeding

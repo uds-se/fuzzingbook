@@ -163,9 +163,7 @@ import random
 class ExpansionError(Exception):
     pass
 
-def simple_grammar_fuzzer(grammar, start_symbol=START_SYMBOL, 
-                          max_nonterminals=10, max_expansion_trials=100,
-                          log=False):
+def simple_grammar_fuzzer(grammar, start_symbol=START_SYMBOL, max_nonterminals=10, max_expansion_trials=100, log=False):
     term = start_symbol
     expansion_trials = 0
 

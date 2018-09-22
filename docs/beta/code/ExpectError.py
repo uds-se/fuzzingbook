@@ -89,8 +89,9 @@ if __name__ == "__main__":
     except:
         # For Python 2
         class TimeoutError(Exception):
-            def __init__(self, value = "Timeout"):
+            def __init__(self, value="Timeout"):
                 self.value = value
+    
             def __str__(self):
                 return repr(self.value)
     

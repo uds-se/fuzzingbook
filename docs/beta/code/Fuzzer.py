@@ -77,7 +77,8 @@ if __name__ == "__main__":
 # 
 # Let us obtain a temporary file name such that we do not clutter the file system.
 # 
-import os, tempfile
+import os
+import tempfile
 
 if __name__ == "__main__":
     basename = "input.txt"
@@ -346,8 +347,8 @@ if __name__ == "__main__":
 # 
 if __name__ == "__main__":
     s = ("<space for reply>" + fuzzer(100) 
-        + "<secret-certificate>" + fuzzer(100) 
-        + "<secret-key>" + fuzzer(100) + "<other-secrets>")
+         + "<secret-certificate>" + fuzzer(100) 
+         + "<secret-key>" + fuzzer(100) + "<other-secrets>")
     
 # We add more "memory" characters to `s`, filled with `"deadbeef"` as marker for uninitialized memory:
 # 
@@ -367,7 +368,7 @@ if __name__ == "__main__":
 # 
 def heartbeat(reply, length):
     global memory
-    
+
     # Store reply in memory
     for i in range(len(reply)):
         memory[i] = reply[i]
@@ -429,7 +430,7 @@ if __name__ == "__main__":
         "PEK": "Beijing",
         "HND": "Tokyo-Haneda",
         "AKL": "Auckland"
-    } # plus many more
+    }  # plus many more
     
 if __name__ == "__main__":
     airport_codes["YVR"]
@@ -513,12 +514,12 @@ class RedBlackTree:
         assert self.treeIsAcyclic()
         assert self.parentsAreConsistent()
         return True
-    
+
     def rootIsBlack(self):
         if self.parent is None:
             assert self.color == BLACK
         return True
-        
+
     def add_element(self, elem):
         assert self.repOK()
         # Add the element
@@ -538,8 +539,8 @@ class RedBlackTree:
 from typing import Dict
 
 airport_codes = {
-    "YVR": "Vancouver", # etc
-} # type: Dict[str, str]
+    "YVR": "Vancouver",  # etc
+}  # type: Dict[str, str]
 
 # If we now add a key with a non-string type, as in
 # 
@@ -568,7 +569,7 @@ class Runner(object):
     def __init__(self):
         """Initialize"""
         pass
-    
+
     def run(self, inp):
         """Run the consumer with the given input"""
         return inp
@@ -598,12 +599,11 @@ class ProgramRunner(Runner):
     def run(self, inp):
         """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
         self.result = subprocess.run(self.program,
-                        input=inp,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        universal_newlines=True)
+                                     input=inp,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     universal_newlines=True)
         return self.result
-    
 
 # Here's a variant for binary (i.e., non-textual) input and output.
 # 
@@ -611,9 +611,9 @@ class BinaryProgramRunner(ProgramRunner):
     def run(self, inp):
         """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
         self.result = subprocess.run(self.program,
-                        input=inp.encode(),
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE)
+                                     input=inp.encode(),
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE)
         return self.result
 
 # Let us demonstrate a `ProgramRunner` using the `cat` program – a program that copies its input to its output.
@@ -638,7 +638,7 @@ class Fuzzer(object):
     def run(self, runner=Runner()):
         """Run `runner` with fuzz input"""
         return runner.run(self.fuzz())
-    
+
     def runs(self, runner=PrintRunner(), trials=10):
         """Run `runner` with fuzz input, `trials` times"""
         return [runner.run(self.fuzz()) for i in range(trials)]
@@ -778,13 +778,13 @@ class TroffRunner(Runner):
         self.no_backslash_d_failures = 0
         self.no_8bit_failures = 0
         self.no_dot_failures = 0
-        
+
     def run(self, inp):
         try:
             no_backslash_d(inp)
         except AssertionError:
             self.no_backslash_d_failures += 1
-        
+
         try:
             no_8bit(inp)
         except AssertionError:
