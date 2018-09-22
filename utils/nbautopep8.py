@@ -11,6 +11,9 @@ import io, os, sys, types, re
 import nbformat
 import autopep8
 
+# If True, split cells that contain more than one def/use
+split_cells = False
+
 def prefix_code(code, prefix):
     return prefix + code.replace('\n', '\n' + prefix)
     
@@ -39,7 +42,7 @@ def autopep8_notebook(notebook_path, options={}):
         fixed_code = autopep8.fix_code(code, options)
 
         code_sep = fixed_code.find('\n\n\n')
-        if code_sep >= 0:
+        if split_cells and code_sep >= 0:
             # Multiple defs/uses in one cell; split
             this_code = fixed_code[:code_sep + 1].strip()
             next_code = fixed_code[code_sep + 3:].strip()
@@ -87,7 +90,12 @@ def autopep8_notebook(notebook_path, options={}):
         sys.stdout.buffer.write(notebook_contents)
 
 if __name__ == "__main__":
-    args = autopep8.parse_args(sys.argv[1:], apply_config=True)
+    args = sys.argv[1:]
+    if args[0] == "--split-cells" or args[0] == "-s":
+        split_cells = True
+        args = args[1:]
+    
+    args = autopep8.parse_args(args, apply_config=True)
     
     if args.diff:
         print("Unsupported option: --diff")

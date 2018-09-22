@@ -493,7 +493,7 @@ style check-style checkstyle: $(PYS) $(PYCODESTYLE_CFG)
 	
 # Automatic formatting
 autopep8 reformat: $(PYCODESTYLE_CFG)
-	$(NBAUTOPEP8) --global-config $(PYCODESTYLE_CFG) --aggressive --in-place $(SOURCES)
+	$(NBAUTOPEP8) --split-cells --global-config $(PYCODESTYLE_CFG) --aggressive --in-place $(SOURCES)
 	@echo "Code reformatting complete.  Use 'make full' to re-execute and test notebooks."
 
 
