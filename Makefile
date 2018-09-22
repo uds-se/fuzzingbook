@@ -130,7 +130,8 @@ NOTEDOWN ?= notedown
 
 # Style checks
 PYCODESTYLE = pycodestyle
-PYCODESTYLE_OPTS = --config code/pycodestyle.cfg
+PYCODESTYLE_CFG = code/pycodestyle.cfg
+NBAUTOPEP8 = $(PYTHON) utils/nbautopep8.py
 
 # Program to open files after creating, say OPEN=open (default: ignore; "true" does nothing)
 OPEN ?= true
@@ -486,9 +487,15 @@ endif
 ## Some checks
 
 # Style checks
-style check-style checkstyle: $(PYS)
-	$(PYCODESTYLE) $(PYCODESTYLE_OPTS) $(PYS)
+style check-style checkstyle: $(PYS) $(PYCODESTYLE_CFG)
+	$(PYCODESTYLE) --config $(PYCODESTYLE_CFG) $(PYS)
 	@echo "All style checks passed."
+	
+# Automatic formatting
+autopep8 reformat: $(PYCODESTYLE_CFG)
+	$(NBAUTOPEP8) --global-config $(PYCODESTYLE_CFG) --aggressive --in-place $(SOURCES)
+	@echo "Code reformatting complete."
+
 
 # List of Cross References
 check-crossref crossref xref: $(SOURCES)
