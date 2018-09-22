@@ -8,9 +8,6 @@ python nbautopep8.py [autopep8 options] notebooks...
 
 import io, os, sys, types, re
 
-from IPython import get_ipython
-from IPython.core.interactiveshell import InteractiveShell
-
 import nbformat
 import autopep8
 
@@ -25,18 +22,20 @@ def autopep8_notebook(notebook_path, options={}):
     with io.open(notebook_path, 'r', encoding='utf-8') as f:
         notebook = nbformat.read(f, 4)
 
-    shell = InteractiveShell.instance()
-
     changed_cells = 0
     for cell in notebook.cells:
         if cell.cell_type == 'code':
-            # transform the input to executable Python
-            code = shell.input_transformer_manager.transform_cell(cell.source)
+            # magic in the cell (say "%matplotlib inline") remains as is
+            code = cell.source + '\n'
             
             # run autopep8 on it
             fixed_code = autopep8.fix_code(code, options)
             
-            # We generally have no whitespace at the beginning or end of cells
+            if args.in_place and fixed_code.find('\n\n\n') >= 0:
+                print(notebook_path + ": warning: definition and use in one cell; consider split:")
+                print(fixed_code)
+
+            # Avoid having whitespace at the beginning or end of code cells
             # fixed_code = fixed_code.strip()
 
             if code == fixed_code:
@@ -63,8 +62,17 @@ def autopep8_notebook(notebook_path, options={}):
 if __name__ == "__main__":
     args = autopep8.parse_args(sys.argv[1:], apply_config=True)
     
-    if args.diff or args.recursive or args.ignore or args.line_range or args.jobs:
-        print("Unsupported option")
+    if args.diff:
+        print("Unsupported option: --diff")
+        sys.exit(2)
+    if args.recursive:
+        print("Unsupported option: --recursive")
+        sys.exit(2)
+    if args.line_range:
+        print("Unsupported option: --line-range")
+        sys.exit(2)
+    if args.jobs != 1:
+        print("Unsupported option: --jobs")
         sys.exit(2)
 
     for notebook in args.files:
