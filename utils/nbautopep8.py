@@ -23,27 +23,54 @@ def autopep8_notebook(notebook_path, options={}):
         notebook = nbformat.read(f, 4)
 
     changed_cells = 0
-    for cell in notebook.cells:
-        if cell.cell_type == 'code':
-            # magic in the cell (say "%matplotlib inline") remains as is
-            code = cell.source + '\n'
-            
-            # run autopep8 on it
-            fixed_code = autopep8.fix_code(code, options)
-            
-            if args.in_place and fixed_code.find('\n\n\n') >= 0:
-                print(notebook_path + ": warning: definition and use in one cell; consider split:")
-                print(fixed_code)
+    i = 0
+    
+    while i < len(notebook.cells):
+        cell = notebook.cells[i]
 
-            # Avoid having whitespace at the beginning or end of code cells
-            # fixed_code = fixed_code.strip()
+        if cell.cell_type != 'code':
+            i += 1
+            continue
+            
+        # magic in the cell (say "%matplotlib inline") remains as is
+        code = cell.source + '\n'
+        
+        # run autopep8 on it
+        fixed_code = autopep8.fix_code(code, options)
 
-            if code == fixed_code:
+        code_sep = fixed_code.find('\n\n\n')
+        if code_sep >= 0:
+            # Multiple defs/uses in one cell; split
+            this_code = fixed_code[:code_sep + 1].strip()
+            next_code = fixed_code[code_sep + 3:].strip()
+            
+            if len(this_code) > 0 and len(next_code) > 0:
+                # if args.in_place:
+                #     print_utf8(notebook_path + ": splitting cell\n")
+                #     print_utf8(fixed_code + "\n")
+                #     print_utf8("into\n")
+                #     print_utf8(this_code + "\n")
+                #     print_utf8("---\n")
+                #     print_utf8(next_code + "\n")
+                
+                next_cell = nbformat.v4.new_code_cell(next_code)
+                if cell.metadata:
+                    next_cell.metadata = cell.metadata
+                cell.source = this_code
+                notebook.cells = notebook.cells[:i] + [cell] + [next_cell] + notebook.cells[i + 1:]
+                changed_cells += 1
                 continue
 
-            # Set it again
-            cell.source = fixed_code
-            changed_cells += 1
+        # Avoid having whitespace at the beginning or end of code cells
+        # fixed_code = fixed_code.strip()
+        if code == fixed_code:
+            i += 1
+            continue
+
+        # Set it again
+        cell.source = fixed_code
+        changed_cells += 1
+        i += 1
 
     notebook_contents = (nbformat.writes(notebook) + '\n').encode('utf-8')
 
