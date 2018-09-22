@@ -7,10 +7,11 @@
 # Attribution-NonCommercial-ShareAlike 4.0 International License,
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
+
 # # Error Handling
 # 
 # The code in this notebook helps with handling errors.  Normally, an error in  notebook code causes the execution of the code to stop; while an infinite loop in notebook code causes the notebook to run without end.  This notebook provides two classes to help address these concerns.
-# 
+
 # **Prerequisites**
 # 
 # * This notebook needs some understanding on advanced concepts in Python, notably 
@@ -19,7 +20,7 @@
 #     * tracing
 #     * measuring time
 #     * exceptions
-# 
+
 # ## Catching Errors
 # 
 # The class `ExpectError` allows to express that some code produces an exception.  A typical usage looks as follows:
@@ -32,9 +33,9 @@
 # ```
 # 
 # If an exception occurs, it is printed on standard error; yet, execution continues.
-# 
+
 # import fuzzingbook_utils
-# 
+
 import traceback
 
 class ExpectError(object):
@@ -53,7 +54,7 @@ class ExpectError(object):
         return True  # Ignore it
 
 # Here's an example:
-# 
+
 def fail_test():
     # Trigger an exception
     x = 1 / 0
@@ -61,7 +62,8 @@ def fail_test():
 if __name__ == "__main__":
     with ExpectError():
         fail_test()
-    
+
+
 # ## Catching Timeouts
 # 
 # The class `ExpectTimeout(seconds)` allows to express that some code may run for a long or inifinite time; execution is thus interruoted after `seconds` seconds.  A typical usage looks as follows:
@@ -78,7 +80,7 @@ if __name__ == "__main__":
 # Should there be a need to cancel the timeout within the `with` block, `t.cancel()` will do the trick.
 # 
 # The implementation uses `sys.settrace()`, as this seems to be the most portable way to implement timeouts.  It is not very efficient, though.  Also, it only works on individual lines of Python code and will not interrupt a long-running system function.
-# 
+
 import sys
 import time
 
@@ -91,10 +93,12 @@ if __name__ == "__main__":
         class TimeoutError(Exception):
             def __init__(self, value="Timeout"):
                 self.value = value
-    
+
             def __str__(self):
                 return repr(self.value)
-    
+
+
+
 class ExpectTimeout(object):
     def __init__(self, seconds):
         self.seconds_before_timeout = seconds
@@ -136,7 +140,7 @@ class ExpectTimeout(object):
         sys.settrace(self.original_trace_function)
 
 # Here's an example:
-# 
+
 def long_running_test():
     print("Start")
     for i in range(10):
@@ -147,14 +151,15 @@ def long_running_test():
 if __name__ == "__main__":
     with ExpectTimeout(5):
         long_running_test()
-    
+
+
 # Note that it is possible to nest multiple timeouts.
-# 
+
 if __name__ == "__main__":
     with ExpectTimeout(2):
         with ExpectTimeout(1):
             long_running_test()
         long_running_test()
-    
+
+
 # That's it, folks – enjoy!
-# 
