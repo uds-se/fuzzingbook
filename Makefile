@@ -129,8 +129,12 @@ PANDOC ?= pandoc
 NOTEDOWN ?= notedown
 
 # Style checks
-PYCODESTYLE = pycodestyle
+PYCODESTYLE ?= pycodestyle
 PYCODESTYLE_CFG = code/pycodestyle.cfg
+
+AUTOPEP8 ?= autopep8
+AUTOPEP8_CFG = code/autopep8.cfg
+AUTOPEP8_OPTIONS = --global-config $(AUTOPEP8_CFG) --aggressive --in-place
 NBAUTOPEP8 = $(PYTHON) utils/nbautopep8.py
 
 # Program to open files after creating, say OPEN=open (default: ignore; "true" does nothing)
@@ -401,6 +405,7 @@ $(REVEAL_JS):
 $(CODE_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 	@test -d $(CODE_TARGET) || $(MKDIR) $(CODE_TARGET)
 	$(CONVERT_TO_PYTHON) $< > $@~ && mv $@~ $@
+	# $(AUTOPEP8) $(AUTOPEP8_OPTIONS) $@
 	-chmod +x $@
 
 
@@ -493,7 +498,7 @@ style check-style checkstyle: $(PYS) $(PYCODESTYLE_CFG)
 	
 # Automatic formatting
 autopep8 reformat: $(PYCODESTYLE_CFG)
-	$(NBAUTOPEP8) --split-cells --global-config $(PYCODESTYLE_CFG) --aggressive --in-place $(SOURCES)
+	$(NBAUTOPEP8) --split-cells --jobs -1 $(AUTOPEP8_OPTIONS) $(SOURCES)
 	@echo "Code reformatting complete.  Use 'make full' to re-execute and test notebooks."
 
 

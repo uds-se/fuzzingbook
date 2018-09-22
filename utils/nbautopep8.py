@@ -20,10 +20,15 @@ def prefix_code(code, prefix):
 def print_utf8(s):
     sys.stdout.buffer.write(s.encode('utf-8'))
 
-def autopep8_notebook(notebook_path, options={}):
+def autopep8_notebook(job_args):
+    notebook_path, options = job_args
+
     # load the notebook
-    with io.open(notebook_path, 'r', encoding='utf-8') as f:
-        notebook = nbformat.read(f, 4)
+    if notebook_path == '-':
+        notebook = nbformat.read(sys.stdin, 4)
+    else:
+        with io.open(notebook_path, 'r', encoding='utf-8') as f:
+            notebook = nbformat.read(f, 4)
 
     changed_cells = 0
     i = 0
@@ -91,7 +96,14 @@ def autopep8_notebook(notebook_path, options={}):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if args[0] == "--split-cells" or args[0] == "-s":
+    if len(args) == 0 or args[0] == "--help" or args[0] == "-h":
+        print("usage: nbautopep8 [--split-cells] [autopep8-options...] notebooks...")
+        print("Automatically formats Python code cells in notebooks")
+        print("to conform to the PEP 8 style guide.")
+        print()
+        print("autopep8-options include:")
+
+    if len(args) > 0 and (args[0] == "--split-cells" or args[0] == "-s"):
         split_cells = True
         args = args[1:]
     
@@ -106,9 +118,15 @@ if __name__ == "__main__":
     if args.line_range:
         print("Unsupported option: --line-range")
         sys.exit(2)
-    if args.jobs != 1:
-        print("Unsupported option: --jobs")
-        sys.exit(2)
+    # if args.jobs != 1:
+    #     print("Unsupported option: --jobs")
+    #     sys.exit(2)
 
-    for notebook in args.files:
-        autopep8_notebook(notebook, args)
+    if args.jobs > 1:
+        import multiprocessing
+        pool = multiprocessing.Pool(args.jobs)
+        pool.map(autopep8_notebook,
+                 [(notebook, args) for notebook in args.files])
+    else:
+        for notebook in args.files:
+            autopep8_notebook((notebook, args))
