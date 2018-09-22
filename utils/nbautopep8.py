@@ -53,14 +53,6 @@ def autopep8_notebook(job_args):
             next_code = fixed_code[code_sep + 3:].strip()
             
             if len(this_code) > 0 and len(next_code) > 0:
-                # if args.in_place:
-                #     print_utf8(notebook_path + ": splitting cell\n")
-                #     print_utf8(fixed_code + "\n")
-                #     print_utf8("into\n")
-                #     print_utf8(this_code + "\n")
-                #     print_utf8("---\n")
-                #     print_utf8(next_code + "\n")
-                
                 next_cell = nbformat.v4.new_code_cell(next_code)
                 if cell.metadata:
                     next_cell.metadata = cell.metadata
@@ -118,9 +110,6 @@ if __name__ == "__main__":
     if args.line_range:
         print("Unsupported option: --line-range")
         sys.exit(2)
-    # if args.jobs != 1:
-    #     print("Unsupported option: --jobs")
-    #     sys.exit(2)
 
     if args.jobs > 1:
         import multiprocessing
