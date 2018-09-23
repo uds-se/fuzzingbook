@@ -40,7 +40,11 @@ def autopep8_notebook(job_args):
             i += 1
             continue
             
-        # magic in the cell (say "%matplotlib inline") remains as is
+        if cell.source.startswith('!'):
+            # Shell magic -- leave unchanged
+            i += 1
+            continue
+
         code = cell.source + '\n'
         
         # run autopep8 on it
@@ -61,14 +65,12 @@ def autopep8_notebook(job_args):
                 changed_cells += 1
                 continue
 
-        # Avoid having whitespace at the beginning or end of code cells
-        # fixed_code = fixed_code.strip()
-        if code == fixed_code:
+        if code.strip() == fixed_code.strip():
             i += 1
             continue
 
         # Set it again
-        cell.source = fixed_code
+        cell.source = fixed_code.strip()
         changed_cells += 1
         i += 1
 
