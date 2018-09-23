@@ -698,8 +698,12 @@ class Fuzzer(object):
 
     def runs(self, runner=PrintRunner(), trials=10):
         """Run `runner` with fuzz input, `trials` times"""
-        return [runner.run(self.fuzz()) for i in range(trials)]
-
+        # Note: the list comprehension below does not invoke self.run() for subclasses
+        # return [self.run(runner) for i in range(trials)]
+        results = []
+        for i in range(trials):
+            results.append(self.run(runner))
+        return results
 
 # By default, `Fuzzer` objects do not do much, as their `fuzz()` function is merley an abstract placeholder.  The subclass `RandomFuzzer`, however, implements the functionality of the `fuzzer()` function, above, adding an additional parameter `min_length` to specify a minimum length.
 

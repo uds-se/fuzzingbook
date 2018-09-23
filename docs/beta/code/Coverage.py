@@ -352,8 +352,6 @@ if __name__ == "__main__":
 # 
 # We can now use our coverage tracing to assess the _effectiveness_ of testing methods – in particular, of course, test _generation_ methods.  Our challenge is to achieve maximum coverage in `cgi_decode()` just with random inputs.  In principle, we should _eventually_ get there, as eventually, we will have produced every possible string in the universe – but exactly how long is this?  To this end, let us run just one fuzzing iteration on `cgi_decode()`:
 
-# Here's a sample string we want to decode.  Surely, this will put `cgi_decode()` to the test...
-
 from Fuzzer import fuzzer
 
 if __name__ == "__main__":
@@ -413,7 +411,6 @@ if __name__ == "__main__":
         hundred_inputs(), cgi_decode)
 
 
-
 # %matplotlib inline
 
 import matplotlib.pyplot as plt
@@ -453,9 +450,171 @@ if __name__ == "__main__":
 
 # We see that on average, we get full coverage after 40–60 fuzzing inputs.
 
+# ## Getting Coverage from External Programs
+# 
+# Of course, not all the world in programming in Python.  The good news is that the problem of obtaining coverage is ubiquitous, and almost every programming language has some facility to measure coverage.  Just as an example, let us therefore demonstrate how to obtain coverage for a C program.
+
+# Our C program (again) implements `cgi_decode` as a program to be executed from the command line:
+# 
+# ```shell
+# $ cgi_decode 'Hello+World'
+# Hello World
+# ```
+
+# We start with the usual C includes:
+
+if __name__ == "__main__":
+    cgi_c_code = """
+    /* CGI decoding as C program */
+
+    #include <stdlib.h>
+    #include <string.h>
+    #include <stdio.h>
+
+    """
+
+
+# Here comes the initialization of `hex_values`:
+
+if __name__ == "__main__":
+    cgi_c_code += r"""
+    int hex_values[256];
+
+    void init_hex_values() {
+        for (int i = 0; i < sizeof(hex_values) / sizeof(int); i++) {
+            hex_values[i] = -1;
+        }
+        hex_values['0'] = 0; hex_values['1'] = 1; hex_values['2'] = 2; hex_values['3'] = 3;
+        hex_values['4'] = 4; hex_values['5'] = 5; hex_values['6'] = 6; hex_values['7'] = 7;
+        hex_values['8'] = 8; hex_values['9'] = 9;
+
+        hex_values['a'] = 10; hex_values['b'] = 11; hex_values['c'] = 12; hex_values['d'] = 13;
+        hex_values['e'] = 14; hex_values['f'] = 15;
+
+        hex_values['A'] = 10; hex_values['B'] = 11; hex_values['C'] = 12; hex_values['D'] = 13;
+        hex_values['E'] = 14; hex_values['F'] = 15;
+    }
+    """
+
+
+# Here's the actual implementation of `cgi_decode()`, using pointers for input source (`s`) and output target (`t`):
+
+if __name__ == "__main__":
+    cgi_c_code += r"""
+    int cgi_decode(char *s, char *t) {
+        while (*s != '\0') {
+            if (*s == '+')
+                *t++ = ' ';
+            else if (*s == '%') {
+                int digit_high = *++s;
+                int digit_low = *++s;
+                if (hex_values[digit_high] >= 0 && hex_values[digit_low] >= 0) {
+                    *t++ = hex_values[digit_high] * 16 + hex_values[digit_low];
+                }
+                else
+                    return -1;
+            }
+            else
+                *t++ = *s;
+            s++;
+        }
+        *t = '\0';
+        return 0;
+    }
+    """
+
+
+# Finally, here's a driver which takes the first argument and invokes `cgi_decode` with it:
+
+if __name__ == "__main__":
+    cgi_c_code += r"""
+    int main(int argc, char *argv[]) {
+        init_hex_values();
+
+        if (argc >= 2) {
+            char *s = argv[1];
+            char *t = malloc(strlen(s)); /* output is at most as long as input */
+            int ret = cgi_decode(s, t);
+            printf("%s\n", t);
+            return ret;
+        }
+        else
+        {
+            printf("cgi_decode: usage: cgi_decode STRING\n");
+            return 1;
+        }
+    }
+    """
+
+
+# Let us create the C source code:
+
+if __name__ == "__main__":
+    import os
+    os.system(r'rm -f cgi_decode.*')
+
+
+if __name__ == "__main__":
+    with open("cgi_decode.c", "w") as f:
+        f.write(cgi_c_code)
+
+
+# We can now compile the C code into an executable.  The `--coverage` option instructs the C compiler to instrument the code such that at runtime, coverage information will be collected.  (The exact options vary from compiler to compiler.)
+
+if __name__ == "__main__":
+    import os
+    os.system(r'cc --coverage -o cgi_decode cgi_decode.c')
+
+
+# When we now execute the program, coverage information will automatically be collected and stored in auxiliary files:
+
+if __name__ == "__main__":
+    import os
+    os.system(r"./cgi_decode 'Send+mail+to+me%40fuzzingbook.org'")
+
+
+# The coverage information is collected by the `gcov` program.  For every source file given, it produces a new `.gcov` file with coverage information.
+
+if __name__ == "__main__":
+    import os
+    os.system(r'gcov cgi_decode.c')
+
+
+# In the `.gcov` file, each line is prefixed with the number of times it was called (`-` stands for a non-executable line, `#####` stands for zero) as well as the line number.  We can take a look at `cgi_decode()`, for instance, and see that the only code not executed yet is the `return -1` for an illegal input.
+
+if __name__ == "__main__":
+    lines = open('cgi_decode.c.gcov').readlines()
+    for i in range(30, 50):
+        print(lines[i], end='')
+
+
+# Let us read in this file to obtain a coverage set:
+
+def read_gcov_coverage(c_file):
+    gcov_file = c_file + ".gcov"
+    coverage = set()
+    for line in open(gcov_file).readlines():
+        elems = line.split(':')
+        covered = elems[0].strip()
+        line_number = int(elems[1].strip())
+        if covered.startswith('-') or covered.startswith('#'):
+            continue
+        coverage.add((c_file, line_number))
+    return coverage
+
+if __name__ == "__main__":
+    coverage = read_gcov_coverage('cgi_decode.c')
+
+
+if __name__ == "__main__":
+    list(coverage)[:5]
+
+
+# With this set, we can now do the same coverage computations as with our Python programs.
+
 # ## Finding Errors with Basic Fuzzing
 # 
-# Given sufficient time, we can indeed cover each and every line within `cgi_decode()`.  This does not mean that they would be error-free, though.  Since we do not check the result of `cgi_decode()`, the function could return any value without us checking or noticing.  To catch such errors, we would have to set up a _results checker_ (commonly called an _oracle_) that would verify test results.  In our case, we could compare against another implementation of `cgi_decode()` and see whether both produce the same results.
+# Given sufficient time, we can indeed cover each and every line within `cgi_decode()`, whatever the programming language would be.  This does not mean that they would be error-free, though.  Since we do not check the result of `cgi_decode()`, the function could return any value without us checking or noticing.  To catch such errors, we would have to set up a _results checker_ (commonly called an _oracle_) that would verify test results.  In our case, we could compare the C and Python implementations of `cgi_decode()` and see whether both produce the same results.
 
 # Where fuzzing is great at, though, is in finding _internal errors_ that can be detected even without checking the result.  Actually, if one runs our `fuzzer()` on `cgi_decode()`, one quickly finds such an error, as the following code shows:
 
@@ -479,23 +638,30 @@ if __name__ == "__main__":
 
 # The problem here is at the end of the string.  After a `'%'` character, our implementation will always attempt to access two more (hexadecimal) characters, but if these are not there, we will get an `IndexError` exception.  
 
-# This problem is actually also present in the original implementation \cite{Pezze2008}, where the code to access the next two characters reads
+# This problem is also present in our C variant, which inherits it from the original implementation \cite{Pezze2008}:
 # 
 # ```c
-# int digit_high = Hex_values[*(++eptr)];
-# int digit_low  = Hex_values[*(++eptr)];
+# int digit_high = *++s;
+# int digit_low = *++s;
 # ```
 # 
-# Here, `eptr` is a pointer to the character to be read; `++` increments it by one character.
-# In this C implementation, the problem is actually much worse.  If the `'%'` character is at the end of the string, the above code will first read a terminating character (`'\0'` in C strings) and then the following character, which may be any memory content after the string, and which thus may cause the program to fail uncontrollably.  The somewhat good news is that `'\0'` is not a valid hexadecimal character, and thus, the C version will "only" read one character beyond the end of the string.
+# Here, `s` is a pointer to the character to be read; `++` increments it by one character.
+# In the C implementation, the problem is actually much worse.  If the `'%'` character is at the end of the string, the above code will first read a terminating character (`'\0'` in C strings) and then the following character, which may be any memory content after the string, and which thus may cause the program to fail uncontrollably.  The somewhat good news is that `'\0'` is not a valid hexadecimal character, and thus, the C version will "only" read one character beyond the end of the string.
 
-# Interestingly enough, none of the manual tests we had designed earlier would catch this bug.  Actually, neither statement nor branch coverage, nor any of the coverage criteria commonly discussed in literature would find it.  However, a simple fuzzing run can identify the error with a few runs.  This definitely calls for more fuzzing!
+# Interestingly enough, none of the manual tests we had designed earlier would trigger this bug.  Actually, neither statement nor branch coverage, nor any of the coverage criteria commonly discussed in literature would find it.  However, a simple fuzzing run can identify the error with a few runs – _if_ appropriate run-time checks are in place that find such overflows.  This definitely calls for more fuzzing!
 
 # ## Lessons Learned
 # 
 # * Coverage metrics are a simple and fully automated means to approximate how much functionality of a program is actually executed during a test run.
 # * A number of coverage metrics exist, the most important ones being statement coverage and branch coverage.
 # * In Python, it is very easy to access the program state during execution, including the currently executed code.
+
+# At the end of the day, let's clean up:
+
+if __name__ == "__main__":
+    import os
+    os.system(r'rm -f cgi_decode cgi_decode.*')
+
 
 # ## Next Steps
 # 
@@ -508,7 +674,7 @@ if __name__ == "__main__":
 
 # ### Exercise 1: Fixing cgi_decode
 # 
-# Create an appropriate test to reproduce the `IndexError` discussed above.  Fix `cgi_decode()` to prevent the bug.  Show that your test (and additional `fuzzer()` runs) no longer expose the bug.
+# Create an appropriate test to reproduce the `IndexError` discussed above.  Fix `cgi_decode()` to prevent the bug.  Show that your test (and additional `fuzzer()` runs) no longer expose the bug.  Do the same for the C variant.
 
 # **Solution.**  Here's a test case:
 
@@ -585,6 +751,17 @@ if __name__ == "__main__":
             pass
 
 
+# For the C variant, the following will do:
+
+if __name__ == "__main__":
+    cgi_c_code = cgi_c_code.replace(
+        r"if (*s == '%')",  # old code
+        r"if (*s == '%' && s[1] != '\0' && s[2] != '\0')"  # new code
+    )
+
+
+# Go back to the above compilation commands and recompile `cgi_decode`.
+
 # ### Exercise 2: Branch Coverage
 # 
 # Besides statement coverage, _branch coverage_ is one of the most frequently used criteria to determine the quality of a test.  In a nutshell, branch coverage measures how many different _control decisions_ are made in code.  In the statement
@@ -614,7 +791,7 @@ if __name__ == "__main__":
     with Coverage() as cov:
         cgi_decode("a+b")
     trace = cov.trace()
-    trace
+    trace[:5]
 
 
 # #### Part 1: Compute branch coverage
@@ -733,7 +910,6 @@ def population_branch_coverage(population, function):
 if __name__ == "__main__":
     all_branch_coverage, cumulative_branch_coverage = population_branch_coverage(
         hundred_inputs(), cgi_decode)
-
 
 
 # %matplotlib inline

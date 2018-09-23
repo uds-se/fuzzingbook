@@ -19,7 +19,7 @@
 # ## Fuzzing a URL Parser
 # 
 # Many programs expect their inputs to come in a very specific format before they would actually process them.  As an example, think of a program that accepts a URL (a Web address).  The URL has to be in a valid format (i.e., the URL format) such that the program can deal with it.  When fuzzing with random inputs, what are our chances to actually produce a valid URL?
-# 
+
 # To get deeper into the problem, let us explore what URLs are made of.  A URL consists of a number of elements:
 # 
 #     scheme://netloc/path?query#fragment
@@ -30,7 +30,7 @@
 # * `path` is the path on that very host, such as `search`
 # * `query` is a list of key/value pairs, such as `q=fuzzing`
 # * `fragment` is a marker for a location in the retrieved document, such as `#result`
-# 
+
 # In Python, we can use the `urlparse()` function to parse and decompose a URL into its parts.
 
 # import fuzzingbook_utils
@@ -300,98 +300,89 @@ if __name__ == "__main__":
         inp = mutate(inp)
 
 
-# As you see, the original seed input is hardly recognizable anymore.  Mutating the input again and again has the advantage of getting a higher variety in the input, but on the other hand further increases the risk of having an invalid input.  The key to success lies in the idea of _guiding_ these mutations – that is, _keeping those that are especially valuable._
+# As you see, the original seed input is hardly recognizable anymore.  By mutating the input again and again, we get a higher variety in the input.
+
+# To implement such multiple mutations in a single package, let us introduce a `MutationFuzzer` class.  It takes a seed (a list of strings) and a minimum and maximum number of mutations.  
+
+from Fuzzer import Fuzzer
+
+class MutationFuzzer(Fuzzer):
+    def __init__(self, seed, min_mutations=2, max_mutations=10):
+        self.seed = seed
+        self.min_mutations = min_mutations
+        self.max_mutations = max_mutations
+        self.reset()
+
+    def reset(self):
+        self.population = self.seed
+        self.seed_index = 0
+
+# In the following, let us develop `MutationFuzzer` further by adding more methods to it.  The Python language requires us to define an entire class with all methods as a single, continuous unit; however, we would like to introduce one method after another.  To avoid this problem, we use a special hack: Whenever we want to introduce a new method to some class `C`, we use the construct
+# 
+# ```python
+# class C(C):
+#     def new_method(self, args):
+#         pass
+# ```
+# 
+# This seems to define `C` as a subclass of itself, which would make no sense – but actually, it introduces a new `C` class as subclass of the old `C` class, and then shadowing the old `C` definition.  What this gets us is a `C` class with `new_method()` as a method, which is just what we want.  (`C` objects defined earlier will retain the earlier `C` definition, though, and thus must be rebuilt.)
+
+# Using this hack, we can now add a `mutate()` method that actually invokes the above `mutate()` function.  Having `mutate()` as a method is useful when we want to extend a `MutationFuzzer` later.
+
+class MutationFuzzer(MutationFuzzer):
+    def mutate(self, inp):
+        return mutate(inp)
+
+# Let's get back to our strategy, maximizing _diversity in coverage_ in our population.  First, let us create a method `create_candidate()`, which randomly picks some input from our current population (`self.population`), and then applies between `min_mutations` and `max_mutations` mutation steps, returning the final result:
+
+class MutationFuzzer(MutationFuzzer):
+    def create_candidate(self):
+        candidate = random.choice(self.population)
+        trials = random.randint(self.min_mutations, self.max_mutations)
+        for i in range(trials):
+            candidate = self.mutate(candidate)
+        return candidate
+
+# The `fuzz()` method is set to first pick the seeds; when these are gone, we mutate:
+
+class MutationFuzzer(MutationFuzzer):
+    def fuzz(self):
+        if self.seed_index < len(self.seed):
+            # Still seeding
+            self.inp = self.seed[self.seed_index]
+            self.seed_index += 1
+        else:
+            # Mutating
+            self.inp = self.create_candidate()
+        return self.inp
+
+if __name__ == "__main__":
+    seed_input = "http://www.google.com/search?q=fuzzing"
+    mutation_fuzzer = MutationFuzzer(seed=[seed_input])
+    mutation_fuzzer.fuzz()
+
+
+if __name__ == "__main__":
+    mutation_fuzzer.fuzz()
+
+
+if __name__ == "__main__":
+    mutation_fuzzer.fuzz()
+
+
+# With every new invocation of `fuzz()`, we get another variant with multiple mutations applied.  The higher variety in inputs, though, increases the risk of having an invalid input.  The key to success lies in the idea of _guiding_ these mutations – that is, _keeping those that are especially valuable._
 
 # ## Guiding by Coverage
 # 
 # To cover as much functionality as possible, one can rely on either _specified_ or _implemented_ functionality, as discussed in the ["Coverage"](Coverage.ipynb) chapter.  For now, we will not assume that there is a specification of program behavior (although it _definitely_ would be good to have one!).  We _will_ assume, though, that the program to be tested exists – and that we can leverage its structure to guide test generation.
 # 
 # Since testing always executes the program at hand, one can always gather information about its execution – the least is the information needed to decide whether a test passes or fails.  Since coverage is frequently measured as well to determine test quality, let us also assume we can retrieve coverage of a test run.  The question is then: _How can we leverage coverage to guide test generation?_
-# 
+
 # One particularly successful idea is implemented in the popular fuzzer named [_American fuzzy lop_](http://lcamtuf.coredump.cx/afl/), or AFL for short.  Just like our examples above, AFL evolves test cases that have been successful – but for AFL, "success" means _finding a new path through the program execution_.  This way, AFL can keep on mutating inputs that so far have found new paths; and if an input finds another path, it will be retained as well.
-# 
-# We can implement such a strategy by maximizing _diversity in coverage_ in our population.  First, let us create a function `create_candidate()` which randomly picks some input from a given population, and then applies between `min_mutations` and `max_mutations` mutation steps, returning the final result:
 
-def create_candidate(population, min_mutations=2, max_mutations=10):
-    candidate = random.choice(population)
-    trials = random.randint(min_mutations, max_mutations)
-    for i in range(trials):
-        candidate = mutate(candidate)
-    return candidate
+# Let us build such a strategy.  We start with introducing a `Runner` class that captures the coverage for a given function.  First, a `FunctionRunner` class:
 
-# Now for the main function.  We maintain a list of inputs (`population`) and a set of coverages already achieved (`coverages_seen`).  The `fuzz()` helper function takes an input and runs the given `function()` on it.  If its coverage is new (i.e. not in `coverages_seen`), the input is added to `population` and the coverage to `coverages_seen`.
-# 
-# The main `coverage_fuzzer()` function first runs `fuzz()` on the provided seed population (adding to the population), and then keeps on creating and testing new candidates coming from `create_candidate()`.
-
-from Coverage import Coverage, population_coverage
-
-def coverage_fuzzer(seed, function, trials=100):
-    population = []
-    coverages_seen = set()
-
-    def fuzz(inp):
-        """Run function(inp) while tracking coverage.
-           If we reach new coverage,
-           add inp to population and its coverage to population_coverage
-        """
-        nonlocal population  # Access "outer" variables
-        nonlocal coverages_seen
-
-        with Coverage() as cov:
-            try:
-                function(inp)
-                valid = True
-            except:
-                valid = False
-
-        # print(repr(inp))
-
-        new_coverage = frozenset(cov.coverage())
-        if valid and new_coverage not in coverages_seen:
-            # We have new coverage
-            population.append(inp)
-            coverages_seen.add(new_coverage)
-
-    for inp in seed:
-        fuzz(inp)
-
-    for i in range(trials):
-        candidate = create_candidate(population)
-        fuzz(candidate)
-
-    return population
-
-
-# Let us now put this to use:
-
-if __name__ == "__main__":
-    seed_input = "http://www.google.com/search?q=fuzzing"
-    population = coverage_fuzzer(
-        seed=[seed_input], function=http_program, trials=1000)
-    population
-
-
-# Success!  In our population, _each and every input_ now is valid and has a different coverage, coming from various combinations of schemes, paths, queries, and fragments.
-
-if __name__ == "__main__":
-    all_coverage, cumulative_coverage = population_coverage(
-        population, http_program)
-
-    import matplotlib.pyplot as plt
-    plt.plot(cumulative_coverage)
-    plt.title('Coverage of urlparse() with random inputs')
-    plt.xlabel('# of inputs')
-    plt.ylabel('lines covered');
-
-
-
-# The nice thing about this strategy is that, applied to larger programs, it will happily explore one path after the other – covering functionality after functionality.  All that is needed is a means to capture the coverage.
-
-# ## With Classes
-# 
-# \todo{Expand}
-
-from Fuzzer import Fuzzer, Runner
+from Fuzzer import Runner
 
 class FunctionRunner(Runner):
     def __init__(self, function):
@@ -400,6 +391,15 @@ class FunctionRunner(Runner):
 
     def run(self, inp):
         return self.function(inp)
+
+if __name__ == "__main__":
+    http_runner = FunctionRunner(http_program)
+    http_runner.run("https://foo.bar/")
+
+
+# We can now extend the `FunctionRunner` class such that it also measures coverage.  After invoking `run()`, the `coverage()` method returns the coverage achieved in the last run, and `valid_input()` returns whether the input was accepted by the program.
+
+from Coverage import Coverage, population_coverage
 
 class FunctionCoverageRunner(FunctionRunner):
     def run(self, inp):
@@ -419,44 +419,31 @@ class FunctionCoverageRunner(FunctionRunner):
     def valid_input(self):
         return self._valid_input
 
-class MutationFuzzer(Fuzzer):
-    def __init__(self, seed, min_mutations=2, max_mutations=10):
-        self.seed = seed
-        self.min_mutations = min_mutations
-        self.max_mutations = max_mutations
-        self.reset()
+if __name__ == "__main__":
+    http_runner = FunctionCoverageRunner(http_program)
+    http_runner.run("https://foo.bar/")
 
+
+# Here's some of the locations covered: 
+
+if __name__ == "__main__":
+    list(http_runner.coverage())[:5]
+
+
+# Now for the main class.  We maintain the population and a set of coverages already achieved (`coverages_seen`).  The `fuzz()` helper function takes an input and runs the given `function()` on it.  If its coverage is new (i.e. not in `coverages_seen`), the input is added to `population` and the coverage to `coverages_seen`.
+
+class MutationCoverageFuzzer(MutationFuzzer):
     def reset(self):
-        self.population = []
+        super().reset()
         self.coverages_seen = set()
-        self.seed_index = 0
-
-    def mutate(self, inp):
-        return mutate(inp)
-
-    def create_candidate(self):
-        candidate = random.choice(self.population)
-        trials = random.randint(self.min_mutations, self.max_mutations)
-        for i in range(trials):
-            candidate = self.mutate(candidate)
-        return candidate
-
-    def fuzz(self):
-        if self.seed_index < len(self.seed):
-            # Still seeding
-            self.inp = self.seed[self.seed_index]
-            self.seed_index += 1
-        else:
-            # Mutating
-            self.inp = self.create_candidate()
-        return self.inp
+        self.population = []
 
     def run(self, runner):
         """Run function(inp) while tracking coverage.
            If we reach new coverage,
            add inp to population and its coverage to population_coverage
         """
-        result = super(MutationFuzzer, self).run(runner)
+        result = super().run(runner)
         new_coverage = frozenset(runner.coverage())
         if runner.valid_input() and new_coverage not in self.coverages_seen:
             # We have new coverage
@@ -465,21 +452,29 @@ class MutationFuzzer(Fuzzer):
 
         return result
 
+# Let us now put this to use:
 
 if __name__ == "__main__":
-    mutation_fuzzer = MutationFuzzer(seed=[seed_input])
-
-
-if __name__ == "__main__":
-    urlparse_runner = FunctionCoverageRunner(urlparse)
-
-
-if __name__ == "__main__":
-    for i in range(100):
-        mutation_fuzzer.run(urlparse_runner)
-
+    seed_input = "http://www.google.com/search?q=fuzzing"
+    mutation_fuzzer = MutationCoverageFuzzer(seed=[seed_input])
+    mutation_fuzzer.runs(http_runner, trials=10000)
     mutation_fuzzer.population
 
+
+# Success!  In our population, _each and every input_ now is valid and has a different coverage, coming from various combinations of schemes, paths, queries, and fragments.
+
+if __name__ == "__main__":
+    all_coverage, cumulative_coverage = population_coverage(
+        mutation_fuzzer.population, http_program)
+
+    import matplotlib.pyplot as plt
+    plt.plot(cumulative_coverage)
+    plt.title('Coverage of urlparse() with random inputs')
+    plt.xlabel('# of inputs')
+    plt.ylabel('lines covered');
+
+
+# The nice thing about this strategy is that, applied to larger programs, it will happily explore one path after the other – covering functionality after functionality.  All that is needed is a means to capture the coverage.
 
 # ## Lessons Learned
 # 
@@ -501,34 +496,120 @@ if __name__ == "__main__":
 # ## Exercises
 # 
 
-# ### Exercise 1
+# ### Exercise 1: Fuzzing CGI decode with Mutations
 # 
-# Apply the above non-guided mutation-based fuzzing technique on `bc`, using files, as in the chapter ["Introduction to Fuzzing"](Fuzzer.ipynb).
-
-# ### Exercise 2
-# 
-# Apply the above guided mutation-based fuzzing technique on `cgi_decode()` from the ["Coverage"](Coverage.ipynb) chapter.  How many trials do you need until you cover all variations of `+`, `%` (valid and invalid), and regular characters?
+# Apply the above _guided_ mutation-based fuzzing technique on `cgi_decode()` from the ["Coverage"](Coverage.ipynb) chapter.  How many trials do you need until you cover all variations of `+`, `%` (valid and invalid), and regular characters?
 
 from Coverage import cgi_decode
 
 if __name__ == "__main__":
-    seed_input = "Hello World"
-    population = coverage_fuzzer(
-        seed=[seed_input], function=cgi_decode, trials=100000)
-    print(population)
+    seed = ["Hello World"]
+    cgi_runner = FunctionCoverageRunner(cgi_decode)
+    m = MutationCoverageFuzzer(seed)
+    results = m.runs(cgi_runner, 10000)
 
 
 if __name__ == "__main__":
-    all_coverage, cumulative_coverage = population_coverage(population, cgi_decode)
+    m.population
 
-
-import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
+    cgi_runner.coverage()
+
+
+if __name__ == "__main__":
+    all_coverage, cumulative_coverage = population_coverage(
+        m.population, cgi_decode)
+
+    import matplotlib.pyplot as plt
     plt.plot(cumulative_coverage)
     plt.title('Coverage of cgi_decode() with random inputs')
     plt.xlabel('# of inputs')
     plt.ylabel('lines covered');
+
+
+# After 10,000 runs, we have managed to synthesize a `+` character and a valid `%xx` form.  We can still do better.
+
+# ### Exercise 2: Fuzzing bc with Mutations
+# 
+# Apply the above mutation-based fuzzing technique on `bc`, as in the chapter ["Introduction to Fuzzing"](Fuzzer.ipynb).
+# 
+# #### Part 1: Non-Guided Mutations
+# 
+# Start with non-guided mutations.  How many of the inputs are valid?
+
+# **Solution.** This is just a matter of tying a `ProgramRunner` to a `MutationFuzzer`:
+
+from Fuzzer import ProgramRunner
+
+if __name__ == "__main__":
+    seed = ["1 + 1"]
+    bc = ProgramRunner(program="bc")
+    m = MutationFuzzer(seed)
+    runs = m.runs(bc, trials=100)
+
+
+if __name__ == "__main__":
+    runs[:3]
+
+
+if __name__ == "__main__":
+    sum(1 for completed_process in runs if completed_process.stderr == "")
+
+
+# #### Part 2: Guided Mutations
+# 
+# Continue with _guided_ mutations.  To this end, you will have to find a way to extract coverage from a C program such as `bc`.  Proceed in these steps:
+# 
+# First, get GNU bc [from the source](https://www.gnu.org/software/bc/); download, say, `bc-1.07.1.tar.gz` and unpack it:
+
+if __name__ == "__main__":
+    import os
+    os.system(r'curl -O http://ftp.gnu.org/gnu/bc/bc-1.07.1.tar.gz')
+
+
+if __name__ == "__main__":
+    import os
+    os.system(r'tar xfz bc-1.07.1.tar.gz')
+
+
+# Second, configure the package:
+
+if __name__ == "__main__":
+    import os
+    os.system(r'cd bc-1.07.1; ./configure')
+
+
+# Third, compile the package with special flags:
+
+if __name__ == "__main__":
+    import os
+    os.system(r'cd bc-1.07.1; make CFLAGS="--coverage"')
+
+
+# The file `bc/bc` should now be executable...
+
+if __name__ == "__main__":
+    import os
+    os.system(r'cd bc-1.07.1/bc; echo 2 + 2 | ./bc')
+
+
+# ...and you should be able to run the `gcov` program to retrieve coverage information.
+
+if __name__ == "__main__":
+    import os
+    os.system(r'cd bc-1.07.1/bc; gcov main.c')
+
+
+# As sketched in the ["Coverage" chapter](Coverage.ipynb), the file [bc-1.07.1/bc/main.c.gcov](bc-1.07.1/bc/main.c.gcov) now holds the coverage information for `bc.c`.  Each line is prefixed with the number of times it was executed. `#####` means zero times; `-` means non-executable line.
+
+# Parse the GCOV file for `bc` and create a `coverage` set, as in `FunctionCoverageRunner`.  Make this a `ProgramCoverageRunner` class that would be constructed with a list of source files (`bc.c`, `main.c`, `load.c`) to run `gcov` on.
+
+# When you're done, don't forget to clean up:
+
+if __name__ == "__main__":
+    import os
+    os.system(r'rm -fr bc-1.07.1 bc-1.07.1.tar.gz')
 
 
 # ### Exercise 3
