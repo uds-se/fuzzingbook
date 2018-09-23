@@ -13179,7 +13179,7 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{(&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 19), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 32)}
+<pre>{(&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 9)}
 </pre>
 </div>
 </div>
@@ -13347,15 +13347,6 @@ a.anchor-link {
 </div>
 </div>
 </div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Here's a sample string we want to decode.  Surely, this will put <code>cgi_decode()</code> to the test...</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[22]:</div>
@@ -13706,12 +13697,476 @@ a.anchor-link {
 
 </div>
 </div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Getting-Coverage-from-External-Programs">Getting Coverage from External Programs<a class="anchor-link" href="#Getting-Coverage-from-External-Programs">&#182;</a></h2><p>Of course, not all the world in programming in Python.  The good news is that the problem of obtaining coverage is ubiquitous, and almost every programming language has some facility to measure coverage.  Just as an example, let us therefore demonstrate how to obtain coverage for a C program.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Our C program (again) implements <code>cgi_decode</code> as a program to be executed from the command line:</p>
+<div class="highlight"><pre><span></span>$ cgi_decode <span class="s1">&#39;Hello+World&#39;</span>
+Hello World
+</pre></div>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We start with the usual C includes:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">/* CGI decoding as C program */</span>
+
+<span class="s2">#include &lt;stdlib.h&gt;</span>
+<span class="s2">#include &lt;string.h&gt;</span>
+<span class="s2">#include &lt;stdio.h&gt;</span>
+
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here comes the initialization of <code>hex_values</code>:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">+=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">int hex_values[256];</span>
+
+<span class="s2">void init_hex_values() {</span>
+<span class="s2">    for (int i = 0; i &lt; sizeof(hex_values) / sizeof(int); i++) {</span>
+<span class="s2">        hex_values[i] = -1;</span>
+<span class="s2">    }</span>
+<span class="s2">    hex_values[&#39;0&#39;] = 0; hex_values[&#39;1&#39;] = 1; hex_values[&#39;2&#39;] = 2; hex_values[&#39;3&#39;] = 3;</span>
+<span class="s2">    hex_values[&#39;4&#39;] = 4; hex_values[&#39;5&#39;] = 5; hex_values[&#39;6&#39;] = 6; hex_values[&#39;7&#39;] = 7;</span>
+<span class="s2">    hex_values[&#39;8&#39;] = 8; hex_values[&#39;9&#39;] = 9;</span>
+
+<span class="s2">    hex_values[&#39;a&#39;] = 10; hex_values[&#39;b&#39;] = 11; hex_values[&#39;c&#39;] = 12; hex_values[&#39;d&#39;] = 13;</span>
+<span class="s2">    hex_values[&#39;e&#39;] = 14; hex_values[&#39;f&#39;] = 15;</span>
+
+<span class="s2">    hex_values[&#39;A&#39;] = 10; hex_values[&#39;B&#39;] = 11; hex_values[&#39;C&#39;] = 12; hex_values[&#39;D&#39;] = 13;</span>
+<span class="s2">    hex_values[&#39;E&#39;] = 14; hex_values[&#39;F&#39;] = 15;</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here's the actual implementation of <code>cgi_decode()</code>, using pointers for input source (<code>s</code>) and output target (<code>t</code>):</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">+=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">int cgi_decode(char *s, char *t) {</span>
+<span class="s2">    while (*s != &#39;\0&#39;) {</span>
+<span class="s2">        if (*s == &#39;+&#39;)</span>
+<span class="s2">            *t++ = &#39; &#39;;</span>
+<span class="s2">        else if (*s == &#39;%&#39;) {</span>
+<span class="s2">            int digit_high = *++s;</span>
+<span class="s2">            int digit_low = *++s;</span>
+<span class="s2">            if (hex_values[digit_high] &gt;= 0 &amp;&amp; hex_values[digit_low] &gt;= 0) {</span>
+<span class="s2">                *t++ = hex_values[digit_high] * 16 + hex_values[digit_low];</span>
+<span class="s2">            }</span>
+<span class="s2">            else</span>
+<span class="s2">                return -1;</span>
+<span class="s2">        }</span>
+<span class="s2">        else</span>
+<span class="s2">            *t++ = *s;</span>
+<span class="s2">        s++;</span>
+<span class="s2">    }</span>
+<span class="s2">    *t = &#39;\0&#39;;</span>
+<span class="s2">    return 0;</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Finally, here's a driver which takes the first argument and invokes <code>cgi_decode</code> with it:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">+=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">int main(int argc, char *argv[]) {</span>
+<span class="s2">    init_hex_values();</span>
+
+<span class="s2">    if (argc &gt;= 2) {</span>
+<span class="s2">        char *s = argv[1];</span>
+<span class="s2">        char *t = malloc(strlen(s)); /* output is at most as long as input */</span>
+<span class="s2">        int ret = cgi_decode(s, t);</span>
+<span class="s2">        printf(&quot;</span><span class="si">%s</span><span class="s2">\n&quot;, t);</span>
+<span class="s2">        return ret;</span>
+<span class="s2">    }</span>
+<span class="s2">    else</span>
+<span class="s2">    {</span>
+<span class="s2">        printf(&quot;cgi_decode: usage: cgi_decode STRING\n&quot;);</span>
+<span class="s2">        return 1;</span>
+<span class="s2">    }</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us create the C source code:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>rm -f cgi_decode.*
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;cgi_decode.c&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cgi_c_code</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can now compile the C code into an executable.  The <code>--coverage</code> option instructs the C compiler to instrument the code such that at runtime, coverage information will be collected.  (The exact options vary from compiler to compiler.)</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>cc --coverage -o cgi_decode cgi_decode.c
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>When we now execute the program, coverage information will automatically be collected and stored in auxiliary files:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>./cgi_decode <span class="s1">&#39;Send+mail+to+me%40fuzzingbook.org&#39;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Send mail to me@fuzzingbook.org
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The coverage information is collected by the <code>gcov</code> program.  For every source file given, it produces a new <code>.gcov</code> file with coverage information.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>gcov cgi_decode.c
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>File &#39;cgi_decode.c&#39;
+Lines executed:91.89% of 37
+cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the <code>.gcov</code> file, each line is prefixed with the number of times it was called (<code>-</code> stands for a non-executable line, <code>#####</code> stands for zero) as well as the line number.  We can take a look at <code>cgi_decode()</code>, for instance, and see that the only code not executed yet is the <code>return -1</code> for an illegal input.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lines</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;cgi_decode.c.gcov&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">50</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>        -:   26:int cgi_decode(char *s, char *t) {
+       64:   27:    while (*s != &#39;\0&#39;) {
+       31:   28:        if (*s == &#39;+&#39;)
+        3:   29:            *t++ = &#39; &#39;;
+       28:   30:        else if (*s == &#39;%&#39;) {
+        1:   31:            int digit_high = *++s;
+        1:   32:            int digit_low = *++s;
+        2:   33:            if (hex_values[digit_high] &gt;= 0 &amp;&amp; hex_values[digit_low] &gt;= 0) {
+        1:   34:                *t++ = hex_values[digit_high] * 16 + hex_values[digit_low];
+        1:   35:            }
+        -:   36:            else
+    #####:   37:                return -1;
+        1:   38:        }
+        -:   39:        else
+       27:   40:            *t++ = *s;
+       31:   41:        s++;
+        -:   42:    }
+        1:   43:    *t = &#39;\0&#39;;
+        1:   44:    return 0;
+        1:   45:}
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us read in this file to obtain a coverage set:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">read_gcov_coverage</span><span class="p">(</span><span class="n">c_file</span><span class="p">):</span>
+    <span class="n">gcov_file</span> <span class="o">=</span> <span class="n">c_file</span> <span class="o">+</span> <span class="s2">&quot;.gcov&quot;</span>
+    <span class="n">coverage</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">gcov_file</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+        <span class="n">elems</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="n">covered</span> <span class="o">=</span> <span class="n">elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">line_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">elems</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">covered</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">covered</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">coverage</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">c_file</span><span class="p">,</span> <span class="n">line_number</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">coverage</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">coverage</span> <span class="o">=</span> <span class="n">read_gcov_coverage</span><span class="p">(</span><span class="s1">&#39;cgi_decode.c&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">coverage</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[46]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;cgi_decode.c&#39;, 53),
+ (&#39;cgi_decode.c&#39;, 14),
+ (&#39;cgi_decode.c&#39;, 20),
+ (&#39;cgi_decode.c&#39;, 34),
+ (&#39;cgi_decode.c&#39;, 29)]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>With this set, we can now do the same coverage computations as with our Python programs.</p>
+
+</div>
+</div>
 </div></div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Finding-Errors-with-Basic-Fuzzing">Finding Errors with Basic Fuzzing<a class="anchor-link" href="#Finding-Errors-with-Basic-Fuzzing">&#182;</a></h2><p>Given sufficient time, we can indeed cover each and every line within <code>cgi_decode()</code>.  This does not mean that they would be error-free, though.  Since we do not check the result of <code>cgi_decode()</code>, the function could return any value without us checking or noticing.  To catch such errors, we would have to set up a <em>results checker</em> (commonly called an <em>oracle</em>) that would verify test results.  In our case, we could compare against another implementation of <code>cgi_decode()</code> and see whether both produce the same results.</p>
+<h2 id="Finding-Errors-with-Basic-Fuzzing">Finding Errors with Basic Fuzzing<a class="anchor-link" href="#Finding-Errors-with-Basic-Fuzzing">&#182;</a></h2><p>Given sufficient time, we can indeed cover each and every line within <code>cgi_decode()</code>, whatever the programming language would be.  This does not mean that they would be error-free, though.  Since we do not check the result of <code>cgi_decode()</code>, the function could return any value without us checking or noticing.  To catch such errors, we would have to set up a <em>results checker</em> (commonly called an <em>oracle</em>) that would verify test results.  In our case, we could compare the C and Python implementations of <code>cgi_decode()</code> and see whether both produce the same results.</p>
 
 </div>
 </div>
@@ -13727,7 +14182,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ExpectError</span> <span class="k">import</span> <span class="n">ExpectError</span>
@@ -13740,7 +14195,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -13767,7 +14222,7 @@ a.anchor-link {
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-35-086d4892c70e&gt;&#34;, line 5, in &lt;module&gt;
+  File &#34;&lt;ipython-input-48-086d4892c70e&gt;&#34;, line 5, in &lt;module&gt;
     cgi_decode(s)
   File &#34;&lt;ipython-input-1-4d0fb90b50b4&gt;&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
@@ -13791,7 +14246,7 @@ IndexError: string index out of range
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span>
@@ -13807,7 +14262,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[36]:</div>
+<div class="prompt output_prompt">Out[49]:</div>
 
 
 
@@ -13835,12 +14290,12 @@ IndexError: string index out of range
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This problem is actually also present in the original implementation \cite{Pezze2008}, where the code to access the next two characters reads</p>
-<div class="highlight"><pre><span></span><span class="kt">int</span> <span class="n">digit_high</span> <span class="o">=</span> <span class="n">Hex_values</span><span class="p">[</span><span class="o">*</span><span class="p">(</span><span class="o">++</span><span class="n">eptr</span><span class="p">)];</span>
-<span class="kt">int</span> <span class="n">digit_low</span>  <span class="o">=</span> <span class="n">Hex_values</span><span class="p">[</span><span class="o">*</span><span class="p">(</span><span class="o">++</span><span class="n">eptr</span><span class="p">)];</span>
+<p>This problem is also present in our C variant, which inherits it from the original implementation \cite{Pezze2008}:</p>
+<div class="highlight"><pre><span></span><span class="kt">int</span> <span class="n">digit_high</span> <span class="o">=</span> <span class="o">*++</span><span class="n">s</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">digit_low</span> <span class="o">=</span> <span class="o">*++</span><span class="n">s</span><span class="p">;</span>
 </pre></div>
-<p>Here, <code>eptr</code> is a pointer to the character to be read; <code>++</code> increments it by one character.
-In this C implementation, the problem is actually much worse.  If the <code>'%'</code> character is at the end of the string, the above code will first read a terminating character (<code>'\0'</code> in C strings) and then the following character, which may be any memory content after the string, and which thus may cause the program to fail uncontrollably.  The somewhat good news is that <code>'\0'</code> is not a valid hexadecimal character, and thus, the C version will "only" read one character beyond the end of the string.</p>
+<p>Here, <code>s</code> is a pointer to the character to be read; <code>++</code> increments it by one character.
+In the C implementation, the problem is actually much worse.  If the <code>'%'</code> character is at the end of the string, the above code will first read a terminating character (<code>'\0'</code> in C strings) and then the following character, which may be any memory content after the string, and which thus may cause the program to fail uncontrollably.  The somewhat good news is that <code>'\0'</code> is not a valid hexadecimal character, and thus, the C version will "only" read one character beyond the end of the string.</p>
 
 </div>
 </div>
@@ -13849,7 +14304,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Interestingly enough, none of the manual tests we had designed earlier would catch this bug.  Actually, neither statement nor branch coverage, nor any of the coverage criteria commonly discussed in literature would find it.  However, a simple fuzzing run can identify the error with a few runs.  This definitely calls for more fuzzing!</p>
+<p>Interestingly enough, none of the manual tests we had designed earlier would trigger this bug.  Actually, neither statement nor branch coverage, nor any of the coverage criteria commonly discussed in literature would find it.  However, a simple fuzzing run can identify the error with a few runs – <em>if</em> appropriate run-time checks are in place that find such overflows.  This definitely calls for more fuzzing!</p>
 
 </div>
 </div>
@@ -13879,11 +14334,11 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Exercise-1:-Fixing-cgi_decode">Exercise 1: Fixing cgi_decode<a class="anchor-link" href="#Exercise-1:-Fixing-cgi_decode">&#182;</a></h3><p>Create an appropriate test to reproduce the <code>IndexError</code> discussed above.  Fix <code>cgi_decode()</code> to prevent the bug.  Show that your test (and additional <code>fuzzer()</code> runs) no longer expose the bug.</p>
+<h3 id="Exercise-1:-Fixing-cgi_decode">Exercise 1: Fixing cgi_decode<a class="anchor-link" href="#Exercise-1:-Fixing-cgi_decode">&#182;</a></h3><p>Create an appropriate test to reproduce the <code>IndexError</code> discussed above.  Fix <code>cgi_decode()</code> to prevent the bug.  Show that your test (and additional <code>fuzzer()</code> runs) no longer expose the bug.  Do the same for the C variant.</p>
 
 </div>
 </div>
-</div>
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -13892,10 +14347,10 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 
 </div>
 </div>
-</div>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -13917,7 +14372,7 @@ In this C implementation, the problem is actually much worse.  If the <code>'%'<
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-37-11dfaa12d229&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-51-11dfaa12d229&gt;&#34;, line 2, in &lt;module&gt;
     assert cgi_decode(&#39;%&#39;) == &#39;%&#39;
   File &#34;&lt;ipython-input-1-4d0fb90b50b4&gt;&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
@@ -13929,10 +14384,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -13954,7 +14409,7 @@ IndexError: string index out of range
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-38-ef9edd8b32b3&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-52-ef9edd8b32b3&gt;&#34;, line 2, in &lt;module&gt;
     assert cgi_decode(&#39;%4&#39;) == &#39;%4&#39;
   File &#34;&lt;ipython-input-1-4d0fb90b50b4&gt;&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
@@ -13966,10 +14421,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;%40&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span>
@@ -13979,7 +14434,7 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -13988,10 +14443,10 @@ IndexError: string index out of range
 
 </div>
 </div>
-</div>
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fixed_cgi_decode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -14032,10 +14487,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div>
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span>
@@ -14045,10 +14500,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%4&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;%4&#39;</span>
@@ -14058,10 +14513,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="prompt input_prompt">In&nbsp;[57]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%40&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span>
@@ -14071,7 +14526,7 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div></section><section>
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -14083,7 +14538,7 @@ IndexError: string index out of range
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
@@ -14098,7 +14553,41 @@ IndexError: string index out of range
 </div>
 </div>
 
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>For the C variant, the following will do:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[59]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">=</span> <span class="n">cgi_c_code</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">&quot;if (*s == &#39;%&#39;)&quot;</span><span class="p">,</span>  <span class="c1"># old code</span>
+    <span class="sa">r</span><span class="s2">&quot;if (*s == &#39;%&#39; &amp;&amp; s[1] != &#39;\0&#39; &amp;&amp; s[2] != &#39;\0&#39;)&quot;</span>  <span class="c1"># new code</span>
+<span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
 </div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Go back to the above compilation commands and recompile <code>cgi_decode</code>.</p>
+
+</div>
+</div>
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -14131,13 +14620,13 @@ IndexError: string index out of range
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="prompt input_prompt">In&nbsp;[60]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
     <span class="n">cgi_decode</span><span class="p">(</span><span class="s2">&quot;a+b&quot;</span><span class="p">)</span>
 <span class="n">trace</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">trace</span><span class="p">()</span>
-<span class="n">trace</span>
+<span class="n">trace</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
 </pre></div>
 
 </div>
@@ -14150,7 +14639,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[45]:</div>
+<div class="prompt output_prompt">Out[60]:</div>
 
 
 
@@ -14160,28 +14649,7 @@ IndexError: string index out of range
  (&#39;cgi_decode&#39;, 10),
  (&#39;cgi_decode&#39;, 11),
  (&#39;cgi_decode&#39;, 12),
- (&#39;cgi_decode&#39;, 15),
- (&#39;cgi_decode&#39;, 16),
- (&#39;cgi_decode&#39;, 17),
- (&#39;cgi_decode&#39;, 18),
- (&#39;cgi_decode&#39;, 19),
- (&#39;cgi_decode&#39;, 21),
- (&#39;cgi_decode&#39;, 30),
- (&#39;cgi_decode&#39;, 31),
- (&#39;cgi_decode&#39;, 17),
- (&#39;cgi_decode&#39;, 18),
- (&#39;cgi_decode&#39;, 19),
- (&#39;cgi_decode&#39;, 20),
- (&#39;cgi_decode&#39;, 31),
- (&#39;cgi_decode&#39;, 17),
- (&#39;cgi_decode&#39;, 18),
- (&#39;cgi_decode&#39;, 19),
- (&#39;cgi_decode&#39;, 21),
- (&#39;cgi_decode&#39;, 30),
- (&#39;cgi_decode&#39;, 31),
- (&#39;cgi_decode&#39;, 17),
- (&#39;cgi_decode&#39;, 32),
- (&#39;__exit__&#39;, 25)]</pre>
+ (&#39;cgi_decode&#39;, 15)]</pre>
 </div>
 
 </div>
@@ -14217,7 +14685,7 @@ IndexError: string index out of range
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="prompt input_prompt">In&nbsp;[61]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">branch_coverage</span><span class="p">(</span><span class="n">trace</span><span class="p">):</span>
@@ -14238,7 +14706,7 @@ IndexError: string index out of range
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">branch_coverage</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
@@ -14254,7 +14722,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[47]:</div>
+<div class="prompt output_prompt">Out[62]:</div>
 
 
 
@@ -14295,7 +14763,7 @@ IndexError: string index out of range
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">BranchCoverage</span><span class="p">(</span><span class="n">Coverage</span><span class="p">):</span>
@@ -14336,7 +14804,7 @@ IndexError: string index out of range
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
@@ -14359,7 +14827,7 @@ IndexError: string index out of range
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{((&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19)), ((&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)), ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18)), ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11)), ((&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21)), ((&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12)), ((&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 15)), ((&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10)), ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20))}
+<pre>{((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)), ((&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10)), ((&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19)), ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20)), ((&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21)), ((&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32)), ((&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11)), ((&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 15)), ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25))}
 </pre>
 </div>
 </div>
@@ -14367,10 +14835,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div><section>
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_plus</span><span class="p">:</span>
@@ -14391,7 +14859,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[50]:</div>
+<div class="prompt output_prompt">Out[65]:</div>
 
 
 
@@ -14406,10 +14874,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div><div class="fragment">
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_max</span><span class="p">:</span>
@@ -14426,10 +14894,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div></div></section><section>
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="prompt input_prompt">In&nbsp;[67]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">cov_plus</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -14445,7 +14913,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[52]:</div>
+<div class="prompt output_prompt">Out[67]:</div>
 
 
 
@@ -14470,7 +14938,7 @@ IndexError: string index out of range
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="prompt input_prompt">In&nbsp;[68]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sample</span>
@@ -14486,7 +14954,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[53]:</div>
+<div class="prompt output_prompt">Out[68]:</div>
 
 
 
@@ -14500,10 +14968,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div><div class="fragment">
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="prompt input_prompt">In&nbsp;[69]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_fuzz</span><span class="p">:</span>
@@ -14524,7 +14992,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[54]:</div>
+<div class="prompt output_prompt">Out[69]:</div>
 
 
 
@@ -14556,10 +15024,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div></div></section><section>
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">cov_fuzz</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -14575,7 +15043,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[55]:</div>
+<div class="prompt output_prompt">Out[70]:</div>
 
 
 
@@ -14593,10 +15061,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div><div class="fragment">
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="prompt input_prompt">In&nbsp;[71]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">population_branch_coverage</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
@@ -14619,10 +15087,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="prompt input_prompt">In&nbsp;[72]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_branch_coverage</span><span class="p">,</span> <span class="n">cumulative_branch_coverage</span> <span class="o">=</span> <span class="n">population_branch_coverage</span><span class="p">(</span>
@@ -14633,10 +15101,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div></div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="prompt input_prompt">In&nbsp;[75]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_branch_coverage</span><span class="p">)</span>
@@ -14671,10 +15139,10 @@ IndexError: string index out of range
 </div>
 </div>
 
-</div></section><section>
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[61]:</div>
+<div class="prompt input_prompt">In&nbsp;[76]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">())</span>
@@ -14690,7 +15158,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[61]:</div>
+<div class="prompt output_prompt">Out[76]:</div>
 
 
 
@@ -14707,7 +15175,7 @@ IndexError: string index out of range
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="prompt input_prompt">In&nbsp;[77]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_branch_coverage</span> <span class="o">-</span> <span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -14723,7 +15191,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[62]:</div>
+<div class="prompt output_prompt">Out[77]:</div>
 
 
 
@@ -14750,7 +15218,7 @@ IndexError: string index out of range
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="prompt input_prompt">In&nbsp;[78]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">all_branch_coverage</span>
@@ -14766,7 +15234,7 @@ IndexError: string index out of range
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[63]:</div>
+<div class="prompt output_prompt">Out[78]:</div>
 
 
 
@@ -14810,7 +15278,7 @@ IndexError: string index out of range
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="prompt input_prompt">In&nbsp;[79]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="mi">100</span>
@@ -14837,7 +15305,7 @@ IndexError: string index out of range
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="prompt input_prompt">In&nbsp;[80]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">average_coverage</span><span class="p">)</span>

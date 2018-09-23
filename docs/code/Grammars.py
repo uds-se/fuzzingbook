@@ -134,7 +134,10 @@ START_SYMBOL = "<start>"
 
 import re
 
-# As a symbol, we can have anything between <...> except spaces.
+if __name__ == "__main__":
+    # anything between <...> except spaces
+
+
 RE_NONTERMINAL = re.compile(r'(<[^<> ]*>)')
 
 def nonterminals(expansion):

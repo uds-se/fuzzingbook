@@ -240,15 +240,15 @@ class GrammarFuzzer(Fuzzer):
         self.log = log
 
 
-# In the following, we will add further methods to `GrammarFuzzer`.  The Python language requires us to define an entire class with all methods as a single, continuous unit; however, we would like to introduce one method after another.  To avoid this problem, we use a special hack: Whenever we want to introduce a new method to some class `C`, we use the construct
+# In the following, we will add further methods to `GrammarFuzzer`, using the hack already introduced for [the `MutationFuzzer` class](MutationFuzzer.ipynb).  The construct
 # 
 # ```python
-# class C(C):
+# class GrammarFuzzer(GrammarFuzzer):
 #     def new_method(self, args):
 #         pass
 # ```
 # 
-# This seems to define `C` as a subclass of itself, which would make no sense – but actually, it introduces a new `C` class as subclass of the old `C` class, and then shadowing the old `C` definition.  What this gets us is a `C` class with `new_method()` as a method, which is just what we want.  (`C` objects defined earlier will retain the earlier `C` definition, though, and thus must be rebuilt.)
+# allows us to add a new method `new_method()` to the `GrammarFuzzer` class. (Actually, we get a new `GrammarFuzzer` class that extends the old one, but for all our purposes, this does not matter.)
 
 # Using this hack, let us define a helper method `init_tree()` that constructs a tree with just the start symbol:
 
