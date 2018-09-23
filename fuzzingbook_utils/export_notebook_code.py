@@ -55,10 +55,15 @@ def export_notebook_code(notebook_name, path=None):
                 # Empty code
                 continue
             
+            bang = False
+            if code.startswith('!'):
+                code = "import os\nos.system(r" + repr(code[1:]) + ")"
+                bang = True
+
             if RE_IGNORE.match(code):
                 # Code to ignore - comment out
                 print_utf8("\n" + prefix_code(code, "# ") + "\n")
-            elif RE_CODE.match(code):
+            elif RE_CODE.match(code) and not bang:
                 # Export the code as is
                 print_utf8("\n" + code + "\n")
             else:
