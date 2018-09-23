@@ -316,9 +316,11 @@ help:
 	
 # Run a notebook, (re)creating all output cells
 ADD_METADATA = utils/add-metadata.py
+NBAUTOSLIDE = utils/nbautoslide.py
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.ipynb_depend $(ADD_METADATA)
 	$(EXECUTE_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 
 # Conversion rules - chapters
 ifeq ($(LATEX),pdflatex)
@@ -379,6 +381,7 @@ $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)PICS || ln -s ../PICS $(HTML_TARGET)
 	@-$(RM) -fr $(TMPDIR)
+	@$(OPEN) $@
 
 # Rules for beta targets
 ifndef BETA
