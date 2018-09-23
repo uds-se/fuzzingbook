@@ -51,9 +51,9 @@ def estimate_lines(cell):
                 # Assume the worst
                 lines = LINES_PER_SLIDE
 
-        print(repr(cell.outputs)[:20] + "..." + "\t" + repr(lines))
+        # print(repr(cell.outputs)[:20] + "..." + "\t" + repr(lines))
         
-    print(repr(cell.source[:20] + "...") + "\t" + repr(lines))
+    # print(repr(cell.source[:20] + "...") + "\t" + repr(lines))
 
     return lines
 
