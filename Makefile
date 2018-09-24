@@ -16,8 +16,12 @@ TODO_CHAPTERS = \
 	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
 
-	# Parsing.ipynb \
-	# Probabilistic_Fuzzing.ipynb
+	# Parser.ipynb
+	# ProbabilisticGrammarFuzzer.ipynb
+	# ConstraintGrammarFuzzer.ipynb
+	# APIFuzzer.ipynb
+	# GUIFuzzer.ipynb
+	# GrammarMiner.ipynb
 	# Reducing.ipynb
 	
 BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
