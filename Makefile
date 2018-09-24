@@ -6,8 +6,12 @@ PUBLIC_CHAPTERS = \
 	Fuzzer.ipynb \
 	Coverage.ipynb \
 
-BETA_CHAPTERS = \
-	MutationFuzzer.ipynb \
+# Chapters that are ready for release
+READY_CHAPTERS = \
+	MutationFuzzer.ipynb
+
+# Chapters that still are work in progress
+TODO_CHAPTERS = \
 	Grammars.ipynb \
 	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
@@ -15,6 +19,8 @@ BETA_CHAPTERS = \
 	# Parsing.ipynb \
 	# Probabilistic_Fuzzing.ipynb
 	# Reducing.ipynb
+	
+BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
 
 CHAPTERS = $(PUBLIC_CHAPTERS) $(BETA_CHAPTERS)
 
@@ -460,7 +466,8 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post-html.py
 	ln -s ../$(BIB) book
 	$(CONVERT_TO_HTML) book
 	$(PYTHON) utils/nbmerge.py book/Ch*.ipynb > notebooks/book.ipynb
-	$(PYTHON) utils/post-html.py --home $@ $(PUBLIC_SOURCES)
+	$(PYTHON) utils/post-html.py $(BETA_FLAG) \
+		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
 	$(RM) -r book notebooks/book.ipynb
 	cd $(HTML_TARGET) && $(RM) book.nbpub.log book_files/$(BIB)
 	@echo Created $@
