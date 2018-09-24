@@ -10,7 +10,7 @@
 
 # # Getting Coverage
 # 
-# In the [previous chapter](Fuzzer.ipynb), we introduced _basic fuzzing_ – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a _proxy for the likelihood of a test to uncover a bug._  In this chapter, we introduce the concept of _code coverage_, measuring which parts of a program are actually executed during a test run.
+# In the [previous chapter](Fuzzer.ipynb), we introduced _basic fuzzing_ – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a _proxy for the likelihood of a test to uncover a bug._  In this chapter, we introduce the concept of _code coverage_, measuring which parts of a program are actually executed during a test run.  Measuring such coverage is also crucial for test generators that attempt to cover as much code as possible.
 
 # **Prerequisites**
 # 
@@ -120,8 +120,6 @@ if __name__ == "__main__":
 # 
 # One nice feature of white-box testing is that one can actually automatically assess whether some program feature was covered.  To this end, one _instruments_ the execution of the program such that during execution, a special functionality keeps track of which code was executed.  After testing, this information can be passed to the programmer, who can then focus on writing tests that cover the yet uncovered code.
 
-# ### Tracing Executions in Python
-# 
 # In most programming languages, it is rather difficult to set up programs such that one can trace their execution.  Not so in Python.  The function `sys.settrace(f)` allows to define a function `f()` that is called for each and every line executed.  Even better, it gets access to the current function and its name, current variable contents, and more.  It is thus an ideal tool for _dynamic analysis_ – that is, the analysis of what actually happens during an execution.
 
 # To illustrate how this works, let us again look into a specific execution of `cgi_decode()`.
@@ -454,14 +452,14 @@ if __name__ == "__main__":
 # 
 # Of course, not all the world in programming in Python.  The good news is that the problem of obtaining coverage is ubiquitous, and almost every programming language has some facility to measure coverage.  Just as an example, let us therefore demonstrate how to obtain coverage for a C program.
 
-# Our C program (again) implements `cgi_decode` as a program to be executed from the command line:
+# Our C program (again) implements `cgi_decode`; this time as a program to be executed from the command line:
 # 
 # ```shell
-# $ cgi_decode 'Hello+World'
+# $ ./cgi_decode 'Hello+World'
 # Hello World
 # ```
 
-# We start with the usual C includes:
+# Here comes the C code, first as a Python string.  We start with the usual C includes:
 
 if __name__ == "__main__":
     cgi_c_code = """

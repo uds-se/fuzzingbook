@@ -10,7 +10,7 @@
 
 # # Mutation-Based Fuzzing
 # 
-# Most [randomly generated inputs](Fuzzer.ipynb) are syntactically _invalid_ and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is by _mutating_ existing valid inputs – that is, introducing small changes that may still keep the input valid, yet exercise new behavior.
+# Most [randomly generated inputs](Fuzzer.ipynb) are syntactically _invalid_ and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is by _mutating_ existing valid inputs – that is, introducing small changes that may still keep the input valid, yet exercise new behavior.  We show how to create such mutations, and how to guide them towards yet uncovered code, applying central concepts from the popular AFL fuzzer.
 
 # **Prerequisites**
 # 
@@ -197,16 +197,13 @@ if __name__ == "__main__":
 
 # Let us now create a random mutator that randomly chooses which mutation to apply:
 
-if __name__ == "__main__":
+def mutate(s):
+    """Return s with a random mutation applied"""
     mutators = [
         delete_random_character,
         insert_random_character,
-        flip_random_character]
-
-
-
-def mutate(s):
-    """Return s with a random mutation applied"""
+        flip_random_character
+    ]
     mutator = random.choice(mutators)
     # print(mutator)
     return mutator(s)
