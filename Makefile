@@ -551,6 +551,12 @@ $(CODE_TARGET)import_all.py: Makefile
 	-chmod +x $@
 
 run: check-import check-code
+	
+# Spell checks
+NBSPELLCHECK = utils/nbspellcheck.py
+spell spellcheck check-spell:
+	$(NBSPELLCHECK) $(SOURCES)
+
 
 # All checks
 check check-all: check-code check-import check-style check-crossref

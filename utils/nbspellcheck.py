@@ -22,7 +22,11 @@ KNOWN_WORDS = [
     "comma-separated", "turing-complete", "nonterminal", 'backus-naur', 'json', 'whitespace',
     'bnf', 'ebnf', 'nonterminals', 'string-based', 'tree-based', 'grammar-generated',
     'infty', 'algorithmically', 'subtree', 'visualizes', 'mutates', 'cgi-encoded',
-    'white-box', 'black-box', 'initialization', 'non-implemented'
+    'white-box', 'black-box', 'initialization', 'non-implemented', 'jupyter', 'javascript',
+    'firefox', 'debug', 'shellsort', 'quintillions', "we'll", 'zeller', 'rahul', 'gopinath',
+    'iterates', 'parenthesized', 'metadata', 'html', 'github', 'makefile', "hasn't",
+    'comprehensions', 'subclassing', 'subclassed', 'inline', 'markdown', 'bulleted',
+    'cheatsheet', 'timeout', 'timeouts'
 ]
 
 spell = SpellChecker()
