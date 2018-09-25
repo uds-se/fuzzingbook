@@ -8,11 +8,11 @@ PUBLIC_CHAPTERS = \
 
 # Chapters that are ready for release
 READY_CHAPTERS = \
-	MutationFuzzer.ipynb
+	MutationFuzzer.ipynb \
+	Grammars.ipynb
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	Grammars.ipynb \
 	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
 
