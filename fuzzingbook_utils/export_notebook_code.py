@@ -14,17 +14,23 @@ RE_IGNORE = re.compile(r'^import fuzzingbook_utils$|^get_ipython().*|^%.*')
 # Strip blank lines
 RE_BLANK_LINES = re.compile(r'^[ \t]*$', re.MULTILINE)
 
+# Comments
+RE_COMMENTS = re.compile(r'^#.*$', re.MULTILINE)
+
 # Common header for all code
 HEADER = """#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
+# This code is part of "Generating Software Tests" (https://www.fuzzingbook.org/)
 # It is licensed under a Creative Commons
 # Attribution-NonCommercial-ShareAlike 4.0 International License,
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 """
+
+def is_all_comments(code):
+    executable_code = re.sub(RE_COMMENTS, '', code).strip()
+    return executable_code == ""
 
 def prefix_code(code, prefix):
     return prefix + code.replace('\n', '\n' + prefix)
@@ -65,6 +71,9 @@ def export_notebook_code(notebook_name, path=None):
                 print_utf8("\n" + prefix_code(code, "# ") + "\n")
             elif RE_CODE.match(code) and not bang:
                 # Export the code as is
+                print_utf8("\n" + code + "\n")
+            elif is_all_comments(code):
+                # Only comments
                 print_utf8("\n" + code + "\n")
             else:
                 # Run code only if run as main file
