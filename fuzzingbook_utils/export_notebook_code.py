@@ -39,8 +39,20 @@ def indent_code(code):
     lines = prefix_code(code, "    ")
     return re.sub(RE_BLANK_LINES, '', lines)
 
+def first_line(text):
+    index = text.find('\n')
+    if index >= 0:
+        return text[:index]
+    else:
+        return text
+
 def print_utf8(s):
     sys.stdout.buffer.write(s.encode('utf-8'))
+
+def print_if_main(code):
+    # Run code only if run as main file
+    print_utf8('\nif __name__ == "__main__":\n')
+    print_utf8(indent_code(code) + "\n\n")
 
 def export_notebook_code(notebook_name, path=None):
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
@@ -53,6 +65,7 @@ def export_notebook_code(notebook_name, path=None):
     # shell = InteractiveShell.instance()
 
     print_utf8(HEADER)
+    sep = ''
 
     for cell in notebook.cells:
         if cell.cell_type == 'code':
@@ -76,13 +89,15 @@ def export_notebook_code(notebook_name, path=None):
                 # Only comments
                 print_utf8("\n" + code + "\n")
             else:
-                # Run code only if run as main file
-                print_utf8('\nif __name__ == "__main__":\n')
-                print_utf8(indent_code(code) + "\n\n")
+                print_if_main(code)
         else:
             # Anything else
             contents = cell.source
             print_utf8("\n" + prefix_code(contents, "# ") + "\n")
+            if contents.startswith('#'):
+                # Header
+                print_if_main("print(" + repr(sep + first_line(contents)) + ")\n\n")
+                sep = '\n'
 
 if __name__ == "__main__":
     for notebook in sys.argv[1:]:
