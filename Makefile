@@ -536,7 +536,7 @@ PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
 $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 	$(PYTHON) $< > $@ 2>&1 || (echo "Error while running $(PYTHON)" >> $@; tail $@; exit 1)
 
-check-code run: code $(PYS_OUT)
+check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Import all code.  This should produce no output (or error messages).
@@ -549,6 +549,8 @@ $(CODE_TARGET)import_all.py: Makefile
 	echo "#!/usr/bin/env $(PYTHON)" > $@
 	(for file in $(IMPORTS); do echo import $$file; done) >> $@
 	-chmod +x $@
+
+run: check-import check-code
 
 # All checks
 check check-all: check-code check-import check-style check-crossref
