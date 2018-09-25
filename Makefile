@@ -248,7 +248,7 @@ EXECUTE_NOTEBOOK = $(NBCONVERT) --to notebook --execute --output-dir=$(FULL_NOTE
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
-chapters default run: html code
+chapters default: html code
 
 # The book is recreated after any change to any source
 book:	book-html book-pdf
@@ -536,7 +536,7 @@ PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
 $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 	$(PYTHON) $< > $@ 2>&1 || (echo "Error while running $(PYTHON)" >> $@; tail $@; exit 1)
 
-check-code: code $(PYS_OUT)
+check-code run: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Import all code.  This should produce no output (or error messages).
