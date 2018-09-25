@@ -18,7 +18,7 @@ RE_BLANK_LINES = re.compile(r'^[ \t]*$', re.MULTILINE)
 RE_COMMENTS = re.compile(r'^#.*$', re.MULTILINE)
 
 # Common header for all code
-HEADER = """#!/usr/bin/env python
+HEADER = """#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # This code is part of "Generating Software Tests" (https://www.fuzzingbook.org/)
