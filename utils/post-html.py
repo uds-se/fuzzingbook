@@ -457,7 +457,7 @@ if args.home:
 # The official way is to set a title in document metadata, 
 # but a) Jupyter Lab can't edit it, and b) the title conflicts with the chapter header - AZ
 chapter_contents = re.sub(r"<title>.*</title>", 
-    "<title>" + page_title + "</title>", chapter_contents)
+    "<title>" + page_title + "</title>", chapter_contents, 1)
 
 if is_beta_chapter:
     beta_warning = '<p><em class="beta">' + beta_suffix + '&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p>'
