@@ -3,11 +3,11 @@
 # Chapters to include in the book, in this order
 PUBLIC_CHAPTERS = \
 	Intro_Testing.ipynb \
-	Fuzzer.ipynb \
-	Coverage.ipynb \
+	Fuzzer.ipynb
 
 # Chapters that are ready for release
 READY_CHAPTERS = \
+	Coverage.ipynb \
 	MutationFuzzer.ipynb \
 	Grammars.ipynb
 
@@ -579,7 +579,8 @@ metadata: $(ADD_METADATA)
 
 ## Publishing
 
-docs: publish-notebooks publish-html publish-code publish-slides publish-pics \
+docs: publish-notebooks publish-html publish-code publish-code-zip \
+	publish-slides publish-pics \
 	$(DOCS_TARGET)index.html README.md binder/postBuild
 	@echo "Now use 'make publish' to commit changes to docs."
 
@@ -604,6 +605,18 @@ publish-code: code
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)code || $(MKDIR) $(DOCS_TARGET)code
 	cp -pr $(CODE_TARGET) $(DOCS_TARGET)code
+	$(RM) $(DOCS_TARGET)code/*.py.out $(DOCS_TARGET)code/*.cfg
+	$(RM) -r $(DOCS_TARGET)code/__pycache__ $(DOCS_TARGET)code/fuzzingbook_utils/__pycache__
+
+ZIP = zip
+ZIP_OPTIONS = -r
+publish-code-zip: publish-code $(DOCS_TARGET)fuzzingbook-code.zip
+
+$(DOCS_TARGET)fuzzingbook-code.zip: publish-code
+	$(RM) $(DOCS_TARGET)fuzzingbook-code $(DOCS_TARGET)fuzzingbook-code.zip
+	ln -s code $(DOCS_TARGET)fuzzingbook-code
+	cd $(DOCS_TARGET); $(ZIP) $(ZIP_OPTIONS) fuzzingbook-code.zip fuzzingbook-code
+	$(RM) $(DOCS_TARGET)fuzzingbook-code
 
 publish-slides: slides
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
