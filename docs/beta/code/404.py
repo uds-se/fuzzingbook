@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/404.html
-# Last change: 2018-09-26 13:58:11+02:00
+# Last change: 2018-09-26 15:19:13+02:00
 #
 # This material is licensed under a
 # Creative Commons Attribution-NonCommercial-ShareAlike 4.0
@@ -59,8 +59,8 @@ if __name__ == "__main__":
 
 # import fuzzingbook_utils
 
-class FourOhFourError(Exception):
-    def __init__(self, value="404 - Page not Found"):
+class NotFoundError(Exception):
+    def __init__(self, value="404"):
         self.value = value
 
     def __str__(self):
@@ -69,4 +69,4 @@ class FourOhFourError(Exception):
 from ExpectError import ExpectError
 
 with ExpectError():
-    raise FourOhFourError
+    raise NotFoundError
