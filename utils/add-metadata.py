@@ -59,6 +59,10 @@ def add_solution_metadata(notebook):
 
         if within_solution:
             cell.metadata['solution2'] = 'hidden'
+            if 'slideshow' not in cell.metadata:
+                cell.metadata['slideshow'] = {}
+                cell.metadata['slideshow']['slide_type'] = "skip"
+
         previous_cell = cell
                 
 
