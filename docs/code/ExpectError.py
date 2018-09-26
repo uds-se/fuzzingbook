@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
-# Last change: 2018-09-26 12:09:16+02:00
+# Last change: 2018-09-26 12:25:32+02:00
 #
 # This material is licensed under a
 # Creative Commons Attribution-NonCommercial-ShareAlike 4.0
@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
 # import fuzzingbook_utils
 
-import traceback
+import traceback, sys
 
 class ExpectError(object):
     # Begin of `with` block
@@ -66,7 +66,7 @@ class ExpectError(object):
 
         # An exception occurred - print it
         lines = ''.join(traceback.format_exception(exc_type, exc_value, tb)).strip()
-        print(lines, "(expected)")
+        print(lines, "(expected)", file=sys.stderr)
         return True  # Ignore it
 
 # Here's an example:
@@ -156,7 +156,7 @@ class ExpectTimeout(object):
 
         # An exception occurred - print it
         lines = ''.join(traceback.format_exception(exc_type, exc_value, tb)).strip()
-        print(lines, "(expected)")
+        print(lines, "(expected)", file=sys.stderr)
         return True  # Ignore it
 
     def cancel(self):
