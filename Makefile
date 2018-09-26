@@ -627,9 +627,11 @@ publish-code: code
 	$(RM) $(DOCS_TARGET)code/*.py.out $(DOCS_TARGET)code/*.cfg
 	$(RM) -r $(DOCS_TARGET)code/__pycache__ \
 	 	$(DOCS_TARGET)code/fuzzingbook_utils/__pycache__
+	$(RM) $(DOCS_TARGET)code/404.py $(RM) $(DOCS_TARGET)code/index.py 
+	$(RM) $(DOCS_TARGET)code/Template.py $(DOCS_TARGET)code/Guide_for_Authors.py
 	cp -p LICENSE.md $(DOCS_TARGET)code
 
-publish-code-zip: delete-betas $(DOCS_TARGET)fuzzingbook-code.zip
+publish-code-zip: publish-code delete-betas $(DOCS_TARGET)fuzzingbook-code.zip
 
 $(DOCS_TARGET)fuzzingbook-code.zip: publish-code delete-betas
 	$(RM) $(DOCS_TARGET)fuzzingbook-code $(DOCS_TARGET)fuzzingbook-code.zip
