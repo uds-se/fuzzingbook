@@ -1,4 +1,7 @@
-This folder holds the "fuzzingbook" code.  You can import it as in
+This folder holds the code from "Generating Software Tests".
+Web site: https://www.fuzzingbook.org/
+
+You can import it as in
 
 ```python
 from fuzzingbook.Fuzzer import RandomFuzzer
