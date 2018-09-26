@@ -26,10 +26,27 @@ HEADER = """#!/usr/bin/env python3
 # Web site: https://www.fuzzingbook.org/html/{module}.html
 # Last change: {timestamp}
 #
-# This material is licensed under a
-# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
-# International License
-# (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+#
+# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 """
 
@@ -120,11 +137,16 @@ def export_notebook_code(notebook_name, path=None):
         else:
             # Anything else
             contents = cell.source
-            print_utf8("\n" + prefix_code(contents, "# ") + "\n")
             if contents.startswith('#'):
                 # Header
-                print_if_main("print(" + repr(sep + first_line(contents)) + ")\n\n")
+                line = first_line(contents)
+                print_utf8("\n" + prefix_code(line, "# ") + "\n")
+                print_if_main("print(" + repr(sep + line) + ")\n\n")
                 sep = '\n'
+            else:
+                # We don't include contents, as they fall under a different license
+                # print_utf8("\n" + prefix_code(contents, "# ") + "\n")
+                pass
 
 if __name__ == "__main__":
     for notebook in sys.argv[1:]:
