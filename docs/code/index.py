@@ -1,10 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/index.html
+# Last change: 2018-09-18 13:44:14+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
@@ -12,6 +15,12 @@
 # 
 # __Welcome to "Generating Software Tests"!__ 
 # Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by _automating_ software testing, specifically by _generating tests automatically_.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code. 
+
+if __name__ == "__main__":
+    print('# About this Book')
+
+
+
 
 # ## A Textbook for Paper, Screen, and Keyboard
 # 
@@ -25,9 +34,21 @@
 # 
 # * You can __present chapters as slides__ (beta).  This allows for presenting the material in lectures.  Just click on "Resources → View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a>
 
+if __name__ == "__main__":
+    print('\n## A Textbook for Paper, Screen, and Keyboard')
+
+
+
+
 # ## Who this Book is for
 # 
 # This work is designed as a _textbook_ for a course in software testing; as _supplementary material_ in a software testing or software engineering course; and as a _resource for software developers_. We cover random fuzzing, mutation-based fuzzing, grammar-based test generation, symbolic testing, and much more, illustrating all techniques with code examples that you can try out yourself.
+
+if __name__ == "__main__":
+    print('\n## Who this Book is for')
+
+
+
 
 # ## News
 # 
@@ -36,11 +57,29 @@
 # <a class="twitter-timeline" data-width="500" data-chrome="noheader nofooter noborders transparent" data-link-color="#A93226" data-align="center" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 # 
 
+if __name__ == "__main__":
+    print('\n## News')
+
+
+
+
 # ## About the Authors
 # 
 # This book is written by _Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler_.  All of us are long-standing experts in software testing and test generation; and we have written or contributed to some of the most important test generators and fuzzers on the planet.  As an example, if you are reading this in a Firefox, Chrome, or Edge Web browser, you can do so safely partly because of us, as _the very techniques listed in this book have found more than 2,600 bugs in their JavaScript interpreters so far._  We are happy to share our expertise and making it accessible to the public.
 
+if __name__ == "__main__":
+    print('\n## About the Authors')
+
+
+
+
 # ## Frequently Asked Questions
+
+if __name__ == "__main__":
+    print('\n## Frequently Asked Questions')
+
+
+
 
 # ### Which content will be coming up?
 # 
@@ -64,13 +103,31 @@
 # 
 # See the table of contents in the menu above for those chapters that are already done.
 
+if __name__ == "__main__":
+    print('\n### Which content will be coming up?')
+
+
+
+
 # ### Why does it take so long to start an interactive notebook?
 # 
 # We use the [binder](https://mybinder.org) service, which runs notebooks on their own servers.  Starting Jupyter through binder normally takes about 30 seconds. If, however, you are the first to invoke binder after a book update, binder recreates its environment, which can take a few minutes.  Note, though, that binder is officially in beta and we do not have control over binder.
 
+if __name__ == "__main__":
+    print('\n### Why does it take so long to start an interactive notebook?')
+
+
+
+
 # ### I have a comment or a suggestion.  What do I do?
 # 
 # Report an issue on the [development page](https://github.com/uds-se/fuzzingbook/issues).
+
+if __name__ == "__main__":
+    print('\n### I have a comment or a suggestion.  What do I do?')
+
+
+
 
 # ### I have reported an issue two weeks ago.  When will it be addressed?
 # 
@@ -84,18 +141,48 @@
 # 6. Things marked as "beta"
 # 7. Everything else
 
+if __name__ == "__main__":
+    print('\n### I have reported an issue two weeks ago.  When will it be addressed?')
+
+
+
+
 # ### How can I solve problems myself?
 # 
 # We're glad you ask that.  The [development page](https://github.com/uds-se/fuzzingbook/) has all sources and some supplementary material.  Pull requests that fix issues are very welcome.
+
+if __name__ == "__main__":
+    print('\n### How can I solve problems myself?')
+
+
+
 
 # ### How can I contribute?
 # 
 # Again, we're glad you're here!  See our [Guide for Authors](http://www.fuzzingbook.org/Guide_for_Authors.html) for instructions on coding and writing.
 
+if __name__ == "__main__":
+    print('\n### How can I contribute?')
+
+
+
+
 # ### Do you provide PDFs of your material?
 # 
 # At this point, we do not provide support for PDF versions.  We are working on producing PDF and paper versions once the book is complete.
 
+if __name__ == "__main__":
+    print('\n### Do you provide PDFs of your material?')
+
+
+
+
 # ### How do I cite your work?
 # 
 # Thanks for referring to our work!  Once the book is complete, you will be able to cite it in the traditional way.  In the meantime, just click on the "cite" button at the bottom of the Web page for each chapter to get a citation entry.
+
+if __name__ == "__main__":
+    print('\n### How do I cite your work?')
+
+
+

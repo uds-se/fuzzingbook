@@ -1,16 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/Coverage.html
+# Last change: 2018-09-24 14:47:48+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
 # # Getting Coverage
 # 
-# In the [previous chapter](Fuzzer.ipynb), we introduced _basic fuzzing_ – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a _proxy for the likelihood of a test to uncover a bug._  In this chapter, we introduce the concept of _code coverage_, measuring which parts of a program are actually executed during a test run.
+# In the [previous chapter](Fuzzer.ipynb), we introduced _basic fuzzing_ – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a _proxy for the likelihood of a test to uncover a bug._  In this chapter, we introduce the concept of _code coverage_, measuring which parts of a program are actually executed during a test run.  Measuring such coverage is also crucial for test generators that attempt to cover as much code as possible.
+
+if __name__ == "__main__":
+    print('# Getting Coverage')
+
+
+
 
 # **Prerequisites**
 # 
@@ -27,6 +36,12 @@
 # In CGI encoding, the string `"Hello, world!"` would thus become `"Hello%2c+world%21"` where `2c` and `21` are the hexadecimal numbers of `','` and `'!'`, respectively.
 # 
 # The function `cgi_decode()` takes such an encoded string and decodes it back to its original form.  Our implementation replicates the code from \cite{Pezze2008}.  (It even includes its bugs – but we won't reveal them at this point.)
+
+if __name__ == "__main__":
+    print('\n## A CGI Decoder')
+
+
+
 
 def cgi_decode(s):
     """Decode the CGI-encoded string `s`:
@@ -84,6 +99,12 @@ if __name__ == "__main__":
 # Here are four assertions (tests) that cover these four features.  We can see that they all pass:
 
 if __name__ == "__main__":
+    print('\n## Black-Box Testing')
+
+
+
+
+if __name__ == "__main__":
     assert cgi_decode('+') == ' '
     assert cgi_decode('%20') == ' '
     assert cgi_decode('abc') == 'abc'
@@ -106,6 +127,12 @@ if __name__ == "__main__":
 # 
 # Besides these, there are far more coverage criteria, including sequences of branches taken, loop iterations taken (zero, one, many), data flows between variable definitions and usages, and many more; \cite{Pezze2008} has a great overview.
 
+if __name__ == "__main__":
+    print('\n## White-Box Testing')
+
+
+
+
 # Let us consider `cgi_decode()`, above, and reason what we have to do such that each statement of the code is executed at least once.  We'd have to cover
 # 
 # * The block following `if c == '+'`
@@ -120,8 +147,12 @@ if __name__ == "__main__":
 # 
 # One nice feature of white-box testing is that one can actually automatically assess whether some program feature was covered.  To this end, one _instruments_ the execution of the program such that during execution, a special functionality keeps track of which code was executed.  After testing, this information can be passed to the programmer, who can then focus on writing tests that cover the yet uncovered code.
 
-# ### Tracing Executions in Python
-# 
+if __name__ == "__main__":
+    print('\n## Tracing Executions')
+
+
+
+
 # In most programming languages, it is rather difficult to set up programs such that one can trace their execution.  Not so in Python.  The function `sys.settrace(f)` allows to define a function `f()` that is called for each and every line executed.  Even better, it gets access to the current function and its name, current variable contents, and more.  It is thus an ideal tool for _dynamic analysis_ – that is, the analysis of what actually happens during an execution.
 
 # To illustrate how this works, let us again look into a specific execution of `cgi_decode()`.
@@ -246,6 +277,12 @@ if __name__ == "__main__":
 # 
 # In this book, we will make use of coverage again and again – to _measure_ the effectiveness of different test generation techniques, but also to _guide_ test generation towards code coverage.  Our previous implementation with a global `coverage` variable is a bit cumbersome for that.  We therefore implement some functionality that will help us measuring coverage easily.
 
+if __name__ == "__main__":
+    print('\n## A Coverage Class')
+
+
+
+
 # The key idea of getting coverage is to make use of the Python `with` statement.  The general form
 # 
 # ```python
@@ -315,6 +352,12 @@ if __name__ == "__main__":
 # Since we represent coverage as a set of executed lines, we can also apply _set operations_ on these.  For instance, we can find out which lines are covered by individual test cases, but not others:
 
 if __name__ == "__main__":
+    print('\n## Comparing Coverage')
+
+
+
+
+if __name__ == "__main__":
     with Coverage() as cov_plus:
         cgi_decode("a+b")
     with Coverage() as cov_standard:
@@ -351,6 +394,12 @@ if __name__ == "__main__":
 # ##  Coverage of Basic Fuzzing
 # 
 # We can now use our coverage tracing to assess the _effectiveness_ of testing methods – in particular, of course, test _generation_ methods.  Our challenge is to achieve maximum coverage in `cgi_decode()` just with random inputs.  In principle, we should _eventually_ get there, as eventually, we will have produced every possible string in the universe – but exactly how long is this?  To this end, let us run just one fuzzing iteration on `cgi_decode()`:
+
+if __name__ == "__main__":
+    print('\n##  Coverage of Basic Fuzzing')
+
+
+
 
 from Fuzzer import fuzzer
 
@@ -454,14 +503,20 @@ if __name__ == "__main__":
 # 
 # Of course, not all the world in programming in Python.  The good news is that the problem of obtaining coverage is ubiquitous, and almost every programming language has some facility to measure coverage.  Just as an example, let us therefore demonstrate how to obtain coverage for a C program.
 
-# Our C program (again) implements `cgi_decode` as a program to be executed from the command line:
+if __name__ == "__main__":
+    print('\n## Getting Coverage from External Programs')
+
+
+
+
+# Our C program (again) implements `cgi_decode`; this time as a program to be executed from the command line:
 # 
 # ```shell
-# $ cgi_decode 'Hello+World'
+# $ ./cgi_decode 'Hello+World'
 # Hello World
 # ```
 
-# We start with the usual C includes:
+# Here comes the C code, first as a Python string.  We start with the usual C includes:
 
 if __name__ == "__main__":
     cgi_c_code = """
@@ -616,6 +671,12 @@ if __name__ == "__main__":
 # 
 # Given sufficient time, we can indeed cover each and every line within `cgi_decode()`, whatever the programming language would be.  This does not mean that they would be error-free, though.  Since we do not check the result of `cgi_decode()`, the function could return any value without us checking or noticing.  To catch such errors, we would have to set up a _results checker_ (commonly called an _oracle_) that would verify test results.  In our case, we could compare the C and Python implementations of `cgi_decode()` and see whether both produce the same results.
 
+if __name__ == "__main__":
+    print('\n## Finding Errors with Basic Fuzzing')
+
+
+
+
 # Where fuzzing is great at, though, is in finding _internal errors_ that can be detected even without checking the result.  Actually, if one runs our `fuzzer()` on `cgi_decode()`, one quickly finds such an error, as the following code shows:
 
 from ExpectError import ExpectError
@@ -656,6 +717,12 @@ if __name__ == "__main__":
 # * A number of coverage metrics exist, the most important ones being statement coverage and branch coverage.
 # * In Python, it is very easy to access the program state during execution, including the currently executed code.
 
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
+
+
 # At the end of the day, let's clean up:
 
 if __name__ == "__main__":
@@ -670,11 +737,29 @@ if __name__ == "__main__":
 # * [guide _mutations_ of existing inputs towards better coverage in the chapter on mutation fuzzing](MutationFuzzer.ipynb)
 # 
 
+if __name__ == "__main__":
+    print('\n## Next Steps')
+
+
+
+
 # ## Exercises
+
+if __name__ == "__main__":
+    print('\n## Exercises')
+
+
+
 
 # ### Exercise 1: Fixing cgi_decode
 # 
 # Create an appropriate test to reproduce the `IndexError` discussed above.  Fix `cgi_decode()` to prevent the bug.  Show that your test (and additional `fuzzer()` runs) no longer expose the bug.  Do the same for the C variant.
+
+if __name__ == "__main__":
+    print('\n### Exercise 1: Fixing cgi_decode')
+
+
+
 
 # **Solution.**  Here's a test case:
 
@@ -785,6 +870,12 @@ if __name__ == "__main__":
 # 
 # Using statement coverage, a single test case where `CONDITION` is true suffices to cover the call to `do_a()`.  Using branch coverage, however, we would also have to create a test case where `do_a()` is _not_ invoked.
 
+if __name__ == "__main__":
+    print('\n### Exercise 2: Branch Coverage')
+
+
+
+
 # Using our `Coverage` infrastructure, we can simulate branch coverage by considering  _pairs of subsequent lines executed_.  The `trace()` method gives us the list of lines executed one after the other:
 
 if __name__ == "__main__":
@@ -807,6 +898,12 @@ if __name__ == "__main__":
 # ```
 # 
 # Bonus for advanced Python programmers: Define `BranchCoverage` as subclass of `Coverage` and make `branch_coverage()` as above a `coverage()` method of `BranchCoverage`.
+
+if __name__ == "__main__":
+    print('\n#### Part 1: Compute branch coverage')
+
+
+
 
 # **Solution.**  Here's a simple definition of `branch_coverage()`:
 
@@ -841,6 +938,12 @@ class BranchCoverage(Coverage):
 # #### Part 2: Comparing statement coverage and branch coverage
 # 
 # Use `branch_coverage()` to repeat the experiments in this chapter with branch coverage rather than statement coverage.  Do the manually written test cases cover all branches?
+
+if __name__ == "__main__":
+    print('\n#### Part 2: Comparing statement coverage and branch coverage')
+
+
+
 
 # **Solution.** Let's repeat the above experiments with `BranchCoverage`:
 
@@ -942,6 +1045,12 @@ if __name__ == "__main__":
 # #### Part 3: Average coverage
 # 
 # Again, repeat the above experiments with branch coverage.  Does `fuzzer()` cover all branches, and if so, how many tests does it take on average?
+
+if __name__ == "__main__":
+    print('\n#### Part 3: Average coverage')
+
+
+
 
 # **Solution.** We repeat the experiments we ran with line coverage with branch coverage.
 

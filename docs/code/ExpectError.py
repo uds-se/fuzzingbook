@@ -1,16 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/ExpectError.html
+# Last change: 2018-09-25 18:13:27+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
 # # Error Handling
 # 
 # The code in this notebook helps with handling errors.  Normally, an error in  notebook code causes the execution of the code to stop; while an infinite loop in notebook code causes the notebook to run without end.  This notebook provides two classes to help address these concerns.
+
+if __name__ == "__main__":
+    print('# Error Handling')
+
+
+
 
 # **Prerequisites**
 # 
@@ -33,6 +42,12 @@
 # ```
 # 
 # If an exception occurs, it is printed on standard error; yet, execution continues.
+
+if __name__ == "__main__":
+    print('\n## Catching Errors')
+
+
+
 
 # import fuzzingbook_utils
 
@@ -66,7 +81,7 @@ if __name__ == "__main__":
 
 # ## Catching Timeouts
 # 
-# The class `ExpectTimeout(seconds)` allows to express that some code may run for a long or inifinite time; execution is thus interruoted after `seconds` seconds.  A typical usage looks as follows:
+# The class `ExpectTimeout(seconds)` allows to express that some code may run for a long or infinite time; execution is thus interrupted after `seconds` seconds.  A typical usage looks as follows:
 # 
 # ```Python
 # from ExpectError import ExpectTimeout
@@ -80,6 +95,12 @@ if __name__ == "__main__":
 # Should there be a need to cancel the timeout within the `with` block, `t.cancel()` will do the trick.
 # 
 # The implementation uses `sys.settrace()`, as this seems to be the most portable way to implement timeouts.  It is not very efficient, though.  Also, it only works on individual lines of Python code and will not interrupt a long-running system function.
+
+if __name__ == "__main__":
+    print('\n## Catching Timeouts')
+
+
+
 
 import sys
 import time

@@ -1,16 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
+# Last change: 2018-09-22 16:29:26+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
 # # Grammar Coverage
 # 
 # In this chapter, we explore how to systematically cover elements of a grammar, as well as element combinations.  \todo{Work in progress.}
+
+if __name__ == "__main__":
+    print('# Grammar Coverage')
+
+
+
 
 # **Prerequisites**
 # 
@@ -31,6 +40,12 @@
 # Let us assume we have already produced a `0` in the first expansion of `<digit>`.  As it comes to expand the next digit, we would mark the `0` expansion as already covered, and choose one of the yet uncovered alternatives.  Only when we have covered all alternatives would we go back and consider expansions covered before.
 # 
 # This concept of coverage is very easy to implement.
+
+if __name__ == "__main__":
+    print('\n## Covering Grammar Elements')
+
+
+
 
 # import fuzzingbook_utils
 
@@ -149,6 +164,12 @@ if __name__ == "__main__":
 # ## Grammar Coverage and Code Coverage
 
 if __name__ == "__main__":
+    print('\n## Grammar Coverage and Code Coverage')
+
+
+
+
+if __name__ == "__main__":
     f = GrammarCoverageFuzzer(CGI_GRAMMAR)
 
 
@@ -164,6 +185,12 @@ if __name__ == "__main__":
 # ## Deep Foresight
 # 
 # Our naive way of selecting expansions is not sufficient; we need to favor expansions that may be covered, but _lead to uncovered ones_.
+
+if __name__ == "__main__":
+    print('\n## Deep Foresight')
+
+
+
 
 class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
     def _max_symbol_expansion_coverage(
@@ -294,6 +321,12 @@ if __name__ == "__main__":
 # ## Combinatorial Coverage
 # 
 # Start with depth of 1, then increase depth
+
+if __name__ == "__main__":
+    print('\n## Combinatorial Coverage')
+
+
+
 
 def flatten_tree(tree):
     """Return `tree` without grandchildren"""
@@ -561,11 +594,23 @@ if __name__ == "__main__":
 # 
 # \todo{Expand.}
 
+if __name__ == "__main__":
+    print('\n## Advanced Grammar Coverage Metrics')
+
+
+
+
 # ## Lessons Learned
 # 
 # * _Lesson one_
 # * _Lesson two_
 # * _Lesson three_
+
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
+
 
 # ## Next Steps
 # 
@@ -576,6 +621,12 @@ if __name__ == "__main__":
 # * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
 # 
 
+if __name__ == "__main__":
+    print('\n## Next Steps')
+
+
+
+
 # ## Exercises
 # 
 # Close the chapter with a few exercises such that people have things to do.  In Jupyter Notebook, use the `exercise2` nbextension to add solutions that can be interactively viewed or hidden:
@@ -585,9 +636,21 @@ if __name__ == "__main__":
 # 
 # (Alternatively, just copy the exercise and solution cells below with their metadata.)
 
+if __name__ == "__main__":
+    print('\n## Exercises')
+
+
+
+
 # ### Exercise 1
 # 
 # _Text of the exercise_
+
+if __name__ == "__main__":
+    print('\n### Exercise 1')
+
+
+
 
 if __name__ == "__main__":
     # Some code that is part of the exercise
@@ -608,5 +671,11 @@ if __name__ == "__main__":
 # ### Exercise 2
 # 
 # _Text of the exercise_
+
+if __name__ == "__main__":
+    print('\n### Exercise 2')
+
+
+
 
 # _Solution for the exercise_

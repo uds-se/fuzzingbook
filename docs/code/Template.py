@@ -1,16 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/Template.html
+# Last change: 2018-09-22 11:57:42+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
 # # _Title_
 # 
 # _Brief abstract/introduction/motivation.  State what the chapter is about in 1-2 paragraphs._
+
+if __name__ == "__main__":
+    print('# _Title_')
+
+
+
 
 # **Prerequisites**
 # 
@@ -20,9 +29,21 @@
 # 
 # \todo{Add}
 
+if __name__ == "__main__":
+    print('\n## _Section 1_')
+
+
+
+
 # ## _Section 2_
 # 
 # \todo{Add}
+
+if __name__ == "__main__":
+    print('\n## _Section 2_')
+
+
+
 
 # ## _Section 3_
 # 
@@ -35,6 +56,12 @@
 # * `for elem in list: body` executes `body` in a loop with `elem` taking each value from `list`.
 # * `for i in range(start, end): body` executes `body` in a loop with `i` from `start` to `end` - 1.
 # * `chr(n)` - return a character with ASCII code `n`
+
+if __name__ == "__main__":
+    print('\n## _Section 3_')
+
+
+
 
 # import fuzzingbook_utils
 
@@ -52,11 +79,23 @@ if __name__ == "__main__":
 # 
 # \todo{Add}
 
+if __name__ == "__main__":
+    print('\n## _Section 4_')
+
+
+
+
 # ## Lessons Learned
 # 
 # * _Lesson one_
 # * _Lesson two_
 # * _Lesson three_
+
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
+
 
 # ## Next Steps
 # 
@@ -66,6 +105,12 @@ if __name__ == "__main__":
 # * [use _grammars_ (i.e., a specification of the input format) to get even more valid inputs](Grammars.ipynb)
 # * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
 # 
+
+if __name__ == "__main__":
+    print('\n## Next Steps')
+
+
+
 
 # ## Exercises
 # 
@@ -79,9 +124,21 @@ if __name__ == "__main__":
 # 
 # Running `make metadata` will automatically add metadata to the cells such that the cells will be hidden by default, and can be uncovered by the user.  The button will be introduced above the solution.
 
+if __name__ == "__main__":
+    print('\n## Exercises')
+
+
+
+
 # ### Exercise 1: _Title_
 # 
 # _Text of the exercise_
+
+if __name__ == "__main__":
+    print('\n### Exercise 1: _Title_')
+
+
+
 
 if __name__ == "__main__":
     # Some code that is part of the exercise
@@ -102,5 +159,11 @@ if __name__ == "__main__":
 # ### Exercise 2: _Title_
 # 
 # _Text of the exercise_
+
+if __name__ == "__main__":
+    print('\n### Exercise 2: _Title_')
+
+
+
 
 # **Solution.** _Solution for the exercise_

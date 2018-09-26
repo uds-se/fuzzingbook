@@ -1,16 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
+# Last change: 2018-09-25 18:13:27+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
 # # Efficient Grammar Fuzzing
 # 
 # In the [chapter on grammars](Grammars.ipynb), we have seen how to use _grammars_ for very effective and efficient testing.  In this chapter, we refine the previous string-based algorithm into a tree-based algorithm, which is much faster and allows for much more control over the production of fuzz inputs.  The algorithm in this chapter serves as a foundation for several more techniques; this chapter thus is a "hub" in the book.
+
+if __name__ == "__main__":
+    print('# Efficient Grammar Fuzzing')
+
+
+
 
 # **Prerequisites**
 # 
@@ -19,6 +28,12 @@
 # ## An Insufficient Algorithm
 # 
 # In the [last chapter](Grammars.ipynb), we have introduced the `simple_grammar_fuzzer()` function which takes a grammar and automatically produces a syntactically valid string from it.  However, `simple_grammar_fuzzer()` is just what its name suggests – simple.  To illustrate the problem, let us get back to the `expr_grammar` we created from `EXPR_GRAMMAR_BNF` in the [chapter on grammars](Grammars.ipynb):
+
+if __name__ == "__main__":
+    print('\n## An Insufficient Algorithm')
+
+
+
 
 # import fuzzingbook_utils
 
@@ -46,7 +61,7 @@ if __name__ == "__main__":
 
 # Here, any choice except for `(expr)` increases the number of symbols, even if only temporary.  Since we place a hard limit on the number of symbols to expand, the only choice left for expanding `<factor>` is `(<expr>)`, which leads to an infinite addition of parentheses.
 
-# The problem of potentially infinite expansion is only one of the problems with `simple_grammar_fuzzer()`.  More probles include:
+# The problem of potentially infinite expansion is only one of the problems with `simple_grammar_fuzzer()`.  More problems include:
 # 
 # 1. *It is inefficient*.  With each iteration, this fuzzer would go search the string produced so far for symbols to expand.  This becomes inefficient as the production string grows.
 # 
@@ -70,11 +85,12 @@ if __name__ == "__main__":
         xs.append(len(s))
         ys.append(t.elapsed_time())
         print(i, end=" ")
-
-    average_time = sum(ys) / trials
     print()
-    print("Average time:", average_time)
 
+
+if __name__ == "__main__":
+    average_time = sum(ys) / trials
+    print("Average time:", average_time)
 
 
 # %matplotlib inline
@@ -90,6 +106,12 @@ if __name__ == "__main__":
 # ## Derivation Trees
 # 
 # To both obtain a more efficient algorithm _and_ exercise better control over expansions, we will use a special representation for the strings that our grammar produces.  The general idea is to use a _tree_ structure that will be subsequently expanded – a so-called _derivation tree_.
+
+if __name__ == "__main__":
+    print('\n## Derivation Trees')
+
+
+
 
 # Like other trees used in programming, a derivation tree consists of _nodes_ which have other nodes as their _children_.  The tree starts with one node that has no parent; this is called the _root node_; a node without children is called a _leaf_.
 
@@ -173,6 +195,12 @@ if __name__ == "__main__":
 # Let us take a very simple derivation tree, representing the intermediate step `<expr> + <term>`, above.
 
 if __name__ == "__main__":
+    print('\n## Representing Derivation Trees')
+
+
+
+
+if __name__ == "__main__":
     derivation_tree = ("<start>",
                        [("<expr>",
                          [("<expr>", None),
@@ -252,6 +280,12 @@ if __name__ == "__main__":
 
 
 # ## Expanding a Node
+
+if __name__ == "__main__":
+    print('\n## Expanding a Node')
+
+
+
 
 # Let us now develop an algorithm that takes a tree with unexpanded symbols (say, `derivation_tree`, above), and expands all these symbols one after the other.  As with earlier fuzzers, we create a special subclass of `Fuzzer` – in this case, `GrammarFuzzer`.  A `GrammarFuzzer` gets a grammar and a start symbol; the other parameters will be used later to further control creation and to support debugging.
 
@@ -379,6 +413,12 @@ if __name__ == "__main__":
 # 
 # Let us now apply the above node expansion to some node in the tree.  To this end, we first need to search the tree for unexpanded nodes.  `possible_expansions()` counts how many unexpanded symbols there are in a tree:
 
+if __name__ == "__main__":
+    print('\n## Expanding a Tree')
+
+
+
+
 class GrammarFuzzer(GrammarFuzzer):
     def possible_expansions(self, node):
         (symbol, children) = node
@@ -479,6 +519,12 @@ if __name__ == "__main__":
 # 
 # To identify the _cost_ of expanding a symbol, we introduce two functions that mutually rely on each other.  First, `symbol_cost()` returns the minimum cost of all expansions of a symbol, using `expansion_cost()` to compute the cost for each expansion.
 
+if __name__ == "__main__":
+    print('\n## Closing the Expansion')
+
+
+
+
 # The method `expansion_cost()` returns the sum of all expansions in `expansions`.  If a nonterminal is encountered again during traversal, the cost of the expansion is $\infty$, indicating (potentially infinite) recursion.
 
 class GrammarFuzzer(GrammarFuzzer):
@@ -571,6 +617,12 @@ if __name__ == "__main__":
 # 
 # Especially at the beginning of an expansion, we may be interested in getting _as many nodes as possible_ – that is, we'd like to prefer expansions that give us _more_ nonterminals to expand.  This is actually the exact opposite from what `expand_node_min_cost()` gives us, and we can implement a method `expand_node_max_cost()` that will always choose among the nodes with the _highest_ cost:
 
+if __name__ == "__main__":
+    print('\n## Node Inflation')
+
+
+
+
 class GrammarFuzzer(GrammarFuzzer):
     def expand_node_max_cost(self, node):
         if self.log:
@@ -614,6 +666,12 @@ if __name__ == "__main__":
 # 3. **Min cost expansion.** Close the expansion with minimum cost.
 # 
 # We implement these three phases by having `expand_node` reference the expansion method to apply.  This is controlled by setting `expand_node` (the method reference) to first `expand_node_max_cost` (i.e., calling `expand_node()` invokes `expand_node_max_cost()`), then `expand_node_randomly`, and finally `expand_node_min_cost`.  In the first two phases, we also set a maximum limit of `min_nonterminals` and `max_nonterminals`, respectively.
+
+if __name__ == "__main__":
+    print('\n## Three Expansion Phases')
+
+
+
 
 class GrammarFuzzer(GrammarFuzzer):
     def log_tree(self, tree):
@@ -673,6 +731,12 @@ if __name__ == "__main__":
 
 
 # ## Putting it all Together
+
+if __name__ == "__main__":
+    print('\n## Putting it all Together')
+
+
+
 
 # Based on this, we can now define a function `fuzz()` that – like `simple_grammar_fuzzer()` – simply takes a grammar and produces a string from it.  It thus no longer exposes the complexity of derivation trees.
 
@@ -771,6 +835,12 @@ if __name__ == "__main__":
 #     2. gives much better control over input generation, and
 #     3. effectively avoids running into infinite expansions.
 
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
+
+
 # ## Next Steps
 # 
 # Congratulations!  You have reached one of the central "hubs" of the book.  From here, there is a wide range of techniques that build on grammar fuzzing.
@@ -794,13 +864,31 @@ if __name__ == "__main__":
 # 
 # Keep on expanding!
 
+if __name__ == "__main__":
+    print('\n## Next Steps')
+
+
+
+
 # ## Exercises
 # 
 # \todo{Finish.}
 
+if __name__ == "__main__":
+    print('\n## Exercises')
+
+
+
+
 # ### Exercise 1
 # 
 # Speed up things by memoizing.
+
+if __name__ == "__main__":
+    print('\n### Exercise 1')
+
+
+
 
 # **Solution**.  Here's a sketch:
 
@@ -823,9 +911,21 @@ def memoize(argnum):
 # 
 # Speed up things by tracking which children still can be expanded.
 
+if __name__ == "__main__":
+    print('\n### Exercise 2')
+
+
+
+
 # **Solution.** Left as exercise for the reader.
 
 # ### Exercise 3
+
+if __name__ == "__main__":
+    print('\n### Exercise 3')
+
+
+
 
 # We could define `expand_node_randomly()` such that it simply invokes `expand_node_by_cost(node, random.choice)`:
 

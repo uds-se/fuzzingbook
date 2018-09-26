@@ -1,16 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/Timer.html
+# Last change: 2018-09-22 11:57:42+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
 # # Timer
 # 
 # The code in this notebook helps with measuring time.
+
+if __name__ == "__main__":
+    print('# Timer')
+
+
+
 
 # **Prerequisites**
 # 
@@ -32,6 +41,12 @@
 # print(t.elapsed_time())
 # ```
 # 
+
+if __name__ == "__main__":
+    print('\n## Measuring Time')
+
+
+
 
 # import fuzzingbook_utils
 

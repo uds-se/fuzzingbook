@@ -1,32 +1,73 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
+# Last change: 2018-09-25 18:13:27+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
 # # Efficient Grammar Fuzzing
 # 
-# In the [chapter on grammars](Grammars.ipynb), we have seen how to use _grammars_ for very effective and efficient testing.  In this chapter, we refine the previous string-based algorithm into a tree-based algorithm, which is much faster and allows for much more control over the production of fuzz inputs.
+# In the [chapter on grammars](Grammars.ipynb), we have seen how to use _grammars_ for very effective and efficient testing.  In this chapter, we refine the previous string-based algorithm into a tree-based algorithm, which is much faster and allows for much more control over the production of fuzz inputs.  The algorithm in this chapter serves as a foundation for several more techniques; this chapter thus is a "hub" in the book.
+
+if __name__ == "__main__":
+    print('# Efficient Grammar Fuzzing')
+
+
+
 
 # **Prerequisites**
 # 
 # * You should know how grammar-based fuzzing works, e.g. from the [chapter on grammars](Grammars.ipynb).
 
-# ## A More Efficient Algorithm
+# ## An Insufficient Algorithm
 # 
-# While simple and straight-forward, our grammar production algorithm from the [previous chapter](Grammars.ipynb) suffers from two problems:
+# In the [last chapter](Grammars.ipynb), we have introduced the `simple_grammar_fuzzer()` function which takes a grammar and automatically produces a syntactically valid string from it.  However, `simple_grammar_fuzzer()` is just what its name suggests – simple.  To illustrate the problem, let us get back to the `expr_grammar` we created from `EXPR_GRAMMAR_BNF` in the [chapter on grammars](Grammars.ipynb):
+
+if __name__ == "__main__":
+    print('\n## An Insufficient Algorithm')
+
+
+
+
+# import fuzzingbook_utils
+
+from Grammars import EXPR_GRAMMAR_EBNF, convert_ebnf_grammar, simple_grammar_fuzzer
+
+if __name__ == "__main__":
+    expr_grammar = convert_ebnf_grammar(EXPR_GRAMMAR_EBNF)
+    expr_grammar
+
+
+# `expr_grammar` has an interesting property.  If we feed it into `simple_grammar_fuzzer()`, the function gets stuck in an infinite expansion:
+
+from ExpectError import ExpectTimeout
+
+if __name__ == "__main__":
+    with ExpectTimeout(1):
+        simple_grammar_fuzzer(grammar=expr_grammar, max_nonterminals=3)
+
+
+# Why is that so?  The problem is in this rule:
+
+if __name__ == "__main__":
+    expr_grammar['<factor>']
+
+
+# Here, any choice except for `(expr)` increases the number of symbols, even if only temporary.  Since we place a hard limit on the number of symbols to expand, the only choice left for expanding `<factor>` is `(<expr>)`, which leads to an infinite addition of parentheses.
+
+# The problem of potentially infinite expansion is only one of the problems with `simple_grammar_fuzzer()`.  More problems include:
 # 
 # 1. *It is inefficient*.  With each iteration, this fuzzer would go search the string produced so far for symbols to expand.  This becomes inefficient as the production string grows.
 # 
-# 2. *It is hard to control.*  Even while limiting the number of symbols, it is still possible to obtain very long strings.
+# 2. *It is hard to control.*  Even while limiting the number of symbols, it is still possible to obtain very long strings – and even infinitely long ones, as discussed above.
 # 
 # Let us illustrate both problems by plotting the time required for strings of different lengths.
-
-# import fuzzingbook_utils
 
 from Grammars import simple_grammar_fuzzer
 from Grammars import START_SYMBOL, EXPR_GRAMMAR, URL_GRAMMAR, CGI_GRAMMAR
@@ -44,11 +85,12 @@ if __name__ == "__main__":
         xs.append(len(s))
         ys.append(t.elapsed_time())
         print(i, end=" ")
-
-    average_time = sum(ys) / trials
     print()
-    print("Average time:", average_time)
 
+
+if __name__ == "__main__":
+    average_time = sum(ys) / trials
+    print("Average time:", average_time)
 
 
 # %matplotlib inline
@@ -59,9 +101,17 @@ if __name__ == "__main__":
 
 # We see that (1) the effort increases quadratically over time, and (2) we can easily produce outputs that are tens of thousands of characters long.
 
+# To address these problem, we need a _smarter algorithm_ – one that is more efficient, that gets us better control over expansions, and that is able to foresee in `expr_grammar` that the `(expr)` alternative yields a potentially infinite expansion, in contrast to the other two.
+
 # ## Derivation Trees
 # 
 # To both obtain a more efficient algorithm _and_ exercise better control over expansions, we will use a special representation for the strings that our grammar produces.  The general idea is to use a _tree_ structure that will be subsequently expanded – a so-called _derivation tree_.
+
+if __name__ == "__main__":
+    print('\n## Derivation Trees')
+
+
+
 
 # Like other trees used in programming, a derivation tree consists of _nodes_ which have other nodes as their _children_.  The tree starts with one node that has no parent; this is called the _root node_; a node without children is called a _leaf_.
 
@@ -145,6 +195,12 @@ if __name__ == "__main__":
 # Let us take a very simple derivation tree, representing the intermediate step `<expr> + <term>`, above.
 
 if __name__ == "__main__":
+    print('\n## Representing Derivation Trees')
+
+
+
+
+if __name__ == "__main__":
     derivation_tree = ("<start>",
                        [("<expr>",
                          [("<expr>", None),
@@ -224,6 +280,12 @@ if __name__ == "__main__":
 
 
 # ## Expanding a Node
+
+if __name__ == "__main__":
+    print('\n## Expanding a Node')
+
+
+
 
 # Let us now develop an algorithm that takes a tree with unexpanded symbols (say, `derivation_tree`, above), and expands all these symbols one after the other.  As with earlier fuzzers, we create a special subclass of `Fuzzer` – in this case, `GrammarFuzzer`.  A `GrammarFuzzer` gets a grammar and a start symbol; the other parameters will be used later to further control creation and to support debugging.
 
@@ -351,6 +413,12 @@ if __name__ == "__main__":
 # 
 # Let us now apply the above node expansion to some node in the tree.  To this end, we first need to search the tree for unexpanded nodes.  `possible_expansions()` counts how many unexpanded symbols there are in a tree:
 
+if __name__ == "__main__":
+    print('\n## Expanding a Tree')
+
+
+
+
 class GrammarFuzzer(GrammarFuzzer):
     def possible_expansions(self, node):
         (symbol, children) = node
@@ -432,7 +500,6 @@ if __name__ == "__main__":
     display_tree(derivation_tree)
 
 
-
 if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
     derivation_tree = f.expand_tree_once(derivation_tree)
@@ -451,6 +518,12 @@ if __name__ == "__main__":
 # With `expand_tree_once()`, we can keep on expanding the tree – but how do we actually stop?  The key idea here, introduced by Luke in \cite{Luke2000}, is that after inflating the derivation tree to some maximum size, we _only want to apply expansions that increase the size of the tree by a minimum_.  For `<factor>`, for instance, we would prefer an expansion into `<integer>`, as this will not introduce further recursion (and potential size inflation); for `<integer>`, likewise, an expansion into `<digit>` is preferred, as it will less increase tree size than `<digit><integer>`.
 # 
 # To identify the _cost_ of expanding a symbol, we introduce two functions that mutually rely on each other.  First, `symbol_cost()` returns the minimum cost of all expansions of a symbol, using `expansion_cost()` to compute the cost for each expansion.
+
+if __name__ == "__main__":
+    print('\n## Closing the Expansion')
+
+
+
 
 # The method `expansion_cost()` returns the sum of all expansions in `expansions`.  If a nonterminal is encountered again during traversal, the cost of the expansion is $\infty$, indicating (potentially infinite) recursion.
 
@@ -544,6 +617,12 @@ if __name__ == "__main__":
 # 
 # Especially at the beginning of an expansion, we may be interested in getting _as many nodes as possible_ – that is, we'd like to prefer expansions that give us _more_ nonterminals to expand.  This is actually the exact opposite from what `expand_node_min_cost()` gives us, and we can implement a method `expand_node_max_cost()` that will always choose among the nodes with the _highest_ cost:
 
+if __name__ == "__main__":
+    print('\n## Node Inflation')
+
+
+
+
 class GrammarFuzzer(GrammarFuzzer):
     def expand_node_max_cost(self, node):
         if self.log:
@@ -587,6 +666,12 @@ if __name__ == "__main__":
 # 3. **Min cost expansion.** Close the expansion with minimum cost.
 # 
 # We implement these three phases by having `expand_node` reference the expansion method to apply.  This is controlled by setting `expand_node` (the method reference) to first `expand_node_max_cost` (i.e., calling `expand_node()` invokes `expand_node_max_cost()`), then `expand_node_randomly`, and finally `expand_node_min_cost`.  In the first two phases, we also set a maximum limit of `min_nonterminals` and `max_nonterminals`, respectively.
+
+if __name__ == "__main__":
+    print('\n## Three Expansion Phases')
+
+
+
 
 class GrammarFuzzer(GrammarFuzzer):
     def log_tree(self, tree):
@@ -646,6 +731,12 @@ if __name__ == "__main__":
 
 
 # ## Putting it all Together
+
+if __name__ == "__main__":
+    print('\n## Putting it all Together')
+
+
+
 
 # Based on this, we can now define a function `fuzz()` that – like `simple_grammar_fuzzer()` – simply takes a grammar and produces a string from it.  It thus no longer exposes the complexity of derivation trees.
 
@@ -727,28 +818,79 @@ if __name__ == "__main__":
 
 # Our test generation is much faster, but also our inputs are much smaller.  \todo{(Actually, parts of the time gain may be due to the faster time.)}  We see that with derivation trees, we can get much better control over grammar production.
 
+# Finally, how does `GrammarFuzzer` work with `expr_grammar`, where `simple_grammar_fuzzer()` failed?  It works without any issue:
+
+if __name__ == "__main__":
+    f = GrammarFuzzer(expr_grammar, max_nonterminals=10)
+    f.fuzz()
+
+
+# With `GrammarFuzzer`, we now have a solid foundation on which to build further fuzzers and illustrate more exciting concepts from the world of generating software tests.  Many of these do not even require writing a grammar – instead, they _infer_ a grammar from the domain at hand, and thus allow to use grammar-based fuzzing even without writing a grammar.  Stay tuned!
+
 # ## Lessons Learned
 # 
-# * _Lesson one_
-# * _Lesson two_
-# * _Lesson three_
+# * _Derivation trees_ are important for expressing input structure
+# * _Grammar fuzzing based on derivation trees_ 
+#     1. is much more efficient than string-based grammar fuzzing,
+#     2. gives much better control over input generation, and
+#     3. effectively avoids running into infinite expansions.
+
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
+
 
 # ## Next Steps
 # 
-# _Link to subsequent chapters (notebooks) here, as in:_
+# Congratulations!  You have reached one of the central "hubs" of the book.  From here, there is a wide range of techniques that build on grammar fuzzing.
 # 
-# * [use _mutations_ on existing inputs to get more valid inputs](MutationFuzzer.ipynb)
-# * [use _grammars_ (i.e., a specification of the input format) to get even more valid inputs](Grammars.ipynb)
-# * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
+# ### Extending Grammars
 # 
+# First, we have a number of techniques that all _extend_ grammars in some form.  You can:
+# 
+# * [parse and recombine inputs](Parser.ipynb), again using derivation trees
+# * [systematically cover grammar expansions](GrammarCoverageFuzzer.ipynb), allowing for _combinatorial_ coverage
+# * [assign _probabilities_ to individual expansions](ProbabilisticGrammarFuzzer.ipynb), controlling expansions
+# * [assign _constraints_ to individual expansions](ConstraintGrammarFuzzer.ipynb), expressing _semantic constraints_
+# 
+# ### Applying Grammars
+# 
+# Second, we can _apply_ grammars in a variety of contexts that all involve some form of learning it automatically:
+# 
+# * [Fuzzing APIs](APIFuzzer.ipynb), learning a grammar from APIs
+# * [Fuzzing GUIs](GUIFuzzer.ipynb), learning a grammar from user interfaces for subsequent fuzzing
+# * [Mining Grammars](GrammarMiner.ipynb), learning a grammar for arbitrary input formats
+# 
+# Keep on expanding!
+
+if __name__ == "__main__":
+    print('\n## Next Steps')
+
+
+
 
 # ## Exercises
 # 
-# _Close the chapter with a few exercises such that people have things to do.  Use the Jupyter `Exercise2` nbextension to add solutions that can be interactively viewed or hidden.  (Alternatively, just copy the exercise and solution cells below with their metadata.)  We will set up things such that solutions do not appear in the PDF and HTML formats._
+# \todo{Finish.}
+
+if __name__ == "__main__":
+    print('\n## Exercises')
+
+
+
 
 # ### Exercise 1
 # 
 # Speed up things by memoizing.
+
+if __name__ == "__main__":
+    print('\n### Exercise 1')
+
+
+
+
+# **Solution**.  Here's a sketch:
 
 def memoize(argnum):
     # cache the function calls. We only cache a given call based on the
@@ -765,15 +907,25 @@ def memoize(argnum):
         return wrapper
     return fn_wrap
 
-# _Solution for the exercise_
-
 # ### Exercise 2
 # 
 # Speed up things by tracking which children still can be expanded.
 
-# _Solution for the exercise_
+if __name__ == "__main__":
+    print('\n### Exercise 2')
+
+
+
+
+# **Solution.** Left as exercise for the reader.
 
 # ### Exercise 3
+
+if __name__ == "__main__":
+    print('\n### Exercise 3')
+
+
+
 
 # We could define `expand_node_randomly()` such that it simply invokes `expand_node_by_cost(node, random.choice)`:
 
@@ -786,33 +938,4 @@ class ExerciseGrammarFuzzer(GrammarFuzzer):
 
 # What is the difference between the original implementation and this alternative?
 
-# _Solution for the exercise_
-
-# ### Exercise 4
-# 
-# Python 3.7 and later allow the use of _annotations_ to attach Python snippets to arbitrary syntactic elements.  You can make use of such annotations to produce even nicer grammars, using `|` to separate alternatives:
-# 
-# ```python
-# from __future__ import annotations
-# 
-# class expression_grammar:
-#    start: "<expr>"
-#    expr: "<term> + <expr>" | "<term> - <expr>"
-#    term: "<factor> * <term>" | "<factor> / <term>" | "<factor>"
-#    factor: "+<factor>" | "-<factor>" | "(<expr>)" | "<integer>" | "<integer>.<integer>"
-#    integer: "<digit> <integer>" | "<digit>"
-#    digit: '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
-# ```
-# 
-# The annotation can be accessed using the `__annotations__` attribute:
-# 
-# ```python
-# print(expression_grammar.__annotations__)
-# {'start': "'<expr>'", 'expr': "'<term> + <expr>' | '<term> - <expr>'", 
-#  'term': "'<factor> * <term>' | '<factor> / <term>' | '<factor>'", 
-#  ...}
-# ```
-# 
-# Using Python 3.7 or later, write a converter that takes a grammar class using the above syntax and convert it to the "portable" format described in this chapter.
-
-# _Solution for the exercise_
+# **Solution.** The alternative has another probability distribution.

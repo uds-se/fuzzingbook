@@ -1,16 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
+# Last change: 2018-09-25 14:25:13+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
 # # Mutation-Based Fuzzing
 # 
-# Most [randomly generated inputs](Fuzzer.ipynb) are syntactically _invalid_ and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is by _mutating_ existing valid inputs – that is, introducing small changes that may still keep the input valid, yet exercise new behavior.
+# Most [randomly generated inputs](Fuzzer.ipynb) are syntactically _invalid_ and thus are quickly rejected by the processing program.  To exercise functionality beyond input processing, we must increase chances to obtain valid inputs.  One such way is by _mutating_ existing valid inputs – that is, introducing small changes that may still keep the input valid, yet exercise new behavior.  We show how to create such mutations, and how to guide them towards yet uncovered code, applying central concepts from the popular AFL fuzzer.
+
+if __name__ == "__main__":
+    print('# Mutation-Based Fuzzing')
+
+
+
 
 # **Prerequisites**
 # 
@@ -19,6 +28,12 @@
 # ## Fuzzing a URL Parser
 # 
 # Many programs expect their inputs to come in a very specific format before they would actually process them.  As an example, think of a program that accepts a URL (a Web address).  The URL has to be in a valid format (i.e., the URL format) such that the program can deal with it.  When fuzzing with random inputs, what are our chances to actually produce a valid URL?
+
+if __name__ == "__main__":
+    print('\n## Fuzzing a URL Parser')
+
+
+
 
 # To get deeper into the problem, let us explore what URLs are made of.  A URL consists of a number of elements:
 # 
@@ -147,6 +162,12 @@ if __name__ == "__main__":
 # 
 # The alternative to generating random strings from scratch is to start with a given _valid_ input, and then to subsequently _mutate_ it.  A _mutation_ in this context is a simple string manipulation - say, inserting a (random) character, deleting a character, or flipping a bit in a character representation.  Here are some mutations to get you started:
 
+if __name__ == "__main__":
+    print('\n## Mutating Inputs')
+
+
+
+
 import random
 
 def delete_random_character(s):
@@ -197,16 +218,13 @@ if __name__ == "__main__":
 
 # Let us now create a random mutator that randomly chooses which mutation to apply:
 
-if __name__ == "__main__":
+def mutate(s):
+    """Return s with a random mutation applied"""
     mutators = [
         delete_random_character,
         insert_random_character,
-        flip_random_character]
-
-
-
-def mutate(s):
-    """Return s with a random mutation applied"""
+        flip_random_character
+    ]
     mutator = random.choice(mutators)
     # print(mutator)
     return mutator(s)
@@ -219,6 +237,12 @@ if __name__ == "__main__":
 # The idea is now that _if_ we have some valid input(s) to begin with, we may create more input candidates by applying one of the above mutations.  To see how this works, let's get back to URLs.
 
 # ## Mutating URLs
+
+if __name__ == "__main__":
+    print('\n## Mutating URLs')
+
+
+
 
 # Let us now get back to our URL parsing problem.  Let us create a function `is_valid_url()` that checks whether `http_program()` accepts the input.
 
@@ -286,6 +310,12 @@ if __name__ == "__main__":
 # ## Multiple Mutations
 # 
 # So far, we have only applied one single mutation on a sample string.  However, we can also apply _multiple_ mutations, further changing it.  What happens, for instance, if we apply, say, 20 mutations on our sample string?
+
+if __name__ == "__main__":
+    print('\n## Multiple Mutations')
+
+
+
 
 if __name__ == "__main__":
     seed_input = "http://www.google.com/search?q=fuzzing"
@@ -377,6 +407,12 @@ if __name__ == "__main__":
 # To cover as much functionality as possible, one can rely on either _specified_ or _implemented_ functionality, as discussed in the ["Coverage"](Coverage.ipynb) chapter.  For now, we will not assume that there is a specification of program behavior (although it _definitely_ would be good to have one!).  We _will_ assume, though, that the program to be tested exists – and that we can leverage its structure to guide test generation.
 # 
 # Since testing always executes the program at hand, one can always gather information about its execution – the least is the information needed to decide whether a test passes or fails.  Since coverage is frequently measured as well to determine test quality, let us also assume we can retrieve coverage of a test run.  The question is then: _How can we leverage coverage to guide test generation?_
+
+if __name__ == "__main__":
+    print('\n## Guiding by Coverage')
+
+
+
 
 # One particularly successful idea is implemented in the popular fuzzer named [_American fuzzy lop_](http://lcamtuf.coredump.cx/afl/), or AFL for short.  Just like our examples above, AFL evolves test cases that have been successful – but for AFL, "success" means _finding a new path through the program execution_.  This way, AFL can keep on mutating inputs that so far have found new paths; and if an input finds another path, it will be retained as well.
 
@@ -482,6 +518,12 @@ if __name__ == "__main__":
 # * Mutations from existing valid inputs have much higher chances to be valid, and thus to exercise functionality beyond input processing.
 # 
 
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
+
+
 # ## Next Steps
 # 
 # Our aim is still to sufficiently cover functionality.  From here, we can continue with:
@@ -493,12 +535,30 @@ if __name__ == "__main__":
 # Finally, the concept of a "population" that is systematically "evolved" through "mutations" will be explored in depth when discussing [search-based testing](Search_Based_Testing.ipynb).  Enjoy!
 # 
 
+if __name__ == "__main__":
+    print('\n## Next Steps')
+
+
+
+
 # ## Exercises
 # 
+
+if __name__ == "__main__":
+    print('\n## Exercises')
+
+
+
 
 # ### Exercise 1: Fuzzing CGI decode with Mutations
 # 
 # Apply the above _guided_ mutation-based fuzzing technique on `cgi_decode()` from the ["Coverage"](Coverage.ipynb) chapter.  How many trials do you need until you cover all variations of `+`, `%` (valid and invalid), and regular characters?
+
+if __name__ == "__main__":
+    print('\n### Exercise 1: Fuzzing CGI decode with Mutations')
+
+
+
 
 from Coverage import cgi_decode
 
@@ -538,6 +598,12 @@ if __name__ == "__main__":
 # 
 # Start with non-guided mutations.  How many of the inputs are valid?
 
+if __name__ == "__main__":
+    print('\n### Exercise 2: Fuzzing bc with Mutations')
+
+
+
+
 # **Solution.** This is just a matter of tying a `ProgramRunner` to a `MutationFuzzer`:
 
 from Fuzzer import ProgramRunner
@@ -562,6 +628,12 @@ if __name__ == "__main__":
 # Continue with _guided_ mutations.  To this end, you will have to find a way to extract coverage from a C program such as `bc`.  Proceed in these steps:
 # 
 # First, get GNU bc [from the source](https://www.gnu.org/software/bc/); download, say, `bc-1.07.1.tar.gz` and unpack it:
+
+if __name__ == "__main__":
+    print('\n#### Part 2: Guided Mutations')
+
+
+
 
 if __name__ == "__main__":
     import os
@@ -616,10 +688,28 @@ if __name__ == "__main__":
 # 
 # In this [blog post](https://lcamtuf.blogspot.com/2014/08/binary-fuzzing-strategies-what-works.html), the author of _American Fuzzy Lop_ (AFL), a very popular mutation-based fuzzer discusses the efficiency of various mutation operators.  Implement four of them and evaluate their efficiency as in the examples above.
 
+if __name__ == "__main__":
+    print('\n### Exercise 3')
+
+
+
+
 # ### Exercise 4
 # 
 # When adding a new element to the list of candidates, AFL does actually not compare the _coverage_, but adds an element if it exercises a new _branch_.  Using branch coverage from the exercises of the ["Coverage"](Coverage.ipynb) chapter, implement this "branch" strategy and compare it against the "coverage" strategy, above.
 
+if __name__ == "__main__":
+    print('\n### Exercise 4')
+
+
+
+
 # ### Exercise 5
 # 
 # Design and implement a system that will gather a population of URLs from the Web.  Can you achieve a higher coverage with these samples?  What if you use them as initial population for further mutation?
+
+if __name__ == "__main__":
+    print('\n### Exercise 5')
+
+
+

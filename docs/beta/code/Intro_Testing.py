@@ -1,10 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
+# Last change: 2018-09-25 18:13:27+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
@@ -12,9 +15,21 @@
 # 
 # Before we get to the central parts of the book, let us introduce essential concepts of software testing.  Why is it necessary to test software at all?  How does one test software?  How can one tell whether a test has been successful?  How does one know if one has tested enough?  In this unit, let us recall the most important concepts, and at the same time get acquainted with Python and interactive notebooks.
 
+if __name__ == "__main__":
+    print('# Introduction to Software Testing')
+
+
+
+
 # ## Simple Testing
 # 
 # Let's start with a simple example.  Your co-worker has been asked to implement a square root function $\sqrt{x}$.  (Let's assume for a moment that the environment does  not already have one.)  After studying [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method), she comes up with the following Python code, claiming that, in fact, this `my_sqrt()` function computes square roots.
+
+if __name__ == "__main__":
+    print('\n## Simple Testing')
+
+
+
 
 def my_sqrt(x):
     """Computes the square root of x, using Newton's method"""
@@ -33,7 +48,7 @@ def my_sqrt(x):
 # 2. Python is _dynamically typed_, meaning that the type of variables like `x`, `approx`, or `guess` is determined at run-time.
 # 3. Most of Python's syntactic features are inspired by other common languages, such as control structures (`while`, `if`), assignments (`=`), or comparisons (`==`, `!=`, `<`).
 # 
-# With that, you can already understand what the above code does: Starting with a `guess` of `x / 2`, it computes better and better approximations in `approx` until the value of `approx` no longer changes.  This is the vaue that finally is returned.
+# With that, you can already understand what the above code does: Starting with a `guess` of `x / 2`, it computes better and better approximations in `approx` until the value of `approx` no longer changes.  This is the value that finally is returned.
 
 # To find our whether `my_sqrt()` works correctly, we can _test_ it with a few values.  For `x = 4`, for instance, it produces the correct value:
 
@@ -49,7 +64,7 @@ if __name__ == "__main__":
     my_sqrt(2)
 
 
-# If you are reading this in the interactive notebook, you can try out `my_sqrt()` with other values as well.  Click on one of the above cells with invocations of `my_sqrt()` and change the value – say, to `my_sqrt(1)`.  Press Shift+Enter (or click on the play symbol) to execute it and see the result.  If you get an error message, go to the above cell with the definition of `my_sqrt()` and execute this first.  You can also run _all_ cells at once; see the Notebook menu for details.  (You can actually also change the text by cicking on it, and corect mistaks such as in this sentence.)
+# If you are reading this in the interactive notebook, you can try out `my_sqrt()` with other values as well.  Click on one of the above cells with invocations of `my_sqrt()` and change the value – say, to `my_sqrt(1)`.  Press Shift+Enter (or click on the play symbol) to execute it and see the result.  If you get an error message, go to the above cell with the definition of `my_sqrt()` and execute this first.  You can also run _all_ cells at once; see the Notebook menu for details.  (You can actually also change the text by clicking on it, and corect mistaks such as in this sentence.)
 
 # Is the above value of `my_sqrt(2)` actually correct?  We can easily verify by exploiting that $\sqrt{x}$ squared again has to be $x$, or in other words $\sqrt{x} \times \sqrt{x} = x$.  Let's take a look:
 
@@ -69,6 +84,12 @@ if __name__ == "__main__":
 # 2. After any change to the program, you have to repeat the testing process
 # 
 # This is why it is very useful to _automate_ tests.  One simple way of doing so is to let the computer first do the computation, and then have it check the results.
+
+if __name__ == "__main__":
+    print('\n## Automating Test Execution')
+
+
+
 
 # For instance, this piece of code automatically tests whether $\sqrt{4} = 2$ holds:
 
@@ -131,6 +152,12 @@ if __name__ == "__main__":
 # Remember that the property $\sqrt{x} \times \sqrt{x} = x$ universally holds?  We can also explicitly test this with a few values:
 
 if __name__ == "__main__":
+    print('\n## Generating Tests')
+
+
+
+
+if __name__ == "__main__":
     assertEquals(my_sqrt(2) * my_sqrt(2), 2)
     assertEquals(my_sqrt(3) * my_sqrt(3), 3)
     assertEquals(my_sqrt(42.11) * my_sqrt(42.11), 42.11)
@@ -178,6 +205,12 @@ if __name__ == "__main__":
 # 
 # Instead of writing and running tests for `my_aqrt()`, we can also go and _integrate the check right into the implementation._  This way, _each and every_ invocation of `my_sqrt()` will be automatically checked.
 
+if __name__ == "__main__":
+    print('\n## Run-Time Verification')
+
+
+
+
 # Such an _automatic run-time check_ is very easy to implement:
 
 def my_sqrt_checked(x):
@@ -195,11 +228,17 @@ if __name__ == "__main__":
 
 # Automatic run-time checks, as above, assume two things, though:
 # 
-# * One has to be able to _formulate_ such run-time checks.  Having concrete values to check against should always be possible, but formulating desired properties in an abstract fashion can be very complex.  In practice, you need to decide which properties are most crucial, and design appropriate checks for them.  Plus, run-time checks may depend not only on local properties, but on several properties of the program state, whcih all have to be identified.
+# * One has to be able to _formulate_ such run-time checks.  Having concrete values to check against should always be possible, but formulating desired properties in an abstract fashion can be very complex.  In practice, you need to decide which properties are most crucial, and design appropriate checks for them.  Plus, run-time checks may depend not only on local properties, but on several properties of the program state, which all have to be identified.
 # 
 # * One has to be able to _afford_ such run-time checks.  In the case of `my_sqrt()`, the check is not very expensive; but if we have to check, say, a large data structure even after a simple operation, the cost of the check may soon be prohibitive.  In practice, run-time checks will typically be disabled during production, trading reliability for efficiency.  On the other hand, a comprehensive suite of run-time checks is a great way to find errors and quickly debug them; you need to decide how many such capabilities you would still want during production.
 
 # ## System Input vs Function Input
+
+if __name__ == "__main__":
+    print('\n## System Input vs Function Input')
+
+
+
 
 # At this point, we may make `my_sqrt()` available to other programmers, who may then embed it in their code.  At some point, it will have to process input that comes from _third parties_, i.e. is not under control by the programmer.  Let us simulate this _system input_ by assuming a function `exposed_sqrt()` whose input is a string under third-party control:
 
@@ -283,6 +322,12 @@ if __name__ == "__main__":
 # 
 # Despite best efforts in testing, keep in mind that you are always checking functionality for a _finite_ set of inputs.  Thus, there may always be _untested_ inputs for which the function may still fail.
 
+if __name__ == "__main__":
+    print('\n## The Limits of Testing')
+
+
+
+
 # In the case of `my_sqrt()`, for instance, computing $\sqrt{0}$ results in a division by zero:
 
 if __name__ == "__main__":
@@ -290,7 +335,7 @@ if __name__ == "__main__":
         root = my_sqrt(0)
 
 
-# In our tests so far, we have not checked this condition, meaning that a program which builds on $\sqrt{0} = 0$ will surprisingly fail.  But even if we had set up our random generator to produce inputs in the range of 0–1000000 rather than 1–1000000, the chances of it producing a zero value by chance would still have been one in a million.  If the behavior of a function is radically different for few individual values, plain random testign has few chances to produce these.
+# In our tests so far, we have not checked this condition, meaning that a program which builds on $\sqrt{0} = 0$ will surprisingly fail.  But even if we had set up our random generator to produce inputs in the range of 0–1000000 rather than 1–1000000, the chances of it producing a zero value by chance would still have been one in a million.  If the behavior of a function is radically different for few individual values, plain random testing has few chances to produce these.
 
 # We can, of course, fix the function accordingly, documenting the accepted values for `x` and handling the special case `x = 0`:
 
@@ -329,6 +374,12 @@ if __name__ == "__main__":
 # * Test execution, test generation, and checking test results can be automated.
 # * Testing is _incomplete_; it provides no 100% guarantee that the code is free of errors.
 
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
+
+
 # ## Next Steps
 # 
 # From here, you can move on how to
@@ -337,11 +388,29 @@ if __name__ == "__main__":
 # 
 # Enjoy the read!
 
+if __name__ == "__main__":
+    print('\n## Next Steps')
+
+
+
+
 # ## Exercises
+
+if __name__ == "__main__":
+    print('\n## Exercises')
+
+
+
 
 # ### Exercise 1: Testing Shellsort
 # 
 # Consider the following implementation of a [Shellsort](https://en.wikipedia.org/wiki/Shellsort) function, taking a list of elements and (presumably) sorting it.
+
+if __name__ == "__main__":
+    print('\n### Exercise 1: Testing Shellsort')
+
+
+
 
 def shellsort(elems):
     sorted_elems = elems.copy()
@@ -379,6 +448,12 @@ if __name__ == "__main__":
 
 # #### Part 1: Manual Test Cases
 
+if __name__ == "__main__":
+    print('\n#### Part 1: Manual Test Cases')
+
+
+
+
 # Your job is now to thoroughly test `shellsort()` with a variety of inputs.
 
 # First, set up `assert` statements with a number of manually written test cases.  Select your test cases such that extreme cases are covered.  Use `==` to compare two lists.
@@ -403,6 +478,12 @@ if __name__ == "__main__":
 
 
 # #### Part 2: Random Inputs
+
+if __name__ == "__main__":
+    print('\n#### Part 2: Random Inputs')
+
+
+
 
 # Second, create random lists as arguments to `shellsort()`.   Make use of the following helper predicates to check whether the result is (a) sorted, and (b) a permutation of the original.
 
@@ -460,6 +541,12 @@ if __name__ == "__main__":
 
 # ### Exercise 2: Quadratic Solver
 
+if __name__ == "__main__":
+    print('\n### Exercise 2: Quadratic Solver')
+
+
+
+
 # Given an equation $ax^2 + bx + c = 0$, we want to find solutions for $x$ given the values of $a$, $b$, and $c$.  The following code is supposed to do this, using the equation $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
 
 def quadratic_solver(a, b, c):
@@ -483,6 +570,12 @@ if __name__ == "__main__":
 # 
 # For each of the two cases above, identify values for `a`, `b`, `c` that trigger the bug.
 
+if __name__ == "__main__":
+    print('\n#### Part 1: Find bug-triggering inputs')
+
+
+
+
 # **Solution**.  Here are two inputs that trigger the bugs:
 
 if __name__ == "__main__":
@@ -499,7 +592,13 @@ if __name__ == "__main__":
 # 
 # Extend the code appropriately such that the cases are handled.  Return `None` for nonexistent values.
 
-# **Solution.** Here is an approriate extension of `quadratic_solver()` that takes care of all the corner cases:
+if __name__ == "__main__":
+    print('\n#### Part 2: Fix the problem')
+
+
+
+
+# **Solution.** Here is an appropriate extension of `quadratic_solver()` that takes care of all the corner cases:
 
 def quadratic_solver_fixed(a, b, c):
     if a == 0:
@@ -533,6 +632,12 @@ if __name__ == "__main__":
 # #### Part 3: Odds and Ends
 # 
 # What are the chances of discovering these conditions with random inputs?  Assuming one can do a billion tests per second, how long would one have to wait on average until a bug gets triggered?
+
+if __name__ == "__main__":
+    print('\n#### Part 3: Odds and Ends')
+
+
+
 
 # **Solution.**  Consider the code above.  If we choose the full range of 32-bit integers for `a`, `b`, and `c`, then the first condition alone, both `a` and `b` being zero, has a chance of $p = 1 / (2^{32} * 2^{32})$; that is, one in 18.4 quintillions:
 

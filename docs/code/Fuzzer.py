@@ -1,16 +1,25 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests"
-# (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/Fuzzer.html
+# Last change: 2018-09-25 18:13:27+02:00
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
 # # Fuzzing: Breaking Things with Random Inputs
 # 
 # In this chapter, we'll start with one of the simplest test generation techniques.  The key idea of random text generation, also known as "fuzzing", is to feed a _string of random characters_ into a program in the hope to uncover failures.
+
+if __name__ == "__main__":
+    print('# Fuzzing: Breaking Things with Random Inputs')
+
+
+
 
 # **Prerequisites**
 # 
@@ -26,9 +35,21 @@
 # 
 # This assignment captures the essence of fuzzing: _Create random inputs, and see if they break things._  Just let it run long enough and you'll see.
 
+if __name__ == "__main__":
+    print('\n## A Testing Assignment')
+
+
+
+
 # ## A Simple Fuzzer
 # 
 # Let us try to fulfill this assignment and build a fuzz generator.  The idea is to produce random characters, adding them to a buffer string variable (`out`), and finally returning the string.
+
+if __name__ == "__main__":
+    print('\n## A Simple Fuzzer')
+
+
+
 
 # This implementation uses the following Python features and functions:
 # 
@@ -78,9 +99,21 @@ if __name__ == "__main__":
 # 
 # Let us see what happens if we actually invoke an external program with fuzzed inputs.  To this end, let us proceed in two steps.  First, we create an _input file_ with fuzzed test data; then we feed this input file into a program of choice.
 
+if __name__ == "__main__":
+    print('\n## Fuzzing External Programs')
+
+
+
+
 # ### Creating Input Files
 # 
 # Let us obtain a temporary file name such that we do not clutter the file system.
+
+if __name__ == "__main__":
+    print('\n### Creating Input Files')
+
+
+
 
 import os
 import tempfile
@@ -115,6 +148,12 @@ if __name__ == "__main__":
 # 
 # To invoke `bc`, let us use the Python `subprocess` module.  This is how this works:
 # 
+
+if __name__ == "__main__":
+    print('\n### Invoking External Programs')
+
+
+
 
 import os
 import subprocess
@@ -155,6 +194,12 @@ if __name__ == "__main__":
 # ### Long-Running Fuzzing
 # 
 # Let us now feed a large number of inputs into our tested program, to see whether it might crash on some.  We store all results in the `runs` variable as pairs of input data and the actual result. (Note: running this may take a while.)
+
+if __name__ == "__main__":
+    print('\n### Long-Running Fuzzing')
+
+
+
 
 if __name__ == "__main__":
     trials = 100
@@ -216,6 +261,12 @@ if __name__ == "__main__":
 # 
 # Considering that many of these UNIX utilities were used in scripts that would also process network input, this was an alarming result.  Programmers quickly built and ran their own fuzzers, rushed to fix the reported errors, and learned not to trust external inputs anymore.
 
+if __name__ == "__main__":
+    print('\n## Bugs Fuzzers Find')
+
+
+
+
 # What kind of problems did Miller's fuzzing experiment find?  It turns out that the mistakes programmers made in 1990 are still the same mistakes being made today.
 # 
 
@@ -227,6 +278,12 @@ if __name__ == "__main__":
 # strcpy (weekday, input);
 # ```
 # Ironically, this already fails if `input` is `"Wednesday"` (9 characters); any excess characters (here, `'y'` and the following `'\0'` string terminator) are simply copied to whatever resides in memory after `weekday`, triggering arbitrary behavior; maybe some boolean character variable which would be set from `'n'` to `'y'`.  With fuzzing, it is very easy to produce arbitrary long inputs and input elements.
+
+if __name__ == "__main__":
+    print('\n### Buffer Overflows')
+
+
+
 
 # We can easily simulate this buffer overflow behavior in a Python function:
 
@@ -264,6 +321,12 @@ if __name__ == "__main__":
 # }
 # ```
 # What happens if the input ends prematurely, as would perfectly be feasible with fuzzing?  Well, `getchar()` returns `EOF`, and keeps on returning `EOF` when called again; so the code above simply enters an infinite loop.
+
+if __name__ == "__main__":
+    print('\n### Missing Error Checks')
+
+
+
 
 # Again, we can simulate such missing error checks.  Here's a function that will effectively hang if no space is present in the input:
 
@@ -332,9 +395,21 @@ if __name__ == "__main__":
 # 
 # When Miller and his students built their first fuzzer, they could identify errors simply because the program would crash or hang – two conditions that are easy to identify.  If the failures are more subtle, though, we need to come up with additional checks.
 
+if __name__ == "__main__":
+    print('\n## Catching Errors')
+
+
+
+
 # ### Generic Checkers
 # 
 # Buffer overflows, as [discussed above](#Buffer-Overflows), are a particular instance of a more general problem: In languages like C, a program can access arbitrary parts of its memory – even those parts that are uninitialized and possibly not even meant to be accessed.  This is necessary if you want to write an operating system, and great if you want a maximum of performance or control, but pretty bad if you want to avoid mistakes.  Fortunately, there are tools that help catching such issues at runtime, and they are great when combined with fuzzing.
+
+if __name__ == "__main__":
+    print('\n### Generic Checkers')
+
+
+
 
 # To catch problematic memory accesses during testing, one can run C programs in special _memory-checking_ environments; at runtime, these check for each and every memory read whether it accesses valid and initialized memory.  A popular example of such a tool is the [LLVM Memory Sanitizer](https://clang.llvm.org/docs/MemorySanitizer.html).  Compiling a C program with
 # 
@@ -434,7 +509,7 @@ if __name__ == "__main__":
 
 # But how was HeartBleed discovered?  Very simple.  Researchers both at the Codenomicon company as well as with Google compiled the OpenSSL library with a memory sanitizer, and then happily flooded it with fuzzed commands.  The memory sanitizer would then notice whether uninitialized memory had been accessed – and actually, it would very quickly discover this.
 
-# We can again simulate this in our Python example.  Let us simply assume that if some string contains the uninitilaized memory marker, we have been accessing memory out of bounds:
+# We can again simulate this in our Python example.  Let us simply assume that if some string contains the uninitialized memory marker, we have been accessing memory out of bounds:
 
 from ExpectError import ExpectError
 
@@ -452,6 +527,12 @@ if __name__ == "__main__":
 # ### Program-Specific Checkers
 # 
 # Besides generic checkers that apply to _all_ programs on a given platform or in a given language, you can also devise _specific_ checkers that apply to your program, or a subsystem.  In the [chapter on testing](Intro_Testing.ipynb), we already have hinted at techniques of [runtime verification](Intro_Testing.ipynb#Runtime-Verification) that check function results at runtime for correctness.
+
+if __name__ == "__main__":
+    print('\n### Program-Specific Checkers')
+
+
+
 
 # One key concept for detecting errors early is _assertions_ that check the input (precondition) and result (postcondition) of important functions.  The more assertions you have in your program, the higher your chances to detect errors during execution that would go undetected by generic checkers – notably during fuzzing.  If you worry about the impact of assertions on performance, keep in mind that assertions can be turned off in production code (although it can be helpful to leave the most critical checks active).
 
@@ -585,6 +666,12 @@ class RedBlackTree:
 # 
 # Many of the benefits from `repOK()` assertions can also be obtained by using _static type checkers_ on your code.  In Python, for instance, the [MyPy](http://mypy-lang.org) static checker can find type errors as soon as types of arguments are properly declared:
 
+if __name__ == "__main__":
+    print('\n### Static Code Checkers')
+
+
+
+
 from typing import Dict
 
 airport_codes = {
@@ -604,17 +691,29 @@ if __name__ == "__main__":
 # airports.py: error: Invalid index type "int" for "Dict[str, str]"; expected type "str"
 # ```
 
-# Statically checking more advanced properties such as the airport code consisting of exactly three upper-case characters or a tree being acyclic, however, quickly reach the limits of static checking.  Your `repOK()` assertions will still be needed – best in conjunction with a good test generator.
+# Statically checking more advanced properties such as the airport code consisting of exactly three uppercase characters or a tree being acyclic, however, quickly reach the limits of static checking.  Your `repOK()` assertions will still be needed – best in conjunction with a good test generator.
 
 # ## A Fuzzing Architecture
 # 
 # Since we'd like to reuse some parts of this chapter in the following ones, let us define things in a way that are easier to reuse, and in particular easier to _extend_.  To this end, we introduce a number of _classes_ that encapsulate the functionality above in a reusable way. 
+
+if __name__ == "__main__":
+    print('\n## A Fuzzing Architecture')
+
+
+
 
 # ### Runner Classes
 # 
 # The first thing we introduce is the notion of a `Runner` – that is, an object whose job it is to execute some object with a given input.  A runner typically is some program or function under test, but we can also have simpler runners.
 # 
 # Let us start with a base class for runners.  A runner essentially provides a method `run(input)` that is used to pass `input` (a string) to the runner.  `run()` returns a result; by default, this is the input.
+
+if __name__ == "__main__":
+    print('\n### Runner Classes')
+
+
+
 
 class Runner(object):
     def __init__(self):
@@ -684,6 +783,12 @@ if __name__ == "__main__":
 # 
 # Let us now define _fuzzers_ that actually feed data into a consumer.  The base class for fuzzers provides one central method `fuzz()` that creates some input.  The `run()` function then sends the fuzz() input to a consumer, returning the result; `runs()` does this for a given number (`trials`) of times.
 
+if __name__ == "__main__":
+    print('\n### Fuzzer Classes')
+
+
+
+
 class Fuzzer(object):
     def __init__(self):
         pass
@@ -705,7 +810,7 @@ class Fuzzer(object):
             results.append(self.run(runner))
         return results
 
-# By default, `Fuzzer` objects do not do much, as their `fuzz()` function is merley an abstract placeholder.  The subclass `RandomFuzzer`, however, implements the functionality of the `fuzzer()` function, above, adding an additional parameter `min_length` to specify a minimum length.
+# By default, `Fuzzer` objects do not do much, as their `fuzz()` function is merely an abstract placeholder.  The subclass `RandomFuzzer`, however, implements the functionality of the `fuzzer()` function, above, adding an additional parameter `min_length` to specify a minimum length.
 
 class RandomFuzzer(Fuzzer):
     def __init__(self, min_length=10, max_length=100,
@@ -762,6 +867,12 @@ if __name__ == "__main__":
 # * Bugs fuzzers find are mainly due to errors and deficiencies in _input processing_.
 # * To catch errors, have as many _consistency checkers_ as possible.
 
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
+
+
 # We're done, so don't forget to clean up:
 
 if __name__ == "__main__":
@@ -779,7 +890,19 @@ if __name__ == "__main__":
 # 
 # Enjoy the read!
 
+if __name__ == "__main__":
+    print('\n## Next Steps')
+
+
+
+
 # ## Exercises
+
+if __name__ == "__main__":
+    print('\n## Exercises')
+
+
+
 
 # One of the errors found by Miller et al. \cite{Miller1990} involves the _troff_ typesetting system.  _Troff_ takes as input a text consisting of lines; a line beginning with a dot (`.`) includes typesetting commands, as in
 # 
@@ -807,6 +930,12 @@ if __name__ == "__main__":
 # ### Exercise 1: Simulate Troff
 # 
 # For each of the above, write a Python function `f(s)` that fails if `s` fulfills the failure criterion.
+
+if __name__ == "__main__":
+    print('\n### Exercise 1: Simulate Troff')
+
+
+
 
 # **Solution**.  Here's three functions that check their input for `troff` bugs:
 
@@ -842,6 +971,12 @@ def no_dot(inp):
 # ### Exercise 2: Run Simulated Troff
 # 
 # Create a class `TroffRunner` as subclass of `Runner` that checks for the above predicates.  Run it with `Fuzzer`.  Be sure to have the `Fuzzer` object produce the entire range of characters.  Count how frequently the individual predicates fail.
+
+if __name__ == "__main__":
+    print('\n### Exercise 2: Run Simulated Troff')
+
+
+
 
 # **Solution.** Here's a simple example:
 
@@ -903,6 +1038,12 @@ if __name__ == "__main__":
 # 
 
 # ### Exercise 3: Run Real Troff
+
+if __name__ == "__main__":
+    print('\n### Exercise 3: Run Real Troff')
+
+
+
 
 # Using `BinaryProgramRunner`, apply the fuzzer you configured on the real `troff` program.  Check if you can produce any run whose output code is non-zero, indicating a failure or a crash.
 

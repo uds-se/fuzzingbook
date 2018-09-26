@@ -3,11 +3,10 @@ import index
 import Intro_Testing
 import Fuzzer
 import Coverage
-import Mutation_Fuzzing
+import MutationFuzzer
 import Grammars
-import Grammar_Coverage
-import Parsing
-import Probabilistic_Fuzzing
+import GrammarFuzzer
+import GrammarCoverageFuzzer
 import Guide_for_Authors
 import Template
 import ExpectError
