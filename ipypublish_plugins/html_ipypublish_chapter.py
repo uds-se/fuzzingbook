@@ -50,9 +50,9 @@ fuzzingbook_tpl_dict = {
 <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
 <link rel="manifest" href="favicon/site.webmanifest">
-<link rel="mask-icon" href="favicon/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="mask-icon" href="favicon/safari-pinned-tab.svg" color="#B03A2E">
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
-<meta name="msapplication-TileColor" content="#da532c">
+<meta name="msapplication-TileColor" content="#B03A2E">
 <meta name="msapplication-config" content="favicon/browserconfig.xml">
 <meta name="theme-color" content="#ffffff">
 
