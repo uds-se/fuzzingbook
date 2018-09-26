@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-09-25 18:13:27+02:00
+# Last change: 2018-09-26 17:14:35+02:00
 #
 # This material is licensed under a
 # Creative Commons Attribution-NonCommercial-ShareAlike 4.0
@@ -37,7 +37,11 @@ if __name__ == "__main__":
 
 # import fuzzingbook_utils
 
-from Grammars import EXPR_GRAMMAR_EBNF, convert_ebnf_grammar, simple_grammar_fuzzer
+if __package__ is None or __package__ == "":
+    from Grammars import EXPR_GRAMMAR_EBNF, convert_ebnf_grammar, simple_grammar_fuzzer
+else:
+    from .Grammars import EXPR_GRAMMAR_EBNF, convert_ebnf_grammar, simple_grammar_fuzzer
+
 
 if __name__ == "__main__":
     expr_grammar = convert_ebnf_grammar(EXPR_GRAMMAR_EBNF)
@@ -46,7 +50,11 @@ if __name__ == "__main__":
 
 # `expr_grammar` has an interesting property.  If we feed it into `simple_grammar_fuzzer()`, the function gets stuck in an infinite expansion:
 
-from ExpectError import ExpectTimeout
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectTimeout
+else:
+    from .ExpectError import ExpectTimeout
+
 
 if __name__ == "__main__":
     with ExpectTimeout(1):
@@ -69,11 +77,29 @@ if __name__ == "__main__":
 # 
 # Let us illustrate both problems by plotting the time required for strings of different lengths.
 
-from Grammars import simple_grammar_fuzzer
-from Grammars import START_SYMBOL, EXPR_GRAMMAR, URL_GRAMMAR, CGI_GRAMMAR
-from Grammars import RE_NONTERMINAL, nonterminals, is_nonterminal
+if __package__ is None or __package__ == "":
+    from Grammars import simple_grammar_fuzzer
+else:
+    from .Grammars import simple_grammar_fuzzer
 
-from Timer import Timer
+
+if __package__ is None or __package__ == "":
+    from Grammars import START_SYMBOL, EXPR_GRAMMAR, URL_GRAMMAR, CGI_GRAMMAR
+else:
+    from .Grammars import START_SYMBOL, EXPR_GRAMMAR, URL_GRAMMAR, CGI_GRAMMAR
+
+
+if __package__ is None or __package__ == "":
+    from Grammars import RE_NONTERMINAL, nonterminals, is_nonterminal
+else:
+    from .Grammars import RE_NONTERMINAL, nonterminals, is_nonterminal
+
+
+if __package__ is None or __package__ == "":
+    from Timer import Timer
+else:
+    from .Timer import Timer
+
 
 if __name__ == "__main__":
     trials = 100
@@ -289,7 +315,11 @@ if __name__ == "__main__":
 
 # Let us now develop an algorithm that takes a tree with unexpanded symbols (say, `derivation_tree`, above), and expands all these symbols one after the other.  As with earlier fuzzers, we create a special subclass of `Fuzzer` – in this case, `GrammarFuzzer`.  A `GrammarFuzzer` gets a grammar and a start symbol; the other parameters will be used later to further control creation and to support debugging.
 
-from Fuzzer import Fuzzer
+if __package__ is None or __package__ == "":
+    from Fuzzer import Fuzzer
+else:
+    from .Fuzzer import Fuzzer
+
 
 class GrammarFuzzer(Fuzzer):
     def __init__(self, grammar, start_symbol=START_SYMBOL,

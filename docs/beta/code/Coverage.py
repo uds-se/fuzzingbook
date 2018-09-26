@@ -401,7 +401,11 @@ if __name__ == "__main__":
 
 
 
-from Fuzzer import fuzzer
+if __package__ is None or __package__ == "":
+    from Fuzzer import fuzzer
+else:
+    from .Fuzzer import fuzzer
+
 
 if __name__ == "__main__":
     sample = fuzzer()
@@ -679,7 +683,11 @@ if __name__ == "__main__":
 
 # Where fuzzing is great at, though, is in finding _internal errors_ that can be detected even without checking the result.  Actually, if one runs our `fuzzer()` on `cgi_decode()`, one quickly finds such an error, as the following code shows:
 
-from ExpectError import ExpectError
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectError
+else:
+    from .ExpectError import ExpectError
+
 
 if __name__ == "__main__":
     with ExpectError():

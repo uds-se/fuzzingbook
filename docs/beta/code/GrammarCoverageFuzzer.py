@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-09-22 16:29:26+02:00
+# Last change: 2018-09-26 17:16:40+02:00
 #
 # This material is licensed under a
 # Creative Commons Attribution-NonCommercial-ShareAlike 4.0
@@ -49,8 +49,18 @@ if __name__ == "__main__":
 
 # import fuzzingbook_utils
 
-from Grammars import DIGIT_GRAMMAR, EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
-from GrammarFuzzer import GrammarFuzzer, all_terminals, nonterminals, display_tree
+if __package__ is None or __package__ == "":
+    from Grammars import DIGIT_GRAMMAR, EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
+else:
+    from .Grammars import DIGIT_GRAMMAR, EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
+
+
+if __package__ is None or __package__ == "":
+    from GrammarFuzzer import GrammarFuzzer, all_terminals, nonterminals, display_tree
+else:
+    from .GrammarFuzzer import GrammarFuzzer, all_terminals, nonterminals, display_tree
+
+
 import random
 
 class GrammarCoverageFuzzer(GrammarFuzzer):

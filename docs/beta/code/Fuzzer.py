@@ -294,7 +294,11 @@ def crash_if_too_long(s):
 
 # And yes, it quickly crashes.
 
-from ExpectError import ExpectError
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectError
+else:
+    from .ExpectError import ExpectError
+
 
 if __name__ == "__main__":
     trials = 100
@@ -340,7 +344,11 @@ def hang_if_no_space(s):
 
 # Using the timeout mechanism from our [Introduction to Testing](Intro_Testing.ipynb), we can interrupt this function after some time.  And yes, it does hang after a few fuzzing inputs.
 
-from ExpectError import ExpectTimeout
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectTimeout
+else:
+    from .ExpectError import ExpectTimeout
+
 
 if __name__ == "__main__":
     trials = 100
@@ -511,7 +519,11 @@ if __name__ == "__main__":
 
 # We can again simulate this in our Python example.  Let us simply assume that if some string contains the uninitialized memory marker, we have been accessing memory out of bounds:
 
-from ExpectError import ExpectError
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectError
+else:
+    from .ExpectError import ExpectError
+
 
 if __name__ == "__main__":
     with ExpectError():

@@ -383,7 +383,11 @@ if __name__ == "__main__":
 
 # To use our generated inputs as seeds, we can feed them directly into the mutation fuzzers introduced earlier:
 
-from MutationFuzzer import MutationFuzzer
+if __package__ is None or __package__ == "":
+    from MutationFuzzer import MutationFuzzer
+else:
+    from .MutationFuzzer import MutationFuzzer
+
 
 if __name__ == "__main__":
     number_of_seeds = 10
@@ -949,7 +953,11 @@ assert is_valid_grammar(JSON_GRAMMAR_EBNF)
 
 JSON_GRAMMAR = convert_ebnf_grammar(JSON_GRAMMAR_EBNF)
 
-from ExpectError import ExpectError
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectError
+else:
+    from .ExpectError import ExpectError
+
 
 if __name__ == "__main__":
     for i in range(10):
@@ -971,7 +979,11 @@ if __name__ == "__main__":
 
 # **Solution**.  `nonterminal_grammar` does not work because `simple_grammar_fuzzer()` eventually tries to expand the just generated nonterminal:
 
-from ExpectError import ExpectError, ExpectTimeout
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectError, ExpectTimeout
+else:
+    from .ExpectError import ExpectError, ExpectTimeout
+
 
 if __name__ == "__main__":
     with ExpectError():

@@ -76,7 +76,11 @@ def http_program(url):
 
 # Let us now go and fuzz `http_program()`.  To fuzz, we use the full range of printable ASCII characters, such that `:`, `/`, and lowercase letters are included.
 
-from Fuzzer import fuzzer
+if __package__ is None or __package__ == "":
+    from Fuzzer import fuzzer
+else:
+    from .Fuzzer import fuzzer
+
 
 if __name__ == "__main__":
     fuzzer(char_start=32, char_range=96)
@@ -121,7 +125,11 @@ if __name__ == "__main__":
 
 # Let's measure how long one run of `http_program()` takes:
 
-from Timer import Timer
+if __package__ is None or __package__ == "":
+    from Timer import Timer
+else:
+    from .Timer import Timer
+
 
 if __name__ == "__main__":
     trials = 1000
@@ -286,7 +294,11 @@ if __name__ == "__main__":
 
 # We can actually afford this.  Let's try:
 
-from Timer import Timer
+if __package__ is None or __package__ == "":
+    from Timer import Timer
+else:
+    from .Timer import Timer
+
 
 if __name__ == "__main__":
     trials = 0
@@ -334,7 +346,11 @@ if __name__ == "__main__":
 
 # To implement such multiple mutations in a single package, let us introduce a `MutationFuzzer` class.  It takes a seed (a list of strings) and a minimum and maximum number of mutations.  
 
-from Fuzzer import Fuzzer
+if __package__ is None or __package__ == "":
+    from Fuzzer import Fuzzer
+else:
+    from .Fuzzer import Fuzzer
+
 
 class MutationFuzzer(Fuzzer):
     def __init__(self, seed, min_mutations=2, max_mutations=10):
@@ -418,7 +434,11 @@ if __name__ == "__main__":
 
 # Let us build such a strategy.  We start with introducing a `Runner` class that captures the coverage for a given function.  First, a `FunctionRunner` class:
 
-from Fuzzer import Runner
+if __package__ is None or __package__ == "":
+    from Fuzzer import Runner
+else:
+    from .Fuzzer import Runner
+
 
 class FunctionRunner(Runner):
     def __init__(self, function):
@@ -435,7 +455,11 @@ if __name__ == "__main__":
 
 # We can now extend the `FunctionRunner` class such that it also measures coverage.  After invoking `run()`, the `coverage()` method returns the coverage achieved in the last run, and `valid_input()` returns whether the input was accepted by the program.
 
-from Coverage import Coverage, population_coverage
+if __package__ is None or __package__ == "":
+    from Coverage import Coverage, population_coverage
+else:
+    from .Coverage import Coverage, population_coverage
+
 
 class FunctionCoverageRunner(FunctionRunner):
     def run(self, inp):
@@ -560,7 +584,11 @@ if __name__ == "__main__":
 
 
 
-from Coverage import cgi_decode
+if __package__ is None or __package__ == "":
+    from Coverage import cgi_decode
+else:
+    from .Coverage import cgi_decode
+
 
 if __name__ == "__main__":
     seed = ["Hello World"]
@@ -606,7 +634,11 @@ if __name__ == "__main__":
 
 # **Solution.** This is just a matter of tying a `ProgramRunner` to a `MutationFuzzer`:
 
-from Fuzzer import ProgramRunner
+if __package__ is None or __package__ == "":
+    from Fuzzer import ProgramRunner
+else:
+    from .Fuzzer import ProgramRunner
+
 
 if __name__ == "__main__":
     seed = ["1 + 1"]
