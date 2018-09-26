@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import io, os, sys, types, re
+import datetime
 
 # from IPython import get_ipython
 # from IPython.core.interactiveshell import InteractiveShell
@@ -21,9 +22,13 @@ RE_COMMENTS = re.compile(r'^#.*$', re.MULTILINE)
 HEADER = """#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This code is part of "Generating Software Tests" (https://www.fuzzingbook.org/)
-# It is licensed under a Creative Commons
-# Attribution-NonCommercial-ShareAlike 4.0 International License,
+# This material is part of "Generating Software Tests".
+# Web site: https://www.fuzzingbook.org/html/{module}.html
+# Last change: {timestamp}
+#
+# This material is licensed under a
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+# International License
 # (https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 """
@@ -64,7 +69,14 @@ def export_notebook_code(notebook_name, path=None):
 
     # shell = InteractiveShell.instance()
 
-    print_utf8(HEADER)
+    # Get versioning info
+    notebook_modification_time = os.path.getmtime(notebook_path)    
+    timestamp = datetime.datetime.fromtimestamp(notebook_modification_time) \
+        .astimezone().isoformat(sep=' ', timespec='seconds')
+    module = os.path.splitext(os.path.basename(notebook_name))[0]
+
+    header = HEADER.format(module=module, timestamp=timestamp)
+    print_utf8(header)
     sep = ''
 
     for cell in notebook.cells:
