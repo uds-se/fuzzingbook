@@ -677,7 +677,9 @@ clean-full-notebooks clean-full clean-fulls:
 	$(RM) $(FULLS)
 
 clean-docs:
-	$(RM) -r $(DOCS_TARGET)*.md $(DOCS_TARGET)html $(DOCS_TARGET)code $(DOCS_TARGET)slides
+	$(RM) -r $(DOCS_TARGET)html $(DOCS_TARGET)code \
+	 	$(DOCS_TARGET)slides $(DOCS_TARGET)index.html $(DOCS_TARGET)PICS \
+		$(DOCS_TARGET)notebooks
 
 clean: clean-code clean-chapters clean-book clean-aux clean-docs clean-fulls
 	@echo "All derived files deleted"
