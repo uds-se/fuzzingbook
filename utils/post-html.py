@@ -455,8 +455,9 @@ chapter_contents = re.sub(r'<a href="([a-zA-Z0-9_]*)\.ipynb">',
 chapter_contents = bibtex_unescape(chapter_contents)
 
 if args.home:
-    chapter_contents = chapter_contents.replace("custom.css", "html/custom.css")
-    chapter_contents = chapter_contents.replace("favicon/", "html/favicon/")
+    # The 404 page needs absolute paths here
+    chapter_contents = chapter_contents.replace("custom.css", "/html/custom.css")
+    chapter_contents = chapter_contents.replace("favicon/", "/html/favicon/")
 
 # Get a title
 # The official way is to set a title in document metadata, 
