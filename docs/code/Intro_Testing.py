@@ -176,7 +176,11 @@ if __name__ == "__main__":
 
 # import fuzzingbook_utils
 
-from Timer import Timer
+if __package__ is None or __package__ == "":
+    from Timer import Timer
+else:
+    from .Timer import Timer
+
 
 if __name__ == "__main__":
     with Timer() as t:
@@ -256,7 +260,11 @@ if __name__ == "__main__":
 
 # Indeed, if you invoke `my_sqrt()` with a negative number, it enters an infinite loop.  For technical reasons, we cannot have infinite loops in this chapter (unless we'd want the code to run forever); so we use a special `with ExpectTimeOut(1)` construct to interrupt execution after one second.
 
-from ExpectError import ExpectTimeout
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectTimeout
+else:
+    from .ExpectError import ExpectTimeout
+
 
 if __name__ == "__main__":
     with ExpectTimeout(1):
@@ -284,7 +292,11 @@ if __name__ == "__main__":
 
 # But wait!  What happens if `exposed_sqrt()` is not invoked with a number?  Then we would try to convert a non-number string, which would also result in a runtime error:
 
-from ExpectError import ExpectError
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectError
+else:
+    from .ExpectError import ExpectError
+
 
 if __name__ == "__main__":
     with ExpectError():
