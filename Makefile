@@ -644,9 +644,12 @@ publish-code: code
 publish-code-zip: publish-code delete-betas $(DOCS_TARGET)fuzzingbook.zip
 
 $(DOCS_TARGET)fuzzingbook.zip: publish-code delete-betas
-	$(RM) $(DOCS_TARGET)fuzzingbook $(DOCS_TARGET)fuzzingbook.zip
-	$(RM) $(DOCS_TARGET)code/import-all.py
-	ln -s code $(DOCS_TARGET)fuzzingbook
+	$(RM) $(DOCS_TARGET)fuzzingbook.zip
+	$(RM) -r $(DOCS_TARGET)fuzzingbook
+	mkdir $(DOCS_TARGET)fuzzingbook
+	ln -s ../code $(DOCS_TARGET)fuzzingbook/fuzzingbook
+	mv $(DOCS_TARGET)fuzzingbook/fuzzingbook/setup.py $(DOCS_TARGET)fuzzingbook
+	mv $(DOCS_TARGET)fuzzingbook/fuzzingbook/README.md $(DOCS_TARGET)fuzzingbook
 	cd $(DOCS_TARGET); $(ZIP) $(ZIP_OPTIONS) fuzzingbook.zip fuzzingbook
 	cd $(DOCS_TARGET)fuzzingbook; $(PYTHON) setup.py sdist
 	mv $(DOCS_TARGET)fuzzingbook/dist/fuzzingbook*.tar.gz $(DOCS_TARGET)
