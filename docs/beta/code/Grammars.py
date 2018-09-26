@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-09-25 18:13:26+02:00
+# Last change: 2018-09-26 15:50:43+02:00
 #
 # This material is licensed under a
 # Creative Commons Attribution-NonCommercial-ShareAlike 4.0
@@ -64,7 +64,13 @@ if __name__ == "__main__":
 # To read such a grammar, start with the starting symbol (`<start>`).  A rule `<A> ::= <B>` means that the symbol on the left side (`<A>`) can be replaced by the string on the right side (`<B>`).  In the above grammar, `<start>` would be replaced by `<digit><digit>`.
 # 
 # In this string again, `<digit>` would be replaced by the string on the right side of the `<digit>` rule.  The special operator `|` denotes _alternatives_, meaning that any of the digits can be chosen for an expansion.  Each `<digit>` thus would be expanded into one of the given digits, eventually yielding a string between `00` and `99`.  There are no further expansions for `0` to `9`, so we are all set.
-# 
+
+if __name__ == "__main__":
+    print('\n### Rules and Expansions')
+
+
+
+
 # The interesting thing about grammars is that they can be _recursive_. That is, expansions can make use of symbols expanded earlier – which would then be expanded again.  As an example, consider a grammar that describes integers:
 # 
 # ```
@@ -74,7 +80,7 @@ if __name__ == "__main__":
 # ```
 # 
 # Here, a `<integer>` is either a single digit, or a digit followed by another integer.  The number `1234` thus would be represented as a single digit `1`, followed by the integer `234`, which in turn is a digit `2`, followed by the integer `34`.
-# 
+
 # If we wanted to express that an integer can be preceded by a sign (`+` or `-`), we would write the grammar as
 # 
 # ```
@@ -85,12 +91,6 @@ if __name__ == "__main__":
 # ```
 # 
 # These rules formally define the language: Anything that can be derived from the start symbol is part of the language; anything that cannot is not.
-
-if __name__ == "__main__":
-    print('\n### Rules and Expansions')
-
-
-
 
 # ### Arithmetic Expressions
 # 
@@ -230,7 +230,8 @@ class ExpansionError(Exception):
     pass
 
 def simple_grammar_fuzzer(grammar, start_symbol=START_SYMBOL,
-                          max_nonterminals=10, max_expansion_trials=100, log=False):
+                          max_nonterminals=10, max_expansion_trials=100,
+                          log=False):
     term = start_symbol
     expansion_trials = 0
 
@@ -319,6 +320,8 @@ if __name__ == "__main__":
 
 
 # ### A URL Grammar
+# 
+# The same properties we have seen for CGI input also hold for more complex inputs.  Let us use a grammar to produce a large number of valid URLs:
 
 if __name__ == "__main__":
     print('\n### A URL Grammar')
@@ -326,51 +329,35 @@ if __name__ == "__main__":
 
 
 
-# The same properties we have seen for CGI input also hold for more complex inputs.  Let us use a grammar to produce a large number of valid URLs:
-
 URL_GRAMMAR = {
     "<start>":
         ["<call>"],
-
     "<call>":
         ["<url>"],
-
     "<url>":
         ["<scheme>://<authority><path><query>"],
-
     "<scheme>":
         ["http", "https", "ftp", "ftps"],
-
     "<authority>":
         ["<host>", "<host>:<port>", "<userinfo>@<host>", "<userinfo>@<host>:<port>"],
-
     "<host>":  # Just a few
         ["cispa.saarland", "www.google.com", "fuzzingbook.com"],
-
     "<port>":
         ["80", "8080", "<nat>"],
-
     "<nat>":
         ["<digit>", "<digit><digit>"],
-
     "<digit>":
         ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
-
     "<userinfo>":  # Just one
         ["user:password"],
-
     "<path>":  # Just a few
         ["", "/", "/<id>"],
-
     "<id>":  # Just a few
         ["abc", "def", "x<digit><digit>"],
-
     "<query>":
         ["", "?<params>"],
-
     "<params>":
         ["<param>", "<param>&<params>"],
-
     "<param>":  # Just a few
         ["<id>=<id>", "<id>=<nat>"],
 }
@@ -735,14 +722,14 @@ if __name__ == "__main__":
 
 
 # #### All Together
+# 
+# We can combine the two, first extending parentheses and then operators:
 
 if __name__ == "__main__":
     print('\n#### All Together')
 
 
 
-
-# We can combine the two, first extending parentheses and then operators:
 
 def convert_ebnf_grammar(ebnf_grammar):
     return convert_ebnf_operators(convert_ebnf_parentheses(ebnf_grammar))
@@ -774,9 +761,9 @@ if __name__ == "__main__":
 
 import sys
 
-def is_valid_grammar(grammar, start_symbol=START_SYMBOL):
-    used_nonterminals = set([start_symbol])
+def def_used_nonterminals(grammar, start_symbol=START_SYMBOL):
     defined_nonterminals = set()
+    used_nonterminals = set([start_symbol])
 
     for defined_nonterminal in grammar:
         defined_nonterminals.add(defined_nonterminal)
@@ -784,11 +771,12 @@ def is_valid_grammar(grammar, start_symbol=START_SYMBOL):
         if not isinstance(expansions, list):
             print(repr(defined_nonterminal) + ": expansion is not a list",
                   file=sys.stderr)
-            return False
+            return None, None
+
         if len(expansions) == 0:
             print(repr(defined_nonterminal) + ": expansion list empty",
                   file=sys.stderr)
-            return False
+            return None, None
 
         for expansion in expansions:
             if isinstance(expansion, tuple):
@@ -797,10 +785,18 @@ def is_valid_grammar(grammar, start_symbol=START_SYMBOL):
                 print(repr(defined_nonterminal) + ": "
                       + repr(expansion) + ": not a string",
                       file=sys.stderr)
-                return False
+                return None, None
 
             for used_nonterminal in nonterminals(expansion):
                 used_nonterminals.add(used_nonterminal)
+
+    return defined_nonterminals, used_nonterminals
+
+def is_valid_grammar(grammar, start_symbol=START_SYMBOL):
+    defined_nonterminals, used_nonterminals = def_used_nonterminals(
+        grammar, start_symbol)
+    if defined_nonterminals is None or used_nonterminals is None:
+        return False
 
     for unused_nonterminal in defined_nonterminals - used_nonterminals:
         print(repr(unused_nonterminal) + ": defined, but not used",
@@ -993,13 +989,7 @@ if __name__ == "__main__":
 # Both issues are addressed and discussed in the [next chapter](GrammarFuzzer.ipynb), introducing a more solid algorithm for producing strings from grammars.
 
 # ### Exercise 3: Grammars with Regular Expressions
-
-if __name__ == "__main__":
-    print('\n### Exercise 3: Grammars with Regular Expressions')
-
-
-
-
+# 
 # In a _grammar extended with regular expressions_, we can use the special form
 # ```
 # /regex/
@@ -1009,6 +999,12 @@ if __name__ == "__main__":
 # <integer> ::= /[+-]?[0-9]+/
 # ```
 # to quickly express that an integer is an optional sign, followed by a sequence of digits.
+
+if __name__ == "__main__":
+    print('\n### Exercise 3: Grammars with Regular Expressions')
+
+
+
 
 # #### Part 1: Convert regular expressions
 # 
