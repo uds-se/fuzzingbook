@@ -611,7 +611,7 @@ metadata: $(ADD_METADATA)
 docs: publish-notebooks publish-html publish-code publish-code-zip \
 	publish-slides publish-pics \
 	$(DOCS_TARGET)index.html $(DOCS_TARGET)404.html README.md binder/postBuild
-	@echo "Now use 'make publish' to commit changes to docs."
+	@echo "Now use 'make publish-all' to commit changes to docs."
 
 # github does not like script tags
 README.md: $(MARKDOWN_TARGET)index.md
@@ -640,19 +640,22 @@ publish-code: code
 	$(RM) $(DOCS_TARGET)code/404.py $(RM) $(DOCS_TARGET)code/index.py 
 	$(RM) $(DOCS_TARGET)code/Template.py $(DOCS_TARGET)code/Guide_for_Authors.py
 
-publish-code-zip: publish-code delete-betas $(DOCS_TARGET)fuzzingbook.zip
+zip dist publish-code-zip: publish-code delete-betas $(DOCS_TARGET)code/fuzzingbook.zip
 
-$(DOCS_TARGET)fuzzingbook.zip: publish-code delete-betas
-	$(RM) $(DOCS_TARGET)fuzzingbook.zip
+$(DOCS_TARGET)code/fuzzingbook.zip: publish-code delete-betas
+	$(RM) $(DOCS_TARGET)code/fuzzingbook.zip $(DOCS_TARGET)code/fuzzingbook*.tar.gz
+	$(RM) -r $(DOCS_TARGET)code/dist $(DOCS_TARGET)code/*.egg-info
 	$(RM) -r $(DOCS_TARGET)fuzzingbook
 	mkdir $(DOCS_TARGET)fuzzingbook
 	ln -s ../code $(DOCS_TARGET)fuzzingbook/fuzzingbook
 	mv $(DOCS_TARGET)fuzzingbook/fuzzingbook/setup.py $(DOCS_TARGET)fuzzingbook
 	mv $(DOCS_TARGET)fuzzingbook/fuzzingbook/README.md $(DOCS_TARGET)fuzzingbook
 	cd $(DOCS_TARGET); $(ZIP) $(ZIP_OPTIONS) fuzzingbook.zip fuzzingbook
+	mv $(DOCS_TARGET)fuzzingbook.zip $(DOCS_TARGET)code
 	cd $(DOCS_TARGET)fuzzingbook; $(PYTHON) setup.py sdist
-	mv $(DOCS_TARGET)fuzzingbook/dist/fuzzingbook*.tar.gz $(DOCS_TARGET)
-	$(RM) -r $(DOCS_TARGET)fuzzingbook
+	mv $(DOCS_TARGET)fuzzingbook/dist/fuzzingbook*.tar.gz $(DOCS_TARGET)code
+	$(RM) -r $(DOCS_TARGET)fuzzingbook $(DOCS_TARGET)code/fuzzingbook
+	$(RM) -r $(DOCS_TARGET)code/dist $(DOCS_TARGET)code/*.egg-info
 
 publish-slides: slides
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
