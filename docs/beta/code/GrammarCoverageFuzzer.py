@@ -5,15 +5,30 @@
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
 # Last change: 2018-09-26 17:16:40+02:00
 #
-# This material is licensed under a
-# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
-# International License
-# (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+#
+# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 # # Grammar Coverage
-# 
-# In this chapter, we explore how to systematically cover elements of a grammar, as well as element combinations.  \todo{Work in progress.}
 
 if __name__ == "__main__":
     print('# Grammar Coverage')
@@ -21,25 +36,7 @@ if __name__ == "__main__":
 
 
 
-# **Prerequisites**
-# 
-# * You should have read the [chapter on grammars](Grammars.ipynb).
-# * You should have read the [chapter on efficient grammar fuzzing](GrammarFuzzer.ipynb).
-
 # ## Covering Grammar Elements
-# 
-# [Producing inputs from grammars](GrammarFuzzer.ipynb) gives all possible expansions of a rule the same likelihood.  For producing a comprehensive test suite, however, it makes more sense to maximize _variety_ – for instance, by avoiding repeating the same expansions over and over again.  To achieve this, we can track the _coverage_ of individual expansions: If we have seen some expansion already, we can prefer other possible expansions in the future.  The idea of ensuring that each expansion in the grammar is used at least once goes back to Paul Purdom \cite{purdom1972}.
-# 
-# As an example, consider the grammar
-# 
-# ```grammar
-# <start> ::= <digit><digit>
-# <digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-# ```
-# 
-# Let us assume we have already produced a `0` in the first expansion of `<digit>`.  As it comes to expand the next digit, we would mark the `0` expansion as already covered, and choose one of the yet uncovered alternatives.  Only when we have covered all alternatives would we go back and consider expansions covered before.
-# 
-# This concept of coverage is very easy to implement.
 
 if __name__ == "__main__":
     print('\n## Covering Grammar Elements')
@@ -132,8 +129,6 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
         return new_children_index
 
 
-# By returning the set of expansions covered so far, we can invoke the fuzzer multiple times, each time adding to the grammar coverage.  With the `DIGIT_GRAMMAR` grammar, for instance, this lets the grammar produce one digit after the other:
-
 if __name__ == "__main__":
     f = GrammarCoverageFuzzer(DIGIT_GRAMMAR, log=True)
     f.fuzz()
@@ -151,21 +146,15 @@ if __name__ == "__main__":
     f.covered_expansions
 
 
-# At the end, all expansions are covered:
-
 if __name__ == "__main__":
     f.max_expansion_coverage() - f.expansion_coverage()
 
-
-# Let us now create some more expressions:
 
 if __name__ == "__main__":
     f = GrammarCoverageFuzzer(EXPR_GRAMMAR)
     for i in range(10):
         print(f.fuzz())
 
-
-# Again, all expansions are covered:
 
 if __name__ == "__main__":
     f.max_expansion_coverage() - f.expansion_coverage()
@@ -193,8 +182,6 @@ if __name__ == "__main__":
 
 
 # ## Deep Foresight
-# 
-# Our naive way of selecting expansions is not sufficient; we need to favor expansions that may be covered, but _lead to uncovered ones_.
 
 if __name__ == "__main__":
     print('\n## Deep Foresight')
@@ -329,8 +316,6 @@ if __name__ == "__main__":
 
 
 # ## Combinatorial Coverage
-# 
-# Start with depth of 1, then increase depth
 
 if __name__ == "__main__":
     print('\n## Combinatorial Coverage')
@@ -601,8 +586,6 @@ if __name__ == "__main__":
 
 
 # ## Advanced Grammar Coverage Metrics
-# 
-# \todo{Expand.}
 
 if __name__ == "__main__":
     print('\n## Advanced Grammar Coverage Metrics')
@@ -611,10 +594,6 @@ if __name__ == "__main__":
 
 
 # ## Lessons Learned
-# 
-# * _Lesson one_
-# * _Lesson two_
-# * _Lesson three_
 
 if __name__ == "__main__":
     print('\n## Lessons Learned')
@@ -623,13 +602,6 @@ if __name__ == "__main__":
 
 
 # ## Next Steps
-# 
-# _Link to subsequent chapters (notebooks) here, as in:_
-# 
-# * [use _mutations_ on existing inputs to get more valid inputs](MutationFuzzer.ipynb)
-# * [use _grammars_ (i.e., a specification of the input format) to get even more valid inputs](Grammars.ipynb)
-# * [reduce _failing inputs_ for efficient debugging](Reducing.ipynb)
-# 
 
 if __name__ == "__main__":
     print('\n## Next Steps')
@@ -638,13 +610,6 @@ if __name__ == "__main__":
 
 
 # ## Exercises
-# 
-# Close the chapter with a few exercises such that people have things to do.  In Jupyter Notebook, use the `exercise2` nbextension to add solutions that can be interactively viewed or hidden:
-# 
-# * Mark the _last_ cell of the exercise (this should be a _text_ cell) as well as _all_ cells of the solution.  (Use the `rubberband` nbextension and use Shift+Drag to mark multiple cells.)
-# * Click on the `solution` button at the top.
-# 
-# (Alternatively, just copy the exercise and solution cells below with their metadata.)
 
 if __name__ == "__main__":
     print('\n## Exercises')
@@ -653,8 +618,6 @@ if __name__ == "__main__":
 
 
 # ### Exercise 1
-# 
-# _Text of the exercise_
 
 if __name__ == "__main__":
     print('\n### Exercise 1')
@@ -667,25 +630,15 @@ if __name__ == "__main__":
     pass
 
 
-# _Some more text for the exercise_
-
-# _Some text for the solution_
-
 if __name__ == "__main__":
     # Some code for the solution
     2 + 2
 
 
-# _Some more text for the solution_
-
 # ### Exercise 2
-# 
-# _Text of the exercise_
 
 if __name__ == "__main__":
     print('\n### Exercise 2')
 
 
 
-
-# _Solution for the exercise_

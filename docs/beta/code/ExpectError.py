@@ -5,15 +5,30 @@
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
 # Last change: 2018-09-26 15:50:42+02:00
 #
-# This material is licensed under a
-# Creative Commons Attribution-NonCommercial-ShareAlike 4.0
-# International License
-# (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+#
+# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 # # Error Handling
-# 
-# The code in this notebook helps with handling errors.  Normally, an error in  notebook code causes the execution of the code to stop; while an infinite loop in notebook code causes the notebook to run without end.  This notebook provides two classes to help address these concerns.
 
 if __name__ == "__main__":
     print('# Error Handling')
@@ -21,27 +36,7 @@ if __name__ == "__main__":
 
 
 
-# **Prerequisites**
-# 
-# * This notebook needs some understanding on advanced concepts in Python, notably 
-#     * classes
-#     * the Python `with` statement
-#     * tracing
-#     * measuring time
-#     * exceptions
-
 # ## Catching Errors
-# 
-# The class `ExpectError` allows to express that some code produces an exception.  A typical usage looks as follows:
-# 
-# ```Python
-# from ExpectError import ExpectError
-# 
-# with ExpectError():
-#     function_that_is_supposed_to_fail()
-# ```
-# 
-# If an exception occurs, it is printed on standard error; yet, execution continues.
 
 if __name__ == "__main__":
     print('\n## Catching Errors')
@@ -74,8 +69,6 @@ class ExpectError(object):
         print(lines, "(expected)", file=sys.stderr)
         return True  # Ignore it
 
-# Here's an example:
-
 def fail_test():
     # Trigger an exception
     x = 1 / 0
@@ -86,21 +79,6 @@ if __name__ == "__main__":
 
 
 # ## Catching Timeouts
-# 
-# The class `ExpectTimeout(seconds)` allows to express that some code may run for a long or infinite time; execution is thus interrupted after `seconds` seconds.  A typical usage looks as follows:
-# 
-# ```Python
-# from ExpectError import ExpectTimeout
-# 
-# with ExpectTimeout(2) as t:
-#     function_that_is_supposed_to_hang()
-# ```
-# 
-# If an exception occurs, it is printed on standard error (as with `ExpectError`); yet, execution continues.
-# 
-# Should there be a need to cancel the timeout within the `with` block, `t.cancel()` will do the trick.
-# 
-# The implementation uses `sys.settrace()`, as this seems to be the most portable way to implement timeouts.  It is not very efficient, though.  Also, it only works on individual lines of Python code and will not interrupt a long-running system function.
 
 if __name__ == "__main__":
     print('\n## Catching Timeouts')
@@ -171,8 +149,6 @@ class ExpectTimeout(object):
     def cancel(self):
         sys.settrace(self.original_trace_function)
 
-# Here's an example:
-
 def long_running_test():
     print("Start")
     for i in range(10):
@@ -185,13 +161,9 @@ if __name__ == "__main__":
         long_running_test()
 
 
-# Note that it is possible to nest multiple timeouts.
-
 if __name__ == "__main__":
     with ExpectTimeout(2):
         with ExpectTimeout(1):
             long_running_test()
         long_running_test()
 
-
-# That's it, folks – enjoy!
