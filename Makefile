@@ -387,7 +387,7 @@ $(DOCS_TARGET)404.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)404.html $@
 	@cd $(HTML_TARGET) && $(RM) -r 404.nbpub.log 404_files
-	$(PYTHON) utils/post-html.py --menu-prefix=html/ --home $(BETA_FLAG) \
+	$(PYTHON) utils/post-html.py --menu-prefix=/html/ --home $(BETA_FLAG) \
 		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
 	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
 	@$(OPEN) $@
