@@ -35,7 +35,8 @@ APPENDICES = \
 	Guide_for_Authors.ipynb \
 	Template.ipynb \
 	ExpectError.ipynb \
-	Timer.ipynb
+	Timer.ipynb \
+	404.ipynb
 
 # All source notebooks
 SOURCE_FILES = \
@@ -85,7 +86,7 @@ endif
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
-HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(DOCS_TARGET)index.html
+HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(DOCS_TARGET)index.html $(DOCS_TARGET)404.html
 SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
 PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py)
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
@@ -378,6 +379,19 @@ $(DOCS_TARGET)index.html: \
 		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
 	@$(OPEN) $@
 
+# https://help.github.com/articles/creating-a-custom-404-page-for-your-github-pages-site/
+$(DOCS_TARGET)404.html: \
+	$(FULL_NOTEBOOKS)/404.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
+	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
+	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
+	$(CONVERT_TO_HTML) $<
+	mv $(HTML_TARGET)404.html $@
+	@cd $(HTML_TARGET) && $(RM) -r 404.nbpub.log 404_files
+	$(PYTHON) utils/post-html.py --menu-prefix=html/ --home $(BETA_FLAG) \
+		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
+	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
+	@$(OPEN) $@
+
 $(HTML_TARGET)%.html: \
 	$(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
@@ -586,7 +600,7 @@ metadata: $(ADD_METADATA)
 
 docs: publish-notebooks publish-html publish-code publish-code-zip \
 	publish-slides publish-pics \
-	$(DOCS_TARGET)index.html README.md binder/postBuild
+	$(DOCS_TARGET)index.html $(DOCS_TARGET)404.html README.md binder/postBuild
 	@echo "Now use 'make publish' to commit changes to docs."
 
 # github does not like script tags
@@ -719,8 +733,7 @@ clean-full-notebooks clean-full clean-fulls:
 
 clean-docs:
 	$(RM) -r $(DOCS_TARGET)html $(DOCS_TARGET)code \
-	 	$(DOCS_TARGET)slides $(DOCS_TARGET)index.html $(DOCS_TARGET)PICS \
-		$(DOCS_TARGET)notebooks
+	 	$(DOCS_TARGET)slides $(DOCS_TARGET)index.html $(DOCS_TARGET)404.html \ 		$(DOCS_TARGET)PICS $(DOCS_TARGET)notebooks
 
 clean: clean-code clean-chapters clean-book clean-aux clean-docs clean-fulls
 	@echo "All derived files deleted"

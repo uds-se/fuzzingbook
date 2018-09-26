@@ -194,7 +194,10 @@ def get_description(notebook):
     """Return the first 2-4 sentences from a notebook file, after the title"""
     contents = get_text_contents(notebook)
     match = re.search(r'^# .*$([^#]*)^#', contents, re.MULTILINE)
-    desc = match.group(1).replace(r'\n', '').replace('\n', '')
+    if match is None:
+        desc = contents
+    else:
+        desc = match.group(1).replace(r'\n', '').replace('\n', '')
     desc = re.sub(r"\]\([^)]*\)", "]", desc).replace('[', '').replace(']', '')
     desc = re.sub(r"[_*]", "", desc)
     # print("Description", desc.encode('utf-8'))
