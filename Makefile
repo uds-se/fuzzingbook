@@ -28,21 +28,25 @@ BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
 
 CHAPTERS = $(PUBLIC_CHAPTERS) $(BETA_CHAPTERS)
 
-# Additional notebooks (not to be included)
-FRONTMATTER = \
-	index.ipynb
+# Appendices for the book
 APPENDICES = \
-	Guide_for_Authors.ipynb \
-	Template.ipynb \
 	ExpectError.ipynb \
 	Timer.ipynb \
+	Guide_for_Authors.ipynb
+
+# Additional notebooks for special pages (not to be included)
+FRONTMATTER = \
+	index.ipynb
+EXTRAS = \
+	Template.ipynb \
 	404.ipynb
 
 # All source notebooks
 SOURCE_FILES = \
 	$(FRONTMATTER) \
 	$(CHAPTERS) \
-	$(APPENDICES)
+	$(APPENDICES) \
+	$(EXTRAS)
 
 # The bibliography file
 BIB = fuzzingbook.bib
@@ -88,7 +92,7 @@ TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
 HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(DOCS_TARGET)index.html $(DOCS_TARGET)404.html
 SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
-PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py)
+PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py) $(CODE_TARGET)setup.py $(CODE_TARGET)__init__.py
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
 MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 EPUBS     = $(SOURCE_FILES:%.ipynb=$(EPUB_TARGET)%.epub)
@@ -435,6 +439,14 @@ $(REVEAL_JS):
 	git submodule update --init
 
 
+$(CODE_TARGET)setup.py: $(CODE_TARGET)setup.py.in
+	cat $< > $@
+	chmod +x $@
+
+$(CODE_TARGET)__init__.py: $(CODE_TARGET)__init__.py.in
+	cat $< > $@
+	chmod +x $@
+
 # For code, we comment out fuzzingbook imports, 
 # ensuring we import a .py and not the .ipynb file
 $(CODE_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
@@ -559,15 +571,13 @@ check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 	
 # Import all code.  This should produce no output (or error messages).
-check-import: $(CODE_TARGET)import_all.py
-	$(PYTHON) $< 2>&1 | tee $<.out
-	@test ! -s $<.out && echo "All import checks passed."
-
-IMPORTS = $(subst .ipynb,,$(SOURCE_FILES))
-$(CODE_TARGET)import_all.py: Makefile
-	echo "#!/usr/bin/env $(PYTHON)" > $@
-	(for file in $(IMPORTS); do echo import $$file; done) >> $@
-	-chmod +x $@
+IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
+check-import: code
+	echo "#!/usr/bin/env $(PYTHON)" > import_all.py
+	(for file in $(IMPORTS); do echo from code import $$file; done) >> import_all.py
+	$(PYTHON) import_all.py 2>&1 | tee import_all.py.out
+	@test ! -s import_all.py.out && echo "All import checks passed."
+	@$(RM) import_all.py*
 
 run: check-import check-code
 	
@@ -624,21 +634,23 @@ publish-code: code
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)code || $(MKDIR) $(DOCS_TARGET)code
 	cp -pr $(CODE_TARGET) $(DOCS_TARGET)code
-	$(RM) $(DOCS_TARGET)code/*.py.out $(DOCS_TARGET)code/*.cfg
+	$(RM) $(DOCS_TARGET)code/*.py.out $(DOCS_TARGET)code/*.cfg $(DOCS_TARGET)code/*.in
 	$(RM) -r $(DOCS_TARGET)code/__pycache__ \
 	 	$(DOCS_TARGET)code/fuzzingbook_utils/__pycache__
 	$(RM) $(DOCS_TARGET)code/404.py $(RM) $(DOCS_TARGET)code/index.py 
 	$(RM) $(DOCS_TARGET)code/Template.py $(DOCS_TARGET)code/Guide_for_Authors.py
 	cp -p LICENSE.md $(DOCS_TARGET)code
 
-publish-code-zip: publish-code delete-betas $(DOCS_TARGET)fuzzingbook-code.zip
+publish-code-zip: publish-code delete-betas $(DOCS_TARGET)fuzzingbook.zip
 
-$(DOCS_TARGET)fuzzingbook-code.zip: publish-code delete-betas
-	$(RM) $(DOCS_TARGET)fuzzingbook-code $(DOCS_TARGET)fuzzingbook-code.zip
+$(DOCS_TARGET)fuzzingbook.zip: publish-code delete-betas
+	$(RM) $(DOCS_TARGET)fuzzingbook $(DOCS_TARGET)fuzzingbook.zip
 	$(RM) $(DOCS_TARGET)code/import-all.py
-	ln -s code $(DOCS_TARGET)fuzzingbook-code
-	cd $(DOCS_TARGET); $(ZIP) $(ZIP_OPTIONS) fuzzingbook-code.zip fuzzingbook-code
-	$(RM) $(DOCS_TARGET)fuzzingbook-code
+	ln -s code $(DOCS_TARGET)fuzzingbook
+	cd $(DOCS_TARGET); $(ZIP) $(ZIP_OPTIONS) fuzzingbook.zip fuzzingbook
+	cd $(DOCS_TARGET)fuzzingbook; $(PYTHON) setup.py sdist
+	mv $(DOCS_TARGET)fuzzingbook/dist/fuzzingbook*.tar.gz $(DOCS_TARGET)
+	$(RM) -r $(DOCS_TARGET)fuzzingbook
 
 publish-slides: slides
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
@@ -744,7 +756,7 @@ realclean: clean
 	cd $(PDF_TARGET); $(RM) *.pdf
 	cd $(HTML_TARGET); $(RM) *.html; $(RM) -r *_files
 	cd $(SLIDES_TARGET); $(RM) *.html
-	cd $(CODE_TARGET); $(RM) *.py*
+	cd $(CODE_TARGET); $(RM) *.py *.py.out
 	cd $(WORD_TARGET); $(RM) *.docx
 	cd $(MARKDOWN_TARGET); $(RM) *.md
 	@echo "All old files deleted"

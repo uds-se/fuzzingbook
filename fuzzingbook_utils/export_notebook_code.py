@@ -43,6 +43,20 @@ def prefix_code(code, prefix):
 def indent_code(code):
     lines = prefix_code(code, "    ")
     return re.sub(RE_BLANK_LINES, '', lines)
+    
+def fix_imports(code):
+    # For proper packaging, we must import our modules from the local dir
+    # Our modules all start with an upper-case letter
+    if code.startswith("from IPython"):
+        return code
+
+    code = re.sub(r"^(from|import) *([A-Z].*)",
+r'''if __package__ is None or __package__ == "":
+    \1 \2
+else:
+    \1 .\2
+''', code)
+    return code
 
 def first_line(text):
     index = text.find('\n')
@@ -95,7 +109,8 @@ def export_notebook_code(notebook_name, path=None):
                 # Code to ignore - comment out
                 print_utf8("\n" + prefix_code(code, "# ") + "\n")
             elif RE_CODE.match(code) and not bang:
-                # Export the code as is
+                # imports and defs
+                code = fix_imports(code)
                 print_utf8("\n" + code + "\n")
             elif is_all_comments(code):
                 # Only comments
