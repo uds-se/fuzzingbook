@@ -246,6 +246,11 @@ CONVERT_TO_MARKDOWN = $(NBCONVERT) --to markdown --output-dir=$(MARKDOWN_TARGET)
 # Run
 EXECUTE_NOTEBOOK = $(NBCONVERT) --to notebook --execute --output-dir=$(FULL_NOTEBOOKS)
 
+# Zip
+ZIP ?= zip
+ZIP_OPTIONS = -r
+
+
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
 chapters default: html code
@@ -606,14 +611,15 @@ publish-code: code
 	@test -d $(DOCS_TARGET)code || $(MKDIR) $(DOCS_TARGET)code
 	cp -pr $(CODE_TARGET) $(DOCS_TARGET)code
 	$(RM) $(DOCS_TARGET)code/*.py.out $(DOCS_TARGET)code/*.cfg
-	$(RM) -r $(DOCS_TARGET)code/__pycache__ $(DOCS_TARGET)code/fuzzingbook_utils/__pycache__
+	$(RM) -r $(DOCS_TARGET)code/__pycache__ \
+	 	$(DOCS_TARGET)code/fuzzingbook_utils/__pycache__
+	cp -p LICENSE.md $(DOCS_TARGET)code
 
-ZIP = zip
-ZIP_OPTIONS = -r
-publish-code-zip: publish-code $(DOCS_TARGET)fuzzingbook-code.zip
+publish-code-zip: delete-betas $(DOCS_TARGET)fuzzingbook-code.zip
 
-$(DOCS_TARGET)fuzzingbook-code.zip: publish-code
+$(DOCS_TARGET)fuzzingbook-code.zip: publish-code delete-betas
 	$(RM) $(DOCS_TARGET)fuzzingbook-code $(DOCS_TARGET)fuzzingbook-code.zip
+	$(RM) $(DOCS_TARGET)code/import-all.py
 	ln -s code $(DOCS_TARGET)fuzzingbook-code
 	cd $(DOCS_TARGET); $(ZIP) $(ZIP_OPTIONS) fuzzingbook-code.zip fuzzingbook-code
 	$(RM) $(DOCS_TARGET)fuzzingbook-code
@@ -635,6 +641,28 @@ publish-pics: PICS
 	$(RM) -fr $(DOCS_TARGET)notebooks/PICS; ln -s ../PICS $(DOCS_TARGET)notebooks
 	$(RM) -fr $(DOCS_TARGET)html/PICS; ln -s ../PICS $(DOCS_TARGET)html
 	$(RM) -fr $(DOCS_TARGET)slides/PICS; ln -s ../PICS $(DOCS_TARGET)slides
+
+ifndef BETA
+# Remove all chapters marked as beta
+delete-betas: publish-code publish-html publish-slides
+	@cd $(DOCS_TARGET); \
+	for chapter in $(BETA_CHAPTERS); do \
+	    module=$$(basename $$chapter .ipynb); \
+		echo "Removing '$$module' (beta)"; \
+		$(RM) code/$$module.py; \
+		$(RM) html/$$module.html; \
+		$(RM) -r html/$${module}_files; \
+		$(RM) notebooks/$$module.ipynb; \
+		$(RM) slides/$$module.slides.html; \
+	done
+endif
+
+ifdef BETA
+# On the beta site, we don't delete stuff
+delete-betas:
+endif
+
+		
 
 ## Binder services
 # custom.css
