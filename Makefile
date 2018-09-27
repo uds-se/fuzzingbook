@@ -640,22 +640,25 @@ publish-code: code
 	$(RM) $(DOCS_TARGET)code/404.py $(RM) $(DOCS_TARGET)code/index.py 
 	$(RM) $(DOCS_TARGET)code/Template.py $(DOCS_TARGET)code/Guide_for_Authors.py
 
-zip dist publish-code-zip: publish-code delete-betas $(DOCS_TARGET)code/fuzzingbook.zip
+dist publish-dist: publish-code delete-betas $(DOCS_TARGET)code/fuzzingbook.zip
 
 $(DOCS_TARGET)code/fuzzingbook.zip: publish-code delete-betas
-	$(RM) $(DOCS_TARGET)code/fuzzingbook.zip $(DOCS_TARGET)code/fuzzingbook*.tar.gz
-	$(RM) -r $(DOCS_TARGET)code/dist $(DOCS_TARGET)code/*.egg-info
+	@-mkdir $(DOCS_TARGET)dist
+	$(RM) -r $(DOCS_TARGET)dist/*
 	$(RM) -r $(DOCS_TARGET)fuzzingbook
 	mkdir $(DOCS_TARGET)fuzzingbook
 	ln -s ../code $(DOCS_TARGET)fuzzingbook/fuzzingbook
 	mv $(DOCS_TARGET)fuzzingbook/fuzzingbook/setup.py $(DOCS_TARGET)fuzzingbook
 	mv $(DOCS_TARGET)fuzzingbook/fuzzingbook/README.md $(DOCS_TARGET)fuzzingbook
+	cd $(DOCS_TARGET)fuzzingbook; $(PYTHON) setup.py sdist bdist_wheel
+	mv $(DOCS_TARGET)fuzzingbook/dist/* $(DOCS_TARGET)dist
+	$(RM) -r $(DOCS_TARGET)fuzzingbook/*.egg-info
+	$(RM) -r $(DOCS_TARGET)fuzzingbook/dist $(DOCS_TARGET)fuzzingbook/build
 	cd $(DOCS_TARGET); $(ZIP) $(ZIP_OPTIONS) fuzzingbook.zip fuzzingbook
-	mv $(DOCS_TARGET)fuzzingbook.zip $(DOCS_TARGET)code
-	cd $(DOCS_TARGET)fuzzingbook; $(PYTHON) setup.py sdist
-	mv $(DOCS_TARGET)fuzzingbook/dist/fuzzingbook*.tar.gz $(DOCS_TARGET)code
+	mv $(DOCS_TARGET)fuzzingbook.zip $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)fuzzingbook $(DOCS_TARGET)code/fuzzingbook
 	$(RM) -r $(DOCS_TARGET)code/dist $(DOCS_TARGET)code/*.egg-info
+	@echo "Created distribution files in $(DOCS_TARGET)dist"
 
 publish-slides: slides
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
