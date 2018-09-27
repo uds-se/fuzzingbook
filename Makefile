@@ -608,7 +608,7 @@ metadata: $(ADD_METADATA)
 
 ## Publishing
 
-docs: publish-notebooks publish-html publish-code publish-code-zip \
+docs: publish-notebooks publish-html publish-code publish-dist \
 	publish-slides publish-pics \
 	$(DOCS_TARGET)index.html $(DOCS_TARGET)404.html README.md binder/postBuild
 	@echo "Now use 'make publish-all' to commit changes to docs."
