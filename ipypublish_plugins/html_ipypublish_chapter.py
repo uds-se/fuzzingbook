@@ -48,7 +48,7 @@ fuzzingbook_tpl_dict = {
 {# Favicons #}
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
 <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-touch-icon.png">
-<link rel="mask-icon" href="favicon/safari-pinned-tab.svg" color="#B03A2E">
+{# <link rel="mask-icon" href="favicon/safari-pinned-tab.svg" color="#B03A2E"> #}
 <meta name="msapplication-TileColor" content="#B03A2E">
 <meta name="msapplication-config" content="favicon/browserconfig.xml">
 <meta name="theme-color" content="#ffffff">
