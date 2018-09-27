@@ -569,10 +569,10 @@ $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 
 check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
-	
+
 # Import all code.  This should produce no output (or error messages).
 IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
-check-import: code
+check-import check-imports: code
 	echo "#!/usr/bin/env $(PYTHON)" > import_all.py
 	(for file in $(IMPORTS); do echo from code import $$file; done) >> import_all.py
 	$(PYTHON) import_all.py 2>&1 | tee import_all.py.out
@@ -588,7 +588,7 @@ spell spellcheck check-spell:
 
 
 # All checks
-check check-all: check-code check-import check-style check-crossref
+check check-all: check-import check-code check-style check-crossref
 	
 # Add notebook metadata (add table of contents, bib reference, etc.)
 metadata: $(ADD_METADATA)
@@ -640,7 +640,8 @@ publish-code: code
 	$(RM) $(DOCS_TARGET)code/404.py $(RM) $(DOCS_TARGET)code/index.py 
 	$(RM) $(DOCS_TARGET)code/Template.py $(DOCS_TARGET)code/Guide_for_Authors.py
 
-dist publish-dist: publish-code delete-betas $(DOCS_TARGET)code/fuzzingbook.zip
+dist publish-dist: check-import check-code \
+	publish-code delete-betas $(DOCS_TARGET)code/fuzzingbook.zip
 
 $(DOCS_TARGET)code/fuzzingbook.zip: publish-code delete-betas
 	@-mkdir $(DOCS_TARGET)dist
@@ -698,7 +699,14 @@ ifdef BETA
 delete-betas:
 endif
 
-		
+
+## Python packages
+# After this, you can do 'pip install fuzzingbook' 
+# and then 'from fuzzingbook.Fuzzer import Fuzzer' :-)
+upload-dist: dist
+	@echo "Use your pypi.org password to upload"
+	cd $(DOCS_TARGET); twine upload dist/*.whl dist/*.tar.gz
+
 
 ## Binder services
 # custom.css
