@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-09-26 20:44:53+02:00
+# Last change: 2018-10-01 06:50:42-07:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -97,7 +97,7 @@ else:
 
 
 if __name__ == "__main__":
-    trials = 100
+    trials = 50
     xs = []
     ys = []
     for i in range(trials):
@@ -691,7 +691,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    trials = 100
+    trials = 50
     xs = []
     ys = []
     f = GrammarFuzzer(EXPR_GRAMMAR, max_nonterminals=20)
@@ -701,9 +701,11 @@ if __name__ == "__main__":
         xs.append(len(s))
         ys.append(t.elapsed_time())
         print(i, end=" ")
-
-    average_time = sum(ys) / trials
     print()
+
+
+if __name__ == "__main__":
+    average_time = sum(ys) / trials
     print("Average time:", average_time)
 
 
