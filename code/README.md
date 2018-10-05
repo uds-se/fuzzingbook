@@ -1,6 +1,6 @@
 # Code for "Generating Software Tests"
 
-This folder holds the code from "Generating Software Tests".  This book addresses the problem of software bugs by automating software testing, specifically by _generating tests automatically_. Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing. They now are mature enough to be assembled in a book – even with executable code.
+This folder holds the code from "Generating Software Tests".  This book addresses the problem of software bugs by automating software testing, specifically by _generating tests automatically_. Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing. They now are mature enough to be assembled in a book - even with executable code.
 
 For details (and all of the book!), see the web site: https://www.fuzzingbook.org/
 
