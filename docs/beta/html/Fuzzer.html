@@ -12193,7 +12193,7 @@ MathJax.Hub.Config({
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>/var/folders/xl/yjwn73155k9cw4mxxxrgqp4w0000gn/T/tmpqsee_nzk/input.txt
+<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpbwwc4_fk/input.txt
 </pre>
 </div>
 
@@ -12519,15 +12519,15 @@ MathJax.Hub.Config({
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>&#39;5*,55&amp;8&gt;&#34;86,?&#34;/7!1%5-**&amp;-$&amp;)$91;&#34;21(\&#39;8&#34;(%$&#39;
-/var/folders/xl/yjwn73155k9cw4mxxxrgqp4w0000gn/T/tmpqsee_nzk/input.txt 1: parse error
-/var/folders/xl/yjwn73155k9cw4mxxxrgqp4w0000gn/T/tmpqsee_nzk/input.txt 1: illegal character: &amp;
-/var/folders/xl/yjwn73155k9cw4mxxxrgqp4w0000gn/T/tmpqsee_nzk/input.txt 1: parse error
-/var/folders/xl/yjwn73155k9cw4mxxxrgqp4w0000gn/T/tmpqsee_nzk/input.txt 1: illegal character: &amp;
-/var/folders/xl/yjwn73155k9cw4mxxxrgqp4w0000gn/T/tmpqsee_nzk/input.txt 1: illegal character: $
-/var/folders/xl/yjwn73155k9cw4mxxxrgqp4w0000gn/T/tmpqsee_nzk/input.txt 1: illegal character: &amp;
-/var/folders/xl/yjwn73155k9cw4mxxxrgqp4w0000gn/T/tmpqsee_nzk/input.txt 1: illegal character: $
-/var/folders/xl/yjwn73155k9cw4mxxxrgqp4w0000gn/T/tmpqsee_nzk/input.txt 1: parse error
-/var/folders/xl/yjwn73155k9cw4mxxxrgqp4w0000gn/T/tmpqsee_nzk/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpbwwc4_fk/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpbwwc4_fk/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpbwwc4_fk/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpbwwc4_fk/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpbwwc4_fk/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpbwwc4_fk/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpbwwc4_fk/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpbwwc4_fk/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpbwwc4_fk/input.txt 1: illegal character: $
 </pre>
 </div>
 
@@ -13911,7 +13911,12 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h3 id="Runner-Classes">Runner Classes<a class="anchor-link" href="#Runner-Classes">&#182;</a></h3><p>The first thing we introduce is the notion of a <code>Runner</code> – that is, an object whose job it is to execute some object with a given input.  A runner typically is some program or function under test, but we can also have simpler runners.</p>
-<p>Let us start with a base class for runners.  A runner essentially provides a method <code>run(input)</code> that is used to pass <code>input</code> (a string) to the runner.  <code>run()</code> returns a result; by default, this is the input.</p>
+<p>Let us start with a base class for runners.  A runner essentially provides a method <code>run(input)</code> that is used to pass <code>input</code> (a string) to the runner.  <code>run()</code> returns a pair (<code>result</code>, <code>outcome</code>).  Here, <code>result</code> is a runner-specific value that gives details on the run; <code>outcome</code> is a value that classifies the result in three categories:</p>
+<ul>
+<li><code>Runner.PASS</code> - the test <em>passed</em>.  The run produced correct results.</li>
+<li><code>Runner.FAIL</code> - the test <em>failed</em>.  The run produced incorrect results.</li>
+<li><code>Runner.UNRESOLVED</code> - the test neither passed nor failed.  This happens if the run could not take place – for instance, because the input was invalid.</li>
+</ul>
 </div>
 </div>
 </div>
@@ -13924,13 +13929,18 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Runner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c1"># Test outcomes</span>
+    <span class="n">PASS</span> <span class="o">=</span> <span class="s2">&quot;PASS&quot;</span>
+    <span class="n">FAIL</span> <span class="o">=</span> <span class="s2">&quot;FAIL&quot;</span>
+    <span class="n">UNRESOLVED</span> <span class="o">=</span> <span class="s2">&quot;UNRESOLVED&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialize&quot;&quot;&quot;</span>
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Run the consumer with the given input&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">inp</span>
+        <span class="sd">&quot;&quot;&quot;Run the runner with the given input&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">Runner</span><span class="o">.</span><span class="n">UNRESOLVED</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13957,7 +13967,7 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Print the given input&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">inp</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">Runner</span><span class="o">.</span><span class="n">UNRESOLVED</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13972,7 +13982,7 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">PrintRunner</span><span class="p">()</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;Some input&quot;</span><span class="p">)</span>
+<span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">outcome</span><span class="p">)</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;Some input&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13987,6 +13997,15 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
 </pre>
 </div>
 
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The result is just the string we passed as input:</p>
+</div>
+</div>
+</div>
 </div>
 
 <div class="input_code">
@@ -14015,6 +14034,38 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Still, at this point, we have no way to classify program behavior:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">outcome</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;UNRESOLVED&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>The <code>ProgramRunner</code> class sends the input to the standard input of a program instead.  The program is specified when creating a <code>ProgramRunner</code> object.</p>
 </div>
 </div>
@@ -14032,14 +14083,26 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
         <span class="sd">&quot;&quot;&quot;Initialize.  `program` is a program spec as passed to `subprocess.run()`&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">program</span>
 
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Run the program with `inp` as input.  Return result of `subprocess.run()`.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">,</span>
                                      <span class="nb">input</span><span class="o">=</span><span class="n">inp</span><span class="p">,</span>
                                      <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                                      <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                                      <span class="n">universal_newlines</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run the program with `inp` as input.  Return test outcome based on result of `subprocess.run()`.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_process</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">PASS</span>
+        <span class="k">elif</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FAIL</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UNRESOLVED</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">outcome</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14063,13 +14126,12 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">BinaryProgramRunner</span><span class="p">(</span><span class="n">ProgramRunner</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Run the program with `inp` as input.  Return result of `subprocess.run()`.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">,</span>
+        <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">,</span>
                                      <span class="nb">input</span><span class="o">=</span><span class="n">inp</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span>
                                      <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
                                      <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span>
 </pre></div>
 
 </div>
@@ -14080,8 +14142,7 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let us demonstrate a <code>ProgramRunner</code> using the <code>cat</code> program – a program that copies its input to its output.
-We see that the output of <code>cat</code> is the same as its input:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us demonstrate a <code>ProgramRunner</code> using the <code>cat</code> program – a program that copies its input to its output.  We see that a standard invocation of <code>cat</code> simply does the job, with the output of <code>cat</code> being the same as its input:</p>
 </div>
 </div>
 </div>
@@ -14105,7 +14166,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;hello&#39;, stderr=&#39;&#39;)
+<pre>(CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;hello&#39;, stderr=&#39;&#39;), &#39;PASS&#39;)
 </pre>
 </div>
 
@@ -14114,7 +14175,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Fuzzer-Classes">Fuzzer Classes<a class="anchor-link" href="#Fuzzer-Classes">&#182;</a></h3><p>Let us now define <em>fuzzers</em> that actually feed data into a consumer.  The base class for fuzzers provides one central method <code>fuzz()</code> that creates some input.  The <code>run()</code> function then sends the fuzz() input to a consumer, returning the result; <code>runs()</code> does this for a given number (<code>trials</code>) of times.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Fuzzer-Classes">Fuzzer Classes<a class="anchor-link" href="#Fuzzer-Classes">&#182;</a></h3><p>Let us now define <em>fuzzers</em> that actually feed data into a consumer.  The base class for fuzzers provides one central method <code>fuzz()</code> that creates some input.  The <code>run()</code> function then sends the fuzz() input to a runner, returning the outcome; <code>runs()</code> does this for a given number (<code>trials</code>) of times.</p>
 </div>
 </div>
 </div>
@@ -14142,10 +14203,10 @@ We see that the output of <code>cat</code> is the same as its input:</p>
         <span class="sd">&quot;&quot;&quot;Run `runner` with fuzz input, `trials` times&quot;&quot;&quot;</span>
         <span class="c1"># Note: the list comprehension below does not invoke self.run() for subclasses</span>
         <span class="c1"># return [self.run(runner) for i in range(trials)]</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">runner</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">results</span>
+            <span class="n">outcomes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">runner</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">outcomes</span>
 </pre></div>
 
 </div>
@@ -14252,7 +14313,9 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
     <span class="n">inp</span> <span class="o">=</span> <span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-    <span class="k">assert</span> <span class="n">cat</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span><span class="o">.</span><span class="n">stdout</span> <span class="o">==</span> <span class="n">inp</span>
+    <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="n">cat</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span> <span class="o">==</span> <span class="n">inp</span>
+    <span class="k">assert</span> <span class="n">outcome</span> <span class="o">==</span> <span class="n">Runner</span><span class="o">.</span><span class="n">PASS</span>
 </pre></div>
 
 </div>
@@ -14286,7 +14349,8 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;?:+= % &lt;1&lt;6$:(&gt;=:9)5&#39;, stderr=&#39;&#39;)
+<pre>(CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;?:+= % &lt;1&lt;6$:(&gt;=:9)5&#39;, stderr=&#39;&#39;),
+ &#39;PASS&#39;)
 </pre>
 </div>
 
@@ -14318,16 +14382,26 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;3976%%&amp;+%6=(1)3&amp;3:&lt;9&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;33$#42$ 11=*%$20=&lt;.-&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&#34;?&lt;\&#39;#8 &lt;/:*%9.--\&#39;97!&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;/0-#(03/!#60&#39;+6&gt;&amp;&amp;72&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;=,+:,6&#39;5:950+&gt;&lt;3(*()&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34; 379+0?&#39;%3137=2:4605&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;02&gt;!$&lt;/&#39;*81.#&lt;/22&gt;+:&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;=-&lt;&#39;3-#88*%&amp;*9&lt; +1&amp;&amp;&#34;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;2;;0=3&amp;6=8&amp;30&amp;&lt;-;?*;&#39;, stderr=&#39;&#39;),
- CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;/#05=*3($&gt;::#7!0=12+&#39;, stderr=&#39;&#39;)]
+<pre>[(CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;3976%%&amp;+%6=(1)3&amp;3:&lt;9&#39;, stderr=&#39;&#39;),
+  &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;33$#42$ 11=*%$20=&lt;.-&#39;, stderr=&#39;&#39;),
+  &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;&#34;?&lt;\&#39;#8 &lt;/:*%9.--\&#39;97!&#39;, stderr=&#39;&#39;),
+  &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;/0-#(03/!#60&#39;+6&gt;&amp;&amp;72&#34;, stderr=&#39;&#39;),
+  &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;=,+:,6&#39;5:950+&gt;&lt;3(*()&#34;, stderr=&#39;&#39;),
+  &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34; 379+0?&#39;%3137=2:4605&#34;, stderr=&#39;&#39;),
+  &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;02&gt;!$&lt;/&#39;*81.#&lt;/22&gt;+:&#34;, stderr=&#39;&#39;),
+  &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#34;=-&lt;&#39;3-#88*%&amp;*9&lt; +1&amp;&amp;&#34;, stderr=&#39;&#39;),
+  &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;2;;0=3&amp;6=8&amp;30&amp;&lt;-;?*;&#39;, stderr=&#39;&#39;),
+  &#39;PASS&#39;),
+ (CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;/#05=*3($&gt;::#7!0=12+&#39;, stderr=&#39;&#39;),
+  &#39;PASS&#39;)]
 </pre>
 </div>
 
@@ -14386,7 +14460,7 @@ We see that the output of <code>cat</code> is the same as its input:</p>
 <ul>
 <li><a href="MutationFuzzer.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
 <li><a href="Grammars.html">use <em>grammars</em> to specify the input format and thus get many more valid inputs</a></li>
-<li><a href="Reducing.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
+<li><a href="Reducer.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
 </ul>
 <p>Enjoy the read!</p>
 </div>
@@ -14485,7 +14559,7 @@ Some paragraph</code></pre>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2018-10-01 06:50:42-07:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2018-09-30 15:49:37+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14501,7 +14575,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">https://www.fuzzingbook.org/beta/html/Fuzzer.html</a>.  Retrieved 2018-10-01 06:50:42-07:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">https://www.fuzzingbook.org/beta/html/Fuzzer.html</a>.  Retrieved 2018-09-30 15:49:37+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Fuzzer,
@@ -14511,9 +14585,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Fuzzer.html}},
-    note = {Retrieved 2018-10-01 06:50:42-07:00},
+    note = {Retrieved 2018-09-30 15:49:37+02:00},
     url = {https://www.fuzzingbook.org/beta/html/Fuzzer.html},
-    urldate = {2018-10-01 06:50:42-07:00}
+    urldate = {2018-09-30 15:49:37+02:00}
 }
 </pre>
 </div>

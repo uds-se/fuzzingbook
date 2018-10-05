@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2018-10-01 07:43:42-07:00
+# Last change: 2018-09-30 16:07:31+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -365,8 +365,18 @@ class FunctionRunner(Runner):
         """Initialize.  `function` is a function to be executed"""
         self.function = function
 
-    def run(self, inp):
+    def run_function(self, inp):
         return self.function(inp)
+    
+    def run(self, inp):
+        try:
+            result = self.run_function(inp)
+            outcome = self.PASS
+        except Exception:
+            result = None
+            outcome = self.FAIL
+        
+        return result, outcome
 
 if __name__ == "__main__":
     http_runner = FunctionRunner(http_program)
@@ -380,22 +390,19 @@ else:
 
 
 class FunctionCoverageRunner(FunctionRunner):
-    def run(self, inp):
-        result = None
+    def run_function(self, inp):
         with Coverage() as cov:
             try:
-                result = self.function(inp)
-                self._valid_input = True
-            except:
-                self._valid_input = False
+                result = super().run_function(inp)
+            except Exception as exc:
+                self._coverage = cov.coverage()
+                raise exc
+                
         self._coverage = cov.coverage()
         return result
 
     def coverage(self):
         return self._coverage
-
-    def valid_input(self):
-        return self._valid_input
 
 if __name__ == "__main__":
     http_runner = FunctionCoverageRunner(http_program)
@@ -417,9 +424,9 @@ class MutationCoverageFuzzer(MutationFuzzer):
            If we reach new coverage,
            add inp to population and its coverage to population_coverage
         """
-        result = super().run(runner)
+        result, outcome = super().run(runner)
         new_coverage = frozenset(runner.coverage())
-        if runner.valid_input() and new_coverage not in self.coverages_seen:
+        if outcome == Runner.PASS and new_coverage not in self.coverages_seen:
             # We have new coverage
             self.population.append(self.inp)
             self.coverages_seen.add(new_coverage)
@@ -526,15 +533,15 @@ if __name__ == "__main__":
     seed = ["1 + 1"]
     bc = ProgramRunner(program="bc")
     m = MutationFuzzer(seed)
-    runs = m.runs(bc, trials=100)
+    outcomes = m.runs(bc, trials=100)
 
 
 if __name__ == "__main__":
-    runs[:3]
+    outcomes[:3]
 
 
 if __name__ == "__main__":
-    sum(1 for completed_process in runs if completed_process.stderr == "")
+    sum(1 for completed_process, outcome in outcomes if completed_process.stderr == "")
 
 
 # #### Part 2: Guided Mutations

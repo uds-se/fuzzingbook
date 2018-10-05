@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2018-10-01 06:50:42-07:00
+# Last change: 2018-09-30 15:49:37+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -497,28 +497,36 @@ if __name__ == "__main__":
 
 
 class Runner(object):
+    # Test outcomes
+    PASS = "PASS"
+    FAIL = "FAIL"
+    UNRESOLVED = "UNRESOLVED"
+    
     def __init__(self):
         """Initialize"""
         pass
 
     def run(self, inp):
-        """Run the consumer with the given input"""
-        return inp
-
+        """Run the runner with the given input"""
+        return (inp, Runner.UNRESOLVED)
 
 class PrintRunner(Runner):
     def run(self, inp):
         """Print the given input"""
         print(inp)
-        return inp
+        return (inp, Runner.UNRESOLVED)
 
 if __name__ == "__main__":
     p = PrintRunner()
-    result = p.run("Some input")
+    (result, outcome) = p.run("Some input")
 
 
 if __name__ == "__main__":
     result
+
+
+if __name__ == "__main__":
+    outcome
 
 
 class ProgramRunner(Runner):
@@ -526,25 +534,34 @@ class ProgramRunner(Runner):
         """Initialize.  `program` is a program spec as passed to `subprocess.run()`"""
         self.program = program
 
-    def run(self, inp):
+    def run_process(self, inp):
         """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
-        self.result = subprocess.run(self.program,
+        return subprocess.run(self.program,
                                      input=inp,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
                                      universal_newlines=True)
-        return self.result
+    
+    def run(self, inp):
+        """Run the program with `inp` as input.  Return test outcome based on result of `subprocess.run()`."""
+        result = self.run_process(inp)
+    
+        if result.returncode == 0:
+            outcome = self.PASS
+        elif result.returncode < 0:
+            outcome = self.FAIL
+        else:
+            outcome = self.UNRESOLVED
 
+        return (result, outcome)
 
 class BinaryProgramRunner(ProgramRunner):
-    def run(self, inp):
+    def run_process(self, inp):
         """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
-        self.result = subprocess.run(self.program,
+        return subprocess.run(self.program,
                                      input=inp.encode(),
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE)
-        return self.result
-
 
 if __name__ == "__main__":
     cat = ProgramRunner(program="cat")
@@ -575,10 +592,10 @@ class Fuzzer(object):
         """Run `runner` with fuzz input, `trials` times"""
         # Note: the list comprehension below does not invoke self.run() for subclasses
         # return [self.run(runner) for i in range(trials)]
-        results = []
+        outcomes = []
         for i in range(trials):
-            results.append(self.run(runner))
-        return results
+            outcomes.append(self.run(runner))
+        return outcomes
 
 class RandomFuzzer(Fuzzer):
     def __init__(self, min_length=10, max_length=100,
@@ -598,7 +615,6 @@ class RandomFuzzer(Fuzzer):
                                         self.char_start + self.char_range))
         return out
 
-
 if __name__ == "__main__":
     random_fuzzer = RandomFuzzer(min_length=20, max_length=20)
     for i in range(10):
@@ -608,7 +624,9 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     for i in range(10):
         inp = random_fuzzer.fuzz()
-        assert cat.run(inp).stdout == inp
+        result, outcome = cat.run(inp)
+        assert result.stdout == inp
+        assert outcome == Runner.PASS
 
 
 if __name__ == "__main__":
@@ -761,7 +779,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     real_troff_runner = BinaryProgramRunner("troff")
     for i in range(100):
-        result = random_fuzzer.run(real_troff_runner)
-        if result.returncode != 0:
+        result, outcome = random_fuzzer.run(real_troff_runner)
+        if outcome == Runner.FAIL:
             print(result)
 
