@@ -448,9 +448,13 @@ chapter_contents = chapter_contents \
     .replace("__YEAR__", notebook_modification_year)
 
 # Fix simple .ipynb links within text
-chapter_contents = re.sub(r'<a href="([a-zA-Z0-9_]*)\.ipynb">', 
-    r'<a href="\1.html">', chapter_contents)
-    
+if args.home:
+    chapter_contents = re.sub(r'<a href="([a-zA-Z0-9_]*)\.ipynb">', 
+        r'<a href="html/\1.html">', chapter_contents)
+else:
+    chapter_contents = re.sub(r'<a href="([a-zA-Z0-9_]*)\.ipynb">', 
+        r'<a href="\1.html">', chapter_contents)
+
 # Recode TeX accents imported from fuzzingbook.bib
 chapter_contents = bibtex_unescape(chapter_contents)
 
