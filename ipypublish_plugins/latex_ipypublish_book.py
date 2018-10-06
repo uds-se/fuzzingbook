@@ -41,7 +41,7 @@ title.tplx_dict['document_predoc'] = r"""
 % Copyright
 \vfill
 \textbf{Generating Software Tests}, by Andreas Zeller, Rahul Gopinath,
-Gordon Fraser, and Christian Holler.
+Marcel Böhme, Gordon Fraser, and Christian Holler.
 
 Copyright © 2018 by the authors; all rights reserved.
 
@@ -49,9 +49,39 @@ Copyright © 2018 by the authors; all rights reserved.
 \setcounter{section}{-1}
 """
 
+fuzzingbook_tplx_dict = {
+    # Need defs for inputencoding, extendedchars, and literate
+    'document_definitions': r"""
+    \lstdefinestyle{fuzzingbookstyle}{
+        commentstyle=\color{codegreen},
+        keywordstyle=\color{magenta},
+        numberstyle=\tiny\color{codegray},
+        stringstyle=\color{codepurple},
+        basicstyle=\ttfamily,
+        breakatwhitespace=false,
+        keepspaces=true,
+        numbers=left,
+        numbersep=10pt,
+        showspaces=false,
+        showstringspaces=false,
+        showtabs=false,
+        tabsize=2,
+        breaklines=true,
+        literate={\-}{}{0\discretionary{-}{}{-}},
+      postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+      inputencoding=utf8,
+      extendedchars=true,
+      literate={ä}{{\"a}}1 {ö}{{\"o}}1 {ü}{{\"u}}1 {Ä}{{\"A}}1 {Ö}{{\"ö}}1 {Ü}{{\"U}}1 {ß}{{\ss}}1 {ı}{{\i}}1,
+    }
+
+    \lstset{style=fuzzingbookstyle}
+"""
+}
+
 oformat = 'Latex'
 template = create_tplx([p.tplx_dict for p in
-                        [package, defs, doc, title, bib, output, code]])
+                        [package, defs, doc, title, bib, output, code]] 
+                        + [fuzzingbook_tplx_dict])
 
 _filters = {'remove_dollars': remove_dollars,
             'first_para': first_para,

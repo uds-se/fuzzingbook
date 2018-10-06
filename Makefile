@@ -18,6 +18,7 @@ TODO_CHAPTERS = \
 
 	# Parser.ipynb
 	# ProbabilisticGrammarFuzzer.ipynb
+	# Reducer.ipynb
 	# ConstraintGrammarFuzzer.ipynb
 	# APIFuzzer.ipynb
 	# GUIFuzzer.ipynb
