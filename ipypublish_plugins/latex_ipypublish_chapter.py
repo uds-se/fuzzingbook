@@ -46,6 +46,9 @@ Marcel Böhme, Gordon Fraser, and Christian Holler.
 Copyright © 2018 by the authors; all rights reserved.
 """
 
+# csquotes doesn't like utf8x
+package.tplx_dict['document_packages'] = package.tplx_dict['document_packages'].replace("utf8x", "utf8").replace(r"\usepackage[mathletters]{ucs}", "")
+
 fuzzingbook_tplx_dict = {
     # Need defs for inputencoding, extendedchars, and literate
     'document_definitions': r"""
@@ -72,6 +75,13 @@ fuzzingbook_tplx_dict = {
     }
 
     \lstset{style=fuzzingbookstyle}
+""",
+
+     'document_packages': r"""
+% Allow for using " as quote character
+\usepackage{csquotes}
+\MakeOuterQuote{"}
+% \MakeInnerQuote{'}
 """
 }
 
