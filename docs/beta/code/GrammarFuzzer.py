@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-09-27 15:22:22+02:00
+# Last change: 2018-10-06 17:25:10+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 # 
 # import matplotlib.pyplot as plt
 # plt.scatter(xs, ys)
-# plt.title('Time required for generating an output');
+# plt.title('Time required for generating an output')
 
 # ## Derivation Trees
 
@@ -404,8 +404,6 @@ class GrammarFuzzer(GrammarFuzzer):
         return random.randrange(0, len(children))
 
     def expand_tree_once(self, tree):
-        # print("Expanding " + repr(tree))
-
         (symbol, children) = tree
         if children is None:
             # Expand this node
@@ -415,12 +413,10 @@ class GrammarFuzzer(GrammarFuzzer):
         expandable_children = [
             c for c in children if self.any_possible_expansions(c)]
 
-        # `index_map` translates an index in `expandable_children` back into the original index in `children`
+        # `index_map` translates an index in `expandable_children` 
+        # back into the original index in `children`
         index_map = [i for (i, c) in enumerate(children)
                      if self.any_possible_expansions(c)]
-
-        # print("expandable_children =", expandable_children)
-        # print("index_map =", index_map)
 
         # Select a random child
         child_to_be_expanded = self.choose_tree_expansion(
@@ -431,7 +427,6 @@ class GrammarFuzzer(GrammarFuzzer):
             self.expand_tree_once(expandable_children[child_to_be_expanded])
 
         return tree
-
 
 if __name__ == "__main__":
     derivation_tree = ("<start>",
@@ -478,7 +473,6 @@ class GrammarFuzzer(GrammarFuzzer):
         # the value of a expansion is the sum of all expandable variables
         # inside + 1
         return sum(self.symbol_cost(s, seen) for s in symbols) + 1
-
 
 if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR)
@@ -527,12 +521,31 @@ if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
     display_tree(derivation_tree)
 
-    step = 1
-    while f.any_possible_expansions(derivation_tree):
+
+if __name__ == "__main__":
+    if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
-        if step < 3:
-            display_tree(derivation_tree)
-        step += 1
+        display_tree(derivation_tree)
+
+
+if __name__ == "__main__":
+    if f.any_possible_expansions(derivation_tree):
+        derivation_tree = f.expand_tree_once(derivation_tree)
+        display_tree(derivation_tree)
+
+
+if __name__ == "__main__":
+    if f.any_possible_expansions(derivation_tree):
+        derivation_tree = f.expand_tree_once(derivation_tree)
+        display_tree(derivation_tree)
+
+
+if __name__ == "__main__":
+    while f.any_possible_expansions(derivation_tree):
+        derivation_tree = f.expand_tree_once(derivation_tree)    
+
+
+if __name__ == "__main__":
     display_tree(derivation_tree)
 
 
@@ -563,15 +576,28 @@ if __name__ == "__main__":
                              ("<term>", None)]
                          )])
 
+
+if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
     display_tree(derivation_tree)
 
-    step = 1
-    while step < 3 and f.any_possible_expansions(derivation_tree):
+
+if __name__ == "__main__":
+    if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
         display_tree(derivation_tree)
-        step += 1
 
+
+if __name__ == "__main__":
+    if f.any_possible_expansions(derivation_tree):
+        derivation_tree = f.expand_tree_once(derivation_tree)
+        display_tree(derivation_tree)
+
+
+if __name__ == "__main__":
+    if f.any_possible_expansions(derivation_tree):
+        derivation_tree = f.expand_tree_once(derivation_tree)
+        display_tree(derivation_tree)
 
 
 # ## Three Expansion Phases
@@ -629,8 +655,10 @@ if __name__ == "__main__":
         max_nonterminals=5,
         log=True)
     derivation_tree = f.expand_tree(derivation_tree)
-    display_tree(derivation_tree)
 
+
+if __name__ == "__main__":
+    display_tree(derivation_tree)
 
 
 if __name__ == "__main__":
@@ -713,7 +741,7 @@ if __name__ == "__main__":
 # 
 # import matplotlib.pyplot as plt
 # plt.scatter(xs, ys)
-# plt.title('Time required for generating an output');
+# plt.title('Time required for generating an output')
 
 if __name__ == "__main__":
     f = GrammarFuzzer(expr_grammar, max_nonterminals=10)
@@ -736,6 +764,22 @@ if __name__ == "__main__":
 
 
 
+# ### Extending Grammars
+
+if __name__ == "__main__":
+    print('\n### Extending Grammars')
+
+
+
+
+# ### Applying Grammars
+
+if __name__ == "__main__":
+    print('\n### Applying Grammars')
+
+
+
+
 # ## Exercises
 
 if __name__ == "__main__":
@@ -744,41 +788,113 @@ if __name__ == "__main__":
 
 
 
-# ### Exercise 1
+# ### Exercise 1: Caching Method Results
 
 if __name__ == "__main__":
-    print('\n### Exercise 1')
+    print('\n### Exercise 1: Caching Method Results')
 
 
 
 
-def memoize(argnum):
-    # cache the function calls. We only cache a given call based on the
-    # indicated argument number per function.
-    def fn_wrap(function):
-        memo = {}
+from copy import deepcopy
 
-        def wrapper(*args):
-            if args[argnum] in memo:
-                return memo[args[argnum]]
-            rv = function(*args)
-            memo[args[argnum]] = rv
-            return rv
-        return wrapper
-    return fn_wrap
+class FasterGrammarFuzzer(GrammarFuzzer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._expansion_cache = {}
+        self._expansion_invocations = 0
+        self._expansion_invocations_cached = 0
 
-# ### Exercise 2
+    def expansion_to_children(self, expansion):
+        self._expansion_invocations += 1
+        if expansion in self._expansion_cache:
+            self._expansion_invocations_cached += 1
+            cached_result = deepcopy(self._expansion_cache[expansion])
+            return cached_result
 
-if __name__ == "__main__":
-    print('\n### Exercise 2')
-
-
-
-
-# ### Exercise 3
+        result = super().expansion_to_children(expansion)
+        self._expansion_cache[expansion] = result
+        return result
 
 if __name__ == "__main__":
-    print('\n### Exercise 3')
+    f = FasterGrammarFuzzer(EXPR_GRAMMAR, min_nonterminals=3, max_nonterminals=5)
+    f.fuzz()
+
+
+if __name__ == "__main__":
+    f._expansion_invocations
+
+
+if __name__ == "__main__":
+    f._expansion_invocations_cached
+
+
+if __name__ == "__main__":
+    print("%.2f%% of invocations can be cached" %
+          (f._expansion_invocations_cached * 100 / f._expansion_invocations))
+
+
+# #### Exercise 2: Grammar Pre-Compilation
+
+if __name__ == "__main__":
+    print('\n#### Exercise 2: Grammar Pre-Compilation')
+
+
+
+
+class EvenFasterGrammarFuzzer(GrammarFuzzer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._symbol_costs = {}
+        self._expansion_costs = {}
+        self.precompute_costs()
+
+    def new_symbol_cost(self, symbol, seen=set()):
+        return self._symbol_costs[symbol]
+
+    def new_expansion_cost(self, expansion, seen=set()):
+        return self._expansion_costs[expansion]
+
+    def precompute_costs(self):
+        for symbol in self.grammar:
+            self._symbol_costs[symbol] = super().symbol_cost(symbol)
+            for expansion in self.grammar[symbol]:
+                self._expansion_costs[expansion] = super(
+                ).expansion_cost(expansion)
+
+        # Make sure we now call the caching methods
+        self.symbol_cost = self.new_symbol_cost
+        self.expansion_cost = self.new_expansion_cost
+
+if __name__ == "__main__":
+    f = EvenFasterGrammarFuzzer(EXPR_GRAMMAR)
+
+
+if __name__ == "__main__":
+    f._symbol_costs
+
+
+if __name__ == "__main__":
+    f._expansion_costs
+
+
+if __name__ == "__main__":
+    f = EvenFasterGrammarFuzzer(EXPR_GRAMMAR)
+    f.fuzz()
+
+
+# ### Exercise 3: Maintaining Trees to be Expanded
+
+if __name__ == "__main__":
+    print('\n### Exercise 3: Maintaining Trees to be Expanded')
+
+
+
+
+# ### Exercise 4: Alternate Random Expansions
+
+if __name__ == "__main__":
+    print('\n### Exercise 4: Alternate Random Expansions')
 
 
 
