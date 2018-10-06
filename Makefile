@@ -23,7 +23,7 @@ TODO_CHAPTERS = \
 	# APIFuzzer.ipynb
 	# GUIFuzzer.ipynb
 	# GrammarMiner.ipynb
-	
+
 BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
 
 CHAPTERS = $(PUBLIC_CHAPTERS) $(BETA_CHAPTERS)
