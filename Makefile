@@ -369,8 +369,12 @@ $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@$(OPEN) $@
 endif
 
-$(PDF_TARGET)%.tex:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS)
-	$(CONVERT_TO_TEX) $<
+$(PDF_TARGET)%.tex:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_METADATA)
+	$(eval TMPDIR := $(shell mktemp -d))
+	$(PYTHON) $(ADD_METADATA) --titlepage $< > $(TMPDIR)/$(notdir $<)
+	cp -pr PICS fuzzingbook.* $(TMPDIR)
+	$(CONVERT_TO_TEX) $(TMPDIR)/$(notdir $<)
+	@-$(RM) -fr $(TMPDIR)
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
 $(DOCS_TARGET)index.html: \

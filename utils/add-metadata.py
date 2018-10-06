@@ -4,17 +4,38 @@
 """
 usage:
 
-python add-metadata.py A.ipynb > A'.ipynb
+python add-metadata.py [--titlepage] A.ipynb > A'.ipynb
 """
 
 import io
 import os
 import sys
+import re
 
 import nbformat
 
+def get_text_contents(notebook):
+    contents = ""
+    for cell in notebook.cells:
+        if cell.cell_type == 'markdown':
+            contents += "".join(cell.source) + "\n\n"
+            
+    # print("Contents of", notebook, ": ", repr(contents[:100]))
 
-def add_document_metadata(notebook):
+    return contents
+    
+
+def get_title(notebook):
+    """Return the title from a notebook file"""
+    contents = get_text_contents(notebook)
+    match = re.search(r'^# (.*)', contents, re.MULTILINE)
+    title = match.group(1).replace(r'\n', '')
+    # print("Title", title.encode('utf-8'))
+    return title
+
+
+
+def add_document_metadata(notebook, titlepage):
     """Add document metadata"""
     # No cell toolbar for published notebooks
     if 'celltoolbar' in notebook.metadata:
@@ -25,6 +46,15 @@ def add_document_metadata(notebook):
         notebook.metadata['ipub'] = {}
     if 'bibliography' not in notebook.metadata['ipub']:
         notebook.metadata['ipub']['bibliography'] = 'fuzzingbook.bib'
+
+    if titlepage:
+        # Add title
+        chapter_title = get_title(notebook)
+        notebook.metadata['ipub']['titlepage'] = {
+            "author": "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler",
+            "title": chapter_title,
+            "subtitle": 'A Chapter of "Generating Software Tests"'
+        }
 
     # Add table of contents
     notebook.metadata['toc'] = {
@@ -67,12 +97,12 @@ def add_solution_metadata(notebook):
                 
 
 
-def add_metadata(filename):
+def add_metadata(filename, titlepage):
     # Read in
     with io.open(filename, 'r', encoding='utf-8') as f:
         notebook = nbformat.read(f, as_version=4)
 
-    add_document_metadata(notebook)
+    add_document_metadata(notebook, titlepage)
     add_solution_metadata(notebook)
 
     # Write out
@@ -83,10 +113,16 @@ def add_metadata(filename):
 
     
 if __name__ == '__main__':
-    notebooks = sys.argv[1:]
+    if sys.argv[1] == "--titlepage":
+        titlepage = True
+        notebooks = sys.argv[2:]
+    else:
+        titlepage = False
+        notebooks = sys.argv[1:]
+
     if not notebooks:
         print(__doc__, file=sys.stderr)
         sys.exit(1)
     
     for notebook in notebooks:
-        add_metadata(notebook)
+        add_metadata(notebook, titlepage)
