@@ -9,21 +9,20 @@ PUBLIC_CHAPTERS = \
 READY_CHAPTERS = \
 	Coverage.ipynb \
 	MutationFuzzer.ipynb \
-	Grammars.ipynb
+	Grammars.ipynb \
+	GrammarFuzzer.ipynb
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
+	Parser.ipynb \
+	ProbabilisticGrammarFuzzer.ipynb \
+	Reducer.ipynb
 
-	# Parser.ipynb
-	# ProbabilisticGrammarFuzzer.ipynb
-	# Reducer.ipynb
 	# ConstraintGrammarFuzzer.ipynb
 	# APIFuzzer.ipynb
 	# GUIFuzzer.ipynb
 	# GrammarMiner.ipynb
-	# Reducing.ipynb
 	
 BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
 
