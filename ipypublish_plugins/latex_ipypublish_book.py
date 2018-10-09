@@ -49,8 +49,23 @@ Copyright © 2018 by the authors; all rights reserved.
 \setcounter{section}{-1}
 """
 
+# Use 11pt
+doc.tplx_dict['document_docclass'] = (
+    doc.tplx_dict['document_docclass'].replace("10pt", "11pt")
+)
+
 # csquotes doesn't like utf8x
-package.tplx_dict['document_packages'] = package.tplx_dict['document_packages'].replace("utf8x", "utf8").replace(r"\usepackage[mathletters]{ucs}", "")
+package.tplx_dict['document_packages'] = (
+    package.tplx_dict['document_packages']
+        .replace("utf8x", "utf8")
+        .replace(r"\usepackage[mathletters]{ucs}", "")
+        .replace(r"\usepackage[utf8]{inputenc}", r"""
+        \usepackage{ifxetex}
+        \ifxetex\else
+            \usepackage[utf8]{inputenc}
+        \fi
+        """)
+        )
 
 fuzzingbook_tplx_dict = {
     # Need defs for inputencoding, extendedchars, and literate
@@ -78,6 +93,29 @@ fuzzingbook_tplx_dict = {
     }
 
     \lstset{style=fuzzingbookstyle}
+    
+    % Use nicer fonts with xelatex
+    \ifxetex
+        \usepackage{fontspec}
+
+        \defaultfontfeatures{Mapping=tex-text}
+        \defaultfontfeatures{Ligatures=TeX} % To support LaTeX quoting style
+
+        \setmainfont{Source Serif Pro}
+        \setromanfont{Source Serif Pro}
+        \setmonofont{Source Code Pro}
+        \setsansfont[Color={B03A2E}]{Patua One}
+        
+        % Use Heading font
+        \setkomafont{sectioning}{\sffamily}
+        
+        % Tweaks to have heading fonts appear in title
+        \let\oldHuge=\Huge
+        \let\oldLARGE=\LARGE
+        \def\Huge{\oldHuge\sffamily}
+        \def\LARGE{\oldLARGE\rmfamily}
+    \fi
+    
 """,
 
      'document_packages': r"""

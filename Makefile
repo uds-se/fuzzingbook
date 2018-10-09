@@ -133,9 +133,10 @@ NBMERGE = $(PYTHON) utils/nbmerge.py
 
 # LaTeX
 PDFLATEX ?= pdflatex
+XELATEX ?= xelatex
 BIBTEX ?= bibtex
 LATEXMK ?= latexmk
-LATEXMK_OPTS ?= -pdf -quiet
+LATEXMK_OPTS ?= -xelatex -quiet
 
 # Word
 PANDOC ?= pandoc
