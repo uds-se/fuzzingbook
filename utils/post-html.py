@@ -394,7 +394,12 @@ def bibtex_unescape(contents):
         r'{\`e}': "è",
         r'{\'e}': "é",
         r'{\`a}': "à",
-        r'{\'a}': "á"
+        r'{\'a}': "á",
+        r'{\d{s}}': "ṣ",
+        r'{\d{n}}': "ṇ",
+        r'{\d{t}}': "ṭ",
+        r'{\=a}': "ā",
+        r'{\=i}': "ī"
     }
     for key in tex_unescape_table:
         contents = contents.replace(key, tex_unescape_table[key])
