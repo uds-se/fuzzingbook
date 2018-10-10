@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
-# Last change: 2018-09-26 20:44:38+02:00
+# Last change: 2018-10-10 10:33:31+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -282,6 +282,14 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     print('\n## Next Steps')
+
+
+
+
+# ## Background
+
+if __name__ == "__main__":
+    print('\n## Background')
 
 
 
