@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-10-10 10:28:59+02:00
+# Last change: 2018-10-10 19:23:21+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -55,9 +55,9 @@ if __name__ == "__main__":
 # import fuzzingbook_utils
 
 if __package__ is None or __package__ == "":
-    from Grammars import DIGIT_GRAMMAR, EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
+    from Grammars import DIGIT_GRAMMAR, EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL, is_valid_grammar
 else:
-    from .Grammars import DIGIT_GRAMMAR, EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
+    from .Grammars import DIGIT_GRAMMAR, EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL, is_valid_grammar
 
 
 if __package__ is None or __package__ == "":
@@ -262,7 +262,7 @@ if __name__ == "__main__":
 
 
 
-class GrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
+class GrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
     def _max_symbol_expansion_coverage(
             self, symbol, max_depth, cov, symbols_seen):
         """Return set of all expansions in a grammar starting with `symbol`"""
@@ -435,18 +435,145 @@ if __name__ == "__main__":
     average_length_until_full_coverage(GrammarCoverageFuzzer(CGI_GRAMMAR))
 
 
-# ## Grammar Coverage and Code Coverage
+# ## Code Coverage via Grammar Coverage
 
 if __name__ == "__main__":
-    print('\n## Grammar Coverage and Code Coverage')
+    print('\n## Code Coverage via Grammar Coverage')
 
 
 
 
-# ## Advanced Grammar Coverage Metrics
+# ### CGI Grammars
 
 if __name__ == "__main__":
-    print('\n## Advanced Grammar Coverage Metrics')
+    print('\n### CGI Grammars')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from Coverage import Coverage, cgi_decode
+else:
+    from .Coverage import Coverage, cgi_decode
+
+
+if __name__ == "__main__":
+    f = GrammarCoverageFuzzer(CGI_GRAMMAR, max_nonterminals=2)
+    coverages = {}
+
+    trials = 100
+    for trial in range(trials):
+        f.reset_coverage()
+        overall_cov = set()
+
+        for i in range(10):
+            s = f.fuzz()
+            with Coverage() as cov:
+                cgi_decode(s)
+            overall_cov |= cov.coverage()
+
+            x = len(f.expansion_coverage())
+            y = len(overall_cov)
+            if x not in coverages:
+                coverages[x] = []
+            coverages[x].append(y)
+
+
+if __name__ == "__main__":
+    xs = list(coverages.keys())
+    ys = [sum(coverages[x]) / len(coverages[x]) for x in coverages]
+
+
+# %matplotlib inline
+
+import matplotlib.pyplot as plt
+
+if __name__ == "__main__":
+    plt.scatter(xs, ys)
+    plt.title('Coverage of cgi_decode() vs. grammar coverage')
+    plt.xlabel('grammar coverage (expansions)')
+    plt.ylabel('code coverage (lines)');
+
+
+import numpy as np
+
+if __name__ == "__main__":
+    np.corrcoef(xs, ys)
+
+
+# ### URL Grammars
+
+if __name__ == "__main__":
+    print('\n### URL Grammars')
+
+
+
+
+if __name__ == "__main__":
+    try:
+        from urlparse import urlparse      # Python 2
+    except ImportError:
+        from urllib.parse import urlparse  # Python 3
+
+
+if __name__ == "__main__":
+    f = GrammarCoverageFuzzer(URL_GRAMMAR, max_nonterminals=2)
+    coverages = {}
+
+    trials = 100
+    for trial in range(trials):
+        f.reset_coverage()
+        overall_cov = set()
+
+        for i in range(20):
+            s = f.fuzz()
+            with Coverage() as cov:
+                urlparse(s)
+            overall_cov |= cov.coverage()
+
+            x = len(f.expansion_coverage())
+            y = len(overall_cov)
+            if x not in coverages:
+                coverages[x] = []
+            coverages[x].append(y)
+
+
+if __name__ == "__main__":
+    xs = list(coverages.keys())
+    ys = [sum(coverages[x]) / len(coverages[x]) for x in coverages]
+
+
+if __name__ == "__main__":
+    plt.scatter(xs, ys)
+    plt.title('Coverage of cgi_decode() vs. grammar coverage')
+    plt.xlabel('grammar coverage (expansions)')
+    plt.ylabel('code coverage (lines)');
+
+
+if __name__ == "__main__":
+    np.corrcoef(xs, ys)
+
+
+# ### Will this always work?
+
+if __name__ == "__main__":
+    print('\n### Will this always work?')
+
+
+
+
+# #### Equivalent Elements
+
+if __name__ == "__main__":
+    print('\n#### Equivalent Elements')
+
+
+
+
+# #### Deep Data Processing
+
+if __name__ == "__main__":
+    print('\n#### Deep Data Processing')
 
 
 
@@ -483,28 +610,28 @@ if __name__ == "__main__":
 
 
 
-# ### Exercise 1
+# ### Exercise 1: Testing ls
 
 if __name__ == "__main__":
-    print('\n### Exercise 1')
+    print('\n### Exercise 1: Testing ls')
 
 
 
+
+LS_GRAMMAR_EBNF = {
+    '<start>':  ['ls <options>'],
+    '<options>': ['<option>*'],
+    '<option>': ['-@', '-1', '-A'
+                # many more
+                ]
+}
+
+assert is_valid_grammar(LS_GRAMMAR_EBNF)
+
+# ### Exercise 2: Caching
 
 if __name__ == "__main__":
-    # Some code that is part of the exercise
-    pass
-
-
-if __name__ == "__main__":
-    # Some code for the solution
-    2 + 2
-
-
-# ### Exercise 2
-
-if __name__ == "__main__":
-    print('\n### Exercise 2')
+    print('\n### Exercise 2: Caching')
 
 
 
