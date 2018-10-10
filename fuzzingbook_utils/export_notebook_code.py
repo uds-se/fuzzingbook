@@ -84,6 +84,10 @@ def first_line(text):
 
 def print_utf8(s):
     sys.stdout.buffer.write(s.encode('utf-8'))
+    
+def decode_title(s):
+    # We have non-breaking spaces in some titles
+    return s.replace('\xa0', ' ')
 
 def print_if_main(code):
     # Run code only if run as main file
@@ -140,8 +144,8 @@ def export_notebook_code(notebook_name, path=None):
             if contents.startswith('#'):
                 # Header
                 line = first_line(contents)
-                print_utf8("\n" + prefix_code(line, "# ") + "\n")
-                print_if_main("print(" + repr(sep + line) + ")\n\n")
+                print_utf8("\n" + prefix_code(decode_title(line), "# ") + "\n")
+                print_if_main("print(" + repr(sep + decode_title(line)) + ")\n\n")
                 sep = '\n'
             else:
                 # We don't include contents, as they fall under a different license
