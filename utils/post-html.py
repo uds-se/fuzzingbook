@@ -82,7 +82,7 @@ site_header_template = menu_start + r"""
 chapter_header_template = menu_start + r"""
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
-     <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
+     <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook (beta)</a></li>
      <li><a href="__SITE_HTML__/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
      <li><a href="__SITE_HTML__/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Download this Code (.py)</a></li>
      <li><a href="__SITE_HTML__/dist/fuzzingbook.zip"><i class="fa fa-fw fa-cube"></i> Download all Code (.zip)</a></li>
