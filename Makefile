@@ -729,6 +729,7 @@ binder/postBuild: binder/postBuild.template $(HTML_TARGET)custom.css
 debug-binder: binder/binder.log binder/postBuild
 binder/binder.log: .FORCE
 	@echo Writing output to $@
+	@docker version > /dev/null
 	jupyter-repo2docker --debug $(GITHUB_REPO) 2>&1 | tee $@
 
 # Force recreation of binder service; avoids long waiting times for first user
