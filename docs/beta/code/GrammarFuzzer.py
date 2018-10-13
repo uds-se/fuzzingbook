@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-10-09 15:10:46+02:00
+# Last change: 2018-10-10 23:30:04+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -780,6 +780,14 @@ if __name__ == "__main__":
 
 
 
+# ## Background
+
+if __name__ == "__main__":
+    print('\n## Background')
+
+
+
+
 # ## Exercises
 
 if __name__ == "__main__":
@@ -834,10 +842,10 @@ if __name__ == "__main__":
           (f._expansion_invocations_cached * 100 / f._expansion_invocations))
 
 
-# #### Exercise 2: Grammar Pre-Compilation
+# ### Exercise 2: Grammar Pre-Compilation
 
 if __name__ == "__main__":
-    print('\n#### Exercise 2: Grammar Pre-Compilation')
+    print('\n### Exercise 2: Grammar Pre-Compilation')
 
 
 

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-10-10 19:23:21+02:00
+# Last change: 2018-10-10 23:32:14+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -619,14 +619,46 @@ if __name__ == "__main__":
 
 
 LS_GRAMMAR_EBNF = {
-    '<start>':  ['ls <options>'],
+    '<start>':  ['-<options>'],
     '<options>': ['<option>*'],
-    '<option>': ['-@', '-1', '-A'
+    '<option>': ['1', 'A', '@', 
                 # many more
                 ]
 }
 
 assert is_valid_grammar(LS_GRAMMAR_EBNF)
+
+if __package__ is None or __package__ == "":
+    from Grammars import convert_ebnf_grammar, srange
+else:
+    from .Grammars import convert_ebnf_grammar, srange
+
+
+LS_GRAMMAR_EBNF = {
+    '<start>':  ['-<options>'],
+    '<options>': ['<option>*'],
+    '<option>': srange("ABCFGHLOPRSTUW@abcdefghiklmnopqrstuwx1")
+}
+assert is_valid_grammar(LS_GRAMMAR_EBNF)
+
+LS_GRAMMAR = convert_ebnf_grammar(LS_GRAMMAR_EBNF)
+
+if __package__ is None or __package__ == "":
+    from Fuzzer import ProgramRunner
+else:
+    from .Fuzzer import ProgramRunner
+
+
+if __name__ == "__main__":
+    f = GrammarCoverageFuzzer(LS_GRAMMAR, max_nonterminals=3)
+    while len(f.max_expansion_coverage() - f.expansion_coverage()) > 0:
+        invocation = f.fuzz()
+        print("ls", invocation, end="; ")
+        args = invocation.split()
+        ls = ProgramRunner(["ls"] + args)
+        ls.run()
+    print()
+
 
 # ### Exercise 2: Caching
 

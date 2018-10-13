@@ -33,7 +33,27 @@ This book is written by _Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon F
 
 ## Frequently Asked Questions
 
-### Which content will be coming up?
+### Technical Issues
+
+#### The interactive notebook does not work!
+
+The interactive notebook uses the [mybinder.org](https://mybinder.org) service, which runs notebooks on their own servers.  There is a [limit of 100 concurrent users for a repository](https://mybinder.readthedocs.io/en/latest/user-guidelines.html).  Also, as listed on the [mybinder.org status and reliability page](https://mybinder.readthedocs.io/en/latest/reliability.html),
+
+> As mybinder.org is a research pilot project, the main goal for the project is to understand usage patterns and workloads for future project evolution. While we strive for site reliability and availability, we want our users to understand the intent of this service is research and we offer no guarantees of its performance in mission critical uses.
+    
+If mybinder.org does not match your needs, [install jupyter notebook on your machine](https://www.dataquest.io/blog/jupyter-notebook-tutorial/) and clone the project repository [from the Github project page](https://github.com/uds-se/fuzzingbook).  Go to the `notebooks/` folder, where you can then open, edit, and run all notebooks at your leisure.
+
+#### Why does it take so long to start an interactive notebook?
+
+Starting Jupyter through mybinder.org normally takes about 30 seconds, depending on your Internet connection. If, however, you are the first to invoke binder after a book update, binder recreates its environment, which will take a few minutes.  Reload the page occasionally.
+
+#### Do you provide PDFs of your material?
+
+At this point, we do not provide support for PDF versions.  We will be producing PDF and paper versions once the book is complete.
+
+### Content
+
+#### Which content will be coming up?
 
 The contents of this book will include topics such as:
 
@@ -41,29 +61,34 @@ The contents of this book will include topics such as:
 2. Basic Fuzzing
 3. Coverage
 4. Mutation-Based Fuzzing
-5. Grammar-Based Fuzzing
-6. Fuzzing Function Calls
-7. Fuzzing User Interfaces
-8. Parsing and Mutating Inputs
-9. Search-Based Testing
-10. Symbolic Testing
-11. Mining Grammars
-12. Probabilistic Testing
-13. Carving Unit Tests
-14. Fuzzing and Invariants
-15. Protection and Repair
+5. Fuzzing with Grammars
+6. Efficient Grammar Fuzzing
+7. Grammar Coverage
+8. Configuration Fuzzing
+9. Parsing and Mutating Inputs
+10. Probabilistic Testing
+11. Reducing Failure-Inducing Inputs
+12. Fuzzing Function Calls
+13. Fuzzing User Interfaces
+14. Search-Based Testing
+15. Symbolic Testing
+16. Mining Grammars
+17. Fuzzing and Invariants
+18. Protection and Repair
 
 See the table of contents in the menu above for those chapters that are already done.
 
-### Why does it take so long to start an interactive notebook?
+#### How do I cite your work?
 
-We use the [binder](https://mybinder.org) service, which runs notebooks on their own servers.  Starting Jupyter through binder normally takes about 30 seconds. If, however, you are the first to invoke binder after a book update, binder recreates its environment, which can take a few minutes.  Note, though, that binder is officially in beta and we do not have control over binder.
+Thanks for referring to our work!  Once the book is complete, you will be able to cite it in the traditional way.  In the meantime, just click on the "cite" button at the bottom of the Web page for each chapter to get a citation entry.
 
-### I have a comment or a suggestion.  What do I do?
+### Other Issues
 
-Report an issue on the [development page](https://github.com/uds-se/fuzzingbook/issues).
+#### I have a question, comment, or a suggestion.  What do I do?
 
-### I have reported an issue two weeks ago.  When will it be addressed?
+You can [tweet to @fuzzingbook on Twitter](https://twitter.com/fuzzingbook), allowing the community of readers to chime in.  For bugs you'd like to get fixed, report an issue on the [development page](https://github.com/uds-se/fuzzingbook/issues).
+
+#### I have reported an issue two weeks ago.  When will it be addressed?
 
 We prioritize issues as follows:
 
@@ -75,18 +100,10 @@ We prioritize issues as follows:
 6. Things marked as "beta"
 7. Everything else
 
-### How can I solve problems myself?
+#### How can I solve problems myself?
 
 We're glad you ask that.  The [development page](https://github.com/uds-se/fuzzingbook/) has all sources and some supplementary material.  Pull requests that fix issues are very welcome.
 
-### How can I contribute?
+#### How can I contribute?
 
 Again, we're glad you're here!  See our [Guide for Authors](Guide_for_Authors.ipynb) for instructions on coding and writing.
-
-### Do you provide PDFs of your material?
-
-At this point, we do not provide support for PDF versions.  We are working on producing PDF and paper versions once the book is complete.
-
-### How do I cite your work?
-
-Thanks for referring to our work!  Once the book is complete, you will be able to cite it in the traditional way.  In the meantime, just click on the "cite" button at the bottom of the Web page for each chapter to get a citation entry.

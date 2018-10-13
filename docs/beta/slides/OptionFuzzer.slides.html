@@ -1,17 +1,64 @@
 
-<!-- A html document -->
-<!-- 
-with standard nbconvert css layout
-with standard nbconvert input/output content
-standard html tag wrapping
-with mathjax loaded
-with jupyter wigets
- caption and label elements according to ipub meta tags  
-with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" /><title>Probabilistic Grammar Fuzzing - Generating Software Tests</title>
+
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="chrome=1" />
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<title>OptionFuzzer slides</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- General and theme style sheets -->
+<link rel="stylesheet" href="reveal.js/css/reveal.css">
+<link rel="stylesheet" href="reveal.js/css/theme/simple.css" id="theme">
+
+<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+<script>
+if( window.location.search.match( /print-pdf/gi ) ) {
+        var link = document.createElement( 'link' );
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'reveal.js/css/print/pdf.css';
+        document.getElementsByTagName( 'head' )[0].appendChild( link );
+}
+
+</script>
+
+<!--[if lt IE 9]>
+<script src="reveal.js/lib/js/html5shiv.js"></script>
+<![endif]-->
+
+<!-- Loading the mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+<!-- Get Font-awesome from cdn -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.css">
 
 <style type="text/css">
     /*!
@@ -11685,7 +11732,7 @@ ul.typeahead-list > li > a {
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
     </style>
 <style type="text/css">
-
+    
 /* Temporary definitions which will become obsolete with Notebook release 5.0 */
 .ansi-black-fg { color: #3E424D; }
 .ansi-black-bg { background-color: #3E424D; }
@@ -11723,514 +11770,1701 @@ ul.typeahead-list > li > a {
 .ansi-bold { font-weight: bold; }
 
     </style>
+<style type="text/css">
+    /* CSS stylesheet for fuzzingbook */
+/* This is applied both for the HTML version as well as for the Jupyter Notebook version */
+/* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
+
+/* Loading fonts in Jupyter */
+@import url(https://fonts.googleapis.com/css?family=Patua+One|Open+Sans|Source+Code+Pro);
+
+
+
+/* Fonts */
+h1, h2, h3, h4, h5 {
+	font-family: 'Patua One', Helvetica, Arial, sans-serif;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+}
+
+code, kbd, pre, samp {
+  font-family: 'Source Code Pro', monospace;
+}
+
+.CodeMirror pre {
+  font-family: 'Source Code Pro', monospace;
+}
+
+
+
+/* Font sizes */
+/* We use somewhat smaller fonts for small devices */
+
+p, li {
+	font-size: 16px;
+	line-height: 26px;
+}
+@media only screen and (max-width: 600px) {
+    p, li {
+    	font-size: 14px;
+    	line-height: 24px;
+    }
+}
+
+code, kbd, pre, samp {
+  font-size: 14px;
+  line-height: 18px;
+}
+.CodeMirror pre {
+  font-size: 14px;
+  line-height: 18px;
+}
+/* Code size must be extra small to fit on screen */
+@media only screen and (max-width: 600px) {
+    code, kbd, pre, samp {
+      font-size: 12px;
+      line-height: 18px;
+    }
+    .CodeMirror pre {
+      font-size: 12px;
+      line-height: 18px;
+    }
+}
+
+
+/* Titles */
+
+/* Book title */
+/* Patua One looks better in normal weight */
+section > h1 {
+	font-size: 48px!important;
+    font-weight: normal!important;
+}
+
+/* Chapter title */
+h1 {
+	font-size: 38px!important;
+    font-weight: normal!important;
+}
+
+/* Section */
+h2 {
+	font-size: 28px!important;
+    font-weight: normal!important;
+}
+
+/* Subsection */
+h3 {
+	font-size: 24px!important;
+    font-weight: normal!important;
+}
+
+/* More sections */
+h4, h5, h6 {
+	font-size: 20px!important;
+    font-weight: normal!important;
+}
+
+/* Small screens */
+@media only screen and (max-width: 600px) {
+    section > h1 { font-size: 36px!important; }
+    h1 { font-size: 32px!important; }
+    h2 { font-size: 26px!important; }
+    h3 { font-size: 22px!important; }
+    h4, h5, h6 {
+        { font-size: 18px!important; }
+    };
+}
+
+
+
+/* Exercises */
+/* Some color tweaks to exercise2 buttons */
+.onoffswitch-label {
+    border: 2px solid #ffffff!important;
+}
+
+/* Show solution */
+.onoffswitch-inner:after {
+    background-color: #B03A2E!important; 
+    color: #ffffff!important;
+}
+
+/* Hide solution */
+.onoffswitch-inner:before {
+    background-color: #F1948A!important; 
+    color: #000000!important;
+}
+
+
+
+
+/* Jupyter Table of Contents */
+/* See https://github.com/ipython-contrib/jupyter_contrib_nbextensions/blob/master/src/jupyter_contrib_nbextensions/nbextensions/toc2/main.css */
+#toc-wrapper .toc-item-num {
+    font-family: 'Patua One', Helvetica, Arial, sans-serif!important;
+    /* font-family: 'Open Sans', sans-serif!important; */
+}
+
+#toc-wrapper li > span:hover {
+  background-color: #F1948A!important;
+}
+.toc-item li { 
+    font-size: 14px!important; 
+    /* font-family: 'Patua One', Helvetica, Arial, sans-serif!important; */
+    font-weight: normal!important;
+}
+#toc-wrapper .header {
+  font-size: 20px!important;
+  color: #B03A2E;
+  font-family: 'Patua One', Helvetica, Arial, sans-serif;
+  font-weight: normal!important;
+}
+
+
+
+/* Colors */
+/* We want white code boxes on a light grey background */
+body {
+    background-color: #F0F0F0;
+}
+
+.container {
+    background-color: #F8F8F8!important;    
+}
+
+.input_area, .output_area {
+    background-color: white!important;    
+}
+
+/* Regular outputs come in blue, errors in red */
+.output_area pre {
+    color: darkblue!important;
+/*  font-weight: bold; */
+}
+
+.output_stderr pre {
+    color: #B03A2E!important;
+}
+
+/* Headers are dark red, too */
+h1, h2, h3 {
+    color: #B03A2E;
+}
+
+h4, h5 {
+    color: black;
+}
+
+/* And links also come in shades of red */
+a:link { /* unvisited link */
+    color: #A93226;
+    /* text-decoration: none!important; */
+}
+
+a:visited {
+    color: #A93226;
+    /* text-decoration: none!important; */
+}
+
+a:hover, a:focus {
+    color: #F1948A;
+    /* text-decoration: none!important; */
+    /* font-weight: bolder!important; */
+}
+
+a:active {
+    color: red;
+    /* text-decoration: none!important; */
+}
+
+/* Imprint */
+.imprint {
+	font-size: 12px;
+    line-height: 16px;
+    margin-top: 1cm;
+}
+
+/* Solutions */
+.solution_link {
+	/* font-size: 12px; */
+    font-style: italic;
+}
+
+
+/* Beta warning */
+.beta {
+    background: #ffff50;
+    padding: 3px;
+    font-style: italic;
+    color: #000000;
+    padding: 5px;
+}
+
+/* Current page in menu */
+#cssmenu a.this_page {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Notebook page in menu */
+#cssmenu a.edit_as_notebook {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* More coming in menu */
+.more_coming {
+    font-style: italic!important;
+}
+
+/* Main content */
+article {
+    margin-top: 30px; /* Add a top margin to avoid content overlay */
+}
+
+/* Have links show up at a nice offset */
+/* See https://stackoverflow.com/questions/4086107/fixed-page-header-overlaps-in-page-anchors */
+:target::before {
+  content: "";
+  display: block;
+  height: 60px; /* fixed header height*/
+  margin: -60px 0 0; /* negative fixed header height */
+}
+
+/* On small screens, have menu text disappear, leaving only icons */
+@media screen and (max-width: 900px) { span.menu_5 { display: none;} }
+@media screen and (max-width: 850px) { span.menu_4 { display: none;} }
+@media screen and (max-width: 800px) { span.menu_3 { display: none;} }
+@media screen and (max-width: 750px) { span.menu_2 { display: none;} }
+@media screen and (max-width: 700px) { span.menu_1 { display: none;} }
+
+/* On small screens, use whatever width that is there */
+@media only screen and (max-width: 600px) {
+  .container {
+    width: auto;
+  }
+}
+
+/* CSS Menu */
+#cssmenu,
+#cssmenu ul,
+#cssmenu ol,
+#cssmenu li,
+#cssmenu a {
+  border: none;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  box-sizing: content-box;
+  cursor: pointer;
+}
+#cssmenu {
+  height: 37px;
+  display: block;
+  border: 1px solid;
+  /* border-radius: 5px; */
+  width: 100%;
+  border-color: #660000;
+  position: fixed;
+  transition: opacity 1s;
+  margin: 0;
+  padding: 0;
+}
+#cssmenu > ul,
+#cssmenu > ol {
+  list-style: inside none;
+  margin: 0;
+  padding: 0;
+}
+#cssmenu > ul > li,
+#cssmenu > ol > li {
+  list-style: inside none;
+  float: left;
+  display: block;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+#cssmenu.align-center > ul,
+#cssmenu.align-center > ol {
+  text-align: center;
+  font-size: 0;
+}
+#cssmenu.align-center > ul > li,
+#cssmenu.align-center > ol > li {
+  float: none;
+  display: inline-block;
+}
+#cssmenu.align-center ul ul,
+#cssmenu.align-center ol ol,
+#cssmenu.align-center ol ul,
+#cssmenu.align-center ul ol {
+  text-align: left;
+}
+#cssmenu.align-center > ul > li:first-child > a,
+#cssmenu.align-center > ol > li:first-child > a {
+  /* border-radius: 0; */
+}
+#cssmenu > ul > li > a,
+#cssmenu > ol > li > a {
+  outline: none;
+  display: block;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+  font-weight: 700;
+  font-size: 13px;
+  font-family: Arial, Helvetica, sans-serif;
+  border-right: 1px solid #660000;
+  color: #ffffff;
+  padding: 12px 20px;
+}
+#cssmenu > ul > li:first-child > a,
+#cssmenu > ol > li:first-child > a {
+  /* border-radius: 5px 0 0 5px; */
+}
+#cssmenu > ul > li > a:after,
+#cssmenu > ol > li > a:after {
+  content: "";
+  position: absolute;
+  border-right: 1px solid;
+  top: -1px;
+  bottom: -1px;
+  right: -2px;
+  z-index: 99;
+  border-color: #cc0000;
+}
+#cssmenu ul li.has-sub:hover > a:after,
+#cssmenu ol li.has-sub:hover > a:after {
+  top: 0;
+  bottom: 0;
+}
+#cssmenu > ul > li.has-sub > a:before,
+#cssmenu > ol > li.has-sub > a:before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: 6px;
+  border: 5px solid transparent;
+  border-top: 5px solid #ffffff;
+}
+#cssmenu > ul > li.has-sub:hover > a:before,
+#cssmenu > ol > li.has-sub:hover > a:before {
+  top: 19px;
+}
+#cssmenu > ul > li.has-sub:hover > a,
+#cssmenu > ol > li.has-sub:hover > a {
+  padding-bottom: 14px;
+  z-index: 999;
+  border-color: #3f3f3f;
+}
+#cssmenu ul li.has-sub:hover > ul,
+#cssmenu ul li.has-sub:hover > ol,
+#cssmenu ol li.has-sub:hover > ul,
+#cssmenu ol li.has-sub:hover > ol {
+  display: block;
+}
+#cssmenu > ul > li.has-sub > a:hover,
+#cssmenu > ul > li.has-sub:hover > a,
+#cssmenu > ol > li.has-sub > a:hover,
+#cssmenu > ol > li.has-sub:hover > a {
+  background: #3f3f3f;
+  border-color: #3f3f3f;
+}
+#cssmenu ul li.has-sub:focus-within > ul,
+#cssmenu ul li.has-sub:focus-within > ol,
+#cssmenu ol li.has-sub:focus-within > ul,
+#cssmenu ol li.has-sub:focus-within > ol {
+  display: block;
+}
+#cssmenu > ul > li.has-sub > a:focus-within,
+#cssmenu > ul > li.has-sub:focus-within > a,
+#cssmenu > ol > li.has-sub > a:focus-within,
+#cssmenu > ol > li.has-sub:focus-within > a {
+  background: #3f3f3f;
+  border-color: #3f3f3f;
+}
+#cssmenu ul li > ul,
+#cssmenu ul li > ol,
+#cssmenu ol li > ul,
+#cssmenu ol li > ol {
+  display: none;
+  width: auto;
+  position: absolute;
+  top: 38px;
+  background: #3f3f3f;
+  /* border-radius: 0 0 5px 5px; */
+  z-index: 999;
+  padding: 10px 0;
+  transition: all 0.5s ease;
+  transition-duration: 0.5s;
+}
+#cssmenu ul li > ul,
+#cssmenu ul li > ol {
+  width: 225px;
+}
+#cssmenu ul ul ul,
+#cssmenu ul ul ol,
+#cssmenu ul ol ul,
+#cssmenu ul ol ol {
+  position: absolute;
+}
+#cssmenu ul ul li:hover > ul,
+#cssmenu ul ul li:hover > ol,
+#cssmenu ul ol li:hover > ul,
+#cssmenu ul ol li:hover > ol {
+  left: 100%;
+  top: -10px;
+  /* border-radius: 5px; */
+}
+#cssmenu ul li > ul li,
+#cssmenu ul li > ol li,
+#cssmenu ol li > ul li,
+#cssmenu ol li > ol li {
+  display: block;
+  list-style: inside none;
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+#cssmenu ul li > ul li a,
+#cssmenu ul li > ol li a,
+#cssmenu ol li > ul li a,
+#cssmenu ol li > ol li a {
+  outline: none;
+  display: block;
+  position: relative;
+  font: 10pt Arial, Helvetica, sans-serif;
+  color: #ffffff;
+  text-decoration: none;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  margin: 0;
+  padding: 8px 20px;
+}
+#cssmenu,
+#cssmenu ul ul > li:hover > a,
+#cssmenu ul ul li a:hover {
+  background: #bb0000;
+  /*
+  background: -moz-linear-gradient(top, #cc0000 0%, #990000 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cc0000), color-stop(100%, #990000));
+  background: -webkit-linear-gradient(top, #cc0000 0%, #990000 100%);
+  background: -o-linear-gradient(top, #cc0000 0%, #990000 100%);
+  background: -ms-linear-gradient(top, #cc0000 0%, #990000 100%);
+  background: linear-gradient(top, #cc0000 0%, #990000 100%);
+  */
+}
+#cssmenu > ul > li > a:hover {
+  background: #660000;
+  color: #ffffff;
+}
+#cssmenu ul ul a:hover,
+#cssmenu ul ol a:hover {
+  background: #990000;
+  color: #ffffff;
+}
+#cssmenu > ul > li.has-sub > a:hover:before {
+  border-top: 5px solid #ffffff;
+}
+
+
+    </style>
+
 
 <style type="text/css">
 /* Overrides of notebook CSS for static HTML export */
-body {
-  overflow: visible;
-  padding: 8px;
+.reveal {
+  font-size: 160%;
 }
-
-div#notebook {
-  overflow: visible;
-  border-top: none;
-}@media print {
-  div.cell {
-    display: block;
-    page-break-inside: avoid;
-  }
-  div.output_wrapper {
-    display: block;
-    page-break-inside: avoid;
-  }
-  div.output {
-    display: block;
-    page-break-inside: avoid;
-  }
+.reveal pre {
+  width: inherit;
+  padding: 0.4em;
+  margin: 0px;
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0);
+}
+.reveal pre code {
+  padding: 0px;
+}
+.reveal section img {
+  border: 0px solid black;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0);
+}
+.reveal i {
+  font-style: normal;
+  font-family: FontAwesome;
+  font-size: 2em;
+}
+.reveal .slides {
+  text-align: left;
+}
+.reveal.fade {
+  opacity: 1;
+}
+.reveal .progress {
+  position: static;
+}
+.reveal .controls .navigate-left,
+.reveal .controls .navigate-left.enabled {
+  border-right-color: #727272;
+}
+.reveal .controls .navigate-left.enabled:hover,
+.reveal .controls .navigate-left.enabled.enabled:hover {
+  border-right-color: #dfdfdf;
+}
+.reveal .controls .navigate-right,
+.reveal .controls .navigate-right.enabled {
+  border-left-color: #727272;
+}
+.reveal .controls .navigate-right.enabled:hover,
+.reveal .controls .navigate-right.enabled.enabled:hover {
+  border-left-color: #dfdfdf;
+}
+.reveal .controls .navigate-up,
+.reveal .controls .navigate-up.enabled {
+  border-bottom-color: #727272;
+}
+.reveal .controls .navigate-up.enabled:hover,
+.reveal .controls .navigate-up.enabled.enabled:hover {
+  border-bottom-color: #dfdfdf;
+}
+.reveal .controls .navigate-down,
+.reveal .controls .navigate-down.enabled {
+  border-top-color: #727272;
+}
+.reveal .controls .navigate-down.enabled:hover,
+.reveal .controls .navigate-down.enabled.enabled:hover {
+  border-top-color: #dfdfdf;
+}
+.reveal .progress span {
+  background: #727272;
+}
+div.input_area {
+  padding: 0.06em;
+}
+div.code_cell {
+  background-color: transparent;
+}
+div.prompt {
+  width: 11ex;
+  padding: 0.4em;
+  margin: 0px;
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+  text-align: right;
+}
+div.output_area pre {
+  font-family: monospace, sans-serif;
+  font-size: 80%;
+}
+div.output_prompt {
+  /* 5px right shift to account for margin in parent container */
+  margin: 5px 5px 0 0;
+}
+div.text_cell.rendered .rendered_html {
+  /* The H1 height seems miscalculated, we are just hidding the scrollbar */
+  overflow-y: hidden;
+}
+a.anchor-link {
+  /* There is still an anchor, we are only hidding it */
+  display: none;
+}
+.rendered_html p {
+  text-align: inherit;
+}
+::-webkit-scrollbar
+{
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar *
+{
+  background:transparent;
+}
+::-webkit-scrollbar-thumb
+{
+  background: #727272 !important;
 }
 </style>
 
 <!-- Custom stylesheet, it must be in the same directory as the html file -->
 <link rel="stylesheet" href="custom.css">
 
-<!-- Load mathjax -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
-<!-- MathJax configuration -->
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-    tex2jax: {
-        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-        processEscapes: true,
-        processEnvironments: true
-    },
-    // Center justify equations in code and markdown cells. Elsewhere
-    // we use CSS to left justify single line equations in code cells.
-    displayAlign: 'center',
-    "HTML-CSS": {
-        styles: {'.MathJax_Display': {"margin": 0}},
-        linebreaks: { automatic: true }
-    }
-});
-</script>
-<!-- End of mathjax configuration --><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+</head>
 
-<!--[if IE lte 8]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-<style type="text/css">
-.ipyfigure { display: -ms-flex; display: -webkit-flex; display: flex;}
-.ipyfigure>div { flex:1; }
-.ipytable { display: -ms-flex; display: -webkit-flex; display: flex;}
-.ipytable>div { flex:1; }
+<body>
 
-</style>
 
-<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
-
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-
-<meta property="og:url" content="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html/" />
-<meta property="og:type" content="article" />
-<meta property="og:title" content="Probabilistic Grammar Fuzzing - Generating Software Tests" />
-<meta property="og:description" content="Let us give grammars even more power by assigning probabilities to individual expansions.  This allows us to control how many of each element should be produced.  \todo{Work in progress.}Prerequisites You should have read the chapter on grammars.We introduce a little helper function that will allow us to add arbitrary options to an expansion." />
-<meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
-
-<link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-touch-icon.png">
-
-<meta name="msapplication-TileColor" content="#B03A2E">
-<meta name="msapplication-config" content="favicon/browserconfig.xml">
-<meta name="theme-color" content="#ffffff">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
-<link rel="manifest" href="favicon/site.webmanifest">
-
-<meta name="viewport" content="width=device-width, initial-scale=1"></head>
- <body>
-
-    <script>
-    var close_menus = function() {
-        /* doesn't work yet - AZ
-        console.log("Closing menus")
-        var cssmenu = document.getElementById("cssmenu")
-        var all_items = cssmenu.getElementsByTagName("li");
-        var i;
-        for (i = 0; i < all_items.length; i++) {
-            item = all_items[i];
-            // console.log("<li>: ")
-            // console.log(item.innerHTML);
-            var j;
-            var all_ul = item.getElementsByTagName("ul");
-            for (j = 0; j < all_ul.length; j++) {
-                console.log("<ul>: ")
-                console.log(all_ul[j].innerHTML);
-                all_ul[j].style.display = "none";
-            }
-            var all_ol = item.getElementsByTagName("ol");
-            for (j = 0; j < all_ol.length; j++) {
-                console.log("<ol>: ")
-                console.log(all_ol[j].innerHTML);
-                all_ol[j].style.display = "none";
-            }
-        }
-        */
-    };
-
-    $( document ).ready( close_menus );
-
-    // Let navbar fade away when scrolling down
-    var prevScrollpos = window.pageYOffset;
-    window.onscroll = function() {
-        var currentScrollPos = window.pageYOffset;
-        if (currentScrollPos > 10 && currentScrollPos > prevScrollpos) {
-            // Hide navbar
-            var cssmenu = document.getElementById("cssmenu")
-            cssmenu.style.opacity = 0;
-
-            // When scrolling, also close all sub-menus
-            close_menus();
-        }
-        else {
-            // Make navbar visible
-            document.getElementById("cssmenu").style.opacity = 1;
-        }
-        prevScrollpos = currentScrollPos;
-    };
-    </script>
-    
-<nav>
-<div id="cssmenu">
-  <ul>
-     <li class="has-sub"><a href="#"><span title="Generating Software Tests"><i class="fa fa-fw fa-bars"></i> </span><span class="menu_1">Generating Software Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></span></a>
-        <ol>
-           <li><a href="https://www.fuzzingbook.org/beta"><i class="fa fa-fw fa-home"></i> About this book</a></li>
-<li><a href="Intro_Testing.html">Introduction to Software Testing</a></li>
-<li><a href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
-<li><a href="Coverage.html">Getting Coverage&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="MutationFuzzer.html">Mutation-Based Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="Grammars.html">Fuzzing with Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="GrammarCoverageFuzzer.html">Grammar Coverage&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="OptionFuzzer.html">Combinatorial Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="Parser.html">Parsing and Recombining Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="ProbabilisticGrammarFuzzer.html" class="this_page">Probabilistic Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-
-           <li><a href="https://www.fuzzingbook.org/beta#News" class="more_coming">More Chapters Coming!</a></li>
-        </ol>
-     </li>
-     <li class="has-sub"><a href="#"><span title="Probabilistic Grammar Fuzzing"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Probabilistic Grammar Fuzzing <i class="fa fa-fw fa-wrench"></i></span></a>
-        <ul>
-           <li><a href="#_Section-4_">_Section 4_</a></li>
-<li><a href="#Lessons-Learned">Lessons Learned</a></li>
-<li><a href="#Next-Steps">Next Steps</a></li>
-<li><a href="#Exercises">Exercises</a></li>
-
-        </ul>
-     </li>
-     
-     <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
-     <ul>
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ProbabilisticGrammarFuzzer.ipynb" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook (beta)</a></li>
-     <li><a href="https://www.fuzzingbook.org/beta/slides/ProbabilisticGrammarFuzzer.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
-     <li><a href="https://www.fuzzingbook.org/beta/code/ProbabilisticGrammarFuzzer.py"><i class="fa fa-fw fa-download"></i> Download this Code (.py)</a></li>
-     <li><a href="https://www.fuzzingbook.org/beta/dist/fuzzingbook.zip"><i class="fa fa-fw fa-cube"></i> Download all Code (.zip)</a></li>
-     <li><a href="https://github.com/uds-se/fuzzingbook/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
-     </ul>
-     </li>
-     
-     <li class="has-sub"><a href="#"><span title="Share"><i class="fa fa-fw fa-comments"></i> </span> <span class="menu_4">Share</span></a>
-        <ul>
-            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Probabilistic%20Grammar%20Fuzzing%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fProbabilisticGrammarFuzzer.html" target=_blank><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
-            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fProbabilisticGrammarFuzzer.html" target=_blank><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
-            <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
-        </ul>
-     </li>
-     <li class="has-sub"><a href="#"><span title="Help"><i class="fa fa-fw fa-question-circle"></i></span> <span class="menu_5">Help</span></a>
-        <ul>
-          <li><a href="https://docs.python.org/3/tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Python Tutorial</a>
-          <li><a href="https://www.dataquest.io/blog/jupyter-notebook-tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Jupyter Notebook Tutorial</a>
-          <li><a href="https://github.com/uds-se/fuzzingbook/issues/" target="_blank"><i class="fa fa-fw fa-commenting"></i> Report an Issue</a></li>
-        </ul>
-     </li>
-  </ul>
+<div class="reveal">
+<div class="slides">
+<section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
-</nav>
-
-    <article>
-   <div tabindex="-1" id="notebook" class="border-box-sizing">
-     <div class="container" id="notebook-container">
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Probabilistic-Grammar-Fuzzing">Probabilistic Grammar Fuzzing<a class="anchor-link" href="#Probabilistic-Grammar-Fuzzing">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-wrench"></i>&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p><p>Let us give grammars even more power by assigning probabilities to individual expansions.  This allows us to control how many of each element should be produced.  \todo{Work in progress.}</p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Combinatorial-Fuzzing">Combinatorial Fuzzing<a class="anchor-link" href="#Combinatorial-Fuzzing">&#182;</a></h1><p>In this chapter, we explore how to systematically cover software configurations – that is, the settings that govern the execution of a program on its (regular) input data.  By <em>automatically inferring configuration options</em>, we can apply these techniques out of the box, with no need for writing a grammar.</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>Prerequisites</strong></p>
 <ul>
-<li>You should have read the <a href="Grammars.html">chapter on grammars</a>.</li>
+<li>You should have read the <a href="Grammars.slides.html">chapter on grammars</a>.</li>
+<li>You should have read the <a href="GrammarCoverage.slides.html">chapter on grammar coverage</a>.</li>
 </ul>
-</div>
-</div>
-</div>
-</div>
 
-<div class="input_code">
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Configuration-Options">Configuration Options<a class="anchor-link" href="#Configuration-Options">&#182;</a></h2>
+</div>
+</div>
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">fuzzingbook_utils</span>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">process_numbers</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;Process some integers.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;integers&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;an integer for the accumulator&#39;</span><span class="p">)</span>
+    <span class="n">group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--sum&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;accumulate&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_const&#39;</span><span class="p">,</span>
+                        <span class="n">const</span><span class="o">=</span><span class="nb">sum</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;sum the integers&#39;</span><span class="p">)</span>
+    <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--min&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;accumulate&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_const&#39;</span><span class="p">,</span>
+                        <span class="n">const</span><span class="o">=</span><span class="nb">min</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;compute the minimum&#39;</span><span class="p">)</span>
+    <span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--max&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;accumulate&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_const&#39;</span><span class="p">,</span>
+                        <span class="n">const</span><span class="o">=</span><span class="nb">max</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;compute the maximum&#39;</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">integers</span><span class="p">))</span>
 </pre></div>
 
 </div>
-</div></div>
 </div>
 </div>
 
-<div class="input_code">
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">GrammarFuzzer</span> <span class="k">import</span> <span class="n">GrammarFuzzer</span>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">process_numbers</span><span class="p">([</span><span class="s2">&quot;--min&quot;</span><span class="p">,</span> <span class="s2">&quot;100&quot;</span><span class="p">,</span> <span class="s2">&quot;200&quot;</span><span class="p">,</span> <span class="s2">&quot;300&quot;</span><span class="p">])</span>
 </pre></div>
 
 </div>
-</div></div>
 </div>
 </div>
 
-<div class="input_code">
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>100
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">Grammars</span> <span class="k">import</span> <span class="n">is_valid_grammar</span>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">process_numbers</span><span class="p">([</span><span class="s2">&quot;--sum&quot;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">])</span>
 </pre></div>
 
 </div>
-</div></div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We introduce a little helper function that will allow us to add arbitrary options to an expansion.</p>
-</div>
-</div>
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>6
+</pre>
 </div>
 </div>
 
-<div class="input_code">
+</div>
+</div>
+
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">opts</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">kwargs</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span>
-        <span class="p">[</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">:</span>
-        <span class="p">[(</span><span class="s2">&quot;&lt;term&gt; + &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)),</span>
-         <span class="p">(</span><span class="s2">&quot;&lt;term&gt; - &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)),</span>
-          <span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">:</span>
-        <span class="p">[(</span><span class="s2">&quot;&lt;factor&gt; * &lt;term&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)),</span>
-         <span class="p">(</span><span class="s2">&quot;&lt;factor&gt; / &lt;term&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)),</span>
-         <span class="s2">&quot;&lt;factor&gt;&quot;</span>
-        <span class="p">],</span>
-
-    <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span>
-        <span class="p">[</span><span class="s2">&quot;+&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span> 
-            <span class="s2">&quot;&lt;leadinteger&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;leadinteger&gt;.&lt;integer&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;leadinteger&gt;&quot;</span><span class="p">:</span>
-        <span class="p">[</span><span class="s2">&quot;&lt;leaddigit&gt;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;leaddigit&gt;&quot;</span><span class="p">],</span>
-
-    <span class="c1"># Benford&#39;s law: frequency distribution of leading digits</span>
-    <span class="s2">&quot;&lt;leaddigit&gt;&quot;</span><span class="p">:</span>
-        <span class="p">[(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.301</span><span class="p">)),</span>
-         <span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.176</span><span class="p">)),</span>
-         <span class="p">(</span><span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.125</span><span class="p">)),</span>
-         <span class="p">(</span><span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.097</span><span class="p">)),</span>
-         <span class="p">(</span><span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.079</span><span class="p">)),</span>
-         <span class="p">(</span><span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.067</span><span class="p">)),</span>
-         <span class="p">(</span><span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.058</span><span class="p">)),</span>
-         <span class="p">(</span><span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.051</span><span class="p">)),</span>
-         <span class="p">(</span><span class="s2">&quot;9&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.046</span><span class="p">)),</span>
-         <span class="p">],</span>
-
-    <span class="c1"># Remaining digits are equally distributed</span>
-    <span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">:</span>
-        <span class="p">[</span> <span class="s2">&quot;&lt;digit&gt;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;digit&gt;&quot;</span> <span class="p">],</span>
-
-    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span>
-        <span class="p">[</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span> <span class="p">],</span>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PROCESS_NUMBERS_GRAMMAR_EBNF</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;operator&gt; &lt;integers&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;operator&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;--sum&quot;</span><span class="p">,</span> <span class="s2">&quot;--min&quot;</span><span class="p">,</span> <span class="s2">&quot;--max&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;integers&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;integers&gt; &lt;integer&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;+&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span> <span class="n">crange</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">)</span>
 <span class="p">}</span>
 
-<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">PROCESS_NUMBERS_GRAMMAR_EBNF</span><span class="p">)</span>
 </pre></div>
 
 </div>
-</div></div>
 </div>
 </div>
 
-<div class="input_code">
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PROCESS_NUMBERS_GRAMMAR</span> <span class="o">=</span> <span class="n">convert_ebnf_grammar</span><span class="p">(</span><span class="n">PROCESS_NUMBERS_GRAMMAR_EBNF</span><span class="p">)</span>
 </pre></div>
 
 </div>
-</div></div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">PROCESS_NUMBERS_GRAMMAR</span><span class="p">,</span> <span class="n">min_nonterminals</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>--max 9 5 8 210 80 9756431
+--sum 9 4 99 1245 612370
+--min 2 3 0 46 15798 7570926
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Mining-Options">Mining Options<a class="anchor-link" href="#Mining-Options">&#182;</a></h2>
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ParseInterrupt</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">OptionGrammarMiner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>    <span class="c1"># FIXME: Should this be a runner?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">OptionGrammarMiner</span><span class="p">(</span><span class="n">OptionGrammarMiner</span><span class="p">):</span>
+    <span class="n">OPTION_SYMBOL</span>   <span class="o">=</span> <span class="s2">&quot;&lt;options&gt;&quot;</span> 
+    <span class="n">ARGUMENT_SYMBOL</span> <span class="o">=</span> <span class="s2">&quot;&lt;arguments&gt;&quot;</span> 
+    <span class="k">def</span> <span class="nf">mine_ebnf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="p">{</span> 
+            <span class="n">START_SYMBOL</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">OPTION_SYMBOL</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ARGUMENT_SYMBOL</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">OPTION_SYMBOL</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">],</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">ARGUMENT_SYMBOL</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">)</span>
+        
+        <span class="n">old_trace</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceit</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">ParseInterrupt</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="n">old_trace</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span>
+    
+    <span class="k">def</span> <span class="nf">mine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">convert_ebnf_grammar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mine_ebnf</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">OptionGrammarMiner</span><span class="p">(</span><span class="n">OptionGrammarMiner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="o">!=</span> <span class="s2">&quot;call&quot;</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="s2">&quot;self&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">self_var</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">[</span><span class="s2">&quot;self&quot;</span><span class="p">]</span>
+
+        <span class="n">method_name</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+        <span class="k">if</span> <span class="n">method_name</span> <span class="o">==</span> <span class="s2">&quot;add_argument&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">process_argument</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">method_name</span> <span class="o">==</span> <span class="s2">&quot;parse_args&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ParseInterrupt</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">OptionGrammarMiner</span><span class="p">(</span><span class="n">OptionGrammarMiner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">process_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">locals</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">[</span><span class="s2">&quot;args&quot;</span><span class="p">]</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">):</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OPTION_SYMBOL</span>
+                <span class="n">metavar</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">arg</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ARGUMENT_SYMBOL</span>
+                <span class="n">metavar</span> <span class="o">=</span> <span class="n">arg</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+            <span class="k">if</span> <span class="s2">&quot;nargs&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">nargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;nargs&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nargs</span> <span class="o">=</span> <span class="mi">1</span>
+            
+            <span class="k">if</span> <span class="s2">&quot;action&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="c1"># No argument</span>
+                <span class="n">param</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">nargs</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+                    <span class="n">type_</span> <span class="o">=</span> <span class="s2">&quot;int&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">type_</span> <span class="o">=</span> <span class="s2">&quot;str&quot;</span>
+
+                <span class="k">if</span> <span class="n">metavar</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;metavar&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="n">metavar</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;metavar&quot;</span><span class="p">]</span>
+                    
+                <span class="k">if</span> <span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">metavar</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">type_</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">metavar</span> <span class="o">=</span> <span class="n">type_</span>
+                    
+                <span class="k">if</span> <span class="n">type_</span> <span class="o">==</span> <span class="s2">&quot;int&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="s2">&quot;&lt;int&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;(-)?&lt;digit&gt;+&quot;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crange</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">)</span>
+                    <span class="n">param</span> <span class="o">=</span> <span class="s2">&quot; &lt;&quot;</span> <span class="o">+</span> <span class="n">metavar</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="s2">&quot;&lt;str&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;char&gt;+&quot;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="s2">&quot;&lt;char&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">digits</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span><span class="p">)</span>
+                    <span class="n">param</span> <span class="o">=</span> <span class="s2">&quot; &lt;&quot;</span> <span class="o">+</span> <span class="n">metavar</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nargs</span><span class="p">):</span>
+                    <span class="n">arg</span> <span class="o">+=</span> <span class="n">param</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">nargs</span> <span class="ow">in</span> <span class="s2">&quot;?+*&quot;</span>
+                <span class="n">arg</span> <span class="o">+=</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="n">param</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span> <span class="o">+</span> <span class="n">nargs</span>
+                    
+            <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">OPTION_SYMBOL</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">target</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="n">arg</span> <span class="o">+</span> <span class="s1">&#39;)?&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">target</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">arg</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">om</span> <span class="o">=</span> <span class="n">OptionGrammarMiner</span><span class="p">(</span><span class="n">process_numbers</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">grammar_ebnf</span> <span class="o">=</span> <span class="n">om</span><span class="o">.</span><span class="n">mine_ebnf</span><span class="p">()</span>
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">grammar_ebnf</span><span class="p">)</span>
+<span class="n">grammar_ebnf</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>(&#39;-h&#39;, &#39;--help&#39;)
+{&#39;action&#39;: &#39;help&#39;, &#39;default&#39;: &#39;==SUPPRESS==&#39;, &#39;help&#39;: &#39;show this help message and exit&#39;}
+
+(&#39;integers&#39;,)
+{&#39;metavar&#39;: &#39;N&#39;, &#39;type&#39;: &lt;class &#39;int&#39;&gt;, &#39;nargs&#39;: &#39;+&#39;, &#39;help&#39;: &#39;an integer for the accumulator&#39;}
+
+(&#39;--sum&#39;,)
+{&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function sum&gt;, &#39;help&#39;: &#39;sum the integers&#39;}
+
+(&#39;--min&#39;,)
+{&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function min&gt;, &#39;help&#39;: &#39;compute the minimum&#39;}
+
+(&#39;--max&#39;,)
+{&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function max&gt;, &#39;help&#39;: &#39;compute the maximum&#39;}
+
+</pre>
 </div>
 </div>
 
 <div class="output_area">
 
+<div class="prompt output_prompt">Out[18]:</div>
+
+
+
+
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;4 + ++--7.0 - -7 - +++7.3 * (1 * 3 + 5 / 3 / 5 + 2) * 38 * (2 + 8)&#39;
+<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;options&gt;&lt;arguments&gt;&#39;],
+ &#39;&lt;options&gt;&#39;: [&#39;( -h)?( --help)?( --sum)?( --min)?( --max)?&#39;],
+ &#39;&lt;arguments&gt;&#39;: [&#39;( &lt;integers&gt;)+&#39;],
+ &#39;&lt;integers&gt;&#39;: [&#39;&lt;int&gt;&#39;],
+ &#39;&lt;int&gt;&#39;: [&#39;(-)?&lt;digit&gt;+&#39;],
+ &#39;&lt;digit&gt;&#39;: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar</span> <span class="o">=</span> <span class="n">convert_ebnf_grammar</span><span class="p">(</span><span class="n">grammar_ebnf</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre> -h --help --sum 5
+ --min --max -207 14 6 -8 39
+ -h --help --max 9575
+ 1
+ --help --sum --min -2 -9 -89430541142
+ -h -61 -7
+ --sum --min --max 3
+ --max -2 1
+ -h --sum --min --max -825 9
+ --help --sum 2
 </pre>
 </div>
-
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Section-4"><em>Section 4</em><a class="anchor-link" href="#Section-4">&#182;</a></h2><p>\todo{Add}</p>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>\todo{Handle exclusive groups}</p>
+
 </div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Complex-Args">Complex Args<a class="anchor-link" href="#Complex-Args">&#182;</a></h2>
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>autopep8 --help
+</pre></div>
+
 </div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>usage: autopep8 [-h] [--version] [-v] [-d] [-i] [--global-config filename]
+                [--ignore-local-config] [-r] [-j n] [-p n] [-a]
+                [--experimental] [--exclude globs] [--list-fixes]
+                [--ignore errors] [--select errors] [--max-line-length n]
+                [--line-range line line] [--hang-closing]
+                [files [files ...]]
+
+Automatically formats Python code to conform to the PEP 8 style guide.
+
+positional arguments:
+  files                 files to format or &#39;-&#39; for standard in
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program&#39;s version number and exit
+  -v, --verbose         print verbose messages; multiple -v result in more
+                        verbose messages
+  -d, --diff            print the diff for the fixed source
+  -i, --in-place        make changes to files in place
+  --global-config filename
+                        path to a global pep8 config file; if this file does
+                        not exist then this is ignored (default:
+                        /Users/zeller/.config/pep8)
+  --ignore-local-config
+                        don&#39;t look for and apply local config files; if not
+                        passed, defaults are updated with any config files in
+                        the project&#39;s root directory
+  -r, --recursive       run recursively over directories; must be used with
+                        --in-place or --diff
+  -j n, --jobs n        number of parallel jobs; match CPU count if value is
+                        less than 1
+  -p n, --pep8-passes n
+                        maximum number of additional pep8 passes (default:
+                        infinite)
+  -a, --aggressive      enable non-whitespace changes; multiple -a result in
+                        more aggressive changes
+  --experimental        enable experimental fixes
+  --exclude globs       exclude file/directory names that match these comma-
+                        separated globs
+  --list-fixes          list codes for fixes; used by --ignore and --select
+  --ignore errors       do not fix these errors/warnings (default:
+                        E226,E24,W503)
+  --select errors       fix only these errors/warnings (e.g. E4,W)
+  --max-line-length n   set maximum allowed line length (default: 79)
+  --line-range line line, --range line line
+                        only fix errors found within this inclusive range of
+                        line numbers (e.g. 1 99); line numbers are indexed at
+                        1
+  --hang-closing        hang-closing option passed to pycodestyle
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">om</span> <span class="o">=</span> <span class="n">OptionGrammarMiner</span><span class="p">(</span><span class="n">autopep8</span><span class="o">.</span><span class="n">main</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">grammar_ebnf</span> <span class="o">=</span> <span class="n">om</span><span class="o">.</span><span class="n">mine_ebnf</span><span class="p">()</span>
+<span class="n">grammar_ebnf</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>(&#39;-h&#39;, &#39;--help&#39;)
+{&#39;action&#39;: &#39;help&#39;, &#39;default&#39;: &#39;==SUPPRESS==&#39;, &#39;help&#39;: &#39;show this help message and exit&#39;}
+
+(&#39;--version&#39;,)
+{&#39;action&#39;: &#39;version&#39;, &#39;version&#39;: &#39;%(prog)s 1.3.4 (pycodestyle: 2.4.0)&#39;}
+
+(&#39;-v&#39;, &#39;--verbose&#39;)
+{&#39;action&#39;: &#39;count&#39;, &#39;default&#39;: 0, &#39;help&#39;: &#39;print verbose messages; multiple -v result in more verbose messages&#39;}
+
+(&#39;-d&#39;, &#39;--diff&#39;)
+{&#39;action&#39;: &#39;store_true&#39;, &#39;help&#39;: &#39;print the diff for the fixed source&#39;}
+
+(&#39;-i&#39;, &#39;--in-place&#39;)
+{&#39;action&#39;: &#39;store_true&#39;, &#39;help&#39;: &#39;make changes to files in place&#39;}
+
+(&#39;--global-config&#39;,)
+{&#39;metavar&#39;: &#39;filename&#39;, &#39;default&#39;: &#39;/Users/zeller/.config/pep8&#39;, &#39;help&#39;: &#39;path to a global pep8 config file; if this file does not exist then this is ignored (default: /Users/zeller/.config/pep8)&#39;}
+
+(&#39;--ignore-local-config&#39;,)
+{&#39;action&#39;: &#39;store_true&#39;, &#39;help&#39;: &#34;don&#39;t look for and apply local config files; if not passed, defaults are updated with any config files in the project&#39;s root directory&#34;}
+
+(&#39;-r&#39;, &#39;--recursive&#39;)
+{&#39;action&#39;: &#39;store_true&#39;, &#39;help&#39;: &#39;run recursively over directories; must be used with --in-place or --diff&#39;}
+
+(&#39;-j&#39;, &#39;--jobs&#39;)
+{&#39;type&#39;: &lt;class &#39;int&#39;&gt;, &#39;metavar&#39;: &#39;n&#39;, &#39;default&#39;: 1, &#39;help&#39;: &#39;number of parallel jobs; match CPU count if value is less than 1&#39;}
+
+(&#39;-p&#39;, &#39;--pep8-passes&#39;)
+{&#39;metavar&#39;: &#39;n&#39;, &#39;default&#39;: -1, &#39;type&#39;: &lt;class &#39;int&#39;&gt;, &#39;help&#39;: &#39;maximum number of additional pep8 passes (default: infinite)&#39;}
+
+(&#39;-a&#39;, &#39;--aggressive&#39;)
+{&#39;action&#39;: &#39;count&#39;, &#39;default&#39;: 0, &#39;help&#39;: &#39;enable non-whitespace changes; multiple -a result in more aggressive changes&#39;}
+
+(&#39;--experimental&#39;,)
+{&#39;action&#39;: &#39;store_true&#39;, &#39;help&#39;: &#39;enable experimental fixes&#39;}
+
+(&#39;--exclude&#39;,)
+{&#39;metavar&#39;: &#39;globs&#39;, &#39;help&#39;: &#39;exclude file/directory names that match these comma-separated globs&#39;}
+
+(&#39;--list-fixes&#39;,)
+{&#39;action&#39;: &#39;store_true&#39;, &#39;help&#39;: &#39;list codes for fixes; used by --ignore and --select&#39;}
+
+(&#39;--ignore&#39;,)
+{&#39;metavar&#39;: &#39;errors&#39;, &#39;default&#39;: &#39;&#39;, &#39;help&#39;: &#39;do not fix these errors/warnings (default: E226,E24,W503)&#39;}
+
+(&#39;--select&#39;,)
+{&#39;metavar&#39;: &#39;errors&#39;, &#39;default&#39;: &#39;&#39;, &#39;help&#39;: &#39;fix only these errors/warnings (e.g. E4,W)&#39;}
+
+(&#39;--max-line-length&#39;,)
+{&#39;metavar&#39;: &#39;n&#39;, &#39;default&#39;: 79, &#39;type&#39;: &lt;class &#39;int&#39;&gt;, &#39;help&#39;: &#39;set maximum allowed line length (default: %(default)s)&#39;}
+
+(&#39;--line-range&#39;, &#39;--range&#39;)
+{&#39;metavar&#39;: &#39;line&#39;, &#39;default&#39;: None, &#39;type&#39;: &lt;class &#39;int&#39;&gt;, &#39;nargs&#39;: 2, &#39;help&#39;: &#39;only fix errors found within this inclusive range of line numbers (e.g. 1 99); line numbers are indexed at 1&#39;}
+
+(&#39;--indent-size&#39;,)
+{&#39;default&#39;: 4, &#39;type&#39;: &lt;class &#39;int&#39;&gt;, &#39;help&#39;: &#39;==SUPPRESS==&#39;}
+
+(&#39;--hang-closing&#39;,)
+{&#39;action&#39;: &#39;store_true&#39;, &#39;help&#39;: &#39;hang-closing option passed to pycodestyle&#39;}
+
+(&#39;files&#39;,)
+{&#39;nargs&#39;: &#39;*&#39;, &#39;help&#39;: &#34;files to format or &#39;-&#39; for standard in&#34;}
+
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[23]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;options&gt;&lt;arguments&gt;&#39;],
+ &#39;&lt;options&gt;&#39;: [&#39;( -h)?( --help)?( --version)?( -v)?( --verbose)?( -d)?( --diff)?( -i)?( --in-place)?( --global-config &lt;filename&gt;)?( --ignore-local-config)?( -r)?( --recursive)?( -j &lt;n&gt;)?( --jobs &lt;n&gt;)?( -p &lt;n&gt;)?( --pep8-passes &lt;n&gt;)?( -a)?( --aggressive)?( --experimental)?( --exclude &lt;globs&gt;)?( --list-fixes)?( --ignore &lt;errors&gt;)?( --select &lt;errors&gt;)?( --max-line-length &lt;n&gt;)?( --line-range &lt;line&gt; &lt;line&gt;)?( --range &lt;line&gt; &lt;line&gt;)?( --indent-size &lt;int&gt;)?( --hang-closing)?&#39;],
+ &#39;&lt;arguments&gt;&#39;: [&#39;( &lt;files&gt;)*&#39;],
+ &#39;&lt;filename&gt;&#39;: [&#39;&lt;str&gt;&#39;],
+ &#39;&lt;str&gt;&#39;: [&#39;&lt;char&gt;+&#39;],
+ &#39;&lt;char&gt;&#39;: [&#39;0&#39;,
+  &#39;1&#39;,
+  &#39;2&#39;,
+  &#39;3&#39;,
+  &#39;4&#39;,
+  &#39;5&#39;,
+  &#39;6&#39;,
+  &#39;7&#39;,
+  &#39;8&#39;,
+  &#39;9&#39;,
+  &#39;a&#39;,
+  &#39;b&#39;,
+  &#39;c&#39;,
+  &#39;d&#39;,
+  &#39;e&#39;,
+  &#39;f&#39;,
+  &#39;g&#39;,
+  &#39;h&#39;,
+  &#39;i&#39;,
+  &#39;j&#39;,
+  &#39;k&#39;,
+  &#39;l&#39;,
+  &#39;m&#39;,
+  &#39;n&#39;,
+  &#39;o&#39;,
+  &#39;p&#39;,
+  &#39;q&#39;,
+  &#39;r&#39;,
+  &#39;s&#39;,
+  &#39;t&#39;,
+  &#39;u&#39;,
+  &#39;v&#39;,
+  &#39;w&#39;,
+  &#39;x&#39;,
+  &#39;y&#39;,
+  &#39;z&#39;,
+  &#39;A&#39;,
+  &#39;B&#39;,
+  &#39;C&#39;,
+  &#39;D&#39;,
+  &#39;E&#39;,
+  &#39;F&#39;,
+  &#39;G&#39;,
+  &#39;H&#39;,
+  &#39;I&#39;,
+  &#39;J&#39;,
+  &#39;K&#39;,
+  &#39;L&#39;,
+  &#39;M&#39;,
+  &#39;N&#39;,
+  &#39;O&#39;,
+  &#39;P&#39;,
+  &#39;Q&#39;,
+  &#39;R&#39;,
+  &#39;S&#39;,
+  &#39;T&#39;,
+  &#39;U&#39;,
+  &#39;V&#39;,
+  &#39;W&#39;,
+  &#39;X&#39;,
+  &#39;Y&#39;,
+  &#39;Z&#39;,
+  &#39;!&#39;,
+  &#39;&#34;&#39;,
+  &#39;#&#39;,
+  &#39;$&#39;,
+  &#39;%&#39;,
+  &#39;&amp;&#39;,
+  &#34;&#39;&#34;,
+  &#39;(&#39;,
+  &#39;)&#39;,
+  &#39;*&#39;,
+  &#39;+&#39;,
+  &#39;,&#39;,
+  &#39;-&#39;,
+  &#39;.&#39;,
+  &#39;/&#39;,
+  &#39;:&#39;,
+  &#39;;&#39;,
+  &#39;&lt;&#39;,
+  &#39;=&#39;,
+  &#39;&gt;&#39;,
+  &#39;?&#39;,
+  &#39;@&#39;,
+  &#39;[&#39;,
+  &#39;\\&#39;,
+  &#39;]&#39;,
+  &#39;^&#39;,
+  &#39;_&#39;,
+  &#39;`&#39;,
+  &#39;{&#39;,
+  &#39;|&#39;,
+  &#39;}&#39;,
+  &#39;~&#39;],
+ &#39;&lt;n&gt;&#39;: [&#39;&lt;int&gt;&#39;],
+ &#39;&lt;int&gt;&#39;: [&#39;(-)?&lt;digit&gt;+&#39;],
+ &#39;&lt;digit&gt;&#39;: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;],
+ &#39;&lt;globs&gt;&#39;: [&#39;&lt;str&gt;&#39;],
+ &#39;&lt;errors&gt;&#39;: [&#39;&lt;str&gt;&#39;],
+ &#39;&lt;line&gt;&#39;: [&#39;&lt;int&gt;&#39;],
+ &#39;&lt;files&gt;&#39;: [&#39;&lt;str&gt;&#39;]}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar</span> <span class="o">=</span> <span class="n">convert_ebnf_grammar</span><span class="p">(</span><span class="n">grammar_ebnf</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">max_nonterminals</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre> --version -v -d --in-place -r --pep8-passes -7 -a --select E --max-line-length 0 --indent-size 38 --hang-closing *r
+ -h --help --verbose --diff -i --global-config j --ignore-local-config --recursive -j -293 --jobs 5 -p 1 --aggressive --experimental --exclude O --list-fixes --ignore ~@ --line-range 02 6 --range -735 -4 B_ z 1 x9| b5 {e !#? U &lt;[Koim RhJ 0 P c } 8 Gn&amp;qQ S^ N&gt;Dl:&#39; Y F g A 7HvTM k`+u ,36p IL - \ ys= $ ] Z 4d &#34;).t % C2 VW( X/f w ;R a b3
+ -v -d --diff -i --in-place -r -j -0102 -p -230 -a --aggressive --max-line-length -61 --range -4 -577 --indent-size -2583 --hang-closing ( X 6 )
+ -h --help --verbose -i --pep8-passes 118 -a --select l --line-range -58 -4 --range -0 0 --hang-closing
+ -h -d --diff --in-place --ignore-local-config --pep8-passes -3 -a --aggressive --exclude 7 --max-line-length 7942 --hang-closing
+ -h --version --verbose --diff -i --in-place --global-config U --ignore-local-config -j -3 --jobs 70 --pep8-passes 62436 -a --aggressive --exclude g=Dhc --list-fixes --select 6 --max-line-length 38 --line-range -8 810 --range -1 -0 --hang-closing &amp;n
+ --help -v --verbose -d -i --in-place --recursive -j -5 --jobs -1 --line-range -3 -9 --indent-size 72 --hang-closing c
+ -h --help --version -v --diff -i --in-place -r --recursive --jobs 33 --pep8-passes 525 -a --aggressive --exclude H --list-fixes --select + --line-range 5 -2
+ -h --help --version -d --diff -i --ignore-local-config -r --jobs 3 --pep8-passes 550 --aggressive --experimental --select W --line-range 595 75
+ -h --help --version -i -r --recursive -j 90 --pep8-passes -89 --list-fixes --ignore c&#39;hG --max-line-length -9 --line-range -35 -3 --range -4 -7 Y Y
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Section-2"><em>Section 2</em><a class="anchor-link" href="#Section-2">&#182;</a></h2><p>\todo{Add}</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Section-3"><em>Section 3</em><a class="anchor-link" href="#Section-3">&#182;</a></h2><p>\todo{Add}</p>
+<p><em>If you want to introduce code, it is helpful to state the most important functions, as in:</em></p>
+<ul>
+<li><code>random.randrange(start, end)</code> - return a random number [<code>start</code>, <code>end</code>]</li>
+<li><code>range(start, end)</code> - create a list with integers from <code>start</code> to <code>end</code>.  Typically used in iterations.</li>
+<li><code>for elem in list: body</code> executes <code>body</code> in a loop with <code>elem</code> taking each value from <code>list</code>.</li>
+<li><code>for i in range(start, end): body</code> executes <code>body</code> in a loop with <code>i</code> from <code>start</code> to <code>end</code> - 1.</li>
+<li><code>chr(n)</code> - return a character with ASCII code <code>n</code></li>
+</ul>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Even more code</span>
+<span class="k">pass</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Section-4"><em>Section 4</em><a class="anchor-link" href="#Section-4">&#182;</a></h2><p>\todo{Add}</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li><em>Lesson one</em></li>
 <li><em>Lesson two</em></li>
 <li><em>Lesson three</em></li>
 </ul>
-</div>
-</div>
-</div>
-</div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
 <ul>
-<li><a href="MutationFuzzer.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
-<li><a href="Grammars.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
-<li><a href="Reducing.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
+<li><a href="MutationFuzzer.slides.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
+<li><a href="Grammars.slides.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
+<li><a href="Reducing.slides.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
 </ul>
-</div>
-</div>
-</div>
-</div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p>Close the chapter with a few exercises such that people have things to do.  In Jupyter Notebook, use the <code>exercise2</code> nbextension to add solutions that can be interactively viewed or hidden:</p>
-<ul>
-<li>Mark the <em>last</em> cell of the exercise (this should be a <em>text</em> cell) as well as <em>all</em> cells of the solution.  (Use the <code>rubberband</code> nbextension and use Shift+Drag to mark multiple cells.)</li>
-<li>Click on the <code>solution</code> button at the top.</li>
-</ul>
-<p>(Alternatively, just copy the exercise and solution cells below with their metadata.)</p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p><em>Cite relevant works in the literature and put them into context, as in:</em></p>
+<p>The idea of ensuring that each expansion in the grammar is used at least once goes back to Burkhardt \cite{Burkhardt1967}, to be later rediscovered by Paul Purdom \cite{Purdom1972}.</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p><em>Text of the exercise</em></p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p><em>Close the chapter with a few exercises such that people have things to do.  To make the solutions hidden (to be revealed by the user), have them start with</em></p>
 
-<div class="input_code">
+<pre><code>markdown
+**Solution.**</code></pre>
+<p><em>Your solution can then extend up to the next title (i.e., any markdown cell starting with <code>#</code>).</em></p>
+<p><em>Running <code>make metadata</code> will automatically add metadata to the cells such that the cells will be hidden by default, and can be uncovered by the user.  The button will be introduced above the solution.</em></p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Exercise-1:-Title">Exercise 1: <em>Title</em><a class="anchor-link" href="#Exercise-1:-Title">&#182;</a></h3><p><em>Text of the exercise</em></p>
+
+</div>
+</div>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
-<div class="input_area">
+    <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Some code that is part of the exercise</span>
 <span class="k">pass</span>
 </pre></div>
 
 </div>
-</div></div>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p><em>Some more text for the exercise</em></p>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><em>Some more text for the exercise</em></p>
 
-    
-<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ProbabilisticGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 </div>
 </div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p><em>Text of the exercise</em></p>
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Exercise-2:-Title">Exercise 2: <em>Title</em><a class="anchor-link" href="#Exercise-2:-Title">&#182;</a></h3><p><em>Text of the exercise</em></p>
 
-    
-<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ProbabilisticGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 </div>
 </div>
 </div>
 </div>
-
-        
-<p class="imprint">
-<img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
-The content of this project is licensed under the
-<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
-The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ProbabilisticGrammarFuzzer.ipynb" target=_blank)>Last change: 2018-10-06 17:41:33+02:00</a> &bull; 
-<a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
-<a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
-</p>
+</div>
 
 <script>
-function revealCitation() {
-    var c = document.getElementById("citation");
-    c.style.display = "block";
-}
+
+require(
+    {
+      // it makes sense to wait a little bit when you are loading
+      // reveal from a cdn in a slow connection environment
+      waitSeconds: 15
+    },
+    [
+      "reveal.js/lib/js/head.min.js",
+      "reveal.js/js/reveal.js"
+    ],
+
+    function(head, Reveal){
+
+        // Full list of configuration options available here: https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            controls: true,
+            progress: true,
+            history: true,
+
+            transition: "slide",
+
+            // Optional libraries used to extend on reveal.js
+            dependencies: [
+                { src: "reveal.js/lib/js/classList.js",
+                  condition: function() { return !document.body.classList; } },
+                { src: "reveal.js/plugin/notes/notes.js",
+                  async: true,
+                  condition: function() { return !!document.body.classList; } }
+            ]
+        });
+
+        var update = function(event){
+          if(MathJax.Hub.getAllJax(Reveal.getCurrentSlide())){
+            MathJax.Hub.Rerender(Reveal.getCurrentSlide());
+          }
+        };
+
+        Reveal.addEventListener('slidechanged', update);
+
+        function setScrollingSlide() {
+            var scroll = false
+            if (scroll === true) {
+              var h = $('.reveal').height() * 0.95;
+              $('section.present').find('section')
+                .filter(function() {
+                  return $(this).height() > h;
+                })
+                .css('height', 'calc(95vh)')
+                .css('overflow-y', 'scroll')
+                .css('margin-top', '20px');
+            }
+        }
+
+        // check and set the scrolling slide every time the slide change
+        Reveal.addEventListener('slidechanged', setScrollingSlide);
+
+    }
+
+);
 </script>
 
-<div id="citation" class="citation" style="display: none;">
-<a name="citation"></a>
-<h2>How to Cite this Work</h2>
-<p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html</a>.  Retrieved 2018-10-06 17:41:33+02:00.
-</p>
-<pre>
-@incollection{fuzzingbook2018:ProbabilisticGrammarFuzzer,
-    author = {Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler},
-    booktitle = {Generating Software Tests},
-    title = {Probabilistic Grammar Fuzzing},
-    year = {2018},
-    publisher = {Saarland University},
-    howpublished = {\url{https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html}},
-    note = {Retrieved 2018-10-06 17:41:33+02:00},
-    url = {https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html},
-    urldate = {2018-10-06 17:41:33+02:00}
-}
-</pre>
-</div>
+</body>
 
-      </div>
-    </div>
-    </article>
-
- </body>
 
 </html>
