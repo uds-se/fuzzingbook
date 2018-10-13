@@ -15,6 +15,7 @@ READY_CHAPTERS = \
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
 	GrammarCoverageFuzzer.ipynb \
+	OptionFuzzer.ipynb \
 	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
 	Reducer.ipynb
@@ -725,7 +726,7 @@ binder/postBuild: binder/postBuild.template $(HTML_TARGET)custom.css
 # See https://repo2docker.readthedocs.io/en/latest/
 .PRECIOUS: binder/binder.log
 .FORCE:
-debug-binder: binder/binder.log
+debug-binder: binder/binder.log binder/postBuild
 binder/binder.log: .FORCE
 	@echo Writing output to $@
 	jupyter-repo2docker --debug $(GITHUB_REPO) 2>&1 | tee $@
