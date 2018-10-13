@@ -10,12 +10,12 @@ READY_CHAPTERS = \
 	Coverage.ipynb \
 	MutationFuzzer.ipynb \
 	Grammars.ipynb \
-	GrammarFuzzer.ipynb
+	GrammarFuzzer.ipynb \
+	GrammarCoverageFuzzer.ipynb
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	GrammarCoverageFuzzer.ipynb \
-	OptionFuzzer.ipynb \
+	ConfigurationFuzzer.ipynb \
 	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
 	Reducer.ipynb
