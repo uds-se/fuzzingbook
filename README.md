@@ -8,13 +8,11 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 
 You can use this book in three ways:
 
-* You can __read chapters in your browser__.  Check out the list of chapters in the menu above, or start right away with the 
-<a href="https://www.fuzzingbook.org/html/Intro_Testing.html">introduction to testing</a> or the
-<a href="https://www.fuzzingbook.org/html/Fuzzer.html">introduction to fuzzing</a>.  All code is available for download.
+* You can __read chapters in your browser__.  Check out the list of chapters in the menu above, or start right away with the [introduction to testing](Intro_Testing.ipynb) or the [introduction to fuzzing](Fuzzer.ipynb).  All code is available for download.
 
-* You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you edit and extend the code, experimenting _live in your browser._  Just click on "Resources $\rightarrow$ Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
+* You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you edit and extend the code, experimenting _live in your browser._  Simply select "Resources $\rightarrow$ Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
 
-* You can __present chapters as slides__ (beta).  This allows for presenting the material in lectures.  Just click on "Resources $\rightarrow$ View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing slides on the introduction to fuzzing.</a>
+* You can __present chapters as slides__.  This allows for presenting the material in lectures.  Just select "Resources $\rightarrow$ View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing the slides for the introduction to fuzzing.</a>
 
 ## Who this Book is for
 
@@ -35,17 +33,27 @@ This book is written by _Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon F
 
 ### Technical Issues
 
-#### The interactive notebook does not work!
-
-The interactive notebook uses the [mybinder.org](https://mybinder.org) service, which runs notebooks on their own servers.  There is a [limit of 100 concurrent users for a repository](https://mybinder.readthedocs.io/en/latest/user-guidelines.html).  Also, as listed on the [mybinder.org status and reliability page](https://mybinder.readthedocs.io/en/latest/reliability.html),
-
-> As mybinder.org is a research pilot project, the main goal for the project is to understand usage patterns and workloads for future project evolution. While we strive for site reliability and availability, we want our users to understand the intent of this service is research and we offer no guarantees of its performance in mission critical uses.
-    
-If mybinder.org does not match your needs, [install jupyter notebook on your machine](https://www.dataquest.io/blog/jupyter-notebook-tutorial/) and clone the project repository [from the Github project page](https://github.com/uds-se/fuzzingbook).  Go to the `notebooks/` folder, where you can then open, edit, and run all notebooks at your leisure.
-
 #### Why does it take so long to start an interactive notebook?
 
-Starting Jupyter through mybinder.org normally takes about 30 seconds, depending on your Internet connection. If, however, you are the first to invoke binder after a book update, binder recreates its environment, which will take a few minutes.  Reload the page occasionally.
+The interactive notebook uses the [mybinder.org](https://mybinder.org) service, which runs notebooks on their own servers.  Starting Jupyter through mybinder.org normally takes about 30 seconds, depending on your Internet connection. If, however, you are the first to invoke binder after a book update, binder recreates its environment, which will take a few minutes.  Reload the page occasionally.
+
+#### The interactive notebook does not work!
+
+mybinder.org imposes a [limit of 100 concurrent users for a repository](https://mybinder.readthedocs.io/en/latest/user-guidelines.html).  Also, as listed on the [mybinder.org status and reliability page](https://mybinder.readthedocs.io/en/latest/reliability.html),
+
+> As mybinder.org is a research pilot project, the main goal for the project is to understand usage patterns and workloads for future project evolution. While we strive for site reliability and availability, we want our users to understand the intent of this service is research and we offer no guarantees of its performance in mission critical uses.
+
+There are alternatives to mybinder.org; see below.
+
+#### Do I have alternatives to the interactive notebook?
+
+If mybinder.org does not work or match your needs, you have a number of alternatives:
+
+1. Download the Python code (using the menu at the top) and edit and run it in your favourite environment.  This is easy to do and does not require lots of resources.
+
+2. [Install jupyter notebook on your machine](https://www.dataquest.io/blog/jupyter-notebook-tutorial/) and clone the `fuzzingbook` project repository [from the Github project page](https://github.com/uds-se/fuzzingbook).  Go to the `notebooks/` folder, where you can then open, edit, and run all notebooks at your leisure.
+
+3. If you want to use the book in a classroom, and depend on your users having access to the interactive notebooks, consider using or deploying a [JupyterHub](http://jupyter.org/hub) or [BinderHub](https://github.com/jupyterhub/binderhub) instance.
 
 #### Do you provide PDFs of your material?
 

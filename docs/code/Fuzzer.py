@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2018-10-10 22:43:48+02:00
+# Last change: 2018-10-13 16:56:26+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -556,7 +556,7 @@ class ProgramRunner(Runner):
         return (result, outcome)
 
 class BinaryProgramRunner(ProgramRunner):
-    def run_process(self, inp):
+    def run_process(self, inp=""):
         """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
         return subprocess.run(self.program,
                                      input=inp.encode(),
