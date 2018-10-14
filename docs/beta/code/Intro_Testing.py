@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
-# Last change: 2018-10-10 23:32:37+02:00
+# Last change: 2018-10-14 23:13:16+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
 
 def my_sqrt(x):
-    """Computes the square root of x, using Newton's method"""
+    """Computes the square root of x, using the Newton–Raphson method"""
     approx = None
     guess = x / 2
     while approx != guess:
