@@ -26,9 +26,9 @@ except:
 # Some fixed strings
 booktitle = "Generating Software Tests"
 authors = "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler"
-site_html = "https://www.fuzzingbook.org"
-github_html = "https://github.com/uds-se/fuzzingbook"
-notebook_html = "https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs"
+site_html = "https://www.fuzzingbook.org/"
+github_html = "https://github.com/uds-se/fuzzingbook/"
+notebook_html = "https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/"
 
 # Menus
 # For icons, see https://fontawesome.com/cheatsheet
@@ -61,7 +61,7 @@ menu_end = r"""
         <ul>
           <li><a href="https://docs.python.org/3/tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Python Tutorial</a>
           <li><a href="https://www.dataquest.io/blog/jupyter-notebook-tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Jupyter Notebook Tutorial</a>
-          <li><a href="__GITHUB_HTML__/issues/" target="_blank"><i class="fa fa-fw fa-commenting"></i> Report an Issue</a></li>
+          <li><a href="__GITHUB_HTML__issues/" target="_blank"><i class="fa fa-fw fa-commenting"></i> Report an Issue</a></li>
         </ul>
      </li>
   </ul>
@@ -72,8 +72,8 @@ menu_end = r"""
 site_header_template = menu_start + r"""
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
-     <li><a href="__SITE_HTML__/dist/fuzzingbook.zip"><i class="fa fa-fw fa-cube"></i> Download all Code (.zip)</a></li>
-     <li><a href="__GITHUB_HTML__/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
+     <li><a href="__SITE_HTML__dist/fuzzingbook.zip"><i class="fa fa-fw fa-cube"></i> Download all Code (.zip)</a></li>
+     <li><a href="__GITHUB_HTML__" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
      </ul>
      </li>
 """ + menu_end
@@ -83,10 +83,10 @@ chapter_header_template = menu_start + r"""
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
      <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook (beta)</a></li>
-     <li><a href="__SITE_HTML__/slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
-     <li><a href="__SITE_HTML__/code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Download this Code (.py)</a></li>
-     <li><a href="__SITE_HTML__/dist/fuzzingbook.zip"><i class="fa fa-fw fa-cube"></i> Download all Code (.zip)</a></li>
-     <li><a href="__GITHUB_HTML__/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
+     <li><a href="__SITE_HTML__slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
+     <li><a href="__SITE_HTML__code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Download this Code (.py)</a></li>
+     <li><a href="__SITE_HTML__dist/fuzzingbook.zip"><i class="fa fa-fw fa-cube"></i> Download all Code (.zip)</a></li>
+     <li><a href="__GITHUB_HTML__" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
      </ul>
      </li>
      """ + menu_end
@@ -107,9 +107,9 @@ __AUTHORS__: "<a href="__SITE_HTML__">__BOOKTITLE__</a>".  Retrieved __DATE__.
     title = {__BOOKTITLE__},
     year = {__YEAR__},
     publisher = {Saarland University},
-    howpublished = {\url{__SITE_HTML__/}},
+    howpublished = {\url{__SITE_HTML__}},
     note = {Retrieved __DATE__},
-    url = {__SITE_HTML__/},
+    url = {__SITE_HTML__},
     urldate = {__DATE__}
 }
 </pre>
@@ -121,7 +121,7 @@ chapter_citation_template = r"""
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-__AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__ (eds.), "<a href="__SITE_HTML__/">__BOOKTITLE__</a>", <a href="__CHAPTER_HTML__">__CHAPTER_HTML__</a>.  Retrieved __DATE__.
+__AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__ (eds.), "<a href="__SITE_HTML__">__BOOKTITLE__</a>", <a href="__CHAPTER_HTML__">__CHAPTER_HTML__</a>.  Retrieved __DATE__.
 </p>
 <pre>
 @incollection{fuzzingbook__YEAR__:__CHAPTER__,
@@ -145,7 +145,7 @@ common_footer_template = r"""
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="__GITHUB_HTML__/commits/master/notebooks/__CHAPTER__.ipynb" target=_blank)>Last change: __DATE__</a> &bull; 
+<a href="__GITHUB_HTML__commits/master/notebooks/__CHAPTER__.ipynb" target=_blank)>Last change: __DATE__</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -284,15 +284,15 @@ else:
     
 # Set base names
 if include_beta:
-    site_html += "/beta"
+    site_html += "beta/"
 
 # Book image
-bookimage = site_html + "/html/PICS/wordcloud.png"
+bookimage = site_html + "html/PICS/wordcloud.png"
 
 # Binder
 if include_beta:
-    notebook_html += "/beta"
-notebook_html += "/notebooks"
+    notebook_html += "beta/"
+notebook_html += "notebooks/"
 
 # Construct sections menu
 all_sections_menu = ""
@@ -301,8 +301,8 @@ chapter_ipynb_file = os.path.join("notebooks", basename + ".ipynb")
 if args.home:
     chapter_html = site_html
 else:
-    chapter_html = site_html + "/html/" + basename + ".html"
-chapter_notebook_ipynb = notebook_html + "/" + basename + ".ipynb"
+    chapter_html = site_html + "html/" + basename + ".html"
+chapter_notebook_ipynb = notebook_html + basename + ".ipynb"
 
 chapter_title = get_title(chapter_ipynb_file)
 chapter_title_beta = chapter_title

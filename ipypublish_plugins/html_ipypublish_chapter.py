@@ -39,7 +39,7 @@ fuzzingbook_tpl_dict = {
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
 {# Open Graph Tags #}
-<meta property="og:url" content="__CHAPTER_HTML__/" />
+<meta property="og:url" content="__CHAPTER_HTML__" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="__PAGE_TITLE__" />
 <meta property="og:description" content="__DESCRIPTION__" />
