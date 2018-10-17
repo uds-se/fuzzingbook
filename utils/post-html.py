@@ -52,8 +52,8 @@ menu_start = r"""
 menu_end = r"""
      <li class="has-sub"><a href="#"><span title="Share"><i class="fa fa-fw fa-comments"></i> </span> <span class="menu_4">Share</span></a>
         <ul>
-            <li><a href="__SHARE_TWITTER__" target=_blank><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
-            <li><a href="__SHARE_FACEBOOK__" target=_blank><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
+            <li><a href="__SHARE_TWITTER__" target="popup" __TWITTER_ONCLICK__><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
+            <li><a href="__SHARE_FACEBOOK__" target="popup" __FACEBOOK_ONCLICK__><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
             <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
      </li>
@@ -282,6 +282,17 @@ else:
     header_template = chapter_header_template
     footer_template = chapter_footer_template
     
+# Popup menus
+twitter_onclick = r"""
+onclick="window.open('__SHARE_TWITTER__','popup','width=600,height=600'); return false;"
+"""
+facebook_onclick = r"""
+onclick="window.open('__SHARE_FACEBOOK__','popup','width=600,height=600'); return false;"
+"""
+if args.home:
+    # Including the Twitter timeline already creates a popup
+    twitter_onclick = ""
+
 # Set base names
 if include_beta:
     site_html += "beta/"
@@ -462,6 +473,8 @@ chapter_contents = chapter_contents \
     .replace("__NOTEBOOK_HTML__", notebook_html) \
     .replace("__CHAPTER_NOTEBOOK_IPYNB__", chapter_notebook_ipynb) \
     .replace("__GITHUB_HTML__", github_html) \
+    .replace("__TWITTER_ONCLICK__", twitter_onclick) \
+    .replace("__FACEBOOK_ONCLICK__", facebook_onclick) \
     .replace("__SHARE_TWITTER__", share_twitter) \
     .replace("__SHARE_FACEBOOK__", share_facebook) \
     .replace("__DATE__", notebook_modification_datetime) \
