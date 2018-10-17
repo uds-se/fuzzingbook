@@ -25,8 +25,10 @@ TODO_CHAPTERS = \
 	# GUIFuzzer.ipynb
 	# GrammarMiner.ipynb
 
+# Only these will appear on the beta site
 BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
 
+# All chapters
 CHAPTERS = $(PUBLIC_CHAPTERS) $(BETA_CHAPTERS)
 
 # Appendices for the book
