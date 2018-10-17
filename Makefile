@@ -431,14 +431,15 @@ $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 	@$(OPEN) $@
 
 # Rules for beta targets
+.FORCE:
 ifndef BETA
-beta/%:
+beta/%: .FORCE
 	$(MAKE) BETA=beta $(@:beta/=)
 
-$(DOCS_TARGET)beta/%:
+$(DOCS_TARGET)beta/%: .FORCE
 	$(MAKE) BETA=beta $(@:beta/=)
 
-%-beta:
+%-beta: .FORCE
 	$(MAKE) BETA=beta $(@:-beta=)
 
 %-all: % %-beta
@@ -732,8 +733,7 @@ binder/postBuild: binder/postBuild.template $(HTML_TARGET)custom.css
 # This is the same system as mybinder uses, but should be easier to debug
 # See https://repo2docker.readthedocs.io/en/latest/
 .PRECIOUS: binder/binder.log
-.FORCE:
-debug-binder: binder/binder.log binder/postBuild
+binder-local debug-binder: binder/binder.log binder/postBuild
 binder/binder.log: .FORCE
 	@echo Writing output to $@
 	@docker version > /dev/null
