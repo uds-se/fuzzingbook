@@ -67,7 +67,8 @@ BINDER_URL = https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=noteb
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
 PUBLIC_SOURCES = $(PUBLIC_CHAPTERS:%=$(NOTEBOOKS)/%)
-BETA_SOURCES = $(BETA_CHAPTERS:%=$(NOTEBOOKS)/%)
+READY_SOURCES = $(READY_CHAPTERS:%=$(NOTEBOOKS)/%)
+TODO_SOURCES = $(TODO_CHAPTERS:%=$(NOTEBOOKS)/%)
 
 # Where to place the pdf, html, slides
 PDF_TARGET      = pdf/
@@ -86,7 +87,7 @@ DOCS_TARGET    := docs/beta/
 HTML_TARGET    := beta/$(HTML_TARGET)
 SLIDES_TARGET  := beta/$(SLIDES_TARGET)
 CODE_TARGET    := beta/$(CODE_TARGET)
-BETA_FLAG = "--include-beta"
+BETA_FLAG = "--include-ready --include-todo"
 endif
 
 
@@ -380,6 +381,14 @@ $(PDF_TARGET)%.tex:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_ME
 	@-$(RM) -fr $(TMPDIR)
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
+
+POST_HTML_OPTIONS = $(BETA_FLAG) \
+	--public-chapters="$(PUBLIC_SOURCES)" \
+	--ready-chapters="$(READY_SOURCES)" \
+	--todo-chapters="$(TODO_SOURCES)"
+HOME_POST_HTML_OPTIONS = \
+	--menu-prefix=html/ --home $(POST_HTML_OPTIONS)
+
 $(DOCS_TARGET)index.html: \
 	$(FULL_NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
@@ -387,8 +396,7 @@ $(DOCS_TARGET)index.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
-	$(PYTHON) utils/post-html.py --menu-prefix=html/ --home $(BETA_FLAG) \
-		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
+	$(PYTHON) utils/post-html.py $(HOME_POST_HTML_OPTIONS) $@
 	@$(OPEN) $@
 
 # https://help.github.com/articles/creating-a-custom-404-page-for-your-github-pages-site/
@@ -399,8 +407,7 @@ $(DOCS_TARGET)404.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)404.html $@
 	@cd $(HTML_TARGET) && $(RM) -r 404.nbpub.log 404_files
-	$(PYTHON) utils/post-html.py --menu-prefix=/html/ --home $(BETA_FLAG) \
-		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
+	$(PYTHON) utils/post-html.py $(HOME_POST_HTML_OPTIONS) $@
 	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
 	@$(OPEN) $@
 
@@ -409,8 +416,7 @@ $(HTML_TARGET)%.html: \
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	$(PYTHON) utils/post-html.py $(BETA_FLAG) \
-		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
+	$(PYTHON) utils/post-html.py $(POST_HTML_OPTIONS) $@
 	@-test -L $(HTML_TARGET)PICS || ln -s ../PICS $(HTML_TARGET)
 	@$(OPEN) $@
 
@@ -509,8 +515,7 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post-html.py
 	ln -s ../$(BIB) book
 	$(CONVERT_TO_HTML) book
 	$(PYTHON) utils/nbmerge.py book/Ch*.ipynb > notebooks/book.ipynb
-	$(PYTHON) utils/post-html.py $(BETA_FLAG) \
-		--public-chapters="$(PUBLIC_SOURCES)" --beta-chapters="$(BETA_SOURCES)" $@
+	$(PYTHON) utils/post-html.py $(BETA_FLAG) $(POST_HTML_OPTIONS) $@
 	$(RM) -r book notebooks/book.ipynb
 	cd $(HTML_TARGET) && $(RM) book.nbpub.log book_files/$(BIB)
 	@echo Created $@

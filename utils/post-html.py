@@ -226,10 +226,12 @@ def anchor(title):
 # Process arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--home", help="omit links to notebook, code, and slides", action='store_true')
-parser.add_argument("--include-beta", help="include beta chapters", action='store_true')
+parser.add_argument("--include-ready", help="include ready chapters", action='store_true')
+parser.add_argument("--include-todo", help="include work-in-progress chapters", action='store_true')
 parser.add_argument("--menu-prefix", help="prefix to html files in menu")
 parser.add_argument("--public-chapters", help="List of public chapters")
-parser.add_argument("--beta-chapters", help="List of beta chapters")
+parser.add_argument("--ready-chapters", help="List of ready chapters")
+parser.add_argument("--todo-chapters", help="List of work-in-progress chapters")
 parser.add_argument("chapter", nargs=1)
 args = parser.parse_args()
 
@@ -248,16 +250,23 @@ if args.public_chapters is not None:
 else:
     public_chapters = []
 
-if args.include_beta and args.beta_chapters is not None:
-    beta_chapters = args.beta_chapters.split()
+if args.include_ready and args.ready_chapters is not None:
+    ready_chapters = args.ready_chapters.split()
 else:
-    beta_chapters = []
+    ready_chapters = []
 
+if args.include_todo and args.todo_chapters is not None:
+    todo_chapters = args.todo_chapters.split()
+else:
+    todo_chapters = []
+    
+beta_chapters = ready_chapters + todo_chapters
 all_chapters = public_chapters + beta_chapters
+include_beta = args.include_ready or args.include_todo
 
 booktitle_beta = booktitle
 beta_suffix = '<i class="fa fa-fw fa-wrench"></i>'
-if args.include_beta:
+if include_beta:
     booktitle_beta += "&nbsp;" + beta_suffix
 
 menu_prefix = args.menu_prefix
@@ -272,14 +281,14 @@ else:
     footer_template = chapter_footer_template
     
 # Set base names
-if args.include_beta:
+if include_beta:
     site_html += "/beta"
 
 # Book image
 bookimage = site_html + "/html/PICS/wordcloud.png"
 
 # Binder
-if args.include_beta:
+if include_beta:
     notebook_html += "/beta"
 notebook_html += "/notebooks"
 
@@ -295,7 +304,7 @@ chapter_notebook_ipynb = notebook_html + "/" + basename + ".ipynb"
 
 chapter_title = get_title(chapter_ipynb_file)
 chapter_title_beta = chapter_title
-is_beta_chapter = args.include_beta and chapter_ipynb_file in beta_chapters
+is_beta_chapter = include_beta and chapter_ipynb_file in beta_chapters
 if is_beta_chapter:
     chapter_title_beta += " " + beta_suffix
 
