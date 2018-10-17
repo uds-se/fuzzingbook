@@ -265,7 +265,7 @@ all_chapters = public_chapters + beta_chapters
 include_beta = args.include_ready or args.include_todo
 
 todo_suffix = '<i class="fa fa-fw fa-wrench"></i>'
-ready_suffix = '<i class="fa fa-fw fa-pencil"></i>'
+ready_suffix = '<i class="fa fa-fw fa-warning"></i>'
 
 booktitle_beta = booktitle
 if include_beta:
