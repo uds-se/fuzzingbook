@@ -492,7 +492,7 @@ beta_warning = None
 if is_todo_chapter:
     beta_warning = '<p><em class="beta">' + todo_suffix + '&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p>'
 elif is_ready_chapter:
-    beta_warning = '<p><em class="beta">' + ready_suffix + '&nbsp;This chapter is still under review ("beta").  It may still change at any time.</em></p>'
+    beta_warning = '<p><em class="beta">' + ready_suffix + '&nbsp;This chapter is still under review ("beta").  It may change at any time.</em></p>'
 
 if beta_warning is not None:
     chapter_contents = chapter_contents.replace("</h1>", "</h1>" + beta_warning)
