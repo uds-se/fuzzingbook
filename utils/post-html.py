@@ -264,10 +264,12 @@ beta_chapters = ready_chapters + todo_chapters
 all_chapters = public_chapters + beta_chapters
 include_beta = args.include_ready or args.include_todo
 
+todo_suffix = '<i class="fa fa-fw fa-wrench"></i>'
+ready_suffix = '<i class="fa fa-fw fa-pencil"></i>'
+
 booktitle_beta = booktitle
-beta_suffix = '<i class="fa fa-fw fa-wrench"></i>'
 if include_beta:
-    booktitle_beta += "&nbsp;" + beta_suffix
+    booktitle_beta += "&nbsp;" + todo_suffix
 
 menu_prefix = args.menu_prefix
 if menu_prefix is None:
@@ -304,9 +306,12 @@ chapter_notebook_ipynb = notebook_html + "/" + basename + ".ipynb"
 
 chapter_title = get_title(chapter_ipynb_file)
 chapter_title_beta = chapter_title
-is_beta_chapter = include_beta and chapter_ipynb_file in beta_chapters
-if is_beta_chapter:
-    chapter_title_beta += " " + beta_suffix
+is_todo_chapter = include_beta and chapter_ipynb_file in todo_chapters
+is_ready_chapter = include_beta and chapter_ipynb_file in ready_chapters
+if is_todo_chapter:
+    chapter_title_beta += " " + todo_suffix
+if is_ready_chapter:
+    chapter_title_beta += " " + ready_suffix
 
 sections = get_sections(chapter_ipynb_file)
 all_sections_menu = ""
@@ -329,10 +334,11 @@ for menu_ipynb_file in all_chapters:
         link_class = ' class="this_page"'
     else:
         link_class = ''
-    if menu_ipynb_file in beta_chapters:
-        beta_indicator = "&nbsp;" + beta_suffix
-    else:
-        beta_indicator = ''
+    beta_indicator = ''
+    if menu_ipynb_file in ready_chapters:
+        beta_indicator = "&nbsp;" + ready_suffix
+    if menu_ipynb_file in todo_chapters:
+        beta_indicator = "&nbsp;" + todo_suffix
     menu_html_file = menu_prefix + basename + ".html"
     item = '<li><a href="%s"%s>%s%s</a></li>\n' % (menu_html_file, link_class, title, beta_indicator)
     all_chapters_menu += item
@@ -482,8 +488,13 @@ if args.home:
 chapter_contents = re.sub(r"<title>.*</title>", 
     "<title>" + page_title + "</title>", chapter_contents, 1)
 
-if is_beta_chapter:
-    beta_warning = '<p><em class="beta">' + beta_suffix + '&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p>'
+beta_warning = None
+if is_todo_chapter:
+    beta_warning = '<p><em class="beta">' + todo_suffix + '&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p>'
+elif is_ready_chapter:
+    beta_warning = '<p><em class="beta">' + ready_suffix + '&nbsp;This chapter is still under review ("beta").  It may still change at any time.</em></p>'
+
+if beta_warning is not None:
     chapter_contents = chapter_contents.replace("</h1>", "</h1>" + beta_warning)
 
 # And write it out again

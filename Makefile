@@ -11,11 +11,11 @@ READY_CHAPTERS = \
 	MutationFuzzer.ipynb \
 	Grammars.ipynb \
 	GrammarFuzzer.ipynb \
-	GrammarCoverageFuzzer.ipynb
+	GrammarCoverageFuzzer.ipynb \
+	ConfigurationFuzzer.ipynb
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	ConfigurationFuzzer.ipynb \
 	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
 	Reducer.ipynb
@@ -87,7 +87,7 @@ DOCS_TARGET    := docs/beta/
 HTML_TARGET    := beta/$(HTML_TARGET)
 SLIDES_TARGET  := beta/$(SLIDES_TARGET)
 CODE_TARGET    := beta/$(CODE_TARGET)
-BETA_FLAG = "--include-ready --include-todo"
+BETA_FLAG = --include-ready --include-todo
 endif
 
 
