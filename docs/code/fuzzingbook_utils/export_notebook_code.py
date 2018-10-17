@@ -10,7 +10,8 @@ import nbformat
 from import_notebooks import RE_CODE
 
 # Things to ignore in exported Python code
-RE_IGNORE = re.compile(r'^import fuzzingbook_utils$|^get_ipython().*|^%.*')
+RE_IGNORE = re.compile(r'^get_ipython().*|^%.*')
+RE_IMPORT_FUZZINGBOOK_UTILS = re.compile(r'^import fuzzingbook_utils *$')
 
 # Strip blank lines
 RE_BLANK_LINES = re.compile(r'^[ \t]*$', re.MULTILINE)
@@ -48,6 +49,13 @@ HEADER = """#!/usr/bin/env python3
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+"""
+
+# Replacement for "import fuzzingbook_utils"
+SET_FIXED_SEED = """
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
 """
 
 def is_all_comments(code):
@@ -126,7 +134,10 @@ def export_notebook_code(notebook_name, path=None):
                 code = "import os\nos.system(r" + repr(code[1:]) + ")"
                 bang = True
 
-            if RE_IGNORE.match(code):
+            if RE_IMPORT_FUZZINGBOOK_UTILS.match(code):
+                # Don't import all of fuzzingbook_utils (requires nbformat & Ipython)
+                print_utf8(SET_FIXED_SEED)
+            elif RE_IGNORE.match(code):
                 # Code to ignore - comment out
                 print_utf8("\n" + prefix_code(code, "# ") + "\n")
             elif RE_CODE.match(code) and not bang:

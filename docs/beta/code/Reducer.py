@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2018-10-10 10:49:51+02:00
+# Last change: 2018-10-16 12:54:10+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -44,7 +44,9 @@ if __name__ == "__main__":
 
 
 
-# import fuzzingbook_utils
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
 
 if __package__ is None or __package__ == "":
     from Fuzzer import Runner
@@ -69,7 +71,7 @@ class Reducer(object):
 
     def reset(self):
         self.tests = 0
-        
+
     def test(self, inp):
         result, outcome = self.runner.run(inp)
         self.tests += 1
@@ -86,7 +88,7 @@ class DeltaDebuggingReducer(Reducer):
     def reduce(self, inp):
         self.reset()
         assert self.test(inp) == Runner.FAIL
-        
+
         n = 2     # Initial granularity
         while len(inp) >= 2:
             start = 0

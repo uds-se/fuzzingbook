@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2018-09-30 16:07:31+02:00
+# Last change: 2018-10-16 12:54:09+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -44,7 +44,9 @@ if __name__ == "__main__":
 
 
 
-# import fuzzingbook_utils
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
 
 if __name__ == "__main__":
     try:
@@ -367,7 +369,7 @@ class FunctionRunner(Runner):
 
     def run_function(self, inp):
         return self.function(inp)
-    
+
     def run(self, inp):
         try:
             result = self.run_function(inp)
@@ -375,7 +377,7 @@ class FunctionRunner(Runner):
         except Exception:
             result = None
             outcome = self.FAIL
-        
+
         return result, outcome
 
 if __name__ == "__main__":
@@ -397,7 +399,7 @@ class FunctionCoverageRunner(FunctionRunner):
             except Exception as exc:
                 self._coverage = cov.coverage()
                 raise exc
-                
+
         self._coverage = cov.coverage()
         return result
 

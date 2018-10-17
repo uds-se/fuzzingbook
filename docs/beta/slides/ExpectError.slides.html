@@ -12453,6 +12453,9 @@ a.anchor-link {
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ExpectError</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_traceback</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_traceback</span> <span class="o">=</span> <span class="n">print_traceback</span>
+
     <span class="c1"># Begin of `with` block</span>
     <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
@@ -12463,12 +12466,16 @@ a.anchor-link {
             <span class="c1"># No exception</span>
             <span class="k">return</span>
 
-        <span class="c1"># An exception occurred - print it</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span>
-                <span class="n">exc_type</span><span class="p">,</span>
-                <span class="n">exc_value</span><span class="p">,</span>
-                <span class="n">tb</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="c1"># An exception occurred</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">print_traceback</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span>
+                    <span class="n">exc_type</span><span class="p">,</span>
+                    <span class="n">exc_value</span><span class="p">,</span>
+                    <span class="n">tb</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception_only</span><span class="p">(</span>
+                <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="s2">&quot;(expected)&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Ignore it</span>
 </pre></div>
@@ -12538,7 +12545,39 @@ ZeroDivisionError: division by zero (expected)
 </div>
 </div>
 
-</div></div></section></section><section><section>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">(</span><span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">fail_test</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>ZeroDivisionError: division by zero (expected)
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -12558,7 +12597,7 @@ ZeroDivisionError: division by zero (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">try</span><span class="p">:</span>
@@ -12581,14 +12620,15 @@ ZeroDivisionError: division by zero (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ExpectTimeout</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">,</span> <span class="n">print_traceback</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seconds_before_timeout</span> <span class="o">=</span> <span class="n">seconds</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">original_trace_function</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">print_traceback</span> <span class="o">=</span> <span class="n">print_traceback</span>
 
     <span class="c1"># Tracing function</span>
     <span class="k">def</span> <span class="nf">check_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
@@ -12617,12 +12657,16 @@ ZeroDivisionError: division by zero (expected)
         <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
-        <span class="c1"># An exception occurred - print it</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span>
-                <span class="n">exc_type</span><span class="p">,</span>
-                <span class="n">exc_value</span><span class="p">,</span>
-                <span class="n">tb</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="c1"># An exception occurred</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">print_traceback</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception</span><span class="p">(</span>
+                    <span class="n">exc_type</span><span class="p">,</span>
+                    <span class="n">exc_value</span><span class="p">,</span>
+                    <span class="n">tb</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception_only</span><span class="p">(</span>
+                <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="s2">&quot;(expected)&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Ignore it</span>
 
@@ -12646,7 +12690,7 @@ ZeroDivisionError: division by zero (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">long_running_test</span><span class="p">():</span>
@@ -12664,10 +12708,10 @@ ZeroDivisionError: division by zero (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">long_running_test</span><span class="p">()</span>
 </pre></div>
 
@@ -12700,16 +12744,7 @@ ZeroDivisionError: division by zero (expected)
 
 
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-10-7e5136e65261&gt;&#34;, line 2, in &lt;module&gt;
-    long_running_test()
-  File &#34;&lt;ipython-input-9-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
-    print(i, &#34;seconds have passed&#34;)
-  File &#34;&lt;ipython-input-9-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
-    print(i, &#34;seconds have passed&#34;)
-  File &#34;&lt;ipython-input-8-aaaa15884c7d&gt;&#34;, line 14, in check_time
-    raise TimeoutError
-TimeoutError (expected)
+<pre>TimeoutError (expected)
 </pre>
 </div>
 </div>
@@ -12717,7 +12752,7 @@ TimeoutError (expected)
 </div>
 </div>
 
-</div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -12726,14 +12761,14 @@ TimeoutError (expected)
 
 </div>
 </div>
-</div></section><section>
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
-    <span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
         <span class="n">long_running_test</span><span class="p">()</span>
     <span class="n">long_running_test</span><span class="p">()</span>
 </pre></div>
@@ -12753,6 +12788,8 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Start
+0 seconds have passed
+1 seconds have passed
 </pre>
 </div>
 </div>
@@ -12764,13 +12801,13 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-11-b194d3a94b81&gt;&#34;, line 3, in &lt;module&gt;
+  File &#34;&lt;ipython-input-12-d87d5d50b60e&gt;&#34;, line 3, in &lt;module&gt;
     long_running_test()
-  File &#34;&lt;ipython-input-9-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
+  File &#34;&lt;ipython-input-10-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
     print(i, &#34;seconds have passed&#34;)
-  File &#34;&lt;ipython-input-9-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
+  File &#34;&lt;ipython-input-10-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
     print(i, &#34;seconds have passed&#34;)
-  File &#34;&lt;ipython-input-8-aaaa15884c7d&gt;&#34;, line 14, in check_time
+  File &#34;&lt;ipython-input-9-bd46aaaacf4f&gt;&#34;, line 15, in check_time
     raise TimeoutError
 TimeoutError (expected)
 </pre>
@@ -12784,6 +12821,7 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Start
+0 seconds have passed
 </pre>
 </div>
 </div>
@@ -12795,13 +12833,13 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-11-b194d3a94b81&gt;&#34;, line 4, in &lt;module&gt;
+  File &#34;&lt;ipython-input-12-d87d5d50b60e&gt;&#34;, line 4, in &lt;module&gt;
     long_running_test()
-  File &#34;&lt;ipython-input-9-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
+  File &#34;&lt;ipython-input-10-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
     print(i, &#34;seconds have passed&#34;)
-  File &#34;&lt;ipython-input-9-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
+  File &#34;&lt;ipython-input-10-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
     print(i, &#34;seconds have passed&#34;)
-  File &#34;&lt;ipython-input-8-aaaa15884c7d&gt;&#34;, line 14, in check_time
+  File &#34;&lt;ipython-input-9-bd46aaaacf4f&gt;&#34;, line 15, in check_time
     raise TimeoutError
 TimeoutError (expected)
 </pre>

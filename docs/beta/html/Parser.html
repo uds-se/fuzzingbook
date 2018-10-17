@@ -11793,7 +11793,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/Parser.html/" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Parsing and Recombining Inputs - Generating Software Tests" />
-<meta property="og:description" content="In this chapter, we use grammars to parse and decompose inputs, allowing us to recombine them arbitrarily.  \todo{Work in progress.}Prerequisites You should have read the chapter on grammars." />
+<meta property="og:description" content="In this chapter, we use grammars to parse and decompose inputs, allowing us to recombine them arbitrarily.\todo{Work in progress.} Specify the restrictions due to precedence Specify the class of languages covered (what is the overlap with CFG) Specify the restrictions on our implementation (parsing predicates)Prerequisites You should have read the chapter on grammars." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11867,12 +11867,12 @@ MathJax.Hub.Config({
            <li><a href="https://www.fuzzingbook.org/beta"><i class="fa fa-fw fa-home"></i> About this book</a></li>
 <li><a href="Intro_Testing.html">Introduction to Software Testing</a></li>
 <li><a href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
-<li><a href="Coverage.html">Getting Coverage&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="MutationFuzzer.html">Mutation-Based Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="Grammars.html">Fuzzing with Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="GrammarCoverageFuzzer.html">Grammar Coverage&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="OptionFuzzer.html">Combinatorial Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="Coverage.html">Getting Coverage&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
+<li><a href="MutationFuzzer.html">Mutation-Based Fuzzing&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
+<li><a href="Grammars.html">Fuzzing with Grammars&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
+<li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
+<li><a href="GrammarCoverageFuzzer.html">Grammar Coverage&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
+<li><a href="ConfigurationFuzzer.html">Testing Configurations&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 <li><a href="Parser.html" class="this_page">Parsing and Recombining Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
@@ -11882,7 +11882,7 @@ MathJax.Hub.Config({
      </li>
      <li class="has-sub"><a href="#"><span title="Parsing and Recombining Inputs"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Parsing and Recombining Inputs <i class="fa fa-fw fa-wrench"></i></span></a>
         <ul>
-           <li><a href="#_Section-4_">_Section 4_</a></li>
+           <li><a href="#Table-driven-parsers">Table driven parsers</a></li>
 <li><a href="#Lessons-Learned">Lessons Learned</a></li>
 <li><a href="#Next-Steps">Next Steps</a></li>
 <li><a href="#Exercises">Exercises</a></li>
@@ -11925,7 +11925,13 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Parsing-and-Recombining-Inputs">Parsing and Recombining Inputs<a class="anchor-link" href="#Parsing-and-Recombining-Inputs">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-wrench"></i>&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p><p>In this chapter, we use grammars to parse and decompose inputs, allowing us to recombine them arbitrarily.  \todo{Work in progress.}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Parsing-and-Recombining-Inputs">Parsing and Recombining Inputs<a class="anchor-link" href="#Parsing-and-Recombining-Inputs">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-wrench"></i>&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p><p>In this chapter, we use grammars to parse and decompose inputs, allowing us to recombine them arbitrarily.
+\todo{Work in progress.}</p>
+<ul>
+<li>Specify the restrictions due to precedence</li>
+<li>Specify the class of languages covered (what is the overlap with CFG)</li>
+<li>Specify the restrictions on our implementation (parsing predicates)</li>
+</ul>
 </div>
 </div>
 </div>
@@ -11995,14 +12001,30 @@ MathJax.Hub.Config({
 <span class="kn">import</span> <span class="nn">re</span>
 
 <span class="n">RE_NONTERMINAL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(&lt;[a-zA-Z_]*&gt;)&#39;</span><span class="p">)</span>
+</pre></div>
 
-<span class="k">class</span> <span class="nc">PEGParser</span><span class="p">:</span>
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PEGParser</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">rule</span><span class="p">):</span> <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">RE_NONTERMINAL</span><span class="p">,</span> <span class="n">rule</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:[</span><span class="n">split</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">rules</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">rule</span><span class="p">):</span> <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+                <span class="n">RE_NONTERMINAL</span><span class="p">,</span> <span class="n">rule</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">split</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">rules</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="k">def</span> <span class="nf">literal_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">cursor</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">cursor</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">),</span> <span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="p">[]))</span> <span class="k">if</span> <span class="n">text</span><span class="p">[</span><span class="n">cursor</span><span class="p">:]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">cursor</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">),</span> <span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="p">)</span> <span class="k">if</span> <span class="n">text</span><span class="p">[</span><span class="n">cursor</span><span class="p">:]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="c1"># memoize repeated calls.</span>
     <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
@@ -12012,7 +12034,8 @@ MathJax.Hub.Config({
         <span class="c1"># we want to be lazy and evaluate only until the first matching</span>
         <span class="n">rets</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unify_line</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">cursor</span><span class="p">)</span> <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">)</span>
         <span class="c1"># return the first non null (matching) rule&#39;s cursor and res</span>
-        <span class="n">cursor</span><span class="p">,</span> <span class="n">res</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">ret</span> <span class="k">for</span> <span class="n">ret</span> <span class="ow">in</span> <span class="n">rets</span> <span class="k">if</span> <span class="n">ret</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="n">cursor</span><span class="p">,</span> <span class="n">res</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">ret</span> <span class="k">for</span> <span class="n">ret</span> <span class="ow">in</span> <span class="n">rets</span> <span class="k">if</span> <span class="n">ret</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span> <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">unify_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parts</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">cursor</span><span class="p">):</span>
@@ -12021,10 +12044,12 @@ MathJax.Hub.Config({
         <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
             <span class="c1"># get the matcher function</span>
-            <span class="n">matcher</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unify_key</span> <span class="k">if</span> <span class="n">is_symbol</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">literal_match</span><span class="p">)</span>
+            <span class="n">matcher</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unify_key</span> <span class="k">if</span> <span class="n">is_symbol</span><span class="p">(</span>
+                <span class="n">part</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">literal_match</span><span class="p">)</span>
             <span class="c1"># compute the cursor, and the result from it.</span>
             <span class="n">cursor</span><span class="p">,</span> <span class="n">res</span> <span class="o">=</span> <span class="n">matcher</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">cursor</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">cursor</span><span class="p">,</span> <span class="n">results</span>
 </pre></div>
@@ -12305,10 +12330,904 @@ MathJax.Hub.Config({
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Section-4"><em>Section 4</em><a class="anchor-link" href="#Section-4">&#182;</a></h2><p>\todo{Add}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Table-driven-parsers">Table driven parsers<a class="anchor-link" href="#Table-driven-parsers">&#182;</a></h2><p>Parsing Expression Grammars specifically oriented towards writing recognizers. Unfortunately, Parsing Expression Grammars are not suitable for grammar based fuzzing. \todo{Verify, and explain how precedence in parsing is not translatable to generation}.
+\todo{Explain LL(k), LR(k), and general Context-Free parsers such as Early and CYK parsers}</p>
 </div>
 </div>
 </div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="LL(1)-parser">LL(1) parser<a class="anchor-link" href="#LL(1)-parser">&#182;</a></h3><p>LL(k) parsers are top-down parsers that rely on a lookahead of k tokens. We provide an implementation of an LL(1) parser.</p>
+<p>We first need a few tools to massage the grammar. The <code>split_tokens</code> splits a production rule to its constituent tokens.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">split_tokens</span><span class="p">(</span><span class="n">rule</span><span class="p">):</span>
+    <span class="n">lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">RE_NONTERMINAL</span><span class="p">,</span> <span class="n">rule</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">lst</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">lst</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>LL(1) grammars are rather restrictive. Specifically, the grammar should not contain left recursion. Hence, we have to
+update our original grammar to remove left-recursion.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;expr&gt;&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;&lt;expr&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;term&gt;&lt;expr_&gt;&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;&lt;expr_&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;+&lt;expr&gt;&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;-&lt;expr&gt;&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;&lt;term&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;factor&gt;&lt;term_&gt;&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;&lt;term_&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;*&lt;term&gt;&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;/&lt;term&gt;&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;&lt;factor&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;+&lt;factor&gt;&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;-&lt;factor&gt;&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;(&lt;expr&gt;)&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;&lt;int&gt;&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;&lt;int&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;integer&gt;&lt;integer_&gt;&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;&lt;integer_&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                          <span class="s1">&#39;.&lt;integer&gt;&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;&lt;integer&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;digit&gt;&lt;I&gt;&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;&lt;I&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;integer&gt;&#39;</span><span class="p">,</span>
+                   <span class="s1">&#39;&#39;</span><span class="p">],</span>
+           <span class="s1">&#39;&lt;digit&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="s1">&#39;5&#39;</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">,</span> <span class="s1">&#39;7&#39;</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">]}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Next, we need to change the grammar so that the productions become tokens</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">new_grammar</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">split_tokens</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">}</span>
+<span class="n">new_grammar</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: [[&#39;&lt;expr&gt;&#39;]],
+ &#39;&lt;expr&gt;&#39;: [[&#39;&lt;term&gt;&#39;, &#39;&lt;expr_&gt;&#39;]],
+ &#39;&lt;expr_&gt;&#39;: [[&#39;+&#39;, &#39;&lt;expr&gt;&#39;], [&#39;-&#39;, &#39;&lt;expr&gt;&#39;], [&#39;&#39;]],
+ &#39;&lt;term&gt;&#39;: [[&#39;&lt;factor&gt;&#39;, &#39;&lt;term_&gt;&#39;]],
+ &#39;&lt;term_&gt;&#39;: [[&#39;*&#39;, &#39;&lt;term&gt;&#39;], [&#39;/&#39;, &#39;&lt;term&gt;&#39;], [&#39;&#39;]],
+ &#39;&lt;factor&gt;&#39;: [[&#39;+&#39;, &#39;&lt;factor&gt;&#39;],
+  [&#39;-&#39;, &#39;&lt;factor&gt;&#39;],
+  [&#39;(&#39;, &#39;&lt;expr&gt;&#39;, &#39;)&#39;],
+  [&#39;&lt;int&gt;&#39;]],
+ &#39;&lt;int&gt;&#39;: [[&#39;&lt;integer&gt;&#39;, &#39;&lt;integer_&gt;&#39;]],
+ &#39;&lt;integer_&gt;&#39;: [[&#39;&#39;], [&#39;.&#39;, &#39;&lt;integer&gt;&#39;]],
+ &#39;&lt;integer&gt;&#39;: [[&#39;&lt;digit&gt;&#39;, &#39;&lt;I&gt;&#39;]],
+ &#39;&lt;I&gt;&#39;: [[&#39;&lt;integer&gt;&#39;], [&#39;&#39;]],
+ &#39;&lt;digit&gt;&#39;: [[&#39;0&#39;],
+  [&#39;1&#39;],
+  [&#39;2&#39;],
+  [&#39;3&#39;],
+  [&#39;4&#39;],
+  [&#39;5&#39;],
+  [&#39;6&#39;],
+  [&#39;7&#39;],
+  [&#39;8&#39;],
+  [&#39;9&#39;]]}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We also need to get the listing of production rules, and the set of terminals in the grammar</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">rules</span><span class="p">(</span><span class="n">g</span><span class="p">):</span> <span class="k">return</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">a</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">terminals</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">token</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+               <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">expr</span> <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">g</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="First-and-Follow-sets">First and Follow sets<a class="anchor-link" href="#First-and-Follow-sets">&#182;</a></h3><p>\todo{Define first and follow sets}
+We first define the fixpiont
+\todo{Define what is a fixpoint of a function}</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fixpoint</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">helper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">sargs</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">args_</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">repr</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span> <span class="o">==</span> <span class="n">sargs</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">args</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">args_</span>
+    <span class="k">return</span> <span class="n">helper</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@fixpoint</span>
+<span class="k">def</span> <span class="nf">compute_ff</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">A</span><span class="p">,</span> <span class="n">expression</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
+        <span class="n">nullable</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">expression</span><span class="p">:</span>
+            <span class="n">first</span><span class="p">[</span><span class="n">A</span><span class="p">]</span> <span class="o">|=</span> <span class="n">first</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
+
+            <span class="c1"># update until the first token that is not nullable</span>
+            <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">epsilon</span><span class="p">:</span>
+                <span class="n">nullable</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">nullable</span><span class="p">:</span>
+            <span class="n">epsilon</span> <span class="o">|=</span> <span class="p">{</span><span class="n">A</span><span class="p">}</span>
+            <span class="n">first</span><span class="p">[</span><span class="n">A</span><span class="p">]</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;&#39;</span><span class="p">}</span>
+
+        <span class="c1"># https://www.cs.uaf.edu/~cs331/notes/FirstFollow.pdf</span>
+        <span class="c1"># essentially, we start from the end of the expression. Then:</span>
+        <span class="c1"># (3) if there is a production A -&gt; aB, then every thing in</span>
+        <span class="c1"># FOLLOW(A) is in FOLLOW(B)</span>
+        <span class="n">follow_B</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="n">A</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">expression</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">t</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c1"># update the follow for the current token. If this is the</span>
+            <span class="c1"># first iteration, then here is the assignment</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
+                <span class="n">follow</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">|=</span> <span class="n">follow_B</span>  <span class="c1"># only bother with nt</span>
+
+            <span class="c1"># computing the last follow symbols for each token t. This</span>
+            <span class="c1"># will be used in the next iteration. If current token is</span>
+            <span class="c1"># nullable, then previous follows can be a legal follow for</span>
+            <span class="c1"># next. Else, only the first of current token is legal follow</span>
+            <span class="c1"># essentially</span>
+
+            <span class="c1"># (2) if there is a production A -&gt; aBb then everything in FIRST(B)</span>
+            <span class="c1"># except for epsilon is added to FOLLOW(B)</span>
+            <span class="n">follow_B</span> <span class="o">=</span> <span class="n">follow_B</span> <span class="o">|</span> <span class="p">(</span>
+                <span class="n">first</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">-</span> <span class="p">{</span><span class="s1">&#39;&#39;</span><span class="p">})</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">epsilon</span> <span class="k">else</span> <span class="n">first</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
+    <span class="c1"># Initialize first and follow sets for non-terminals</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="nb">set</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">}</span>
+    <span class="n">follow</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="nb">set</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">}</span>
+
+    <span class="c1"># If X is a terminal, then First(X) is just X</span>
+    <span class="n">first</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="p">{</span><span class="n">i</span><span class="p">})</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">terminals</span><span class="p">(</span><span class="n">grammar</span><span class="p">))</span>
+    <span class="n">epsilon</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&#39;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">compute_ff</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">rnullable</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">token</span> <span class="ow">in</span> <span class="n">epsilon</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">rule</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">rfirst</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">rule</span><span class="p">:</span>
+        <span class="n">tokens</span> <span class="o">|=</span> <span class="n">first</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">epsilon</span><span class="p">:</span>
+            <span class="k">break</span>  <span class="c1"># not nullable</span>
+    <span class="k">return</span> <span class="n">tokens</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">rulepair</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+    <span class="n">A</span><span class="p">,</span> <span class="n">rule</span> <span class="o">=</span> <span class="n">rulepair</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">rfirst</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">rnullable</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+        <span class="n">rf</span> <span class="o">|=</span> <span class="n">follow</span><span class="p">[</span><span class="n">A</span><span class="p">]</span> <span class="o">-</span> <span class="p">{</span><span class="s1">&#39;&#39;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">rf</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">parse_table</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">my_rules</span><span class="p">):</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">,</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="n">process</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+
+    <span class="n">ptable</span> <span class="o">=</span> <span class="p">[(</span><span class="n">rule</span><span class="p">,</span> <span class="n">predict</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">))</span>
+              <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">my_rules</span><span class="p">]</span>
+
+    <span class="n">parse_tbl</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">expr</span><span class="p">),</span> <span class="n">pvals</span> <span class="ow">in</span> <span class="n">ptable</span><span class="p">:</span>
+        <span class="n">parse_tbl</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">v</span><span class="p">:</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pvals</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">parse_tbl</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">parse_helper</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">tbl</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">inplst</span><span class="p">):</span>
+    <span class="n">inp</span><span class="p">,</span> <span class="o">*</span><span class="n">inplst</span> <span class="o">=</span> <span class="n">inplst</span>
+    <span class="n">exprs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="n">val</span><span class="p">,</span> <span class="o">*</span><span class="n">stack</span> <span class="o">=</span> <span class="n">stack</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>  <span class="c1"># terminal</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="o">!=</span> <span class="n">inp</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> != </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">inp</span><span class="p">))</span>
+            <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">inp</span><span class="p">,</span> <span class="o">*</span><span class="n">inplst</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">inplst</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">rhs</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="n">val</span><span class="p">][</span><span class="n">inp</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="n">k</span> <span class="o">==</span> <span class="n">val</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="n">rhs</span> <span class="o">+</span> <span class="p">[(</span><span class="n">val</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rhs</span><span class="p">))]</span> <span class="o">+</span> <span class="n">stack</span>
+    <span class="k">return</span> <span class="n">exprs</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="n">my_rules</span> <span class="o">=</span> <span class="n">rules</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+    <span class="n">parse_tbl</span> <span class="o">=</span> <span class="n">parse_table</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">my_rules</span><span class="p">)</span>
+    <span class="n">k</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">my_rules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">parse_helper</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">parse_tbl</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">to_tree</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">arr</span><span class="p">:</span>
+        <span class="n">elt</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elt</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">elt</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># get the last n</span>
+            <span class="n">sym</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">elt</span>
+            <span class="n">elts</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">:]</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">]</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sym</span><span class="p">,</span> <span class="n">elts</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">stack</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">to_tree</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="n">new_grammar</span><span class="p">,</span> <span class="s1">&#39;(1+2)&#39;</span><span class="p">))</span>
+<span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="355pt" height="635pt"
+ viewBox="0.00 0.00 355.00 635.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 631)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-631 351,-631 351,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="285" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="285" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="#000000" d="M285,-611.9748C285,-605.195 285,-594.966 285,-586.1331"/>
+<polygon fill="#000000" stroke="#000000" points="288.5001,-586.0561 285,-576.0561 281.5001,-586.0561 288.5001,-586.0561"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="254" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M280.4258,-560.9748C276.0758,-553.8183 269.3899,-542.8188 263.8317,-533.6747"/>
+<polygon fill="#000000" stroke="#000000" points="266.778,-531.7834 258.5929,-525.0561 260.7963,-535.4193 266.778,-531.7834"/>
+</g>
+<!-- 38 -->
+<g id="node39" class="node">
+<title>38</title>
+<text text-anchor="middle" x="317" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr_&gt;</text>
+</g>
+<!-- 1&#45;&gt;38 -->
+<g id="edge38" class="edge">
+<title>1&#45;&gt;38</title>
+<path fill="none" stroke="#000000" d="M289.7217,-560.9748C294.212,-553.8183 301.1137,-542.8188 306.8512,-533.6747"/>
+<polygon fill="#000000" stroke="#000000" points="309.9087,-535.387 312.2589,-525.0561 303.9792,-531.6665 309.9087,-535.387"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="197" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M245.5895,-509.9748C237.0859,-502.3663 223.7275,-490.4141 213.1677,-480.9658"/>
+<polygon fill="#000000" stroke="#000000" points="215.2313,-478.1157 205.4451,-474.0561 210.5637,-483.3324 215.2313,-478.1157"/>
+</g>
+<!-- 36 -->
+<g id="node37" class="node">
+<title>36</title>
+<text text-anchor="middle" x="264" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term_&gt;</text>
+</g>
+<!-- 2&#45;&gt;36 -->
+<g id="edge36" class="edge">
+<title>2&#45;&gt;36</title>
+<path fill="none" stroke="#000000" d="M255.4755,-509.9748C256.8049,-503.195 258.8106,-492.966 260.5425,-484.1331"/>
+<polygon fill="#000000" stroke="#000000" points="264.0288,-484.5427 262.5184,-474.0561 257.1596,-483.1958 264.0288,-484.5427"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="156" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">(</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M190.9503,-458.9748C184.1341,-450.4961 172.9814,-436.6232 165.1104,-426.8324"/>
+<polygon fill="#000000" stroke="#000000" points="167.6088,-424.3541 158.6154,-418.7533 162.1531,-428.74 167.6088,-424.3541"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="197" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 3&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>3&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M197,-458.9748C197,-452.195 197,-441.966 197,-433.1331"/>
+<polygon fill="#000000" stroke="#000000" points="200.5001,-433.0561 197,-423.0561 193.5001,-433.0561 200.5001,-433.0561"/>
+</g>
+<!-- 35 -->
+<g id="node36" class="node">
+<title>35</title>
+<text text-anchor="middle" x="238" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">)</text>
+</g>
+<!-- 3&#45;&gt;35 -->
+<g id="edge35" class="edge">
+<title>3&#45;&gt;35</title>
+<path fill="none" stroke="#000000" d="M203.0497,-458.9748C209.8659,-450.4961 221.0186,-436.6232 228.8896,-426.8324"/>
+<polygon fill="#000000" stroke="#000000" points="231.8469,-428.74 235.3846,-418.7533 226.3912,-424.3541 231.8469,-428.74"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="166" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M192.4258,-407.9748C188.0758,-400.8183 181.3899,-389.8188 175.8317,-380.6747"/>
+<polygon fill="#000000" stroke="#000000" points="178.778,-378.7834 170.5929,-372.0561 172.7963,-382.4193 178.778,-378.7834"/>
+</g>
+<!-- 18 -->
+<g id="node19" class="node">
+<title>18</title>
+<text text-anchor="middle" x="229" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr_&gt;</text>
+</g>
+<!-- 5&#45;&gt;18 -->
+<g id="edge18" class="edge">
+<title>5&#45;&gt;18</title>
+<path fill="none" stroke="#000000" d="M201.7217,-407.9748C206.212,-400.8183 213.1137,-389.8188 218.8512,-380.6747"/>
+<polygon fill="#000000" stroke="#000000" points="221.9087,-382.387 224.2589,-372.0561 215.9792,-378.6665 221.9087,-382.387"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="103" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M156.7041,-356.9748C147.1193,-349.2157 131.9541,-336.939 120.1799,-327.4075"/>
+<polygon fill="#000000" stroke="#000000" points="122.3087,-324.6278 112.334,-321.0561 117.9043,-330.0685 122.3087,-324.6278"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="170" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term_&gt;</text>
+</g>
+<!-- 6&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>6&#45;&gt;16</title>
+<path fill="none" stroke="#000000" d="M166.5902,-356.9748C167.122,-350.195 167.9242,-339.966 168.617,-331.1331"/>
+<polygon fill="#000000" stroke="#000000" points="172.1146,-331.2992 169.4074,-321.0561 165.1361,-330.7518 172.1146,-331.2992"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="103" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;int&gt;</text>
+</g>
+<!-- 7&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>7&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M103,-305.9748C103,-299.195 103,-288.966 103,-280.1331"/>
+<polygon fill="#000000" stroke="#000000" points="106.5001,-280.0561 103,-270.0561 99.5001,-280.0561 106.5001,-280.0561"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="33" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M92.6713,-254.9748C81.9181,-247.1403 64.8434,-234.7002 51.7088,-225.1307"/>
+<polygon fill="#000000" stroke="#000000" points="53.5145,-222.1159 43.3711,-219.0561 49.3925,-227.7736 53.5145,-222.1159"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="110" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer_&gt;</text>
+</g>
+<!-- 8&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>8&#45;&gt;14</title>
+<path fill="none" stroke="#000000" d="M104.0329,-254.9748C104.9634,-248.195 106.3674,-237.966 107.5798,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="111.0705,-229.4392 108.9629,-219.0561 104.1355,-228.4873 111.0705,-229.4392"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="21" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M31.2294,-203.9748C29.6164,-197.1196 27.1737,-186.7383 25.0798,-177.8392"/>
+<polygon fill="#000000" stroke="#000000" points="28.4753,-176.9886 22.7779,-168.0561 21.6614,-178.5919 28.4753,-176.9886"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="71" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;I&gt;</text>
+</g>
+<!-- 9&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>9&#45;&gt;12</title>
+<path fill="none" stroke="#000000" d="M38.607,-203.9748C44.0516,-196.6677 52.4813,-185.354 59.3767,-176.0997"/>
+<polygon fill="#000000" stroke="#000000" points="62.2017,-178.1661 65.37,-168.0561 56.5885,-173.9837 62.2017,-178.1661"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="21" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">1</text>
+</g>
+<!-- 10&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>10&#45;&gt;11</title>
+<path fill="none" stroke="#000000" d="M21,-152.9748C21,-146.195 21,-135.966 21,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="24.5001,-127.0561 21,-117.0561 17.5001,-127.0561 24.5001,-127.0561"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="#000000" d="M71,-152.9748C71,-152.9194 71,-152.8637 71,-152.8078"/>
+<polygon fill="#000000" stroke="#000000" points="74.5059,-162.6375 71,-152.6395 67.5059,-162.6416 74.5059,-162.6375"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="#000000" d="M110,-203.9748C110,-203.9194 110,-203.8637 110,-203.8078"/>
+<polygon fill="#000000" stroke="#000000" points="113.5059,-213.6375 110,-203.6395 106.5059,-213.6416 113.5059,-213.6375"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+</g>
+<!-- 16&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>16&#45;&gt;17</title>
+<path fill="none" stroke="#000000" d="M170,-305.9748C170,-305.9194 170,-305.8637 170,-305.8078"/>
+<polygon fill="#000000" stroke="#000000" points="173.5059,-315.6375 170,-305.6395 166.5059,-315.6416 173.5059,-315.6375"/>
+</g>
+<!-- 19 -->
+<g id="node20" class="node">
+<title>19</title>
+<text text-anchor="middle" x="225" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">+</text>
+</g>
+<!-- 18&#45;&gt;19 -->
+<g id="edge19" class="edge">
+<title>18&#45;&gt;19</title>
+<path fill="none" stroke="#000000" d="M228.4098,-356.9748C227.878,-350.195 227.0758,-339.966 226.383,-331.1331"/>
+<polygon fill="#000000" stroke="#000000" points="229.8639,-330.7518 225.5926,-321.0561 222.8854,-331.2992 229.8639,-330.7518"/>
+</g>
+<!-- 20 -->
+<g id="node21" class="node">
+<title>20</title>
+<text text-anchor="middle" x="268" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 18&#45;&gt;20 -->
+<g id="edge20" class="edge">
+<title>18&#45;&gt;20</title>
+<path fill="none" stroke="#000000" d="M234.7546,-356.9748C240.3424,-349.6677 248.994,-338.354 256.0708,-329.0997"/>
+<polygon fill="#000000" stroke="#000000" points="258.9275,-331.1258 262.2218,-321.0561 253.367,-326.8736 258.9275,-331.1258"/>
+</g>
+<!-- 21 -->
+<g id="node22" class="node">
+<title>21</title>
+<text text-anchor="middle" x="260" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 20&#45;&gt;21 -->
+<g id="edge21" class="edge">
+<title>20&#45;&gt;21</title>
+<path fill="none" stroke="#000000" d="M266.8196,-305.9748C265.7561,-299.195 264.1515,-288.966 262.766,-280.1331"/>
+<polygon fill="#000000" stroke="#000000" points="266.1927,-279.3929 261.1853,-270.0561 259.2773,-280.4777 266.1927,-279.3929"/>
+</g>
+<!-- 33 -->
+<g id="node34" class="node">
+<title>33</title>
+<text text-anchor="middle" x="323" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr_&gt;</text>
+</g>
+<!-- 20&#45;&gt;33 -->
+<g id="edge33" class="edge">
+<title>20&#45;&gt;33</title>
+<path fill="none" stroke="#000000" d="M276.1154,-305.9748C284.3206,-298.3663 297.2103,-286.4141 307.3996,-276.9658"/>
+<polygon fill="#000000" stroke="#000000" points="309.8984,-279.422 314.8513,-270.0561 305.1388,-274.2891 309.8984,-279.422"/>
+</g>
+<!-- 22 -->
+<g id="node23" class="node">
+<title>22</title>
+<text text-anchor="middle" x="203" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 21&#45;&gt;22 -->
+<g id="edge22" class="edge">
+<title>21&#45;&gt;22</title>
+<path fill="none" stroke="#000000" d="M251.5895,-254.9748C243.0859,-247.3663 229.7275,-235.4141 219.1677,-225.9658"/>
+<polygon fill="#000000" stroke="#000000" points="221.2313,-223.1157 211.4451,-219.0561 216.5637,-228.3324 221.2313,-223.1157"/>
+</g>
+<!-- 31 -->
+<g id="node32" class="node">
+<title>31</title>
+<text text-anchor="middle" x="270" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term_&gt;</text>
+</g>
+<!-- 21&#45;&gt;31 -->
+<g id="edge31" class="edge">
+<title>21&#45;&gt;31</title>
+<path fill="none" stroke="#000000" d="M261.4755,-254.9748C262.8049,-248.195 264.8106,-237.966 266.5425,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="270.0288,-229.5427 268.5184,-219.0561 263.1596,-228.1958 270.0288,-229.5427"/>
+</g>
+<!-- 23 -->
+<g id="node24" class="node">
+<title>23</title>
+<text text-anchor="middle" x="203" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;int&gt;</text>
+</g>
+<!-- 22&#45;&gt;23 -->
+<g id="edge23" class="edge">
+<title>22&#45;&gt;23</title>
+<path fill="none" stroke="#000000" d="M203,-203.9748C203,-197.195 203,-186.966 203,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="206.5001,-178.0561 203,-168.0561 199.5001,-178.0561 206.5001,-178.0561"/>
+</g>
+<!-- 24 -->
+<g id="node25" class="node">
+<title>24</title>
+<text text-anchor="middle" x="131" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 23&#45;&gt;24 -->
+<g id="edge24" class="edge">
+<title>23&#45;&gt;24</title>
+<path fill="none" stroke="#000000" d="M192.3762,-152.9748C181.2094,-145.065 163.4149,-132.4606 149.8547,-122.8554"/>
+<polygon fill="#000000" stroke="#000000" points="151.8508,-119.9802 141.6674,-117.0561 147.8046,-125.6924 151.8508,-119.9802"/>
+</g>
+<!-- 29 -->
+<g id="node30" class="node">
+<title>29</title>
+<text text-anchor="middle" x="208" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer_&gt;</text>
+</g>
+<!-- 23&#45;&gt;29 -->
+<g id="edge29" class="edge">
+<title>23&#45;&gt;29</title>
+<path fill="none" stroke="#000000" d="M203.7378,-152.9748C204.4025,-146.195 205.4053,-135.966 206.2713,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="209.7667,-127.3499 207.2592,-117.0561 202.8001,-126.6669 209.7667,-127.3499"/>
+</g>
+<!-- 25 -->
+<g id="node26" class="node">
+<title>25</title>
+<text text-anchor="middle" x="105" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 24&#45;&gt;25 -->
+<g id="edge25" class="edge">
+<title>24&#45;&gt;25</title>
+<path fill="none" stroke="#000000" d="M127.1636,-101.9748C123.592,-94.969 118.1429,-84.2803 113.5416,-75.2547"/>
+<polygon fill="#000000" stroke="#000000" points="116.5122,-73.3755 108.8521,-66.0561 110.2759,-76.5548 116.5122,-73.3755"/>
+</g>
+<!-- 27 -->
+<g id="node28" class="node">
+<title>27</title>
+<text text-anchor="middle" x="155" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;I&gt;</text>
+</g>
+<!-- 24&#45;&gt;27 -->
+<g id="edge27" class="edge">
+<title>24&#45;&gt;27</title>
+<path fill="none" stroke="#000000" d="M134.5413,-101.9748C137.8381,-94.969 142.8681,-84.2803 147.1155,-75.2547"/>
+<polygon fill="#000000" stroke="#000000" points="150.353,-76.5946 151.4442,-66.0561 144.0193,-73.614 150.353,-76.5946"/>
+</g>
+<!-- 26 -->
+<g id="node27" class="node">
+<title>26</title>
+<text text-anchor="middle" x="105" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+</g>
+<!-- 25&#45;&gt;26 -->
+<g id="edge26" class="edge">
+<title>25&#45;&gt;26</title>
+<path fill="none" stroke="#000000" d="M105,-50.9748C105,-44.195 105,-33.966 105,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="108.5001,-25.0561 105,-15.0561 101.5001,-25.0561 108.5001,-25.0561"/>
+</g>
+<!-- 28 -->
+<g id="node29" class="node">
+<title>28</title>
+</g>
+<!-- 27&#45;&gt;28 -->
+<g id="edge28" class="edge">
+<title>27&#45;&gt;28</title>
+<path fill="none" stroke="#000000" d="M155,-50.9748C155,-50.9194 155,-50.8637 155,-50.8078"/>
+<polygon fill="#000000" stroke="#000000" points="158.5059,-60.6375 155,-50.6395 151.5059,-60.6416 158.5059,-60.6375"/>
+</g>
+<!-- 30 -->
+<g id="node31" class="node">
+<title>30</title>
+</g>
+<!-- 29&#45;&gt;30 -->
+<g id="edge30" class="edge">
+<title>29&#45;&gt;30</title>
+<path fill="none" stroke="#000000" d="M208,-101.9748C208,-101.9194 208,-101.8637 208,-101.8078"/>
+<polygon fill="#000000" stroke="#000000" points="211.5059,-111.6375 208,-101.6395 204.5059,-111.6416 211.5059,-111.6375"/>
+</g>
+<!-- 32 -->
+<g id="node33" class="node">
+<title>32</title>
+</g>
+<!-- 31&#45;&gt;32 -->
+<g id="edge32" class="edge">
+<title>31&#45;&gt;32</title>
+<path fill="none" stroke="#000000" d="M270,-203.9748C270,-203.9194 270,-203.8637 270,-203.8078"/>
+<polygon fill="#000000" stroke="#000000" points="273.5059,-213.6375 270,-203.6395 266.5059,-213.6416 273.5059,-213.6375"/>
+</g>
+<!-- 34 -->
+<g id="node35" class="node">
+<title>34</title>
+</g>
+<!-- 33&#45;&gt;34 -->
+<g id="edge34" class="edge">
+<title>33&#45;&gt;34</title>
+<path fill="none" stroke="#000000" d="M323,-254.9748C323,-254.9194 323,-254.8637 323,-254.8078"/>
+<polygon fill="#000000" stroke="#000000" points="326.5059,-264.6375 323,-254.6395 319.5059,-264.6416 326.5059,-264.6375"/>
+</g>
+<!-- 37 -->
+<g id="node38" class="node">
+<title>37</title>
+</g>
+<!-- 36&#45;&gt;37 -->
+<g id="edge37" class="edge">
+<title>36&#45;&gt;37</title>
+<path fill="none" stroke="#000000" d="M264,-458.9748C264,-458.9194 264,-458.8637 264,-458.8078"/>
+<polygon fill="#000000" stroke="#000000" points="267.5059,-468.6375 264,-458.6395 260.5059,-468.6416 267.5059,-468.6375"/>
+</g>
+<!-- 39 -->
+<g id="node40" class="node">
+<title>39</title>
+</g>
+<!-- 38&#45;&gt;39 -->
+<g id="edge39" class="edge">
+<title>38&#45;&gt;39</title>
+<path fill="none" stroke="#000000" d="M317,-509.9748C317,-509.9194 317,-509.8637 317,-509.8078"/>
+<polygon fill="#000000" stroke="#000000" points="320.5059,-519.6375 317,-509.6395 313.5059,-519.6416 320.5059,-519.6375"/>
+</g>
+</g>
+</svg>
+
+</div>
+
 </div>
 
 <div class="input_markdown">
@@ -12406,7 +13325,7 @@ MathJax.Hub.Config({
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2018-10-06 17:39:04+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2018-10-16 12:54:11+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -12422,7 +13341,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2018-10-06 17:39:04+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2018-10-16 12:54:11+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Parser,
@@ -12432,9 +13351,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Parser.html}},
-    note = {Retrieved 2018-10-06 17:39:04+02:00},
+    note = {Retrieved 2018-10-16 12:54:11+02:00},
     url = {https://www.fuzzingbook.org/beta/html/Parser.html},
-    urldate = {2018-10-06 17:39:04+02:00}
+    urldate = {2018-10-16 12:54:11+02:00}
 }
 </pre>
 </div>

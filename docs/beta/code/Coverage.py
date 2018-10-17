@@ -276,7 +276,9 @@ if __name__ == "__main__":
     cov_plus.coverage() - cov_standard.coverage()
 
 
-# import fuzzingbook_utils
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
 
 if __name__ == "__main__":
     with Coverage() as cov_max:

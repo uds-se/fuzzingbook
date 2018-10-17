@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
-# Last change: 2018-10-14 23:13:16+02:00
+# Last change: 2018-10-17 14:47:34+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -95,7 +95,7 @@ def abs(x):
         return x
 
 if __name__ == "__main__":
-    assert abs(my_sqrt(4) - 2 < EPSILON)
+    assert abs(my_sqrt(4) - 2) < EPSILON
 
 
 def assertEquals(x, y, epsilon=1e-8):
@@ -126,7 +126,9 @@ if __name__ == "__main__":
         assertEquals(my_sqrt(n) * my_sqrt(n), n)
 
 
-# import fuzzingbook_utils
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
 
 if __package__ is None or __package__ == "":
     from Timer import Timer
@@ -203,7 +205,6 @@ def exposed_sqrt(s):
     else:
         print('The root of', x, 'is', my_sqrt(x))
 
-
 if __name__ == "__main__":
     exposed_sqrt("-1")
 
@@ -221,7 +222,7 @@ if __name__ == "__main__":
 
 def exposed_sqrt(s):
     try:
-        x = int(s)
+        x = float(s)
     except ValueError:
         print("Illegal Input")
     else:

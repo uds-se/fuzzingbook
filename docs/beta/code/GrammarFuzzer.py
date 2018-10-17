@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-10-10 23:30:04+02:00
+# Last change: 2018-10-17 14:10:19+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -44,16 +44,18 @@ if __name__ == "__main__":
 
 
 
-# import fuzzingbook_utils
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
 
 if __package__ is None or __package__ == "":
-    from Grammars import EXPR_GRAMMAR_EBNF, convert_ebnf_grammar, simple_grammar_fuzzer
+    from Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer
 else:
-    from .Grammars import EXPR_GRAMMAR_EBNF, convert_ebnf_grammar, simple_grammar_fuzzer
+    from .Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer
 
 
 if __name__ == "__main__":
-    expr_grammar = convert_ebnf_grammar(EXPR_GRAMMAR_EBNF)
+    expr_grammar = convert_ebnf_grammar(EXPR_EBNF_GRAMMAR)
     expr_grammar
 
 
@@ -413,7 +415,7 @@ class GrammarFuzzer(GrammarFuzzer):
         expandable_children = [
             c for c in children if self.any_possible_expansions(c)]
 
-        # `index_map` translates an index in `expandable_children` 
+        # `index_map` translates an index in `expandable_children`
         # back into the original index in `children`
         index_map = [i for (i, c) in enumerate(children)
                      if self.any_possible_expansions(c)]

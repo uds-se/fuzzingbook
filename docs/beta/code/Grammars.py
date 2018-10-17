@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-10-10 23:33:04+02:00
+# Last change: 2018-10-17 14:10:19+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -76,7 +76,9 @@ if __name__ == "__main__":
 
 
 
-# import fuzzingbook_utils
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
 
 DIGIT_GRAMMAR = {
     "<start>":
@@ -408,11 +410,11 @@ if __name__ == "__main__":
 from copy import deepcopy
 
 if __name__ == "__main__":
-    nonterminal_grammar_ebnf = deepcopy(nonterminal_grammar)
-    nonterminal_grammar_ebnf["<identifier>"] = "<idchar>+"
+    nonterminal_ebnf_grammar = deepcopy(nonterminal_grammar)
+    nonterminal_ebnf_grammar["<identifier>"] = "<idchar>+"
 
 
-EXPR_GRAMMAR_EBNF = {
+EXPR_EBNF_GRAMMAR = {
     "<start>":
         ["<expr>"],
 
@@ -453,7 +455,7 @@ def new_symbol(grammar, symbol_name="<symbol>"):
         count += 1
 
 if __name__ == "__main__":
-    assert new_symbol(EXPR_GRAMMAR_EBNF, '<expr>') == '<expr-1>'
+    assert new_symbol(EXPR_EBNF_GRAMMAR, '<expr>') == '<expr-1>'
 
 
 # #### Expanding Parenthesized Expressions
@@ -584,7 +586,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    expr_grammar = convert_ebnf_grammar(EXPR_GRAMMAR_EBNF)
+    expr_grammar = convert_ebnf_grammar(EXPR_EBNF_GRAMMAR)
     expr_grammar
 
 
@@ -651,7 +653,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    assert is_valid_grammar(EXPR_GRAMMAR_EBNF)
+    assert is_valid_grammar(EXPR_EBNF_GRAMMAR)
 
 
 if __name__ == "__main__":
@@ -715,7 +717,7 @@ CHARACTERS_WITHOUT_QUOTE = (string.digits
                             + string.punctuation.replace('"', '').replace('\\', '')
                             + ' ')
 
-JSON_GRAMMAR_EBNF = {
+JSON_EBNF_GRAMMAR = {
     "<start>": ["<json>"],
 
     "<json>": ["<element>"],
@@ -761,9 +763,9 @@ JSON_GRAMMAR_EBNF = {
     "<ws>": [" "]
 }
 
-assert is_valid_grammar(JSON_GRAMMAR_EBNF)
+assert is_valid_grammar(JSON_EBNF_GRAMMAR)
 
-JSON_GRAMMAR = convert_ebnf_grammar(JSON_GRAMMAR_EBNF)
+JSON_GRAMMAR = convert_ebnf_grammar(JSON_EBNF_GRAMMAR)
 
 if __package__ is None or __package__ == "":
     from ExpectError import ExpectError
@@ -826,10 +828,78 @@ if __name__ == "__main__":
 
 
 
-# ### Exercise 4: Grammar Annotations
+# ### Exercise 4: Defining Grammars as Functions (Advanced)
 
 if __name__ == "__main__":
-    print('\n### Exercise 4: Grammar Annotations')
+    print('\n### Exercise 4: Defining Grammars as Functions (Advanced)')
 
 
 
+
+def expression_grammar_fn():
+    start = "<expr>"
+    expr = "<term> + <expr>" | "<term> - <expr>"
+    term = "<factor> * <term>" | "<factor> / <term>" | "<factor>"
+    factor = "+<factor>" | "-<factor>" | "(<expr>)" | "<integer>" | "<integer>.<integer>"
+    integer = "<digit><integer>" | "<digit>"
+    digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+
+if __name__ == "__main__":
+    with ExpectError():
+        alt_expression_grammar()
+
+
+import ast
+import inspect
+
+if __name__ == "__main__":
+    source = inspect.getsource(expression_grammar_fn)
+    source
+
+
+if __name__ == "__main__":
+    tree = ast.parse(source)
+
+
+def get_alternatives(op):
+    return ([op.s] if isinstance(op, ast.Str)
+            else get_alternatives(op.left) + [op.right.s])
+
+def funct_parser(tree):
+    return {assign.targets[0].id: get_alternatives(assign.value)
+            for assign in tree.body[0].body}
+
+if __name__ == "__main__":
+    grammar = funct_parser(tree)
+    for symbol in grammar:
+        print(symbol, "::=", grammar[symbol])
+
+
+# #### Part 1: One Single Function
+
+if __name__ == "__main__":
+    print('\n#### Part 1: One Single Function')
+
+
+
+
+def convert_function_grammar(fn):
+    source = inspect.getsource(expression_grammar_fn)
+    tree = ast.parse(source)
+    grammar = funct_parser(tree)
+    return grammar
+
+if __name__ == "__main__":
+    convert_function_grammar(expression_grammar_fn)
+
+
+# #### Part 2: Extended Grammars
+
+if __name__ == "__main__":
+    print('\n#### Part 2: Extended Grammars')
+
+
+
+
+def identifier_grammar_fn():
+    identifier = idchar * (1,)

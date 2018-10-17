@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
-# Last change: 2018-09-26 15:50:42+02:00
+# Last change: 2018-10-16 12:54:10+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -44,12 +44,17 @@ if __name__ == "__main__":
 
 
 
-# import fuzzingbook_utils
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
 
 import traceback
 import sys
 
 class ExpectError(object):
+    def __init__(self, print_traceback=True):
+        self.print_traceback = print_traceback
+
     # Begin of `with` block
     def __enter__(self):
         return self
@@ -60,12 +65,16 @@ class ExpectError(object):
             # No exception
             return
 
-        # An exception occurred - print it
-        lines = ''.join(
-            traceback.format_exception(
-                exc_type,
-                exc_value,
-                tb)).strip()
+        # An exception occurred
+        if self.print_traceback:
+            lines = ''.join(
+                traceback.format_exception(
+                    exc_type,
+                    exc_value,
+                    tb)).strip()
+        else:
+            lines = traceback.format_exception_only(
+                exc_type, exc_value)[-1].strip()
         print(lines, "(expected)", file=sys.stderr)
         return True  # Ignore it
 
@@ -75,6 +84,11 @@ def fail_test():
 
 if __name__ == "__main__":
     with ExpectError():
+        fail_test()
+
+
+if __name__ == "__main__":
+    with ExpectError(print_traceback=False):
         fail_test()
 
 
@@ -105,10 +119,11 @@ if __name__ == "__main__":
 
 
 class ExpectTimeout(object):
-    def __init__(self, seconds):
+    def __init__(self, seconds, print_traceback=True):
         self.seconds_before_timeout = seconds
         self.original_trace_function = None
         self.end_time = None
+        self.print_traceback = print_traceback
 
     # Tracing function
     def check_time(self, frame, event, arg):
@@ -137,12 +152,16 @@ class ExpectTimeout(object):
         if exc_type is None:
             return
 
-        # An exception occurred - print it
-        lines = ''.join(
-            traceback.format_exception(
-                exc_type,
-                exc_value,
-                tb)).strip()
+        # An exception occurred
+        if self.print_traceback:
+            lines = ''.join(
+                traceback.format_exception(
+                    exc_type,
+                    exc_value,
+                    tb)).strip()
+        else:
+            lines = traceback.format_exception_only(
+                exc_type, exc_value)[-1].strip()
         print(lines, "(expected)", file=sys.stderr)
         return True  # Ignore it
 
@@ -157,13 +176,13 @@ def long_running_test():
     print("End")
 
 if __name__ == "__main__":
-    with ExpectTimeout(5):
+    with ExpectTimeout(5, print_traceback=False):
         long_running_test()
 
 
 if __name__ == "__main__":
-    with ExpectTimeout(2):
-        with ExpectTimeout(1):
+    with ExpectTimeout(5):
+        with ExpectTimeout(3):
             long_running_test()
         long_running_test()
 

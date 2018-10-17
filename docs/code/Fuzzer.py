@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2018-10-13 16:56:26+02:00
+# Last change: 2018-10-16 12:54:11+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -52,7 +52,9 @@ if __name__ == "__main__":
 
 
 
-# import fuzzingbook_utils
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
 
 import random
 
@@ -501,7 +503,7 @@ class Runner(object):
     PASS = "PASS"
     FAIL = "FAIL"
     UNRESOLVED = "UNRESOLVED"
-    
+
     def __init__(self):
         """Initialize"""
         pass
@@ -537,15 +539,15 @@ class ProgramRunner(Runner):
     def run_process(self, inp=""):
         """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
         return subprocess.run(self.program,
-                                     input=inp,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     universal_newlines=True)
-    
+                              input=inp,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE,
+                              universal_newlines=True)
+
     def run(self, inp=""):
         """Run the program with `inp` as input.  Return test outcome based on result of `subprocess.run()`."""
         result = self.run_process(inp)
-    
+
         if result.returncode == 0:
             outcome = self.PASS
         elif result.returncode < 0:
@@ -559,9 +561,9 @@ class BinaryProgramRunner(ProgramRunner):
     def run_process(self, inp=""):
         """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
         return subprocess.run(self.program,
-                                     input=inp.encode(),
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE)
+                              input=inp.encode(),
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
 
 if __name__ == "__main__":
     cat = ProgramRunner(program="cat")

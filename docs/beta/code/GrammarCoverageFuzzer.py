@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-10-10 23:32:14+02:00
+# Last change: 2018-10-17 14:16:11+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -52,7 +52,9 @@ if __name__ == "__main__":
 
 
 
-# import fuzzingbook_utils
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
 
 if __package__ is None or __package__ == "":
     from Grammars import DIGIT_GRAMMAR, EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL, is_valid_grammar
@@ -149,7 +151,8 @@ def average_length_until_full_coverage(fuzzer):
     sum = 0
     for trial in range(trials):
         fuzzer.reset_coverage()
-        while len(fuzzer.max_expansion_coverage() - fuzzer.expansion_coverage()) > 0:
+        while len(fuzzer.max_expansion_coverage() -
+                  fuzzer.expansion_coverage()) > 0:
             s = fuzzer.fuzz()
             sum += len(s)
 
@@ -385,7 +388,8 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
 
         if new_coverages is None:
             # All expansions covered - use superclass method
-            return GrammarFuzzer.choose_node_expansion(self, node, possible_children)
+            return GrammarFuzzer.choose_node_expansion(
+                self, node, possible_children)
 
         max_new_coverage = max(len(cov) for cov in new_coverages)
         children_with_max_new_coverage = [(i, c) for (i, c) in enumerate(possible_children)
@@ -618,15 +622,15 @@ if __name__ == "__main__":
 
 
 
-LS_GRAMMAR_EBNF = {
-    '<start>':  ['-<options>'],
+LS_EBNF_GRAMMAR = {
+    '<start>': ['-<options>'],
     '<options>': ['<option>*'],
-    '<option>': ['1', 'A', '@', 
-                # many more
-                ]
+    '<option>': ['1', 'A', '@',
+                 # many more
+                 ]
 }
 
-assert is_valid_grammar(LS_GRAMMAR_EBNF)
+assert is_valid_grammar(LS_EBNF_GRAMMAR)
 
 if __package__ is None or __package__ == "":
     from Grammars import convert_ebnf_grammar, srange
@@ -634,14 +638,14 @@ else:
     from .Grammars import convert_ebnf_grammar, srange
 
 
-LS_GRAMMAR_EBNF = {
-    '<start>':  ['-<options>'],
+LS_EBNF_GRAMMAR = {
+    '<start>': ['-<options>'],
     '<options>': ['<option>*'],
     '<option>': srange("ABCFGHLOPRSTUW@abcdefghiklmnopqrstuwx1")
 }
-assert is_valid_grammar(LS_GRAMMAR_EBNF)
+assert is_valid_grammar(LS_EBNF_GRAMMAR)
 
-LS_GRAMMAR = convert_ebnf_grammar(LS_GRAMMAR_EBNF)
+LS_GRAMMAR = convert_ebnf_grammar(LS_EBNF_GRAMMAR)
 
 if __package__ is None or __package__ == "":
     from Fuzzer import ProgramRunner

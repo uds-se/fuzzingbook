@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2018-10-14 23:12:59+02:00
+# Last change: 2018-10-17 15:14:05+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -28,10 +28,10 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-# # Fuzzing Configurations
+# # Testing Configurations
 
 if __name__ == "__main__":
-    print('# Fuzzing Configurations')
+    print('# Testing Configurations')
 
 
 
@@ -44,7 +44,18 @@ if __name__ == "__main__":
 
 
 
-# import fuzzingbook_utils
+if __name__ == "__main__":
+    import os
+    os.system(r'grep --help')
+
+
+# ## Options in Python
+
+if __name__ == "__main__":
+    print('\n## Options in Python')
+
+
+
 
 import argparse
 
@@ -54,14 +65,14 @@ def process_numbers(args=[]):
                         help='an integer for the accumulator')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--sum', dest='accumulate', action='store_const',
-                        const=sum,
-                        help='sum the integers')
+                       const=sum,
+                       help='sum the integers')
     group.add_argument('--min', dest='accumulate', action='store_const',
-                        const=min,
-                        help='compute the minimum')
+                       const=min,
+                       help='compute the minimum')
     group.add_argument('--max', dest='accumulate', action='store_const',
-                        const=max,
-                        help='compute the maximum')
+                       const=max,
+                       help='compute the maximum')
 
     args = parser.parse_args(args)
     print(args.accumulate(args.integers))
@@ -71,7 +82,22 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    process_numbers(["--sum", '1', '2', '3'])
+    process_numbers(["--sum", "1", "2", "3"])
+
+
+# We use the same fixed seed as the notebook to ensure consistency
+from fuzzingbook_utils import set_fixed_seed
+set_fixed_seed.set_fixed_seed()
+
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectError
+else:
+    from .ExpectError import ExpectError
+
+
+if __name__ == "__main__":
+    with ExpectError(print_traceback=False):
+        process_numbers(["--sum", "--max", "1", "2", "3"])
 
 
 # ## A Grammar for Configurations
@@ -88,7 +114,7 @@ else:
     from .Grammars import crange, srange, convert_ebnf_grammar, is_valid_grammar, START_SYMBOL, new_symbol
 
 
-PROCESS_NUMBERS_GRAMMAR_EBNF = {
+PROCESS_NUMBERS_EBNF_GRAMMAR = {
     "<start>": ["<operator> <integers>"],
     "<operator>": ["--sum", "--min", "--max"],
     "<integers>": ["<integer>", "<integers> <integer>"],
@@ -96,9 +122,9 @@ PROCESS_NUMBERS_GRAMMAR_EBNF = {
     "<digit>": crange('0', '9')
 }
 
-assert is_valid_grammar(PROCESS_NUMBERS_GRAMMAR_EBNF)
+assert is_valid_grammar(PROCESS_NUMBERS_EBNF_GRAMMAR)
 
-PROCESS_NUMBERS_GRAMMAR = convert_ebnf_grammar(PROCESS_NUMBERS_GRAMMAR_EBNF)
+PROCESS_NUMBERS_GRAMMAR = convert_ebnf_grammar(PROCESS_NUMBERS_EBNF_GRAMMAR)
 
 if __package__ is None or __package__ == "":
     from GrammarCoverageFuzzer import GrammarCoverageFuzzer
@@ -112,6 +138,14 @@ if __name__ == "__main__":
         print(f.fuzz())
 
 
+if __name__ == "__main__":
+    f = GrammarCoverageFuzzer(PROCESS_NUMBERS_GRAMMAR, min_nonterminals=10)
+    for i in range(3):
+        args = f.fuzz().split()
+        print(args)
+        process_numbers(args)
+
+
 # ## Mining Configuration Options
 
 if __name__ == "__main__":
@@ -120,25 +154,72 @@ if __name__ == "__main__":
 
 
 
+# ### Tracking Arguments
+
+if __name__ == "__main__":
+    print('\n### Tracking Arguments')
+
+
+
+
 import sys
 
 import string
 
+def traceit(frame, event, arg):
+    if event != "call":
+        return
+    method_name = frame.f_code.co_name
+    if method_name != "add_argument":
+        return
+    locals = frame.f_locals
+    print(method_name, locals)
+
+if __name__ == "__main__":
+    sys.settrace(traceit)
+    process_numbers(["--sum", "1", "2", "3"])
+    sys.settrace(None)
+
+
+def traceit(frame, event, arg):
+    if event != "call":
+        return
+    method_name = frame.f_code.co_name
+    if method_name != "add_argument":
+        return
+    locals = frame.f_locals
+    print(locals['args'])
+
+if __name__ == "__main__":
+    sys.settrace(traceit)
+    process_numbers(["--sum", "1", "2", "3"])
+    sys.settrace(None)
+
+
+# ### A Grammar Miner for Options and Arguments
+
+if __name__ == "__main__":
+    print('\n### A Grammar Miner for Options and Arguments')
+
+
+
+
 class ParseInterrupt(Exception):
     pass
 
-class ConfigurationGrammarMiner(object):
+class OptionGrammarMiner(object):
     def __init__(self, function, log=False):
-        self.function = function    # FIXME: Should this be a runner?
+        self.function = function
         self.log = log
 
-class ConfigurationGrammarMiner(ConfigurationGrammarMiner):
+class OptionGrammarMiner(OptionGrammarMiner):
     OPTION_SYMBOL = "<option>"
-    ARGUMENTS_SYMBOL = "<arguments>" 
+    ARGUMENTS_SYMBOL = "<arguments>"
+
     def mine_ebnf_grammar(self):
-        self.grammar = { 
-            START_SYMBOL: [ "(" + self.OPTION_SYMBOL + ")*" + self.ARGUMENTS_SYMBOL],
-            self.OPTION_SYMBOL: [], 
+        self.grammar = {
+            START_SYMBOL: ["(" + self.OPTION_SYMBOL + ")*" + self.ARGUMENTS_SYMBOL],
+            self.OPTION_SYMBOL: [],
             self.ARGUMENTS_SYMBOL: []
         }
         self.current_group = self.OPTION_SYMBOL
@@ -149,13 +230,13 @@ class ConfigurationGrammarMiner(ConfigurationGrammarMiner):
         except ParseInterrupt:
             pass
         sys.settrace(old_trace)
-        
+
         return self.grammar
-    
+
     def mine_grammar(self):
         return convert_ebnf_grammar(self.mine_ebnf_grammar())
 
-class ConfigurationGrammarMiner(ConfigurationGrammarMiner):
+class OptionGrammarMiner(OptionGrammarMiner):
     def traceit(self, frame, event, arg):
         if event != "call":
             return
@@ -169,20 +250,17 @@ class ConfigurationGrammarMiner(ConfigurationGrammarMiner):
         if method_name == "add_argument":
             in_group = repr(type(self_var)).find("Group") >= 0
             self.process_argument(frame.f_locals, in_group)
-            
-        if method_name == "add_mutually_exclusive_group":
+        elif method_name == "add_mutually_exclusive_group":
             self.add_group(frame.f_locals, exclusive=True)
-
-        if method_name == "add_argument_group":
+        elif method_name == "add_argument_group":
             # self.add_group(frame.f_locals, exclusive=False)
             pass
-    
-        if method_name == "parse_args":
+        elif method_name == "parse_args":
             raise ParseInterrupt
 
         return None
 
-class ConfigurationGrammarMiner(ConfigurationGrammarMiner):
+class OptionGrammarMiner(OptionGrammarMiner):
     def process_argument(self, locals, in_group):
         args = locals["args"]
         kwargs = locals["kwargs"]
@@ -193,63 +271,94 @@ class ConfigurationGrammarMiner(ConfigurationGrammarMiner):
             print()
 
         for arg in args:
-            if arg.startswith('-'):
-                if not in_group:
-                    target = self.OPTION_SYMBOL
-                else:
-                    target = self.current_group
-                metavar = None
-                arg = " " + arg
-            else:
-                target = self.ARGUMENTS_SYMBOL
-                metavar = arg
-                arg = ""
+            self.process_arg(arg, in_group, kwargs)
 
-            if "nargs" in kwargs:
-                nargs = kwargs["nargs"]
+class OptionGrammarMiner(OptionGrammarMiner):
+    def process_arg(self, arg, in_group, kwargs):
+        if arg.startswith('-'):
+            if not in_group:
+                target = self.OPTION_SYMBOL
             else:
-                nargs = 1
-            
-            if "action" in kwargs:
-                # No argument
-                param = ""
-                nargs = 0
-            else:
-                if "type" in kwargs and isinstance(kwargs["type"], int):
-                    type_ = "int"
-                else:
-                    type_ = "str"
+                target = self.current_group
+            metavar = None
+            arg = " " + arg
+        else:
+            target = self.ARGUMENTS_SYMBOL
+            metavar = arg
+            arg = ""
 
-                if metavar is None and "metavar" in kwargs:
-                    metavar = kwargs["metavar"]
-                    
-                if metavar is not None:
-                    self.grammar["<" + metavar + ">"] = ["<" + type_ + ">"]
-                else:
-                    metavar = type_
-                    
-                if type_ == "int":
-                    self.grammar["<int>"] = ["(-)?<digit>+"]
-                    self.grammar["<digit>"] = crange('0', '9')
-                    param = " <" + metavar + ">"
-                else:
-                    self.grammar["<str>"] = ["<char>+"]
-                    self.grammar["<char>"] = srange(string.digits + string.ascii_letters + string.punctuation)
-                    param = " <" + metavar + ">"
+        if "nargs" in kwargs:
+            nargs = kwargs["nargs"]
+        else:
+            nargs = 1
 
-            if isinstance(nargs, int):
-                for i in range(nargs):
-                    arg += param
-            else:
-                assert nargs in "?+*"
-                arg += '(' + param + ')' + nargs
-                    
-            if target == self.OPTION_SYMBOL:
-                self.grammar[target].append(arg)
-            else:
-                self.grammar[target].append(arg)
+        param = self.add_parameter(kwargs, metavar)
+        if param == "":
+            nargs = 0
 
-class ConfigurationGrammarMiner(ConfigurationGrammarMiner):
+        if isinstance(nargs, int):
+            for i in range(nargs):
+                arg += param
+        else:
+            assert nargs in "?+*"
+            arg += '(' + param + ')' + nargs
+
+        if target == self.OPTION_SYMBOL:
+            self.grammar[target].append(arg)
+        else:
+            self.grammar[target].append(arg)
+
+import inspect
+
+class OptionGrammarMiner(OptionGrammarMiner):
+    def add_parameter(self, kwargs, metavar):
+        if "action" in kwargs:
+            # No parameter
+            return ""
+
+        type_ = "str"
+        if "type" in kwargs:
+            given_type = kwargs["type"]
+            # int types come as '<class int>'
+            if inspect.isclass(given_type) and issubclass(given_type, int):
+                type_ = "int"
+
+        if metavar is None:
+            if "metavar" in kwargs:
+                metavar = kwargs["metavar"]
+            else:
+                metavar = type_
+
+        self.add_type_rule(type_)
+        if metavar != type_:
+            self.add_metavar_rule(metavar, type_)
+
+        param = " <" + metavar + ">"
+
+        return param
+
+class OptionGrammarMiner(OptionGrammarMiner):
+    def add_type_rule(self, type_):
+        if type_ == "int":
+            self.add_int_rule()
+        else:
+            self.add_str_rule()
+
+    def add_int_rule(self):
+        self.grammar["<int>"] = ["(-)?<digit>+"]
+        self.grammar["<digit>"] = crange('0', '9')
+
+    def add_str_rule(self):
+        self.grammar["<str>"] = ["<char>+"]
+        self.grammar["<char>"] = srange(
+            string.digits +
+            string.ascii_letters +
+            string.punctuation)
+
+    def add_metavar_rule(self, metavar, type_):
+        self.grammar["<" + metavar + ">"] = ["<" + type_ + ">"]
+
+class OptionGrammarMiner(OptionGrammarMiner):
     def add_group(self, locals, exclusive):
         kwargs = locals["kwargs"]
         if self.log:
@@ -267,22 +376,46 @@ class ConfigurationGrammarMiner(ConfigurationGrammarMiner):
         if not required and not exclusive:
             group_expansion = group + "*"
 
-        self.grammar[START_SYMBOL][0] = group_expansion + self.grammar[START_SYMBOL][0]
+        self.grammar[START_SYMBOL][0] = group_expansion + \
+            self.grammar[START_SYMBOL][0]
         self.grammar[group] = []
         self.current_group = group
 
 if __name__ == "__main__":
-    miner = ConfigurationGrammarMiner(process_numbers, log=True)
-    grammar_ebnf = miner.mine_ebnf_grammar()
-    print(grammar_ebnf)
+    miner = OptionGrammarMiner(process_numbers, log=True)
+    ebnf_grammar = miner.mine_ebnf_grammar()
 
 
 if __name__ == "__main__":
-    assert is_valid_grammar(grammar_ebnf)
+    ebnf_grammar["<start>"]
 
 
 if __name__ == "__main__":
-    grammar = convert_ebnf_grammar(grammar_ebnf)
+    ebnf_grammar["<group-1>"]
+
+
+if __name__ == "__main__":
+    ebnf_grammar["<option>"]
+
+
+if __name__ == "__main__":
+    ebnf_grammar["<arguments>"]
+
+
+if __name__ == "__main__":
+    ebnf_grammar["<integers>"]
+
+
+if __name__ == "__main__":
+    ebnf_grammar["<int>"]
+
+
+if __name__ == "__main__":
+    assert is_valid_grammar(ebnf_grammar)
+
+
+if __name__ == "__main__":
+    grammar = convert_ebnf_grammar(ebnf_grammar)
     assert is_valid_grammar(grammar)
 
 
@@ -292,10 +425,10 @@ if __name__ == "__main__":
         print(f.fuzz())
 
 
-# ## Complex Args
+# ## Testing Autopep8
 
 if __name__ == "__main__":
-    print('\n## Complex Args')
+    print('\n## Testing Autopep8')
 
 
 
@@ -303,6 +436,14 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     import os
     os.system(r'autopep8 --help')
+
+
+# ### Autopep8 Setup
+
+if __name__ == "__main__":
+    print('\n### Autopep8 Setup')
+
+
 
 
 import os
@@ -315,42 +456,82 @@ def find_executable(name):
     return None
 
 if __name__ == "__main__":
-    find_executable("autopep8")
+    autopep8_executable = find_executable("autopep8")
+    assert autopep8_executable is not None
+    autopep8_executable
 
 
 def autopep8():
     executable = find_executable("autopep8")
+    
+    # First line has to contain "/usr/bin/env python" or like
     first_line = open(executable).readline()
     assert first_line.find("python") >= 0
+    
     contents = open(executable).read()
     exec(contents)
 
-if __name__ == "__main__":
-    miner = ConfigurationGrammarMiner(autopep8, log=True)
-
+# ### Mining an Autopep8 Grammar
 
 if __name__ == "__main__":
-    grammar = miner.mine_ebnf_grammar()
-    print(grammar["<option>"])
+    print('\n### Mining an Autopep8 Grammar')
 
 
-if __name__ == "__main__":
-    grammar = convert_ebnf_grammar(grammar_ebnf)
-    assert is_valid_grammar(grammar)
-    print(grammar["<option>"])
 
 
 if __name__ == "__main__":
-    grammar["<arguments>"] = [" foo.py"]
-    f = GrammarCoverageFuzzer(grammar, max_nonterminals=3)
+    autopep8_miner = OptionGrammarMiner(autopep8)
+
+
+if __name__ == "__main__":
+    autopep8_ebnf_grammar = autopep8_miner.mine_ebnf_grammar()
+
+
+if __name__ == "__main__":
+    print(autopep8_ebnf_grammar["<option>"])
+
+
+if __name__ == "__main__":
+    autopep8_ebnf_grammar["<line>"]
+
+
+if __name__ == "__main__":
+    autopep8_ebnf_grammar["<arguments>"]
+
+
+if __name__ == "__main__":
+    autopep8_ebnf_grammar["<files>"]
+
+
+if __name__ == "__main__":
+    autopep8_ebnf_grammar["<arguments>"] = [" <files>"]
+    autopep8_ebnf_grammar["<files>"] = ["foo.py"]
+    assert is_valid_grammar(autopep8_ebnf_grammar)
+
+
+# ### Creating Autopep8 Options
+
+if __name__ == "__main__":
+    print('\n### Creating Autopep8 Options')
+
+
+
+
+if __name__ == "__main__":
+    autopep8_grammar = convert_ebnf_grammar(autopep8_ebnf_grammar)
+    assert is_valid_grammar(autopep8_grammar)
+
+
+if __name__ == "__main__":
+    f = GrammarCoverageFuzzer(autopep8_grammar, max_nonterminals=4)
     for i in range(20):
         print(f.fuzz())
 
 
 def create_foo_py():
     open("foo.py", "w").write("""
-def twice(x):
-    return x+x
+def twice(x = 2):
+    return  x  +  x
 """)
 
 if __name__ == "__main__":
@@ -358,7 +539,12 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    print(open("foo.py").read())
+    print(open("foo.py").read(), end="")
+
+
+if __name__ == "__main__":
+    import os
+    os.system(r'autopep8 foo.py')
 
 
 if __package__ is None or __package__ == "":
@@ -368,7 +554,7 @@ else:
 
 
 if __name__ == "__main__":
-    f = GrammarCoverageFuzzer(grammar, max_nonterminals=5)
+    f = GrammarCoverageFuzzer(autopep8_grammar, max_nonterminals=5)
     for i in range(20):
         invocation = "autopep8" + f.fuzz()
         print("$ " + invocation)
@@ -379,21 +565,25 @@ if __name__ == "__main__":
             print(result.stderr, end="")
 
 
+if __name__ == "__main__":
+    print(open("foo.py").read(), end="")
+
+
 import os
 
 if __name__ == "__main__":
     os.remove("foo.py")
 
 
-# ## Putting it all Together
+# ## Classes for Fuzzing Configuration Options
 
 if __name__ == "__main__":
-    print('\n## Putting it all Together')
+    print('\n## Classes for Fuzzing Configuration Options')
 
 
 
 
-class ConfigurationRunner(ProgramRunner):
+class OptionRunner(ProgramRunner):
     def __init__(self, program, arguments=None):
         if isinstance(program, str):
             self.base_executable = program
@@ -406,6 +596,7 @@ class ConfigurationRunner(ProgramRunner):
             self.set_arguments(arguments)
         super().__init__(program)
 
+class OptionRunner(OptionRunner):
     def find_contents(self):
         self._executable = find_executable(self.base_executable)
         first_line = open(self._executable).readline()
@@ -415,81 +606,117 @@ class ConfigurationRunner(ProgramRunner):
     def invoker(self):
         exec(self.contents)
     
-    def find_grammar(self):
-        miner = ConfigurationGrammarMiner(self.invoker)
-        self._grammar = miner.mine_grammar()
-
-    def grammar(self):
-        return self._grammar
-
     def executable(self):
         return self._executable
 
-    def set_arguments(self, args):
-        self._grammar["<arguments>"] = [" " + args]
+class OptionRunner(OptionRunner):
+    def find_grammar(self):
+        miner = OptionGrammarMiner(self.invoker)
+        self._ebnf_grammar = miner.mine_ebnf_grammar()
+    
+    def ebnf_grammar(self):
+        return self._ebnf_grammar
         
+    def grammar(self):
+        return convert_ebnf_grammar(self._ebnf_grammar)
+
+class OptionRunner(OptionRunner):
+    def set_arguments(self, args):
+        self._ebnf_grammar["<arguments>"] = [" " + args]
+
     def set_invocation(self, program):
         self.program = program
 
 if __name__ == "__main__":
-    conf_runner = ConfigurationRunner("autopep8", "foo.py")
+    autopep8_runner = OptionRunner("autopep8", "foo.py")
 
 
 if __name__ == "__main__":
-    conf_runner.grammar()["<option>"]
+    print(autopep8_runner.ebnf_grammar()["<option>"])
 
 
-class ConfigurationFuzzer(GrammarCoverageFuzzer):
+class OptionFuzzer(GrammarCoverageFuzzer):
     def __init__(self, runner, *args, **kwargs):
+        assert issubclass(type(runner), OptionRunner)
         self.runner = runner
         grammar = runner.grammar()
         super().__init__(grammar, *args, **kwargs)
 
+class OptionFuzzer(OptionFuzzer):
     def run(self, runner=None, inp=""):
         if runner is None:
             runner = self.runner
+        assert issubclass(type(runner), OptionRunner)
         invocation = runner.executable() + " " + self.fuzz()
         runner.set_invocation(invocation.split())
         return runner.run(inp)
 
-if __name__ == "__main__":
-    conf_fuzzer = ConfigurationFuzzer(conf_runner, max_nonterminals=5)
-
+# ### Example: Autopep8
 
 if __name__ == "__main__":
-    conf_fuzzer.fuzz()
-
-
-if __name__ == "__main__":
-    conf_fuzzer.run(conf_runner)
-
-
-# ## MyPy
-
-if __name__ == "__main__":
-    print('\n## MyPy')
+    print('\n### Example: Autopep8')
 
 
 
 
 if __name__ == "__main__":
-    mypy = ConfigurationRunner("mypy", "foo.py")
-    print(mypy.grammar()["<option>"])
+    autopep8_fuzzer = OptionFuzzer(autopep8_runner, max_nonterminals=5)
 
 
 if __name__ == "__main__":
-    mypy_fuzzer = ConfigurationFuzzer(mypy, max_nonterminals=3)
+    for i in range(3):
+        print(autopep8_fuzzer.fuzz())
+
+
+if __name__ == "__main__":
+    autopep8_fuzzer.run(autopep8_runner)
+
+
+# ### Example: MyPy
+
+if __name__ == "__main__":
+    print('\n### Example: MyPy')
+
+
+
+
+if __name__ == "__main__":
+    assert find_executable("mypy") is not None
+
+
+if __name__ == "__main__":
+    mypy_runner = OptionRunner("mypy", "foo.py")
+    print(mypy_runner.ebnf_grammar()["<option>"])
+
+
+if __name__ == "__main__":
+    mypy_fuzzer = OptionFuzzer(mypy_runner, max_nonterminals=5)
     for i in range(10):
         print(mypy_fuzzer.fuzz())
 
 
+# ### Example: Notedown
+
 if __name__ == "__main__":
-    notedown = ConfigurationRunner("notedown")
-    print(notedown.grammar()["<option>"])
+    print('\n### Example: Notedown')
+
+
 
 
 if __name__ == "__main__":
-    notedown_fuzzer = ConfigurationFuzzer(notedown, max_nonterminals=3)
+    assert find_executable("notedown") is not None
+
+
+if __name__ == "__main__":
+    notedown_runner = OptionRunner("notedown")
+
+
+if __name__ == "__main__":
+    print(notedown_runner.ebnf_grammar()["<option>"])
+
+
+if __name__ == "__main__":
+    notedown_fuzzer = OptionFuzzer(notedown_runner, max_nonterminals=5)
     for i in range(10):
         print(notedown_fuzzer.fuzz())
 
@@ -500,6 +727,69 @@ if __name__ == "__main__":
     print('\n## Combinatorial Testing')
 
 
+
+
+from itertools import combinations
+
+if __name__ == "__main__":
+    option_list = notedown_runner.ebnf_grammar()["<option>"]
+    pairs = list(combinations(option_list, 2))
+
+
+if __name__ == "__main__":
+    len(pairs)
+
+
+if __name__ == "__main__":
+    print(pairs[:20])
+
+
+def pairwise(option_list):
+    return [option_1 +
+            option_2 for (option_1, option_2) in combinations(option_list, 2)]
+
+if __name__ == "__main__":
+    print(pairwise(option_list)[:20])
+
+
+from copy import deepcopy
+
+if __name__ == "__main__":
+    notedown_grammar = notedown_runner.grammar()
+    pairwise_notedown_grammar = deepcopy(notedown_grammar)
+    pairwise_notedown_grammar["<option>"] = pairwise(notedown_grammar["<option>"])
+    assert is_valid_grammar(pairwise_notedown_grammar)
+
+
+if __name__ == "__main__":
+    notedown_fuzzer = GrammarCoverageFuzzer(pairwise_notedown_grammar, max_nonterminals=4)
+
+
+if __name__ == "__main__":
+    for i in range(10):
+        print(notedown_fuzzer.fuzz())
+
+
+if __name__ == "__main__":
+    for combination_length in range(1, 20):
+        tuples = list(combinations(option_list, combination_length))
+        print(combination_length, len(tuples))
+
+
+if __name__ == "__main__":
+    len(autopep8_runner.ebnf_grammar()["<option>"])
+
+
+if __name__ == "__main__":
+    len(autopep8_runner.ebnf_grammar()["<option>"]) * (len(autopep8_runner.ebnf_grammar()["<option>"]) - 1)
+
+
+if __name__ == "__main__":
+    len(mypy_runner.ebnf_grammar()["<option>"])
+
+
+if __name__ == "__main__":
+    len(mypy_runner.ebnf_grammar()["<option>"]) * (len(mypy_runner.ebnf_grammar()["<option>"]) - 1)
 
 
 # ## Lessons Learned
@@ -526,36 +816,123 @@ if __name__ == "__main__":
 
 
 
-# ## Exercises
+# ### Exercise 1: Configuration Files
 
 if __name__ == "__main__":
-    print('\n## Exercises')
+    print('\n### Exercise 1: Configuration Files')
 
 
 
 
-# ### Exercise 1: _Title_
-
-if __name__ == "__main__":
-    print('\n### Exercise 1: _Title_')
-
-
-
+import configparser
 
 if __name__ == "__main__":
-    # Some code that is part of the exercise
-    pass
+    config = configparser.ConfigParser()
+    config['DEFAULT'] = {'ServerAliveInterval': '45',
+                         'Compression': 'yes',
+                         'CompressionLevel': '9'}
+    config['bitbucket.org'] = {}
+    config['bitbucket.org']['User'] = 'hg'
+    config['topsecret.server.com'] = {}
+    topsecret = config['topsecret.server.com']
+    topsecret['Port'] = '50022'     # mutates the parser
+    topsecret['ForwardX11'] = 'no'  # same here
+    config['DEFAULT']['ForwardX11'] = 'yes'
+    with open('example.ini', 'w') as configfile:
+        config.write(configfile)
+
+    with open('example.ini') as configfile:
+        print(configfile.read(), end="")
 
 
 if __name__ == "__main__":
-    # Some code for the solution
-    2 + 2
+    config = configparser.ConfigParser()
+    config.read('example.ini')
+    topsecret = config['topsecret.server.com']
+    topsecret['Port']
 
 
-# ### Exercise 2: _Title_
+# #### Part 1: Read Configuration
 
 if __name__ == "__main__":
-    print('\n### Exercise 2: _Title_')
+    print('\n#### Part 1: Read Configuration')
 
 
+
+
+# #### Part 2: Create a Configuration Grammar
+
+if __name__ == "__main__":
+    print('\n#### Part 2: Create a Configuration Grammar')
+
+
+
+
+# #### Part 3: Mine a Configuration Grammar
+
+if __name__ == "__main__":
+    print('\n#### Part 3: Mine a Configuration Grammar')
+
+
+
+
+class TrackingConfigParser(configparser.ConfigParser):
+    def __getitem__(self, key):
+        print("Accessing", repr(key))
+        return super().__getitem__(key)
+
+if __name__ == "__main__":
+    tracking_config_parser = TrackingConfigParser()
+    tracking_config_parser.read('example.ini')
+    section = tracking_config_parser['topsecret.server.com']
+
+
+import os
+
+if __name__ == "__main__":
+    os.remove("example.ini")
+
+
+# ### Exercise 2: C Option Fuzzing
+
+if __name__ == "__main__":
+    print('\n### Exercise 2: C Option Fuzzing')
+
+
+
+
+# #### Part 1: Getopt Fuzzing
+
+if __name__ == "__main__":
+    print('\n#### Part 1: Getopt Fuzzing')
+
+
+
+
+# #### Part 2: Fuzzing Long Options in C
+
+if __name__ == "__main__":
+    print('\n#### Part 2: Fuzzing Long Options in C')
+
+
+
+
+# ### Exercise 3: Expansions in Context
+
+if __name__ == "__main__":
+    print('\n### Exercise 3: Expansions in Context')
+
+
+
+
+if __name__ == "__main__":
+    autopep8_runner.ebnf_grammar()["<line>"]
+
+
+if __name__ == "__main__":
+    autopep8_runner.ebnf_grammar()["<int>"]
+
+
+if __name__ == "__main__":
+    autopep8_runner.ebnf_grammar()["<digit>"]
 
