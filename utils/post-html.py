@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-# Expand HEADER and FOOTER elements in generated HTML
-# Usage: add-header-and-footer.py CHAPTER_NAME CHAPTER_1 CHAPTER_2 ...
+# Expand elements in generated HTML
+# Usage: post-html.py CHAPTER_NAME CHAPTER_1 CHAPTER_2 ...
 
 # Note: I suppose this could also be done using Jinja2 templates and ipypublish,
-# but this thing here works pretty well.  If you'd like to convert this into some more elegant
-# framework, implement it and send me a pull request -- AZ
+# but this thing here works pretty well.
+# If you'd like to convert this into some more elegant framework,
+# implement it and send me a pull request -- AZ
 
 import argparse
 import os.path
@@ -54,6 +55,7 @@ menu_end = r"""
         <ul>
             <li><a href="__SHARE_TWITTER__" target="popup" __TWITTER_ONCLICK__><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
             <li><a href="__SHARE_FACEBOOK__" target="popup" __FACEBOOK_ONCLICK__><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
+            <li><a href="__SHARE_MAIL__"><i class="fa fa-fw fa-envelope"></i> Share by Email</a>
             <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
      </li>
@@ -379,10 +381,19 @@ def cgi_escape(text):
     }
     return "".join(cgi_escape_table.get(c,c) for c in text)
 
-share_twitter = "https://twitter.com/intent/tweet?text=" + \
-    cgi_escape(r'I just read "' + chapter_title + '" (part of @FuzzingBook) at ' + chapter_html)
-share_facebook = "https://www.facebook.com/sharer/sharer.php?u=" + cgi_escape(chapter_html)
+if args.home:
+    share_message = (r'I just read "' + booktitle 
+        + r'" (@FuzzingBook) at ' + site_html)
+    share_title = booktitle
+else:
+    share_message = (r'I just read "' + chapter_title 
+        + r'" (part of @FuzzingBook) at ' + chapter_html)
+    share_title = chapter_title
 
+share_twitter = "https://twitter.com/intent/tweet?text=" + cgi_escape(share_message)
+share_facebook = "https://www.facebook.com/sharer/sharer.php?u=" + cgi_escape(chapter_html)
+share_mail = ("mailto:?subject=" + cgi_escape(share_title) 
+    + "&body=" + cgi_escape(share_message))
 
 # Authors
 def bibtex_escape(authors):
@@ -477,6 +488,7 @@ chapter_contents = chapter_contents \
     .replace("__FACEBOOK_ONCLICK__", facebook_onclick) \
     .replace("__SHARE_TWITTER__", share_twitter) \
     .replace("__SHARE_FACEBOOK__", share_facebook) \
+    .replace("__SHARE_MAIL__", share_mail) \
     .replace("__DATE__", notebook_modification_datetime) \
     .replace("__YEAR__", notebook_modification_year)
 
