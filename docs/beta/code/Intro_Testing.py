@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
-# Last change: 2018-10-17 14:47:34+02:00
+# Last change: 2018-10-18 10:07:20+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -53,12 +53,66 @@ def my_sqrt(x):
         guess = (approx + x / approx) / 2
     return approx
 
+# ### Understanding Python Programs
+
+if __name__ == "__main__":
+    print('\n### Understanding Python Programs')
+
+
+
+
+# ### Running a Function
+
+if __name__ == "__main__":
+    print('\n### Running a Function')
+
+
+
+
 if __name__ == "__main__":
     my_sqrt(4)
 
 
 if __name__ == "__main__":
     my_sqrt(2)
+
+
+# ### Interacting with Notebooks
+
+if __name__ == "__main__":
+    print('\n### Interacting with Notebooks')
+
+
+
+
+# ### Debugging a Function
+
+if __name__ == "__main__":
+    print('\n### Debugging a Function')
+
+
+
+
+def my_sqrt_with_log(x):
+    """Computes the square root of x, using the Newton–Raphson method"""
+    approx = None
+    guess = x / 2
+    while approx != guess:
+        print("approx =", approx)  # <-- New
+        approx = guess
+        guess = (approx + x / approx) / 2
+    return approx
+
+if __name__ == "__main__":
+    my_sqrt_with_log(9)
+
+
+# ### Checking a Function
+
+if __name__ == "__main__":
+    print('\n### Checking a Function')
+
+
 
 
 if __name__ == "__main__":

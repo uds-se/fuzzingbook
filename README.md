@@ -49,7 +49,7 @@ There are alternatives to mybinder.org; see below.
 
 If mybinder.org does not work or match your needs, you have a number of alternatives:
 
-1. Download the Python code (using the menu at the top) and edit and run it in your favourite environment.  This is easy to do and does not require lots of resources.
+1. Download the Python code (using the menu at the top) and edit and run it in your favorite environment.  This is easy to do and does not require lots of resources.
 
 2. [Install jupyter notebook on your machine](https://www.dataquest.io/blog/jupyter-notebook-tutorial/) and clone the `fuzzingbook` project repository [from the Github project page](https://github.com/uds-se/fuzzingbook).  Go to the `notebooks/` folder, where you can then open, edit, and run all notebooks at your leisure.
 
