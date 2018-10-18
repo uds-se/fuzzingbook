@@ -635,8 +635,7 @@ publish: docs
 	git add $(DOCS_TARGET)* binder/postBuild README.md
 	-git status
 	-git commit -m "Doc update" $(DOCS_TARGET) binder README.md
-	@echo "Now use 'git push' to place docs on website,"
-	@echo "and then 'make binder' to speed up binder startup"
+	@echo "Now use 'make push' to place docs on website and trigger a mybinder update"
 
 # Add/update HTML code in repository
 publish-html: html
@@ -722,12 +721,22 @@ upload-dist: dist
 	cd $(DOCS_TARGET); twine upload dist/*.whl dist/*.tar.gz
 
 
+
 ## Binder services
-# custom.css
+# Make sure we have our custom.css in Binder, too
 binder/postBuild: binder/postBuild.template $(HTML_TARGET)custom.css
 	cat binder/postBuild.template $(HTML_TARGET)custom.css > $@
 	echo END >> $@
 	chmod +x $@
+
+# Force recreation of binder service; avoids long waiting times for first user
+binder: .FORCE
+	open $(BINDER_URL)
+
+# After a git push, we want binder to update; "make push" does this
+push: .FORCE
+	git push
+	open $(BINDER_URL)
 
 # Debugging binder
 # This is the same system as mybinder uses, but should be easier to debug
@@ -739,9 +748,6 @@ binder/binder.log: .FORCE
 	@docker version > /dev/null
 	jupyter-repo2docker --debug $(GITHUB_REPO) 2>&1 | tee $@
 
-# Force recreation of binder service; avoids long waiting times for first user
-binder: .FORCE
-	open $(BINDER_URL)
 
 
 ## Cleanup
