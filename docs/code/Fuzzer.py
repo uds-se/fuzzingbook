@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2018-10-16 12:54:11+02:00
+# Last change: 2018-10-18 12:20:25+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -52,9 +52,12 @@ if __name__ == "__main__":
 
 
 
-# We use the same fixed seed as the notebook to ensure consistency
-from fuzzingbook_utils import set_fixed_seed
-set_fixed_seed.set_fixed_seed()
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    from fuzzingbook_utils import set_fixed_seed
+    set_fixed_seed.set_fixed_seed()
+
+
 
 import random
 

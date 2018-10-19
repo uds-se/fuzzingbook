@@ -52,8 +52,7 @@ HEADER = """#!/usr/bin/env python3
 """
 
 # Replacement for "import fuzzingbook_utils"
-SET_FIXED_SEED = """
-# We use the same fixed seed as the notebook to ensure consistency
+SET_FIXED_SEED = r"""# We use the same fixed seed as the notebook to ensure consistency
 from fuzzingbook_utils import set_fixed_seed
 set_fixed_seed.set_fixed_seed()
 """
@@ -136,7 +135,7 @@ def export_notebook_code(notebook_name, path=None):
 
             if RE_IMPORT_FUZZINGBOOK_UTILS.match(code):
                 # Don't import all of fuzzingbook_utils (requires nbformat & Ipython)
-                print_utf8(SET_FIXED_SEED)
+                print_if_main(SET_FIXED_SEED)
             elif RE_IGNORE.match(code):
                 # Code to ignore - comment out
                 print_utf8("\n" + prefix_code(code, "# ") + "\n")
