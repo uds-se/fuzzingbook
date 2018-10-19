@@ -18,12 +18,12 @@ READY_CHAPTERS = \
 TODO_CHAPTERS = \
 	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
-	Reducer.ipynb
+	Reducer.ipynb \
+	GrammarMiner.ipynb
 
 	# ConstraintGrammarFuzzer.ipynb
 	# APIFuzzer.ipynb
 	# GUIFuzzer.ipynb
-	# GrammarMiner.ipynb
 
 # Only these will appear on the beta site
 BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
