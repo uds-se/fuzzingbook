@@ -580,7 +580,7 @@ check-crossref crossref xref: $(SOURCES)
 
 # Stats
 stats: $(SOURCES)
-	@cd notebooks; ../utils/nbstats.py $(CHAPTERS) $(APPENDICES)
+	@cd notebooks; ../utils/nbstats.py $(SOURCE_FILES)
 
 # Run all code.  This should produce no failures.
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
