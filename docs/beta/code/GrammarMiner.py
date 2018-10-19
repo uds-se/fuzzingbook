@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2018-10-19 14:25:17+02:00
+# Last change: 2018-10-19 14:28:26+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
