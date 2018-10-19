@@ -36,9 +36,12 @@ if __name__ == "__main__":
 
 
 
-# We use the same fixed seed as the notebook to ensure consistency
-from fuzzingbook_utils import set_fixed_seed
-set_fixed_seed.set_fixed_seed()
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    from fuzzingbook_utils import set_fixed_seed
+    set_fixed_seed.set_fixed_seed()
+
+
 
 if __package__ is None or __package__ == "":
     from GrammarFuzzer import GrammarFuzzer

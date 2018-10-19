@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-10-16 12:54:11+02:00
+# Last change: 2018-10-19 10:35:51+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -36,9 +36,12 @@ if __name__ == "__main__":
 
 
 
-# We use the same fixed seed as the notebook to ensure consistency
-from fuzzingbook_utils import set_fixed_seed
-set_fixed_seed.set_fixed_seed()
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    from fuzzingbook_utils import set_fixed_seed
+    set_fixed_seed.set_fixed_seed()
+
+
 
 if __package__ is None or __package__ == "":
     from Grammars import EXPR_GRAMMAR, START_SYMBOL
@@ -59,15 +62,17 @@ RE_NONTERMINAL = re.compile(r'(<[a-zA-Z_]*>)')
 
 class PEGParser:
     def __init__(self, grammar):
-        def split(rule): return tuple(
-            s for s in re.split(
-                RE_NONTERMINAL, rule) if s)
+        def split(rule):
+            return tuple(s for s in
+                         re.split(RE_NONTERMINAL, rule) if s)
         self.grammar = {k: [split(l) for l in rules]
                         for k, rules in grammar.items()}
 
     def literal_match(self, part, text, cursor):
-        return (cursor + len(part), (part, [])
-                ) if text[cursor:].startswith(part) else (cursor, None)
+        if text[cursor:].startswith(part):
+            return (cursor + len(part), (part, []))
+        else:
+            return (cursor, None)
 
     # memoize repeated calls.
     @functools.lru_cache(maxsize=None)
@@ -87,8 +92,8 @@ class PEGParser:
         results = []
         for part in parts:
             # get the matcher function
-            matcher = (self.unify_key if is_symbol(
-                part) else self.literal_match)
+            matcher = (self.unify_key
+                       if is_symbol(part) else self.literal_match)
             # compute the cursor, and the result from it.
             cursor, res = matcher(part, text, cursor)
             if res is None:
@@ -124,10 +129,7 @@ if __name__ == "__main__":
 
 
 def split_tokens(rule):
-    lst = [i for i in re.split(RE_NONTERMINAL, rule) if i != '']
-    if lst == []:
-        return ['']
-    return lst
+    return [i for i in re.split(RE_NONTERMINAL, rule) if i != ''] or ['']
 
 if __name__ == "__main__":
     grammar = {'<start>': ['<expr>'],
@@ -292,7 +294,7 @@ def parse(grammar, inp):
     stack = [k]
     return parse_helper(grammar, parse_tbl, stack, list(inp))
 
-def to_tree(arr):
+def linear_to_tree(arr):
     stack = []
     while arr:
         elt = arr.pop(0)
@@ -308,8 +310,135 @@ def to_tree(arr):
     return stack[0]
 
 if __name__ == "__main__":
-    tree = to_tree(parse(new_grammar, '(1+2)'))
+    tree = linear_to_tree(parse(new_grammar, '(1+2)'))
     display_tree(tree)
+
+
+# ### Earley parser
+
+if __name__ == "__main__":
+    print('\n### Earley parser')
+
+
+
+
+def epsilon_convert(rule): return [i.strip() for i in rule if i != '']
+
+if __name__ == "__main__":
+    new_grammar = {k: [epsilon_convert(split_tokens(e)) for e in EXPR_GRAMMAR[k]] for k in EXPR_GRAMMAR}
+    new_grammar
+
+
+@fixpoint
+def nullable_(rules, e):
+    for A, expression in rules:
+        if all((token in e)  for token in expression): e |= {A}
+    return (rules, e)
+
+def nullable(grammar):
+    return nullable_(rules(grammar), set())[1]
+
+class State(object):
+    def __init__(self, name, expr, dot, origin, children=[]):
+        self.name, self.expr, self.dot, self.origin = name, expr, dot, origin
+        self.children = children[:]
+    def finished(self): return self.dot >= len(self.expr)
+    def shift(self):
+        return State(self.name, self.expr, self.dot+1, self.origin, self.children)
+    def symbol(self): return self.expr[self.dot]
+
+    def _t(self): return (self.name, self.expr, self.dot, self.origin.i, tuple(self.children))
+    def __hash__(self): return hash(self._t())
+    def __eq__(self, other): return  self._t() == other._t()
+
+class Column(object):
+    def __init__(self, i, token):
+        self.token, self.states, self._unique, self.i = token, [], {}, i
+
+    def add(self, state):
+        if state in self._unique: return self._unique[state]
+        self._unique[state] = state
+        self.states.append(state)
+        return self._unique[state]
+
+def predict(col, sym, grammar):
+    for alt in grammar[sym]:
+        col.add(State(sym, tuple(alt), 0, col))
+
+def scan(col, state, token):
+    if token == col.token:
+        col.add(state.shift())
+
+def complete(col, state, grammar):
+    for st in state.origin.states:
+        if st.finished(): continue
+        if state.name != st.symbol(): continue
+        col.add(st.shift()).children.append(state)
+
+# http://courses.washington.edu/ling571/ling571_fall_2010/slides/parsing_earley.pdf
+# https://github.com/tomerfiliba/tau/blob/master/earley3.py
+def parse(words, grammar, start):
+    # Aycock 2002 Practical Earley Parsing -- treatment of epsilon
+    epsilon = nullable(grammar)
+    alt = tuple(*grammar[start])
+    chart = [Column(i, tok) for i,tok in enumerate([None, *words])]
+    chart[0].add(State(start, alt, 0, chart[0], []))
+
+    for i, col in enumerate(chart):
+        for state in col.states:
+            if state.finished():
+                complete(col, state, grammar)
+            else:
+                sym = state.symbol()
+                if sym in grammar:
+                    predict(col, sym, grammar)
+                    if sym in epsilon:
+                        # note that precomputation of epsilon derivation can result in infinite
+                        # loops for certain grammars. Hence, we mark a nullable non-terminal
+                        # but do not expand it.
+                        col.add(state.shift()).children.append(State(sym + '*', tuple(), 0, col))
+                else:
+                    if i + 1 >= len(chart): continue
+                    scan(chart[i+1], state, sym)
+    return chart
+
+def process_expr(expr, children, grammar):
+    terms = iter([(i,[]) for i in expr if i not in grammar])
+    nts = iter([node_translator(i, grammar) for i in  children])
+    return [next(terms if i not in grammar else nts) for i in expr]
+
+def node_translator(state, grammar):
+    return (state.name, process_expr(state.expr, state.children, grammar))
+
+if __name__ == "__main__":
+    new_grammar = {k: [epsilon_convert(split_tokens(e)) for e in EXPR_GRAMMAR[k]] for k in EXPR_GRAMMAR}
+    table = parse(list('1+2+3'), new_grammar, '<start>')
+    states = [st for st in table[-1].states if st.name == '<start>' and st.finished()]
+    for state in states:
+        display_tree(node_translator(state, new_grammar))
+
+
+# #### Ambiguous grammars generates parse forests
+
+if __name__ == "__main__":
+    print('\n#### Ambiguous grammars generates parse forests')
+
+
+
+
+if __name__ == "__main__":
+    grammar= {
+            '<start>': ['<A>'],
+            '<A>': ['<A>+<A>', 'a'],
+            }
+
+
+if __name__ == "__main__":
+    new_grammar = {k: [epsilon_convert(split_tokens(e)) for e in grammar[k]] for k in grammar}
+    table = parse(list('a+a+a'), new_grammar, '<start>')
+    states = [st for st in table[-1].states if st.name == '<start>' and st.finished()]
+    for state in states:
+        display_tree(node_translator(state, new_grammar))
 
 
 # ## Lessons Learned
