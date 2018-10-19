@@ -656,13 +656,15 @@ publish-code: code
 	$(RM) $(DOCS_TARGET)code/*.py.out $(DOCS_TARGET)code/*.cfg $(DOCS_TARGET)code/*.in
 	$(RM) -r $(DOCS_TARGET)code/__pycache__ \
 	 	$(DOCS_TARGET)code/fuzzingbook_utils/__pycache__
-	$(RM) $(DOCS_TARGET)code/404.py $(RM) $(DOCS_TARGET)code/index.py 
-	$(RM) $(DOCS_TARGET)code/Template.py $(DOCS_TARGET)code/Guide_for_Authors.py
+	$(RM) $(DOCS_TARGET)code/404.py \
+		  $(DOCS_TARGET)code/index.py \
+		  $(DOCS_TARGET)code/Template.py \
+		  $(DOCS_TARGET)code/Guide_for_Authors.py
 
 dist publish-dist: check-import check-code \
-	publish-code delete-betas $(DOCS_TARGET)code/fuzzingbook.zip
+	publish-code delete-betas $(DOCS_TARGET)dist/fuzzingbook.zip
 
-$(DOCS_TARGET)code/fuzzingbook.zip: publish-code delete-betas
+$(DOCS_TARGET)dist/fuzzingbook.zip: $(PYS) $(CODE_TARGET)README.md $(CODE_TARGET)LICENSE.md
 	@-mkdir $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)dist/*
 	$(RM) -r $(DOCS_TARGET)fuzzingbook
