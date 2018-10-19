@@ -324,6 +324,7 @@ help:
 	@echo "* make reformat -> reformat notebook Python code according to PEP8 guidelines"
 	@echo "* make style -> style checker"
 	@echo "* make crossref -> cross reference checker"
+	@echo "* make stats -> report statistics"
 	@echo "* make clean -> delete all derived files"
 	@echo ""
 	@echo "Created files end here:"
@@ -575,6 +576,11 @@ check-crossref crossref xref: $(SOURCES)
 			echo '* ' $$file; \
 		fi \
 	done
+
+
+# Stats
+stats: $(SOURCES)
+	@cd notebooks; ../utils/nbstats.py $(CHAPTERS) $(APPENDICES)
 
 # Run all code.  This should produce no failures.
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
