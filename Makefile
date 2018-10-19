@@ -263,14 +263,18 @@ ZIP_OPTIONS = -r
 
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
+.PHONY: chapters default
 chapters default: html code
 
 # The book is recreated after any change to any source
+.PHONY: book all and more
 book:	book-html book-pdf
 all:	chapters pdf code slides book
 and more:	word markdown epub
 
 # Individual targets
+.PHONY: html pdf python code slides word doc docx md markdown epub
+.PHONY: full-notebooks full fulls book-pdf book-html
 html:	ipypublish-chapters $(HTMLS)
 pdf:	ipypublish-chapters $(PDFS)
 python code:	$(PYS)
@@ -283,6 +287,7 @@ full-notebooks full fulls: $(FULLS)
 book-pdf:  ipypublish-book $(BOOK_PDF)
 book-html: ipypublish-book $(BOOK_HTML)
 
+.PHONY: ipypublish-book ipypublish-chapters
 ifeq ($(PUBLISH),bookbook)
 ipypublish-book:
 ipypublish-chapters:
@@ -303,6 +308,7 @@ ipypublish-chapters:
 endif
 endif
 
+.PHONY: edit jupyter lab notebook
 # Invoke notebook and editor: `make jupyter lab`
 edit notebook:
 	jupyter notebook
@@ -314,6 +320,7 @@ jupyter:
 
 
 # Help
+.PHONY: help
 help:
 	@echo "Welcome to the 'fuzzingbook' Makefile!"
 	@echo ""
@@ -446,6 +453,7 @@ $(DOCS_TARGET)beta/%: .FORCE
 %-all: % %-beta
 	@true
 
+.PHONY: beta
 beta: docs-beta
 endif
 
@@ -555,17 +563,20 @@ endif
 ## Some checks
 
 # Style checks
+.PHONY: style check-style checkstyle
 style check-style checkstyle: $(PYS) $(PYCODESTYLE_CFG)
 	$(PYCODESTYLE) --config $(PYCODESTYLE_CFG) $(PYS)
 	@echo "All style checks passed."
 	
 # Automatic formatting
+.PHONY: autopep8 reformat
 autopep8 reformat: $(PYCODESTYLE_CFG)
 	$(NBAUTOPEP8) --split-cells --jobs -1 $(AUTOPEP8_OPTIONS) $(SOURCES)
 	@echo "Code reformatting complete.  Use 'make full' to re-execute and test notebooks."
 
 
 # List of Cross References
+.PHONY: check-crossref crossref xref
 check-crossref crossref xref: $(SOURCES)
 	@echo "Referenced notebooks (* = missing)"
 	@files=$$(grep '\.ipynb)' $(SOURCES) | sed 's/.*[(]\([a-zA-Z0-9_][a-zA-Z0-9_]*\.ipynb\)[)].*/\1/' | sort | uniq); \
@@ -579,6 +590,7 @@ check-crossref crossref xref: $(SOURCES)
 
 
 # Stats
+.PHONY: stats
 stats: $(SOURCES)
 	@cd notebooks; ../utils/nbstats.py $(SOURCE_FILES)
 
@@ -587,11 +599,13 @@ PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
 $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 	$(PYTHON) $< > $@ 2>&1 || (echo "Error while running $(PYTHON)" >> $@; tail $@; exit 1)
 
+.PHONY: check-code
 check-code: code $(PYS_OUT)
 	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
 
 # Import all code.  This should produce no output (or error messages).
 IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
+.PHONY: check-import check-imports
 check-import check-imports: code
 	echo "#!/usr/bin/env $(PYTHON)" > import_all.py
 	(for file in $(IMPORTS); do echo from code import $$file; done) >> import_all.py
@@ -599,18 +613,22 @@ check-import check-imports: code
 	@test ! -s import_all.py.out && echo "All import checks passed."
 	@$(RM) import_all.py*
 
+.PHONY: run
 run: check-import check-code
 	
 # Spell checks
 NBSPELLCHECK = utils/nbspellcheck.py
+.PHONY: spell spellcheck check-spell
 spell spellcheck check-spell:
 	$(NBSPELLCHECK) $(SOURCES)
 
 
 # All checks
+.PHONY: check check-all
 check check-all: check-import check-code check-style check-crossref
 	
 # Add notebook metadata (add table of contents, bib reference, etc.)
+.PHONY: metadata
 metadata: $(ADD_METADATA)
 	@for notebook in $(SOURCES); do \
 		echo "Adding metadata to $$notebook...\c"; \
@@ -625,9 +643,8 @@ metadata: $(ADD_METADATA)
 	done
 
 
-
 ## Publishing
-
+.PHONY: docs
 docs: publish-notebooks publish-html publish-code publish-dist \
 	publish-slides publish-pics \
 	$(DOCS_TARGET)index.html $(DOCS_TARGET)404.html README.md binder/postBuild
@@ -637,6 +654,7 @@ docs: publish-notebooks publish-html publish-code publish-dist \
 README.md: $(MARKDOWN_TARGET)index.md
 	sed 's!<script.*</script>!!g' $< > $@
 
+.PHONY: publish
 publish: docs
 	git add $(DOCS_TARGET)* binder/postBuild README.md
 	-git status
@@ -644,11 +662,13 @@ publish: docs
 	@echo "Now use 'make push' to place docs on website and trigger a mybinder update"
 
 # Add/update HTML code in repository
+.PHONY: publish-html
 publish-html: html
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)html || $(MKDIR) $(DOCS_TARGET)html
 	cp -pr $(HTML_TARGET) $(DOCS_TARGET)html
 
+.PHONY: publish-code
 publish-code: code
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)code || $(MKDIR) $(DOCS_TARGET)code
@@ -661,6 +681,7 @@ publish-code: code
 		  $(DOCS_TARGET)code/Template.py \
 		  $(DOCS_TARGET)code/Guide_for_Authors.py
 
+.PHONY: dist publish-dist
 dist publish-dist: check-import check-code \
 	publish-code delete-betas $(DOCS_TARGET)dist/fuzzingbook.zip
 
@@ -682,16 +703,19 @@ $(DOCS_TARGET)dist/fuzzingbook.zip: $(PYS) $(CODE_TARGET)README.md $(CODE_TARGET
 	$(RM) -r $(DOCS_TARGET)code/dist $(DOCS_TARGET)code/*.egg-info
 	@echo "Created distribution files in $(DOCS_TARGET)dist"
 
+.PHONY: publish-slides
 publish-slides: slides
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)slides || $(MKDIR) $(DOCS_TARGET)slides
 	cp -pr $(SLIDES_TARGET) $(DOCS_TARGET)slides
-	
+
+.PHONY: publish-notebooks
 publish-notebooks: full-notebooks
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)notebooks || $(MKDIR) $(DOCS_TARGET)notebooks
 	cp -pr $(FULL_NOTEBOOKS)/* $(DOCS_TARGET)notebooks
 
+.PHONY: publish-pics
 publish-pics: PICS
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)PICS || $(MKDIR) $(DOCS_TARGET)PICS
@@ -702,6 +726,7 @@ publish-pics: PICS
 
 ifndef BETA
 # Remove all chapters marked as beta
+.PHONY: delete-betas
 delete-betas: publish-code publish-html publish-slides
 	@cd $(DOCS_TARGET); \
 	for chapter in $(BETA_CHAPTERS); do \
@@ -717,6 +742,7 @@ endif
 
 ifdef BETA
 # On the beta site, we don't delete stuff
+.PHONY: delete-betas
 delete-betas:
 endif
 
@@ -724,6 +750,7 @@ endif
 ## Python packages
 # After this, you can do 'pip install fuzzingbook' 
 # and then 'from fuzzingbook.Fuzzer import Fuzzer' :-)
+.PHONY: upload-dist
 upload-dist: dist
 	@echo "Use your pypi.org password to upload"
 	cd $(DOCS_TARGET); twine upload dist/*.whl dist/*.tar.gz
@@ -738,10 +765,12 @@ binder/postBuild: binder/postBuild.template $(HTML_TARGET)custom.css
 	chmod +x $@
 
 # Force recreation of binder service; avoids long waiting times for first user
+.PHONY: binder
 binder: .FORCE
 	open $(BINDER_URL)
 
 # After a git push, we want binder to update; "make push" does this
+.PHONY: push
 push: .FORCE
 	git push
 	open $(BINDER_URL)
@@ -750,6 +779,7 @@ push: .FORCE
 # This is the same system as mybinder uses, but should be easier to debug
 # See https://repo2docker.readthedocs.io/en/latest/
 .PRECIOUS: binder/binder.log
+.PHONY: binder-local debug-binder
 binder-local debug-binder: binder/binder.log binder/postBuild
 binder/binder.log: .FORCE
 	@echo Writing output to $@
@@ -772,6 +802,7 @@ AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot *.fls *.fdb_latexmk 
 	  $(PDF_TARGET)*.fls \
 	  $(PDF_TARGET)*.fdb_latexmk
 
+.PHONY: clean-code clean-chapters clean-book clean-aux clean-pdf
 clean-code:
 	$(RM) $(PYS) $(PYS_OUT)
 
@@ -785,7 +816,8 @@ clean-book:
 
 clean-aux clean-pdf:
 	$(RM) $(AUX)
-	
+
+.PHONY: clean-full_notebooks clean-full clean-fulls clean-docs clean realclean
 clean-full-notebooks clean-full clean-fulls:
 	$(RM) $(FULLS)
 
@@ -818,7 +850,8 @@ $(DEPEND_TARGET)%.ipynb_depend: $(NOTEBOOKS)/%.ipynb
 			echo '$$''(FULL_NOTEBOOKS)/$(notdir $<): $$''(NOTEBOOKS)/'"$$import.ipynb"; \
 		fi; \
 	done > $@
-	
+
+.PHONY: depend
 depend: $(DEPENDS)
 
 include $(wildcard $(DEPENDS))
