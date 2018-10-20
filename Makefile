@@ -16,14 +16,17 @@ READY_CHAPTERS = \
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
+	Parser.ipynb \
 	Reducer.ipynb \
 	GrammarMiner.ipynb
 
 	# ConstraintGrammarFuzzer.ipynb
 	# APIFuzzer.ipynb
 	# GUIFuzzer.ipynb
+	# SearchBasedFuzzer.ipynb
+	# SymbolicFuzzer.ipynb
+	# ...
 
 # Only these will appear on the beta site
 BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
@@ -584,7 +587,7 @@ check-crossref crossref xref: $(SOURCES)
 		if [ -f $(NOTEBOOKS)/$$file ]; then \
 		    echo '  ' $$file; \
 		else \
-			echo '* ' $$file; \
+			echo '* ' $$file "- in" $$(cd $(NOTEBOOKS); grep -l $$file $(SOURCE_FILES)); \
 		fi \
 	done
 
@@ -592,7 +595,7 @@ check-crossref crossref xref: $(SOURCES)
 # Stats
 .PHONY: stats
 stats: $(SOURCES)
-	@cd notebooks; ../utils/nbstats.py $(SOURCE_FILES)
+	@cd $(NOTEBOOKS); ../utils/nbstats.py $(SOURCE_FILES)
 
 # Run all code.  This should produce no failures.
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
