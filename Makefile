@@ -16,8 +16,8 @@ READY_CHAPTERS = \
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	ProbabilisticGrammarFuzzer.ipynb \
 	Parser.ipynb \
+	ProbabilisticGrammarFuzzer.ipynb \
 	Reducer.ipynb \
 	GrammarMiner.ipynb
 
