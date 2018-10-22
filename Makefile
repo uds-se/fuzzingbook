@@ -723,8 +723,7 @@ publish-notebooks: full-notebooks
 publish-pics: $(NOTEBOOKS)/PICS
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)PICS || $(MKDIR) $(DOCS_TARGET)PICS
-	cp -pr $(NOTEBOOKS)/PICS/* $(DOCS_TARGET)PICS
-	$(RM) -fr $(DOCS_TARGET)notebooks/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)notebooks
+	cp -pr $(NOTEBOOKS)/PICS $(DOCS_TARGET)notebooks
 	$(RM) -fr $(DOCS_TARGET)html/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)html
 	$(RM) -fr $(DOCS_TARGET)slides/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)slides
 
