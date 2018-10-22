@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-10-19 14:12:32+02:00
+# Last change: 2018-10-20 22:12:13+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -864,12 +864,13 @@ if __name__ == "__main__":
     tree = ast.parse(source)
 
 
-def get_alternatives(op):
-    return ([op.s] if isinstance(op, ast.Str)
-            else get_alternatives(op.left) + [op.right.s])
+def get_alternatives(op, to_expr=lambda o: o.s):
+    if isinstance(op, ast.BinOp) and isinstance(op.op, ast.BitOr):
+        return get_alternatives(op.left, to_expr) + [to_expr(op.right)]
+    return [to_expr(op)]
 
-def funct_parser(tree):
-    return {assign.targets[0].id: get_alternatives(assign.value)
+def funct_parser(tree, to_expr=lambda o: o.s):
+    return {assign.targets[0].id: get_alternatives(assign.value, to_expr)
             for assign in tree.body[0].body}
 
 if __name__ == "__main__":
@@ -878,23 +879,41 @@ if __name__ == "__main__":
         print(symbol, "::=", grammar[symbol])
 
 
-# #### Part 1: One Single Function
+# #### Part 1 (a): One Single Function
 
 if __name__ == "__main__":
-    print('\n#### Part 1: One Single Function')
+    print('\n#### Part 1 (a): One Single Function')
 
 
 
 
-def define_grammar(fn):
+def define_grammar(fn, to_expr=lambda o: o.s):
     source = inspect.getsource(fn)
     tree = ast.parse(source)
-    grammar = funct_parser(tree)
+    grammar = funct_parser(tree, to_expr)
     return grammar
 
 if __name__ == "__main__":
     define_grammar(expression_grammar_fn)
 
+
+# #### Part 1 (b): Alternative representations
+
+if __name__ == "__main__":
+    print('\n#### Part 1 (b): Alternative representations')
+
+
+
+
+def define_name(o): return o.id if isinstance(o, ast.Name) else o.s
+
+def define_expr(op):
+    if isinstance(op, ast.BinOp) and isinstance(op.op, ast.Add):
+        return (*define_expr(op.left), define_name(op.right))
+    return (define_name(op),)
+
+def define_ex_grammar(fn):
+    return define_grammar(fn, define_expr)
 
 # #### Part 2: Extended Grammars
 

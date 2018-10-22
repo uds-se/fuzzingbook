@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-10-19 14:16:37+02:00
+# Last change: 2018-10-20 22:01:13+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -197,7 +197,6 @@ if __name__ == "__main__":
                          )])
 
 
-
 from graphviz import Digraph
 
 from IPython.display import display
@@ -295,36 +294,38 @@ if __name__ == "__main__":
     display_tree(f.init_tree())
 
 
+def expansion_to_children(expansion):
+    # print("Converting " + repr(expansion))
+    # strings contains all substrings -- both terminals and non-terminals such
+    # that ''.join(strings) == expansion
+
+    # See nonterminals() in Grammars.py
+    if isinstance(expansion, tuple):
+        expansion = expansion[0]
+
+    if expansion == "":  # Special case: empty expansion
+        return [("", [])]
+
+    strings = re.split(RE_NONTERMINAL, expansion)
+    return [(s, None) if is_nonterminal(s) else (s, [])
+            for s in strings if len(s) > 0]
+
+
+if __name__ == "__main__":
+    expansion_to_children("<term> + <expr>")
+
+
+if __name__ == "__main__":
+    expansion_to_children("")
+
+
+if __name__ == "__main__":
+    expansion_to_children(("+<term>", ["extra_data"]))
+
+
 class GrammarFuzzer(GrammarFuzzer):
     def expansion_to_children(self, expansion):
-        # print("Converting " + repr(expansion))
-        # strings contains all substrings -- both terminals and non-terminals such
-        # that ''.join(strings) == expansion
-
-        # See nonterminals() in Grammars.py
-        if isinstance(expansion, tuple):
-            expansion = expansion[0]
-
-        if expansion == "":  # Special case: empty expansion
-            return [("", [])]
-
-        strings = re.split(RE_NONTERMINAL, expansion)
-        return [(s, None) if is_nonterminal(s) else (s, [])
-                for s in strings if len(s) > 0]
-
-
-if __name__ == "__main__":
-    f = GrammarFuzzer(EXPR_GRAMMAR)
-    f.expansion_to_children("<term> + <expr>")
-
-
-if __name__ == "__main__":
-    f.expansion_to_children("")
-
-
-if __name__ == "__main__":
-    f.expansion_to_children(("+<term>", ["extra_data"]))
-
+        return expansion_to_children(expansion)
 
 import random
 
@@ -342,8 +343,7 @@ class GrammarFuzzer(GrammarFuzzer):
 
         # Fetch the possible expansions from grammar...
         expansions = self.grammar[symbol]
-        possible_children = [self.expansion_to_children(
-            expansion) for expansion in expansions]
+        possible_children = [self.expansion_to_children(expansion) for expansion in expansions]
 
         # ... and select a random expansion
         index = self.choose_node_expansion(node, possible_children)

@@ -12417,7 +12417,7 @@ a.anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Reducing-Failure-Inducing-Inputs">Reducing Failure-Inducing Inputs<a class="anchor-link" href="#Reducing-Failure-Inducing-Inputs">&#182;</a></h1><p><em>Brief abstract/introduction/motivation.  State what the chapter is about in 1-2 paragraphs.</em></p>
+<h1 id="Reducing-Failure-Inducing-Inputs">Reducing Failure-Inducing Inputs<a class="anchor-link" href="#Reducing-Failure-Inducing-Inputs">&#182;</a></h1><p>By construction, fuzzers create inputs that may be hard to read.  This causes issues during <em>debugging</em>, when a human has to analyze the exact cause of the failure.  In this chapter, we present techniques that <em>automatically reduce and simplify failure-inducing inputs to a minimum</em> in order to ease debugging.</p>
 
 </div>
 </div>
@@ -12428,7 +12428,9 @@ a.anchor-link {
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Prerequisites</strong></p>
 <ul>
-<li><em>Refer to earlier chapters as notebooks here, as here:</em> <a href="Fuzzer.slides.html">Earlier Chapter</a>.</li>
+<li>As reduction is typically used together with fuzzing, reading the <a href="Fuzzer.slides.html">chapter on basic fuzzing</a> is a good idea.</li>
+<li>The simple "delta debugging" technique for reduction has no specific prerequisites.</li>
+<li>The later grammar-based techniques require knowledge on <a href="GrammarFuzzer.slides.html">derivation trees</a> and <a href="Parser.slides.html">parsing</a>.</li>
 </ul>
 
 </div>
@@ -12438,23 +12440,518 @@ a.anchor-link {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Why-Reducing?">Why Reducing?<a class="anchor-link" href="#Why-Reducing?">&#182;</a></h2><p>\todo{Add}</p>
+<h2 id="Why-Reducing?">Why Reducing?<a class="anchor-link" href="#Why-Reducing?">&#182;</a></h2><p>At this point, we have seen a number of test generation techniques that all in some form produce input in order to trigger failures.  If they are successful – that is, the program actually fails – we must find out why the failure occurred and how to fix it.</p>
 
 </div>
 </div>
-</div></section></section><section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Text-Based-Input-Reduction">Text-Based Input Reduction<a class="anchor-link" href="#Text-Based-Input-Reduction">&#182;</a></h2><p>\todo{Add}</p>
+<p>Here's an example of such a situation.  We have a class <code>MysteryRunner</code> class with a <code>run()</code> method that – given its code – can occasionally fail.  But under which circumstances does this actually happen?  We have deliberately obscured the exact condition in order to make this non-obvious.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">MysteryRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mo">0o17</span> <span class="o">+</span> <span class="mo">0o31</span><span class="p">))</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mo">0o27</span> <span class="o">+</span> <span class="mo">0o22</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">y</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">Runner</span><span class="o">.</span><span class="n">FAIL</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">Runner</span><span class="o">.</span><span class="n">PASS</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us fuzz the function until we find a failing input.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystery</span> <span class="o">=</span> <span class="n">MysteryRunner</span><span class="p">()</span>
+<span class="n">random_fuzzer</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">()</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">inp</span> <span class="o">=</span> <span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+    <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="n">mystery</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">outcome</span> <span class="o">==</span> <span class="n">mystery</span><span class="o">.</span><span class="n">FAIL</span><span class="p">:</span>
+        <span class="k">break</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">failing_input</span> <span class="o">=</span> <span class="n">result</span>
+<span class="n">failing_input</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[5]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39; 7:,&gt;((/$$-/-&gt;.;.=;(.%!:50#7*8=$&amp;&amp;=$9!%6(4=&amp;69\&#39;:\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5\&#39;\&#39;&gt;#&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Something in this input causes <code>MysteryRunner</code> to fail.  But what is it?</p>
+
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Manual-Input-Reduction">Manual Input Reduction<a class="anchor-link" href="#Manual-Input-Reduction">&#182;</a></h2><p>One important step in the debugging process is <em>reduction</em> – that is, to identify those circumstances of a failure that are relevant for the failure to occur, and to <em>omit</em> (if possible) those parts that are not.  As Kernighan and Pike \cite{Kernighan1999} put it:</p>
+<blockquote><p>For every circumstance of the problem, check whether it is relevant for the problem to occur.  If it is not, remove it from the problem report or the test case in question.</p>
+</blockquote>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Specifically for inputs, they suggest a <em>divide and conquer</em> process:</p>
+<blockquote><p>Proceed by binary search.  Throw away half the input and see if the output is still wrong; if not, go back to the previous state and discard the other half of the input.</p>
+</blockquote>
+<p>This is something we can easily try out.  For instance, we can see whether the error still occurs if we only feed in the first half:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">half_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">failing_input</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>   <span class="c1"># // is integer division</span>
+<span class="n">first_half</span> <span class="o">=</span> <span class="n">failing_input</span><span class="p">[:</span><span class="n">half_length</span><span class="p">]</span>
+<span class="n">mystery</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">first_half</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[6]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(&#34; 7:,&gt;((/$$-/-&gt;.;.=;(.%!:50#7*8=$&amp;&amp;=$9!%6(4=&amp;69&#39;:&#34;, &#39;PASS&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Nope – the first half alone does not suffice.  Maybe the second half?</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">second_half</span> <span class="o">=</span> <span class="n">failing_input</span><span class="p">[</span><span class="n">half_length</span><span class="p">:]</span>
+<span class="n">mystery</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">second_half</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[7]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(&#39;\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5\&#39;\&#39;&gt;#&#39;, &#39;PASS&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This did not go so well either.  We may still proceed by cutting away <em>smaller chunks</em> – say, one character after another.  If our test is deterministic and easily repeated, it is clear that this process eventually will yield a reduced input.  But still, it is a rather inefficient process, especially for long inputs.  What we need is a <em>strategy</em> that effectively minimizes a failure-inducing input – a strategy that can be automated.</p>
+
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Delta-Debugging">Delta Debugging<a class="anchor-link" href="#Delta-Debugging">&#182;</a></h2>
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>One strategy to effectively reduce failure-inducing inputs is <em>delta debugging</em> \cite{Zeller2002}.  Delta Debugging implements the "binary search" strategy, as listed above, but with a twist: If neither half fails (also as above), it keeps on cutting away smaller and smaller chunks from the input, until it eliminates individual characters.  Thus, after cutting away the first half, we cut away
+the first quarter, the second quarter, and so on.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us illustrate this on our example, and see what happens if we cut away the first quarter.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">quarter_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">failing_input</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span>
+<span class="n">input_without_first_quarter</span> <span class="o">=</span> <span class="n">failing_input</span><span class="p">[</span><span class="n">quarter_length</span><span class="p">:]</span>
+<span class="n">mystery</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">input_without_first_quarter</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[8]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(&#39;50#7*8=$&amp;&amp;=$9!%6(4=&amp;69\&#39;:\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5\&#39;\&#39;&gt;#&#39;,
+ &#39;FAIL&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Ah! This has failed, and reduced our failing input by 25%.  Let's remove another quarter.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">input_without_first_and_second_quarter</span> <span class="o">=</span> <span class="n">failing_input</span><span class="p">[</span><span class="n">quarter_length</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:]</span>
+<span class="n">mystery</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">input_without_first_and_second_quarter</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[9]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(&#39;\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5\&#39;\&#39;&gt;#&#39;, &#39;PASS&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is not too surprising, as we had that one before:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">second_half</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[10]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5\&#39;\&#39;&gt;#&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">input_without_first_and_second_quarter</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[11]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5\&#39;\&#39;&gt;#&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>How about removing the third quarter, then?</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">input_without_first_and_third_quarter</span> <span class="o">=</span> <span class="n">failing_input</span><span class="p">[</span><span class="n">quarter_length</span><span class="p">:</span><span class="n">quarter_length</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">failing_input</span><span class="p">[</span><span class="n">quarter_length</span> <span class="o">*</span> <span class="mi">3</span><span class="p">:]</span>
+<span class="n">mystery</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">input_without_first_and_third_quarter</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[12]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(&#34;50#7*8=$&amp;&amp;=$9!%6(4=&amp;69&#39;:&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5&#39;&#39;&gt;#&#34;, &#39;PASS&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>How about removing the third quarter, then?</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">input_without_first_and_fourth_quarter</span> <span class="o">=</span> <span class="n">failing_input</span><span class="p">[</span><span class="n">quarter_length</span><span class="p">:</span><span class="n">quarter_length</span> <span class="o">*</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">mystery</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">input_without_first_and_fourth_quarter</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[13]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(&#39;50#7*8=$&amp;&amp;=$9!%6(4=&amp;69\&#39;:\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&#39;, &#39;FAIL&#39;)</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Yes!  This has succeeded.  Our input is now 50% smaller.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We have now tried to remove pieces that make up $\frac{1}{2}$ and $\frac{1}{4}$ of the original failing string.  In the next iteration, we would go and remove even smaller pieces – $\frac{1}{8}$, $\frac{1}{16}$ and so on.  We continue until we are down to $\frac{1}{97}$ – that is, individual characters.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>However, this is comething we happily let a computer do for us.  We first introduce a <code>Reducer</code> class as an abstract superclass for all kinds of reducers.  The <code>test()</code> methods runs a single test (with logging, if so wanted); the <code>reduce()</code> method will eventually reduce an input to the minimum.</p>
 
 </div>
 </div>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Reducer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -12485,12 +12982,55 @@ a.anchor-link {
 </div>
 
 </div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>CachingReducer</code> variant saves test results, such that we don't have to run the same tests again and again:</p>
+
+</div>
+</div>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">Reducer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CachingReducer</span><span class="p">(</span><span class="n">Reducer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">inp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">inp</span><span class="p">]</span>
+        
+        <span class="n">outcome</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">inp</span><span class="p">]</span> <span class="o">=</span> <span class="n">outcome</span>
+        <span class="k">return</span> <span class="n">outcome</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here comes the <em>Delta Debugging</em> reducer.  Delta Debugging implements the strategy sketched above: It first removes larger chunks of size $\frac{1}{2}$; if this does not fail, then we proceed to chunks of size $\frac{1}{4}$, then $\frac{1}{8}$ and so on.</p>
+<p>Our implementation uses almost the same Python code as Zeller in \cite{Zeller2011}; the only difference is that it has been adapted to work on Python 3 and our <code>Runner</code> framework.    The variable <code>n</code> (initially 2) indicates the granularity – in each step, chunks of size $\frac{1}{n}$ are cut away.  If none of the test fails (<code>some_complement_is_failing</code> is False), then <code>n</code> is doubled – until it reaches the length of the input.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">CachingReducer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">==</span> <span class="n">Runner</span><span class="o">.</span><span class="n">FAIL</span>
@@ -12498,11 +13038,11 @@ a.anchor-link {
         <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>     <span class="c1"># Initial granularity</span>
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">subset_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">//</span> <span class="n">n</span>   <span class="c1"># Integer Division</span>
+            <span class="n">subset_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
             <span class="n">some_complement_is_failing</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="k">while</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
-                <span class="n">complement</span> <span class="o">=</span> <span class="n">inp</span><span class="p">[:</span><span class="n">start</span><span class="p">]</span> <span class="o">+</span> <span class="n">inp</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="n">subset_length</span><span class="p">:]</span>
+                <span class="n">complement</span> <span class="o">=</span> <span class="n">inp</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)]</span> <span class="o">+</span> <span class="n">inp</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">subset_length</span><span class="p">):]</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">complement</span><span class="p">)</span> <span class="o">==</span> <span class="n">Runner</span><span class="o">.</span><span class="n">FAIL</span><span class="p">:</span>
                     <span class="n">inp</span> <span class="o">=</span> <span class="n">complement</span>
@@ -12525,32 +13065,22 @@ a.anchor-link {
 </div>
 
 </div></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ParenRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">in</span> <span class="n">inp</span> <span class="ow">and</span> <span class="s1">&#39;)&#39;</span> <span class="ow">in</span> <span class="n">inp</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FAIL</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">PASS</span><span class="p">)</span>
-</pre></div>
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To see how the <code>DeltaDebuggingReducer</code> works, let us run it on our failing input.  With each step, we see how the remaining input gets smaller and smaller, until only two characters remain:</p>
 
 </div>
 </div>
-</div>
-
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">paren_runner</span> <span class="o">=</span> <span class="n">ParenRunner</span><span class="p">()</span>
-<span class="n">dd_reducer</span> <span class="o">=</span> <span class="n">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">paren_runner</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">dd_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="s1">&#39;foo(2 + 24)&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dd_reducer</span> <span class="o">=</span> <span class="n">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">dd_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">failing_input</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12567,21 +13097,42 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Test #1 &#39;foo(2 + 24)&#39; 11 FAIL
-Test #2 &#39; + 24)&#39; 6 PASS
-Test #3 &#39;foo(2)&#39; 6 FAIL
-Test #4 &#39;(2)&#39; 3 FAIL
-Test #5 &#39;2)&#39; 2 PASS
-Test #6 &#39;()&#39; 2 FAIL
-Test #7 &#39;)&#39; 1 PASS
-Test #8 &#39;(&#39; 1 PASS
+<pre>Test #1 &#39; 7:,&gt;((/$$-/-&gt;.;.=;(.%!:50#7*8=$&amp;&amp;=$9!%6(4=&amp;69\&#39;:\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5\&#39;\&#39;&gt;#&#39; 97 FAIL
+Test #2 &#39;\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5\&#39;\&#39;&gt;#&#39; 49 PASS
+Test #3 &#34; 7:,&gt;((/$$-/-&gt;.;.=;(.%!:50#7*8=$&amp;&amp;=$9!%6(4=&amp;69&#39;:&#34; 48 PASS
+Test #4 &#39;50#7*8=$&amp;&amp;=$9!%6(4=&amp;69\&#39;:\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5\&#39;\&#39;&gt;#&#39; 73 FAIL
+Test #5 &#34;50#7*8=$&amp;&amp;=$9!%6(4=&amp;69&#39;:&lt;7+1&lt;2!4$&gt;92+$1&lt;(3%&amp;5&#39;&#39;&gt;#&#34; 49 PASS
+Test #6 &#39;50#7*8=$&amp;&amp;=$9!%6(4=&amp;69\&#39;:\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&#39; 48 FAIL
+Test #7 &#39;\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&#39; 24 PASS
+Test #8 &#34;50#7*8=$&amp;&amp;=$9!%6(4=&amp;69&#39;:&#34; 24 PASS
+Test #9 &#39;9!%6(4=&amp;69\&#39;:\&#39;&lt;3+0-3.24#7=!&amp;60)2/+&#34;;+&#39; 36 FAIL
+Test #10 &#39;9!%6(4=&amp;69\&#39;:=!&amp;60)2/+&#34;;+&#39; 24 FAIL
+Test #11 &#39;=!&amp;60)2/+&#34;;+&#39; 12 PASS
+Test #12 &#34;9!%6(4=&amp;69&#39;:&#34; 12 PASS
+Test #13 &#39;=&amp;69\&#39;:=!&amp;60)2/+&#34;;+&#39; 18 PASS
+Test #14 &#39;9!%6(4=!&amp;60)2/+&#34;;+&#39; 18 FAIL
+Test #15 &#39;9!%6(42/+&#34;;+&#39; 12 PASS
+Test #16 &#39;9!%6(4=!&amp;60)&#39; 12 FAIL
+Test #17 &#39;=!&amp;60)&#39; 6 PASS
+Test #18 &#39;9!%6(4&#39; 6 PASS
+Test #19 &#39;6(4=!&amp;60)&#39; 9 FAIL
+Test #20 &#39;6(460)&#39; 6 FAIL
+Test #21 &#39;60)&#39; 3 PASS
+Test #22 &#39;6(4&#39; 3 PASS
+Test #23 &#39;(460)&#39; 5 FAIL
+Test #24 &#39;460)&#39; 4 PASS
+Test #25 &#39;(0)&#39; 3 FAIL
+Test #26 &#39;0)&#39; 2 PASS
+Test #27 &#39;(&#39; 1 PASS
+Test #28 &#39;()&#39; 2 FAIL
+Test #29 &#39;)&#39; 1 PASS
 </pre>
 </div>
 </div>
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[6]:</div>
+<div class="prompt output_prompt">Out[17]:</div>
 
 
 
@@ -12600,6 +13151,50 @@ Test #8 &#39;(&#39; 1 PASS
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we know why <code>MysteryRunner</code> fails – it suffices that the input contains two matching parentheses.  Delta Debugging determines this is 29 steps.  Its result is <em>1-minimal</em>, meaning that every character contained is required to produce the error; removing any (as seen in tests <code>#27</code> and <code>#28</code>, above) no longer makes the test fail.  This property is guaranteed by the delta debugging algorithm, which in its last stage always tries to delete characters one by one.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A reduced test case such as the one above has many advantages:</p>
+<ul>
+<li><p>A reduced test case <strong>reduces the <em>cognitive load</em> of the programmer</strong>.  The test case is shorter and focused, and thus does not burden the programmer with irrelevant details.  A reduced input typically leads to shorter executions and smaller program states, both of which reduce the search space as it comes to understanding the bug.  In our case, we have eliminated lots of irrelevant input – only the two characters the reduced input contains are relevant.</p>
+</li>
+<li><p>A reduced test case <strong>is easier to communicate</strong>.  All one needs here is the summary: <code>MysteryRunner fails on "()"</code>, which is much better than <code>MysteryRunner fails on a 4100-character input (attached)</code>.</p>
+</li>
+<li><p>A reduced test case helps in <strong>identifying duplicates</strong>.  If similar bugs have been reported already, and all of them have been reduced to the same cause (namely that the input contains matching parentheses), then it becomes obvious that all these bugs are different symptoms of the same underlying cause – and would all be resolved at once with one code fix.</p>
+</li>
+</ul>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>How effective is delta debugging?  In the best case (wither the left half or the right half fails), the number of tests is logarithmic proportional to the length $n$ of an input (i.e., $O(\log_2 n)$); this is the same complexity as binary search.  In the worst case, though, delta debugging can require a number of tests proportional to $n^2$  (i.e., $O(n^2)$) – this happens in the case when we are down to character granularity, and we have to repeatedly tried to delete all characters, only to find that deleting the last character results in a failure \cite{Zeller2002}.  (This is a pretty pathological situation, though.)</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In general, delta debugging is a very robust algorithm that is easy to implement, easy to deploy, and easy to use – provided that the underlying test case is deterministic and runs quickly enough to warrant a number of experiments.  As these are the same prerequisites that make fuzzing effective, delta debugging makes an excellent companion to fuzzing.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Grammar-Based-Input-Reduction">Grammar-Based Input Reduction<a class="anchor-link" href="#Grammar-Based-Input-Reduction">&#182;</a></h2><p>\todo{Add}</p>
 
 </div>
@@ -12607,18 +13202,460 @@ Test #8 &#39;(&#39; 1 PASS
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">Reducer</span><span class="p">):</span>
-    <span class="k">pass</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># For logging the queue</span>
+<span class="k">def</span> <span class="nf">queue_to_string</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">q</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
 </pre></div>
 
 </div>
 </div>
 </div>
 
-</div></div></section></section><section><section>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">derivation_tree</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">,</span>
+                   <span class="p">[(</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span>
+                     <span class="p">[(</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                      <span class="p">(</span><span class="s2">&quot; + &quot;</span><span class="p">,</span> <span class="p">[]),</span>
+                         <span class="p">(</span><span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span>
+                     <span class="p">)])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">queue_to_string</span><span class="p">([</span><span class="n">derivation_tree</span><span class="p">,</span> <span class="n">derivation_tree</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[22]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;[&lt;expr&gt; + &lt;term&gt;, &lt;expr&gt; + &lt;term&gt;]&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">Reducer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">runner</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">grammar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span> <span class="o">=</span> <span class="n">start_symbol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">derivation_reductions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>  <span class="c1"># Terminal symbol</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying alternative expansions for &quot;</span> <span class="o">+</span> <span class="n">symbol</span><span class="p">)</span>
+
+        <span class="c1"># Possible expansions for this symbol</span>
+        <span class="n">expansions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expansions: &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">expansions</span><span class="p">))</span>
+
+        <span class="n">alternatives</span> <span class="o">=</span> \
+            <span class="p">[</span><span class="n">expansion_to_children</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span> <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="n">expansions</span><span class="p">]</span>
+
+        <span class="n">reductions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">alternative</span> <span class="ow">in</span> <span class="n">alternatives</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alternative</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">):</span>
+                <span class="k">continue</span>  <span class="c1"># New alternative has more children</span>
+
+            <span class="n">match</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">new_children_reductions</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># print(&quot;Trying alternative expansion &quot; + queue_to_string(alternative))</span>
+            <span class="k">for</span> <span class="n">alt_child</span> <span class="ow">in</span> <span class="n">alternative</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">alt_symbol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">alt_child</span>
+                <span class="n">child_reductions</span> <span class="o">=</span> <span class="n">subtrees_with_symbol</span><span class="p">(</span><span class="n">alt_symbol</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">child_reductions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># Child not found; cannot apply rule</span>
+                    <span class="n">match</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+
+                <span class="c1"># print(&quot;Found alternatives &quot; + queue_to_string(child_reductions))</span>
+                <span class="n">new_children_reductions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child_reductions</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+                <span class="k">continue</span>  <span class="c1"># Try next alternative</span>
+
+            <span class="c1"># Go through the possible combinations</span>
+            <span class="k">for</span> <span class="n">new_children</span> <span class="ow">in</span> <span class="n">possible_combinations</span><span class="p">(</span><span class="n">new_children_reductions</span><span class="p">):</span>
+                <span class="n">new_tree</span> <span class="o">=</span> <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">number_of_nodes</span><span class="p">(</span><span class="n">new_tree</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+                    <span class="k">continue</span>  <span class="c1"># No reduction</span>
+
+                <span class="n">reductions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_tree</span><span class="p">)</span>
+
+        <span class="c1"># Apply this recursively</span>
+        <span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)):</span>
+                <span class="n">child</span> <span class="o">=</span> <span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">child_reductions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">derivation_reductions</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">reduced_child</span> <span class="ow">in</span> <span class="n">child_reductions</span><span class="p">:</span>
+                    <span class="n">new_children</span> <span class="o">=</span> <span class="p">(</span><span class="n">children</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> 
+                            <span class="p">[</span><span class="n">reduced_child</span><span class="p">]</span> <span class="o">+</span>
+                            <span class="n">children</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
+                    <span class="n">reductions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">))</span>
+
+        <span class="c1"># Filter duplicates</span>
+        <span class="n">unique_reductions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reductions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_reductions</span><span class="p">:</span>
+                <span class="n">unique_reductions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">reductions</span> <span class="o">=</span> <span class="n">unique_reductions</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reductions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># We have a new expansion</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Can reduce &quot;</span> <span class="o">+</span> <span class="n">symbol</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="o">+</span> \
+                 <span class="s2">&quot; to reduced subtrees &quot;</span> <span class="o">+</span> <span class="n">queue_to_string</span><span class="p">(</span><span class="n">reductions</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">reductions</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">reductions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">derivation_reductions</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
+    <span class="c1"># Reduce with respect to a given test</span>
+    <span class="k">def</span> <span class="nf">reduce_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="c1"># Find possible reductions</span>
+        <span class="n">smallest_tree</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="n">tree_reductions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reductions</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Alternatives: &quot;</span> <span class="o">+</span> <span class="n">queue_to_string</span><span class="p">(</span><span class="n">tree_reductions</span><span class="p">))</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">tree_reductions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">tree_reductions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">tree_reductions</span> <span class="o">=</span> <span class="n">tree_reductions</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="n">Runner</span><span class="o">.</span><span class="n">FAIL</span><span class="p">:</span>
+                <span class="c1"># Found new smallest tree; try to reduce that one further</span>
+                <span class="n">smallest_tree</span> <span class="o">=</span> <span class="n">t</span>
+                <span class="n">tree_reductions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reductions</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="n">tree_reductions</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">tree</span><span class="p">:</span> <span class="o">-</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New smallest tree: &quot;</span> <span class="o">+</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">smallest_tree</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">smallest_tree</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="n">cursor</span><span class="p">,</span> <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">unify_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">,</span> <span class="n">inp</span><span class="p">)</span> <span class="c1"># TODO: Have &quot;Parser&quot; base class</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">tree</span>
+
+    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+        <span class="n">smallest_tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">smallest_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Find all subtrees in TREE whose root is SEARCH_SYMBOL.</span>
+<span class="c1"># If IGNORE_ROOT is true, ignore the root note of TREE.</span>
+<span class="k">def</span> <span class="nf">subtrees_with_symbol</span><span class="p">(</span><span class="n">search_symbol</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">ignore_root</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_root</span> <span class="ow">and</span> <span class="n">symbol</span> <span class="o">==</span> <span class="n">search_symbol</span><span class="p">:</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    
+    <span class="c1"># Search across all children</span>
+    <span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="n">subtrees_with_symbol</span><span class="p">(</span><span class="n">search_symbol</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># convert a list [[X1, X2], [Y1, Y2], ...] </span>
+<span class="c1"># into [X1, Y1], [X1, Y2], [X2, Y1], [X2, Y2], ...</span>
+<span class="k">def</span> <span class="nf">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="c1"># print(list_of_lists)</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">list_of_lists</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">e</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="n">new_combo</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span>
+                <span class="c1"># print(&quot;New combo: &quot;, repr(new_combo))</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_combo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Return the number of nodes</span>
+<span class="k">def</span> <span class="nf">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="n">number_of_nodes</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">n</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inp</span> <span class="o">=</span> <span class="s2">&quot;1 + (2 * 3)&quot;</span>
+<span class="n">grammar_reducer</span> <span class="o">=</span> <span class="n">GrammarReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
+<span class="n">grammar_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>1 + (2 * 3)
+Trying alternative expansions for &lt;start&gt;
+Expansions: [&#39;&lt;expr&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Can reduce &lt;term&gt; 2 * 3 to reduced subtrees [2, 3]
+Can reduce &lt;expr&gt; 2 * 3 to reduced subtrees [3, 2]
+Can reduce &lt;factor&gt; (2 * 3) to reduced subtrees [2, 3, (3), (2)]
+Can reduce &lt;term&gt; (2 * 3) to reduced subtrees [2, 3, (3), (2)]
+Can reduce &lt;expr&gt; (2 * 3) to reduced subtrees [2 * 3, 3, 2, (3), (2)]
+Can reduce &lt;expr&gt; 1 + (2 * 3) to reduced subtrees [1 + 2 * 3, 3 + 2 * 3, 1, (2 * 3), 2 * 3, 3, 1 + 3, 1 + 2, 1 + (3), 1 + (2)]
+Can reduce &lt;start&gt; 1 + (2 * 3) to reduced subtrees [(2 * 3), 2 * 3, 1 + 2 * 3, 3 + 2 * 3, 1, 3, 1 + 3, 1 + 2, 1 + (3), 1 + (2)]
+Alternatives: [(2 * 3), 2 * 3, 1 + 2 * 3, 3 + 2 * 3, 1, 3, 1 + 3, 1 + 2, 1 + (3), 1 + (2)]
+Trying alternative expansions for &lt;start&gt;
+Expansions: [&#39;&lt;expr&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Can reduce &lt;term&gt; 2 * 3 to reduced subtrees [2, 3]
+Can reduce &lt;expr&gt; 2 * 3 to reduced subtrees [3, 2]
+Can reduce &lt;factor&gt; (2 * 3) to reduced subtrees [2, 3, (3), (2)]
+Can reduce &lt;term&gt; (2 * 3) to reduced subtrees [2, 3, (3), (2)]
+Can reduce &lt;expr&gt; (2 * 3) to reduced subtrees [2 * 3, 3, 2, (3), (2)]
+Can reduce &lt;start&gt; (2 * 3) to reduced subtrees [2 * 3, 3, 2, (3), (2)]
+New smallest tree: (2 * 3)
+Trying alternative expansions for &lt;start&gt;
+Expansions: [&#39;&lt;expr&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Can reduce &lt;factor&gt; (3) to reduced subtrees [3]
+Can reduce &lt;term&gt; (3) to reduced subtrees [3]
+Can reduce &lt;expr&gt; (3) to reduced subtrees [3]
+Can reduce &lt;start&gt; (3) to reduced subtrees [3]
+New smallest tree: (3)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[33]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;(3)&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -12649,7 +13686,7 @@ Test #8 &#39;(&#39; 1 PASS
 <ul>
 <li><a href="MutationFuzzer.slides.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
 <li><a href="Grammars.slides.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
-<li><a href="Reducing.slides.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
+<li><a href="Reducer.slides.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
 </ul>
 
 </div>
@@ -12690,7 +13727,7 @@ Test #8 &#39;(&#39; 1 PASS
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Some code that is part of the exercise</span>

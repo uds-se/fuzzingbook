@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-10-19 10:35:51+02:00
+# Last change: 2018-10-20 22:12:01+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -60,55 +60,44 @@ import re
 
 RE_NONTERMINAL = re.compile(r'(<[a-zA-Z_]*>)')
 
+def split(rule):
+    return [s for s in re.split(RE_NONTERMINAL, rule) if s]
+
 class PEGParser:
     def __init__(self, grammar):
-        def split(rule):
-            return tuple(s for s in
-                         re.split(RE_NONTERMINAL, rule) if s)
         self.grammar = {k: [split(l) for l in rules]
                         for k, rules in grammar.items()}
-
-    def literal_match(self, part, text, cursor):
-        if text[cursor:].startswith(part):
-            return (cursor + len(part), (part, []))
-        else:
-            return (cursor, None)
-
     # memoize repeated calls.
     @functools.lru_cache(maxsize=None)
-    def unify_key(self, key, text, cursor=0):
+    def unify_key(self, key, text, at=0):
+        if key not in self.grammar:
+            if text[at:].startswith(key): return at + len(key), (key, [])
+            else: return at, None
         rules = self.grammar[key]
-        # make a generator for matching rules. We dont want a list because
-        # we want to be lazy and evaluate only until the first matching
-        rets = (self.unify_line(rule, text, cursor) for rule in rules)
-        # return the first non null (matching) rule's cursor and res
-        cursor, res = next(
-            (ret for ret in rets if ret[1] is not None), (cursor, None))
-        return (cursor, (key, res) if res is not None else None)
+        for rule in rules:
+            l, res = self.unify_line(rule, text, at)
+            if res: return (l, (key, res))
+        return 0, None
 
-    def unify_line(self, parts, text, cursor):
-        def is_symbol(v): return v[0] == '<'
-
+    def unify_line(self, rule, text, at):
         results = []
-        for part in parts:
-            # get the matcher function
-            matcher = (self.unify_key
-                       if is_symbol(part) else self.literal_match)
-            # compute the cursor, and the result from it.
-            cursor, res = matcher(part, text, cursor)
-            if res is None:
-                return (cursor, None)
+        for token in rule:
+            at, res = self.unify_key(token, text, at)
+            if res is None: return at, None
             results.append(res)
-        return cursor, results
+        return at, results
 
 def parse(text, grammar, start_symbol=START_SYMBOL):
-    def readall(fn): return ''.join([f for f in open(fn, 'r')]).strip()
-
-    result = PEGParser(grammar).unify_key(start_symbol, text)
-    return result
+    peg = PEGParser(grammar)
+    return peg.unify_key(start_symbol, text)
 
 if __name__ == "__main__":
-    cursor, tree = parse("1 + 2 * 3", EXPR_GRAMMAR)
+    cursor, tree = parse("1 + (2 * 3)", EXPR_GRAMMAR)
+    display_tree(tree)
+
+
+if __name__ == "__main__":
+    cursor, tree = parse("1 * (2 + 3.45)", EXPR_GRAMMAR)
     display_tree(tree)
 
 
@@ -128,8 +117,8 @@ if __name__ == "__main__":
 
 
 
-def split_tokens(rule):
-    return [i for i in re.split(RE_NONTERMINAL, rule) if i != ''] or ['']
+EOF = '\0'
+EPSILON = ''
 
 if __name__ == "__main__":
     grammar = {'<start>': ['<expr>'],
@@ -155,15 +144,14 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    new_grammar = {k: [split_tokens(e) for e in grammar[k]] for k in grammar}
+    new_grammar = {k: [split(e) for e in grammar[k]] for k in grammar}
     new_grammar
 
 
 def rules(g): return [(k, e) for k, a in g.items() for e in a]
 
 def terminals(g):
-    return set(token for k, expr in rules(g)
-               for token in expr if token not in g)
+    return set(t for k, expr in rules(g) for t in expr if t not in g)
 
 # ### First and Follow sets
 
@@ -184,33 +172,51 @@ def fixpoint(f):
     return helper
 
 @fixpoint
-def compute_ff(grammar, first, follow, epsilon):
-    for A, expression in rules(grammar):
-        nullable = True
+def nullable_(rules, e):
+    for A, expression in rules:
+        if all((token in e)  for token in expression): e |= {A}
+    return (rules, e)
+
+def nullable(grammar):
+    return nullable_(rules(grammar), set())[1]
+
+
+@fixpoint
+def firstset_(rules, first, epsilon):
+    for A, expression in rules:
         for token in expression:
             first[A] |= first[token]
 
             # update until the first token that is not nullable
             if token not in epsilon:
-                nullable = False
                 break
+    return (rules, first, epsilon)
 
-        if nullable:
-            epsilon |= {A}
-            first[A] |= {''}
+def firstset(grammar, epsilon):
+    # https://www.cs.umd.edu/class/spring2014/cmsc430/lectures/lec05.pdf p6
+    # (1) If X is a terminal, then First(X) is just X
+    first = {i:{i} for i in terminals(grammar)}
 
+    # (2) if X ::= epsilon, then epsilon \in First(X)
+    for k in grammar:
+        first[k] = {EPSILON} if k in epsilon else set()
+    return firstset_(rules(grammar), first, epsilon)[1]
+
+@fixpoint
+def followset_(grammar, epsilon, first, follow):
+    for A, expression in rules(grammar):
+        # https://www.cs.umd.edu/class/spring2014/cmsc430/lectures/lec05.pdf
         # https://www.cs.uaf.edu/~cs331/notes/FirstFollow.pdf
         # essentially, we start from the end of the expression. Then:
         # (3) if there is a production A -> aB, then every thing in
         # FOLLOW(A) is in FOLLOW(B)
-        follow_B = follow[A]
+        # note: f_B serves as both follow and first.
+        f_B = follow[A]
         for t in reversed(expression):
-            if not t:
-                continue
             # update the follow for the current token. If this is the
             # first iteration, then here is the assignment
             if t in grammar:
-                follow[t] |= follow_B  # only bother with nt
+                follow[t] |= f_B  # only bother with nt
 
             # computing the last follow symbols for each token t. This
             # will be used in the next iteration. If current token is
@@ -220,20 +226,18 @@ def compute_ff(grammar, first, follow, epsilon):
 
             # (2) if there is a production A -> aBb then everything in FIRST(B)
             # except for epsilon is added to FOLLOW(B)
-            follow_B = follow_B | (
-                first[t] - {''}) if t in epsilon else first[t]
+            f_B = f_B | first[t] if t in epsilon else (first[t] - {EPSILON})
 
-    return (grammar, first, follow, epsilon)
+    return (grammar, epsilon, first, follow)
 
-def process(grammar):
+def followset(grammar, start):
     # Initialize first and follow sets for non-terminals
-    first = {i: set() for i in grammar}
     follow = {i: set() for i in grammar}
+    follow[start] = {EOF}
 
-    # If X is a terminal, then First(X) is just X
-    first.update((i, {i}) for i in terminals(grammar))
-    epsilon = {''}
-    return compute_ff(grammar, first, follow, epsilon)
+    epsilon = nullable(grammar)
+    first = firstset(grammar, epsilon)
+    return followset_(grammar, epsilon, first, follow)
 
 def rnullable(rule, epsilon):
     return all(token in epsilon for token in rule)
@@ -242,19 +246,18 @@ def rfirst(rule, first, epsilon):
     tokens = set()
     for token in rule:
         tokens |= first[token]
-        if token not in epsilon:
-            break  # not nullable
+        if token not in epsilon: break
     return tokens
 
 def predict(rulepair, first, follow, epsilon):
     A, rule = rulepair
     rf = rfirst(rule, first, epsilon)
     if rnullable(rule, epsilon):
-        rf |= follow[A] - {''}
+        rf |= follow[A]
     return rf
 
-def parse_table(grammar, my_rules):
-    _, first, follow, epsilon = process(grammar)
+def parse_table(grammar, start, my_rules):
+    _, epsilon, first, follow = followset(grammar, start)
 
     ptable = [(rule, predict(rule, first, follow, epsilon))
               for rule in my_rules]
@@ -272,24 +275,18 @@ def parse_helper(grammar, tbl, stack, inplst):
         val, *stack = stack
         if isinstance(val, tuple):
             exprs.append(val)
-            continue
-        if val not in grammar:  # terminal
-            if val == '':
-                exprs.append(val)
-                continue
-            if val != inp:
-                raise Exception("%s != %s" % (val, inp))
+        elif val not in grammar:  # terminal
+            assert val == inp
             exprs.append(val)
-            inp, *inplst = [*inplst, '']
+            inp, *inplst = inplst or [None]
         else:
-            k, rhs = tbl[val][inp]
-            assert k == val
+            _, rhs = tbl[val][inp] if inp else (None, [])
             stack = rhs + [(val, len(rhs))] + stack
     return exprs
 
-def parse(grammar, inp):
+def parse(grammar, start, inp):
     my_rules = rules(grammar)
-    parse_tbl = parse_table(grammar, my_rules)
+    parse_tbl = parse_table(grammar, start, my_rules)
     k, _ = my_rules[0]
     stack = [k]
     return parse_helper(grammar, parse_tbl, stack, list(inp))
@@ -303,14 +300,14 @@ def linear_to_tree(arr):
         else:
             # get the last n
             sym, n = elt
-            elts = stack[-n:]
+            elts = stack[-n:] if n > 0 else []
             stack = stack[0:len(stack) - n]
             stack.append((sym, elts))
     assert len(stack) == 1
     return stack[0]
 
 if __name__ == "__main__":
-    tree = linear_to_tree(parse(new_grammar, '(1+2)'))
+    tree = linear_to_tree(parse(new_grammar, START_SYMBOL, '(1+2)*3'))
     display_tree(tree)
 
 
@@ -322,10 +319,10 @@ if __name__ == "__main__":
 
 
 
-def epsilon_convert(rule): return [i.strip() for i in rule if i != '']
+def shrink(rule): return [i.strip() for i in rule]
 
 if __name__ == "__main__":
-    new_grammar = {k: [epsilon_convert(split_tokens(e)) for e in EXPR_GRAMMAR[k]] for k in EXPR_GRAMMAR}
+    new_grammar = {k: [shrink(split(e)) for e in EXPR_GRAMMAR[k]] for k in EXPR_GRAMMAR}
     new_grammar
 
 
@@ -411,7 +408,7 @@ def node_translator(state, grammar):
     return (state.name, process_expr(state.expr, state.children, grammar))
 
 if __name__ == "__main__":
-    new_grammar = {k: [epsilon_convert(split_tokens(e)) for e in EXPR_GRAMMAR[k]] for k in EXPR_GRAMMAR}
+    new_grammar = {k: [shrink(split(e)) for e in EXPR_GRAMMAR[k]] for k in EXPR_GRAMMAR}
     table = parse(list('1+2+3'), new_grammar, '<start>')
     states = [st for st in table[-1].states if st.name == '<start>' and st.finished()]
     for state in states:
@@ -434,7 +431,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    new_grammar = {k: [epsilon_convert(split_tokens(e)) for e in grammar[k]] for k in grammar}
+    new_grammar = {k: [shrink(split(e)) for e in grammar[k]] for k in grammar}
     table = parse(list('a+a+a'), new_grammar, '<start>')
     states = [st for st in table[-1].states if st.name == '<start>' and st.finished()]
     for state in states:

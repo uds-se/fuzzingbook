@@ -31,7 +31,7 @@ This book is written by _Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon F
 
 ## Frequently Asked Questions
 
-### Technical Issues
+### Troubleshooting
 
 #### Why does it take so long to start an interactive notebook?
 
@@ -55,9 +55,9 @@ If mybinder.org does not work or match your needs, you have a number of alternat
 
 3. If you want to use the book in a classroom, and depend on your users having access to the interactive notebooks, consider using or deploying a [JupyterHub](http://jupyter.org/hub) or [BinderHub](https://github.com/jupyterhub/binderhub) instance.
 
-#### Do you provide PDFs of your material?
+#### Can't you run your own dedicated cloud service?
 
-At this point, we do not provide support for PDF versions.  We will be producing PDF and paper versions once the book is complete.
+Technically, yes; but this would cost money and effort, which we'd rather spend on the book at this point.  If you'd like to host a [JupyterHub](http://jupyter.org/hub) or [BinderHub](https://github.com/jupyterhub/binderhub) instance for the public, please _do so_ and let us know.
 
 ### Content
 
@@ -89,6 +89,42 @@ See the table of contents in the menu above for those chapters that are already 
 #### How do I cite your work?
 
 Thanks for referring to our work!  Once the book is complete, you will be able to cite it in the traditional way.  In the meantime, just click on the "cite" button at the bottom of the Web page for each chapter to get a citation entry.
+
+#### Can you cite my paper?  And possibly write a chapter about it?
+
+We're always happy to get suggestions!  If we missed an important reference, we will of course add it.  If you'd like specific material to be covered, the best way is to _write a notebook_ yourself; see our [Guide for Authors](Guide_for_Authors.ipynb) for instructions on coding and writing.  We can then refer to it or even host it.
+
+### Teaching and Coursework
+
+#### Can I use your material in my course?
+
+Of course!  Just respect the [license](https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md) (including attribution and share alike).  If you want to use the material for commercial purposes, contact us.
+
+#### Can I extend or adapt your material?
+
+Yes!  Again, please see the [license](https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md) for details.
+
+#### How can I run a course based on the book?
+
+We have successfully used the material in various courses.  
+
+* Initially, we used the slides and code and did _live coding_ in lectures to illustrate how a technique works. 
+
+* Now, the goal of the book is to be completely self-contained; that is, it should work without additional support.  Hence, we now give out completed chapters to students in a _flipped classroom_ setting, with the students working on the notebooks at their leisure.  We would meet in the classroom to discuss experiences with past notebooks and discuss future notebooks.
+
+When running a course, [do not rely on mybinder.org](#Troubleshooting) – it will not provide sufficient resources for a larger group of students.  Instead, [install and run your own hub.](#Do-I-have-alternatives-to-the-interactive-notebook?)
+
+#### How can I extend or adapt your slides?
+
+Clone the `fuzzingbook` project repository [from the Github project page](https://github.com/uds-se/fuzzingbook) and adapt the notebooks in `notebooks/` at your leisure (see above), including "Slide Type" settings.  Then,
+
+1. Download slides from Jupyter Notebook; or
+2. Use the RISE extension ([instructions](http://www.blog.pythonlibrary.org/2018/09/25/creating-presentations-with-jupyter-notebook/)) to present your slides right out of Jupyter notebook; or
+3. Run `make slides` to create HTML slides in the `slides/` folder, which you can open in a browser.
+
+#### Do you provide PDFs of your material?
+
+At this point, we do not provide support for PDF versions.  We will be producing PDF and print versions once the book is complete.
 
 ### Other Issues
 

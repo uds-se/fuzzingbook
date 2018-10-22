@@ -363,7 +363,7 @@ ifeq ($(LATEX),pdflatex)
 # Use PDFLaTeX
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@echo Running LaTeX...
-	@-test -L $(PDF_TARGET)PICS || ln -s ../PICS $(PDF_TARGET)
+	@-test -L $(PDF_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(PDF_TARGET)
 	cd $(PDF_TARGET) && $(PDFLATEX) $*
 	-cd $(PDF_TARGET) && $(BIBTEX) $*
 	cd $(PDF_TARGET) && $(PDFLATEX) $*
@@ -376,7 +376,7 @@ else
 # Use LaTeXMK
 $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@echo Running LaTeXMK...
-	@-test -L $(PDF_TARGET)PICS || ln -s ../PICS $(PDF_TARGET)
+	@-test -L $(PDF_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(PDF_TARGET)
 	cd $(PDF_TARGET) && $(LATEXMK) $(LATEXMK_OPTS) $*
 	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm $*.lof $*.lot $*.fls $*.fdb_latexmk $*.xdv
 	@cd $(PDF_TARGET) && $(RM) -r $*_files
@@ -387,7 +387,7 @@ endif
 $(PDF_TARGET)%.tex:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_METADATA)
 	$(eval TMPDIR := $(shell mktemp -d))
 	$(PYTHON) $(ADD_METADATA) --titlepage $< > $(TMPDIR)/$(notdir $<)
-	cp -pr PICS fuzzingbook.* $(TMPDIR)
+	cp -pr $(NOTEBOOKS)/PICS fuzzingbook.* $(TMPDIR)
 	$(CONVERT_TO_TEX) $(TMPDIR)/$(notdir $<)
 	@-$(RM) -fr $(TMPDIR)
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
@@ -428,7 +428,7 @@ $(HTML_TARGET)%.html: \
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	$(PYTHON) utils/post-html.py $(POST_HTML_OPTIONS) $@
-	@-test -L $(HTML_TARGET)PICS || ln -s ../PICS $(HTML_TARGET)
+	@-test -L $(HTML_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(HTML_TARGET)
 	@$(OPEN) $@
 
 $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
@@ -437,7 +437,7 @@ $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 	sed 's/\.ipynb)/\.slides\.html)/g' $< > $(TMPDIR)/$(notdir $<)
 	$(CONVERT_TO_SLIDES) $(TMPDIR)/$(notdir $<)
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	@-test -L $(HTML_TARGET)PICS || ln -s ../PICS $(HTML_TARGET)
+	@-test -L $(HTML_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(HTML_TARGET)
 	@-$(RM) -fr $(TMPDIR)
 	@$(OPEN) $@
 
@@ -610,11 +610,11 @@ check-code: code $(PYS_OUT)
 IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
 .PHONY: check-import check-imports
 check-import check-imports: code
-	echo "#!/usr/bin/env $(PYTHON)" > import_all.py
-	(for file in $(IMPORTS); do echo from code import $$file; done) >> import_all.py
-	$(PYTHON) import_all.py 2>&1 | tee import_all.py.out
-	@test ! -s import_all.py.out && echo "All import checks passed."
-	@$(RM) import_all.py*
+	echo "#!/usr/bin/env $(PYTHON)" > $(CODE_TARGET)import_all.py
+	(for file in $(IMPORTS); do echo import $$file; done) >> $(CODE_TARGET)import_all.py
+	cd $(CODE_TARGET); $(PYTHON) import_all.py 2>&1 | tee import_all.py.out
+	@test ! -s $(CODE_TARGET)import_all.py.out && echo "All import checks passed."
+	@$(RM) $(CODE_TARGET)import_all.py*
 
 .PHONY: run
 run: check-import check-code
@@ -674,6 +674,7 @@ publish-html: html
 .PHONY: publish-code
 publish-code: code
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
+	$(RM) -r $(DOCS_TARGET)code
 	@test -d $(DOCS_TARGET)code || $(MKDIR) $(DOCS_TARGET)code
 	cp -pr $(CODE_TARGET) $(DOCS_TARGET)code
 	$(RM) $(DOCS_TARGET)code/*.py.out $(DOCS_TARGET)code/*.cfg $(DOCS_TARGET)code/*.in
@@ -719,13 +720,13 @@ publish-notebooks: full-notebooks
 	cp -pr $(FULL_NOTEBOOKS)/* $(DOCS_TARGET)notebooks
 
 .PHONY: publish-pics
-publish-pics: PICS
+publish-pics: $(NOTEBOOKS)/PICS
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)PICS || $(MKDIR) $(DOCS_TARGET)PICS
-	cp -pr PICS/* $(DOCS_TARGET)PICS
-	$(RM) -fr $(DOCS_TARGET)notebooks/PICS; ln -s ../PICS $(DOCS_TARGET)notebooks
-	$(RM) -fr $(DOCS_TARGET)html/PICS; ln -s ../PICS $(DOCS_TARGET)html
-	$(RM) -fr $(DOCS_TARGET)slides/PICS; ln -s ../PICS $(DOCS_TARGET)slides
+	cp -pr $(NOTEBOOKS)/PICS/* $(DOCS_TARGET)PICS
+	$(RM) -fr $(DOCS_TARGET)notebooks/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)notebooks
+	$(RM) -fr $(DOCS_TARGET)html/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)html
+	$(RM) -fr $(DOCS_TARGET)slides/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)slides
 
 ifndef BETA
 # Remove all chapters marked as beta

@@ -14110,8 +14110,8 @@ http//se:password@wwwgogle.cm/abc?def=.ab@c
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>As one of the foundations of human language, grammars have been around as long as human language existed.  The first <em>formalization</em> of generative grammars was by Dakṣiputra Pāṇini in 350 BC [<a href="https://en.wikipedia.org/wiki/P%C4%81%E1%B9%87ini%23A%E1%B9%A3%E1%B9%AD%C4%81dhy%C4%81y%C4%AB">Dakṣiputra Pāṇini, 350 BCE.</a>].</p>
-<p>\todo{Add more.}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>As one of the foundations of human language, grammars have been around as long as human language existed.  The first <em>formalization</em> of generative grammars was by Dakṣiputra Pāṇini in 350 BC [Unresolved citation: Panini350bce.].</p>
+<p>\todo{Add more. Discuss LangFuzz, CSmith, Zhendong Su's work}</p>
 </div>
 </div>
 </div>
@@ -14384,7 +14384,7 @@ NameError: name &#39;alt_expression_grammar&#39; is not defined (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We can now parse the tree to find operators and alternatives.  <code>get_alternatives()</code> iterates over all nodes <code>op</code> of the tree; if it is a string, it returns the string; otherwise, it creates a list over the operators:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can now parse the tree to find operators and alternatives.  <code>get_alternatives()</code> iterates over all nodes <code>op</code> of the tree; If the node looks like a binary <em>or</em> (<code>|</code> ) operation, we drill deeper and recurse. If not, we have reached a single production, and we try to get the expression from the production. We define the <code>to_expr</code> parameter depending on how we want to represent the production. In this case, we represent a single production by a single string.</p>
 </div>
 </div>
 </div>
@@ -14396,9 +14396,10 @@ NameError: name &#39;alt_expression_grammar&#39; is not defined (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_alternatives</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">([</span><span class="n">op</span><span class="o">.</span><span class="n">s</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Str</span><span class="p">)</span>
-            <span class="k">else</span> <span class="n">get_alternatives</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">left</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">op</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">s</span><span class="p">])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_alternatives</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">to_expr</span><span class="o">=</span><span class="k">lambda</span> <span class="n">o</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">BinOp</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">BitOr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_alternatives</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">to_expr</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">to_expr</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">right</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">to_expr</span><span class="p">(</span><span class="n">op</span><span class="p">)]</span>
 </pre></div>
 
 </div>
@@ -14421,8 +14422,8 @@ NameError: name &#39;alt_expression_grammar&#39; is not defined (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">funct_parser</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="n">assign</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">get_alternatives</span><span class="p">(</span><span class="n">assign</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">funct_parser</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">to_expr</span><span class="o">=</span><span class="k">lambda</span> <span class="n">o</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">assign</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">:</span> <span class="n">get_alternatives</span><span class="p">(</span><span class="n">assign</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">to_expr</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">assign</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">body</span><span class="p">}</span>
 </pre></div>
 
@@ -14473,10 +14474,96 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-1:-One-Single-Function">Part 1: One Single Function<a class="anchor-link" href="#Part-1:-One-Single-Function">&#182;</a></h4><p>Write a single function <code>define_grammar(fn)</code> that takes a grammar defined as function (such as <code>expression_grammar_fn</code>) and returns a regular grammar.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-1-(a):-One-Single-Function">Part 1 (a): One Single Function<a class="anchor-link" href="#Part-1-(a):-One-Single-Function">&#182;</a></h4><p>Write a single function <code>define_grammar(fn)</code> that takes a grammar defined as function (such as <code>expression_grammar_fn</code>) and returns a regular grammar.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/Grammars.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-1-(b):-Alternative-representations">Part 1 (b): Alternative representations<a class="anchor-link" href="#Part-1-(b):-Alternative-representations">&#182;</a></h4></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We note that the grammar representation we designed previously does not allow simple generation of alternatives such as <code>srange</code> and <code>crange</code>. Further, one may find the string representation of expressions limiting. Turns out, it is simple to extend our grammar definition to support grammars such as below:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_name</span><span class="p">(</span><span class="n">o</span><span class="p">):</span> <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="k">else</span> <span class="n">o</span><span class="o">.</span><span class="n">s</span>
+
+<span class="k">def</span> <span class="nf">define_expr</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">BinOp</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Add</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">define_expr</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">left</span><span class="p">),</span> <span class="n">define_name</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">right</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">define_name</span><span class="p">(</span><span class="n">op</span><span class="p">),)</span>
+
+<span class="k">def</span> <span class="nf">define_ex_grammar</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">define_grammar</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">define_expr</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The grammar:</p>
+<div class="highlight"><pre><span></span><span class="nd">@define_ex_grammar</span>
+<span class="k">def</span> <span class="nf">expression_grammar</span><span class="p">():</span>
+    <span class="n">start</span>   <span class="o">=</span> <span class="n">expr</span>
+    <span class="n">expr</span>    <span class="o">=</span> <span class="p">(</span><span class="n">term</span> <span class="o">+</span> <span class="s1">&#39;+&#39;</span> <span class="o">+</span> <span class="n">expr</span>
+            <span class="o">|</span>  <span class="n">term</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">expr</span><span class="p">)</span>
+    <span class="n">term</span>    <span class="o">=</span> <span class="p">(</span><span class="n">factor</span> <span class="o">+</span> <span class="s1">&#39;*&#39;</span> <span class="o">+</span> <span class="n">term</span>
+            <span class="o">|</span>  <span class="n">factor</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">term</span>
+            <span class="o">|</span>  <span class="n">factor</span><span class="p">)</span>
+    <span class="n">factor</span>  <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;+&#39;</span> <span class="o">+</span> <span class="n">factor</span>
+            <span class="o">|</span>  <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">factor</span>
+            <span class="o">|</span>  <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="n">expr</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+            <span class="o">|</span>  <span class="n">integer</span>
+            <span class="o">|</span>  <span class="n">integer</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">integer</span><span class="p">)</span>
+    <span class="n">integer</span> <span class="o">=</span> <span class="p">(</span><span class="n">digit</span> <span class="o">+</span> <span class="n">integer</span>
+            <span class="o">|</span>  <span class="n">digit</span><span class="p">)</span>
+    <span class="n">digit</span>   <span class="o">=</span> <span class="s1">&#39;0&#39;</span> <span class="o">|</span> <span class="s1">&#39;1&#39;</span> <span class="o">|</span> <span class="s1">&#39;2&#39;</span> <span class="o">|</span> <span class="s1">&#39;3&#39;</span> <span class="o">|</span> <span class="s1">&#39;4&#39;</span> <span class="o">|</span> <span class="s1">&#39;5&#39;</span> <span class="o">|</span> <span class="s1">&#39;6&#39;</span> <span class="o">|</span> <span class="s1">&#39;7&#39;</span> <span class="o">|</span> <span class="s1">&#39;8&#39;</span> <span class="o">|</span> <span class="s1">&#39;9&#39;</span>
+
+<span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">expression_grammar</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="s2">&quot;::=&quot;</span><span class="p">,</span> <span class="n">expression_grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Note.</strong> The grammar data structure thus obtained is a little more detailed than the standard data structure. It represents each production as a tuple.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We note that we have not enabled <code>srange</code> or <code>crange</code> in the above grammar. How would you go about adding these? (<em>Hint:</em> modify <code>define_name</code> to look for <code>ast.Call</code>)</p>
 </div>
 </div>
 </div>
@@ -14524,7 +14611,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-10-19 14:12:32+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-10-20 22:12:13+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14540,7 +14627,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2018-10-19 14:12:32+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2018-10-20 22:12:13+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Grammars,
@@ -14550,9 +14637,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Grammars.html}},
-    note = {Retrieved 2018-10-19 14:12:32+02:00},
+    note = {Retrieved 2018-10-20 22:12:13+02:00},
     url = {https://www.fuzzingbook.org/beta/html/Grammars.html},
-    urldate = {2018-10-19 14:12:32+02:00}
+    urldate = {2018-10-20 22:12:13+02:00}
 }
 </pre>
 </div>
