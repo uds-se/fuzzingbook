@@ -75,6 +75,7 @@ menu_end = r"""
 site_header_template = menu_start + r"""
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
+     <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit Notebooks (beta)</a></li>
      <li><a href="__SITE_HTML__dist/fuzzingbook-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
      <li><a href="__SITE_HTML__dist/fuzzingbook-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
      <li><a href="__GITHUB_HTML__" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
@@ -317,9 +318,10 @@ basename = os.path.splitext(os.path.basename(chapter_html_file))[0]
 chapter_ipynb_file = os.path.join("notebooks", basename + ".ipynb")
 if args.home:
     chapter_html = site_html
+    chapter_notebook_ipynb = notebook_html + "00_Table_of_Contents.ipynb"
 else:
     chapter_html = site_html + "html/" + basename + ".html"
-chapter_notebook_ipynb = notebook_html + basename + ".ipynb"
+    chapter_notebook_ipynb = notebook_html + basename + ".ipynb"
 
 chapter_title = get_title(chapter_ipynb_file)
 chapter_title_beta = chapter_title
