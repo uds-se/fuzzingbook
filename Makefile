@@ -93,6 +93,16 @@ CODE_TARGET    := beta/$(CODE_TARGET)
 BETA_FLAG = --include-ready --include-todo
 endif
 
+# Files to apear in the table of contents
+ifndef BETA
+TOC_CHAPTERS := $(PUBLIC_CHAPTERS)
+TOC_APPENDICES = $(APPENDICES)
+endif
+ifdef BETA
+TOC_CHAPTERS := $(CHAPTERS)
+TOC_APPENDICES = $(APPENDICES)
+endif
+
 
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
@@ -562,7 +572,6 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 endif
 
 
-
 ## Some checks
 
 # Style checks
@@ -685,7 +694,7 @@ publish-code: code
 	done
 
 .PHONY: dist publish-dist
-dist publish-dist: check-import check-code publish-code delete-betas \
+dist publish-dist: check-import check-code publish-code delete-betas toc \
 	$(DOCS_TARGET)dist/fuzzingbook-code.zip \
 	$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip
 
@@ -761,6 +770,15 @@ ifdef BETA
 .PHONY: delete-betas
 delete-betas:
 endif
+
+# Table of contents
+.PHONY: toc
+toc: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb
+$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: .FORCE
+	$(RM) $@
+	$(PYTHON) utils/nbtoc.py \
+		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
+		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
 
 
 ## Python packages
