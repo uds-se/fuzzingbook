@@ -780,7 +780,6 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: .FORCE
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
 		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
 
-
 ## Python packages
 # After this, you can do 'pip install fuzzingbook' 
 # and then 'from fuzzingbook.Fuzzer import Fuzzer' :-)

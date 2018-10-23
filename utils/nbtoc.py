@@ -58,6 +58,22 @@ def notebook_toc(public_chapters, appendices):
             nbformat.v4.new_markdown_cell(source=chapter_toc),
             nbformat.v4.new_markdown_cell(source=appendix_toc)
         ])
+
+    # Get along with TOC extension
+    toc_notebook.metadata['toc'] = {
+     "base_numbering": 1,
+     "nav_menu": {},
+     "number_sections": False,
+     "sideBar": False,
+     "skip_h1_title": False,
+     "title_cell": "",
+     "title_sidebar": "Contents",
+     "toc_cell": False,
+     "toc_position": {},
+     "toc_section_display": False,
+     "toc_window_display": False
+    }
+    
     return toc_notebook    
 
 
