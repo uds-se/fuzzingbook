@@ -37,13 +37,13 @@ CHAPTERS = $(PUBLIC_CHAPTERS) $(BETA_CHAPTERS)
 # Appendices for the book
 APPENDICES = \
 	ExpectError.ipynb \
-	Timer.ipynb \
-	Guide_for_Authors.ipynb
+	Timer.ipynb
 
-# Additional notebooks for special pages (not to be included)
+# Additional notebooks for special pages (not to be included in distributions)
 FRONTMATTER = \
 	index.ipynb
 EXTRAS = \
+	Guide_for_Authors.ipynb \
 	Template.ipynb \
 	404.ipynb
 
@@ -91,6 +91,16 @@ HTML_TARGET    := beta/$(HTML_TARGET)
 SLIDES_TARGET  := beta/$(SLIDES_TARGET)
 CODE_TARGET    := beta/$(CODE_TARGET)
 BETA_FLAG = --include-ready --include-todo
+endif
+
+# Files to apear in the table of contents
+ifndef BETA
+TOC_CHAPTERS := $(PUBLIC_CHAPTERS)
+TOC_APPENDICES = $(APPENDICES)
+endif
+ifdef BETA
+TOC_CHAPTERS := $(CHAPTERS)
+TOC_APPENDICES = $(APPENDICES)
 endif
 
 
@@ -398,7 +408,7 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--ready-chapters="$(READY_SOURCES)" \
 	--todo-chapters="$(TODO_SOURCES)"
 HOME_POST_HTML_OPTIONS = \
-	--menu-prefix=html/ --home $(POST_HTML_OPTIONS)
+	--menu-prefix=/html/ --home $(POST_HTML_OPTIONS)
 
 $(DOCS_TARGET)index.html: \
 	$(FULL_NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
@@ -562,7 +572,6 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
 endif
 
 
-
 ## Some checks
 
 # Style checks
@@ -680,16 +689,16 @@ publish-code: code
 	$(RM) $(DOCS_TARGET)code/*.py.out $(DOCS_TARGET)code/*.cfg $(DOCS_TARGET)code/*.in
 	$(RM) -r $(DOCS_TARGET)code/__pycache__ \
 	 	$(DOCS_TARGET)code/fuzzingbook_utils/__pycache__
-	$(RM) $(DOCS_TARGET)code/404.py \
-		  $(DOCS_TARGET)code/index.py \
-		  $(DOCS_TARGET)code/Template.py \
-		  $(DOCS_TARGET)code/Guide_for_Authors.py
+	for file in $(EXTRAS:%.ipynb=%.py) $(FRONTMATTER:%.ipynb=%.py); do \
+		$(RM) $(DOCS_TARGET)code/$$file; \
+	done
 
 .PHONY: dist publish-dist
-dist publish-dist: check-import check-code \
-	publish-code delete-betas $(DOCS_TARGET)dist/fuzzingbook.zip
+dist publish-dist: check-import check-code publish-code delete-betas toc \
+	$(DOCS_TARGET)dist/fuzzingbook-code.zip \
+	$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip
 
-$(DOCS_TARGET)dist/fuzzingbook.zip: $(PYS) $(CODE_TARGET)README.md $(CODE_TARGET)LICENSE.md
+$(DOCS_TARGET)dist/fuzzingbook-code.zip: $(PYS) $(CODE_TARGET)README.md $(CODE_TARGET)LICENSE.md
 	@-mkdir $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)dist/*
 	$(RM) -r $(DOCS_TARGET)fuzzingbook
@@ -701,11 +710,24 @@ $(DOCS_TARGET)dist/fuzzingbook.zip: $(PYS) $(CODE_TARGET)README.md $(CODE_TARGET
 	mv $(DOCS_TARGET)fuzzingbook/dist/* $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)fuzzingbook/*.egg-info
 	$(RM) -r $(DOCS_TARGET)fuzzingbook/dist $(DOCS_TARGET)fuzzingbook/build
-	cd $(DOCS_TARGET); $(ZIP) $(ZIP_OPTIONS) fuzzingbook.zip fuzzingbook
-	mv $(DOCS_TARGET)fuzzingbook.zip $(DOCS_TARGET)dist
+	cd $(DOCS_TARGET); $(ZIP) $(ZIP_OPTIONS) fuzzingbook-code.zip fuzzingbook
+	mv $(DOCS_TARGET)fuzzingbook-code.zip $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)fuzzingbook $(DOCS_TARGET)code/fuzzingbook
 	$(RM) -r $(DOCS_TARGET)code/dist $(DOCS_TARGET)code/*.egg-info
-	@echo "Created distribution files in $(DOCS_TARGET)dist"
+	@echo "Created code distribution files in $(DOCS_TARGET)dist"
+	
+$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip: $(FULLS) Makefile
+	$(RM) -r $(DOCS_TARGET)notebooks/fuzzingbook_utils/__pycache__
+	cd $(DOCS_TARGET); ln -s notebooks fuzzingbook-notebooks
+	cd $(DOCS_TARGET); \
+		$(ZIP) $(ZIP_OPTIONS) fuzzingbook-notebooks.zip fuzzingbook-notebooks
+	$(RM) $(DOCS_TARGET)/fuzzingbook-notebooks
+	cd $(DOCS_TARGET); \
+		for file in $(EXTRAS); do \
+			$(ZIP) fuzzingbook-notebooks.zip -d fuzzingbook-notebooks/$$file; \
+		done
+	mv $(DOCS_TARGET)fuzzingbook-notebooks.zip $@
+	@echo "Created notebook distribution files in $(DOCS_TARGET)dist"
 
 .PHONY: publish-slides
 publish-slides: slides
@@ -749,6 +771,14 @@ ifdef BETA
 delete-betas:
 endif
 
+# Table of contents
+.PHONY: toc
+toc: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb
+$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: .FORCE
+	$(RM) $@
+	$(PYTHON) utils/nbtoc.py \
+		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
+		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
 
 ## Python packages
 # After this, you can do 'pip install fuzzingbook' 
