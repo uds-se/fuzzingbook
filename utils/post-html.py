@@ -61,6 +61,7 @@ menu_end = r"""
      </li>
      <li class="has-sub"><a href="#"><span title="Help"><i class="fa fa-fw fa-question-circle"></i></span> <span class="menu_5">Help</span></a>
         <ul>
+          <li><a href="__SITE_HTML__#Troubleshooting"><i class="fa fa-fw fa-wrench"></i> Troubleshooting</a></li>
           <li><a href="https://docs.python.org/3/tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Python Tutorial</a>
           <li><a href="https://www.dataquest.io/blog/jupyter-notebook-tutorial/" target=_blank><i class="fa fa-fw fa-question-circle"></i> Jupyter Notebook Tutorial</a>
           <li><a href="__GITHUB_HTML__issues/" target="_blank"><i class="fa fa-fw fa-commenting"></i> Report an Issue</a></li>
