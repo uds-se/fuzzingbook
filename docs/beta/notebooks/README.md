@@ -49,9 +49,9 @@ There are alternatives to mybinder.org; see below.
 
 If mybinder.org does not work or match your needs, you have a number of alternatives:
 
-1. Download the Python code (using the menu at the top) and edit and run it in your favorite environment.  This is easy to do and does not require lots of resources.
+1. **Download the Python code** (using the menu at the top) and edit and run it in your favorite environment.  This is easy to do and does not require lots of resources.
 
-2. [Install jupyter notebook on your machine](https://www.dataquest.io/blog/jupyter-notebook-tutorial/) and clone the `fuzzingbook` project repository [from the Github project page](https://github.com/uds-se/fuzzingbook).  Go to the `notebooks/` folder, where you can then open, edit, and run all notebooks at your leisure.
+2. **Download the Jupyter Notebooks** (using the menu at the top) and open them in Jupyter.  Here's [how to install jupyter notebook on your machine](https://www.dataquest.io/blog/jupyter-notebook-tutorial/).
 
 3. If you want to use the book in a classroom, and depend on your users having access to the interactive notebooks, consider using or deploying a [JupyterHub](http://jupyter.org/hub) or [BinderHub](https://github.com/jupyterhub/binderhub) instance.
 
@@ -66,23 +66,23 @@ Technically, yes; but this would cost money and effort, which we'd rather spend 
 The contents of this book will include topics such as:
 
 1. Introduction to Testing
-2. Basic Fuzzing
-3. Coverage
-4. Mutation-Based Fuzzing
-5. Fuzzing with Grammars
-6. Efficient Grammar Fuzzing
-7. Grammar Coverage
-8. Configuration Fuzzing
-9. Parsing and Mutating Inputs
-10. Probabilistic Testing
-11. Reducing Failure-Inducing Inputs
-12. Fuzzing Function Calls
-13. Fuzzing User Interfaces
-14. Search-Based Testing
-15. Symbolic Testing
-16. Mining Grammars
-17. Fuzzing and Invariants
-18. Protection and Repair
+1. Basic Fuzzing
+1. Coverage
+1. Mutation-Based Fuzzing
+1. Fuzzing with Grammars
+1. Efficient Grammar Fuzzing
+1. Grammar Coverage
+1. Configuration Fuzzing
+1. Parsing and Mutating Inputs
+1. Probabilistic Testing
+1. Reducing Failure-Inducing Inputs
+1. Fuzzing Function Calls
+1. Fuzzing User Interfaces
+1. Search-Based Testing
+1. Symbolic Testing
+1. Mining Grammars
+1. Fuzzing and Invariants
+1. Protection and Repair
 
 See the table of contents in the menu above for those chapters that are already done.
 
@@ -116,11 +116,10 @@ When running a course, [do not rely on mybinder.org](#Troubleshooting) – it w
 
 #### How can I extend or adapt your slides?
 
-Clone the `fuzzingbook` project repository [from the Github project page](https://github.com/uds-se/fuzzingbook) and adapt the notebooks in `notebooks/` at your leisure (see above), including "Slide Type" settings.  Then,
+Download the Jupyter Notebooks (using the menu at the top) and adapt the notebooks at your leisure (see above), including "Slide Type" settings.  Then,
 
 1. Download slides from Jupyter Notebook; or
-2. Use the RISE extension ([instructions](http://www.blog.pythonlibrary.org/2018/09/25/creating-presentations-with-jupyter-notebook/)) to present your slides right out of Jupyter notebook; or
-3. Run `make slides` to create HTML slides in the `slides/` folder, which you can open in a browser.
+2. Use the RISE extension ([instructions](http://www.blog.pythonlibrary.org/2018/09/25/creating-presentations-with-jupyter-notebook/)) to present your slides right out of Jupyter notebook.
 
 #### Do you provide PDFs of your material?
 
