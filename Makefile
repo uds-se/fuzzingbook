@@ -407,9 +407,8 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--public-chapters="$(PUBLIC_SOURCES)" \
 	--ready-chapters="$(READY_SOURCES)" \
 	--todo-chapters="$(TODO_SOURCES)"
-HOME_POST_HTML_OPTIONS = \
-	--menu-prefix=/html/ --home $(POST_HTML_OPTIONS)
 
+# index.html comes with relative links (html/) such that the beta version gets the beta menu
 $(DOCS_TARGET)index.html: \
 	$(FULL_NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
@@ -417,9 +416,10 @@ $(DOCS_TARGET)index.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
-	$(PYTHON) utils/post-html.py $(HOME_POST_HTML_OPTIONS) $@
+	$(PYTHON) utils/post-html.py --menu-prefix=html/ --home $(POST_HTML_OPTIONS)$(HOME_POST_HTML_OPTIONS) $@
 	@$(OPEN) $@
 
+# 404.html comes with absolute links (/html/) such that it works anywhare
 # https://help.github.com/articles/creating-a-custom-404-page-for-your-github-pages-site/
 $(DOCS_TARGET)404.html: \
 	$(FULL_NOTEBOOKS)/404.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
@@ -428,7 +428,7 @@ $(DOCS_TARGET)404.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)404.html $@
 	@cd $(HTML_TARGET) && $(RM) -r 404.nbpub.log 404_files
-	$(PYTHON) utils/post-html.py $(HOME_POST_HTML_OPTIONS) $@
+	$(PYTHON) utils/post-html.py --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
 	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
 	@$(OPEN) $@
 
