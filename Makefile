@@ -398,7 +398,7 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--ready-chapters="$(READY_SOURCES)" \
 	--todo-chapters="$(TODO_SOURCES)"
 HOME_POST_HTML_OPTIONS = \
-	--menu-prefix=html/ --home $(POST_HTML_OPTIONS)
+	--menu-prefix=/html/ --home $(POST_HTML_OPTIONS)
 
 $(DOCS_TARGET)index.html: \
 	$(FULL_NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
