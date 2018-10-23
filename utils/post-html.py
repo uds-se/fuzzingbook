@@ -230,6 +230,105 @@ def anchor(title):
     """Return an anchor '#a-title' for a title 'A title'"""
     return '#' + title.replace(' ', '-')
 
+
+
+# Authors
+def bibtex_escape(authors):
+    """Return list of authors in BibTeX-friendly form"""
+    tex_escape_table = {
+        "ä": r'{\"a}',
+        "ö": r'{\"o}',
+        "ü": r'{\"u}',
+        "Ä": r'{\"A}',
+        "Ö": r'{\"O}',
+        "Ü": r'{\"U}',
+        "ß": r'{\ss}'
+    }
+    return "".join(tex_escape_table.get(c,c) for c in authors)
+
+assert bibtex_escape("Böhme") == r'B{\"o}hme'
+
+authors_bibtex = bibtex_escape(authors).replace(", and ", " and ").replace(", ", " and ")
+
+
+# The other way round
+# Use "grep '\\' fuzzingbook.bib" to see accents currently in use
+def bibtex_unescape(contents):
+    """Fix TeX escapes introduced by BibTeX"""
+    tex_unescape_table = {
+        r'{\"a}': "ä",
+        r'{\"o}': "ö",
+        r'{\"u}': "ü",
+        r'{\"i}': "ï",
+        r'{\"e}': "ë",
+        r'{\"A}': "Ä",
+        r'{\"O}': "Ö",
+        r'{\"U}': "Ü",
+        r'{\ss}': "ß",
+        r'{\`e}': "è",
+        r'{\'e}': "é",
+        r'{\`a}': "à",
+        r'{\'a}': "á",
+        r'{\d{s}}': "ṣ",
+        r'{\d{n}}': "ṇ",
+        r'{\d{t}}': "ṭ",
+        r'{\=a}': "ā",
+        r'{\=i}': "ī"
+    }
+    for key in tex_unescape_table:
+        contents = contents.replace(key, tex_unescape_table[key])
+    return contents
+
+assert bibtex_unescape(r"B{\"o}hme") == 'Böhme'
+assert bibtex_unescape(r"P{\`e}zze") == 'Pèzze'
+
+
+
+# Imports are in <span class="nn">NAME</span>
+RE_IMPORT = re.compile(r'<span class="nn">([^<]+)</span>')
+
+# Add links to imports
+def add_links_to_imports(contents):
+    imports = re.findall(RE_IMPORT, contents)
+    for module in imports:
+        link = None
+        if module == "fuzzingbook_utils":
+            pass
+        elif module[0].isupper():
+            # Point to notebook
+            link = module + '.html'
+        else:
+            # Point to Python doc
+            link = "https://docs.python.org/3/library/" + module + ".html"
+
+        if link is not None:
+            contents = contents.replace(r'<span class="nn">' + module + r'</span>',
+                r'<span class="nn"><a href="' + link 
+                + r'" class="import" target="_blank">' 
+                + module + r"</a>" + r'</span>')
+
+    return contents
+
+
+# Sharing
+def cgi_escape(text):
+    """Produce entities within text."""
+    cgi_escape_table = {
+        " ": r"%20",
+        "&": r"%26",
+        '"': r"%22",
+        "'": r"%27",
+        ">": r"%3e",
+        "<": r"%3c",
+        ":": r"%3a",
+        "/": r"%2f",
+        "?": r"%3f",
+        "=": r"%3d",
+    }
+    return "".join(cgi_escape_table.get(c,c) for c in text)
+
+
+
 # Process arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--home", help="omit links to notebook, code, and slides", action='store_true')
@@ -370,23 +469,6 @@ end_of_exercise = '''
 <p><div class="solution_link"><a href="__CHAPTER_NOTEBOOK_IPYNB__#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 '''
 
-# Sharing
-def cgi_escape(text):
-    """Produce entities within text."""
-    cgi_escape_table = {
-        " ": r"%20",
-        "&": r"%26",
-        '"': r"%22",
-        "'": r"%27",
-        ">": r"%3e",
-        "<": r"%3c",
-        ":": r"%3a",
-        "/": r"%2f",
-        "?": r"%3f",
-        "=": r"%3d",
-    }
-    return "".join(cgi_escape_table.get(c,c) for c in text)
-
 if args.home:
     share_message = (r'I just read "' + booktitle 
         + r'" (@FuzzingBook) at ' + site_html)
@@ -400,57 +482,6 @@ share_twitter = "https://twitter.com/intent/tweet?text=" + cgi_escape(share_mess
 share_facebook = "https://www.facebook.com/sharer/sharer.php?u=" + cgi_escape(chapter_html)
 share_mail = ("mailto:?subject=" + cgi_escape(share_title) 
     + "&body=" + cgi_escape(share_message))
-
-# Authors
-def bibtex_escape(authors):
-    """Return list of authors in BibTeX-friendly form"""
-    tex_escape_table = {
-        "ä": r'{\"a}',
-        "ö": r'{\"o}',
-        "ü": r'{\"u}',
-        "Ä": r'{\"A}',
-        "Ö": r'{\"O}',
-        "Ü": r'{\"U}',
-        "ß": r'{\ss}'
-    }
-    return "".join(tex_escape_table.get(c,c) for c in authors)
-
-assert bibtex_escape("Böhme") == r'B{\"o}hme'
-
-authors_bibtex = bibtex_escape(authors).replace(", and ", " and ").replace(", ", " and ")
-
-
-# The other way round
-# Use "grep '\\' fuzzingbook.bib" to see accents currently in use
-def bibtex_unescape(contents):
-    """Fix TeX escapes introduced by BibTeX"""
-    tex_unescape_table = {
-        r'{\"a}': "ä",
-        r'{\"o}': "ö",
-        r'{\"u}': "ü",
-        r'{\"i}': "ï",
-        r'{\"e}': "ë",
-        r'{\"A}': "Ä",
-        r'{\"O}': "Ö",
-        r'{\"U}': "Ü",
-        r'{\ss}': "ß",
-        r'{\`e}': "è",
-        r'{\'e}': "é",
-        r'{\`a}': "à",
-        r'{\'a}': "á",
-        r'{\d{s}}': "ṣ",
-        r'{\d{n}}': "ṇ",
-        r'{\d{t}}': "ṭ",
-        r'{\=a}': "ā",
-        r'{\=i}': "ī"
-    }
-    for key in tex_unescape_table:
-        contents = contents.replace(key, tex_unescape_table[key])
-    return contents
-
-assert bibtex_unescape(r"B{\"o}hme") == 'Böhme'
-assert bibtex_unescape(r"P{\`e}zze") == 'Pèzze'
-
 
 # Page title
 if args.home:
@@ -497,6 +528,9 @@ chapter_contents = chapter_contents \
     .replace("__SHARE_MAIL__", share_mail) \
     .replace("__DATE__", notebook_modification_datetime) \
     .replace("__YEAR__", notebook_modification_year)
+
+# Add links to imports
+chapter_contents = add_links_to_imports(chapter_contents)
 
 # Fix simple .ipynb links within text
 if args.home:
