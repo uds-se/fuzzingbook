@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-10-20 22:12:01+02:00
+# Last change: 2018-10-23 14:42:56+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -36,37 +36,37 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    from fuzzingbook_utils import set_fixed_seed
-    set_fixed_seed.set_fixed_seed()
-
-
-
-if __package__ is None or __package__ == "":
-    from Grammars import EXPR_GRAMMAR, START_SYMBOL
-else:
-    from .Grammars import EXPR_GRAMMAR, START_SYMBOL
-
-
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import display_tree
-else:
-    from .GrammarFuzzer import display_tree
-
-
+import fuzzingbook_utils
+from Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL
+from GrammarFuzzer import display_tree
 import functools
 import re
-
-RE_NONTERMINAL = re.compile(r'(<[a-zA-Z_]*>)')
 
 def split(rule):
     return [s for s in re.split(RE_NONTERMINAL, rule) if s]
 
-class PEGParser:
-    def __init__(self, grammar):
-        self.grammar = {k: [split(l) for l in rules]
-                        for k, rules in grammar.items()}
+def canonical(grammar):
+    return  {k: [split(l) for l in rules] for k, rules in grammar.items()}
+
+class IParser:
+    def parse(self, text): raise NotImplemented()
+
+class Parser(IParser):
+    def __init__(self, grammar, start_symbol):
+        self.start_symbol = start_symbol
+        self.grammar = grammar
+
+# ## Parsing Expression Grammars
+
+if __name__ == "__main__":
+    print('\n## Parsing Expression Grammars')
+
+
+
+
+class PEGParser(Parser):
+    def __init__(self, grammar, start_symbol):
+        super().__init__(canonical(grammar), start_symbol)
     # memoize repeated calls.
     @functools.lru_cache(maxsize=None)
     def unify_key(self, key, text, at=0):
@@ -86,18 +86,36 @@ class PEGParser:
             if res is None: return at, None
             results.append(res)
         return at, results
-
-def parse(text, grammar, start_symbol=START_SYMBOL):
-    peg = PEGParser(grammar)
-    return peg.unify_key(start_symbol, text)
+    
+    def parse(self, text): return self.unify_key(self.start_symbol, text, 0)
+    
+def parse(text, grammar):
+    peg = PEGParser(grammar, START_SYMBOL)
+    return peg.parse(text)
+    
 
 if __name__ == "__main__":
-    cursor, tree = parse("1 + (2 * 3)", EXPR_GRAMMAR)
+    EXPR_GRAMMAR
+
+
+NEW_EXPR_GRAMMAR = {'<start>': ['<expr>'],
+ '<expr>': ['<term> + <expr>', '<term> - <expr>', '<term>'],
+ '<term>': ['<factor> * <term>', '<factor> / <term>', '<factor>'],
+ '<factor>': ['+<factor>',
+  '-<factor>',
+  '(<expr>)',
+  '<integer>.<integer>',
+  '<integer>'],
+ '<integer>': ['<digit><integer>', '<digit>'],
+ '<digit>': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']}
+
+if __name__ == "__main__":
+    cursor, tree = parse("1 + (2 * 3)", NEW_EXPR_GRAMMAR)
     display_tree(tree)
 
 
 if __name__ == "__main__":
-    cursor, tree = parse("1 * (2 + 3.45)", EXPR_GRAMMAR)
+    cursor, tree = parse("1 * (2 + 3.35)", NEW_EXPR_GRAMMAR)
     display_tree(tree)
 
 
