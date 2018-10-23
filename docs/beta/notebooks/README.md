@@ -55,6 +55,10 @@ If mybinder.org does not work or match your needs, you have a number of alternat
 
 3. If you want to use the book in a classroom, and depend on your users having access to the interactive notebooks, consider using or deploying a [JupyterHub](http://jupyter.org/hub) or [BinderHub](https://github.com/jupyterhub/binderhub) instance.
 
+#### Can I run the code on my Windows machine?
+
+We try to keep the code as general as possible, but occasionally, when we interact with the operating system, we assume a Unix-like environment (because that is what Binder provides).  To run these examples on your own Windows machine, you can install a Linux VM or a Docker environment.  Instructions on how to do this are welcome.
+
 #### Can't you run your own dedicated cloud service?
 
 Technically, yes; but this would cost money and effort, which we'd rather spend on the book at this point.  If you'd like to host a [JupyterHub](http://jupyter.org/hub) or [BinderHub](https://github.com/jupyterhub/binderhub) instance for the public, please _do so_ and let us know.

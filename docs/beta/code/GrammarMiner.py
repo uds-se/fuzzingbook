@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2018-10-23 08:08:30+02:00
+# Last change: 2018-10-22 17:02:46+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -262,7 +262,7 @@ else:
 
 if __name__ == "__main__":
     f = GrammarFuzzer(grammar)
-    for i in range(10):
+    for i in range(20):
         print(f.fuzz())
 
 

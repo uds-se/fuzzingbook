@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2018-10-23 08:08:30+02:00
+# Last change: 2018-10-22 13:52:42+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
