@@ -65,7 +65,7 @@ FULL_NOTEBOOKS = full_notebooks
 
 # Git repo
 GITHUB_REPO = https://github.com/uds-se/fuzzingbook/
-BINDER_URL = https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=notebooks
+BINDER_URL = https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/00_Table_of_Contents.ipynb
 
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
