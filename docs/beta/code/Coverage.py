@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2018-10-20 17:55:22+02:00
+# Last change: 2018-10-24 11:17:04+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -278,9 +278,8 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     # We use the same fixed seed as the notebook to ensure consistency
-    from fuzzingbook_utils import set_fixed_seed
-    set_fixed_seed.set_fixed_seed()
-
+    import random
+    random.seed(2001)
 
 
 if __name__ == "__main__":

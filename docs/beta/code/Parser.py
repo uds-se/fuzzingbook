@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-10-23 14:42:56+02:00
+# Last change: 2018-10-23 17:59:24+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -48,13 +48,20 @@ def split(rule):
 def canonical(grammar):
     return  {k: [split(l) for l in rules] for k, rules in grammar.items()}
 
-class IParser:
-    def parse(self, text): raise NotImplemented()
-
-class Parser(IParser):
-    def __init__(self, grammar, start_symbol):
+class Parser(object):
+    def __init__(self, grammar, start_symbol=START_SYMBOL):
         self.start_symbol = start_symbol
         self.grammar = grammar
+        
+    def parse_prefix(self, text):
+        """Return pair (cursor, forest) for longest prefix of text"""
+        raise NotImplemented()
+        
+    def parse(self, text):
+        cursor, forest = self.parse_prefix(text)
+        if cursor < len(text):
+            raise SyntaxError("at " + repr(text[cursor:]))
+        return forest
 
 # ## Parsing Expression Grammars
 
@@ -91,8 +98,7 @@ class PEGParser(Parser):
     
 def parse(text, grammar):
     peg = PEGParser(grammar, START_SYMBOL)
-    return peg.parse(text)
-    
+    return peg.parse(text)  
 
 if __name__ == "__main__":
     EXPR_GRAMMAR

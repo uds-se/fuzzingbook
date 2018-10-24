@@ -46,9 +46,8 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     # We use the same fixed seed as the notebook to ensure consistency
-    from fuzzingbook_utils import set_fixed_seed
-    set_fixed_seed.set_fixed_seed()
-
+    import random
+    random.seed(2001)
 
 
 if __name__ == "__main__":
