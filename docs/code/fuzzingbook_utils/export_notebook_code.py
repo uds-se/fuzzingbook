@@ -53,9 +53,8 @@ HEADER = """#!/usr/bin/env python3
 
 # Replacement for "import fuzzingbook_utils"
 SET_FIXED_SEED = r"""# We use the same fixed seed as the notebook to ensure consistency
-from fuzzingbook_utils import set_fixed_seed
-set_fixed_seed.set_fixed_seed()
-"""
+import random
+random.seed(2001)"""
 
 def is_all_comments(code):
     executable_code = re.sub(RE_COMMENTS, '', code).strip()

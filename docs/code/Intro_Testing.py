@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
-# Last change: 2018-10-19 13:31:59+02:00
+# Last change: 2018-10-23 17:12:41+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -142,12 +142,6 @@ if __name__ == "__main__":
 
 EPSILON = 1e-8
 
-def abs(x):
-    if x < 0:
-        return -x
-    else:
-        return x
-
 if __name__ == "__main__":
     assert abs(my_sqrt(4) - 2) < EPSILON
 
@@ -182,9 +176,8 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     # We use the same fixed seed as the notebook to ensure consistency
-    from fuzzingbook_utils import set_fixed_seed
-    set_fixed_seed.set_fixed_seed()
-
+    import random
+    random.seed(2001)
 
 
 if __package__ is None or __package__ == "":
@@ -195,7 +188,7 @@ else:
 
 if __name__ == "__main__":
     with Timer() as t:
-        for n in range(1, 100):
+        for n in range(1, 10000):
             assertEquals(my_sqrt(n) * my_sqrt(n), n)
     print(t.elapsed_time())
 
@@ -437,7 +430,7 @@ if __name__ == "__main__":
 
 
 def is_permutation(a, b):
-    return all(a.count(elem) == b.count(elem) for elem in a)
+    return len(a) == len(b) and all(a.count(elem) == b.count(elem) for elem in a)
 
 if __name__ == "__main__":
     is_permutation([3, 2, 1], [1, 3, 2])

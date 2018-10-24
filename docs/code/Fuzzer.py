@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2018-10-23 14:33:23+02:00
+# Last change: 2018-10-23 17:14:18+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -54,9 +54,8 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     # We use the same fixed seed as the notebook to ensure consistency
-    from fuzzingbook_utils import set_fixed_seed
-    set_fixed_seed.set_fixed_seed()
-
+    import random
+    random.seed(2001)
 
 
 import random
@@ -194,8 +193,8 @@ if __name__ == "__main__":
     [result.stderr for (data, result) in runs if
      result.stderr != ""
      and "illegal character" not in result.stderr
-     and "parse error" not in result.stderr]
-
+     and "parse error" not in result.stderr
+     and "syntax error" not in result.stderr]
 
 
 if __name__ == "__main__":
