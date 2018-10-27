@@ -628,6 +628,12 @@ check-import check-imports: code
 .PHONY: run
 run: check-import check-code
 	
+# Todo checks
+check-todo todo:
+	@grep '\\todo' $(PUBLIC_SOURCES); \
+	if [ $$? = 0 ]; then exit 1; else \
+	echo "No todos in $(PUBLIC_CHAPTERS:%.ipynb=%)"; exit 0; fi
+
 # Spell checks
 NBSPELLCHECK = utils/nbspellcheck.py
 .PHONY: spell spellcheck check-spell
@@ -637,7 +643,7 @@ spell spellcheck check-spell:
 
 # All checks
 .PHONY: check check-all
-check check-all: check-import check-code check-style check-crossref
+check check-all: check-import check-code check-style check-crossref check-todo
 	
 # Add notebook metadata (add table of contents, bib reference, etc.)
 .PHONY: metadata
