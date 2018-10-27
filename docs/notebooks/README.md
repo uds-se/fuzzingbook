@@ -4,6 +4,27 @@
 __Welcome to "Generating Software Tests"!__ 
 Software has bugs, and catching bugs can involve lots of effort.  This book addresses this problem by _automating_ software testing, specifically by _generating tests automatically_.  Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing.  They now are mature enough to be assembled in a book – even with executable code. 
 
+
+```python
+from fuzzingbook_utils import YouTubeVideo
+YouTubeVideo("Ty0ktPXJ23c")
+```
+
+
+
+
+
+        <iframe
+            width="640"
+            height="360"
+            src="https://www.youtube.com/embed/Ty0ktPXJ23c"
+            frameborder="0"
+            allowfullscreen
+        ></iframe>
+        
+
+
+
 ## A Textbook for Paper, Screen, and Keyboard
 
 You can use this book in three ways:
