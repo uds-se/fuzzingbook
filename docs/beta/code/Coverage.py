@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2018-10-27 13:29:32+02:00
+# Last change: 2018-10-27 14:15:56+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -477,11 +477,6 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    import os
-    os.system(r'rm -f cgi_decode.*')
-
-
-if __name__ == "__main__":
     with open("cgi_decode.c", "w") as f:
         f.write(cgi_c_code)
 
@@ -525,6 +520,11 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     list(coverage)[:5]
+
+
+if __name__ == "__main__":
+    import os
+    os.system(r'ls cgi_decode.*')
 
 
 # ## Finding Errors with Basic Fuzzing
