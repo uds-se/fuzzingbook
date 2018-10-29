@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2018-10-26 16:01:05+02:00
+# Last change: 2018-10-29 14:03:52+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -42,83 +42,137 @@ if __name__ == "__main__":
     random.seed(2001)
 
 
-# ## Fuzzing APIs
+# ## Fuzzing a Function
 
 if __name__ == "__main__":
-    print('\n## Fuzzing APIs')
+    print('\n## Fuzzing a Function')
+
+
+
+
+# ### Testing a URL Parser
+
+if __name__ == "__main__":
+    print('\n### Testing a URL Parser')
 
 
 
 
 import fuzzingbook_utils
 
-API_GRAMMAR = {
-    "<call>":
-        ['urlparse("<url>")']
-}
+from urllib.parse import urlparse
+
+if __name__ == "__main__":
+    urlparse('https://www.fuzzingbook.com/html/APIFuzzer.html')
+
 
 if __package__ is None or __package__ == "":
     from Grammars import URL_GRAMMAR, is_valid_grammar
 else:
     from .Grammars import URL_GRAMMAR, is_valid_grammar
 
+from GrammarFuzzer import GrammarFuzzer, display_tree, all_terminals
 
 if __name__ == "__main__":
-    API_GRAMMAR.update(URL_GRAMMAR)
-
-
-if __name__ == "__main__":
-    API_GRAMMAR["<start>"] = ["<call>"]
+    url_fuzzer = GrammarFuzzer(URL_GRAMMAR)
 
 
 if __name__ == "__main__":
-    assert is_valid_grammar(API_GRAMMAR)
+    for i in range(10):
+        url = url_fuzzer.fuzz()
+        print(urlparse(url))
+
+
+# ### Synthesizing Code
+
+if __name__ == "__main__":
+    print('\n### Synthesizing Code')
+
+
 
 
 if __name__ == "__main__":
-    API_GRAMMAR
-
-
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer
-else:
-    from .GrammarFuzzer import GrammarFuzzer
+    call = "urlparse('http://www.example.com/')"
 
 
 if __name__ == "__main__":
-    urlparse_fuzzer = GrammarFuzzer(API_GRAMMAR)
+    eval(call)
+
+
+URLPARSE_GRAMMAR = {
+    "<call>":
+        ['urlparse("<url>")']
+}
+
+if __name__ == "__main__":
+    URLPARSE_GRAMMAR.update(URL_GRAMMAR)
+
+
+if __name__ == "__main__":
+    URLPARSE_GRAMMAR["<start>"] = ["<call>"]
+
+
+if __name__ == "__main__":
+    assert is_valid_grammar(URLPARSE_GRAMMAR)
+
+
+if __name__ == "__main__":
+    URLPARSE_GRAMMAR
+
+
+if __name__ == "__main__":
+    urlparse_fuzzer = GrammarFuzzer(URLPARSE_GRAMMAR)
     urlparse_fuzzer.fuzz()
 
-
-from urllib.parse import *
 
 if __name__ == "__main__":
     # Call function_name(arg[0], arg[1], ...) as a string
     def do_call(call_string):
-        # We create the call as a string (easier + more robust)
-        # Alternative: Call the code object directly, bypassing the parser
         print(call_string)
-        try:
-            result = eval(call_string)
-        except:
-            result = sys.exc_info()[0]
+        result = eval(call_string)
         print("\t= " + repr(result))
         return result
 
 
 if __name__ == "__main__":
-    for i in range(10):
-        call = urlparse_fuzzer.fuzz()
-        do_call(call)
+    call = urlparse_fuzzer.fuzz()
+    do_call(call)
 
 
-# ## Carving API Calls
+URLPARSE_C_GRAMMAR = {
+    "<cfile>": ["<cheader><cfunction>"],
+    "<cheader>": ['#include "urlparse.h"\n\n'],
+    "<cfunction>": ["void test() {\n<calls>}\n"],
+    "<calls>": ["<call>", "<calls><call>"],
+    "<call>": ['    urlparse("<url>");\n']
+}
 
 if __name__ == "__main__":
-    print('\n## Carving API Calls')
+    URLPARSE_C_GRAMMAR.update(URL_GRAMMAR)
+
+
+if __name__ == "__main__":
+    URLPARSE_C_GRAMMAR["<start>"] = ["<cfile>"]
+
+
+if __name__ == "__main__":
+    assert is_valid_grammar(URLPARSE_C_GRAMMAR)
+
+
+if __name__ == "__main__":
+    urlparse_fuzzer = GrammarFuzzer(URLPARSE_C_GRAMMAR)
+    print(urlparse_fuzzer.fuzz())
+
+
+# ## Carving Function Calls
+
+if __name__ == "__main__":
+    print('\n## Carving Function Calls')
 
 
 
+
+from urllib.parse import *
 
 if __name__ == "__main__":
     # return function_name(arg[0], arg[1], ...) as a string
@@ -437,22 +491,62 @@ if __name__ == "__main__":
 
 
 
-# ### Exercise 1: _Title_
+# ### Exercise 1: Synthesizing Oracles
 
 if __name__ == "__main__":
-    print('\n### Exercise 1: _Title_')
+    print('\n### Exercise 1: Synthesizing Oracles')
 
 
-
-
-if __name__ == "__main__":
-    # Some code that is part of the exercise
-    pass
 
 
 if __name__ == "__main__":
-    # Some code for the solution
-    2 + 2
+    result = urlparse("https://www.fuzzingbook.org")
+    assert result.scheme == "https"
+    assert result.netloc == "www.fuzzingbook.org"
+
+
+if __name__ == "__main__":
+    urlparse_fuzzer = GrammarFuzzer(URLPARSE_GRAMMAR)
+    call = urlparse_fuzzer.fuzz()
+    call
+
+
+if __name__ == "__main__":
+    call_tree = urlparse_fuzzer.derivation_tree
+    display_tree(call_tree)
+
+
+def get_element(tree, name):
+    """Return definition of `name` in `tree` as a string"""
+    (symbol, children) = tree
+    if symbol == name:
+        return all_terminals(tree)
+    for c in children:
+        result = get_element(c, name)
+        if result is not None:
+            return result
+    return None # Not Found
+
+if __name__ == "__main__":
+    get_element(call_tree, "<scheme>")
+
+
+if __name__ == "__main__":
+    get_element(call_tree, "<host>")
+
+
+if __name__ == "__main__":
+    test = ""
+    for i in range(10):
+        call = urlparse_fuzzer.fuzz()
+        tree = urlparse_fuzzer.derivation_tree
+        test += "result = " + call + "\n"
+        test += "assert result.scheme == " + repr(get_element(tree, "<scheme>")) + "\n"
+    print(test)
+
+
+if __name__ == "__main__":
+    exec(test)
 
 
 # ### Exercise 2: _Title_
