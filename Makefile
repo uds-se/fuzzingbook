@@ -20,6 +20,7 @@ TODO_CHAPTERS = \
 	ProbabilisticGrammarFuzzer.ipynb \
 	Reducer.ipynb \
 	GrammarMiner.ipynb \
+	Carver.ipynb \
 	APIFuzzer.ipynb
 
 	# ConstraintGrammarFuzzer.ipynb
@@ -780,7 +781,7 @@ endif
 # Table of contents
 .PHONY: toc
 toc: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb
-$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: .FORCE
+$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py Makefile
 	$(RM) $@
 	$(PYTHON) utils/nbtoc.py \
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
