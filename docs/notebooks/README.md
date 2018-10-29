@@ -174,4 +174,9 @@ We're glad you ask that.  The [development page](https://github.com/uds-se/fuzzi
 
 #### How can I contribute?
 
-Again, we're glad you're here!  See our [Guide for Authors](Guide_for_Authors.ipynb) for instructions on coding and writing.
+Again, we're glad you're here!  We are happy to accept 
+
+* **Code fixes and improvements.**  Please place any code under the MIT license such that we can easily include it.
+* **Additional text, chapters, and notebooks** on specialized topics.  We plan to set up a special folder for third-party contributions.
+
+See our [Guide for Authors](Guide_for_Authors.ipynb) for instructions on coding and writing.
