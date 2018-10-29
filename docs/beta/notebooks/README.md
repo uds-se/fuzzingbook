@@ -7,7 +7,7 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 
 ```python
 from fuzzingbook_utils import YouTubeVideo
-YouTubeVideo("Ty0ktPXJ23c")
+YouTubeVideo("w4u5gCgPlmg")
 ```
 
 
@@ -17,7 +17,7 @@ YouTubeVideo("Ty0ktPXJ23c")
         <iframe
             width="640"
             height="360"
-            src="https://www.youtube.com/embed/Ty0ktPXJ23c"
+            src="https://www.youtube.com/embed/w4u5gCgPlmg"
             frameborder="0"
             allowfullscreen
         ></iframe>

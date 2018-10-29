@@ -11,7 +11,7 @@ with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" /><title>Oh no!  We are not ready yet! - Generating Software Tests</title>
+<meta charset="utf-8" /><title>Carving Unit Tests - Generating Software Tests</title>
 
 <style type="text/css">
     /*!
@@ -11790,10 +11790,10 @@ MathJax.Hub.Config({
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
-<meta property="og:url" content="https://www.fuzzingbook.org/beta/html/404.html" />
+<meta property="og:url" content="https://www.fuzzingbook.org/beta/html/Carver.html" />
 <meta property="og:type" content="article" />
-<meta property="og:title" content="Oh no!  We are not ready yet! - Generating Software Tests" />
-<meta property="og:description" content="We&#x27;re sorry - this page does not exist (yet).  " />
+<meta property="og:title" content="Carving Unit Tests - Generating Software Tests" />
+<meta property="og:description" content="So far, we have always generated system input, i.e. data that the program as a whole obtains via its input channels.  If we are interested in testing only a small set of functions, having to go through the system can be very inefficient.  This chapter introduces a technique known as carving, which, given a system test, automatically extracts a set of unit tests that replicate the calls seen during the unit test.  The key idea is to record such calls such that we can replay them later – as a whole or selectively.Prerequisites Carving makes use of dynamic traces of function calls and variables, as introduced in the chapter on configuration fuzzing." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11877,27 +11877,32 @@ MathJax.Hub.Config({
 <li><a href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="GrammarMiner.html">Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="Carver.html">Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="Carver.html" class="this_page">Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="APIFuzzer.html">Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 
            <li><a href="https://www.fuzzingbook.org/beta/#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
      </li>
-     <li class="has-sub"><a href="#"><span title="Oh no!  We are not ready yet!"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Oh no!  We are not ready yet!</span></a>
+     <li class="has-sub"><a href="#"><span title="Carving Unit Tests"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Carving Unit Tests <i class="fa fa-fw fa-wrench"></i></span></a>
         <ul>
-           <li><a href="#Finding-Content">Finding Content</a></li>
-<li><a href="#Getting-Informed-About-New-Content">Getting Informed About New Content</a></li>
-<li><a href="#Error-Details">Error Details</a></li>
+           <li><a href="#System-Tests-vs-Unit-Tests">System Tests vs Unit Tests</a></li>
+<li><a href="#Carving-Unit-Tests">Carving Unit Tests</a></li>
+<li><a href="#Recording-Calls">Recording Calls</a></li>
+<li><a href="#Replaying-Calls">Replaying Calls</a></li>
+<li><a href="#Lessons-Learned">Lessons Learned</a></li>
+<li><a href="#Next-Steps">Next Steps</a></li>
+<li><a href="#Background">Background</a></li>
+<li><a href="#Exercises">Exercises</a></li>
 
         </ul>
      </li>
      
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/404.ipynb" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook (beta)</a></li>
-     <li><a href="https://www.fuzzingbook.org/beta/slides/404.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
-     <li><a href="https://www.fuzzingbook.org/beta/code/404.py"><i class="fa fa-fw fa-download"></i> Download Code (.py)</a></li>
-     <li><a href="https://www.fuzzingbook.org/beta/notebooks/404.ipynb"><i class="fa fa-fw fa-download"></i> Download Notebook (.ipynb)</a></li>
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/Carver.ipynb" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook (beta)</a></li>
+     <li><a href="https://www.fuzzingbook.org/beta/slides/Carver.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
+     <li><a href="https://www.fuzzingbook.org/beta/code/Carver.py"><i class="fa fa-fw fa-download"></i> Download Code (.py)</a></li>
+     <li><a href="https://www.fuzzingbook.org/beta/notebooks/Carver.ipynb"><i class="fa fa-fw fa-download"></i> Download Notebook (.ipynb)</a></li>
      <li><a href="https://www.fuzzingbook.org/beta/dist/fuzzingbook-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
      <li><a href="https://www.fuzzingbook.org/beta/dist/fuzzingbook-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
      <li><a href="https://github.com/uds-se/fuzzingbook/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
@@ -11906,13 +11911,13 @@ MathJax.Hub.Config({
      
      <li class="has-sub"><a href="#"><span title="Share"><i class="fa fa-fw fa-comments"></i> </span> <span class="menu_4">Share</span></a>
         <ul>
-            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Oh%20no!%20%20We%20are%20not%20ready%20yet!%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2f404.html" target="popup" 
-onclick="window.open('https://twitter.com/intent/tweet?text=I%20just%20read%20%22Oh%20no!%20%20We%20are%20not%20ready%20yet!%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2f404.html','popup','width=600,height=600'); return false;"
+            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Carving%20Unit%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fCarver.html" target="popup" 
+onclick="window.open('https://twitter.com/intent/tweet?text=I%20just%20read%20%22Carving%20Unit%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fCarver.html','popup','width=600,height=600'); return false;"
 ><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
-            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2f404.html" target="popup" 
-onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2f404.html','popup','width=600,height=600'); return false;"
+            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fCarver.html" target="popup" 
+onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fCarver.html','popup','width=600,height=600'); return false;"
 ><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
-            <li><a href="mailto:?subject=Oh%20no!%20%20We%20are%20not%20ready%20yet!&body=I%20just%20read%20%22Oh%20no!%20%20We%20are%20not%20ready%20yet!%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2f404.html"><i class="fa fa-fw fa-envelope"></i> Share by Email</a>
+            <li><a href="mailto:?subject=Carving%20Unit%20Tests&body=I%20just%20read%20%22Carving%20Unit%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fbeta%2fhtml%2fCarver.html"><i class="fa fa-fw fa-envelope"></i> Share by Email</a>
             <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
      </li>
@@ -11935,61 +11940,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Oh-no!--We-are-not-ready-yet!">Oh no!  We are not ready yet!<a class="anchor-link" href="#Oh-no!--We-are-not-ready-yet!">&#182;</a></h1><p>We're sorry - this page does not exist (yet).</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Carving-Unit-Tests">Carving Unit Tests<a class="anchor-link" href="#Carving-Unit-Tests">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-wrench"></i>&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p><p>So far, we have always generated <em>system input</em>, i.e. data that the program as a whole obtains via its input channels.  If we are interested in testing only a small set of functions, having to go through the system can be very inefficient.  This chapter introduces a technique known as <em>carving</em>, which, given a system test, automatically extracts a set of <em>unit tests</em> that replicate the calls seen during the unit test.  The key idea is to <em>record</em> such calls such that we can <em>replay</em> them later – as a whole or selectively.</p>
 </div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Finding-Content">Finding Content<a class="anchor-link" href="#Finding-Content">&#182;</a></h2><p>Most likely, you have been looking for material that is not yet written or not yet published.  Go to the <a href="https://www.fuzzingbook.org/beta/">home page</a> or choose from this list of chapters:</p>
-<ol>
-               <li><a href="https://www.fuzzingbook.org/beta/"><i class="fa fa-fw fa-home"></i> About this book</a></li>
-<li><a href="Intro_Testing.html">Introduction to Software Testing</a></li>
-<li><a href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
-<li><a href="Coverage.html">Getting Coverage&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
-<li><a href="MutationFuzzer.html">Mutation-Based Fuzzing&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
-<li><a href="Grammars.html">Fuzzing with Grammars&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
-<li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
-<li><a href="GrammarCoverageFuzzer.html">Grammar Coverage&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
-<li><a href="ConfigurationFuzzer.html">Testing Configurations&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
-<li><a href="Parser.html">Parsing and Recombining Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="GrammarMiner.html">Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="Carver.html">Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="APIFuzzer.html">Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-
-</ol></div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>If you think this is an error, please <a href="https://github.com/uds-se/fuzzingbook//issues/">report an issue</a>.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Getting-Informed-About-New-Content">Getting Informed About New Content<a class="anchor-link" href="#Getting-Informed-About-New-Content">&#182;</a></h2><p>New chapters are coming out every week.  To get notified when a new chapter (or this one) comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.</p>
-<p><a class="twitter-timeline" data-width="500" data-chrome="noheader nofooter noborders transparent" data-link-color="#A93226" data-align="center" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Error-Details">Error Details<a class="anchor-link" href="#Error-Details">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -12000,43 +11952,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">fuzzingbook_utils</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">NotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;404&quot;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="k">import</span> <span class="n">ExpectError</span>
-
-<span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-    <span class="k">raise</span> <span class="n">NotFoundError</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">fuzzingbook_utils</span> <span class="k">import</span> <span class="n">YouTubeVideo</span>
+<span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;w4u5gCgPlmg&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12046,14 +11963,1314 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_area">
 
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-3-f7cd072299fb&gt;&#34;, line 4, in &lt;module&gt;
-    raise NotFoundError
-NotFoundError: &#39;404&#39; (expected)
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+        <iframe
+            width="640"
+            height="360"
+            src="https://www.youtube.com/embed/w4u5gCgPlmg"
+            frameborder="0"
+            allowfullscreen
+        ></iframe>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
+<ul>
+<li>Carving makes use of dynamic traces of function calls and variables, as introduced in the <a href="ConfigurationFuzzer.html">chapter on configuration fuzzing</a>.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="System-Tests-vs-Unit-Tests">System Tests vs Unit Tests<a class="anchor-link" href="#System-Tests-vs-Unit-Tests">&#182;</a></h2><p>Remember the URL grammar introduced for <a href="Grammars.html">grammar fuzzing</a>?  With such a grammar, we can happily test a Web browser again and again, checking how it reacts to arbitrary page requests.</p>
+<p>Let us define a very simple "web browser" that goes and downloads the content given by the URL.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/urllib.parse.html" class="import" target="_blank">urllib.parse</a></span><span class="o">,</span> <span class="nn"><a href="https://docs.python.org/3/library/urllib.request.html" class="import" target="_blank">urllib.request</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">webbrowser</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Download the http/https resource given by the URL&quot;&quot;&quot;</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">getcode</span><span class="p">()</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">contents</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">contents</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us apply this on <a href="https://www.fuzzingbook.org/">fuzzingboook.org</a> and measure the time, using the <a href="Timer.html">Timer class</a>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Timer.html" class="import" target="_blank">Timer</a></span> <span class="k">import</span> <span class="n">Timer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">webbrowser_timer</span><span class="p">:</span>
+    <span class="n">fuzzingbook_contents</span> <span class="o">=</span> <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;http://www.fuzzingbook.org/html/Fuzzer.html&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Downloaded </span><span class="si">%d</span><span class="s2"> bytes in </span><span class="si">%.2f</span><span class="s2"> seconds&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fuzzingbook_contents</span><span class="p">),</span> <span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Downloaded 394166 bytes in 0.19 seconds
 </pre>
 </div>
 
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzingbook_contents</span><span class="p">[:</span><span class="mi">100</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>b&#39;\n&lt;!-- A html document --&gt;\n&lt;!-- \nwith standard nbconvert css layout\nwith standard nbconvert input/out&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Having to start a whole browser (or having it render a Web page) again and again means lots of overhead, though – in particular if we want to test only a subset of its functionality.  In particular, after a change in the code, we would prefer to test only the subset of functions that is affected by the change, rather than running the well-tested functions again and again.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us assume we change the function that takes care of parsing the given URL and decomposing it into the individual elements – the scheme ("http"), the network location (<code>"www.fuzzingbook.com"</code>), or the path (<code>"/html/Fuzzer.html"</code>).  This function is named <code>urlparse()</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/urllib.parse.html" class="import" target="_blank">urllib.parse</a></span> <span class="k">import</span> <span class="n">urlparse</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlparse</span><span class="p">(</span><span class="s1">&#39;https://www.fuzzingbook.com/html/APIFuzzer.html&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>ParseResult(scheme=&#39;https&#39;, netloc=&#39;www.fuzzingbook.com&#39;, path=&#39;/html/APIFuzzer.html&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>You see how the individual elements of the URL – the <em>scheme</em> (<code>"http"</code>), the <em>network location</em> (<code>"www.fuzzingbook.com"</code>), or the path (<code>"//html/APIFuzzer.html"</code>) are all properly identified.  Other elements (like <code>params</code>, <code>query</code>, or <code>fragment</code>) are empty, because they were not part of our input.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The interesting thing is that executing only <code>urlparse()</code> is orders of magnitude faster than running all of <code>webbrowser()</code>.  Let us measure the factor:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">urlparse_timer</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">runs</span><span class="p">):</span>
+        <span class="n">urlparse</span><span class="p">(</span><span class="s1">&#39;https://www.fuzzingbook.com/html/APIFuzzer.html&#39;</span><span class="p">)</span>
+
+<span class="n">avg_urlparse_time</span> <span class="o">=</span> <span class="n">urlparse_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span> <span class="o">/</span> <span class="mi">1000</span>
+<span class="n">avg_urlparse_time</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>3.9056939999682074e-06
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Compare this to the time required by the webbrowser</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0.19321028500007742
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The difference in time is huge:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span> <span class="o">/</span> <span class="n">avg_urlparse_time</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>49468.87416209518
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Hence, in the time it takes to run <code>webbrowser()</code> once, we can have <em>hundreds of thousands</em> of executions of <code>urlparse()</code> – and this does not even take into account the time it takes the browser to render the downloaded HTML, to run the included scripts, and whatever else happens when a Web page is loaded.  Hence, strategies that allow us to test at the <em>unit</em> level are very promising as they can save lots of overhead.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Carving-Unit-Tests">Carving Unit Tests<a class="anchor-link" href="#Carving-Unit-Tests">&#182;</a></h2><p>Testing methods and functions at the unit level requires a very good understanding of the individual units to be tested as well as their interplay with other units.  Setting up an appropriate infrastructure and writing unit tests by hand thus is demanding, yet rewarding.  There is, however, an interesting alternative to writing unit tests by hand.  The technique of <em>carving</em> automatically <em>converts system tests into unit tests</em> by means of recording and replaying function calls:</p>
+<ol>
+<li>During a system test (given or generated), we <em>record</em> all calls into a function, including all arguments and other variables the function reads.</li>
+<li>From these, we synthesize a self-contained <em>unit test</em> that reconstructs the function call with all arguments.</li>
+<li>This unit test can be executed (replayed) at any time with high efficiency.</li>
+</ol>
+<p>In the remainder of this chapter, let us explore these steps.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Recording-Calls">Recording Calls<a class="anchor-link" href="#Recording-Calls">&#182;</a></h2><p>Our first challenge is to record function calls together with their arguments.  (In the interest of simplicity, we restrict ourself to arguments, ignoring any global variables or other non-arguments that are read by the function.)  To record calls and arguments, we use the mechanism <a href="Coverage.html">we introduced for coverage</a>: By setting up a tracer function, we track all calls into individual functions, also saving their arguments.  Just like <code>Coverage</code> objects, we want to use <code>Carver</code> objects to be able to be used in conjunction with the <code>with</code> statement, such that we can trace a particular code block:</p>
+<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">Carver</span><span class="p">()</span> <span class="k">as</span> <span class="n">carver</span><span class="p">:</span>
+    <span class="n">function_to_be_traced</span><span class="p">()</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">carver</span><span class="o">.</span><span class="n">calls</span><span class="p">()</span>
+</pre></div>
+<p>The initial definition supports this construct:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/sys.html" class="import" target="_blank">sys</a></span>
+<span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/inspect.html" class="import" target="_blank">inspect</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Carver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Start of `with` block</span>
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">original_trace_function</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">gettrace</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c1"># End of `with` block</span>
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_trace_function</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The actual work takes place in the <code>traceit()</code> method, which records all calls in the <code>_calls</code> attribute:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_qualified_name</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmodule</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">module</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">name</span>
+    <span class="k">return</span> <span class="n">name</span>
+
+<span class="k">class</span> <span class="nc">Carver</span><span class="p">(</span><span class="n">Carver</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">add_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">function_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span><span class="p">[</span><span class="n">function_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">arguments</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span><span class="p">[</span><span class="n">function_name</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span><span class="p">[</span><span class="n">function_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arguments</span><span class="p">)</span>
+
+    <span class="c1"># Tracking function: Record all calls and all args</span>
+    <span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="o">!=</span> <span class="s2">&quot;call&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">code</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span>
+        <span class="n">function_name</span>  <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">co_name</span>
+        <span class="n">qualified_name</span> <span class="o">=</span> <span class="n">get_qualified_name</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+
+        <span class="c1"># When called, all arguments are local variables</span>
+        <span class="n">arguments</span> <span class="o">=</span> <span class="p">[(</span><span class="n">var</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">[</span><span class="n">var</span><span class="p">])</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">]</span>
+        <span class="n">arguments</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>  <span class="c1"># Want same order as call</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_call</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">qualified_name</span> <span class="o">!=</span> <span class="n">function_name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_call</span><span class="p">(</span><span class="n">qualified_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>
+
+        <span class="c1"># Some tracking</span>
+        <span class="c1"># print(simple_call_string(function_name, args))</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Finally, we need some convenience functions to access the calls:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Carver</span><span class="p">(</span><span class="n">Carver</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">calls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a dictionary of all calls traced.&quot;&quot;&quot;</span>  
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span>
+
+    <span class="k">def</span> <span class="nf">arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of all arguments of the given function</span>
+<span class="sd">        as (VAR, VALUE) pairs.</span>
+<span class="sd">        Raises an exception if the function was not traced.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span><span class="p">[</span><span class="n">function_name</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">called_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qualified</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return all functions called.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">qualified</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">function_name</span> <span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">function_name</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">function_name</span> <span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calls</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">function_name</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us see how these work.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Recording-my_sqrt()">Recording my_sqrt()<a class="anchor-link" href="#Recording-my_sqrt()">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let's try out our new <code>Carver</code> class – first on a very simple function:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Intro_Testing.html" class="import" target="_blank">Intro_Testing</a></span> <span class="k">import</span> <span class="n">my_sqrt</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Carver</span><span class="p">()</span> <span class="k">as</span> <span class="n">sqrt_carver</span><span class="p">:</span>
+    <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can retrieve all calls seen...</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sqrt_carver</span><span class="o">.</span><span class="n">calls</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;my_sqrt&#39;: [[(&#39;x&#39;, 2)], [(&#39;x&#39;, 4)]],
+ &#39;__exit__&#39;: [[(&#39;self&#39;, &lt;__main__.Carver at 0x1074c6f98&gt;),
+   (&#39;exc_type&#39;, None),
+   (&#39;exc_value&#39;, None),
+   (&#39;tb&#39;, None)]]}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>... as well as the arguments of a particular function:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sqrt_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;my_sqrt&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[[(&#39;x&#39;, 2)], [(&#39;x&#39;, 4)]]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We define a convenience function for nicer printing of these lists:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">simple_call_string</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">argument_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return function_name(arg[0], arg[1], ...) as a string&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> \
+        <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">var</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">argument_list</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="n">sqrt_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">argument_list</span> <span class="ow">in</span> <span class="n">sqrt_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="n">function_name</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">simple_call_string</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">argument_list</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is a syntax we can directly use to invoke <code>my_sqrt()</code> again:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;my_sqrt(x=2)&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>1.414213562373095
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Carving-urlparse()">Carving urlparse()<a class="anchor-link" href="#Carving-urlparse()">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>What happens if we apply this to <code>webbrowser()</code>?</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Carver</span><span class="p">()</span> <span class="k">as</span> <span class="n">webbrowser_carver</span><span class="p">:</span>
+    <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;http://www.example.com&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that retrieving a URL from the Web requires quite some functionality:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[&#39;urllib.request.urlopen&#39;, &#39;urllib.request.open&#39;, &#39;urllib.request.__init__&#39;, &#39;urllib.request.full_url&#39;, &#39;urllib.parse.unwrap&#39;, &#39;urllib.parse.splittag&#39;, &#39;urllib.request._parse&#39;, &#39;urllib.parse.splittype&#39;, &#39;urllib.parse.splithost&#39;, &#39;urllib.parse.unquote&#39;, &#39;urllib.request.data&#39;, &#39;urllib.request.request_host&#39;, &#39;urllib.parse.urlparse&#39;, &#39;urllib.parse._coerce_args&#39;, &#39;urllib.parse.urlsplit&#39;, &#39;urllib.parse._splitnetloc&#39;, &#39;urllib.parse._noop&#39;, &#39;urllib.request.do_request_&#39;, &#39;urllib.request.has_proxy&#39;, &#39;urllib.request.has_header&#39;, &#39;urllib.request.add_unredirected_header&#39;, &#39;urllib.request._open&#39;, &#39;urllib.request._call_chain&#39;, &#39;urllib.request.http_open&#39;, &#39;urllib.request.do_open&#39;, &#39;http.client.__init__&#39;, &#39;http.client._get_hostport&#39;, &#39;http.client.set_debuglevel&#39;, &#39;urllib.request.&lt;genexpr&gt;&#39;, &#39;urllib.request.get_method&#39;, &#39;http.client.request&#39;, &#39;http.client._send_request&#39;, &#39;http.client.&lt;genexpr&gt;&#39;, &#39;http.client.putrequest&#39;, &#39;http.client._output&#39;, &#39;http.client.putheader&#39;, &#39;http.client._get_content_length&#39;, &#39;http.client.endheaders&#39;, &#39;http.client._send_output&#39;, &#39;http.client.send&#39;, &#39;http.client.connect&#39;, &#39;socket.create_connection&#39;, &#39;socket.getaddrinfo&#39;, &#39;encodings.idna.encode&#39;, &#39;socket._intenum_converter&#39;, &#39;enum.__call__&#39;, &#39;enum.__new__&#39;, &#39;socket.__init__&#39;, &#39;http.client.getresponse&#39;, &#39;socket.makefile&#39;, &#39;socket.readable&#39;, &#39;http.client.begin&#39;, &#39;http.client._read_status&#39;, &#39;socket.readinto&#39;, &#39;http.client.parse_headers&#39;, &#39;email.parser.__init__&#39;, &#39;email.parser.parsestr&#39;, &#39;email.parser.parse&#39;, &#39;email.feedparser.__init__&#39;, &#39;email.message.__init__&#39;, &#39;email.feedparser.feed&#39;, &#39;email.feedparser.push&#39;, &#39;email.feedparser.pushlines&#39;, &#39;email.feedparser._call_parse&#39;, &#39;email.feedparser._parsegen&#39;, &#39;email.feedparser._new_message&#39;, &#39;email.feedparser.__iter__&#39;, &#39;email.feedparser.__next__&#39;, &#39;email.feedparser.readline&#39;, &#39;email.feedparser._parse_headers&#39;, &#39;email._policybase.header_source_parse&#39;, &#39;email.message.set_raw&#39;, &#39;email.message.get_content_type&#39;, &#39;email.message.get&#39;, &#39;email._policybase.header_fetch_parse&#39;, &#39;email._policybase._sanitize_header&#39;, &#39;email.utils._has_surrogates&#39;, &#39;email.message._splitparam&#39;, &#39;email.message.get_content_maintype&#39;, &#39;email.feedparser.close&#39;, &#39;email.message.set_payload&#39;, &#39;email.feedparser._pop_message&#39;, &#39;http.client._check_close&#39;, &#39;http.client.close&#39;, &#39;socket.close&#39;, &#39;urllib.request.get_full_url&#39;, &#39;urllib.request.http_response&#39;, &#39;http.client.info&#39;, &#39;http.client.getcode&#39;, &#39;http.client.read&#39;, &#39;http.client._safe_read&#39;, &#39;http.client._close_conn&#39;, &#39;socket._decref_socketios&#39;, &#39;socket._real_close&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Among several other functions, we also have a call to <code>urlparse()</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlparse_argument_list</span> <span class="o">=</span> <span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;urllib.parse.urlparse&quot;</span><span class="p">)</span>
+<span class="n">urlparse_argument_list</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[[(&#39;url&#39;, &#39;http://www.example.com&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)]]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Again, we can convert this into a well-formatted call:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlparse_call</span> <span class="o">=</span> <span class="n">simple_call_string</span><span class="p">(</span><span class="s2">&quot;urlparse&quot;</span><span class="p">,</span> <span class="n">urlparse_argument_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">urlparse_call</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#34;urlparse(url=&#39;http://www.example.com&#39;, scheme=&#39;&#39;, allow_fragments=True)&#34;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Again, we can re-execute this call:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">eval</span><span class="p">(</span><span class="n">urlparse_call</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>ParseResult(scheme=&#39;http&#39;, netloc=&#39;www.example.com&#39;, path=&#39;&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We now have successfully carved the call to <code>urlparse()</code> out of the <code>webbrowser()</code> execution.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Replaying-Calls">Replaying Calls<a class="anchor-link" href="#Replaying-Calls">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Replaying calls in their entirety and in all generality is tricky, as there are several challenges to be addressed.  These include:</p>
+<ol>
+<li><p>We need to be able to <em>access</em> individual functions.  If we access a function by name, the name must be in scope.  If the name is not visible (for instance, because it is a name internal to the module), we must make it visible.</p>
+</li>
+<li><p>Any resources accessed outside of arguments must be recorded and reconstructed for replay as well.  This can be difficult if variables refer to external resources such as files or network resources.</p>
+</li>
+<li><p>Complex objects must be reconstructed as well.</p>
+</li>
+</ol>
+<p>These constraints make carving hard if the function to be tested interacts heavily with its environment.  To illustrate these issues, consider the <code>email.parser.parse()</code> method that is invoked in <code>webbrowser()</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">email_parse_argument_list</span> <span class="o">=</span> <span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;email.parser.parse&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Calls to this method look like this:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">email_parse_call</span> <span class="o">=</span> <span class="n">simple_call_string</span><span class="p">(</span><span class="s2">&quot;email.parser.parse&quot;</span><span class="p">,</span> <span class="n">email_parse_argument_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">email_parse_call</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;email.parser.parse(self=&lt;email.parser.Parser object at 0x1074e11d0&gt;, fp=&lt;_io.StringIO object at 0x10746aa68&gt;, headersonly=False)&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that <code>email.parser.parse()</code> is part of a <code>email.parser.Parser</code> object and it gets a <code>StringIO</code> object.  Both are non-primitive values.  How could we possibly reconstruct them?</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Serializing-Objects">Serializing Objects<a class="anchor-link" href="#Serializing-Objects">&#182;</a></h3><p>The answer to the problem of complex objects lies in creating a <em>persistent</em> representation that can be <em>reconstructed</em> at later points in time.  This process is known as <em>serialization</em>; in Python, it is also known as <em>pickling</em>.  The <code>pickle</code> module provides means to create a serialized representation of an object.  Let us apply this on the <code>email.parser.Parser</code> object we just found:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/pickle.html" class="import" target="_blank">pickle</a></span>    
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">parser_object</span> <span class="o">=</span> <span class="n">email_parse_argument_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">parser_object</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;email.parser.Parser at 0x1074e11d0&gt;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pickled</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">parser_object</span><span class="p">)</span>
+<span class="n">pickled</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>b&#39;\x80\x03cemail.parser\nParser\nq\x00)\x81q\x01}q\x02(X\x06\x00\x00\x00_classq\x03chttp.client\nHTTPMessage\nq\x04X\x06\x00\x00\x00policyq\x05cemail._policybase\nCompat32\nq\x06)\x81q\x07ub.&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_raw">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">unpickled_parser_object</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">pickled</span><span class="p">)</span>
+<span class="n">unpickled_parser_object</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;email.parser.Parser at 0x1074e1860&gt;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The serialization mechanism allows us to produce a representation for all objects passed as parameters (assuming they can be pickled, that is).  We can now extend the <code>simple_call_string()</code> function such that it automatically pickles objects.  Additionally, we set it up such that if the first parameter is named <code>self</code> (i.e., it is a class method), we make it a method of the <code>self</code> object.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">call_string</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">argument_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return function_name(arg[0], arg[1], ...) as a string, pickling complex objects&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">call_value</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="n">value_as_string</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value_as_string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Complex object</span>
+            <span class="n">value_as_string</span> <span class="o">=</span> <span class="s2">&quot;pickle.loads(&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+        <span class="k">return</span> <span class="n">value_as_string</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argument_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">first_var</span><span class="p">,</span> <span class="n">first_value</span><span class="p">)</span> <span class="o">=</span> <span class="n">argument_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">first_var</span> <span class="o">==</span> <span class="s2">&quot;self&quot;</span><span class="p">:</span>
+            <span class="c1"># Make this a method call</span>
+            <span class="n">method_name</span> <span class="o">=</span> <span class="n">function_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">function_name</span> <span class="o">=</span> <span class="n">call_value</span><span class="p">(</span><span class="n">first_value</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">method_name</span>
+            <span class="n">argument_list</span> <span class="o">=</span> <span class="n">argument_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> \
+        <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">var</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="n">call_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">argument_list</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">call</span> <span class="o">=</span> <span class="n">call_string</span><span class="p">(</span><span class="s2">&quot;email.parser.parse&quot;</span><span class="p">,</span> <span class="n">email_parse_argument_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>pickle.loads(b&#39;\x80\x03cemail.parser\nParser\nq\x00)\x81q\x01}q\x02(X\x06\x00\x00\x00_classq\x03chttp.client\nHTTPMessage\nq\x04X\x06\x00\x00\x00policyq\x05cemail._policybase\nCompat32\nq\x06)\x81q\x07ub.&#39;).parse(fp=pickle.loads(b&#39;\x80\x03c_io\nStringIO\nq\x00)\x81q\x01(XD\x01\x00\x00Cache-Control: max-age=604800\r\nContent-Type: text/html; charset=UTF-8\r\nDate: Mon, 29 Oct 2018 13:41:21 GMT\r\nEtag: &#34;1541025663+ident&#34;\r\nExpires: Mon, 05 Nov 2018 13:41:21 GMT\r\nLast-Modified: Fri, 09 Aug 2013 23:54:35 GMT\r\nServer: ECS (dca/2493)\r\nVary: Accept-Encoding\r\nX-Cache: HIT\r\nContent-Length: 1270\r\nConnection: close\r\n\r\nq\x02X\x01\x00\x00\x00\nq\x03MD\x01Ntq\x04b.&#39;), headersonly=False)
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">eval</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&lt;http.client.HTTPMessage at 0x1074e0ac8&gt;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="All-Calls">All Calls<a class="anchor-link" href="#All-Calls">&#182;</a></h3><p>So far, we have seen only one call of <code>webbrowser()</code>.  How many of the calls within <code>webbrowser()</code> can we actually carve and replay?</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/traceback.html" class="import" target="_blank">traceback</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/enum.html" class="import" target="_blank">enum</a></span><span class="o">,</span> <span class="nn"><a href="https://docs.python.org/3/library/socket.html" class="import" target="_blank">socket</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_functions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">())</span>
+<span class="n">call_success</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="n">run_success</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">argument_list</span> <span class="ow">in</span> <span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="n">function_name</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">call</span> <span class="o">=</span> <span class="n">call_string</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">argument_list</span><span class="p">)</span>
+            <span class="n">call_success</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">function_name</span><span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+            <span class="n">run_success</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">function_name</span><span class="p">)</span>
+
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># print(&quot;-&gt;&quot;, call, file=sys.stderr)</span>
+            <span class="c1"># traceback.print_exc()</span>
+            <span class="c1"># print(&quot;&quot;, file=sys.stderr)</span>
+            <span class="k">continue</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2"> calls (</span><span class="si">%.2f%%</span><span class="s2">) successfully created and </span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2"> calls (</span><span class="si">%.2f%%</span><span class="s2">) successfully ran&quot;</span> <span class="o">%</span> <span class="p">(</span>
+    <span class="nb">len</span><span class="p">(</span><span class="n">call_success</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_functions</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">call_success</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_functions</span><span class="p">),</span>
+    <span class="nb">len</span><span class="p">(</span><span class="n">run_success</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_functions</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">run_success</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_functions</span><span class="p">)))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>82/94 calls (87.23%) successfully created and 46/94 calls (48.94%) successfully ran
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that:</p>
+<ul>
+<li><strong>A large majority of calls could be converted into call strings.</strong>  If this is not the case, this is mostly due to having unserialized objects being passed.</li>
+<li><strong>The majority of calls could be executed.</strong>  The error messages for these are varied (try uncommenting the above diagnostic lines); the most frequent being that some internal name is invoked that is not in scope.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Our carving mechanism should be taken with a grain of salt: We still do not cover the situation where external variables and values (such as global variables) are being accessed, and the serialization mechanism cannot recreate external resources.  Still, if the function of interest falls among those that <em>can</em> be carved and replayed, we can very effectively re-run its calls with their original arguments.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<li><em>Carving</em> allows for effective replay of function calls recorded during a system test.</li>
+<li>A function call can be <em>orders of magnitude faster</em> than a system invocation.</li>
+<li><em>Serialization</em> allows to create persistent representations of complex objects.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>The following chapters make use of the concepts defined here:</p>
+<ul>
+<li>In the chapter on <a href="APIFuzzer.html">fuzzing APIs</a>, we discuss how to use carving to <em>fuzz functions with combinations of carved and newly generated values</em>.  This effectively joins the strengths of carving and fuzzing.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>Carving was invented by Elbaum et al. [<a href="https://doi.org/10.1145/1181775.1181806">Elbaum <em>et al</em>, 2006.</a>] and originally implemented for Java.  In this chapter, we follow several of their design choices (including recording and serializing method arguments only).  We do not know how long it took to implement carving for Java, but the above implementation was crafted in one afternoon.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p>\todo{Add.}</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Carving-Return-Values">Exercise 1: Carving Return Values<a class="anchor-link" href="#Exercise-1:-Carving-Return-Values">&#182;</a></h3><p>Record not only calls, but also their return values.  Use this for <em>regression testing</em>.</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/Carver.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
 </div>
 
         
@@ -12062,7 +13279,7 @@ NotFoundError: &#39;404&#39; (expected)
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/404.ipynb" target=_blank)>Last change: 2018-09-26 15:19:13+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Carver.ipynb" target=_blank)>Last change: 2018-10-29 14:40:48+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -12078,19 +13295,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/404.html">Oh no!  We are not ready yet!</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/404.html">https://www.fuzzingbook.org/beta/html/404.html</a>.  Retrieved 2018-09-26 15:19:13+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Carver.html">Carving Unit Tests</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Carver.html">https://www.fuzzingbook.org/beta/html/Carver.html</a>.  Retrieved 2018-10-29 14:40:48+01:00.
 </p>
 <pre>
-@incollection{fuzzingbook2018:404,
+@incollection{fuzzingbook2018:Carver,
     author = {Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler},
     booktitle = {Generating Software Tests},
-    title = {Oh no!  We are not ready yet!},
+    title = {Carving Unit Tests},
     year = {2018},
     publisher = {Saarland University},
-    howpublished = {\url{https://www.fuzzingbook.org/beta/html/404.html}},
-    note = {Retrieved 2018-09-26 15:19:13+02:00},
-    url = {https://www.fuzzingbook.org/beta/html/404.html},
-    urldate = {2018-09-26 15:19:13+02:00}
+    howpublished = {\url{https://www.fuzzingbook.org/beta/html/Carver.html}},
+    note = {Retrieved 2018-10-29 14:40:48+01:00},
+    url = {https://www.fuzzingbook.org/beta/html/Carver.html},
+    urldate = {2018-10-29 14:40:48+01:00}
 }
 </pre>
 </div>
