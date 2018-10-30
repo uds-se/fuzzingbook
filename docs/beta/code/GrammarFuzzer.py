@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-10-24 11:55:41+02:00
+# Last change: 2018-10-28 10:10:33+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -44,11 +44,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import fuzzingbook_utils
 
 if __package__ is None or __package__ == "":
     from Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer
@@ -205,7 +201,7 @@ import re
 def dot_escape(s):
     """Return s in a form suitable for dot"""
     # s = s.replace("\\", "\\\\")
-    s = re.sub(r"([^a-zA-Z0-9 ])", r"\\\1", s)
+    s = re.sub(r'([^a-zA-Z0-9" ])', r"\\\1", s)
     return s
 
 if __name__ == "__main__":
@@ -214,7 +210,7 @@ if __name__ == "__main__":
     assert dot_escape("\\n") == "\\\\n"
 
 
-def display_tree(derivation_tree):
+def display_tree(derivation_tree, log=False):
     """Visualize a derivation tree as SVG using the graphviz/dot package."""
 
     counter = 0
@@ -234,8 +230,9 @@ def display_tree(derivation_tree):
     dot = Digraph(comment="Derivation Tree")
     dot.attr('node', shape='plain')
     traverse_tree(dot, derivation_tree)
+    if log:
+        print(dot)
     display(dot)
-
 
 if __name__ == "__main__":
     display_tree(derivation_tree)

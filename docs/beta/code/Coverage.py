@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2018-10-24 11:17:04+02:00
+# Last change: 2018-10-28 08:54:08+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -145,7 +145,7 @@ def cgi_decode_traced(s):
 
 if __name__ == "__main__":
     cgi_decode_traced("a+b")
-    coverage
+    print(coverage)
 
 
 if __name__ == "__main__":
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     covered_lines = set(coverage)
-    covered_lines
+    print(covered_lines)
 
 
 if __name__ == "__main__":
@@ -276,11 +276,7 @@ if __name__ == "__main__":
     cov_plus.coverage() - cov_standard.coverage()
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import fuzzingbook_utils
 
 if __name__ == "__main__":
     with Coverage() as cov_max:
@@ -466,7 +462,7 @@ if __name__ == "__main__":
 
         if (argc >= 2) {
             char *s = argv[1];
-            char *t = malloc(strlen(s)); /* output is at most as long as input */
+            char *t = malloc(strlen(s) + 1); /* output is at most as long as input */
             int ret = cgi_decode(s, t);
             printf("%s\n", t);
             return ret;
@@ -478,11 +474,6 @@ if __name__ == "__main__":
         }
     }
     """
-
-
-if __name__ == "__main__":
-    import os
-    os.system(r'rm -f cgi_decode.*')
 
 
 if __name__ == "__main__":
@@ -514,13 +505,14 @@ if __name__ == "__main__":
 def read_gcov_coverage(c_file):
     gcov_file = c_file + ".gcov"
     coverage = set()
-    for line in open(gcov_file).readlines():
-        elems = line.split(':')
-        covered = elems[0].strip()
-        line_number = int(elems[1].strip())
-        if covered.startswith('-') or covered.startswith('#'):
-            continue
-        coverage.add((c_file, line_number))
+    with open(gcov_file) as file:
+        for line in file.readlines():
+            elems = line.split(':')
+            covered = elems[0].strip()
+            line_number = int(elems[1].strip())
+            if covered.startswith('-') or covered.startswith('#'):
+                continue
+            coverage.add((c_file, line_number))
     return coverage
 
 if __name__ == "__main__":
@@ -567,9 +559,11 @@ if __name__ == "__main__":
 
 
 
+import os, glob
+
 if __name__ == "__main__":
-    import os
-    os.system(r'rm -f cgi_decode cgi_decode.*')
+    for file in glob.glob("cgi_decode") + glob.glob("cgi_decode.*"):
+        os.remove(file)
 
 
 # ## Next Steps

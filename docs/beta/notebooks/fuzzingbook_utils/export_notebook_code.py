@@ -11,7 +11,7 @@ from import_notebooks import RE_CODE
 
 # Things to ignore in exported Python code
 RE_IGNORE = re.compile(r'^get_ipython().*|^%.*')
-RE_IMPORT_FUZZINGBOOK_UTILS = re.compile(r'^import fuzzingbook_utils *$')
+RE_IMPORT_FUZZINGBOOK_UTILS = re.compile(r'^(import|from) fuzzingbook_utils .*$', re.MULTILINE)
 
 # Strip blank lines
 RE_BLANK_LINES = re.compile(r'^[ \t]*$', re.MULTILINE)

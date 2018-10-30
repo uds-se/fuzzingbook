@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2018-10-20 17:53:37+02:00
+# Last change: 2018-10-28 08:42:11+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -85,11 +85,7 @@ if __name__ == "__main__":
     process_numbers(["--sum", "1", "2", "3"])
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import fuzzingbook_utils
 
 if __package__ is None or __package__ == "":
     from ExpectError import ExpectError

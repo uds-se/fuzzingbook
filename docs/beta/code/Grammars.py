@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-10-20 22:12:13+02:00
+# Last change: 2018-10-26 16:03:55+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -76,11 +76,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import fuzzingbook_utils
 
 DIGIT_GRAMMAR = {
     "<start>":
@@ -101,8 +97,8 @@ EXPR_GRAMMAR = {
         ["+<factor>",
          "-<factor>",
          "(<expr>)",
-         "<integer>",
-         "<integer>.<integer>"],
+         "<integer>.<integer>",
+         "<integer>"],
 
     "<integer>":
         ["<digit><integer>", "<digit>"],
@@ -260,8 +256,6 @@ if __name__ == "__main__":
 
 URL_GRAMMAR = {
     "<start>":
-        ["<call>"],
-    "<call>":
         ["<url>"],
     "<url>":
         ["<scheme>://<authority><path><query>"],
@@ -842,7 +836,7 @@ def expression_grammar_fn():
     start = "<expr>"
     expr = "<term> + <expr>" | "<term> - <expr>"
     term = "<factor> * <term>" | "<factor> / <term>" | "<factor>"
-    factor = "+<factor>" | "-<factor>" | "(<expr>)" | "<integer>" | "<integer>.<integer>"
+    factor = "+<factor>" | "-<factor>" | "(<expr>)" | "<integer>.<integer>" | "<integer>"
     integer = "<digit><integer>" | "<digit>"
     digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-10-23 17:59:24+02:00
+# Last change: 2018-10-27 14:03:06+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -38,15 +38,101 @@ if __name__ == "__main__":
 
 import fuzzingbook_utils
 from Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL
-from GrammarFuzzer import display_tree
-import functools
+from GrammarFuzzer import display_tree, all_terminals, GrammarFuzzer
+from ExpectError import ExpectError
+
+if __name__ == "__main__":
+    mystring = '1+2'
+
+
+A1_GRAMMAR = {
+   "<start>":
+       ["<expr>"],
+   "<expr>":
+       ["<expr>+<expr>", "<expr>-<expr>", "<integer>"],
+   "<integer>":
+       ["<digit><integer>", "<digit>"],
+   "<digit>":
+        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+}
+
+if __name__ == "__main__":
+    tree = ('<start>',[
+        ('<expr>',[
+            ('<expr>',[('<integer>',[('<digit>',[('1',[])])])]),
+            ('+',[]),                           
+            ('<expr>',[('<integer>',[('<digit>',[('2',[])])])])])])
+    assert mystring == all_terminals(tree)
+    display_tree(tree)
+
+
+A2_GRAMMAR = {
+   "<start>":
+      ["<expr>"],
+   "<expr>":
+      ["<integer><expr_>"],
+   "<expr_>":
+      ["+<expr>", "-<expr>", ""],
+   "<integer>":
+      ["<digit><integer_>"],
+   "<integer_>":
+      ["<integer>", ""],
+   "<digit>":
+      ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+}
+
+if __name__ == "__main__":
+    tree = ('<start>', [
+        ('<expr>', [('<integer>',
+                     [('<digit>', [('1', [])]), ('<integer_>', [('',[])])]),
+                    ('<expr_>', [('+', []), 
+                                 ('<expr>', [
+                                     ('<integer>', [
+                                         ('<digit>', [('2', [])]),
+                                         ('<integer_>', [('',[])])]),
+                                     ('<expr_>', [('',[])])])])])])
+    assert mystring == all_terminals(tree)
+    display_tree(tree)
+
+
+if __name__ == "__main__":
+    mystring = '1+2+3'
+    tree = ('<start>', [
+        ('<expr>', [
+            ('<expr>', [
+                ('<expr>', [('<integer>', [('<digit>', [('1', [])])])]),
+                ('+', []),
+                ('<expr>', [('<integer>', [('<digit>', [('2', [])])])])]), 
+            ('+', []), 
+            ('<expr>', [('<integer>', [('<digit>', [('3', [])])])])])])
+    assert mystring == all_terminals(tree)
+    display_tree(tree)
+
+
+if __name__ == "__main__":
+    tree = ('<start>', [
+        ('<expr>', [
+            ('<expr>', [('<integer>', [('<digit>', [('1', [])])])]), 
+            ('+', []), 
+            ('<expr>', [
+                ('<expr>', [('<integer>', [('<digit>', [('2', [])])])]), 
+                ('+', []), 
+                ('<expr>', [('<integer>', [('<digit>', [('3', [])])])])]) ])])
+    assert all_terminals(tree) == mystring
+    display_tree(tree)
+
+
+from functools import reduce, lru_cache
 import re
 
 def split(rule):
-    return [s for s in re.split(RE_NONTERMINAL, rule) if s]
+    return [token
+            for token in re.split(RE_NONTERMINAL, rule)
+            if token]
 
 def canonical(grammar):
-    return  {k: [split(l) for l in rules] for k, rules in grammar.items()}
+    return  {key: [split(choice) for choice in choices]
+             for key, choices in grammar.items()}
 
 class Parser(object):
     def __init__(self, grammar, start_symbol=START_SYMBOL):
@@ -71,72 +157,111 @@ if __name__ == "__main__":
 
 
 
+if __name__ == "__main__":
+    peg = {
+        '<start>': [['a'],['b']]
+    }
+
+
+if __name__ == "__main__":
+    peg = {
+        '<start>': [['ab'],['abc']]
+    }
+
+
+# ### Packrat Parser for _PEGs_
+
+if __name__ == "__main__":
+    print('\n### Packrat Parser for _PEGs_')
+
+
+
+
 class PEGParser(Parser):
     def __init__(self, grammar, start_symbol):
         super().__init__(canonical(grammar), start_symbol)
-    # memoize repeated calls.
-    @functools.lru_cache(maxsize=None)
+        
+    def parse_prefix(self, text):
+        return self.unify_key(self.start_symbol, text, 0)
+
+class PEGParser(PEGParser):
     def unify_key(self, key, text, at=0):
         if key not in self.grammar:
             if text[at:].startswith(key): return at + len(key), (key, [])
             else: return at, None
-        rules = self.grammar[key]
-        for rule in rules:
-            l, res = self.unify_line(rule, text, at)
-            if res: return (l, (key, res))
+        for rule in self.grammar[key]:
+            to, res = self.unify_rule(rule, text, at)
+            if res: return (to, (key, res))
         return 0, None
 
-    def unify_line(self, rule, text, at):
+class PEGParser(PEGParser):
+    def unify_rule(self, rule, text, at):
         results = []
         for token in rule:
             at, res = self.unify_key(token, text, at)
             if res is None: return at, None
             results.append(res)
         return at, results
-    
-    def parse(self, text): return self.unify_key(self.start_symbol, text, 0)
-    
+
+class PEGParser(PEGParser):
+    @lru_cache(maxsize=None)
+    def unify_key(self, key, text, at=0):
+        if key not in self.grammar:
+            if text[at:].startswith(key): return at + len(key), (key, [])
+            else: return at, None
+        for rule in self.grammar[key]:
+            to, res = self.unify_rule(rule, text, at)
+            if res: return (to, (key, res))
+        return 0, None
+
 def parse(text, grammar):
     peg = PEGParser(grammar, START_SYMBOL)
     return peg.parse(text)  
 
 if __name__ == "__main__":
-    EXPR_GRAMMAR
-
-
-NEW_EXPR_GRAMMAR = {'<start>': ['<expr>'],
- '<expr>': ['<term> + <expr>', '<term> - <expr>', '<term>'],
- '<term>': ['<factor> * <term>', '<factor> / <term>', '<factor>'],
- '<factor>': ['+<factor>',
-  '-<factor>',
-  '(<expr>)',
-  '<integer>.<integer>',
-  '<integer>'],
- '<integer>': ['<digit><integer>', '<digit>'],
- '<digit>': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']}
-
-if __name__ == "__main__":
-    cursor, tree = parse("1 + (2 * 3)", NEW_EXPR_GRAMMAR)
+    mystring = "1 + (2 * 3)"
+    tree = parse(mystring, EXPR_GRAMMAR)
+    assert all_terminals(tree) == mystring
     display_tree(tree)
 
 
 if __name__ == "__main__":
-    cursor, tree = parse("1 * (2 + 3.35)", NEW_EXPR_GRAMMAR)
+    mystring = "1 * (2 + 3.35)"
+    tree = parse(mystring, EXPR_GRAMMAR)
+    assert all_terminals(tree) == mystring
     display_tree(tree)
 
 
-# ## Table driven parsers
+PEG_SURPRISE = {
+    "<A>": ["a<A>a","aa"]
+}
 
 if __name__ == "__main__":
-    print('\n## Table driven parsers')
+    strings = []
+    for e in range(4):
+        f = GrammarFuzzer(PEG_SURPRISE, '<A>')
+        tree = ('<A>',None)
+        for _ in range(e):
+            tree = f.expand_tree_once(tree)
+        tree = f.expand_tree_with_strategy(tree, f.expand_node_min_cost)
+        strings.append(all_terminals(tree))
+        display_tree(tree)
+    strings
 
-
-
-
-# ### LL(1) parser
 
 if __name__ == "__main__":
-    print('\n### LL(1) parser')
+    peg = PEGParser(PEG_SURPRISE, '<A>')
+    for s in strings:
+        with ExpectError():
+            tree = peg.parse(s)
+            display_tree(tree)
+            print(s)
+
+
+# ## Context Free Grammars
+
+if __name__ == "__main__":
+    print('\n## Context Free Grammars')
 
 
 
@@ -144,195 +269,75 @@ if __name__ == "__main__":
 EOF = '\0'
 EPSILON = ''
 
+def rules(grammar):
+    return [(key, choice)
+            for key, choices in grammar.items()
+            for choice in choices]
+
 if __name__ == "__main__":
-    grammar = {'<start>': ['<expr>'],
-               '<expr>': ['<term><expr_>'],
-               '<expr_>': ['+<expr>',
-                           '-<expr>',
-                           ''],
-               '<term>': ['<factor><term_>'],
-               '<term_>': ['*<term>',
-                           '/<term>',
-                           ''],
-               '<factor>': ['+<factor>',
-                            '-<factor>',
-                            '(<expr>)',
-                            '<int>'],
-               '<int>': ['<integer><integer_>'],
-               '<integer_>': ['',
-                              '.<integer>'],
-               '<integer>': ['<digit><I>'],
-               '<I>': ['<integer>',
-                       ''],
-               '<digit>': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']}
+    rules(canonical(EXPR_GRAMMAR))
+
+
+def terminals(grammar):
+    return set(token
+               for key, choice in rules(grammar)
+               for token in choice if token not in grammar)
+
+if __name__ == "__main__":
+    terminals(canonical(EXPR_GRAMMAR))
 
 
 if __name__ == "__main__":
-    new_grammar = {k: [split(e) for e in grammar[k]] for k in grammar}
-    new_grammar
-
-
-def rules(g): return [(k, e) for k, a in g.items() for e in a]
-
-def terminals(g):
-    return set(t for k, expr in rules(g) for t in expr if t not in g)
-
-# ### First and Follow sets
-
-if __name__ == "__main__":
-    print('\n### First and Follow sets')
-
-
+    my_grammar = {
+        '<start>': [['<A>'], ['<B>']],
+        '<A>': [['a'],['']],
+        '<B>': [['b']]
+    }
 
 
 def fixpoint(f):
-    def helper(*args):
+    def helper(arg):
         while True:
-            sargs = repr(args)
-            args_ = f(*args)
-            if repr(args_) == sargs:
-                return args
-            args = args_
+            sarg = str(arg)
+            arg_ = f(arg)
+            if str(arg_) == sarg:
+                return arg
+            arg = arg_
     return helper
 
-@fixpoint
-def nullable_(rules, e):
-    for A, expression in rules:
-        if all((token in e)  for token in expression): e |= {A}
-    return (rules, e)
-
-def nullable(grammar):
-    return nullable_(rules(grammar), set())[1]
-
-
-@fixpoint
-def firstset_(rules, first, epsilon):
-    for A, expression in rules:
-        for token in expression:
-            first[A] |= first[token]
-
-            # update until the first token that is not nullable
-            if token not in epsilon:
-                break
-    return (rules, first, epsilon)
-
-def firstset(grammar, epsilon):
-    # https://www.cs.umd.edu/class/spring2014/cmsc430/lectures/lec05.pdf p6
-    # (1) If X is a terminal, then First(X) is just X
-    first = {i:{i} for i in terminals(grammar)}
-
-    # (2) if X ::= epsilon, then epsilon \in First(X)
-    for k in grammar:
-        first[k] = {EPSILON} if k in epsilon else set()
-    return firstset_(rules(grammar), first, epsilon)[1]
-
-@fixpoint
-def followset_(grammar, epsilon, first, follow):
-    for A, expression in rules(grammar):
-        # https://www.cs.umd.edu/class/spring2014/cmsc430/lectures/lec05.pdf
-        # https://www.cs.uaf.edu/~cs331/notes/FirstFollow.pdf
-        # essentially, we start from the end of the expression. Then:
-        # (3) if there is a production A -> aB, then every thing in
-        # FOLLOW(A) is in FOLLOW(B)
-        # note: f_B serves as both follow and first.
-        f_B = follow[A]
-        for t in reversed(expression):
-            # update the follow for the current token. If this is the
-            # first iteration, then here is the assignment
-            if t in grammar:
-                follow[t] |= f_B  # only bother with nt
-
-            # computing the last follow symbols for each token t. This
-            # will be used in the next iteration. If current token is
-            # nullable, then previous follows can be a legal follow for
-            # next. Else, only the first of current token is legal follow
-            # essentially
-
-            # (2) if there is a production A -> aBb then everything in FIRST(B)
-            # except for epsilon is added to FOLLOW(B)
-            f_B = f_B | first[t] if t in epsilon else (first[t] - {EPSILON})
-
-    return (grammar, epsilon, first, follow)
-
-def followset(grammar, start):
-    # Initialize first and follow sets for non-terminals
-    follow = {i: set() for i in grammar}
-    follow[start] = {EOF}
-
-    epsilon = nullable(grammar)
-    first = firstset(grammar, epsilon)
-    return followset_(grammar, epsilon, first, follow)
-
-def rnullable(rule, epsilon):
-    return all(token in epsilon for token in rule)
-
-def rfirst(rule, first, epsilon):
-    tokens = set()
-    for token in rule:
-        tokens |= first[token]
-        if token not in epsilon: break
-    return tokens
-
-def predict(rulepair, first, follow, epsilon):
-    A, rule = rulepair
-    rf = rfirst(rule, first, epsilon)
-    if rnullable(rule, epsilon):
-        rf |= follow[A]
-    return rf
-
-def parse_table(grammar, start, my_rules):
-    _, epsilon, first, follow = followset(grammar, start)
-
-    ptable = [(rule, predict(rule, first, follow, epsilon))
-              for rule in my_rules]
-
-    parse_tbl = {k: {} for k in grammar}
-
-    for (k, expr), pvals in ptable:
-        parse_tbl[k].update({v: (k, expr) for v in pvals})
-    return parse_tbl
-
-def parse_helper(grammar, tbl, stack, inplst):
-    inp, *inplst = inplst
-    exprs = []
-    while stack:
-        val, *stack = stack
-        if isinstance(val, tuple):
-            exprs.append(val)
-        elif val not in grammar:  # terminal
-            assert val == inp
-            exprs.append(val)
-            inp, *inplst = inplst or [None]
-        else:
-            _, rhs = tbl[val][inp] if inp else (None, [])
-            stack = rhs + [(val, len(rhs))] + stack
-    return exprs
-
-def parse(grammar, start, inp):
-    my_rules = rules(grammar)
-    parse_tbl = parse_table(grammar, start, my_rules)
-    k, _ = my_rules[0]
-    stack = [k]
-    return parse_helper(grammar, parse_tbl, stack, list(inp))
-
-def linear_to_tree(arr):
-    stack = []
-    while arr:
-        elt = arr.pop(0)
-        if not isinstance(elt, tuple):
-            stack.append((elt, []))
-        else:
-            # get the last n
-            sym, n = elt
-            elts = stack[-n:] if n > 0 else []
-            stack = stack[0:len(stack) - n]
-            stack.append((sym, elts))
-    assert len(stack) == 1
-    return stack[0]
+def my_sqrt(x):
+    @fixpoint
+    def _my_sqrt(approx):
+        return (approx + x / approx) / 2
+    return _my_sqrt(1)
 
 if __name__ == "__main__":
-    tree = linear_to_tree(parse(new_grammar, START_SYMBOL, '(1+2)*3'))
-    display_tree(tree)
+    my_sqrt(2)
+
+
+def nullable(grammar):
+    productions = rules(grammar)
+    @fixpoint
+    def nullable_(nullables):
+        for A, expr in productions:
+            if all(token in nullables for token in expr):
+                nullables |= {A}
+        return (nullables)
+    return nullable_({EPSILON})
+
+if __name__ == "__main__":
+    nullable(my_grammar)
+
+
+def shrink(rule):
+    return [i.strip() for i in rule]
+
+def canonical(grammar):
+    return  {k: [shrink(split(l)) for l in rules]
+             for k, rules in grammar.items()}
+
+if __name__ == "__main__":
+    canonical(EXPR_GRAMMAR)
 
 
 # ### Earley parser
@@ -343,106 +348,171 @@ if __name__ == "__main__":
 
 
 
-def shrink(rule): return [i.strip() for i in rule]
+# #### Columns
 
 if __name__ == "__main__":
-    new_grammar = {k: [shrink(split(e)) for e in EXPR_GRAMMAR[k]] for k in EXPR_GRAMMAR}
-    new_grammar
+    print('\n#### Columns')
 
 
-@fixpoint
-def nullable_(rules, e):
-    for A, expression in rules:
-        if all((token in e)  for token in expression): e |= {A}
-    return (rules, e)
 
-def nullable(grammar):
-    return nullable_(rules(grammar), set())[1]
-
-class State(object):
-    def __init__(self, name, expr, dot, origin, children=[]):
-        self.name, self.expr, self.dot, self.origin = name, expr, dot, origin
-        self.children = children[:]
-    def finished(self): return self.dot >= len(self.expr)
-    def shift(self):
-        return State(self.name, self.expr, self.dot+1, self.origin, self.children)
-    def symbol(self): return self.expr[self.dot]
-
-    def _t(self): return (self.name, self.expr, self.dot, self.origin.i, tuple(self.children))
-    def __hash__(self): return hash(self._t())
-    def __eq__(self, other): return  self._t() == other._t()
 
 class Column(object):
-    def __init__(self, i, token):
-        self.token, self.states, self._unique, self.i = token, [], {}, i
+    def __init__(self, index, letter):
+        self.index, self.letter = index, letter
+        self.states, self._unique =  [], {}
 
+class Column(Column):
     def add(self, state):
         if state in self._unique: return self._unique[state]
         self._unique[state] = state
         self.states.append(state)
         return self._unique[state]
 
-def predict(col, sym, grammar):
-    for alt in grammar[sym]:
-        col.add(State(sym, tuple(alt), 0, col))
+# #### States
 
-def scan(col, state, token):
-    if token == col.token:
-        col.add(state.shift())
+if __name__ == "__main__":
+    print('\n#### States')
 
-def complete(col, state, grammar):
-    for st in state.origin.states:
-        if st.finished(): continue
-        if state.name != st.symbol(): continue
-        col.add(st.shift()).children.append(state)
 
-# http://courses.washington.edu/ling571/ling571_fall_2010/slides/parsing_earley.pdf
-# https://github.com/tomerfiliba/tau/blob/master/earley3.py
-def parse(words, grammar, start):
-    # Aycock 2002 Practical Earley Parsing -- treatment of epsilon
-    epsilon = nullable(grammar)
-    alt = tuple(*grammar[start])
-    chart = [Column(i, tok) for i,tok in enumerate([None, *words])]
-    chart[0].add(State(start, alt, 0, chart[0], []))
 
-    for i, col in enumerate(chart):
-        for state in col.states:
-            if state.finished():
-                complete(col, state, grammar)
-            else:
-                sym = state.symbol()
-                if sym in grammar:
-                    predict(col, sym, grammar)
-                    if sym in epsilon:
-                        # note that precomputation of epsilon derivation can result in infinite
-                        # loops for certain grammars. Hence, we mark a nullable non-terminal
-                        # but do not expand it.
-                        col.add(state.shift()).children.append(State(sym + '*', tuple(), 0, col))
+
+class State(object):
+    def __init__(self, name, expr, dot, s_col, children=[]):
+        self.name, self.expr, self.dot = name, expr, dot
+        self.s_col, self.e_col = s_col, None
+        self.children = children[:]
+        
+    def _t(self):
+        return (self.name, self.expr, self.dot, self.s_col.index, tuple(self.children))
+    def __hash__(self): return hash(self._t())
+    def __eq__(self, other): return  self._t() == other._t()
+
+class State(State):
+    def finished(self):
+        return self.dot >= len(self.expr)
+    def advance(self):
+        return State(self.name, self.expr, self.dot+1, self.s_col, self.children)
+    def at_dot(self):
+        return self.expr[self.dot] if self.dot < len(self.expr) else None
+
+# #### The Parser
+
+if __name__ == "__main__":
+    print('\n#### The Parser')
+
+
+
+
+class EarleyParser(Parser):
+    def __init__(self, grammar, start_symbol):
+        super().__init__(grammar, start_symbol)
+        self.epsilon = nullable(self.grammar)
+
+class EarleyParser(EarleyParser):
+    def chart_parse(self, words, start):
+        alt = tuple(*self.grammar[start])
+        chart = [Column(i, tok) for i,tok in enumerate([None, *words])]
+        chart[0].add(State(start, alt, 0, chart[0], []))
+        return self.fill_chart(chart)
+
+class EarleyParser(EarleyParser):
+    def predict(self, col, sym):
+        for alt in self.grammar[sym]:
+            col.add(State(sym, tuple(alt), 0, col))
+
+# ##### Scan
+
+if __name__ == "__main__":
+    print('\n##### Scan')
+
+
+
+
+class EarleyParser(EarleyParser):
+    def scan(self, col, state, letter):
+        if letter == col.letter:
+            col.add(state.advance())
+
+# ##### Complete
+
+if __name__ == "__main__":
+    print('\n##### Complete')
+
+
+
+
+class EarleyParser(EarleyParser):
+    def complete(self, col, state): return self.earley_complete(col, state)
+    def earley_complete(self, col, state):
+        parent_states = [st for st in state.s_col.states
+                     if st.at_dot() == state.name]
+        for st in parent_states:
+            col.add(st.advance()).children.append(state)
+
+# ##### Fill chart
+
+if __name__ == "__main__":
+    print('\n##### Fill chart')
+
+
+
+
+class EarleyParser(EarleyParser):
+    def fill_chart(self, chart):
+        for i, col in enumerate(chart):
+            for state in col.states:
+                if state.finished():
+                    self.complete(col, state)
                 else:
-                    if i + 1 >= len(chart): continue
-                    scan(chart[i+1], state, sym)
-    return chart
+                    sym = state.at_dot()
+                    if sym in self.grammar:
+                        self.predict(col, sym)
+                        if sym in self.epsilon:
+                            c = col.add(state.advance())
+                            c.children.append(State(sym + '*', tuple(), 0, col))
+                    else:
+                        if i + 1 >= len(chart): continue
+                        self.scan(chart[i+1], state, sym)
+        return chart
 
-def process_expr(expr, children, grammar):
-    terms = iter([(i,[]) for i in expr if i not in grammar])
-    nts = iter([node_translator(i, grammar) for i in  children])
-    return [next(terms if i not in grammar else nts) for i in expr]
 
-def node_translator(state, grammar):
-    return (state.name, process_expr(state.expr, state.children, grammar))
+class EarleyParser(EarleyParser):
+    def parse_prefix(self, text):
+        table = self.chart_parse(text, self.start_symbol)
+        for col in reversed(table):
+            states = [st for st in col.states if st.name == self.start_symbol]
+            if states: return col.index, states
+        return -1, []
+
+    def parse(self, text):
+        cursor, states = self.parse_prefix(text)
+        if cursor != len(text): return []
+        for state in states:
+            if state.finished():
+                yield self.derivation_tree(state)
+
+    def process_expr(self, expr, children):
+        terms = iter([(i,[]) for i in expr if i not in self.grammar])
+        nts = iter([self.derivation_tree(i) for i in  children])
+        return [next(terms if i not in self.grammar else nts) for i in expr]
+
+    def derivation_tree(self, state):
+        return (state.name, self.process_expr(state.expr, state.children))
+
+def parse(text, grammar, start=START_SYMBOL):
+    ep = EarleyParser(grammar, start)
+    return ep.parse(text)  
 
 if __name__ == "__main__":
-    new_grammar = {k: [shrink(split(e)) for e in EXPR_GRAMMAR[k]] for k in EXPR_GRAMMAR}
-    table = parse(list('1+2+3'), new_grammar, '<start>')
-    states = [st for st in table[-1].states if st.name == '<start>' and st.finished()]
-    for state in states:
-        display_tree(node_translator(state, new_grammar))
+    new_grammar = canonical(EXPR_GRAMMAR)
+    for tree in parse(list('1+2+3'), new_grammar):
+        display_tree(tree)
 
 
-# #### Ambiguous grammars generates parse forests
+# #### Ambiguous grammars
 
 if __name__ == "__main__":
-    print('\n#### Ambiguous grammars generates parse forests')
+    print('\n#### Ambiguous grammars')
 
 
 
@@ -455,11 +525,17 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    new_grammar = {k: [shrink(split(e)) for e in grammar[k]] for k in grammar}
-    table = parse(list('a+a+a'), new_grammar, '<start>')
-    states = [st for st in table[-1].states if st.name == '<start>' and st.finished()]
-    for state in states:
-        display_tree(node_translator(state, new_grammar))
+    new_grammar = canonical(A1_GRAMMAR)
+    for tree in parse(list('1+2+3'), new_grammar, '<start>'):
+        display_tree(tree)
+
+
+# ## Further Information
+
+if __name__ == "__main__":
+    print('\n## Further Information')
+
+
 
 
 # ## Lessons Learned
@@ -495,13 +571,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    # Some code that is part of the exercise
     pass
-
-
-if __name__ == "__main__":
-    # Some code for the solution
-    2 + 2
 
 
 # ### Exercise 2
@@ -511,3 +581,79 @@ if __name__ == "__main__":
 
 
 
+
+if __name__ == "__main__":
+    pass
+
+
+# ### Exercise 3
+
+if __name__ == "__main__":
+    print('\n### Exercise 3')
+
+
+
+
+if __name__ == "__main__":
+    pass
+
+
+# ### Exercise 4
+
+if __name__ == "__main__":
+    print('\n### Exercise 4')
+
+
+
+
+if __name__ == "__main__":
+    pass
+
+
+# ### Exercise 5
+
+if __name__ == "__main__":
+    print('\n### Exercise 5')
+
+
+
+
+if __name__ == "__main__":
+    RE_NONTERMINAL
+
+
+# ### Exercise 6
+
+if __name__ == "__main__":
+    print('\n### Exercise 6')
+
+
+
+
+class LeoParser(EarleyParser):
+    def check_single_item(self, st, remain):
+        res = [s for s in remain
+                 if s.name == st.name and s.expr == st.expr and
+                    s.s_col.i == st.s_col.i and s.dot == (st.dot - 1)]
+        return len(res) == 1
+
+    @lru_cache(maxsize=None)
+    def get_above(self, state):
+        remain, finished = splitlst(lambda s: s.finished(), state.s_col.states)
+        vals = [st for st in finished
+                    if state.name == st.expr[-1] and
+                       self.check_single_item(st, remain)]
+        if vals:
+            assert len(vals) == 1
+            res = self.get_above(vals[0])
+            return vals[0] if not res else res
+        return None
+
+    def leo_complete(self, col, state):
+        detred = self.get_above(state)
+        if detred:
+            col.add(detred.copy()).children.append(state)
+        else:
+            self.earley_complete(col, state)
+
+    def complete(self, col, state): return self.leo_complete(col, state)

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2018-10-23 12:27:39+02:00
+# Last change: 2018-10-29 09:09:55+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -130,11 +130,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import fuzzingbook_utils
 
 if __package__ is None or __package__ == "":
     from Grammars import START_SYMBOL

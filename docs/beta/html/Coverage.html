@@ -11793,7 +11793,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/Coverage.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Getting Coverage - Generating Software Tests" />
-<meta property="og:description" content="In the previous chapter, we introduced basic fuzzing – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a proxy for the likelihood of a test to uncover a bug.  In this chapter, we introduce the concept of code coverage, measuring which parts of a program are actually executed during a test run.  Measuring such coverage is also crucial for test generators that attempt to cover as much code as possible.Prerequisites You need basic understanding of how a program is executed. You should have learned about basic fuzzing in the previous chapter." />
+<meta property="og:description" content="In the previous chapter, we introduced basic fuzzing – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a proxy for the likelihood of a test to uncover a bug.  In this chapter, we introduce the concept of code coverage, measuring which parts of a program are actually executed during a test run.  Measuring such coverage is also crucial for test generators that attempt to cover as much code as possible.Prerequisites You need some understanding of how a program is executed. You should have learned about basic fuzzing in the previous chapter." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11877,6 +11877,8 @@ MathJax.Hub.Config({
 <li><a href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="GrammarMiner.html">Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="Carver.html">Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="APIFuzzer.html">Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 
            <li><a href="https://www.fuzzingbook.org/beta/#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
@@ -11954,7 +11956,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
 <ul>
-<li>You need basic understanding of how a program is executed.</li>
+<li>You need some understanding of how a program is executed.</li>
 <li>You should have learned about basic fuzzing in the <a href="Fuzzer.html">previous chapter</a>.</li>
 </ul>
 </div>
@@ -12204,9 +12206,14 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>To track how the execution proceeds through <code>cgi_decode()</code>, we make use of <code>sys.settrace()</code>.  First, we define the <em>tracing function</em> that will be called for each line.  It has three parameters:</p>
 <ul>
-<li>the current <em>frame</em>, allowing access to the current location and variables;</li>
-<li>the current <em>event</em>, a string with values including <code>"line"</code> (a new line has been reached) or <code>"call"</code> (a function is being called); and</li>
-<li>an additional <em>argument</em> for some events.</li>
+<li>The <code>frame</code> parameter gets you the current <em>frame</em>, allowing access to the current location and variables:<ul>
+<li><code>frame.f_code</code> gets you the currently executed code with <code>frame.f_code.co_name</code> being the function name;</li>
+<li><code>frame.f_lineno</code> gets you the current line number; and</li>
+<li><code>frame.f_locals</code> gets you the current local variables and arguments.</li>
+</ul>
+</li>
+<li>The <code>event</code> parameter is a string with values including <code>"line"</code> (a new line has been reached) or <code>"call"</code> (a function is being called).</li>
+<li>The <code>arg</code> parameter is an additional <em>argument</em> for some events; for <code>"return"</code> events, for instance, <code>arg</code> holds the value being returned.</li>
 </ul>
 <p>We use the tracing function for simply reporting the current line executed, which we access through the <code>frame</code> argument.</p>
 </div>
@@ -12306,7 +12313,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_traced</span><span class="p">(</span><span class="s2">&quot;a+b&quot;</span><span class="p">)</span>
-<span class="n">coverage</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">coverage</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12316,32 +12323,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_area">
 
-<div class="output_text output_subarea output_execute_result">
-<pre>[9,
- 10,
- 11,
- 12,
- 15,
- 16,
- 17,
- 18,
- 19,
- 21,
- 30,
- 31,
- 17,
- 18,
- 19,
- 20,
- 31,
- 17,
- 18,
- 19,
- 21,
- 30,
- 31,
- 17,
- 32]
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[9, 10, 11, 12, 15, 16, 17, 18, 19, 21, 30, 31, 17, 18, 19, 20, 31, 17, 18, 19, 21, 30, 31, 17, 32]
 </pre>
 </div>
 
@@ -12488,7 +12471,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">covered_lines</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">coverage</span><span class="p">)</span>
-<span class="n">covered_lines</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">covered_lines</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12498,8 +12481,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_area">
 
-<div class="output_text output_subarea output_execute_result">
-<pre>{9, 10, 11, 12, 15, 16, 17, 18, 19, 20, 21, 30, 31, 32}
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>{32, 9, 10, 11, 12, 15, 16, 17, 18, 19, 20, 21, 30, 31}
 </pre>
 </div>
 
@@ -12693,7 +12676,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{(&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 12), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)}
+<pre>{(&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 11)}
 </pre>
 </div>
 
@@ -13357,7 +13340,7 @@ Hello World
 
 <span class="s2">    if (argc &gt;= 2) {</span>
 <span class="s2">        char *s = argv[1];</span>
-<span class="s2">        char *t = malloc(strlen(s)); /* output is at most as long as input */</span>
+<span class="s2">        char *t = malloc(strlen(s) + 1); /* output is at most as long as input */</span>
 <span class="s2">        int ret = cgi_decode(s, t);</span>
 <span class="s2">        printf(&quot;</span><span class="si">%s</span><span class="s2">\n&quot;, t);</span>
 <span class="s2">        return ret;</span>
@@ -13382,20 +13365,6 @@ Hello World
 <div class="text_cell_render border-box-sizing rendered_html"><p>Let us create the C source code:</p>
 </div>
 </div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>rm -f cgi_decode.*
-</pre></div>
-
-</div>
-</div></div>
 </div>
 </div>
 
@@ -13574,13 +13543,14 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">read_gcov_coverage</span><span class="p">(</span><span class="n">c_file</span><span class="p">):</span>
     <span class="n">gcov_file</span> <span class="o">=</span> <span class="n">c_file</span> <span class="o">+</span> <span class="s2">&quot;.gcov&quot;</span>
     <span class="n">coverage</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">gcov_file</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
-        <span class="n">elems</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
-        <span class="n">covered</span> <span class="o">=</span> <span class="n">elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">line_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">elems</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">covered</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">covered</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
-            <span class="k">continue</span>
-        <span class="n">coverage</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">c_file</span><span class="p">,</span> <span class="n">line_number</span><span class="p">))</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gcov_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+            <span class="n">elems</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+            <span class="n">covered</span> <span class="o">=</span> <span class="n">elems</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">line_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">elems</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">covered</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">covered</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">coverage</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">c_file</span><span class="p">,</span> <span class="n">line_number</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">coverage</span>
 </pre></div>
 
@@ -13620,11 +13590,11 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[(&#39;cgi_decode.c&#39;, 32),
- (&#39;cgi_decode.c&#39;, 23),
- (&#39;cgi_decode.c&#39;, 24),
- (&#39;cgi_decode.c&#39;, 50),
- (&#39;cgi_decode.c&#39;, 44)]
+<pre>[(&#39;cgi_decode.c&#39;, 34),
+ (&#39;cgi_decode.c&#39;, 12),
+ (&#39;cgi_decode.c&#39;, 22),
+ (&#39;cgi_decode.c&#39;, 45),
+ (&#39;cgi_decode.c&#39;, 55)]
 </pre>
 </div>
 
@@ -13695,7 +13665,7 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-48-086d4892c70e&gt;&#34;, line 5, in &lt;module&gt;
+  File &#34;&lt;ipython-input-47-086d4892c70e&gt;&#34;, line 5, in &lt;module&gt;
     cgi_decode(s)
   File &#34;&lt;ipython-input-1-4d0fb90b50b4&gt;&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
@@ -13797,7 +13767,22 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>rm -f cgi_decode cgi_decode.*
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/os.html" class="import" target="_blank">os</a></span><span class="o">,</span> <span class="nn"><a href="https://docs.python.org/3/library/glob.html" class="import" target="_blank">glob</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;cgi_decode&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;cgi_decode.*&quot;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13820,7 +13805,7 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>Coverage is a central concept in systematic software testing.  [<a href="http://ix.cs.uoregon.edu/~michal/book/">Pezzè <em>et al</em>, 2008.</a>] provides a good overview on the topic.  \todo{Add more.}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>Coverage is a central concept in systematic software testing.  For discussions, see the books in the <a href="Intro_Testing.html">Introduction to Testing</a>.</p>
 </div>
 </div>
 </div>
@@ -13916,7 +13901,7 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 <span class="c1"># more_pairs</span>
 <span class="p">)</span>
 </pre></div>
-<p>Bonus for advanced Python programmers: Define <code>BranchCoverage</code> as subclass of <code>Coverage</code> and make <code>branch_coverage()</code> as above a <code>coverage()</code> method of <code>BranchCoverage</code>.</p>
+<p>Bonus for advanced Python programmers: Define <code>BranchCoverage</code> as a subclass of <code>Coverage</code> and make <code>branch_coverage()</code> as above a <code>coverage()</code> method of <code>BranchCoverage</code>.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/Coverage.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -13955,7 +13940,7 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Coverage.ipynb" target=_blank)>Last change: 2018-10-24 11:17:04+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Coverage.ipynb" target=_blank)>Last change: 2018-10-28 08:54:08+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13971,7 +13956,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Coverage.html">Getting Coverage</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Coverage.html">https://www.fuzzingbook.org/beta/html/Coverage.html</a>.  Retrieved 2018-10-24 11:17:04+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Coverage.html">Getting Coverage</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Coverage.html">https://www.fuzzingbook.org/beta/html/Coverage.html</a>.  Retrieved 2018-10-28 08:54:08+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Coverage,
@@ -13981,9 +13966,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Coverage.html}},
-    note = {Retrieved 2018-10-24 11:17:04+02:00},
+    note = {Retrieved 2018-10-28 08:54:08+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Coverage.html},
-    urldate = {2018-10-24 11:17:04+02:00}
+    urldate = {2018-10-28 08:54:08+01:00}
 }
 </pre>
 </div>

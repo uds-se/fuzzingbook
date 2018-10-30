@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
-# Last change: 2018-10-16 12:54:10+02:00
+# Last change: 2018-10-28 14:49:40+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -44,11 +44,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import fuzzingbook_utils
 
 import traceback
 import sys
