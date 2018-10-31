@@ -1,52 +1,13 @@
 # Fuzzingbook Makefile
 
-# Chapters to include in the book, in this order
-PUBLIC_CHAPTERS = \
-	Intro_Testing.ipynb \
-	Fuzzer.ipynb
-
-# Chapters that are ready for release
-READY_CHAPTERS = \
-	Coverage.ipynb \
-	MutationFuzzer.ipynb \
-	Grammars.ipynb \
-	GrammarFuzzer.ipynb \
-	GrammarCoverageFuzzer.ipynb \
-	ConfigurationFuzzer.ipynb
-
-# Chapters that still are work in progress
-TODO_CHAPTERS = \
-	Parser.ipynb \
-	ProbabilisticGrammarFuzzer.ipynb \
-	Reducer.ipynb \
-	GrammarMiner.ipynb \
-	Carver.ipynb \
-	APIFuzzer.ipynb
-
-	# ConstraintGrammarFuzzer.ipynb
-	# GUIFuzzer.ipynb
-	# SearchBasedFuzzer.ipynb
-	# SymbolicFuzzer.ipynb
-	# ...
+# Get chapter files
+include Chapters.mk
 
 # Only these will appear on the beta site
 BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
 
 # All chapters
 CHAPTERS = $(PUBLIC_CHAPTERS) $(BETA_CHAPTERS)
-
-# Appendices for the book
-APPENDICES = \
-	ExpectError.ipynb \
-	Timer.ipynb
-
-# Additional notebooks for special pages (not to be included in distributions)
-FRONTMATTER = \
-	index.ipynb
-EXTRAS = \
-	Guide_for_Authors.ipynb \
-	Template.ipynb \
-	404.ipynb
 
 # All source notebooks
 SOURCE_FILES = \
@@ -408,10 +369,12 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--public-chapters="$(PUBLIC_SOURCES)" \
 	--ready-chapters="$(READY_SOURCES)" \
 	--todo-chapters="$(TODO_SOURCES)"
+	
+HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py Chapters.mk
 
 # index.html comes with relative links (html/) such that the beta version gets the beta menu
 $(DOCS_TARGET)index.html: \
-	$(FULL_NOTEBOOKS)/index.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
+	$(FULL_NOTEBOOKS)/index.ipynb $(HTML_DEPS)
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
@@ -423,7 +386,7 @@ $(DOCS_TARGET)index.html: \
 # 404.html comes with absolute links (/html/) such that it works anywhare
 # https://help.github.com/articles/creating-a-custom-404-page-for-your-github-pages-site/
 $(DOCS_TARGET)404.html: \
-	$(FULL_NOTEBOOKS)/404.ipynb $(PUBLISH_PLUGINS) utils/post-html.py
+	$(FULL_NOTEBOOKS)/404.ipynb $(HTML_DEPS)
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
@@ -434,7 +397,7 @@ $(DOCS_TARGET)404.html: \
 	@$(OPEN) $@
 
 $(HTML_TARGET)%.html: \
-	$(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py
+	$(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
@@ -512,7 +475,7 @@ $(EPUB_TARGET)%.epub: $(MARKDOWN_TARGET)%.md
 # and let the book converters run on this
 ifeq ($(PUBLISH),nbpublish)
 # With nbpublish
-$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
+$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS) Chapters.mk
 	-$(RM) -r book
 	$(MKDIR) book
 	chapter=0; \
@@ -545,7 +508,7 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post-html.py
 	@echo Created $@
 else
 # With bookbook
-$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS)
+$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS) Chapters.mk
 	-$(RM) -r book
 	$(MKDIR) book
 	chapter=0; \
