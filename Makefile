@@ -1,7 +1,8 @@
 # Fuzzingbook Makefile
 
 # Get chapter files
-include Chapters.mk
+CHAPTERS_MAKEFILE = Chapters.makefile
+include $(CHAPTERS_MAKEFILE)
 
 # Only these will appear on the beta site
 BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
@@ -370,7 +371,7 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--ready-chapters="$(READY_SOURCES)" \
 	--todo-chapters="$(TODO_SOURCES)"
 	
-HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py Chapters.mk
+HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py $(CHAPTERS_MAKEFILE)
 
 # index.html comes with relative links (html/) such that the beta version gets the beta menu
 $(DOCS_TARGET)index.html: \
@@ -475,7 +476,7 @@ $(EPUB_TARGET)%.epub: $(MARKDOWN_TARGET)%.md
 # and let the book converters run on this
 ifeq ($(PUBLISH),nbpublish)
 # With nbpublish
-$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS) Chapters.mk
+$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
 	-$(RM) -r book
 	$(MKDIR) book
 	chapter=0; \
@@ -508,7 +509,7 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post-html.py
 	@echo Created $@
 else
 # With bookbook
-$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS) Chapters.mk
+$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
 	-$(RM) -r book
 	$(MKDIR) book
 	chapter=0; \
