@@ -804,6 +804,7 @@ AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot *.fls *.fdb_latexmk 
 	  $(PDF_TARGET)*.lof \
 	  $(PDF_TARGET)*.lot \
 	  $(PDF_TARGET)*.fls \
+	  $(PDF_TARGET)*.xdv \
 	  $(PDF_TARGET)*.fdb_latexmk
 
 .PHONY: clean-code clean-chapters clean-book clean-aux clean-pdf
