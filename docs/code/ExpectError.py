@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
-# Last change: 2018-10-28 14:49:40+01:00
+# Last change: 2018-10-31 16:27:06+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -50,8 +50,9 @@ import traceback
 import sys
 
 class ExpectError(object):
-    def __init__(self, print_traceback=True):
+    def __init__(self, print_traceback=True, mute=False):
         self.print_traceback = print_traceback
+        self.mute = mute
 
     # Begin of `with` block
     def __enter__(self):
@@ -73,7 +74,9 @@ class ExpectError(object):
         else:
             lines = traceback.format_exception_only(
                 exc_type, exc_value)[-1].strip()
-        print(lines, "(expected)", file=sys.stderr)
+
+        if not self.mute:
+            print(lines, "(expected)", file=sys.stderr)
         return True  # Ignore it
 
 def fail_test():
@@ -117,11 +120,12 @@ if __name__ == "__main__":
 
 
 class ExpectTimeout(object):
-    def __init__(self, seconds, print_traceback=True):
+    def __init__(self, seconds, print_traceback=True, mute=False):
         self.seconds_before_timeout = seconds
         self.original_trace_function = None
         self.end_time = None
         self.print_traceback = print_traceback
+        self.mute = mute
 
     # Tracing function
     def check_time(self, frame, event, arg):
@@ -160,7 +164,9 @@ class ExpectTimeout(object):
         else:
             lines = traceback.format_exception_only(
                 exc_type, exc_value)[-1].strip()
-        print(lines, "(expected)", file=sys.stderr)
+
+        if not self.mute:
+            print(lines, "(expected)", file=sys.stderr)
         return True  # Ignore it
 
     def cancel(self):

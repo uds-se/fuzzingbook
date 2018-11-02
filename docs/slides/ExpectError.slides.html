@@ -12481,8 +12481,9 @@ a.anchor-link {
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ExpectError</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_traceback</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">print_traceback</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">print_traceback</span> <span class="o">=</span> <span class="n">print_traceback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mute</span> <span class="o">=</span> <span class="n">mute</span>
 
     <span class="c1"># Begin of `with` block</span>
     <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -12504,7 +12505,9 @@ a.anchor-link {
         <span class="k">else</span><span class="p">:</span>
             <span class="n">lines</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception_only</span><span class="p">(</span>
                 <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="s2">&quot;(expected)&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mute</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="s2">&quot;(expected)&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Ignore it</span>
 </pre></div>
 
@@ -12652,11 +12655,12 @@ ZeroDivisionError: division by zero (expected)
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ExpectTimeout</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">,</span> <span class="n">print_traceback</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seconds</span><span class="p">,</span> <span class="n">print_traceback</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mute</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seconds_before_timeout</span> <span class="o">=</span> <span class="n">seconds</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">original_trace_function</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">print_traceback</span> <span class="o">=</span> <span class="n">print_traceback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mute</span> <span class="o">=</span> <span class="n">mute</span>
 
     <span class="c1"># Tracing function</span>
     <span class="k">def</span> <span class="nf">check_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
@@ -12695,7 +12699,9 @@ ZeroDivisionError: division by zero (expected)
         <span class="k">else</span><span class="p">:</span>
             <span class="n">lines</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exception_only</span><span class="p">(</span>
                 <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="s2">&quot;(expected)&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mute</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="s2">&quot;(expected)&quot;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>  <span class="c1"># Ignore it</span>
 
     <span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -12835,7 +12841,7 @@ ZeroDivisionError: division by zero (expected)
     print(i, &#34;seconds have passed&#34;)
   File &#34;&lt;ipython-input-10-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
     print(i, &#34;seconds have passed&#34;)
-  File &#34;&lt;ipython-input-9-bd46aaaacf4f&gt;&#34;, line 15, in check_time
+  File &#34;&lt;ipython-input-9-a28a583f0630&gt;&#34;, line 16, in check_time
     raise TimeoutError
 TimeoutError (expected)
 </pre>
@@ -12867,7 +12873,7 @@ TimeoutError (expected)
     print(i, &#34;seconds have passed&#34;)
   File &#34;&lt;ipython-input-10-8d0f8e53f106&gt;&#34;, line 5, in long_running_test
     print(i, &#34;seconds have passed&#34;)
-  File &#34;&lt;ipython-input-9-bd46aaaacf4f&gt;&#34;, line 15, in check_time
+  File &#34;&lt;ipython-input-9-a28a583f0630&gt;&#34;, line 16, in check_time
     raise TimeoutError
 TimeoutError (expected)
 </pre>
