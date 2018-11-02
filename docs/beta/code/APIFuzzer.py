@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2018-10-30 13:41:25+01:00
+# Last change: 2018-10-31 16:27:08+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -198,7 +198,7 @@ if __name__ == "__main__":
             function_name = code.co_name
 
             if function_name.startswith('_'):
-                return None # Internal function
+                return None  # Internal function
 
             # When called, all arguments are local variables
             variables = frame.f_locals.keys()
@@ -212,7 +212,8 @@ if __name__ == "__main__":
             # Some tracking
             # print(call_with_args(function_name, args))
 
-        # If we return None, this will only be called for functions (more efficient)
+        # If we return None, this will only be called for functions (more
+        # efficient)
         return None
 
 
@@ -224,33 +225,33 @@ if __name__ == "__main__":
     def power(x, y):
         return math.pow(x, y)
 
-    def powerpair(pair):
-        return power(pair[0], pair[1])
 
-    def record_calls():
-        global the_args
-        the_args = {}
+def powerpair(pair):
+    return power(pair[0], pair[1])
 
-        urls = [
-            "https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller",
-            "http://fuzzingbook.com/fuzzing",
-            "http://google.com/query",
-            "http://microsoft.com/windows",
-            "https://mark:zuckerberg@facebook.com:666/friends"
-        ]
+def record_calls():
+    global the_args
+    the_args = {}
 
-        sys.settrace(traceit)
+    urls = [
+        "https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller",
+        "http://fuzzingbook.com/fuzzing",
+        "http://google.com/query",
+        "http://microsoft.com/windows",
+        "https://mark:zuckerberg@facebook.com:666/friends"
+    ]
 
-        for n in range(0, 10):
-            x = power(n, n)
-            x = powerpair((n, n))
+    sys.settrace(traceit)
 
-        for url in urls:
-            parts = urlparse(url)
-            url = urlunparse(parts)
+    for n in range(0, 10):
+        x = power(n, n)
+        x = powerpair((n, n))
 
-        sys.settrace(None)
+    for url in urls:
+        parts = urlparse(url)
+        url = urlunparse(parts)
 
+    sys.settrace(None)
 
 if __name__ == "__main__":
     record_calls()
@@ -295,16 +296,16 @@ def mine_grammar_from_calls():
     grammar = {
         "<start>": [all_calls],
     }
-    
+
     function_nonterminals = []
     for function_name in the_args.keys():
         if function_name.startswith("_") or function_name.startswith("<"):
             # Internal function
             continue
-        
+
         nonterminal_name = nonterminal(function_name)
         function_nonterminals.append(nonterminal_name)
-        
+
         # Add a rule for the function
         expansion = function_name + "("
         first_arg = True
@@ -328,10 +329,10 @@ def mine_grammar_from_calls():
                     values[var].append(value)
         g = value_rules(values, function_name)
         grammrs = merge_grammars(grammar, g)
-        
+
     # Add a rule for all calls
     grammar[all_calls] = function_nonterminals
-            
+
     return grammar
 
 if __name__ == "__main__":
@@ -410,7 +411,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    # Expand a structured value into individual grammar rules       
+    # Expand a structured value into individual grammar rules
     def deep_value_expansions(prefix, value):
         # print("Expanding", prefix, "=", repr(value))
 
@@ -456,7 +457,6 @@ if __name__ == "__main__":
 
         # print("Expanded:", grammar_to_string(grammar))
         return grammar
-
 
 
 # ## Lessons Learned
@@ -525,7 +525,7 @@ def get_element(tree, name):
         result = get_element(c, name)
         if result is not None:
             return result
-    return None # Not Found
+    return None  # Not Found
 
 if __name__ == "__main__":
     get_element(call_tree, "<scheme>")
@@ -541,7 +541,8 @@ if __name__ == "__main__":
         call = urlparse_fuzzer.fuzz()
         tree = urlparse_fuzzer.derivation_tree
         test += "result = " + call + "\n"
-        test += "assert result.scheme == " + repr(get_element(tree, "<scheme>")) + "\n"
+        test += "assert result.scheme == " + \
+            repr(get_element(tree, "<scheme>")) + "\n"
     print(test)
 
 

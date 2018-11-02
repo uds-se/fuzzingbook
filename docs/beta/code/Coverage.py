@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2018-10-30 13:41:25+01:00
+# Last change: 2018-10-31 16:22:02+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -559,7 +559,8 @@ if __name__ == "__main__":
 
 
 
-import os, glob
+import os
+import glob
 
 if __name__ == "__main__":
     for file in glob.glob("cgi_decode") + glob.glob("cgi_decode.*"):

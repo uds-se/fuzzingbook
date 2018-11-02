@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2018-10-30 13:41:25+01:00
+# Last change: 2018-10-31 16:27:08+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -36,12 +36,6 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
-
 # ## System Tests vs Unit Tests
 
 if __name__ == "__main__":
@@ -50,7 +44,10 @@ if __name__ == "__main__":
 
 
 
-import urllib.parse, urllib.request
+import urllib.parse
+import urllib.request
+
+import fuzzingbook_utils
 
 def webbrowser(url):
     """Download the http/https resource given by the URL"""
@@ -67,9 +64,11 @@ else:
 
 if __name__ == "__main__":
     with Timer() as webbrowser_timer:
-        fuzzingbook_contents = webbrowser("http://www.fuzzingbook.org/html/Fuzzer.html")
+        fuzzingbook_contents = webbrowser(
+            "http://www.fuzzingbook.org/html/Fuzzer.html")
 
-    print("Downloaded %d bytes in %.2f seconds" % (len(fuzzingbook_contents), webbrowser_timer.elapsed_time()))
+    print("Downloaded %d bytes in %.2f seconds" %
+          (len(fuzzingbook_contents), webbrowser_timer.elapsed_time()))
 
 
 if __name__ == "__main__":
@@ -79,14 +78,14 @@ if __name__ == "__main__":
 from urllib.parse import urlparse
 
 if __name__ == "__main__":
-    urlparse('https://www.fuzzingbook.com/html/APIFuzzer.html')
+    urlparse('https://www.fuzzingbook.com/html/Carver.html')
 
 
 if __name__ == "__main__":
     runs = 1000
     with Timer() as urlparse_timer:
         for i in range(runs):
-            urlparse('https://www.fuzzingbook.com/html/APIFuzzer.html')
+            urlparse('https://www.fuzzingbook.com/html/Carver.html')
 
     avg_urlparse_time = urlparse_timer.elapsed_time() / 1000
     avg_urlparse_time
@@ -117,10 +116,13 @@ if __name__ == "__main__":
 
 
 import sys
-import inspect
 
 class Carver(object):
-    def __init__(self):
+    def __init__(self, log=False):
+        self._log = log
+        self.reset()
+
+    def reset(self):
         self._calls = {}
 
     # Start of `with` block
@@ -133,59 +135,69 @@ class Carver(object):
     def __exit__(self, exc_type, exc_value, tb):
         sys.settrace(self.original_trace_function)
 
+import inspect
+
 def get_qualified_name(code):
+    """Return the fully qualified name of the current function"""
     name = code.co_name
     module = inspect.getmodule(code)
     if module is not None:
         name = module.__name__ + "." + name
     return name
 
-class Carver(Carver):
+def get_arguments(frame):
+    """Return call arguments in the given frame"""
+    # When called, all arguments are local variables
+    arguments = [(var, frame.f_locals[var]) for var in frame.f_locals]
+    arguments.reverse()  # Want same order as call
+    return arguments
+
+class CallCarver(Carver):
     def add_call(self, function_name, arguments):
+        """Add given call to list of calls"""
         if function_name not in self._calls:
             self._calls[function_name] = []
         if arguments not in self._calls[function_name]:
             self._calls[function_name].append(arguments)
-    
+
     # Tracking function: Record all calls and all args
     def traceit(self, frame, event, arg):
         if event != "call":
             return None
-        
-        code = frame.f_code
-        function_name  = code.co_name
-        qualified_name = get_qualified_name(code)
 
-        # When called, all arguments are local variables
-        arguments = [(var, frame.f_locals[var]) for var in frame.f_locals]
-        arguments.reverse()  # Want same order as call
+        code = frame.f_code
+        function_name = code.co_name
+        qualified_name = get_qualified_name(code)
+        arguments = get_arguments(frame)
 
         self.add_call(function_name, arguments)
         if qualified_name != function_name:
             self.add_call(qualified_name, arguments)
 
-        # Some tracking
-        # print(simple_call_string(function_name, args))
+        if self._log:
+            print(simple_call_string(function_name, arguments))
 
         return None
 
-class Carver(Carver):
+class CallCarver(CallCarver):
     def calls(self):
-        """Return a dictionary of all calls traced."""  
+        """Return a dictionary of all calls traced."""
         return self._calls
-    
+
     def arguments(self, function_name):
         """Return a list of all arguments of the given function
         as (VAR, VALUE) pairs.
         Raises an exception if the function was not traced."""
         return self._calls[function_name]
-    
-    def called_functions(self, qualified=True):
+
+    def called_functions(self, qualified=False):
         """Return all functions called."""
         if qualified:
-            return [function_name for function_name in self._calls.keys() if function_name.find('.') >= 0]
+            return [function_name for function_name in self._calls.keys()
+                    if function_name.find('.') >= 0]
         else:
-            return [function_name for function_name in self._calls.keys() if function_name.find('.') < 0]
+            return [function_name for function_name in self._calls.keys()
+                    if function_name.find('.') < 0]
 
 # ### Recording my_sqrt()
 
@@ -202,7 +214,7 @@ else:
 
 
 if __name__ == "__main__":
-    with Carver() as sqrt_carver:
+    with CallCarver() as sqrt_carver:
         my_sqrt(2)
         my_sqrt(4)
 
@@ -212,13 +224,18 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
+    sqrt_carver.called_functions()
+
+
+if __name__ == "__main__":
     sqrt_carver.arguments("my_sqrt")
 
 
 def simple_call_string(function_name, argument_list):
     """Return function_name(arg[0], arg[1], ...) as a string"""
     return function_name + "(" + \
-        ", ".join([var + "=" + repr(value) for (var, value) in argument_list]) + ")"
+        ", ".join([var + "=" + repr(value)
+                   for (var, value) in argument_list]) + ")"
 
 if __name__ == "__main__":
     for function_name in sqrt_carver.called_functions():
@@ -239,12 +256,12 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    with Carver() as webbrowser_carver:
+    with CallCarver() as webbrowser_carver:
         webbrowser("http://www.example.com")
 
 
 if __name__ == "__main__":
-    print(webbrowser_carver.called_functions())
+    print(webbrowser_carver.called_functions(qualified=True))
 
 
 if __name__ == "__main__":
@@ -274,7 +291,9 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    email_parse_call = simple_call_string("email.parser.parse", email_parse_argument_list[0])
+    email_parse_call = simple_call_string(
+        "email.parser.parse",
+        email_parse_argument_list[0])
     email_parse_call
 
 
@@ -303,15 +322,15 @@ if __name__ == "__main__":
     unpickled_parser_object
 
 
+def call_value(value):
+    value_as_string = repr(value)
+    if value_as_string.find('<') >= 0:
+        # Complex object
+        value_as_string = "pickle.loads(" + repr(pickle.dumps(value)) + ")"
+    return value_as_string
+
 def call_string(function_name, argument_list):
     """Return function_name(arg[0], arg[1], ...) as a string, pickling complex objects"""
-    def call_value(value):
-        value_as_string = repr(value)
-        if value_as_string.find('<') >= 0:
-            # Complex object
-            value_as_string = "pickle.loads(" + repr(pickle.dumps(value)) + ")"
-        return value_as_string
-    
     if len(argument_list) > 0:
         (first_var, first_value) = argument_list[0]
         if first_var == "self":
@@ -319,9 +338,10 @@ def call_string(function_name, argument_list):
             method_name = function_name.split(".")[-1]
             function_name = call_value(first_value) + "." + method_name
             argument_list = argument_list[1:]
-    
+
     return function_name + "(" + \
-        ", ".join([var + "=" + call_value(value) for (var, value) in argument_list]) + ")"
+        ", ".join([var + "=" + call_value(value)
+                   for (var, value) in argument_list]) + ")"
 
 if __name__ == "__main__":
     call = call_string("email.parser.parse", email_parse_argument_list[0])
@@ -342,16 +362,19 @@ if __name__ == "__main__":
 
 import traceback
 
-import enum, socket
+import enum
+import socket
 
 if __name__ == "__main__":
-    all_functions = set(webbrowser_carver.called_functions())
+    all_functions = set(webbrowser_carver.called_functions(qualified=True))
     call_success = set()
     run_success = set()
 
 
 if __name__ == "__main__":
-    for function_name in webbrowser_carver.called_functions():
+    exceptions_seen = set()
+
+    for function_name in webbrowser_carver.called_functions(qualified=True):
         for argument_list in webbrowser_carver.arguments(function_name):
             try:
                 call = call_string(function_name, argument_list)
@@ -360,7 +383,8 @@ if __name__ == "__main__":
                 result = eval(call)
                 run_success.add(function_name)
 
-            except:
+            except Exception as exc:
+                exceptions_seen.add(repr(exc))
                 # print("->", call, file=sys.stderr)
                 # traceback.print_exc()
                 # print("", file=sys.stderr)
@@ -369,8 +393,14 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     print("%d/%d calls (%.2f%%) successfully created and %d/%d calls (%.2f%%) successfully ran" % (
-        len(call_success), len(all_functions), len(call_success) * 100 / len(all_functions),
+        len(call_success), len(all_functions), len(
+            call_success) * 100 / len(all_functions),
         len(run_success), len(all_functions), len(run_success) * 100 / len(all_functions)))
+
+
+if __name__ == "__main__":
+    for i in range(10):
+        print(list(exceptions_seen)[i])
 
 
 # ## Lessons Learned
@@ -405,10 +435,132 @@ if __name__ == "__main__":
 
 
 
-# ### Exercise 1: Carving Return Values
+class ResultCarver(CallCarver):
+    def traceit(self, frame, event, arg):
+        if event == "return":
+            if self._log:
+                print("Result:", arg)
+
+        super().traceit(frame, event, arg)
+        # Need to return traceit function such that it is invoked for return
+        # events
+        return self.traceit
 
 if __name__ == "__main__":
-    print('\n### Exercise 1: Carving Return Values')
+    with ResultCarver(log=True) as result_carver:
+        my_sqrt(2)
 
 
+# #### Part 1: Store function results
+
+if __name__ == "__main__":
+    print('\n#### Part 1: Store function results')
+
+
+
+
+class ResultCarver(CallCarver):
+    def reset(self):
+        super().reset()
+        self._call_stack = []
+        self._results = {}
+
+    def add_result(self, function_name, arguments, result):
+        key = simple_call_string(function_name, arguments)
+        self._results[key] = result
+
+    def traceit(self, frame, event, arg):
+        if event == "call":
+            code = frame.f_code
+            function_name = code.co_name
+            qualified_name = get_qualified_name(code)
+            self._call_stack.append(
+                (function_name, qualified_name, get_arguments(frame)))
+
+        if event == "return":
+            result = arg
+            (function_name, qualified_name, arguments) = self._call_stack.pop()
+            self.add_result(function_name, arguments, result)
+            if function_name != qualified_name:
+                self.add_result(qualified_name, arguments, result)
+            if self._log:
+                print(
+                    simple_call_string(
+                        function_name,
+                        arguments),
+                    "=",
+                    result)
+
+        # Keep on processing current calls
+        super().traceit(frame, event, arg)
+
+        # Need to return traceit function such that it is invoked for return
+        # events
+        return self.traceit
+
+if __name__ == "__main__":
+    with ResultCarver(log=True) as result_carver:
+        my_sqrt(2)
+    result_carver._results
+
+
+# #### Part 2: Access results
+
+if __name__ == "__main__":
+    print('\n#### Part 2: Access results')
+
+
+
+
+class ResultCarver(ResultCarver):
+    def result(self, function_name, argument):
+        key = simple_call_string(function_name, arguments)
+        return self._results[key]
+
+# #### Part 3: Produce assertions
+
+if __name__ == "__main__":
+    print('\n#### Part 3: Produce assertions')
+
+
+
+
+if __name__ == "__main__":
+    with ResultCarver() as webbrowser_result_carver:
+        webbrowser("http://www.example.com")
+
+
+if __name__ == "__main__":
+    for function_name in ["urllib.parse.urlparse", "urllib.parse.urlsplit"]:
+        for arguments in webbrowser_result_carver.arguments(function_name):
+            try:
+                call = call_string(function_name, arguments)
+                result = webbrowser_result_carver.result(function_name, arguments)
+                print("assert", call, "==", call_value(result))
+            except Exception:
+                continue
+
+
+from urllib.parse import SplitResult, ParseResult, urlparse, urlsplit
+
+if __name__ == "__main__":
+    assert urlparse(
+        url='http://www.example.com',
+        scheme='',
+        allow_fragments=True) == ParseResult(
+            scheme='http',
+            netloc='www.example.com',
+            path='',
+            params='',
+            query='',
+        fragment='')
+    assert urlsplit(
+        url='http://www.example.com',
+        scheme='',
+        allow_fragments=True) == SplitResult(
+            scheme='http',
+            netloc='www.example.com',
+            path='',
+            query='',
+        fragment='')
 

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2018-10-30 13:41:25+01:00
+# Last change: 2018-10-30 12:47:07+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -410,13 +410,14 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    list(http_runner.coverage())[:5]
+    print(list(http_runner.coverage())[:5])
 
 
 class MutationCoverageFuzzer(MutationFuzzer):
     def reset(self):
         super().reset()
         self.coverages_seen = set()
+        # Now empty; we fill this with seed in the first fuzz runs
         self.population = []
 
     def run(self, runner):

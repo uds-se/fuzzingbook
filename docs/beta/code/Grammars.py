@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-10-26 16:52:52+02:00
+# Last change: 2018-11-02 11:26:51+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -898,7 +898,8 @@ if __name__ == "__main__":
 
 
 
-def define_name(o): return o.id if isinstance(o, ast.Name) else o.s
+def define_name(o):
+    return o.id if isinstance(o, ast.Name) else o.s
 
 def define_expr(op):
     if isinstance(op, ast.BinOp) and isinstance(op.op, ast.Add):

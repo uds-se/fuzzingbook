@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2018-10-30 13:41:25+01:00
+# Last change: 2018-10-31 16:34:14+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -349,9 +349,9 @@ class OptionGrammarMiner(OptionGrammarMiner):
     def add_str_rule(self):
         self.grammar["<str>"] = ["<char>+"]
         self.grammar["<char>"] = srange(
-            string.digits +
-            string.ascii_letters +
-            string.punctuation)
+            string.digits
+            + string.ascii_letters
+            + string.punctuation)
 
     def add_metavar_rule(self, metavar, type_):
         self.grammar["<" + metavar + ">"] = ["<" + type_ + ">"]
@@ -461,11 +461,11 @@ if __name__ == "__main__":
 
 def autopep8():
     executable = find_executable("autopep8")
-    
+
     # First line has to contain "/usr/bin/env python" or like
     first_line = open(executable).readline()
     assert first_line.find("python") >= 0
-    
+
     contents = open(executable).read()
     exec(contents)
 
@@ -603,7 +603,7 @@ class OptionRunner(OptionRunner):
 
     def invoker(self):
         exec(self.contents)
-    
+
     def executable(self):
         return self._executable
 
@@ -611,10 +611,10 @@ class OptionRunner(OptionRunner):
     def find_grammar(self):
         miner = OptionGrammarMiner(self.invoker)
         self._ebnf_grammar = miner.mine_ebnf_grammar()
-    
+
     def ebnf_grammar(self):
         return self._ebnf_grammar
-        
+
     def grammar(self):
         return convert_ebnf_grammar(self._ebnf_grammar)
 
@@ -743,8 +743,8 @@ if __name__ == "__main__":
 
 
 def pairwise(option_list):
-    return [option_1 +
-            option_2 for (option_1, option_2) in combinations(option_list, 2)]
+    return [option_1 + option_2
+            for (option_1, option_2) in combinations(option_list, 2)]
 
 if __name__ == "__main__":
     print(pairwise(option_list)[:20])
@@ -760,7 +760,8 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    notedown_fuzzer = GrammarCoverageFuzzer(pairwise_notedown_grammar, max_nonterminals=4)
+    notedown_fuzzer = GrammarCoverageFuzzer(
+        pairwise_notedown_grammar, max_nonterminals=4)
 
 
 if __name__ == "__main__":
@@ -779,7 +780,8 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    len(autopep8_runner.ebnf_grammar()["<option>"]) * (len(autopep8_runner.ebnf_grammar()["<option>"]) - 1)
+    len(autopep8_runner.ebnf_grammar()["<option>"]) * \
+        (len(autopep8_runner.ebnf_grammar()["<option>"]) - 1)
 
 
 if __name__ == "__main__":
@@ -787,7 +789,8 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    len(mypy_runner.ebnf_grammar()["<option>"]) * (len(mypy_runner.ebnf_grammar()["<option>"]) - 1)
+    len(mypy_runner.ebnf_grammar()["<option>"]) * \
+        (len(mypy_runner.ebnf_grammar()["<option>"]) - 1)
 
 
 # ## Lessons Learned

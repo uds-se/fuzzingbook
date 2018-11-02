@@ -12064,7 +12064,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
         <span class="c1"># print(var, value)</span>
 
         <span class="c1"># Save all non-trivial string values that also occur in the input</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">the_input</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">the_input</span><span class="p">:</span>
             <span class="n">the_values</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="k">return</span> <span class="n">traceit</span>
@@ -12221,14 +12222,14 @@ query = &#39;q=path&#39;
                 <span class="n">repl_alternatives</span> <span class="o">=</span> <span class="n">grammar</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
                 <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">repl_alternatives</span><span class="p">)):</span>
                     <span class="n">repl</span> <span class="o">=</span> <span class="n">repl_alternatives</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">repl</span><span class="p">:</span>                    
+                    <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">repl</span><span class="p">:</span>
                         <span class="c1"># Replace value by nonterminal name</span>
                         <span class="n">alt_key</span> <span class="o">=</span> <span class="n">nonterminal</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
                         <span class="n">repl_alternatives</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">repl</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">alt_key</span><span class="p">)</span>
                         <span class="n">new_rules</span> <span class="o">=</span> <span class="n">new_rules</span> <span class="o">+</span> <span class="p">[(</span><span class="n">var</span><span class="p">,</span> <span class="n">alt_key</span><span class="p">,</span> <span class="n">value</span><span class="p">)]</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_rules</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">break</span> <span class="c1"># Nothing to expand anymore</span>
+            <span class="k">break</span>  <span class="c1"># Nothing to expand anymore</span>
 
         <span class="k">for</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">alt_key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">new_rules</span><span class="p">:</span>
             <span class="c1"># Add new rule to grammar</span>
@@ -12414,14 +12415,15 @@ query = &#39;q=path&#39;
 <div class="output_text output_subarea output_execute_result">
 <pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;url&gt;&#39;],
  &#39;&lt;url&gt;&#39;: [&#39;&lt;scheme&gt;://&lt;netloc&gt;/?&lt;query&gt;#&lt;fragment&gt;&#39;,
-  &#39;&lt;scheme&gt;://&lt;netloc&gt;/&#39;,
+  &#39;&lt;scheme&gt;:&lt;rest&gt;&#39;,
   &#39;&lt;scheme&gt;://&lt;netloc&gt;/#&lt;fragment&gt;&#39;],
  &#39;&lt;scheme&gt;&#39;: [&#39;http&#39;, &#39;https&#39;],
- &#39;&lt;fragment&gt;&#39;: [&#39;ref&#39;, &#39;News&#39;],
- &#39;&lt;query&gt;&#39;: [&#39;q=path&#39;],
  &#39;&lt;netloc&gt;&#39;: [&#39;user:pass@www.google.com:80&#39;,
   &#39;www.cispa.saarland:80&#39;,
-  &#39;www.fuzzingbook.org&#39;]}
+  &#39;www.fuzzingbook.org&#39;],
+ &#39;&lt;fragment&gt;&#39;: [&#39;ref&#39;, &#39;News&#39;],
+ &#39;&lt;query&gt;&#39;: [&#39;q=path&#39;],
+ &#39;&lt;rest&gt;&#39;: [&#39;//&lt;netloc&gt;/&#39;]}
 </pre>
 </div>
 
@@ -12470,14 +12472,14 @@ query = &#39;q=path&#39;
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>http://www.fuzzingbook.org/?q=path#News
 https://www.cispa.saarland:80/
-https://www.cispa.saarland:80/#ref
-http://user:pass@www.google.com:80/#News
-http://user:pass@www.google.com:80/#News
-https://user:pass@www.google.com:80/?q=path#ref
-https://www.cispa.saarland:80/?q=path#News
+http://www.fuzzingbook.org/#ref
+https://www.fuzzingbook.org/#News
+https://user:pass@www.google.com:80/
+http://user:pass@www.google.com:80/
+https://www.fuzzingbook.org/#ref
+http://user:pass@www.google.com:80/
+http://www.cispa.saarland:80/?q=path#News
 http://www.fuzzingbook.org/
-http://www.cispa.saarland:80/?q=path#ref
-https://www.fuzzingbook.org/
 </pre>
 </div>
 
@@ -12586,7 +12588,7 @@ https://www.fuzzingbook.org/
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarMiner.ipynb" target=_blank)>Last change: 2018-10-30 13:41:25+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarMiner.ipynb" target=_blank)>Last change: 2018-10-31 16:27:07+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -12602,7 +12604,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">Mining Input Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">https://www.fuzzingbook.org/beta/html/GrammarMiner.html</a>.  Retrieved 2018-10-30 13:41:25+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">Mining Input Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">https://www.fuzzingbook.org/beta/html/GrammarMiner.html</a>.  Retrieved 2018-10-31 16:27:07+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:GrammarMiner,
@@ -12612,9 +12614,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/GrammarMiner.html}},
-    note = {Retrieved 2018-10-30 13:41:25+01:00},
+    note = {Retrieved 2018-10-31 16:27:07+01:00},
     url = {https://www.fuzzingbook.org/beta/html/GrammarMiner.html},
-    urldate = {2018-10-30 13:41:25+01:00}
+    urldate = {2018-10-31 16:27:07+01:00}
 }
 </pre>
 </div>
