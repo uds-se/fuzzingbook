@@ -18367,7 +18367,8 @@ For example, say we have states as below.</p>
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Computing the <code>nullable</code> set requires expanding each production rule in the grammar iteratively and inspecting whether a given rule can derive the empty string. Each iteration needs to take into account new terminals that have been found to be <code>nullable</code>. The procedure stops when we obtain a stable result. This procedure can be abstracted into a more general method <code>fixpoint</code>. A <code>fixpoint</code> of a function is an element in the function's domain such that it is mapped to itself. For example, 1 is a <code>fixpoint</code> of square root because <code>squareroot(1) == 1</code>.</p>
+<p>Computing the <code>nullable</code> set requires expanding each production rule in the grammar iteratively and inspecting whether a given rule can derive the empty string. Each iteration needs to take into account new terminals that have been found to be <code>nullable</code>. The procedure stops when we obtain a stable result. This procedure can be abstracted into a more general method <code>fixpoint</code>.</p>
+<h5 id="Fixpoint">Fixpoint<a class="anchor-link" href="#Fixpoint">&#182;</a></h5><p>A <code>fixpoint</code> of a function is an element in the function's domain such that it is mapped to itself. For example, 1 is a <code>fixpoint</code> of square root because <code>squareroot(1) == 1</code>.</p>
 <p>(We use <code>str</code> rather than <code>hash</code> to check for equality in <code>fixpoint</code> because the data structure <code>set</code>, which we would like to use as an argument has a good string representation but is not hashable).</p>
 
 </div>
@@ -18452,28 +18453,29 @@ For example, say we have states as below.</p>
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Similarly, we can define <code>nullable</code> using <code>fixpoint</code>. We essentially provide the definition of a single intermediate step. That is, assuming that <code>nullables</code> contain the current <code>nullable</code> non-terminals, we iterate over the grammar looking for productions which are <code>nullable</code> -- that is, productions where the entire sequence can yield an empty string on some expansion.</p>
+<h5 id="Nullable">Nullable<a class="anchor-link" href="#Nullable">&#182;</a></h5><p>Similarly, we can define <code>nullable</code> using <code>fixpoint</code>. We essentially provide the definition of a single intermediate step. That is, assuming that <code>nullables</code> contain the current <code>nullable</code> non-terminals, we iterate over the grammar looking for productions which are <code>nullable</code> -- that is, productions where the entire sequence can yield an empty string on some expansion.</p>
 
 </div>
 </div>
-</div></div></section><section>
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[62]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">nullable</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">nullable_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">nullables</span><span class="p">):</span> <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">token</span> <span class="ow">in</span> <span class="n">nullables</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">expr</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">nullable</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
     <span class="n">productions</span> <span class="o">=</span> <span class="n">rules</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
     <span class="nd">@fixpoint</span>
     <span class="k">def</span> <span class="nf">nullable_</span><span class="p">(</span><span class="n">nullables</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">A</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">productions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">token</span> <span class="ow">in</span> <span class="n">nullables</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">expr</span><span class="p">):</span>
-                <span class="n">nullables</span> <span class="o">|=</span> <span class="p">{</span><span class="n">A</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">nullable_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">nullables</span><span class="p">):</span> <span class="n">nullables</span> <span class="o">|=</span> <span class="p">{</span><span class="n">A</span><span class="p">}</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">nullables</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">nullable_</span><span class="p">({</span><span class="n">EPSILON</span><span class="p">})</span>
 </pre></div>
@@ -18515,7 +18517,7 @@ For example, say we have states as below.</p>
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
@@ -18524,7 +18526,7 @@ For example, say we have states as below.</p>
 
 </div>
 </div>
-</div></div></section><section>
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[64]:</div>
@@ -19257,7 +19259,7 @@ ________________________________________________________________________________
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(6, [&lt;__main__.State at 0x10cabec88&gt;])</pre>
+<pre>(6, [&lt;__main__.State at 0x10e220710&gt;])</pre>
 </div>
 
 </div>
@@ -19311,11 +19313,11 @@ of that non-terminal. The first set of any non-terminal that can derive the empt
 <div class="prompt input_prompt">In&nbsp;[74]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">firstset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">firstset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">nullable</span><span class="p">):</span>
     <span class="n">first</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:{</span><span class="n">i</span><span class="p">}</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">terminals</span><span class="p">(</span><span class="n">grammar</span><span class="p">)}</span>
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
-        <span class="n">first</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">EPSILON</span><span class="p">}</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">epsilon</span> <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">firstset_</span><span class="p">((</span><span class="n">rules</span><span class="p">(</span><span class="n">grammar</span><span class="p">),</span> <span class="n">first</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">first</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">EPSILON</span><span class="p">}</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">nullable</span> <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">firstset_</span><span class="p">((</span><span class="n">rules</span><span class="p">(</span><span class="n">grammar</span><span class="p">),</span> <span class="n">first</span><span class="p">,</span> <span class="n">nullable</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
 </pre></div>
 
 </div>
@@ -19337,14 +19339,18 @@ of that non-terminal. The first set of any non-terminal that can derive the empt
 <div class="prompt input_prompt">In&nbsp;[75]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@fixpoint</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">first_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">nullable</span><span class="p">):</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">expr</span><span class="p">:</span>
+        <span class="n">tokens</span> <span class="o">|=</span> <span class="n">first</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nullable</span><span class="p">:</span> <span class="k">break</span>
+    <span class="k">return</span> <span class="n">tokens</span>
+
+<span class="nd">@fixpoint</span>
 <span class="k">def</span> <span class="nf">firstset_</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
     <span class="p">(</span><span class="n">rules</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span> <span class="o">=</span> <span class="n">arg</span>
     <span class="k">for</span> <span class="n">A</span><span class="p">,</span> <span class="n">expression</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">expression</span><span class="p">:</span>
-            <span class="n">first</span><span class="p">[</span><span class="n">A</span><span class="p">]</span> <span class="o">|=</span> <span class="n">first</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">epsilon</span><span class="p">:</span>
-                <span class="k">break</span>
+        <span class="n">first</span><span class="p">[</span><span class="n">A</span><span class="p">]</span> <span class="o">|=</span> <span class="n">first_expr</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span><span class="n">epsilon</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">rules</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
 </pre></div>
 
@@ -19377,23 +19383,23 @@ of that non-terminal. The first set of any non-terminal that can derive the empt
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;2&#39;: {&#39;2&#39;},
- &#39;9&#39;: {&#39;9&#39;},
- &#39;0&#39;: {&#39;0&#39;},
- &#39;-&#39;: {&#39;-&#39;},
- &#39;8&#39;: {&#39;8&#39;},
- &#39;+&#39;: {&#39;+&#39;},
- &#39;(&#39;: {&#39;(&#39;},
- &#39;3&#39;: {&#39;3&#39;},
- &#39;5&#39;: {&#39;5&#39;},
- &#39;7&#39;: {&#39;7&#39;},
- &#39;*&#39;: {&#39;*&#39;},
- &#39;)&#39;: {&#39;)&#39;},
- &#39;.&#39;: {&#39;.&#39;},
- &#39;1&#39;: {&#39;1&#39;},
- &#39;4&#39;: {&#39;4&#39;},
+<pre>{&#39;0&#39;: {&#39;0&#39;},
  &#39;6&#39;: {&#39;6&#39;},
+ &#39;1&#39;: {&#39;1&#39;},
+ &#39;5&#39;: {&#39;5&#39;},
+ &#39;3&#39;: {&#39;3&#39;},
+ &#39;8&#39;: {&#39;8&#39;},
+ &#39;9&#39;: {&#39;9&#39;},
+ &#39;(&#39;: {&#39;(&#39;},
+ &#39;2&#39;: {&#39;2&#39;},
+ &#39;7&#39;: {&#39;7&#39;},
+ &#39;4&#39;: {&#39;4&#39;},
+ &#39;)&#39;: {&#39;)&#39;},
  &#39;/&#39;: {&#39;/&#39;},
+ &#39;-&#39;: {&#39;-&#39;},
+ &#39;*&#39;: {&#39;*&#39;},
+ &#39;.&#39;: {&#39;.&#39;},
+ &#39;+&#39;: {&#39;+&#39;},
  &#39;&lt;start&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
  &#39;&lt;expr&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
  &#39;&lt;term&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
@@ -19526,7 +19532,91 @@ of that non-terminal. The first set of any non-terminal that can derive the empt
 </div>
 </div>
 
-</div></section>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Exercise-7-LL(1)-parser">Exercise 7 <em>LL(1) parser</em><a class="anchor-link" href="#Exercise-7-LL(1)-parser">&#182;</a></h3>
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[80]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">rulepair</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+    <span class="n">A</span><span class="p">,</span> <span class="n">rule</span> <span class="o">=</span> <span class="n">rulepair</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">rfirst</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">rnullable</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+        <span class="n">rf</span> <span class="o">|=</span> <span class="n">follow</span><span class="p">[</span><span class="n">A</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">rf</span>
+
+<span class="k">def</span> <span class="nf">parse_table</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">my_rules</span><span class="p">):</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span> <span class="o">=</span> <span class="n">followset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+
+    <span class="n">ptable</span> <span class="o">=</span> <span class="p">[(</span><span class="n">rule</span><span class="p">,</span> <span class="n">predict</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">))</span>
+              <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">my_rules</span><span class="p">]</span>
+
+    <span class="n">parse_tbl</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">expr</span><span class="p">),</span> <span class="n">pvals</span> <span class="ow">in</span> <span class="n">ptable</span><span class="p">:</span>
+        <span class="n">parse_tbl</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">v</span><span class="p">:</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pvals</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">parse_tbl</span>
+
+<span class="k">def</span> <span class="nf">parse_helper</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">tbl</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">inplst</span><span class="p">):</span>
+    <span class="n">inp</span><span class="p">,</span> <span class="o">*</span><span class="n">inplst</span> <span class="o">=</span> <span class="n">inplst</span>
+    <span class="n">exprs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="n">val</span><span class="p">,</span> <span class="o">*</span><span class="n">stack</span> <span class="o">=</span> <span class="n">stack</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>  <span class="c1"># terminal</span>
+            <span class="k">assert</span> <span class="n">val</span> <span class="o">==</span> <span class="n">inp</span>
+            <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">inp</span><span class="p">,</span> <span class="o">*</span><span class="n">inplst</span> <span class="o">=</span> <span class="n">inplst</span> <span class="ow">or</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">rhs</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="n">val</span><span class="p">][</span><span class="n">inp</span><span class="p">]</span> <span class="k">if</span> <span class="n">inp</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="n">rhs</span> <span class="o">+</span> <span class="p">[(</span><span class="n">val</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rhs</span><span class="p">))]</span> <span class="o">+</span> <span class="n">stack</span>
+    <span class="k">return</span> <span class="n">exprs</span>
+
+<span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="n">my_rules</span> <span class="o">=</span> <span class="n">rules</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+    <span class="n">parse_tbl</span> <span class="o">=</span> <span class="n">parse_table</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">my_rules</span><span class="p">)</span>
+    <span class="n">k</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">my_rules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">parse_helper</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">parse_tbl</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">linear_to_tree</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">arr</span><span class="p">:</span>
+        <span class="n">elt</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elt</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">elt</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># get the last n</span>
+            <span class="n">sym</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">elt</span>
+            <span class="n">elts</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">:]</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">[]</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">]</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sym</span><span class="p">,</span> <span class="n">elts</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">stack</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Exercise-8-LR(1)-parser">Exercise 8 <em>LR(1) parser</em><a class="anchor-link" href="#Exercise-8-LR(1)-parser">&#182;</a></h3>
+</div>
+</div>
+</div>
 </div>
 </div>
 

@@ -17732,7 +17732,8 @@ For example, say we have states as below.</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Computing the <code>nullable</code> set requires expanding each production rule in the grammar iteratively and inspecting whether a given rule can derive the empty string. Each iteration needs to take into account new terminals that have been found to be <code>nullable</code>. The procedure stops when we obtain a stable result. This procedure can be abstracted into a more general method <code>fixpoint</code>. A <code>fixpoint</code> of a function is an element in the function's domain such that it is mapped to itself. For example, 1 is a <code>fixpoint</code> of square root because <code>squareroot(1) == 1</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Computing the <code>nullable</code> set requires expanding each production rule in the grammar iteratively and inspecting whether a given rule can derive the empty string. Each iteration needs to take into account new terminals that have been found to be <code>nullable</code>. The procedure stops when we obtain a stable result. This procedure can be abstracted into a more general method <code>fixpoint</code>.</p>
+<h5 id="Fixpoint">Fixpoint<a class="anchor-link" href="#Fixpoint">&#182;</a></h5><p>A <code>fixpoint</code> of a function is an element in the function's domain such that it is mapped to itself. For example, 1 is a <code>fixpoint</code> of square root because <code>squareroot(1) == 1</code>.</p>
 <p>(We use <code>str</code> rather than <code>hash</code> to check for equality in <code>fixpoint</code> because the data structure <code>set</code>, which we would like to use as an argument has a good string representation but is not hashable).</p>
 </div>
 </div>
@@ -17814,7 +17815,7 @@ For example, say we have states as below.</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Similarly, we can define <code>nullable</code> using <code>fixpoint</code>. We essentially provide the definition of a single intermediate step. That is, assuming that <code>nullables</code> contain the current <code>nullable</code> non-terminals, we iterate over the grammar looking for productions which are <code>nullable</code> -- that is, productions where the entire sequence can yield an empty string on some expansion.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h5 id="Nullable">Nullable<a class="anchor-link" href="#Nullable">&#182;</a></h5><p>Similarly, we can define <code>nullable</code> using <code>fixpoint</code>. We essentially provide the definition of a single intermediate step. That is, assuming that <code>nullables</code> contain the current <code>nullable</code> non-terminals, we iterate over the grammar looking for productions which are <code>nullable</code> -- that is, productions where the entire sequence can yield an empty string on some expansion.</p>
 </div>
 </div>
 </div>
@@ -17826,13 +17827,14 @@ For example, say we have states as below.</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">nullable</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">nullable_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">nullables</span><span class="p">):</span> <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">token</span> <span class="ow">in</span> <span class="n">nullables</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">expr</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">nullable</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
     <span class="n">productions</span> <span class="o">=</span> <span class="n">rules</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
     <span class="nd">@fixpoint</span>
     <span class="k">def</span> <span class="nf">nullable_</span><span class="p">(</span><span class="n">nullables</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">A</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">productions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">token</span> <span class="ow">in</span> <span class="n">nullables</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">expr</span><span class="p">):</span>
-                <span class="n">nullables</span> <span class="o">|=</span> <span class="p">{</span><span class="n">A</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">nullable_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">nullables</span><span class="p">):</span> <span class="n">nullables</span> <span class="o">|=</span> <span class="p">{</span><span class="n">A</span><span class="p">}</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">nullables</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">nullable_</span><span class="p">({</span><span class="n">EPSILON</span><span class="p">})</span>
 </pre></div>
@@ -18577,7 +18579,7 @@ ________________________________________________________________________________
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(6, [&lt;__main__.State at 0x10cabec88&gt;])
+<pre>(6, [&lt;__main__.State at 0x10e220710&gt;])
 </pre>
 </div>
 
@@ -18620,6 +18622,104 @@ of that non-terminal. The first set of any non-terminal that can derive the empt
 </div>
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">firstset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">nullable</span><span class="p">):</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:{</span><span class="n">i</span><span class="p">}</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">terminals</span><span class="p">(</span><span class="n">grammar</span><span class="p">)}</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
+        <span class="n">first</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">EPSILON</span><span class="p">}</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">nullable</span> <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">firstset_</span><span class="p">((</span><span class="n">rules</span><span class="p">(</span><span class="n">grammar</span><span class="p">),</span> <span class="n">first</span><span class="p">,</span> <span class="n">nullable</span><span class="p">))[</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Finally, we rely on the <code>fixpoint</code> to update the first set with the contents of the current first set until the first set stops changing.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">first_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">nullable</span><span class="p">):</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">expr</span><span class="p">:</span>
+        <span class="n">tokens</span> <span class="o">|=</span> <span class="n">first</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nullable</span><span class="p">:</span> <span class="k">break</span>
+    <span class="k">return</span> <span class="n">tokens</span>
+
+<span class="nd">@fixpoint</span>
+<span class="k">def</span> <span class="nf">firstset_</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">rules</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span> <span class="o">=</span> <span class="n">arg</span>
+    <span class="k">for</span> <span class="n">A</span><span class="p">,</span> <span class="n">expression</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="n">first</span><span class="p">[</span><span class="n">A</span><span class="p">]</span> <span class="o">|=</span> <span class="n">first_expr</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span><span class="n">epsilon</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">rules</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">firstset</span><span class="p">(</span><span class="n">canonical</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">),</span> <span class="n">EPSILON</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;0&#39;: {&#39;0&#39;},
+ &#39;6&#39;: {&#39;6&#39;},
+ &#39;1&#39;: {&#39;1&#39;},
+ &#39;5&#39;: {&#39;5&#39;},
+ &#39;3&#39;: {&#39;3&#39;},
+ &#39;8&#39;: {&#39;8&#39;},
+ &#39;9&#39;: {&#39;9&#39;},
+ &#39;(&#39;: {&#39;(&#39;},
+ &#39;2&#39;: {&#39;2&#39;},
+ &#39;7&#39;: {&#39;7&#39;},
+ &#39;4&#39;: {&#39;4&#39;},
+ &#39;)&#39;: {&#39;)&#39;},
+ &#39;/&#39;: {&#39;/&#39;},
+ &#39;-&#39;: {&#39;-&#39;},
+ &#39;*&#39;: {&#39;*&#39;},
+ &#39;.&#39;: {&#39;.&#39;},
+ &#39;+&#39;: {&#39;+&#39;},
+ &#39;&lt;start&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
+ &#39;&lt;expr&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
+ &#39;&lt;term&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
+ &#39;&lt;factor&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
+ &#39;&lt;integer&gt;&#39;: {&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
+ &#39;&lt;digit&gt;&#39;: {&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;}}
+</pre>
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -18643,13 +18743,472 @@ of that non-terminal. The first set of any non-terminal that can derive the empt
 </div>
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">EOF</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\0</span><span class="s1">&#39;</span>
+<span class="k">def</span> <span class="nf">followset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+    <span class="n">follow</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="nb">set</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">}</span>
+    <span class="n">follow</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">EOF</span><span class="p">}</span>
+
+    <span class="n">epsilon</span> <span class="o">=</span> <span class="n">nullable</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="n">firstset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">followset_</span><span class="p">((</span><span class="n">grammar</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">))[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Given the current follow set, one can update the follow set as follows:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@fixpoint</span>
+<span class="k">def</span> <span class="nf">followset_</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="n">grammar</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span> <span class="o">=</span> <span class="n">arg</span>
+    <span class="k">for</span> <span class="n">A</span><span class="p">,</span> <span class="n">expression</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
+        <span class="n">f_B</span> <span class="o">=</span> <span class="n">follow</span><span class="p">[</span><span class="n">A</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">expression</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span> <span class="n">follow</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">|=</span> <span class="n">f_B</span>
+            <span class="n">f_B</span> <span class="o">=</span> <span class="n">f_B</span> <span class="o">|</span> <span class="n">first</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">epsilon</span> <span class="k">else</span> <span class="p">(</span><span class="n">first</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">-</span> <span class="p">{</span><span class="n">EPSILON</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">followset</span><span class="p">(</span><span class="n">canonical</span><span class="p">(</span><span class="n">A1_GRAMMAR</span><span class="p">),</span> <span class="n">START_SYMBOL</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: {&#39;\x00&#39;},
+ &#39;&lt;expr&gt;&#39;: {&#39;\x00&#39;, &#39;+&#39;, &#39;-&#39;},
+ &#39;&lt;integer&gt;&#39;: {&#39;\x00&#39;, &#39;+&#39;, &#39;-&#39;},
+ &#39;&lt;digit&gt;&#39;: {&#39;\x00&#39;,
+  &#39;+&#39;,
+  &#39;-&#39;,
+  &#39;0&#39;,
+  &#39;1&#39;,
+  &#39;2&#39;,
+  &#39;3&#39;,
+  &#39;4&#39;,
+  &#39;5&#39;,
+  &#39;6&#39;,
+  &#39;7&#39;,
+  &#39;8&#39;,
+  &#39;9&#39;}}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-7-LL(1)-parser">Exercise 7 <em>LL(1) parser</em><a class="anchor-link" href="#Exercise-7-LL(1)-parser">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="n">rulepair</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+    <span class="n">A</span><span class="p">,</span> <span class="n">rule</span> <span class="o">=</span> <span class="n">rulepair</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">rfirst</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">rnullable</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">):</span>
+        <span class="n">rf</span> <span class="o">|=</span> <span class="n">follow</span><span class="p">[</span><span class="n">A</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">rf</span>
+
+<span class="k">def</span> <span class="nf">parse_table</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">my_rules</span><span class="p">):</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span> <span class="o">=</span> <span class="n">followset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+
+    <span class="n">ptable</span> <span class="o">=</span> <span class="p">[(</span><span class="n">rule</span><span class="p">,</span> <span class="n">predict</span><span class="p">(</span><span class="n">rule</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">follow</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">))</span>
+              <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">my_rules</span><span class="p">]</span>
+
+    <span class="n">parse_tbl</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">}</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">expr</span><span class="p">),</span> <span class="n">pvals</span> <span class="ow">in</span> <span class="n">ptable</span><span class="p">:</span>
+        <span class="n">parse_tbl</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">v</span><span class="p">:</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pvals</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">parse_tbl</span>
+
+<span class="k">def</span> <span class="nf">parse_helper</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">tbl</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">inplst</span><span class="p">):</span>
+    <span class="n">inp</span><span class="p">,</span> <span class="o">*</span><span class="n">inplst</span> <span class="o">=</span> <span class="n">inplst</span>
+    <span class="n">exprs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="n">val</span><span class="p">,</span> <span class="o">*</span><span class="n">stack</span> <span class="o">=</span> <span class="n">stack</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>  <span class="c1"># terminal</span>
+            <span class="k">assert</span> <span class="n">val</span> <span class="o">==</span> <span class="n">inp</span>
+            <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="n">inp</span><span class="p">,</span> <span class="o">*</span><span class="n">inplst</span> <span class="o">=</span> <span class="n">inplst</span> <span class="ow">or</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">rhs</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="n">val</span><span class="p">][</span><span class="n">inp</span><span class="p">]</span> <span class="k">if</span> <span class="n">inp</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="n">rhs</span> <span class="o">+</span> <span class="p">[(</span><span class="n">val</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rhs</span><span class="p">))]</span> <span class="o">+</span> <span class="n">stack</span>
+    <span class="k">return</span> <span class="n">exprs</span>
+
+<span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="n">my_rules</span> <span class="o">=</span> <span class="n">rules</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+    <span class="n">parse_tbl</span> <span class="o">=</span> <span class="n">parse_table</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">my_rules</span><span class="p">)</span>
+    <span class="n">k</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">my_rules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">parse_helper</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">parse_tbl</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">linear_to_tree</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="n">arr</span><span class="p">:</span>
+        <span class="n">elt</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elt</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">elt</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># get the last n</span>
+            <span class="n">sym</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">elt</span>
+            <span class="n">elts</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="o">-</span><span class="n">n</span><span class="p">:]</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">[]</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">]</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sym</span><span class="p">,</span> <span class="n">elts</span><span class="p">))</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">stack</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-8-LR(1)-parser">Exercise 8 <em>LR(1) parser</em><a class="anchor-link" href="#Exercise-8-LR(1)-parser">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/enum.html" class="import" target="_blank">enum</a></span> <span class="k">import</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">auto</span>
+<span class="k">class</span> <span class="nc">Action</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">Goto</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">Shift</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">Accept</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+    <span class="n">Reduce</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
+
+<span class="n">RE_NONTERMINAL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(&lt;[^&lt;&gt; ]*&gt;)&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">PLine</span><span class="p">:</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">fdict</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">production</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lookahead</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span> <span class="n">pnum</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">production</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">lookahead</span> <span class="o">=</span> <span class="n">key</span><span class="p">,</span><span class="n">production</span><span class="p">,</span><span class="n">cursor</span><span class="p">,</span><span class="n">lookahead</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">production</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pnum</span> <span class="o">=</span> <span class="n">pnum</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">PLine</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">PLine</span><span class="o">.</span><span class="n">fdict</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">PLine</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">init_cache</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">fdict</span><span class="p">):</span>
+        <span class="n">PLine</span><span class="o">.</span><span class="n">fdict</span> <span class="o">=</span> <span class="n">fdict</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">grammar</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">production</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+                <span class="n">PLine</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="nb">str</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">production</span><span class="p">,</span> <span class="mi">0</span><span class="p">))]</span> <span class="o">=</span> <span class="n">PLine</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">production</span><span class="p">,</span>
+                        <span class="n">cursor</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lookahead</span><span class="o">=</span><span class="n">fdict</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">pnum</span><span class="o">=</span><span class="n">PLine</span><span class="o">.</span><span class="n">counter</span><span class="p">)</span>
+                <span class="n">PLine</span><span class="o">.</span><span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">PLine</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">production</span><span class="p">,</span> <span class="n">cursor</span><span class="p">):</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">PLine</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">production</span><span class="p">,</span> <span class="n">cursor</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">val</span><span class="p">:</span> <span class="k">return</span> <span class="n">val</span>
+
+        <span class="n">seed</span> <span class="o">=</span> <span class="n">PLine</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">production</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">PLine</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">production</span><span class="p">,</span> <span class="n">cursor</span><span class="p">,</span> <span class="n">seed</span><span class="o">.</span><span class="n">lookahead</span><span class="p">,</span> <span class="n">seed</span><span class="o">.</span><span class="n">pnum</span><span class="p">)</span>
+        <span class="n">PLine</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="nb">str</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">production</span><span class="p">,</span> <span class="n">cursor</span><span class="p">))]</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="k">return</span> <span class="n">val</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_seed</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">cursor</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">PLine</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">production</span><span class="p">,</span> <span class="n">cursor</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">production_number</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pnum</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;[p</span><span class="si">%s</span><span class="s2">]: </span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2"> </span><span class="se">\t</span><span class="s2">cursor: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">production_number</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="p">,</span> <span class="s1">&#39;@&#39;</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lookahead</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">advance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">):</span> <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="p">)</span> <span class="o">==</span> <span class="n">EOF</span><span class="p">:</span> <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">token</span><span class="p">,</span> <span class="n">PLine</span><span class="o">.</span><span class="n">from_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">at</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cursor</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cursor</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">):</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">[</span><span class="n">cursor</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">lr1_closure</span><span class="p">(</span><span class="n">closure</span><span class="p">,</span> <span class="n">cursor</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">closure</span><span class="p">[:]</span> <span class="c1"># copy</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">while</span> <span class="n">items</span><span class="p">:</span>
+        <span class="n">item</span><span class="p">,</span> <span class="o">*</span><span class="n">items</span> <span class="o">=</span> <span class="n">items</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">cursor</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span> <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ps</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">[</span><span class="n">token</span><span class="p">]:</span>
+                <span class="n">pl</span> <span class="o">=</span> <span class="n">PLine</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">token</span><span class="p">,</span> <span class="n">production</span><span class="o">=</span><span class="n">ps</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pl</span><span class="p">)</span>
+                <span class="n">closure</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pl</span><span class="p">)</span>
+                <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">closure</span>
+
+<span class="k">class</span> <span class="nc">State</span><span class="p">:</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">():</span>
+        <span class="n">PLine</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="n">State</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">State</span><span class="o">.</span><span class="n">registry</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">State</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plines</span><span class="p">,</span> <span class="n">sfrom</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plines</span> <span class="o">=</span> <span class="n">plines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shifts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">go_tos</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="n">State</span><span class="o">.</span><span class="n">counter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">row</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hrow</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">note</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+        <span class="k">if</span> <span class="n">sfrom</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">sfrom</span><span class="o">.</span><span class="n">grammar</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">sfrom</span><span class="o">.</span><span class="n">start</span>
+        <span class="n">State</span><span class="o">.</span><span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">State</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">plines</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">State</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cache already has the state. Use State.get&quot;</span><span class="p">)</span>
+        <span class="n">State</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">plines</span><span class="p">,</span> <span class="n">sfrom</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">plines</span><span class="p">])</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">State</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">val</span><span class="p">:</span> <span class="k">return</span> <span class="n">val</span>
+        <span class="n">State</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">State</span><span class="p">(</span><span class="n">plines</span><span class="p">,</span> <span class="n">sfrom</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">State</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;State(</span><span class="si">%s</span><span class="s2">):</span><span class="se">\n\t</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plines</span><span class="p">]))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">construct_initial_state</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_epsilon</span><span class="p">,</span> <span class="n">_first</span><span class="p">,</span> <span class="n">follow</span> <span class="o">=</span> <span class="n">followset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+        <span class="n">PLine</span><span class="o">.</span><span class="n">init_cache</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">follow</span><span class="p">)</span>
+        <span class="n">production_str</span> <span class="o">=</span> <span class="n">grammar</span><span class="p">[</span><span class="n">start</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">pl</span> <span class="o">=</span> <span class="n">PLine</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">production</span><span class="o">=</span><span class="n">production_str</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">lr1_items</span> <span class="o">=</span> <span class="n">lr1_closure</span><span class="p">(</span><span class="n">closure</span><span class="o">=</span><span class="p">[</span><span class="n">pl</span><span class="p">],</span> <span class="n">cursor</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">grammar</span><span class="o">=</span><span class="n">grammar</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span>  <span class="bp">cls</span><span class="p">(</span><span class="n">lr1_items</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># seed state</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">start</span><span class="p">,</span> <span class="n">grammar</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">go_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">go_tos</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">token</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">go_tos</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">new_plines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pline</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plines</span><span class="p">:</span>
+            <span class="n">tadv</span><span class="p">,</span> <span class="n">new_pline</span> <span class="o">=</span> <span class="n">pline</span><span class="o">.</span><span class="n">advance</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="n">tadv</span><span class="p">:</span>
+                <span class="n">new_plines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_pline</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_plines</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_closure</span><span class="p">(</span><span class="n">new_plines</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">go_tos</span><span class="p">[</span><span class="n">token</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">note</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; [</span><span class="si">%s</span><span class="s2">] -&gt; &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">i</span><span class="p">,</span>  <span class="n">token</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">shift_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shifts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">token</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shifts</span><span class="p">[</span><span class="n">token</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">new_plines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pline</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plines</span><span class="p">:</span>
+            <span class="n">tadv</span><span class="p">,</span> <span class="n">new_pline</span> <span class="o">=</span> <span class="n">pline</span><span class="o">.</span><span class="n">advance</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="n">tadv</span><span class="p">:</span>
+                <span class="n">new_plines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_pline</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_plines</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="c1"># each time we shift, we have to build a new closure, with cursor at 0</span>
+        <span class="c1"># for the newly added rules.</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_closure</span><span class="p">(</span><span class="n">new_plines</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shifts</span><span class="p">[</span><span class="n">token</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">note</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> -&gt; [</span><span class="si">%s</span><span class="s2">] -&gt; &quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">i</span><span class="p">,</span>  <span class="n">token</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">form_closure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plines</span><span class="p">):</span>
+        <span class="n">closure</span> <span class="o">=</span> <span class="n">lr1_closure</span><span class="p">(</span><span class="n">closure</span><span class="o">=</span><span class="n">plines</span><span class="p">,</span> <span class="n">cursor</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">grammar</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">State</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">plines</span><span class="o">=</span><span class="n">plines</span><span class="p">,</span> <span class="n">sfrom</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">get_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nxt_tok</span><span class="p">):</span>
+        <span class="c1"># is the cursor at the end in any of the plines?</span>
+        <span class="k">for</span> <span class="n">pline</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pline</span><span class="o">.</span><span class="n">cursor</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pline</span><span class="o">.</span><span class="n">tokens</span><span class="p">):</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">nxt_tok</span> <span class="ow">in</span> <span class="n">pline</span><span class="o">.</span><span class="n">lookahead</span>
+                <span class="k">if</span> <span class="n">res</span><span class="p">:</span> <span class="k">return</span> <span class="n">pline</span>
+        <span class="c1"># return the production number too for this pline</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">construct_states</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">):</span>
+        <span class="n">state1</span> <span class="o">=</span> <span class="n">State</span><span class="o">.</span><span class="n">construct_initial_state</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+        <span class="n">states</span> <span class="o">=</span> <span class="p">[</span><span class="n">state1</span><span class="p">]</span>
+        <span class="n">follow</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">all_states</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">states</span><span class="p">:</span>
+            <span class="n">state</span><span class="p">,</span> <span class="o">*</span><span class="n">states</span> <span class="o">=</span> <span class="n">states</span>
+            <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">i</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">all_states</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+            <span class="n">sym</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sym</span><span class="p">):</span> <span class="c1"># needs terminal symbols too.</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
+                    <span class="n">new_state</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">shift_to</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">new_state</span><span class="p">:</span> <span class="c1"># and new_state.i not in seen:</span>
+                        <span class="n">states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_state</span><span class="p">)</span>
+                        <span class="n">state</span><span class="o">.</span><span class="n">hrow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Action</span><span class="o">.</span><span class="n">Shift</span><span class="p">,</span> <span class="n">new_state</span><span class="o">.</span><span class="n">i</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">state</span><span class="o">.</span><span class="n">hrow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">new_state</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">go_to</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">new_state</span><span class="p">:</span> <span class="c1"># and new_state.i not in seen:</span>
+                        <span class="n">states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_state</span><span class="p">)</span>
+                        <span class="n">state</span><span class="o">.</span><span class="n">hrow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Action</span><span class="o">.</span><span class="n">Goto</span><span class="p">,</span> <span class="n">new_state</span><span class="o">.</span><span class="n">i</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">state</span><span class="o">.</span><span class="n">hrow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">all_states</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">plines</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">cursor</span><span class="p">)</span> <span class="o">==</span> <span class="n">EOF</span><span class="p">:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">EOF</span> 
+                    <span class="n">state</span><span class="o">.</span><span class="n">hrow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Action</span><span class="o">.</span><span class="n">Accept</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">line</span><span class="o">.</span><span class="n">cursor</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">tokens</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">lookahead</span><span class="p">:</span>
+                        <span class="n">state</span><span class="o">.</span><span class="n">hrow</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Action</span><span class="o">.</span><span class="n">Reduce</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state1</span>
+
+<span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">input_text</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+    <span class="n">expr_stack</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">state_stack</span> <span class="o">=</span> <span class="p">[</span><span class="n">State</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">input_text</span><span class="p">)</span>
+    <span class="n">next_token</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">next_token</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tokens</span><span class="p">:</span>
+                <span class="n">next_token</span> <span class="o">=</span> <span class="n">EOF</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">next_token</span><span class="p">,</span> <span class="o">*</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">tokens</span>
+        <span class="c1"># use the next_token on the state stack to decide what to do.</span>
+        <span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">nxt</span><span class="p">)</span> <span class="o">=</span> <span class="n">State</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">state_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">hrow</span><span class="p">[</span><span class="n">next_token</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="n">Action</span><span class="o">.</span><span class="n">Shift</span><span class="p">:</span>
+            <span class="n">next_state</span> <span class="o">=</span> <span class="n">State</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">nxt</span><span class="p">]</span>
+            <span class="c1"># this means we can shift.</span>
+            <span class="n">expr_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_token</span><span class="p">)</span>
+            <span class="n">state_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_state</span><span class="o">.</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">next_token</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="n">Action</span><span class="o">.</span><span class="n">Reduce</span><span class="p">:</span>
+            <span class="n">pline</span> <span class="o">=</span> <span class="n">nxt</span>
+            <span class="c1"># Remove the matched topmost L symbols (and parse trees and</span>
+            <span class="c1"># associated state numbers) from the parse stack.</span>
+            <span class="c1"># pop the plines&#39; rhs symbols off the stack</span>
+            <span class="n">pnum</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pline</span><span class="o">.</span><span class="n">tokens</span><span class="p">)</span>
+            <span class="n">popped</span> <span class="o">=</span> <span class="n">expr_stack</span><span class="p">[</span><span class="o">-</span><span class="n">pnum</span><span class="p">:]</span>
+            <span class="n">expr_stack</span> <span class="o">=</span> <span class="n">expr_stack</span><span class="p">[:</span><span class="o">-</span><span class="n">pnum</span><span class="p">]</span>
+            <span class="c1"># push the lhs symbol of pline</span>
+            <span class="n">expr_stack</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">pline</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">popped</span><span class="p">})</span>
+            <span class="c1"># pop the same number of states.</span>
+            <span class="n">state_stack</span> <span class="o">=</span> <span class="n">state_stack</span><span class="p">[:</span><span class="o">-</span><span class="n">pnum</span><span class="p">]</span>
+            <span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">nxt</span><span class="p">)</span> <span class="o">=</span> <span class="n">State</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">state_stack</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">hrow</span><span class="p">[</span><span class="n">pline</span><span class="o">.</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">next_state</span> <span class="o">=</span> <span class="n">State</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">nxt</span><span class="p">]</span>
+            <span class="n">state_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_state</span><span class="o">.</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="n">Action</span><span class="o">.</span><span class="n">Goto</span><span class="p">:</span>
+            <span class="n">next_state</span> <span class="o">=</span> <span class="n">State</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">nxt</span><span class="p">]</span>
+            <span class="n">state_stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_state</span><span class="o">.</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="n">Action</span><span class="o">.</span><span class="n">Accept</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Syntax error&quot;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">expr_stack</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">expr_stack</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+    <span class="n">grammar</span><span class="p">[</span><span class="n">start</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">EOF</span><span class="p">)</span>
+    <span class="n">State</span><span class="o">.</span><span class="n">construct_states</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
         
 <p class="imprint">
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2018-11-02 11:27:32+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2018-11-02 11:36:04+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -18665,7 +19224,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2018-11-02 11:27:32+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2018-11-02 11:36:04+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Parser,
@@ -18675,9 +19234,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Parser.html}},
-    note = {Retrieved 2018-11-02 11:27:32+01:00},
+    note = {Retrieved 2018-11-02 11:36:04+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Parser.html},
-    urldate = {2018-11-02 11:27:32+01:00}
+    urldate = {2018-11-02 11:36:04+01:00}
 }
 </pre>
 </div>
