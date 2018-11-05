@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2018-10-31 16:27:08+01:00
+# Last change: 2018-11-05 18:08:55+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -157,8 +157,8 @@ class CallCarver(Carver):
         """Add given call to list of calls"""
         if function_name not in self._calls:
             self._calls[function_name] = []
-        if arguments not in self._calls[function_name]:
-            self._calls[function_name].append(arguments)
+        # if arguments not in self._calls[function_name]:
+        self._calls[function_name].append(arguments)
 
     # Tracking function: Record all calls and all args
     def traceit(self, frame, event, arg):

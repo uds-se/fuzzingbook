@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2018-11-02 11:27:32+01:00
+# Last change: 2018-11-05 17:04:13+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -212,9 +212,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from Parser import PEGParser, parse, canonical
+    from Parser import PEGParser, canonical
 else:
-    from .Parser import PEGParser, parse, canonical
+    from .Parser import PEGParser, canonical
 
 
 if __package__ is None or __package__ == "":

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2018-10-31 16:34:14+01:00
+# Last change: 2018-11-05 17:00:26+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -389,7 +389,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    ebnf_grammar["<group-1>"]
+    ebnf_grammar["<group>"]
 
 
 if __name__ == "__main__":
