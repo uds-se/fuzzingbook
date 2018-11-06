@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2018-11-05 17:20:56+01:00
+# Last change: 2018-11-06 17:14:14+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -132,7 +132,7 @@ if __name__ == "__main__":
                             stdin=subprocess.DEVNULL,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
-                            universal_newlines=True)
+                            universal_newlines=True)  # Will be "text" in Python 3.7
 
 
 if __name__ == "__main__":
@@ -708,7 +708,7 @@ if __name__ == "__main__":
 
 
 def no_dot(inp):
-    assert ".\n" not in inp
+    assert inp != ".\n"
     return True
 
 # ### Exercise 2: Run Simulated Troff

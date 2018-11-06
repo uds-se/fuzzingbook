@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-10-28 10:10:33+01:00
+# Last change: 2018-11-06 16:55:33+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -292,7 +292,7 @@ if __name__ == "__main__":
 
 def expansion_to_children(expansion):
     # print("Converting " + repr(expansion))
-    # strings contains all substrings -- both terminals and non-terminals such
+    # strings contains all substrings -- both terminals and nonterminals such
     # that ''.join(strings) == expansion
 
     # See nonterminals() in Grammars.py
@@ -357,7 +357,7 @@ if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
 
     print("Before:")
-    tree = ("<term>", None)
+    tree = ("<integer>", None)
     display_tree(tree)
 
     print("After:")

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2018-10-31 16:22:02+01:00
+# Last change: 2018-11-06 13:54:01+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -139,9 +139,9 @@ import sys
 def cgi_decode_traced(s):
     global coverage
     coverage = []
-    sys.settrace(traceit)
+    sys.settrace(traceit) # Turn on
     cgi_decode(s)
-    sys.settrace(None)
+    sys.settrace(None)    # Turn off
 
 if __name__ == "__main__":
     cgi_decode_traced("a+b")
@@ -183,9 +183,7 @@ if __name__ == "__main__":
             i += 1
         return t
     """
-
     cgi_decode_lines = cgi_decode_code.splitlines()
-
 
 
 if __name__ == "__main__":

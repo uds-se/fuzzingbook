@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-05 16:57:37+01:00
+# Last change: 2018-11-06 15:30:57+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
 
 import fuzzingbook_utils
-from Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL
+from Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL, is_valid_grammar
 from GrammarFuzzer import display_tree, all_terminals, GrammarFuzzer
 from ExpectError import ExpectError
 
@@ -312,14 +312,19 @@ if __name__ == "__main__":
     terminals(canonical(EXPR_GRAMMAR))
 
 
-def shrink(rule):
-    return [i.strip() for i in rule]
+def canonical(grammar, shrink=True):
+    def tokenize(word):
+        return list(word.strip() if shrink else word)
 
+    def canonical_expr(expression):
+        return [
+            token for word in split(expression)
+            for token in ([word] if word in grammar else tokenize(word))
+        ]
 
-def canonical(grammar):
     return {
-        k: [shrink(split(l)) for l in rules]
-        for k, rules in grammar.items()
+        k: [canonical_expr(expression) for expression in alternatives]
+        for k, alternatives in grammar.items()
     }
 
 if __name__ == "__main__":
@@ -842,6 +847,169 @@ if __name__ == "__main__":
     display_tree(tree)
 
 
+# ## Recombining Parsed Inputs
+
+if __name__ == "__main__":
+    print('\n## Recombining Parsed Inputs')
+
+
+
+
+# ### A Simple Fuzzer
+
+if __name__ == "__main__":
+    print('\n### A Simple Fuzzer')
+
+
+
+
+import string
+VAR_GRAMMAR = {
+    '<start>': [['<statements>']],
+    '<statements>': [['<statement>', ';', '<statements>'], ['<statement>']],
+    '<statement>': [['<declaration>'], ['<assignment>']],
+    '<declaration>': [['<def>', ' ', '<identifier>']],
+    '<assignment>': [['<identifier>', '=', '<expr>']],
+    '<def>': [list('def')],
+    '<identifier>': [['<word>']],
+    '<word>': [['<alpha>', '<word>'], ['<alpha>']],
+    '<alpha>': [list(string.ascii_letters)],
+    '<expr>': [['<term>', '+', '<expr>'], ['<term>', '-', '<expr>'], ['<term>']],
+    '<term>': [['<factor>', '*', '<term>'], ['<factor>', '/', '<term>'], ['<factor>']],
+    '<factor>': [
+        ['+', '<factor>'], ['-',
+                            '<factor>'], ['(', '<expr>', ')'], ['<identifier>'], ['<number>']
+    ],
+    '<number>': [['<integer>', '.', '<integer>'], ['<integer>']],
+    '<integer>': [['<digit>','<integer>'], ['<digit>']],
+    
+    '<digit>': [list(string.digits)],
+}
+
+if __name__ == "__main__":
+    mystring = 'def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)'
+    earley = EarleyParser(VAR_GRAMMAR)
+    trees = earley.parse(mystring)
+    for tree in trees:
+        display_tree(tree)
+
+
+VAR_TOKENS = {'<def>', '<number>', '<identifier>'}
+
+def shrink_tree(tree):
+    name, children = tree
+    if name in VAR_TOKENS:
+        return (name, [(all_terminals(tree), [])])
+    else:
+        return (name, [shrink_tree(c) for c in children])
+
+from graphviz import Digraph
+
+
+def annotated_symbol(s, a):
+    return re.sub(r'([^a-zA-Z0-9" ])', r"\\\1", s) + ("(%s)" % a if a else '')
+
+
+def annotated_node(node, id):
+    return node[0], node[1], ''
+
+
+def display_annotated_tree(derivation_tree,
+                           annotated_node=annotated_node,
+                           annotate=annotated_symbol):
+    counter = 0
+
+    def traverse_tree(dot, tree, id=0):
+        (symbol, children, annotation) = annotated_node(tree, id)
+        dot.node(repr(id), annotate(symbol, annotation))
+
+        if children is not None:
+            for child in children:
+                nonlocal counter
+                counter += 1
+                child_id = counter
+                dot.edge(repr(id), repr(child_id))
+                traverse_tree(dot, child, child_id)
+
+    dot = Digraph(comment="Derivation Tree")
+    dot.attr('node', shape='plain')
+    traverse_tree(dot, derivation_tree)
+    display(dot)
+
+if __name__ == "__main__":
+    for tree in trees:
+        display_annotated_tree(shrink_tree(tree))
+
+
+if __name__ == "__main__":
+    mystrings = [
+        'def abc;abc=12+(3+3.3)',
+        'def a;def b;def c;a=1;b=2;c=a+b',
+        'def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)',
+    ]
+    mytrees = []
+    for mystring in mystrings:
+        trees = earley.parse(mystring)
+        mytrees.extend([shrink_tree(t) for t in trees])
+
+
+if __name__ == "__main__":
+    fragment_pool = {i:[] for i in VAR_GRAMMAR}
+
+
+
+import copy
+def traverse_tree(node, grammar, tokens):
+    counter = 0
+    def helper(node, id):
+        nonlocal counter
+        name, children = node 
+        new_children = []
+        fragment_pool[name].append(copy.deepcopy(node))
+        for child in children:
+            cname, cchildren = child
+            if cname not in grammar:
+                new_children.append((cname, cchildren, 0))
+            elif cname in tokens:
+                gchild = cchildren[0][0]
+                new_children.append((cname, [(gchild, [], 0)], 0))
+            else:
+                counter += 1
+                cname, cchildren, cid = helper(child, counter)
+                new_children.append((cname, cchildren, cid))
+        return name, new_children, id
+    return helper(node, 0), counter
+
+
+if __name__ == "__main__":
+    counted_trees = []
+    for t in mytrees:
+        new_tree, count = traverse_tree(t, VAR_GRAMMAR, VAR_TOKENS)
+        counted_trees.append((new_tree, count))
+        display_annotated_tree(new_tree, lambda x: x)
+
+
+import random
+
+def generate_new_tree(counted_tree, fragment_pool):
+    tree, count = counted_tree
+    choice = random.randint(1, count)
+    def replace_tree_node(node, choice):
+        name, children, id = node
+        if id == choice:
+            return random.choice(fragment_pool[name])
+        else:
+            return (name, [replace_tree_node(c, choice) for c in children])
+    return replace_tree_node(tree, choice)
+
+if __name__ == "__main__":
+    for s in mystrings:
+        print("original:  ",s)
+    for ct in counted_trees:
+        t = generate_new_tree(ct, fragment_pool)
+        print("modified:  ", all_terminals(t))
+
+
 # ## Further Information
 
 if __name__ == "__main__":
@@ -1078,10 +1246,10 @@ if __name__ == "__main__":
     result
 
 
-# ### Exercise 6 _First set of a non-terminal_
+# ### Exercise 6 _First set of a nonterminal_
 
 if __name__ == "__main__":
-    print('\n### Exercise 6 _First set of a non-terminal_')
+    print('\n### Exercise 6 _First set of a nonterminal_')
 
 
 
@@ -1112,10 +1280,10 @@ if __name__ == "__main__":
     firstset(canonical(EXPR_GRAMMAR), EPSILON)
 
 
-# ### Exercise 7 _Follow set of a non-terminal_
+# ### Exercise 7 _Follow set of a nonterminal_
 
 if __name__ == "__main__":
-    print('\n### Exercise 7 _Follow set of a non-terminal_')
+    print('\n### Exercise 7 _Follow set of a nonterminal_')
 
 
 
