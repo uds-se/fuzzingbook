@@ -669,7 +669,7 @@ dist publish-dist: check-import check-code publish-code delete-betas toc \
 	$(DOCS_TARGET)dist/fuzzingbook-code.zip \
 	$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip
 
-$(DOCS_TARGET)dist/fuzzingbook-code.zip: $(PYS) $(CODE_TARGET)README.md $(CODE_TARGET)LICENSE.md
+$(DOCS_TARGET)dist/fuzzingbook-code.zip: $(PYS) $(CODE_TARGET)README.md $(CODE_TARGET)LICENSE.md $(CHAPTERS_MAKEFILE)
 	@-mkdir $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)dist/*
 	$(RM) -r $(DOCS_TARGET)fuzzingbook
@@ -687,7 +687,7 @@ $(DOCS_TARGET)dist/fuzzingbook-code.zip: $(PYS) $(CODE_TARGET)README.md $(CODE_T
 	$(RM) -r $(DOCS_TARGET)code/dist $(DOCS_TARGET)code/*.egg-info
 	@echo "Created code distribution files in $(DOCS_TARGET)dist"
 	
-$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip: $(FULLS) Makefile
+$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip: $(FULLS) $(CHAPTERS_MAKEFILE)
 	$(RM) -r $(DOCS_TARGET)notebooks/fuzzingbook_utils/__pycache__
 	cd $(DOCS_TARGET); ln -s notebooks fuzzingbook-notebooks
 	cd $(DOCS_TARGET); \
