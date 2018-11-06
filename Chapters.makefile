@@ -20,15 +20,13 @@ TODO_CHAPTERS = \
 	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
 	Reducer.ipynb \
-	GrammarMiner.ipynb \
 	Carver.ipynb \
 	APIFuzzer.ipynb
-
 	# ConstraintGrammarFuzzer.ipynb
 	# GUIFuzzer.ipynb
 	# SearchBasedFuzzer.ipynb
 	# SymbolicFuzzer.ipynb
-	# ...
+	# GrammarMiner.ipynb
 
 # Appendices for the book
 APPENDICES = \

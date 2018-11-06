@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-10-26 16:52:52+02:00
+# Last change: 2018-11-03 13:07:38+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -443,6 +443,9 @@ if __name__ == "__main__":
 
 def new_symbol(grammar, symbol_name="<symbol>"):
     """Return a new symbol for `grammar` based on `symbol_name`"""
+    if symbol_name not in grammar:
+        return symbol_name
+
     count = 1
     while True:
         tentative_symbol_name = symbol_name[:-1] + "-" + repr(count) + ">"
@@ -898,7 +901,8 @@ if __name__ == "__main__":
 
 
 
-def define_name(o): return o.id if isinstance(o, ast.Name) else o.s
+def define_name(o):
+    return o.id if isinstance(o, ast.Name) else o.s
 
 def define_expr(op):
     if isinstance(op, ast.BinOp) and isinstance(op.op, ast.Add):

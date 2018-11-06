@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-10-18 11:22:52+02:00
+# Last change: 2018-10-31 16:24:29+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -149,8 +149,8 @@ def average_length_until_full_coverage(fuzzer):
     sum = 0
     for trial in range(trials):
         fuzzer.reset_coverage()
-        while len(fuzzer.max_expansion_coverage() -
-                  fuzzer.expansion_coverage()) > 0:
+        while len(fuzzer.max_expansion_coverage() 
+                  - fuzzer.expansion_coverage()) > 0:
             s = fuzzer.fuzz()
             sum += len(s)
 

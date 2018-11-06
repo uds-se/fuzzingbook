@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2018-10-25 14:38:14+02:00
+# Last change: 2018-11-05 17:04:13+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -123,7 +123,8 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    input_without_first_and_third_quarter = failing_input[quarter_length:quarter_length * 2] + failing_input[quarter_length * 3:]
+    input_without_first_and_third_quarter = failing_input[quarter_length:
+                                                          quarter_length * 2] + failing_input[quarter_length * 3:]
     mystery.run(input_without_first_and_third_quarter)
 
 
@@ -162,7 +163,7 @@ class CachingReducer(Reducer):
     def test(self, inp):
         if inp in self.cache:
             return self.cache[inp]
-        
+
         outcome = super().test(inp)
         self.cache[inp] = outcome
         return outcome
@@ -179,7 +180,8 @@ class DeltaDebuggingReducer(CachingReducer):
             some_complement_is_failing = False
 
             while start < len(inp):
-                complement = inp[:int(start)] + inp[int(start + subset_length):]
+                complement = inp[:int(start)] + \
+                    inp[int(start + subset_length):]
 
                 if self.test(complement) == Runner.FAIL:
                     inp = complement
@@ -210,9 +212,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from Parser import PEGParser, parse
+    from Parser import PEGParser, canonical
 else:
-    from .Parser import PEGParser, parse
+    from .Parser import PEGParser, canonical
 
 
 if __package__ is None or __package__ == "":
@@ -251,7 +253,7 @@ class GrammarReducer(Reducer):
         super().__init__(runner, log=log)
         self.grammar = grammar
         self.start_symbol = start_symbol
-        self.parser = PEGParser(grammar, start_symbol)
+        self.parser = PEGParser(canonical(grammar), start_symbol)
 
 class GrammarReducer(GrammarReducer):
     def derivation_reductions(self, tree):
@@ -306,9 +308,9 @@ class GrammarReducer(GrammarReducer):
                 child = children[i]
                 child_reductions = self.derivation_reductions(child)
                 for reduced_child in child_reductions:
-                    new_children = (children[:i] + 
-                            [reduced_child] +
-                            children[i + 1:])
+                    new_children = (children[:i]
+                                    + [reduced_child]
+                                    + children[i + 1:])
                     reductions.append((symbol, new_children))
 
         # Filter duplicates
@@ -320,8 +322,8 @@ class GrammarReducer(GrammarReducer):
 
         if len(reductions) > 0:
             # We have a new expansion
-            print("Can reduce " + symbol + " " + all_terminals(tree) + \
-                 " to reduced subtrees " + queue_to_string(reductions))
+            print("Can reduce " + symbol + " " + all_terminals(tree)
+                  + " to reduced subtrees " + queue_to_string(reductions))
 
         return reductions
 
@@ -345,14 +347,14 @@ class GrammarReducer(GrammarReducer):
                 # Found new smallest tree; try to reduce that one further
                 smallest_tree = t
                 tree_reductions = self.reductions(t)
-                tree_reductions.sort(key = lambda tree: -number_of_nodes(tree))
+                tree_reductions.sort(key=lambda tree: -number_of_nodes(tree))
                 print("New smallest tree: " + all_terminals(smallest_tree))
 
         return smallest_tree
 
 class GrammarReducer(GrammarReducer):
     def parse(self, inp):
-        cursor, tree = self.parser.unify_key(self.start_symbol, inp) # TODO: Have "Parser" base class
+        tree = self.parser.parse(inp)
         print(all_terminals(tree))
         return tree
 
@@ -361,42 +363,40 @@ class GrammarReducer(GrammarReducer):
         smallest_tree = self.reduce_tree(tree)
         return all_terminals(smallest_tree)
 
-if __name__ == "__main__":
-    # Find all subtrees in TREE whose root is SEARCH_SYMBOL.
-    # If IGNORE_ROOT is true, ignore the root note of TREE.
-    def subtrees_with_symbol(search_symbol, tree, ignore_root = True):
-        ret = []
-        (symbol, children) = tree
-        if not ignore_root and symbol == search_symbol:
-            ret.append(tree)
+# Find all subtrees in TREE whose root is SEARCH_SYMBOL.
+# If IGNORE_ROOT is true, ignore the root note of TREE.
 
-        # Search across all children
-        if children is not None:
-            for c in children:
-                ret += subtrees_with_symbol(search_symbol, c, False)
-        return ret
+def subtrees_with_symbol(search_symbol, tree, ignore_root=True):
+    ret = []
+    (symbol, children) = tree
+    if not ignore_root and symbol == search_symbol:
+        ret.append(tree)
 
+    # Search across all children
+    if children is not None:
+        for c in children:
+            ret += subtrees_with_symbol(search_symbol, c, False)
+    return ret
 
-if __name__ == "__main__":
-    # convert a list [[X1, X2], [Y1, Y2], ...] 
-    # into [X1, Y1], [X1, Y2], [X2, Y1], [X2, Y2], ...
-    def possible_combinations(list_of_lists):
-        if len(list_of_lists) == 0:
-            return []
+# convert a list [[X1, X2], [Y1, Y2], ...]
+# into [X1, Y1], [X1, Y2], [X2, Y1], [X2, Y2], ...
 
-        # print(list_of_lists)
+def possible_combinations(list_of_lists):
+    if len(list_of_lists) == 0:
+        return []
 
-        ret = []
-        for e in list_of_lists[0]:
-            if len(list_of_lists) == 1:
-                ret.append([e])
-            else:
-                for c in possible_combinations(list_of_lists[1:]):
-                    new_combo = [e] + c
-                    # print("New combo: ", repr(new_combo))
-                    ret.append(new_combo)
-        return ret
+    # print(list_of_lists)
 
+    ret = []
+    for e in list_of_lists[0]:
+        if len(list_of_lists) == 1:
+            ret.append([e])
+        else:
+            for c in possible_combinations(list_of_lists[1:]):
+                new_combo = [e] + c
+                # print("New combo: ", repr(new_combo))
+                ret.append(new_combo)
+    return ret
 
 if __name__ == "__main__":
     # Return the number of nodes
@@ -415,7 +415,7 @@ else:
 
 
 if __name__ == "__main__":
-    inp = "1 + (2 * 3)"
+    inp = "1+(2*3)"
     grammar_reducer = GrammarReducer(mystery, EXPR_GRAMMAR)
     grammar_reducer.reduce(inp)
 

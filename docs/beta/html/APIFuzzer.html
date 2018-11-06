@@ -11876,7 +11876,6 @@ MathJax.Hub.Config({
 <li><a href="Parser.html">Parsing and Recombining Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="GrammarMiner.html">Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Carver.html">Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="APIFuzzer.html" class="this_page">Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 
@@ -11886,9 +11885,7 @@ MathJax.Hub.Config({
      <li class="has-sub"><a href="#"><span title="Fuzzing APIs"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Fuzzing APIs <i class="fa fa-fw fa-wrench"></i></span></a>
         <ul>
            <li><a href="#Fuzzing-a-Function">Fuzzing a Function</a></li>
-<li><a href="#Carving-Function-Calls">Carving Function Calls</a></li>
-<li><a href="#Mining-a-Grammar">Mining a Grammar</a></li>
-<li><a href="#Deep-Values">Deep Values</a></li>
+<li><a href="#Mining-API-Grammars">Mining API Grammars</a></li>
 <li><a href="#Lessons-Learned">Lessons Learned</a></li>
 <li><a href="#Next-Steps">Next Steps</a></li>
 <li><a href="#Background">Background</a></li>
@@ -11944,37 +11941,6 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 </div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">fuzzingbook_utils</span> <span class="k">import</span> <span class="n">YouTubeVideo</span>
-<span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;w4u5gCgPlmg&quot;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_html rendered_html output_subarea output_execute_result">
-
-        <iframe
-            width="640"
-            height="360"
-            src="https://www.youtube.com/embed/w4u5gCgPlmg"
-            frameborder="0"
-            allowfullscreen
-        ></iframe>
-
-</div>
-
 </div>
 
 <div class="input_markdown">
@@ -12083,7 +12049,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">URL_GRAMMAR</span><span class="p">,</span> <span class="n">is_valid_grammar</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">URL_GRAMMAR</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">new_symbol</span>
 <span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">display_tree</span><span class="p">,</span> <span class="n">all_terminals</span>
 </pre></div>
 
@@ -12553,123 +12519,32 @@ void test() {
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Carving-Function-Calls">Carving Function Calls<a class="anchor-link" href="#Carving-Function-Calls">&#182;</a></h2><p>Let us now try to <em>record</em> and <em>replay</em> calls.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Mining-API-Grammars">Mining API Grammars<a class="anchor-link" href="#Mining-API-Grammars">&#182;</a></h2><p>While it is relatively straightforward to write a grammar that produces a sequence of function calls, we can again try to automate this further by automatically <em>mining</em> function calls from a given execution of a program.  To this end, we make use of <a href="Carver.html">our <em>carving</em> infrastructure introduced in the previous chapter</a> to <em>record</em> function calls and their arguments, from which we can create a grammar that can then combine arbitrary arguments into new calls.</p>
 </div>
 </div>
 </div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/urllib.parse.html" class="import" target="_blank">urllib.parse</a></span> <span class="k">import</span> <span class="o">*</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># return function_name(arg[0], arg[1], ...) as a string</span>
-<span class="k">def</span> <span class="nf">call_with_args</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> \
-        <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">var</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">call_with_args</span><span class="p">(</span><span class="s2">&quot;urlparse&quot;</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;url&quot;</span><span class="p">,</span> <span class="s2">&quot;http://example.com&quot;</span><span class="p">)])</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#34;urlparse(url=&#39;http://example.com&#39;)&#34;
-</pre>
-</div>
-
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We use a tracer to capture all calls and arguments.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The general idea is as follows:</p>
+<ol>
+<li>First, we record all calls of a specific function from a given execution of the program.</li>
+<li>Second, we create a grammar that incorporates all these calls, with separate rules for each argument and alternatives for each value found; this allows us to produce calls that arbitrarily <em>recombine</em> these arguments.</li>
+</ol>
+<p>Let us explore these steps in the following sections.</p>
 </div>
 </div>
 </div>
 </div>
 
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># This is where we store all calls and arguments</span>
-<span class="n">the_args</span> <span class="o">=</span> <span class="p">{}</span>
-</pre></div>
-
-</div>
-</div></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="From-Calls-to-Grammars">From Calls to Grammars<a class="anchor-link" href="#From-Calls-to-Grammars">&#182;</a></h3><p>Let us start with an example.  The <code>power(x, y)</code> function returns $x^y$; it is but a wrapper around the equivalent <code>math.pow()</code> function.  (Since <code>power()</code> is defined in Python, we can trace it – in contrast to <code>math.pow()</code>, which is implemented in C.)</p>
 </div>
 </div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Tracking function: Record all calls and all args</span>
-<span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s2">&quot;call&quot;</span><span class="p">:</span>
-        <span class="n">code</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span>
-        <span class="n">function_name</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">co_name</span>
-
-        <span class="k">if</span> <span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span> <span class="c1"># Internal function</span>
-
-        <span class="c1"># When called, all arguments are local variables</span>
-        <span class="n">variables</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-        <span class="n">args</span> <span class="o">=</span> <span class="p">[(</span><span class="n">var</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">[</span><span class="n">var</span><span class="p">])</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">function_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">the_args</span><span class="p">:</span>
-            <span class="n">the_args</span><span class="p">[</span><span class="n">function_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">args</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">the_args</span><span class="p">[</span><span class="n">function_name</span><span class="p">]:</span>
-            <span class="n">the_args</span><span class="p">[</span><span class="n">function_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-
-        <span class="c1"># Some tracking</span>
-        <span class="c1"># print(call_with_args(function_name, args))</span>
-
-    <span class="c1"># If we return None, this will only be called for functions (more efficient)</span>
-    <span class="k">return</span> <span class="kc">None</span>
-</pre></div>
-
-</div>
-</div></div>
 </div>
 </div>
 
@@ -12680,7 +12555,6 @@ void test() {
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/math.html" class="import" target="_blank">math</a></span>
-<span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/sys.html" class="import" target="_blank">sys</a></span>
 </pre></div>
 
 </div>
@@ -12694,36 +12568,31 @@ void test() {
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Record all function calls during an execution</span>
-<span class="k">def</span> <span class="nf">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
 
-<span class="k">def</span> <span class="nf">powerpair</span><span class="p">(</span><span class="n">pair</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">power</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</div>
+</div></div>
+</div>
+</div>
 
-<span class="k">def</span> <span class="nf">record_calls</span><span class="p">():</span>
-    <span class="k">global</span> <span class="n">the_args</span>
-    <span class="n">the_args</span> <span class="o">=</span> <span class="p">{}</span>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us invoke <code>power()</code> while recording its arguments:</p>
+</div>
+</div>
+</div>
+</div>
 
-    <span class="n">urls</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="s2">&quot;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;http://fuzzingbook.com/fuzzing&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;http://google.com/query&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;http://microsoft.com/windows&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;https://mark:zuckerberg@facebook.com:666/friends&quot;</span>
-    <span class="p">]</span>
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
 
-    <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="n">traceit</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">power</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">powerpair</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
-
-    <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">urls</span><span class="p">:</span>
-        <span class="n">parts</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-        <span class="n">url</span> <span class="o">=</span> <span class="n">urlunparse</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
-
-    <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Carver.html" class="import" target="_blank">Carver</a></span> <span class="k">import</span> <span class="n">CallCarver</span><span class="p">,</span> <span class="n">call_value</span><span class="p">,</span> <span class="n">call_string</span>
 </pre></div>
 
 </div>
@@ -12737,7 +12606,9 @@ void test() {
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">record_calls</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CallCarver</span><span class="p">()</span> <span class="k">as</span> <span class="n">power_carver</span><span class="p">:</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">power</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">power</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12751,7 +12622,7 @@ void test() {
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">the_args</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">power_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;power&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12762,84 +12633,19 @@ void test() {
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;power&#39;: [[(&#39;y&#39;, 0), (&#39;x&#39;, 0)],
-  [(&#39;y&#39;, 1), (&#39;x&#39;, 1)],
-  [(&#39;y&#39;, 2), (&#39;x&#39;, 2)],
-  [(&#39;y&#39;, 3), (&#39;x&#39;, 3)],
-  [(&#39;y&#39;, 4), (&#39;x&#39;, 4)],
-  [(&#39;y&#39;, 5), (&#39;x&#39;, 5)],
-  [(&#39;y&#39;, 6), (&#39;x&#39;, 6)],
-  [(&#39;y&#39;, 7), (&#39;x&#39;, 7)],
-  [(&#39;y&#39;, 8), (&#39;x&#39;, 8)],
-  [(&#39;y&#39;, 9), (&#39;x&#39;, 9)]],
- &#39;powerpair&#39;: [[(&#39;pair&#39;, (0, 0))],
-  [(&#39;pair&#39;, (1, 1))],
-  [(&#39;pair&#39;, (2, 2))],
-  [(&#39;pair&#39;, (3, 3))],
-  [(&#39;pair&#39;, (4, 4))],
-  [(&#39;pair&#39;, (5, 5))],
-  [(&#39;pair&#39;, (6, 6))],
-  [(&#39;pair&#39;, (7, 7))],
-  [(&#39;pair&#39;, (8, 8))],
-  [(&#39;pair&#39;, (9, 9))]],
- &#39;urlparse&#39;: [[(&#39;allow_fragments&#39;, True),
-   (&#39;scheme&#39;, &#39;&#39;),
-   (&#39;url&#39;, &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;)],
-  [(&#39;allow_fragments&#39;, True),
-   (&#39;scheme&#39;, &#39;&#39;),
-   (&#39;url&#39;, &#39;http://fuzzingbook.com/fuzzing&#39;)],
-  [(&#39;allow_fragments&#39;, True),
-   (&#39;scheme&#39;, &#39;&#39;),
-   (&#39;url&#39;, &#39;http://google.com/query&#39;)],
-  [(&#39;allow_fragments&#39;, True),
-   (&#39;scheme&#39;, &#39;&#39;),
-   (&#39;url&#39;, &#39;http://microsoft.com/windows&#39;)],
-  [(&#39;allow_fragments&#39;, True),
-   (&#39;scheme&#39;, &#39;&#39;),
-   (&#39;url&#39;, &#39;https://mark:zuckerberg@facebook.com:666/friends&#39;)]],
- &#39;urlsplit&#39;: [[(&#39;allow_fragments&#39;, True),
-   (&#39;scheme&#39;, &#39;&#39;),
-   (&#39;url&#39;, &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;)],
-  [(&#39;allow_fragments&#39;, True),
-   (&#39;scheme&#39;, &#39;&#39;),
-   (&#39;url&#39;, &#39;http://fuzzingbook.com/fuzzing&#39;)],
-  [(&#39;allow_fragments&#39;, True),
-   (&#39;scheme&#39;, &#39;&#39;),
-   (&#39;url&#39;, &#39;http://google.com/query&#39;)],
-  [(&#39;allow_fragments&#39;, True),
-   (&#39;scheme&#39;, &#39;&#39;),
-   (&#39;url&#39;, &#39;http://microsoft.com/windows&#39;)],
-  [(&#39;allow_fragments&#39;, True),
-   (&#39;scheme&#39;, &#39;&#39;),
-   (&#39;url&#39;, &#39;https://mark:zuckerberg@facebook.com:666/friends&#39;)]],
- &#39;&lt;genexpr&gt;&#39;: [[(&#39;.0&#39;, &lt;str_iterator at 0x10ceae438&gt;)],
-  [(&#39;.0&#39;, &lt;str_iterator at 0x10ceae438&gt;), (&#39;c&#39;, &#39;/&#39;)],
-  [(&#39;.0&#39;, &lt;str_iterator at 0x10ceae5f8&gt;)],
-  [(&#39;.0&#39;, &lt;str_iterator at 0x10ceae5f8&gt;), (&#39;c&#39;, &#39;/&#39;)]],
- &#39;urlunparse&#39;: [[(&#39;components&#39;,
-    ParseResult(scheme=&#39;https&#39;, netloc=&#39;andreas:zeller@cispa.saarland:8080&#39;, path=&#39;/faculty/q&#39;, params=&#39;&#39;, query=&#39;=zeller&#39;, fragment=&#39;&#39;))],
-  [(&#39;components&#39;,
-    ParseResult(scheme=&#39;http&#39;, netloc=&#39;fuzzingbook.com&#39;, path=&#39;/fuzzing&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))],
-  [(&#39;components&#39;,
-    ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&#39;, path=&#39;/query&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))],
-  [(&#39;components&#39;,
-    ParseResult(scheme=&#39;http&#39;, netloc=&#39;microsoft.com&#39;, path=&#39;/windows&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))],
-  [(&#39;components&#39;,
-    ParseResult(scheme=&#39;https&#39;, netloc=&#39;mark:zuckerberg@facebook.com:666&#39;, path=&#39;/friends&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))]],
- &#39;urlunsplit&#39;: [[(&#39;components&#39;,
-    (&#39;https&#39;,
-     &#39;andreas:zeller@cispa.saarland:8080&#39;,
-     &#39;/faculty/q&#39;,
-     &#39;=zeller&#39;,
-     &#39;&#39;))],
-  [(&#39;components&#39;, (&#39;http&#39;, &#39;fuzzingbook.com&#39;, &#39;/fuzzing&#39;, &#39;&#39;, &#39;&#39;))],
-  [(&#39;components&#39;, (&#39;http&#39;, &#39;google.com&#39;, &#39;/query&#39;, &#39;&#39;, &#39;&#39;))],
-  [(&#39;components&#39;, (&#39;http&#39;, &#39;microsoft.com&#39;, &#39;/windows&#39;, &#39;&#39;, &#39;&#39;))],
-  [(&#39;components&#39;,
-    (&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#39;, &#39;/friends&#39;, &#39;&#39;, &#39;&#39;))]]}
+<pre>[[(&#39;x&#39;, 1), (&#39;y&#39;, 2)], [(&#39;x&#39;, 3), (&#39;y&#39;, 4)]]
 </pre>
 </div>
 
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>From this list of recorded arguments, we could now create a grammar for the <code>power()</code> call, with <code>x</code> and <code>y</code> expanding into the values seen:</p>
+</div>
+</div>
+</div>
 </div>
 
 <div class="input_code">
@@ -12848,15 +12654,11 @@ void test() {
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Re-run all calls seen, invoking functions directly</span>
-<span class="k">def</span> <span class="nf">run_calls</span><span class="p">():</span>
-    <span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="n">the_args</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">):</span>
-            <span class="k">continue</span>        <span class="c1"># Internal call</span>
-
-        <span class="k">for</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">the_args</span><span class="p">[</span><span class="n">function_name</span><span class="p">]:</span>
-            <span class="n">call_string</span> <span class="o">=</span> <span class="n">call_with_args</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
-            <span class="n">do_call</span><span class="p">(</span><span class="n">call_string</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">POWER_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;power(&lt;x&gt;, &lt;y&gt;)&quot;</span> <span class="p">],</span>
+    <span class="s2">&quot;&lt;x&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;y&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">]</span>
+<span class="p">}</span>
 </pre></div>
 
 </div>
@@ -12870,7 +12672,45 @@ void test() {
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">run_calls</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">POWER_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>When fuzzing with this grammar, we then get arbitrary combinations of <code>x</code> and <code>y</code>; aiming for coverage will ensure that all values are actually tested at least once:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarCoverageFuzzer.html" class="import" target="_blank">GrammarCoverageFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarCoverageFuzzer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">power_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">POWER_GRAMMAR</span><span class="p">)</span>
+<span class="p">[</span><span class="n">power_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
 </pre></div>
 
 </div>
@@ -12880,87 +12720,8 @@ void test() {
 
 <div class="output_area">
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>power(y=0, x=0)
-	= 1.0
-power(y=1, x=1)
-	= 1.0
-power(y=2, x=2)
-	= 4.0
-power(y=3, x=3)
-	= 27.0
-power(y=4, x=4)
-	= 256.0
-power(y=5, x=5)
-	= 3125.0
-power(y=6, x=6)
-	= 46656.0
-power(y=7, x=7)
-	= 823543.0
-power(y=8, x=8)
-	= 16777216.0
-power(y=9, x=9)
-	= 387420489.0
-powerpair(pair=(0, 0))
-	= 1.0
-powerpair(pair=(1, 1))
-	= 1.0
-powerpair(pair=(2, 2))
-	= 4.0
-powerpair(pair=(3, 3))
-	= 27.0
-powerpair(pair=(4, 4))
-	= 256.0
-powerpair(pair=(5, 5))
-	= 3125.0
-powerpair(pair=(6, 6))
-	= 46656.0
-powerpair(pair=(7, 7))
-	= 823543.0
-powerpair(pair=(8, 8))
-	= 16777216.0
-powerpair(pair=(9, 9))
-	= 387420489.0
-urlparse(allow_fragments=True, scheme=&#39;&#39;, url=&#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;)
-	= ParseResult(scheme=&#39;https&#39;, netloc=&#39;andreas:zeller@cispa.saarland:8080&#39;, path=&#39;/faculty/q&#39;, params=&#39;&#39;, query=&#39;=zeller&#39;, fragment=&#39;&#39;)
-urlparse(allow_fragments=True, scheme=&#39;&#39;, url=&#39;http://fuzzingbook.com/fuzzing&#39;)
-	= ParseResult(scheme=&#39;http&#39;, netloc=&#39;fuzzingbook.com&#39;, path=&#39;/fuzzing&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
-urlparse(allow_fragments=True, scheme=&#39;&#39;, url=&#39;http://google.com/query&#39;)
-	= ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&#39;, path=&#39;/query&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
-urlparse(allow_fragments=True, scheme=&#39;&#39;, url=&#39;http://microsoft.com/windows&#39;)
-	= ParseResult(scheme=&#39;http&#39;, netloc=&#39;microsoft.com&#39;, path=&#39;/windows&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
-urlparse(allow_fragments=True, scheme=&#39;&#39;, url=&#39;https://mark:zuckerberg@facebook.com:666/friends&#39;)
-	= ParseResult(scheme=&#39;https&#39;, netloc=&#39;mark:zuckerberg@facebook.com:666&#39;, path=&#39;/friends&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
-urlsplit(allow_fragments=True, scheme=&#39;&#39;, url=&#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;)
-	= SplitResult(scheme=&#39;https&#39;, netloc=&#39;andreas:zeller@cispa.saarland:8080&#39;, path=&#39;/faculty/q&#39;, query=&#39;=zeller&#39;, fragment=&#39;&#39;)
-urlsplit(allow_fragments=True, scheme=&#39;&#39;, url=&#39;http://fuzzingbook.com/fuzzing&#39;)
-	= SplitResult(scheme=&#39;http&#39;, netloc=&#39;fuzzingbook.com&#39;, path=&#39;/fuzzing&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
-urlsplit(allow_fragments=True, scheme=&#39;&#39;, url=&#39;http://google.com/query&#39;)
-	= SplitResult(scheme=&#39;http&#39;, netloc=&#39;google.com&#39;, path=&#39;/query&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
-urlsplit(allow_fragments=True, scheme=&#39;&#39;, url=&#39;http://microsoft.com/windows&#39;)
-	= SplitResult(scheme=&#39;http&#39;, netloc=&#39;microsoft.com&#39;, path=&#39;/windows&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
-urlsplit(allow_fragments=True, scheme=&#39;&#39;, url=&#39;https://mark:zuckerberg@facebook.com:666/friends&#39;)
-	= SplitResult(scheme=&#39;https&#39;, netloc=&#39;mark:zuckerberg@facebook.com:666&#39;, path=&#39;/friends&#39;, query=&#39;&#39;, fragment=&#39;&#39;)
-urlunparse(components=ParseResult(scheme=&#39;https&#39;, netloc=&#39;andreas:zeller@cispa.saarland:8080&#39;, path=&#39;/faculty/q&#39;, params=&#39;&#39;, query=&#39;=zeller&#39;, fragment=&#39;&#39;))
-	= &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;
-urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;fuzzingbook.com&#39;, path=&#39;/fuzzing&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;http://fuzzingbook.com/fuzzing&#39;
-urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&#39;, path=&#39;/query&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;http://google.com/query&#39;
-urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;microsoft.com&#39;, path=&#39;/windows&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;http://microsoft.com/windows&#39;
-urlunparse(components=ParseResult(scheme=&#39;https&#39;, netloc=&#39;mark:zuckerberg@facebook.com:666&#39;, path=&#39;/friends&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;https://mark:zuckerberg@facebook.com:666/friends&#39;
-urlunsplit(components=(&#39;https&#39;, &#39;andreas:zeller@cispa.saarland:8080&#39;, &#39;/faculty/q&#39;, &#39;=zeller&#39;, &#39;&#39;))
-	= &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;
-urlunsplit(components=(&#39;http&#39;, &#39;fuzzingbook.com&#39;, &#39;/fuzzing&#39;, &#39;&#39;, &#39;&#39;))
-	= &#39;http://fuzzingbook.com/fuzzing&#39;
-urlunsplit(components=(&#39;http&#39;, &#39;google.com&#39;, &#39;/query&#39;, &#39;&#39;, &#39;&#39;))
-	= &#39;http://google.com/query&#39;
-urlunsplit(components=(&#39;http&#39;, &#39;microsoft.com&#39;, &#39;/windows&#39;, &#39;&#39;, &#39;&#39;))
-	= &#39;http://microsoft.com/windows&#39;
-urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#39;, &#39;/friends&#39;, &#39;&#39;, &#39;&#39;))
-	= &#39;https://mark:zuckerberg@facebook.com:666/friends&#39;
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;power(1, 4)&#39;, &#39;power(3, 2)&#39;, &#39;power(3, 2)&#39;, &#39;power(3, 2)&#39;, &#39;power(3, 2)&#39;]
 </pre>
 </div>
 
@@ -12969,7 +12730,7 @@ urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#3
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Of course, we can also first fuzz a program with a grammar, record the API calls and replay them.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>What we need is a method to automatically convert the arguments as seen in <code>power_carver</code> to the grammar as seen in <code>POWER_GRAMMAR</code>.  This is what we define in the next section.</p>
 </div>
 </div>
 </div>
@@ -12978,7 +12739,7 @@ urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#3
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Mining-a-Grammar">Mining a Grammar<a class="anchor-link" href="#Mining-a-Grammar">&#182;</a></h2><p>Let us bring together the fuzzing and carving techniques and mine a function call grammar from API invocations.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="A-Grammar-Miner-for-Calls">A Grammar Miner for Calls<a class="anchor-link" href="#A-Grammar-Miner-for-Calls">&#182;</a></h3><p>We introduce a class <code>CallGrammarMiner</code>, which, given a <code>Carver</code>, automatically produces a grammar from the calls seen.  To initialize, we pass the carver object:</p>
 </div>
 </div>
 </div>
@@ -12990,9 +12751,33 @@ urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Convert a variable name into a grammar nonterminal</span>
-<span class="k">def</span> <span class="nf">nonterminal</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
-    <span class="k">return</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallGrammarMiner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">carver</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">carver</span> <span class="o">=</span> <span class="n">carver</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Initial-Grammar">Initial Grammar<a class="anchor-link" href="#Initial-Grammar">&#182;</a></h4><p>The initial grammar produces a single call.  The possible <code>&lt;call&gt;</code> expansions are to be constructed later:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/copy.html" class="import" target="_blank">copy</a></span> 
 </pre></div>
 
 </div>
@@ -13006,49 +12791,14 @@ urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">mine_grammar_from_calls</span><span class="p">():</span>
-    <span class="n">all_calls</span> <span class="o">=</span> <span class="s2">&quot;&lt;call&gt;&quot;</span>
-    <span class="n">grammar</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">all_calls</span><span class="p">],</span>
-    <span class="p">}</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallGrammarMiner</span><span class="p">(</span><span class="n">CallGrammarMiner</span><span class="p">):</span>
+    <span class="n">CALL_SYMBOL</span> <span class="o">=</span> <span class="s2">&quot;&lt;call&gt;&quot;</span>
 
-    <span class="n">function_nonterminals</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="n">the_args</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">):</span>
-            <span class="c1"># Internal function</span>
-            <span class="k">continue</span>
-
-        <span class="n">nonterminal_name</span> <span class="o">=</span> <span class="n">nonterminal</span><span class="p">(</span><span class="n">function_name</span><span class="p">)</span>
-        <span class="n">function_nonterminals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nonterminal_name</span><span class="p">)</span>
-
-        <span class="c1"># Add a rule for the function</span>
-        <span class="n">expansion</span> <span class="o">=</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span>
-        <span class="n">first_arg</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">the_args</span><span class="p">[</span><span class="n">function_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="n">arg_name</span> <span class="o">=</span> <span class="n">nonterminal</span><span class="p">(</span><span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">first_arg</span><span class="p">:</span>
-                <span class="n">expansion</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span>
-            <span class="n">first_arg</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">expansion</span> <span class="o">+=</span> <span class="n">var</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="n">arg_name</span>
-        <span class="n">expansion</span> <span class="o">+=</span> <span class="s2">&quot;)&quot;</span>
-        <span class="c1"># TODO: Handle polymorphic functions</span>
-        <span class="n">grammar</span><span class="p">[</span><span class="n">nonterminal_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">expansion</span><span class="p">]</span>
-
-        <span class="c1"># Add rules for the arguments</span>
-        <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">the_args</span><span class="p">[</span><span class="n">function_name</span><span class="p">]:</span>
-            <span class="k">for</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
-                    <span class="n">values</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span><span class="p">[</span><span class="n">var</span><span class="p">]:</span>
-                    <span class="n">values</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="n">g</span> <span class="o">=</span> <span class="n">value_rules</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">function_name</span><span class="p">)</span>
-        <span class="n">grammrs</span> <span class="o">=</span> <span class="n">merge_grammars</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
-
-    <span class="c1"># Add a rule for all calls</span>
-    <span class="n">grammar</span><span class="p">[</span><span class="n">all_calls</span><span class="p">]</span> <span class="o">=</span> <span class="n">function_nonterminals</span>
-
-    <span class="k">return</span> <span class="n">grammar</span>
+    <span class="k">def</span> <span class="nf">initial_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span>
+               <span class="p">{</span> <span class="n">START_SYMBOL</span><span class="p">:</span> <span class="p">[</span> <span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">],</span> 
+                 <span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">:</span> <span class="p">[]</span>
+               <span class="p">})</span>
 </pre></div>
 
 </div>
@@ -13062,25 +12812,102 @@ urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Merge two grammars G1 and G2</span>
-<span class="k">def</span> <span class="nf">merge_grammars</span><span class="p">(</span><span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">):</span>
-    <span class="n">merged_grammar</span> <span class="o">=</span> <span class="n">g1</span>
-    <span class="k">for</span> <span class="n">key2</span> <span class="ow">in</span> <span class="n">g2</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">repl2</span> <span class="o">=</span> <span class="n">g2</span><span class="p">[</span><span class="n">key2</span><span class="p">]</span>
-        <span class="n">key_found</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">for</span> <span class="n">key1</span> <span class="ow">in</span> <span class="n">g1</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">repl1</span> <span class="o">=</span> <span class="n">g1</span><span class="p">[</span><span class="n">key1</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">repl</span> <span class="ow">in</span> <span class="n">repl2</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">key1</span> <span class="o">==</span> <span class="n">key2</span><span class="p">:</span>
-                    <span class="n">key_found</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">if</span> <span class="n">repl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">repl1</span><span class="p">:</span>
-                        <span class="c1"># Extend existing rule</span>
-                        <span class="n">merged_grammar</span><span class="p">[</span><span class="n">key1</span><span class="p">]</span> <span class="o">=</span> <span class="n">repl1</span> <span class="o">+</span> <span class="p">[</span><span class="n">repl</span><span class="p">]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">power_carver</span><span class="p">)</span>
+<span class="n">initial_grammar</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">initial_grammar</span><span class="p">()</span>
+<span class="n">initial_grammar</span>
+</pre></div>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">key_found</span><span class="p">:</span>
-            <span class="c1"># Add new rule</span>
-            <span class="n">merged_grammar</span><span class="p">[</span><span class="n">key2</span><span class="p">]</span> <span class="o">=</span> <span class="n">repl2</span>
-    <span class="k">return</span> <span class="n">merged_grammar</span>
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;call&gt;&#39;], &#39;&lt;call&gt;&#39;: []}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="A-Grammar-from-Arguments">A Grammar from Arguments<a class="anchor-link" href="#A-Grammar-from-Arguments">&#182;</a></h4><p>Let us start by creating a grammar from a list of arguments.  The method <code>mine_arguments_grammar()</code> creates a grammar for the arguments seen during carving, such as these:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">arguments</span> <span class="o">=</span> <span class="n">power_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;power&quot;</span><span class="p">)</span>
+<span class="n">arguments</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[[(&#39;x&#39;, 1), (&#39;y&#39;, 2)], [(&#39;x&#39;, 3), (&#39;y&#39;, 4)]]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>mine_arguments_grammar()</code> method iterates through the variables seen and creates a mapping <code>variables</code> of variable names to a set of values seen (as strings, going through <code>call_value()</code>).  In a second step, it then creates a grammar with a rule for each variable name, expanding into the values seen.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallGrammarMiner</span><span class="p">(</span><span class="n">CallGrammarMiner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">var_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">new_symbol</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">mine_arguments_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="n">var_grammar</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">argument_list</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">:</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">argument_list</span><span class="p">:</span>
+                <span class="n">value_string</span> <span class="o">=</span> <span class="n">call_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="n">value_string</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">value_string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">var_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;langle&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;&quot;</span><span class="p">]</span>
+                    <span class="n">value_string</span> <span class="o">=</span> <span class="n">value_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;langle&gt;&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+                    <span class="n">variables</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="n">variables</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">value_string</span><span class="p">)</span>
+
+        <span class="n">var_symbols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+            <span class="n">var_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_symbol</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+            <span class="n">var_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var_symbol</span><span class="p">)</span>
+            <span class="n">var_grammar</span><span class="p">[</span><span class="n">var_symbol</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">var_grammar</span><span class="p">,</span> <span class="n">var_symbols</span>
 </pre></div>
 
 </div>
@@ -13094,7 +12921,8 @@ urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">DEEP_VALUES</span> <span class="o">=</span> <span class="kc">False</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">power_carver</span><span class="p">)</span>
+<span class="n">var_grammar</span><span class="p">,</span> <span class="n">var_symbols</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_arguments_grammar</span><span class="p">(</span><span class="s2">&quot;power&quot;</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">initial_grammar</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13108,20 +12936,95 @@ urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Return a grammar only for the values in VALUES</span>
-<span class="k">def</span> <span class="nf">value_rules</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
-    <span class="n">grammar</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-        <span class="n">arg_name</span> <span class="o">=</span> <span class="n">nonterminal</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">var</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">DEEP_VALUES</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">[</span><span class="n">var</span><span class="p">]:</span>
-                <span class="n">g</span> <span class="o">=</span> <span class="n">deep_value_expansions</span><span class="p">(</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-                <span class="n">grammar</span> <span class="o">=</span> <span class="n">merge_grammars</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">var_grammar</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;], &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;]}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The additional return value <code>var_symbols</code> is a list of argument symbols in the call:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">var_symbols</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;&lt;power-x&gt;&#39;, &#39;&lt;power-y&gt;&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="A-Grammar-from-Calls">A Grammar from Calls<a class="anchor-link" href="#A-Grammar-from-Calls">&#182;</a></h4><p>To get the grammar for a single function (<code>mine_function_grammar()</code>), we add a call to the function:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallGrammarMiner</span><span class="p">(</span><span class="n">CallGrammarMiner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">function_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">new_symbol</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">mine_function_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="n">arguments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="n">function_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>
+
+        <span class="n">var_grammar</span><span class="p">,</span> <span class="n">var_symbols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mine_arguments_grammar</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+
+        <span class="n">function_grammar</span> <span class="o">=</span> <span class="n">var_grammar</span>
+        <span class="n">function_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function_symbol</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">var_symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;-self&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Method call</span>
+            <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span> <span class="n">var_symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span> <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">expansions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">[</span><span class="n">var</span><span class="p">]]</span>
-            <span class="n">grammar</span><span class="p">[</span><span class="n">arg_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">expansions</span>
+            <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span> <span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">grammar</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">function_symbol</span><span class="p">,</span> <span class="s2">&quot;::=&quot;</span><span class="p">,</span> <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">function_grammar</span><span class="p">,</span> <span class="n">function_symbol</span>
 </pre></div>
 
 </div>
@@ -13135,11 +13038,33 @@ urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">api_grammar</span> <span class="o">=</span> <span class="n">mine_grammar_from_calls</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">power_carver</span><span class="p">)</span>
+<span class="n">function_grammar</span><span class="p">,</span> <span class="n">function_symbol</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_function_grammar</span><span class="p">(</span><span class="s2">&quot;power&quot;</span><span class="p">,</span> <span class="n">initial_grammar</span><span class="p">)</span>
+<span class="n">function_grammar</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;],
+ &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;],
+ &#39;&lt;power&gt;&#39;: [&#39;power(&lt;power-x&gt;, &lt;power-y&gt;)&#39;]}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The additionally returned <code>function_symbol</code> holds the name of the function call just added:</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -13149,7 +13074,110 @@ urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">api_grammar</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">function_symbol</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;&lt;power&gt;&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="A-Grammar-from-all-Calls">A Grammar from all Calls<a class="anchor-link" href="#A-Grammar-from-all-Calls">&#182;</a></h4><p>Let us now repeat the above for all function calls seen during carving.  To this end, we simply iterate over all function calls seen:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">power_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;power&#39;, &#39;__exit__&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallGrammarMiner</span><span class="p">(</span><span class="n">CallGrammarMiner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">mine_call_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qualified</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">grammar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_grammar</span><span class="p">()</span>
+        <span class="n">fn_list</span> <span class="o">=</span> <span class="n">function_list</span>
+        <span class="k">if</span> <span class="n">function_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fn_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">(</span><span class="n">qualified</span><span class="o">=</span><span class="n">qualified</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="n">fn_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">function_list</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)):</span>
+                <span class="k">continue</span> <span class="c1"># Internal function</span>
+
+            <span class="c1"># Ignore errors with mined functions</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">function_grammar</span><span class="p">,</span> <span class="n">function_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mine_function_grammar</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">function_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span>
+
+            <span class="k">if</span> <span class="n">function_symbol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">]:</span>
+                <span class="n">grammar</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">function_symbol</span><span class="p">)</span>
+            <span class="n">grammar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">function_grammar</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grammar</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The method <code>mine_call_grammar()</code> is the one that clients can and should use – first for mining...</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">power_carver</span><span class="p">)</span>
+<span class="n">power_grammar</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_call_grammar</span><span class="p">()</span>
+<span class="n">power_grammar</span>
 </pre></div>
 
 </div>
@@ -13161,168 +13189,10 @@ urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#3
 
 <div class="output_text output_subarea output_execute_result">
 <pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;call&gt;&#39;],
- &#39;&lt;power&gt;&#39;: [&#39;power(y=&lt;power_y&gt;, x=&lt;power_x&gt;)&#39;],
- &#39;&lt;power_y&gt;&#39;: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;],
- &#39;&lt;power_x&gt;&#39;: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;],
- &#39;&lt;powerpair&gt;&#39;: [&#39;powerpair(pair=&lt;powerpair_pair&gt;)&#39;],
- &#39;&lt;powerpair_pair&gt;&#39;: [&#39;(0, 0)&#39;,
-  &#39;(1, 1)&#39;,
-  &#39;(2, 2)&#39;,
-  &#39;(3, 3)&#39;,
-  &#39;(4, 4)&#39;,
-  &#39;(5, 5)&#39;,
-  &#39;(6, 6)&#39;,
-  &#39;(7, 7)&#39;,
-  &#39;(8, 8)&#39;,
-  &#39;(9, 9)&#39;],
- &#39;&lt;urlparse&gt;&#39;: [&#39;urlparse(allow_fragments=&lt;urlparse_allow_fragments&gt;, scheme=&lt;urlparse_scheme&gt;, url=&lt;urlparse_url&gt;)&#39;],
- &#39;&lt;urlparse_allow_fragments&gt;&#39;: [&#39;True&#39;],
- &#39;&lt;urlparse_scheme&gt;&#39;: [&#34;&#39;&#39;&#34;],
- &#39;&lt;urlparse_url&gt;&#39;: [&#34;&#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;&#34;,
-  &#34;&#39;http://fuzzingbook.com/fuzzing&#39;&#34;,
-  &#34;&#39;http://google.com/query&#39;&#34;,
-  &#34;&#39;http://microsoft.com/windows&#39;&#34;,
-  &#34;&#39;https://mark:zuckerberg@facebook.com:666/friends&#39;&#34;],
- &#39;&lt;urlsplit&gt;&#39;: [&#39;urlsplit(allow_fragments=&lt;urlsplit_allow_fragments&gt;, scheme=&lt;urlsplit_scheme&gt;, url=&lt;urlsplit_url&gt;)&#39;],
- &#39;&lt;urlsplit_allow_fragments&gt;&#39;: [&#39;True&#39;],
- &#39;&lt;urlsplit_scheme&gt;&#39;: [&#34;&#39;&#39;&#34;],
- &#39;&lt;urlsplit_url&gt;&#39;: [&#34;&#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;&#34;,
-  &#34;&#39;http://fuzzingbook.com/fuzzing&#39;&#34;,
-  &#34;&#39;http://google.com/query&#39;&#34;,
-  &#34;&#39;http://microsoft.com/windows&#39;&#34;,
-  &#34;&#39;https://mark:zuckerberg@facebook.com:666/friends&#39;&#34;],
- &#39;&lt;urlunparse&gt;&#39;: [&#39;urlunparse(components=&lt;urlunparse_components&gt;)&#39;],
- &#39;&lt;urlunparse_components&gt;&#39;: [&#34;ParseResult(scheme=&#39;https&#39;, netloc=&#39;andreas:zeller@cispa.saarland:8080&#39;, path=&#39;/faculty/q&#39;, params=&#39;&#39;, query=&#39;=zeller&#39;, fragment=&#39;&#39;)&#34;,
-  &#34;ParseResult(scheme=&#39;http&#39;, netloc=&#39;fuzzingbook.com&#39;, path=&#39;/fuzzing&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)&#34;,
-  &#34;ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&#39;, path=&#39;/query&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)&#34;,
-  &#34;ParseResult(scheme=&#39;http&#39;, netloc=&#39;microsoft.com&#39;, path=&#39;/windows&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)&#34;,
-  &#34;ParseResult(scheme=&#39;https&#39;, netloc=&#39;mark:zuckerberg@facebook.com:666&#39;, path=&#39;/friends&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;)&#34;],
- &#39;&lt;urlunsplit&gt;&#39;: [&#39;urlunsplit(components=&lt;urlunsplit_components&gt;)&#39;],
- &#39;&lt;urlunsplit_components&gt;&#39;: [&#34;(&#39;https&#39;, &#39;andreas:zeller@cispa.saarland:8080&#39;, &#39;/faculty/q&#39;, &#39;=zeller&#39;, &#39;&#39;)&#34;,
-  &#34;(&#39;http&#39;, &#39;fuzzingbook.com&#39;, &#39;/fuzzing&#39;, &#39;&#39;, &#39;&#39;)&#34;,
-  &#34;(&#39;http&#39;, &#39;google.com&#39;, &#39;/query&#39;, &#39;&#39;, &#39;&#39;)&#34;,
-  &#34;(&#39;http&#39;, &#39;microsoft.com&#39;, &#39;/windows&#39;, &#39;&#39;, &#39;&#39;)&#34;,
-  &#34;(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#39;, &#39;/friends&#39;, &#39;&#39;, &#39;&#39;)&#34;],
- &#39;&lt;call&gt;&#39;: [&#39;&lt;power&gt;&#39;,
-  &#39;&lt;powerpair&gt;&#39;,
-  &#39;&lt;urlparse&gt;&#39;,
-  &#39;&lt;urlsplit&gt;&#39;,
-  &#39;&lt;urlunparse&gt;&#39;,
-  &#39;&lt;urlunsplit&gt;&#39;]}
-</pre>
-</div>
-
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlunsplit_fuzzer</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">api_grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s1">&#39;&lt;urlunsplit&gt;&#39;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="n">do_call</span><span class="p">(</span><span class="n">urlunsplit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>urlunsplit(components=(&#39;https&#39;, &#39;andreas:zeller@cispa.saarland:8080&#39;, &#39;/faculty/q&#39;, &#39;=zeller&#39;, &#39;&#39;))
-	= &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;
-urlunsplit(components=(&#39;https&#39;, &#39;andreas:zeller@cispa.saarland:8080&#39;, &#39;/faculty/q&#39;, &#39;=zeller&#39;, &#39;&#39;))
-	= &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;
-urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#39;, &#39;/friends&#39;, &#39;&#39;, &#39;&#39;))
-	= &#39;https://mark:zuckerberg@facebook.com:666/friends&#39;
-urlunsplit(components=(&#39;http&#39;, &#39;google.com&#39;, &#39;/query&#39;, &#39;&#39;, &#39;&#39;))
-	= &#39;http://google.com/query&#39;
-urlunsplit(components=(&#39;http&#39;, &#39;google.com&#39;, &#39;/query&#39;, &#39;&#39;, &#39;&#39;))
-	= &#39;http://google.com/query&#39;
-urlunsplit(components=(&#39;http&#39;, &#39;fuzzingbook.com&#39;, &#39;/fuzzing&#39;, &#39;&#39;, &#39;&#39;))
-	= &#39;http://fuzzingbook.com/fuzzing&#39;
-urlunsplit(components=(&#39;https&#39;, &#39;andreas:zeller@cispa.saarland:8080&#39;, &#39;/faculty/q&#39;, &#39;=zeller&#39;, &#39;&#39;))
-	= &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;
-urlunsplit(components=(&#39;https&#39;, &#39;andreas:zeller@cispa.saarland:8080&#39;, &#39;/faculty/q&#39;, &#39;=zeller&#39;, &#39;&#39;))
-	= &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;
-urlunsplit(components=(&#39;http&#39;, &#39;fuzzingbook.com&#39;, &#39;/fuzzing&#39;, &#39;&#39;, &#39;&#39;))
-	= &#39;http://fuzzingbook.com/fuzzing&#39;
-urlunsplit(components=(&#39;https&#39;, &#39;mark:zuckerberg@facebook.com:666&#39;, &#39;/friends&#39;, &#39;&#39;, &#39;&#39;))
-	= &#39;https://mark:zuckerberg@facebook.com:666/friends&#39;
-</pre>
-</div>
-
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlunparse_fuzzer</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">api_grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s1">&#39;&lt;urlunparse&gt;&#39;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="n">do_call</span><span class="p">(</span><span class="n">urlunparse_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>urlunparse(components=ParseResult(scheme=&#39;https&#39;, netloc=&#39;andreas:zeller@cispa.saarland:8080&#39;, path=&#39;/faculty/q&#39;, params=&#39;&#39;, query=&#39;=zeller&#39;, fragment=&#39;&#39;))
-	= &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;
-urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&#39;, path=&#39;/query&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;http://google.com/query&#39;
-urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;fuzzingbook.com&#39;, path=&#39;/fuzzing&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;http://fuzzingbook.com/fuzzing&#39;
-urlunparse(components=ParseResult(scheme=&#39;https&#39;, netloc=&#39;andreas:zeller@cispa.saarland:8080&#39;, path=&#39;/faculty/q&#39;, params=&#39;&#39;, query=&#39;=zeller&#39;, fragment=&#39;&#39;))
-	= &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;
-urlunparse(components=ParseResult(scheme=&#39;https&#39;, netloc=&#39;andreas:zeller@cispa.saarland:8080&#39;, path=&#39;/faculty/q&#39;, params=&#39;&#39;, query=&#39;=zeller&#39;, fragment=&#39;&#39;))
-	= &#39;https://andreas:zeller@cispa.saarland:8080/faculty/q?=zeller&#39;
-urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;microsoft.com&#39;, path=&#39;/windows&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;http://microsoft.com/windows&#39;
-urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&#39;, path=&#39;/query&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;http://google.com/query&#39;
-urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;microsoft.com&#39;, path=&#39;/windows&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;http://microsoft.com/windows&#39;
-urlunparse(components=ParseResult(scheme=&#39;https&#39;, netloc=&#39;mark:zuckerberg@facebook.com:666&#39;, path=&#39;/friends&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;https://mark:zuckerberg@facebook.com:666/friends&#39;
-urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&#39;, path=&#39;/query&#39;, params=&#39;&#39;, query=&#39;&#39;, fragment=&#39;&#39;))
-	= &#39;http://google.com/query&#39;
+ &#39;&lt;call&gt;&#39;: [&#39;&lt;power&gt;&#39;],
+ &#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;],
+ &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;],
+ &#39;&lt;power&gt;&#39;: [&#39;power(&lt;power-x&gt;, &lt;power-y&gt;)&#39;]}
 </pre>
 </div>
 
@@ -13331,24 +13201,7 @@ urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We can thus extract a grammar from a module simply by tracking its calls.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Deep-Values">Deep Values<a class="anchor-link" href="#Deep-Values">&#182;</a></h2></div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Non-primitive values need special handling in Python:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>...and then for fuzzing:</p>
 </div>
 </div>
 </div>
@@ -13360,153 +13213,8 @@ urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Expand a structured value into individual grammar rules       </span>
-<span class="k">def</span> <span class="nf">deep_value_expansions</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="c1"># print(&quot;Expanding&quot;, prefix, &quot;=&quot;, repr(value))</span>
-
-    <span class="n">grammar</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="n">attributes</span> <span class="o">=</span> <span class="n">value_attributes</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">attributes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># A class or named tuple</span>
-        <span class="n">attr_names</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">attribute</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
-                <span class="c1"># Internal attribute</span>
-                <span class="k">continue</span>
-            <span class="n">attr_name</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">attribute</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-            <span class="n">attr_names</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">attribute</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">))</span>
-            <span class="n">g</span> <span class="o">=</span> <span class="n">deep_value_expansions</span><span class="p">(</span><span class="n">attr_name</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">attribute</span><span class="p">))</span>
-            <span class="n">grammar</span> <span class="o">=</span> <span class="n">merge_grammars</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
-
-        <span class="n">expansion</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span>
-        <span class="n">first_attribute</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span> <span class="ow">in</span> <span class="n">attr_names</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">first_attribute</span><span class="p">:</span>
-                <span class="n">expansion</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span>
-            <span class="n">first_attribute</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">expansion</span> <span class="o">+=</span> <span class="n">attribute</span> <span class="o">+</span> <span class="s2">&quot; = &quot;</span> <span class="o">+</span> <span class="n">attr_name</span>
-        <span class="n">expansion</span> <span class="o">+=</span> <span class="s2">&quot;)&quot;</span>
-        <span class="n">grammar</span><span class="p">[</span><span class="n">prefix</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">expansion</span><span class="p">]</span>
-
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">(())):</span>
-        <span class="c1"># A tuple</span>
-        <span class="n">field_names</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)):</span>
-            <span class="n">field_name</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-            <span class="n">field_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field_name</span><span class="p">)</span>
-            <span class="n">g</span> <span class="o">=</span> <span class="n">deep_value_expansions</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="n">value</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
-            <span class="n">grammar</span> <span class="o">=</span> <span class="n">merge_grammars</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
-
-        <span class="n">grammar</span><span class="p">[</span><span class="n">prefix</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">field_names</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">]</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># Can only expand to value</span>
-        <span class="n">grammar</span><span class="p">[</span><span class="n">prefix</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
-
-    <span class="c1"># print(&quot;Expanded:&quot;, grammar_to_string(grammar))</span>
-    <span class="k">return</span> <span class="n">grammar</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
-<li><em>Lesson one</em></li>
-<li><em>Lesson two</em></li>
-<li><em>Lesson three</em></li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
-<ul>
-<li><a href="MutationFuzzer.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
-<li><a href="Grammars.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
-<li><a href="Reducer.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p><em>Cite relevant works in the literature and put them into context, as in:</em></p>
-<p>The idea of ensuring that each expansion in the grammar is used at least once goes back to Burkhardt [<a href="https://doi.org/10.1007/BF02235512">Burkhardt <em>et al</em>, 1967.</a>], to be later rediscovered by Paul Purdom [<a href="https://doi.org/10.1007/BF01932308">Purdom <em>et al</em>, 1972.</a>].</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p><em>Close the chapter with a few exercises such that people have things to do.  To make the solutions hidden (to be revealed by the user), have them start with</em></p>
-
-<pre><code>markdown
-**Solution.**</code></pre>
-<p><em>Your solution can then extend up to the next title (i.e., any markdown cell starting with <code>#</code>).</em></p>
-<p><em>Running <code>make metadata</code> will automatically add metadata to the cells such that the cells will be hidden by default, and can be uncovered by the user.  The button will be introduced above the solution.</em></p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Synthesizing-Oracles">Exercise 1: Synthesizing Oracles<a class="anchor-link" href="#Exercise-1:-Synthesizing-Oracles">&#182;</a></h3><p>The tests we generate for <code>urlparse()</code> only check if <code>urlparse()</code> fails as a whole (i.e. crashes or raises an exception).  Set up a testing framework that ensures that the elements originally created (i.e., <code>scheme</code>, <code>path</code>, etc.) also occur in the result.  Here's an example of a test that you could synthesize:</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="s2">&quot;https://www.fuzzingbook.org&quot;</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">scheme</span> <span class="o">==</span> <span class="s2">&quot;https&quot;</span>
-<span class="k">assert</span> <span class="n">result</span><span class="o">.</span><span class="n">netloc</span> <span class="o">==</span> <span class="s2">&quot;www.fuzzingbook.org&quot;</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Unfortunately, you cannot generate such tests via grammars alone (at least not via a context-free grammar, as we use them).  However, you can make use of the <a href="GrammarFuzzer.html">derivation tree</a> from which the input is created.  As a first step, after creating the input, access its derivation tree via the <code>derivation_tree</code> attribute:</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlparse_fuzzer</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">URLPARSE_GRAMMAR</span><span class="p">)</span>
-<span class="n">call</span> <span class="o">=</span> <span class="n">urlparse_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-<span class="n">call</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">power_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">power_grammar</span><span class="p">)</span>
+<span class="p">[</span><span class="n">power_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
 </pre></div>
 
 </div>
@@ -13517,7 +13225,309 @@ urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;urlparse(&#34;ftps://www.google.com:80/?x27=abc&amp;abc=def&#34;)&#39;
+<pre>[&#39;power(3, 2)&#39;, &#39;power(1, 4)&#39;, &#39;power(3, 4)&#39;, &#39;power(3, 4)&#39;, &#39;power(3, 2)&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>With this, we have successfully extracted a grammar from a recorded execution; in contrast to "simple" carving, our grammar allows us to <em>recombine</em> arguments and thus to fuzz at the API level.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Fuzzing-Web-Functions">Fuzzing Web Functions<a class="anchor-link" href="#Fuzzing-Web-Functions">&#182;</a></h3><p>Let us now apply our grammar miner on a larger API – the <code>urlparse</code> API we already encountered during carving.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Carver.html" class="import" target="_blank">Carver</a></span> <span class="k">import</span> <span class="n">webbrowser</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CallCarver</span><span class="p">()</span> <span class="k">as</span> <span class="n">webbrowser_carver</span><span class="p">:</span>
+    <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;http://www.fuzzingbook.org&quot;</span><span class="p">)</span>
+    <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;https://www.example.com&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can mine a grammar from the calls encountered:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">webbrowser_carver</span><span class="p">)</span>
+<span class="n">webbrowser_grammar</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_call_grammar</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is a rather large grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s1">&#39;&lt;call&gt;&#39;</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[&#39;&lt;webbrowser&gt;&#39;, &#39;&lt;urlopen&gt;&#39;, &#39;&lt;build_opener&gt;&#39;, &#39;&lt;getproxies&gt;&#39;, &#39;&lt;getproxies_environment&gt;&#39;, &#39;&lt;items&gt;&#39;, &#39;&lt;encode&gt;&#39;, &#39;&lt;getproxies_macosx_sysconf&gt;&#39;, &#39;&lt;add_handler&gt;&#39;, &#39;&lt;add_parent&gt;&#39;, &#39;&lt;open&gt;&#39;, &#39;&lt;full_url&gt;&#39;, &#39;&lt;unwrap&gt;&#39;, &#39;&lt;splittag&gt;&#39;, &#39;&lt;splittype&gt;&#39;, &#39;&lt;compile&gt;&#39;, &#39;&lt;isstring&gt;&#39;, &#39;&lt;parse&gt;&#39;, &#39;&lt;tell&gt;&#39;, &#39;&lt;get&gt;&#39;, &#39;&lt;match&gt;&#39;, &#39;&lt;opengroup&gt;&#39;, &#39;&lt;groups&gt;&#39;, &#39;&lt;append&gt;&#39;, &#39;&lt;closegroup&gt;&#39;, &#39;&lt;getwidth&gt;&#39;, &#39;&lt;fix_flags&gt;&#39;, &#39;&lt;splithost&gt;&#39;, &#39;&lt;unquote&gt;&#39;, &#39;&lt;data&gt;&#39;, &#39;&lt;request_host&gt;&#39;, &#39;&lt;urlparse&gt;&#39;, &#39;&lt;urlsplit&gt;&#39;, &#39;&lt;do_request_&gt;&#39;, &#39;&lt;has_proxy&gt;&#39;, &#39;&lt;has_header&gt;&#39;, &#39;&lt;add_unredirected_header&gt;&#39;, &#39;&lt;http_open&gt;&#39;, &#39;&lt;do_open&gt;&#39;, &#39;&lt;get_method&gt;&#39;, &#39;&lt;create_connection&gt;&#39;, &#39;&lt;getaddrinfo&gt;&#39;, &#39;&lt;search_function&gt;&#39;, &#39;&lt;normalize_encoding&gt;&#39;, &#39;&lt;getregentry&gt;&#39;, &#39;&lt;readable&gt;&#39;, &#39;&lt;begin&gt;&#39;, &#39;&lt;parsestr&gt;&#39;, &#39;&lt;push&gt;&#39;, &#39;&lt;pushlines&gt;&#39;, &#39;&lt;readline&gt;&#39;, &#39;&lt;header_source_parse&gt;&#39;, &#39;&lt;set_raw&gt;&#39;, &#39;&lt;get_content_type&gt;&#39;, &#39;&lt;header_fetch_parse&gt;&#39;, &#39;&lt;get_content_maintype&gt;&#39;, &#39;&lt;set_payload&gt;&#39;, &#39;&lt;get_full_url&gt;&#39;, &#39;&lt;http_response&gt;&#39;, &#39;&lt;info&gt;&#39;, &#39;&lt;error&gt;&#39;, &#39;&lt;http_error_302&gt;&#39;, &#39;&lt;urlunparse&gt;&#39;, &#39;&lt;urlunsplit&gt;&#39;, &#39;&lt;quote&gt;&#39;, &#39;&lt;quote_from_bytes&gt;&#39;, &#39;&lt;urljoin&gt;&#39;, &#39;&lt;redirect_request&gt;&#39;, &#39;&lt;flush&gt;&#39;, &#39;&lt;https_open&gt;&#39;, &#39;&lt;match_hostname&gt;&#39;, &#39;&lt;ip_address&gt;&#39;, &#39;&lt;getcode&gt;&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's the rule for the <code>urlsplit()</code> function:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlsplit&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;urlsplit(&lt;urlsplit-url&gt;, &lt;urlsplit-scheme&gt;, &lt;urlsplit-allow_fragments&gt;)&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here are the arguments.  Note that although we only passed <code>http://www.fuzzingbook.org</code> as a parameter, we also see the <code>https:</code> variant.  That is because opening the <code>http:</code> URL automatically redirects to the <code>https:</code> URL, which is then also processed by <code>urlsplit()</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlsplit-url&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#34;&#39;http://www.fuzzingbook.org&#39;&#34;,
+ &#34;&#39;https://www.example.com&#39;&#34;,
+ &#34;&#39;https://www.fuzzingbook.org/&#39;&#34;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>There also is some variation in the <code>scheme</code> argument:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlsplit-scheme&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#34;&#39;&#39;&#34;, &#34;&#39;http&#39;&#34;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we now apply a fuzzer on these rules, we systematically cover all variations of arguments seen, including, of course, combinations not seen during carving.  Again, we are fuzzing at the API level here.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlsplit_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">webbrowser_grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;urlsplit&gt;&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">urlsplit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit(&#39;http://www.fuzzingbook.org&#39;, &#39;http&#39;, True)
+urlsplit(&#39;https://www.example.com&#39;, &#39;&#39;, True)
+urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;http&#39;, True)
+urlsplit(&#39;https://www.example.com&#39;, &#39;http&#39;, True)
+urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;http&#39;, True)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Just <a href="Carver.html">as seen with carving</a>, running tests at the API level is orders of magnitude faster than executing system tests.  Hence, this calls for means to fuzz at the method level:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/urllib.parse.html" class="import" target="_blank">urllib.parse</a></span> <span class="k">import</span> <span class="n">urlsplit</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Timer.html" class="import" target="_blank">Timer</a></span> <span class="k">import</span> <span class="n">Timer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">urlsplit_timer</span><span class="p">:</span>
+    <span class="n">urlsplit</span><span class="p">(</span><span class="s1">&#39;http://www.fuzzingbook.org/&#39;</span><span class="p">,</span> <span class="s1">&#39;http&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">urlsplit_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>1.4614000974688679e-05
 </pre>
 </div>
 
@@ -13529,8 +13539,9 @@ urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">call_tree</span> <span class="o">=</span> <span class="n">urlparse_fuzzer</span><span class="o">.</span><span class="n">derivation_tree</span>
-<span class="n">display_tree</span><span class="p">(</span><span class="n">call_tree</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">webbrowser_timer</span><span class="p">:</span>
+    <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;http://www.fuzzingbook.org&quot;</span><span class="p">)</span>
+<span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -13540,432 +13551,40 @@ urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&
 
 <div class="output_area">
 
-<div class="output_image output_svg output_subarea ">
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
- "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
- -->
-<!-- Title: %3 Pages: 1 -->
-<svg width="355pt" height="431pt"
- viewBox="0.00 0.00 354.50 431.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 427)">
-<title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-427 350.5,-427 350.5,4 -4,4"/>
-<!-- 0 -->
-<g id="node1" class="node">
-<title>0</title>
-<text text-anchor="middle" x="115" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
-</g>
-<!-- 1 -->
-<g id="node2" class="node">
-<title>1</title>
-<text text-anchor="middle" x="115" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;call&gt;</text>
-</g>
-<!-- 0&#45;&gt;1 -->
-<g id="edge1" class="edge">
-<title>0&#45;&gt;1</title>
-<path fill="none" stroke="#000000" d="M115,-407.9748C115,-401.195 115,-390.966 115,-382.1331"/>
-<polygon fill="#000000" stroke="#000000" points="118.5001,-382.0561 115,-372.0561 111.5001,-382.0561 118.5001,-382.0561"/>
-</g>
-<!-- 2 -->
-<g id="node3" class="node">
-<title>2</title>
-<text text-anchor="middle" x="64" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">urlparse(&quot;</text>
-</g>
-<!-- 1&#45;&gt;2 -->
-<g id="edge2" class="edge">
-<title>1&#45;&gt;2</title>
-<path fill="none" stroke="#000000" d="M107.4748,-356.9748C99.9417,-349.4417 88.1503,-337.6503 78.7472,-328.2472"/>
-<polygon fill="#000000" stroke="#000000" points="81.1021,-325.6523 71.5561,-321.0561 76.1523,-330.6021 81.1021,-325.6523"/>
-</g>
-<!-- 3 -->
-<g id="node4" class="node">
-<title>3</title>
-<text text-anchor="middle" x="115" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;url&gt;</text>
-</g>
-<!-- 1&#45;&gt;3 -->
-<g id="edge3" class="edge">
-<title>1&#45;&gt;3</title>
-<path fill="none" stroke="#000000" d="M115,-356.9748C115,-350.195 115,-339.966 115,-331.1331"/>
-<polygon fill="#000000" stroke="#000000" points="118.5001,-331.0561 115,-321.0561 111.5001,-331.0561 118.5001,-331.0561"/>
-</g>
-<!-- 36 -->
-<g id="node37" class="node">
-<title>36</title>
-<text text-anchor="middle" x="149" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&quot;)</text>
-</g>
-<!-- 1&#45;&gt;36 -->
-<g id="edge36" class="edge">
-<title>1&#45;&gt;36</title>
-<path fill="none" stroke="#000000" d="M120.0168,-356.9748C125.0597,-349.4105 132.9649,-337.5527 139.2463,-328.1306"/>
-<polygon fill="#000000" stroke="#000000" points="142.1854,-330.0316 144.8203,-319.7696 136.3611,-326.1486 142.1854,-330.0316"/>
-</g>
-<!-- 4 -->
-<g id="node5" class="node">
-<title>4</title>
-<text text-anchor="middle" x="22" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;scheme&gt;</text>
-</g>
-<!-- 3&#45;&gt;4 -->
-<g id="edge4" class="edge">
-<title>3&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M102.8419,-306.8326C88.1673,-298.7853 63.1829,-285.0842 44.8646,-275.0386"/>
-<polygon fill="#000000" stroke="#000000" points="46.4339,-271.9075 35.9828,-270.168 43.068,-278.0452 46.4339,-271.9075"/>
-</g>
-<!-- 6 -->
-<g id="node7" class="node">
-<title>6</title>
-<text text-anchor="middle" x="67" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">://</text>
-</g>
-<!-- 3&#45;&gt;6 -->
-<g id="edge6" class="edge">
-<title>3&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M107.9174,-305.9748C100.1722,-297.7455 87.6443,-284.4346 78.4886,-274.7067"/>
-<polygon fill="#000000" stroke="#000000" points="80.9181,-272.1812 71.5157,-267.298 75.8207,-276.9788 80.9181,-272.1812"/>
-</g>
-<!-- 7 -->
-<g id="node8" class="node">
-<title>7</title>
-<text text-anchor="middle" x="115" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;authority&gt;</text>
-</g>
-<!-- 3&#45;&gt;7 -->
-<g id="edge7" class="edge">
-<title>3&#45;&gt;7</title>
-<path fill="none" stroke="#000000" d="M115,-305.9748C115,-299.195 115,-288.966 115,-280.1331"/>
-<polygon fill="#000000" stroke="#000000" points="118.5001,-280.0561 115,-270.0561 111.5001,-280.0561 118.5001,-280.0561"/>
-</g>
-<!-- 13 -->
-<g id="node14" class="node">
-<title>13</title>
-<text text-anchor="middle" x="173" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;path&gt;</text>
-</g>
-<!-- 3&#45;&gt;13 -->
-<g id="edge13" class="edge">
-<title>3&#45;&gt;13</title>
-<path fill="none" stroke="#000000" d="M123.5581,-305.9748C132.2965,-298.291 146.0732,-286.177 156.867,-276.6859"/>
-<polygon fill="#000000" stroke="#000000" points="159.2082,-279.2879 164.4068,-270.0561 154.5859,-274.0311 159.2082,-279.2879"/>
-</g>
-<!-- 15 -->
-<g id="node16" class="node">
-<title>15</title>
-<text text-anchor="middle" x="224" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;query&gt;</text>
-</g>
-<!-- 3&#45;&gt;15 -->
-<g id="edge15" class="edge">
-<title>3&#45;&gt;15</title>
-<path fill="none" stroke="#000000" d="M127.0814,-307.8472C144.1738,-299.8499 175.8337,-285.0365 198.3136,-274.5184"/>
-<polygon fill="#000000" stroke="#000000" points="200.0391,-277.5753 207.6134,-270.1671 197.0725,-271.235 200.0391,-277.5753"/>
-</g>
-<!-- 5 -->
-<g id="node6" class="node">
-<title>5</title>
-<text text-anchor="middle" x="22" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">ftps</text>
-</g>
-<!-- 4&#45;&gt;5 -->
-<g id="edge5" class="edge">
-<title>4&#45;&gt;5</title>
-<path fill="none" stroke="#000000" d="M22,-254.9748C22,-248.195 22,-237.966 22,-229.1331"/>
-<polygon fill="#000000" stroke="#000000" points="25.5001,-229.0561 22,-219.0561 18.5001,-229.0561 25.5001,-229.0561"/>
-</g>
-<!-- 8 -->
-<g id="node9" class="node">
-<title>8</title>
-<text text-anchor="middle" x="75" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;host&gt;</text>
-</g>
-<!-- 7&#45;&gt;8 -->
-<g id="edge8" class="edge">
-<title>7&#45;&gt;8</title>
-<path fill="none" stroke="#000000" d="M109.0979,-254.9748C103.3668,-247.6677 94.4933,-236.354 87.2351,-227.0997"/>
-<polygon fill="#000000" stroke="#000000" points="89.8518,-224.7647 80.9264,-219.0561 84.3438,-229.0847 89.8518,-224.7647"/>
-</g>
-<!-- 10 -->
-<g id="node11" class="node">
-<title>10</title>
-<text text-anchor="middle" x="110" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">:</text>
-</g>
-<!-- 7&#45;&gt;10 -->
-<g id="edge10" class="edge">
-<title>7&#45;&gt;10</title>
-<path fill="none" stroke="#000000" d="M114.2622,-254.9748C113.5975,-248.195 112.5947,-237.966 111.7287,-229.1331"/>
-<polygon fill="#000000" stroke="#000000" points="115.1999,-228.6669 110.7408,-219.0561 108.2333,-229.3499 115.1999,-228.6669"/>
-</g>
-<!-- 11 -->
-<g id="node12" class="node">
-<title>11</title>
-<text text-anchor="middle" x="144" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;port&gt;</text>
-</g>
-<!-- 7&#45;&gt;11 -->
-<g id="edge11" class="edge">
-<title>7&#45;&gt;11</title>
-<path fill="none" stroke="#000000" d="M119.279,-254.9748C123.3056,-247.8936 129.4716,-237.05 134.6381,-227.9641"/>
-<polygon fill="#000000" stroke="#000000" points="137.8028,-229.4791 139.7034,-219.0561 131.7178,-226.0189 137.8028,-229.4791"/>
-</g>
-<!-- 9 -->
-<g id="node10" class="node">
-<title>9</title>
-<text text-anchor="middle" x="75" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">www.google.com</text>
-</g>
-<!-- 8&#45;&gt;9 -->
-<g id="edge9" class="edge">
-<title>8&#45;&gt;9</title>
-<path fill="none" stroke="#000000" d="M75,-203.9748C75,-197.195 75,-186.966 75,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="78.5001,-178.0561 75,-168.0561 71.5001,-178.0561 78.5001,-178.0561"/>
-</g>
-<!-- 12 -->
-<g id="node13" class="node">
-<title>12</title>
-<text text-anchor="middle" x="144" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">80</text>
-</g>
-<!-- 11&#45;&gt;12 -->
-<g id="edge12" class="edge">
-<title>11&#45;&gt;12</title>
-<path fill="none" stroke="#000000" d="M144,-203.9748C144,-197.195 144,-186.966 144,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="147.5001,-178.0561 144,-168.0561 140.5001,-178.0561 147.5001,-178.0561"/>
-</g>
-<!-- 14 -->
-<g id="node15" class="node">
-<title>14</title>
-<text text-anchor="middle" x="178" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">/</text>
-</g>
-<!-- 13&#45;&gt;14 -->
-<g id="edge14" class="edge">
-<title>13&#45;&gt;14</title>
-<path fill="none" stroke="#000000" d="M173.7378,-254.9748C174.4025,-248.195 175.4053,-237.966 176.2713,-229.1331"/>
-<polygon fill="#000000" stroke="#000000" points="179.7667,-229.3499 177.2592,-219.0561 172.8001,-228.6669 179.7667,-229.3499"/>
-</g>
-<!-- 16 -->
-<g id="node17" class="node">
-<title>16</title>
-<text text-anchor="middle" x="214" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">?</text>
-</g>
-<!-- 15&#45;&gt;16 -->
-<g id="edge16" class="edge">
-<title>15&#45;&gt;16</title>
-<path fill="none" stroke="#000000" d="M222.5245,-254.9748C221.1951,-248.195 219.1894,-237.966 217.4575,-229.1331"/>
-<polygon fill="#000000" stroke="#000000" points="220.8404,-228.1958 215.4816,-219.0561 213.9712,-229.5427 220.8404,-228.1958"/>
-</g>
-<!-- 17 -->
-<g id="node18" class="node">
-<title>17</title>
-<text text-anchor="middle" x="256" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;params&gt;</text>
-</g>
-<!-- 15&#45;&gt;17 -->
-<g id="edge17" class="edge">
-<title>15&#45;&gt;17</title>
-<path fill="none" stroke="#000000" d="M228.7217,-254.9748C233.212,-247.8183 240.1137,-236.8188 245.8512,-227.6747"/>
-<polygon fill="#000000" stroke="#000000" points="248.9087,-229.387 251.2589,-219.0561 242.9792,-225.6665 248.9087,-229.387"/>
-</g>
-<!-- 18 -->
-<g id="node19" class="node">
-<title>18</title>
-<text text-anchor="middle" x="211" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;param&gt;</text>
-</g>
-<!-- 17&#45;&gt;18 -->
-<g id="edge18" class="edge">
-<title>17&#45;&gt;18</title>
-<path fill="none" stroke="#000000" d="M249.3601,-203.9748C242.8462,-196.5923 232.7238,-185.1203 224.5125,-175.8142"/>
-<polygon fill="#000000" stroke="#000000" points="226.9078,-173.2388 217.6671,-168.0561 221.659,-177.8702 226.9078,-173.2388"/>
-</g>
-<!-- 28 -->
-<g id="node29" class="node">
-<title>28</title>
-<text text-anchor="middle" x="256" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&amp;</text>
-</g>
-<!-- 17&#45;&gt;28 -->
-<g id="edge28" class="edge">
-<title>17&#45;&gt;28</title>
-<path fill="none" stroke="#000000" d="M256,-203.9748C256,-197.195 256,-186.966 256,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="259.5001,-178.0561 256,-168.0561 252.5001,-178.0561 259.5001,-178.0561"/>
-</g>
-<!-- 29 -->
-<g id="node30" class="node">
-<title>29</title>
-<text text-anchor="middle" x="302" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;params&gt;</text>
-</g>
-<!-- 17&#45;&gt;29 -->
-<g id="edge29" class="edge">
-<title>17&#45;&gt;29</title>
-<path fill="none" stroke="#000000" d="M262.7875,-203.9748C269.5141,-196.517 280.005,-184.8857 288.4436,-175.53"/>
-<polygon fill="#000000" stroke="#000000" points="291.086,-177.826 295.1847,-168.0561 285.888,-173.1376 291.086,-177.826"/>
-</g>
-<!-- 19 -->
-<g id="node20" class="node">
-<title>19</title>
-<text text-anchor="middle" x="158" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
-</g>
-<!-- 18&#45;&gt;19 -->
-<g id="edge19" class="edge">
-<title>18&#45;&gt;19</title>
-<path fill="none" stroke="#000000" d="M203.1797,-152.9748C195.3511,-145.4417 183.0974,-133.6503 173.3255,-124.2472"/>
-<polygon fill="#000000" stroke="#000000" points="175.485,-121.4679 165.8524,-117.0561 170.6313,-126.5119 175.485,-121.4679"/>
-</g>
-<!-- 25 -->
-<g id="node26" class="node">
-<title>25</title>
-<text text-anchor="middle" x="204" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">=</text>
-</g>
-<!-- 18&#45;&gt;25 -->
-<g id="edge25" class="edge">
-<title>18&#45;&gt;25</title>
-<path fill="none" stroke="#000000" d="M209.9671,-152.9748C209.0366,-146.195 207.6326,-135.966 206.4202,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="209.8645,-126.4873 205.0371,-117.0561 202.9295,-127.4392 209.8645,-126.4873"/>
-</g>
-<!-- 26 -->
-<g id="node27" class="node">
-<title>26</title>
-<text text-anchor="middle" x="236" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
-</g>
-<!-- 18&#45;&gt;26 -->
-<g id="edge26" class="edge">
-<title>18&#45;&gt;26</title>
-<path fill="none" stroke="#000000" d="M214.6888,-152.9748C218.1231,-145.969 223.3626,-135.2803 227.7869,-126.2547"/>
-<polygon fill="#000000" stroke="#000000" points="231.0371,-127.5759 232.296,-117.0561 224.7517,-124.4947 231.0371,-127.5759"/>
-</g>
-<!-- 20 -->
-<g id="node21" class="node">
-<title>20</title>
-<text text-anchor="middle" x="107" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">x</text>
-</g>
-<!-- 19&#45;&gt;20 -->
-<g id="edge20" class="edge">
-<title>19&#45;&gt;20</title>
-<path fill="none" stroke="#000000" d="M150.4748,-101.9748C141.7312,-93.2312 127.2509,-78.7509 117.4268,-68.9268"/>
-<polygon fill="#000000" stroke="#000000" points="119.7992,-66.3495 110.2533,-61.7533 114.8495,-71.2992 119.7992,-66.3495"/>
-</g>
-<!-- 21 -->
-<g id="node22" class="node">
-<title>21</title>
-<text text-anchor="middle" x="144" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 19&#45;&gt;21 -->
-<g id="edge21" class="edge">
-<title>19&#45;&gt;21</title>
-<path fill="none" stroke="#000000" d="M155.9343,-101.9748C154.0524,-95.1196 151.2027,-84.7383 148.7598,-75.8392"/>
-<polygon fill="#000000" stroke="#000000" points="152.0966,-74.7728 146.0742,-66.0561 145.3463,-76.6259 152.0966,-74.7728"/>
-</g>
-<!-- 23 -->
-<g id="node24" class="node">
-<title>23</title>
-<text text-anchor="middle" x="194" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 19&#45;&gt;23 -->
-<g id="edge23" class="edge">
-<title>19&#45;&gt;23</title>
-<path fill="none" stroke="#000000" d="M163.3119,-101.9748C168.4167,-94.743 176.2916,-83.5868 182.7859,-74.3866"/>
-<polygon fill="#000000" stroke="#000000" points="185.7588,-76.2442 188.6663,-66.0561 180.04,-72.2074 185.7588,-76.2442"/>
-</g>
-<!-- 22 -->
-<g id="node23" class="node">
-<title>22</title>
-<text text-anchor="middle" x="144" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
-</g>
-<!-- 21&#45;&gt;22 -->
-<g id="edge22" class="edge">
-<title>21&#45;&gt;22</title>
-<path fill="none" stroke="#000000" d="M144,-50.9748C144,-44.195 144,-33.966 144,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="147.5001,-25.0561 144,-15.0561 140.5001,-25.0561 147.5001,-25.0561"/>
-</g>
-<!-- 24 -->
-<g id="node25" class="node">
-<title>24</title>
-<text text-anchor="middle" x="194" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">7</text>
-</g>
-<!-- 23&#45;&gt;24 -->
-<g id="edge24" class="edge">
-<title>23&#45;&gt;24</title>
-<path fill="none" stroke="#000000" d="M194,-50.9748C194,-44.195 194,-33.966 194,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="197.5001,-25.0561 194,-15.0561 190.5001,-25.0561 197.5001,-25.0561"/>
-</g>
-<!-- 27 -->
-<g id="node28" class="node">
-<title>27</title>
-<text text-anchor="middle" x="236" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">abc</text>
-</g>
-<!-- 26&#45;&gt;27 -->
-<g id="edge27" class="edge">
-<title>26&#45;&gt;27</title>
-<path fill="none" stroke="#000000" d="M236,-101.9748C236,-95.195 236,-84.966 236,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="239.5001,-76.0561 236,-66.0561 232.5001,-76.0561 239.5001,-76.0561"/>
-</g>
-<!-- 30 -->
-<g id="node31" class="node">
-<title>30</title>
-<text text-anchor="middle" x="303" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;param&gt;</text>
-</g>
-<!-- 29&#45;&gt;30 -->
-<g id="edge30" class="edge">
-<title>29&#45;&gt;30</title>
-<path fill="none" stroke="#000000" d="M302.1476,-152.9748C302.2805,-146.195 302.4811,-135.966 302.6543,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="306.155,-127.1228 302.8518,-117.0561 299.1564,-126.9855 306.155,-127.1228"/>
-</g>
-<!-- 31 -->
-<g id="node32" class="node">
-<title>31</title>
-<text text-anchor="middle" x="272" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
-</g>
-<!-- 30&#45;&gt;31 -->
-<g id="edge31" class="edge">
-<title>30&#45;&gt;31</title>
-<path fill="none" stroke="#000000" d="M298.4258,-101.9748C294.0758,-94.8183 287.3899,-83.8188 281.8317,-74.6747"/>
-<polygon fill="#000000" stroke="#000000" points="284.778,-72.7834 276.5929,-66.0561 278.7963,-76.4193 284.778,-72.7834"/>
-</g>
-<!-- 33 -->
-<g id="node34" class="node">
-<title>33</title>
-<text text-anchor="middle" x="304" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">=</text>
-</g>
-<!-- 30&#45;&gt;33 -->
-<g id="edge33" class="edge">
-<title>30&#45;&gt;33</title>
-<path fill="none" stroke="#000000" d="M303.1476,-101.9748C303.2805,-95.195 303.4811,-84.966 303.6543,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="307.155,-76.1228 303.8518,-66.0561 300.1564,-75.9855 307.155,-76.1228"/>
-</g>
-<!-- 34 -->
-<g id="node35" class="node">
-<title>34</title>
-<text text-anchor="middle" x="336" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
-</g>
-<!-- 30&#45;&gt;34 -->
-<g id="edge34" class="edge">
-<title>30&#45;&gt;34</title>
-<path fill="none" stroke="#000000" d="M307.8693,-101.9748C312.4999,-94.8183 319.6172,-83.8188 325.534,-74.6747"/>
-<polygon fill="#000000" stroke="#000000" points="328.6167,-76.3532 331.1108,-66.0561 322.7397,-72.5504 328.6167,-76.3532"/>
-</g>
-<!-- 32 -->
-<g id="node33" class="node">
-<title>32</title>
-<text text-anchor="middle" x="272" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">abc</text>
-</g>
-<!-- 31&#45;&gt;32 -->
-<g id="edge32" class="edge">
-<title>31&#45;&gt;32</title>
-<path fill="none" stroke="#000000" d="M272,-50.9748C272,-44.195 272,-33.966 272,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="275.5001,-25.0561 272,-15.0561 268.5001,-25.0561 275.5001,-25.0561"/>
-</g>
-<!-- 35 -->
-<g id="node36" class="node">
-<title>35</title>
-<text text-anchor="middle" x="336" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">def</text>
-</g>
-<!-- 34&#45;&gt;35 -->
-<g id="edge35" class="edge">
-<title>34&#45;&gt;35</title>
-<path fill="none" stroke="#000000" d="M336,-50.9748C336,-44.195 336,-33.966 336,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="339.5001,-25.0561 336,-15.0561 332.5001,-25.0561 339.5001,-25.0561"/>
-</g>
-</g>
-</svg>
-
+<div class="output_text output_subarea output_execute_result">
+<pre>0.08705351199751021
+</pre>
 </div>
 
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>In a second step, write a function <code>get_element()</code> that extracts individual elements from that tree (by symbol name):</p>
-<div class="highlight"><pre><span></span><span class="k">assert</span> <span class="n">get_element</span><span class="p">(</span><span class="n">call_tree</span><span class="p">,</span> <span class="s2">&quot;&lt;scheme&gt;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;http&quot;</span>
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span> <span class="o">/</span> <span class="n">urlsplit_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
 </pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>5956.85686269531
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>But then again, the caveats encountered during carving apply, notably the requirement to recreate the original function environment.  If we also alter or recombine arguments, we get the additional risk of <em>violating an implicit precondition</em> – that is, invoking a function with arguments the function was never designed for.  Such <em>false alarms</em>, resulting from incorrect invocations rather than incorrect implementations, must then be identified (typically manually) and wed out (for instance, by altering or constraining the grammar).  The huge speed gains at the API level, however, may well justify this additional investment.</p>
 </div>
 </div>
 </div>
@@ -13974,7 +13593,51 @@ urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Use both the generated input as well as extracted elements to create assertions for <code>urlparse()</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
+<li>To fuzz individual functions, one can easily set up grammars that produce function calls.</li>
+<li>Such grammars can also be mined (carved) from given executions.</li>
+<li>Fuzzing at the API level can be much faster than fuzzing at the system level, but brings the risk of false alarms by violating implicit preconditions.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>To extend the techniques just introduced, you can</p>
+<ul>
+<li><a href="SearchBasedFuzzer.html">use <em>search-based testing</em> to guide test generation towards specific goals</a></li>
+<li><a href="ConstraintGrammarFuzzer.html">use <em>constraints</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>The combination of carving and fuzzing at the API level was first conducted by Alexander Kampmann in his PhD work.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p>The exercises for this chapter combine the above techniques with fuzzing techniques introduced earlier.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Covering-Argument-Combinations">Exercise 1: Covering Argument Combinations<a class="anchor-link" href="#Exercise-1:-Covering-Argument-Combinations">&#182;</a></h3><p>In the chapter on <a href="ConfigurationFuzzer.html">configuration testing</a>, we also discussed <em>combinatorial testing</em> – that is, systematic coverage of <em>sets</em> of configuration elements.  Implement a scheme that by changing the grammar, allows all <em>pairs</em> of argument values to be covered.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/APIFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -13986,7 +13649,20 @@ urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-Title">Exercise 2: <em>Title</em><a class="anchor-link" href="#Exercise-2:-Title">&#182;</a></h3><p><em>Text of the exercise</em></p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-Mutating-Arguments">Exercise 2: Mutating Arguments<a class="anchor-link" href="#Exercise-2:-Mutating-Arguments">&#182;</a></h3><p>To widen the range of arguments to be used during testing, apply the <em>mutation schemes</em> introduced in <a href="MutationFuzzer.html">mutation fuzzing</a> – for instance, flip individual bytes or delete characters from strings.  Apply this either during grammar inference or as a separate step when invoking functions.</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/APIFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-3:-Abstracting-Arguments">Exercise 3: Abstracting Arguments<a class="anchor-link" href="#Exercise-3:-Abstracting-Arguments">&#182;</a></h3><p>Set up an abstraction scheme to widen the range of arguments to be used during testing.  If the values for an argument, all conform to some type <code>T</code>. abstract it into <code>&lt;T&gt;</code>.  For instance, if calls to <code>foo(1)</code>, <code>foo(2)</code>, <code>foo(3)</code> have been seen, the grammar should abstract its calls into <code>foo(&lt;int&gt;)</code>, with <code>&lt;int&gt;</code> being appropriately defined.</p>
+<p>Do this for a number of common types: integers, positive numbers, floating-point numbers, host names, URLs, mail addresses, and more.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/APIFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -14001,7 +13677,7 @@ urlunparse(components=ParseResult(scheme=&#39;http&#39;, netloc=&#39;google.com&
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/APIFuzzer.ipynb" target=_blank)>Last change: 2018-10-30 13:41:25+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/APIFuzzer.ipynb" target=_blank)>Last change: 2018-11-05 17:57:29+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14017,7 +13693,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">Fuzzing APIs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">https://www.fuzzingbook.org/beta/html/APIFuzzer.html</a>.  Retrieved 2018-10-30 13:41:25+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">Fuzzing APIs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">https://www.fuzzingbook.org/beta/html/APIFuzzer.html</a>.  Retrieved 2018-11-05 17:57:29+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:APIFuzzer,
@@ -14027,9 +13703,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/APIFuzzer.html}},
-    note = {Retrieved 2018-10-30 13:41:25+01:00},
+    note = {Retrieved 2018-11-05 17:57:29+01:00},
     url = {https://www.fuzzingbook.org/beta/html/APIFuzzer.html},
-    urldate = {2018-10-30 13:41:25+01:00}
+    urldate = {2018-11-05 17:57:29+01:00}
 }
 </pre>
 </div>

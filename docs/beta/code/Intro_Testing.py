@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
-# Last change: 2018-10-30 13:41:25+01:00
+# Last change: 2018-11-05 16:38:54+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -511,8 +511,14 @@ if __name__ == "__main__":
 def quadratic_solver_fixed(a, b, c):
     if a == 0:
         if b == 0:
-            return (-c, None)
-        return (-c / b, None)
+            if c == 0:
+                # Actually, any value of x
+                return (0, None)
+            else:
+                # No value of x can satisfy c = 0
+                return (None, None)
+        else:
+            return (-c / b, None)
 
     q = b * b - 4 * a * c
     if q < 0:
@@ -525,7 +531,6 @@ def quadratic_solver_fixed(a, b, c):
     solution_1 = (-b + my_sqrt_fixed(q)) / (2 * a)
     solution_2 = (-b - my_sqrt_fixed(q)) / (2 * a)
     return (solution_1, solution_2)
-
 
 if __name__ == "__main__":
     with ExpectError():

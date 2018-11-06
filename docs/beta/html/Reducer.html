@@ -11876,7 +11876,6 @@ MathJax.Hub.Config({
 <li><a href="Parser.html">Parsing and Recombining Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Reducer.html" class="this_page">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="GrammarMiner.html">Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Carver.html">Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="APIFuzzer.html">Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 
@@ -12336,7 +12335,8 @@ the first quarter, the second quarter, and so on.</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">input_without_first_and_third_quarter</span> <span class="o">=</span> <span class="n">failing_input</span><span class="p">[</span><span class="n">quarter_length</span><span class="p">:</span><span class="n">quarter_length</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">failing_input</span><span class="p">[</span><span class="n">quarter_length</span> <span class="o">*</span> <span class="mi">3</span><span class="p">:]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">input_without_first_and_third_quarter</span> <span class="o">=</span> <span class="n">failing_input</span><span class="p">[</span><span class="n">quarter_length</span><span class="p">:</span>
+                                                      <span class="n">quarter_length</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">failing_input</span><span class="p">[</span><span class="n">quarter_length</span> <span class="o">*</span> <span class="mi">3</span><span class="p">:]</span>
 <span class="n">mystery</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">input_without_first_and_third_quarter</span><span class="p">)</span>
 </pre></div>
 
@@ -12399,7 +12399,7 @@ the first quarter, the second quarter, and so on.</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We have now tried to remove pieces that make up ${2}$ and ${4}$ of the original failing string.  In the next iteration, we would go and remove even smaller pieces – ${8}$, ${16}$ and so on.  We continue until we are down to ${97}$ – that is, individual characters.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We have now tried to remove pieces that make up $\frac{1}{2}$ and $\frac{1}{4}$ of the original failing string.  In the next iteration, we would go and remove even smaller pieces – $\frac{1}{8}$, $\frac{1}{16}$ and so on.  We continue until we are down to $\frac{1}{97}$ – that is, individual characters.</p>
 </div>
 </div>
 </div>
@@ -12485,8 +12485,8 @@ the first quarter, the second quarter, and so on.</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Here comes the <em>Delta Debugging</em> reducer.  Delta Debugging implements the strategy sketched above: It first removes larger chunks of size ${2}$; if this does not fail, then we proceed to chunks of size ${4}$, then ${8}$ and so on.</p>
-<p>Our implementation uses almost the same Python code as Zeller in [Unresolved citation: Zeller2011.]; the only difference is that it has been adapted to work on Python 3 and our <code>Runner</code> framework.    The variable <code>n</code> (initially 2) indicates the granularity – in each step, chunks of size ${n}$ are cut away.  If none of the test fails (<code>some_complement_is_failing</code> is False), then <code>n</code> is doubled – until it reaches the length of the input.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here comes the <em>Delta Debugging</em> reducer.  Delta Debugging implements the strategy sketched above: It first removes larger chunks of size $\frac{1}{2}$; if this does not fail, then we proceed to chunks of size $\frac{1}{4}$, then $\frac{1}{8}$ and so on.</p>
+<p>Our implementation uses almost the same Python code as Zeller in [Unresolved citation: Zeller2011.]; the only difference is that it has been adapted to work on Python 3 and our <code>Runner</code> framework.    The variable <code>n</code> (initially 2) indicates the granularity – in each step, chunks of size $\frac{1}{n}$ are cut away.  If none of the test fails (<code>some_complement_is_failing</code> is False), then <code>n</code> is doubled – until it reaches the length of the input.</p>
 </div>
 </div>
 </div>
@@ -12510,7 +12510,8 @@ the first quarter, the second quarter, and so on.</p>
             <span class="n">some_complement_is_failing</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="k">while</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">):</span>
-                <span class="n">complement</span> <span class="o">=</span> <span class="n">inp</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)]</span> <span class="o">+</span> <span class="n">inp</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">subset_length</span><span class="p">):]</span>
+                <span class="n">complement</span> <span class="o">=</span> <span class="n">inp</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)]</span> <span class="o">+</span> \
+                    <span class="n">inp</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">subset_length</span><span class="p">):]</span>
 
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">complement</span><span class="p">)</span> <span class="o">==</span> <span class="n">Runner</span><span class="o">.</span><span class="n">FAIL</span><span class="p">:</span>
                     <span class="n">inp</span> <span class="o">=</span> <span class="n">complement</span>
@@ -12650,7 +12651,8 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammar-Based-Input-Reduction">Grammar-Based Input Reduction<a class="anchor-link" href="#Grammar-Based-Input-Reduction">&#182;</a></h2></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammar-Based-Input-Reduction">Grammar-Based Input Reduction<a class="anchor-link" href="#Grammar-Based-Input-Reduction">&#182;</a></h2><p>\todo{Add}</p>
+</div>
 </div>
 </div>
 </div>
@@ -12661,7 +12663,7 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Parser.html" class="import" target="_blank">Parser</a></span> <span class="k">import</span> <span class="n">PEGParser</span><span class="p">,</span> <span class="n">parse</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Parser.html" class="import" target="_blank">Parser</a></span> <span class="k">import</span> <span class="n">PEGParser</span><span class="p">,</span> <span class="n">canonical</span>
 </pre></div>
 
 </div>
@@ -12766,7 +12768,7 @@ Test #29 &#39;)&#39; 1 PASS
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">runner</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">grammar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span> <span class="o">=</span> <span class="n">start_symbol</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">),</span> <span class="n">start_symbol</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12833,9 +12835,9 @@ Test #29 &#39;)&#39; 1 PASS
                 <span class="n">child</span> <span class="o">=</span> <span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                 <span class="n">child_reductions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">derivation_reductions</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">reduced_child</span> <span class="ow">in</span> <span class="n">child_reductions</span><span class="p">:</span>
-                    <span class="n">new_children</span> <span class="o">=</span> <span class="p">(</span><span class="n">children</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> 
-                            <span class="p">[</span><span class="n">reduced_child</span><span class="p">]</span> <span class="o">+</span>
-                            <span class="n">children</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
+                    <span class="n">new_children</span> <span class="o">=</span> <span class="p">(</span><span class="n">children</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="p">[</span><span class="n">reduced_child</span><span class="p">]</span>
+                                    <span class="o">+</span> <span class="n">children</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
                     <span class="n">reductions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">))</span>
 
         <span class="c1"># Filter duplicates</span>
@@ -12847,8 +12849,8 @@ Test #29 &#39;)&#39; 1 PASS
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reductions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># We have a new expansion</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Can reduce &quot;</span> <span class="o">+</span> <span class="n">symbol</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="o">+</span> \
-                 <span class="s2">&quot; to reduced subtrees &quot;</span> <span class="o">+</span> <span class="n">queue_to_string</span><span class="p">(</span><span class="n">reductions</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Can reduce &quot;</span> <span class="o">+</span> <span class="n">symbol</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+                  <span class="o">+</span> <span class="s2">&quot; to reduced subtrees &quot;</span> <span class="o">+</span> <span class="n">queue_to_string</span><span class="p">(</span><span class="n">reductions</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">reductions</span>
 </pre></div>
@@ -12896,7 +12898,7 @@ Test #29 &#39;)&#39; 1 PASS
                 <span class="c1"># Found new smallest tree; try to reduce that one further</span>
                 <span class="n">smallest_tree</span> <span class="o">=</span> <span class="n">t</span>
                 <span class="n">tree_reductions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reductions</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-                <span class="n">tree_reductions</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">tree</span><span class="p">:</span> <span class="o">-</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+                <span class="n">tree_reductions</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tree</span><span class="p">:</span> <span class="o">-</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New smallest tree: &quot;</span> <span class="o">+</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">smallest_tree</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">smallest_tree</span>
@@ -12915,7 +12917,7 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
-        <span class="n">cursor</span><span class="p">,</span> <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">unify_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">,</span> <span class="n">inp</span><span class="p">)</span> <span class="c1"># TODO: Have &quot;Parser&quot; base class</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">tree</span>
 
@@ -12938,7 +12940,20 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Find all subtrees in TREE whose root is SEARCH_SYMBOL.</span>
 <span class="c1"># If IGNORE_ROOT is true, ignore the root note of TREE.</span>
-<span class="k">def</span> <span class="nf">subtrees_with_symbol</span><span class="p">(</span><span class="n">search_symbol</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">ignore_root</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">subtrees_with_symbol</span><span class="p">(</span><span class="n">search_symbol</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">ignore_root</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_root</span> <span class="ow">and</span> <span class="n">symbol</span> <span class="o">==</span> <span class="n">search_symbol</span><span class="p">:</span>
@@ -12962,9 +12977,22 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># convert a list [[X1, X2], [Y1, Y2], ...] </span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># convert a list [[X1, X2], [Y1, Y2], ...]</span>
 <span class="c1"># into [X1, Y1], [X1, Y2], [X2, Y1], [X2, Y2], ...</span>
-<span class="k">def</span> <span class="nf">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
 
@@ -13027,7 +13055,7 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inp</span> <span class="o">=</span> <span class="s2">&quot;1 + (2 * 3)&quot;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inp</span> <span class="o">=</span> <span class="s2">&quot;1+(2*3)&quot;</span>
 <span class="n">grammar_reducer</span> <span class="o">=</span> <span class="n">GrammarReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
 <span class="n">grammar_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
 </pre></div>
@@ -13040,7 +13068,7 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>1
+<pre>1+(2*3)
 Trying alternative expansions for &lt;start&gt;
 Expansions: [&#39;&lt;expr&gt;&#39;]
 Trying alternative expansions for &lt;expr&gt;
@@ -13053,7 +13081,94 @@ Trying alternative expansions for &lt;integer&gt;
 Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
 Trying alternative expansions for &lt;digit&gt;
 Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
-Alternatives: []
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Can reduce &lt;term&gt; 2*3 to reduced subtrees [2, 3]
+Can reduce &lt;expr&gt; 2*3 to reduced subtrees [3, 2]
+Can reduce &lt;factor&gt; (2*3) to reduced subtrees [2, 3, (3), (2)]
+Can reduce &lt;term&gt; (2*3) to reduced subtrees [2, 3, (3), (2)]
+Can reduce &lt;expr&gt; (2*3) to reduced subtrees [2*3, 3, 2, (3), (2)]
+Can reduce &lt;expr&gt; 1+(2*3) to reduced subtrees [1, (2*3), 2*3, 3, 1+2*3, 1+3, 1+2, 1+(3), 1+(2)]
+Can reduce &lt;start&gt; 1+(2*3) to reduced subtrees [(2*3), 2*3, 1, 3, 1+2*3, 1+3, 1+2, 1+(3), 1+(2)]
+Alternatives: [(2*3), 2*3, 1, 3, 1+2*3, 1+3, 1+2, 1+(3), 1+(2)]
+Trying alternative expansions for &lt;start&gt;
+Expansions: [&#39;&lt;expr&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Can reduce &lt;term&gt; 2*3 to reduced subtrees [2, 3]
+Can reduce &lt;expr&gt; 2*3 to reduced subtrees [3, 2]
+Can reduce &lt;factor&gt; (2*3) to reduced subtrees [2, 3, (3), (2)]
+Can reduce &lt;term&gt; (2*3) to reduced subtrees [2, 3, (3), (2)]
+Can reduce &lt;expr&gt; (2*3) to reduced subtrees [2*3, 3, 2, (3), (2)]
+Can reduce &lt;start&gt; (2*3) to reduced subtrees [2*3, 3, 2, (3), (2)]
+New smallest tree: (2*3)
+Trying alternative expansions for &lt;start&gt;
+Expansions: [&#39;&lt;expr&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;expr&gt;
+Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
+Trying alternative expansions for &lt;term&gt;
+Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
+Trying alternative expansions for &lt;factor&gt;
+Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
+Trying alternative expansions for &lt;integer&gt;
+Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
+Trying alternative expansions for &lt;digit&gt;
+Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
+Can reduce &lt;factor&gt; (3) to reduced subtrees [3]
+Can reduce &lt;term&gt; (3) to reduced subtrees [3]
+Can reduce &lt;expr&gt; (3) to reduced subtrees [3]
+Can reduce &lt;start&gt; (3) to reduced subtrees [3]
+New smallest tree: (3)
 </pre>
 </div>
 
@@ -13062,7 +13177,7 @@ Alternatives: []
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;1&#39;
+<pre>&#39;(3)&#39;
 </pre>
 </div>
 
@@ -13071,7 +13186,8 @@ Alternatives: []
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Section-4"><em>Section 4</em><a class="anchor-link" href="#Section-4">&#182;</a></h2></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Section-4"><em>Section 4</em><a class="anchor-link" href="#Section-4">&#182;</a></h2><p>\todo{Add}</p>
+</div>
 </div>
 </div>
 </div>
@@ -13108,6 +13224,7 @@ Alternatives: []
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>The delta debugging algorithm discussed here stems from [<a href="https://doi.org/10.1109/32.988498">Zeller <em>et al</em>, 2002.</a>]; actually, this is the exact Python implementation as used by Zeller in 2002.  The idea of systematically reducing inputs has been discovered a number of times, although not as  automatic and generic as delta debugging. [<a href="https://www.microsoft.com/en-us/research/publication/massive-stochastic-testing-of-sql/">Slutz <em>et al</em>, 1998.</a>], for instance, discusses systematic reduction of SQL statements for SQL databases; the general process as manual work is well described by [Kernighan <em>et al</em>, 1999.].</p>
 <p>[<a href="http://dl.acm.org/citation.cfm?id=3155562.3155669">Herfert <em>et al</em>, 2017.</a>]</p>
+<p>\todo{Add more: hierarchical DD, Csmith / C-reduce}</p>
 </div>
 </div>
 </div>
@@ -13181,7 +13298,7 @@ Alternatives: []
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Reducer.ipynb" target=_blank)>Last change: 2018-10-25 14:38:14+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Reducer.ipynb" target=_blank)>Last change: 2018-11-05 17:04:13+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13197,7 +13314,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Reducer.html">Reducing Failure-Inducing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Reducer.html">https://www.fuzzingbook.org/beta/html/Reducer.html</a>.  Retrieved 2018-10-25 14:38:14+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Reducer.html">Reducing Failure-Inducing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Reducer.html">https://www.fuzzingbook.org/beta/html/Reducer.html</a>.  Retrieved 2018-11-05 17:04:13+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Reducer,
@@ -13207,9 +13324,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Reducer.html}},
-    note = {Retrieved 2018-10-25 14:38:14+02:00},
+    note = {Retrieved 2018-11-05 17:04:13+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Reducer.html},
-    urldate = {2018-10-25 14:38:14+02:00}
+    urldate = {2018-11-05 17:04:13+01:00}
 }
 </pre>
 </div>

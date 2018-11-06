@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2018-10-30 13:41:25+01:00
+# Last change: 2018-10-31 16:27:07+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -92,7 +92,8 @@ if __name__ == "__main__":
             # print(var, value)
 
             # Save all non-trivial string values that also occur in the input
-            if type(value) == type('') and len(value) >= 2 and value in the_input:
+            if isinstance(value, type('')) and len(
+                    value) >= 2 and value in the_input:
                 the_values[var] = value
 
         return traceit
@@ -162,14 +163,14 @@ if __name__ == "__main__":
                     repl_alternatives = grammar[key]
                     for j in range(0, len(repl_alternatives)):
                         repl = repl_alternatives[j]
-                        if value in repl:                    
+                        if value in repl:
                             # Replace value by nonterminal name
                             alt_key = nonterminal(var)
                             repl_alternatives[j] = repl.replace(value, alt_key)
                             new_rules = new_rules + [(var, alt_key, value)]
 
             if len(new_rules) == 0:
-                break # Nothing to expand anymore
+                break  # Nothing to expand anymore
 
             for (var, alt_key, value) in new_rules:
                 # Add new rule to grammar
@@ -217,7 +218,7 @@ def merge_grammars(g1, g2):
                     if repl not in repl1:
                         # Extend existing rule
                         merged_grammar[key1] = repl1 + [repl]
-                        
+
         if not key_found:
             # Add new rule
             merged_grammar[key2] = repl2

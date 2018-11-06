@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
-# Last change: 2018-10-30 09:39:54+01:00
+# Last change: 2018-10-31 16:27:06+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -74,7 +74,7 @@ class ExpectError(object):
         else:
             lines = traceback.format_exception_only(
                 exc_type, exc_value)[-1].strip()
-            
+
         if not self.mute:
             print(lines, "(expected)", file=sys.stderr)
         return True  # Ignore it
@@ -164,7 +164,7 @@ class ExpectTimeout(object):
         else:
             lines = traceback.format_exception_only(
                 exc_type, exc_value)[-1].strip()
-            
+
         if not self.mute:
             print(lines, "(expected)", file=sys.stderr)
         return True  # Ignore it
