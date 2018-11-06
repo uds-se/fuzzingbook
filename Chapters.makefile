@@ -4,12 +4,12 @@
 # Chapters to include in the book, in this order
 PUBLIC_CHAPTERS = \
 	Intro_Testing.ipynb \
-	Fuzzer.ipynb
+	Fuzzer.ipynb \
+	Coverage.ipynb \
+	MutationFuzzer.ipynb
 
 # Chapters that are ready for release
 READY_CHAPTERS = \
-	Coverage.ipynb \
-	MutationFuzzer.ipynb \
 	Grammars.ipynb \
 	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
