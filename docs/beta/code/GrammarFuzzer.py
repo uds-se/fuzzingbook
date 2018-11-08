@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-11-06 16:55:33+01:00
+# Last change: 2018-11-08 17:54:56+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -420,8 +420,8 @@ class GrammarFuzzer(GrammarFuzzer):
                      if self.any_possible_expansions(c)]
 
         # Select a random child
-        child_to_be_expanded = self.choose_tree_expansion(
-            tree, expandable_children)
+        child_to_be_expanded = \
+            self.choose_tree_expansion(tree, expandable_children)
 
         # Expand in place
         children[index_map[child_to_be_expanded]] = \

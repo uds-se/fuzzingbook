@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2018-10-20 17:57:50+02:00
+# Last change: 2018-11-08 17:50:31+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -39,15 +39,15 @@ if __name__ == "__main__":
 import fuzzingbook_utils
 
 if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer
+    from GrammarFuzzer import GrammarFuzzer, all_terminals
 else:
-    from .GrammarFuzzer import GrammarFuzzer
+    from .GrammarFuzzer import GrammarFuzzer, all_terminals
 
 
 if __package__ is None or __package__ == "":
-    from Grammars import is_valid_grammar
+    from Grammars import is_valid_grammar, EXPR_GRAMMAR, START_SYMBOL, crange
 else:
-    from .Grammars import is_valid_grammar
+    from .Grammars import is_valid_grammar, EXPR_GRAMMAR, START_SYMBOL, crange
 
 
 def opts(**kwargs):
@@ -96,19 +96,190 @@ PROBABILISTIC_EXPR_GRAMMAR = {
         ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
 }
 
-assert is_valid_grammar(PROBABILISTIC_EXPR_GRAMMAR)
+if __name__ == "__main__":
+    assert is_valid_grammar(PROBABILISTIC_EXPR_GRAMMAR)
+
+
+if __name__ == "__main__":
+    PROBABILISTIC_EXPR_GRAMMAR["<leaddigit>"]
+
+
+def exp_string(expansion):
+    """Return the string to be expanded"""
+    if isinstance(expansion, str):
+        return expansion
+    return expansion[0]
+
+if __name__ == "__main__":
+    exp_string(PROBABILISTIC_EXPR_GRAMMAR["<leaddigit>"][0])
+
+
+def exp_prob(expansion):
+    """Return the specified probability, or None if unspecified"""
+    if isinstance(expansion, str):
+        return None
+    return expansion[1]['prob']
+
+if __name__ == "__main__":
+    exp_prob(PROBABILISTIC_EXPR_GRAMMAR["<leaddigit>"][0])
+
 
 if __name__ == "__main__":
     f = GrammarFuzzer(PROBABILISTIC_EXPR_GRAMMAR)
     f.fuzz()
 
 
-# ## _Section 4_
+if __package__ is None or __package__ == "":
+    from GrammarCoverageFuzzer import GrammarCoverageFuzzer
+else:
+    from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
+
 
 if __name__ == "__main__":
-    print('\n## _Section 4_')
+    f = GrammarCoverageFuzzer(PROBABILISTIC_EXPR_GRAMMAR)
+    f.fuzz()
 
 
+# ## Checking Probabilities
+
+if __name__ == "__main__":
+    print('\n## Checking Probabilities')
+
+
+
+
+def exp_probabilities(expansions, nonterminal="<symbol>"):
+    probabilities = [exp_prob(expansion) for expansion in expansions]
+    prob_dist = prob_distribution(probabilities, nonterminal)
+    
+    prob_mapping = {}
+    for i in range(len(expansions)):
+        expansion = exp_string(expansions[i])
+        prob_mapping[expansion] = prob_dist[i]
+    
+    return prob_mapping
+
+def prob_distribution(probabilities, nonterminal="<symbol>"):
+    epsilon = 0.00001
+
+    number_of_unspecified_probabilities = probabilities.count(None)
+    if number_of_unspecified_probabilities == 0:
+        assert abs(sum(probabilities) - 1.0) < epsilon, \
+            nonterminal + ": sum of probabilities must be 1.0"
+        return probabilities
+
+    sum_of_specified_probabilities = 0.0
+    for p in probabilities:
+        if p is not None:
+            sum_of_specified_probabilities += p
+    assert 0 <= sum_of_specified_probabilities <= 1.0, \
+        nonterminal + ": sum of specified probabilities must be between 0.0 and 1.0"
+
+    default_probability = ((1.0 - sum_of_specified_probabilities) / 
+         number_of_unspecified_probabilities)
+    all_probabilities = []
+    for p in probabilities:
+        if p is None:
+            p = default_probability
+        all_probabilities.append(p)
+
+    assert abs(sum(all_probabilities) - 1.0) < epsilon
+    return all_probabilities
+
+if __name__ == "__main__":
+    PROBABILISTIC_EXPR_GRAMMAR["<leaddigit>"]
+
+
+if __name__ == "__main__":
+    exp_probabilities(PROBABILISTIC_EXPR_GRAMMAR["<leaddigit>"])
+
+
+if __name__ == "__main__":
+    exp_probabilities(PROBABILISTIC_EXPR_GRAMMAR["<digit>"])
+
+
+if __name__ == "__main__":
+    exp_probabilities(PROBABILISTIC_EXPR_GRAMMAR["<expr>"])
+
+
+def is_valid_probabilistic_grammar(grammar, start_symbol=START_SYMBOL):
+    if not is_valid_grammar(grammar, start_symbol):
+        return False
+   
+    for nonterminal in grammar:
+        expansions = grammar[nonterminal]
+        prob_dist = exp_probabilities(expansions, nonterminal)
+    
+    return True
+
+if __name__ == "__main__":
+    assert is_valid_probabilistic_grammar(PROBABILISTIC_EXPR_GRAMMAR)
+
+
+if __name__ == "__main__":
+    assert is_valid_probabilistic_grammar(EXPR_GRAMMAR)
+
+
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectError
+else:
+    from .ExpectError import ExpectError
+
+
+if __name__ == "__main__":
+    with ExpectError():
+        assert not is_valid_probabilistic_grammar({"<start>": [("1", opts(prob=0.5))]})
+
+
+if __name__ == "__main__":
+    with ExpectError():
+        assert not is_valid_probabilistic_grammar({"<start>": [("1", opts(prob=1.5)), "2"]})
+
+
+# ## Selecting by Probability
+
+if __name__ == "__main__":
+    print('\n## Selecting by Probability')
+
+
+
+
+import random
+
+class ProbabilisticGrammarFuzzer(GrammarFuzzer):
+    def choose_node_expansion(self, node, possible_children):
+        (symbol, tree) = node
+        expansions = self.grammar[symbol]
+        probabilities = exp_probabilities(expansions)
+
+        weights = []
+        for child in possible_children:
+            child_weight = probabilities[all_terminals((node, child))]
+            weights.append(child_weight)
+            
+        return random.choices(range(len(possible_children)), weights=weights)[0]
+
+if __name__ == "__main__":
+    f = ProbabilisticGrammarFuzzer(PROBABILISTIC_EXPR_GRAMMAR)
+    f.fuzz()
+
+
+if __name__ == "__main__":
+    leaddigit_fuzzer = ProbabilisticGrammarFuzzer(PROBABILISTIC_EXPR_GRAMMAR, start_symbol="<leaddigit>")
+    leaddigit_fuzzer.fuzz()
+
+
+if __name__ == "__main__":
+    trials = 10000
+
+    count = {}
+    for c in crange('0', '9'):
+        count[c] = 0
+
+    for i in range(trials):
+        count[leaddigit_fuzzer.fuzz()] += 1
+
+    print([(digit, count[digit] / trials) for digit in count])
 
 
 # ## Lessons Learned
@@ -143,14 +314,35 @@ if __name__ == "__main__":
 
 
 
+class ProbabilisticGrammarCoverageFuzzer(GrammarCoverageFuzzer, ProbabilisticGrammarFuzzer):
+    # Choose uncovered expansions first
+    def choose_node_expansion(self, node, possible_children):
+        return GrammarCoverageFuzzer.choose_node_expansion(self, node, possible_children)
+
+    # Among uncovered expansions, pick by (relative) probability
+    def choose_uncovered_node_expansion(self, node, possible_children):
+        return ProbabilisticGrammarFuzzer.choose_node_expansion(self, node, possible_children)
+    
+    # For covered nodes, pick by probability, too
+    def choose_covered_node_expansion(self, node, possible_children):
+        return ProbabilisticGrammarFuzzer.choose_node_expansion(self, node, possible_children)
+
 if __name__ == "__main__":
-    # Some code that is part of the exercise
-    pass
+    cov_leaddigit_fuzzer = ProbabilisticGrammarCoverageFuzzer(PROBABILISTIC_EXPR_GRAMMAR, start_symbol="<leaddigit>")
+    print([cov_leaddigit_fuzzer.fuzz() for i in range(9)])
 
 
 if __name__ == "__main__":
-    # Some code for the solution
-    2 + 2
+    trials = 10000
+
+    count = {}
+    for c in crange('0', '9'):
+        count[c] = 0
+
+    for i in range(trials):
+        count[cov_leaddigit_fuzzer.fuzz()] += 1
+
+    print([(digit, count[digit] / trials) for digit in count])
 
 
 # ### Exercise 2

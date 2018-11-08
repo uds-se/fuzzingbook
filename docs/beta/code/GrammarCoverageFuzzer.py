@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-10-31 16:24:29+01:00
+# Last change: 2018-11-08 16:42:01+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -83,6 +83,8 @@ class TrackingGrammarCoverageFuzzer(GrammarFuzzer):
 class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
     def expansion_key(self, symbol, expansion):
         """Convert (symbol, children) into a key.  `children` can be an expansion string or a derivation tree."""
+        if isinstance(expansion, tuple):
+            expansion = expansion[0]
         if not isinstance(expansion, str):
             children = expansion
             expansion = all_terminals((symbol, children))
@@ -172,23 +174,26 @@ class SimpleGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
     def choose_node_expansion(self, node, possible_children):
         # Prefer uncovered expansions
         (symbol, children) = node
-        uncovered_children = [(i, c) for (i, c) in enumerate(possible_children)
+        uncovered_children = [c for (i, c) in enumerate(possible_children)
                               if self.expansion_key(symbol, c) not in self.covered_expansions]
+        index_map = [i for (i, c) in enumerate(possible_children)
+                     if self.expansion_key(symbol, c) not in self.covered_expansions]
 
         if len(uncovered_children) == 0:
             # All expansions covered - use superclass method
-            if self.log:
-                print("All", symbol, "alternatives covered")
-            return super().choose_node_expansion(node, possible_children)
+            return self.choose_covered_node_expansion(node, possible_children)
 
         # select a random expansion
-        index = random.randrange(len(uncovered_children))
-        (new_children_index, new_children) = uncovered_children[index]
+        index = self.choose_uncovered_node_expansion(node, uncovered_children)
 
-        # Save the expansion as covered
-        self.add_coverage(symbol, new_children)
+        return index_map[index]
 
-        return new_children_index
+class SimpleGrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
+    def choose_uncovered_node_expansion(self, node, possible_children):
+        return TrackingGrammarCoverageFuzzer.choose_node_expansion(self, node, possible_children)
+
+    def choose_covered_node_expansion(self, node, possible_children):
+        return TrackingGrammarCoverageFuzzer.choose_node_expansion(self, node, possible_children)
 
 if __name__ == "__main__":
     f = SimpleGrammarCoverageFuzzer(DIGIT_GRAMMAR, log=True)
@@ -263,7 +268,7 @@ if __name__ == "__main__":
 
 
 
-class GrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
+class GrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
     def _max_symbol_expansion_coverage(
             self, symbol, max_depth, cov, symbols_seen):
         """Return set of all expansions in a grammar starting with `symbol`"""
@@ -386,16 +391,18 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
 
         if new_coverages is None:
             # All expansions covered - use superclass method
-            return GrammarFuzzer.choose_node_expansion(
-                self, node, possible_children)
+            return self.choose_covered_node_expansion(node, possible_children)
 
         max_new_coverage = max(len(cov) for cov in new_coverages)
-        children_with_max_new_coverage = [(i, c) for (i, c) in enumerate(possible_children)
-                                          if len(new_coverages[i]) == max_new_coverage]
-
-        # select a random expansion
-        new_children_index, new_children = random.choice(
-            children_with_max_new_coverage)
+        
+        children_with_max_new_coverage = [c for (i, c) in enumerate(possible_children)
+                                            if len(new_coverages[i]) == max_new_coverage]
+        index_map = [i for (i, c) in enumerate(possible_children)
+                     if len(new_coverages[i]) == max_new_coverage]
+        
+        # Select a random expansion
+        new_children_index = self.choose_uncovered_node_expansion(node, children_with_max_new_coverage)
+        new_children = children_with_max_new_coverage[new_children_index]
 
         # Save the expansion as covered
         key = self.expansion_key(symbol, new_children)
@@ -404,7 +411,7 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
             print("Now covered:", key)
         self.covered_expansions.add(key)
 
-        return new_children_index
+        return index_map[new_children_index]
 
 if __name__ == "__main__":
     f = GrammarCoverageFuzzer(EXPR_GRAMMAR, min_nonterminals=3)

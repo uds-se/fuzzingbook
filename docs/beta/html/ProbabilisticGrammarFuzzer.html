@@ -11793,7 +11793,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Probabilistic Grammar Fuzzing - Generating Software Tests" />
-<meta property="og:description" content="Let us give grammars even more power by assigning probabilities to individual expansions.  This allows us to control how many of each element should be produced.  \todo{Work in progress.}Prerequisites You should have read the chapter on grammars.We introduce a little helper function that will allow us to add arbitrary options to an expansion." />
+<meta property="og:description" content="Let us give grammars even more power by assigning probabilities to individual expansions.  This allows us to control how many of each element should be produced.  \todo{Work in progress.}Prerequisites You should have read the chapter on grammars.We introduce a little helper function that will allow us to add arbitrary options to an expansion.The probabilistic grammar works with our existing infrastructure:" />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11885,7 +11885,8 @@ MathJax.Hub.Config({
      </li>
      <li class="has-sub"><a href="#"><span title="Probabilistic Grammar Fuzzing"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Probabilistic Grammar Fuzzing <i class="fa fa-fw fa-wrench"></i></span></a>
         <ul>
-           <li><a href="#_Section-4_">_Section 4_</a></li>
+           <li><a href="#Checking-Probabilities">Checking Probabilities</a></li>
+<li><a href="#Selecting-by-Probability">Selecting by Probability</a></li>
 <li><a href="#Lessons-Learned">Lessons Learned</a></li>
 <li><a href="#Next-Steps">Next Steps</a></li>
 <li><a href="#Exercises">Exercises</a></li>
@@ -11974,7 +11975,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarFuzzer</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">all_terminals</span>
 </pre></div>
 
 </div>
@@ -11988,7 +11989,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">is_valid_grammar</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">crange</span>
 </pre></div>
 
 </div>
@@ -12068,12 +12069,146 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
     <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span>
         <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">],</span>
 <span class="p">}</span>
-
-<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">)</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;leaddigit&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;1&#39;, {&#39;prob&#39;: 0.301}),
+ (&#39;2&#39;, {&#39;prob&#39;: 0.176}),
+ (&#39;3&#39;, {&#39;prob&#39;: 0.125}),
+ (&#39;4&#39;, {&#39;prob&#39;: 0.097}),
+ (&#39;5&#39;, {&#39;prob&#39;: 0.079}),
+ (&#39;6&#39;, {&#39;prob&#39;: 0.067}),
+ (&#39;7&#39;, {&#39;prob&#39;: 0.058}),
+ (&#39;8&#39;, {&#39;prob&#39;: 0.051}),
+ (&#39;9&#39;, {&#39;prob&#39;: 0.046})]
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_string</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the string to be expanded&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">expansion</span>
+    <span class="k">return</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_string</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;leaddigit&gt;&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;1&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_prob</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the specified probability, or None if unspecified&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;prob&#39;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_prob</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;leaddigit&gt;&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0.301
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The probabilistic grammar works with our existing infrastructure:</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -12101,13 +12236,486 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarCoverageFuzzer.html" class="import" target="_blank">GrammarCoverageFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarCoverageFuzzer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;1.30&#39;
+</pre>
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Section-4"><em>Section 4</em><a class="anchor-link" href="#Section-4">&#182;</a></h2><p>\todo{Add}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Checking-Probabilities">Checking Probabilities<a class="anchor-link" href="#Checking-Probabilities">&#182;</a></h2></div>
 </div>
 </div>
 </div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_probabilities</span><span class="p">(</span><span class="n">expansions</span><span class="p">,</span> <span class="n">nonterminal</span><span class="o">=</span><span class="s2">&quot;&lt;symbol&gt;&quot;</span><span class="p">):</span>
+    <span class="n">probabilities</span> <span class="o">=</span> <span class="p">[</span><span class="n">exp_prob</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span> <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="n">expansions</span><span class="p">]</span>
+    <span class="n">prob_dist</span> <span class="o">=</span> <span class="n">prob_distribution</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">nonterminal</span><span class="p">)</span>
+
+    <span class="n">prob_mapping</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">expansions</span><span class="p">)):</span>
+        <span class="n">expansion</span> <span class="o">=</span> <span class="n">exp_string</span><span class="p">(</span><span class="n">expansions</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">prob_mapping</span><span class="p">[</span><span class="n">expansion</span><span class="p">]</span> <span class="o">=</span> <span class="n">prob_dist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">prob_mapping</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">prob_distribution</span><span class="p">(</span><span class="n">probabilities</span><span class="p">,</span> <span class="n">nonterminal</span><span class="o">=</span><span class="s2">&quot;&lt;symbol&gt;&quot;</span><span class="p">):</span>
+    <span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.00001</span>
+
+    <span class="n">number_of_unspecified_probabilities</span> <span class="o">=</span> <span class="n">probabilities</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">number_of_unspecified_probabilities</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">probabilities</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">epsilon</span><span class="p">,</span> \
+            <span class="n">nonterminal</span> <span class="o">+</span> <span class="s2">&quot;: sum of probabilities must be 1.0&quot;</span>
+        <span class="k">return</span> <span class="n">probabilities</span>
+
+    <span class="n">sum_of_specified_probabilities</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">probabilities</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sum_of_specified_probabilities</span> <span class="o">+=</span> <span class="n">p</span>
+    <span class="k">assert</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">sum_of_specified_probabilities</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">,</span> \
+        <span class="n">nonterminal</span> <span class="o">+</span> <span class="s2">&quot;: sum of specified probabilities must be between 0.0 and 1.0&quot;</span>
+
+    <span class="n">default_probability</span> <span class="o">=</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">sum_of_specified_probabilities</span><span class="p">)</span> <span class="o">/</span> 
+         <span class="n">number_of_unspecified_probabilities</span><span class="p">)</span>
+    <span class="n">all_probabilities</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">probabilities</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">default_probability</span>
+        <span class="n">all_probabilities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">all_probabilities</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">epsilon</span>
+    <span class="k">return</span> <span class="n">all_probabilities</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;leaddigit&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;1&#39;, {&#39;prob&#39;: 0.301}),
+ (&#39;2&#39;, {&#39;prob&#39;: 0.176}),
+ (&#39;3&#39;, {&#39;prob&#39;: 0.125}),
+ (&#39;4&#39;, {&#39;prob&#39;: 0.097}),
+ (&#39;5&#39;, {&#39;prob&#39;: 0.079}),
+ (&#39;6&#39;, {&#39;prob&#39;: 0.067}),
+ (&#39;7&#39;, {&#39;prob&#39;: 0.058}),
+ (&#39;8&#39;, {&#39;prob&#39;: 0.051}),
+ (&#39;9&#39;, {&#39;prob&#39;: 0.046})]
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_probabilities</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;leaddigit&gt;&quot;</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;1&#39;: 0.301,
+ &#39;2&#39;: 0.176,
+ &#39;3&#39;: 0.125,
+ &#39;4&#39;: 0.097,
+ &#39;5&#39;: 0.079,
+ &#39;6&#39;: 0.067,
+ &#39;7&#39;: 0.058,
+ &#39;8&#39;: 0.051,
+ &#39;9&#39;: 0.046}
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_probabilities</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;0&#39;: 0.1,
+ &#39;1&#39;: 0.1,
+ &#39;2&#39;: 0.1,
+ &#39;3&#39;: 0.1,
+ &#39;4&#39;: 0.1,
+ &#39;5&#39;: 0.1,
+ &#39;6&#39;: 0.1,
+ &#39;7&#39;: 0.1,
+ &#39;8&#39;: 0.1,
+ &#39;9&#39;: 0.1}
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_probabilities</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;term&gt; + &lt;expr&gt;&#39;: 0.1, &#39;&lt;term&gt; - &lt;expr&gt;&#39;: 0.2, &#39;&lt;term&gt;&#39;: 0.7}
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">is_valid_probabilistic_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
+        <span class="n">expansions</span> <span class="o">=</span> <span class="n">grammar</span><span class="p">[</span><span class="n">nonterminal</span><span class="p">]</span>
+        <span class="n">prob_dist</span> <span class="o">=</span> <span class="n">exp_probabilities</span><span class="p">(</span><span class="n">expansions</span><span class="p">,</span> <span class="n">nonterminal</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">True</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_probabilistic_grammar</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_probabilistic_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="k">import</span> <span class="n">ExpectError</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_probabilistic_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.5</span><span class="p">))]})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-25-52b9560321a8&gt;&#34;, line 2, in &lt;module&gt;
+    assert not is_valid_probabilistic_grammar({&#34;&lt;start&gt;&#34;: [(&#34;1&#34;, opts(prob=0.5))]})
+  File &#34;&lt;ipython-input-21-4c4804178dc7&gt;&#34;, line 7, in is_valid_probabilistic_grammar
+    prob_dist = exp_probabilities(expansions, nonterminal)
+  File &#34;&lt;ipython-input-15-002b16bf30d0&gt;&#34;, line 3, in exp_probabilities
+    prob_dist = prob_distribution(probabilities, nonterminal)
+  File &#34;&lt;ipython-input-16-a663ca479845&gt;&#34;, line 6, in prob_distribution
+    assert abs(sum(probabilities) - 1.0) &lt; epsilon,             nonterminal + &#34;: sum of probabilities must be 1.0&#34;
+AssertionError: &lt;start&gt;: sum of probabilities must be 1.0 (expected)
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_probabilistic_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)),</span> <span class="s2">&quot;2&quot;</span><span class="p">]})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-26-2edf698b8e32&gt;&#34;, line 2, in &lt;module&gt;
+    assert not is_valid_probabilistic_grammar({&#34;&lt;start&gt;&#34;: [(&#34;1&#34;, opts(prob=1.5)), &#34;2&#34;]})
+  File &#34;&lt;ipython-input-21-4c4804178dc7&gt;&#34;, line 7, in is_valid_probabilistic_grammar
+    prob_dist = exp_probabilities(expansions, nonterminal)
+  File &#34;&lt;ipython-input-15-002b16bf30d0&gt;&#34;, line 3, in exp_probabilities
+    prob_dist = prob_distribution(probabilities, nonterminal)
+  File &#34;&lt;ipython-input-16-a663ca479845&gt;&#34;, line 13, in prob_distribution
+    assert 0 &lt;= sum_of_specified_probabilities &lt;= 1.0,         nonterminal + &#34;: sum of specified probabilities must be between 0.0 and 1.0&#34;
+AssertionError: &lt;start&gt;: sum of specified probabilities must be between 0.0 and 1.0 (expected)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Selecting-by-Probability">Selecting by Probability<a class="anchor-link" href="#Selecting-by-Probability">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/random.html" class="import" target="_blank">random</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">GrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">choose_node_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="n">expansions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span>
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="n">exp_probabilities</span><span class="p">(</span><span class="n">expansions</span><span class="p">)</span>
+
+        <span class="n">weights</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">possible_children</span><span class="p">:</span>
+            <span class="n">child_weight</span> <span class="o">=</span> <span class="n">probabilities</span><span class="p">[</span><span class="n">all_terminals</span><span class="p">((</span><span class="n">node</span><span class="p">,</span> <span class="n">child</span><span class="p">))]</span>
+            <span class="n">weights</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child_weight</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">possible_children</span><span class="p">)),</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;+++588.1&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">leaddigit_fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;leaddigit&gt;&quot;</span><span class="p">)</span>
+<span class="n">leaddigit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;3&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">10000</span>
+
+<span class="n">count</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">crange</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">):</span>
+    <span class="n">count</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+    <span class="n">count</span><span class="p">[</span><span class="n">leaddigit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="nb">print</span><span class="p">([(</span><span class="n">digit</span><span class="p">,</span> <span class="n">count</span><span class="p">[</span><span class="n">digit</span><span class="p">]</span> <span class="o">/</span> <span class="n">trials</span><span class="p">)</span> <span class="k">for</span> <span class="n">digit</span> <span class="ow">in</span> <span class="n">count</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[(&#39;0&#39;, 0.0), (&#39;1&#39;, 0.3025), (&#39;2&#39;, 0.1751), (&#39;3&#39;, 0.122), (&#39;4&#39;, 0.0942), (&#39;5&#39;, 0.0812), (&#39;6&#39;, 0.0651), (&#39;7&#39;, 0.0591), (&#39;8&#39;, 0.0529), (&#39;9&#39;, 0.0479)]
+</pre>
+</div>
+
 </div>
 
 <div class="input_markdown">
@@ -12154,31 +12762,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p><em>Text of the exercise</em></p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Some code that is part of the exercise</span>
-<span class="k">pass</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p><em>Some more text for the exercise</em></p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p>Create a class <code>ProbabilisticGrammarCoverageFuzzer</code> that extends <code>GrammarCoverageFuzzer</code> with probabilistic capabilities.  The idea is to first cover all uncovered expansions (like <code>GrammarCoverageFuzzer</code>) and once all expansions are covered, to proceed by probabilities (like <code>ProbabilisticGrammarFuzzer</code>).  To this end, define new instances of the <code>choose_covered_node_expansion()</code> and <code>choose_uncovered_node_expansion()</code> methods that choose an expansion based on the given weights.  If you are an advanced programmer, realize the class via <em>multiple inheritance</em> from <code>GrammarCoverageFuzzer</code> and <code>ProbabilisticGrammarFuzzer</code> to achieve this.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ProbabilisticGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -12205,7 +12789,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ProbabilisticGrammarFuzzer.ipynb" target=_blank)>Last change: 2018-10-20 17:57:50+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ProbabilisticGrammarFuzzer.ipynb" target=_blank)>Last change: 2018-11-08 17:50:31+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -12221,7 +12805,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html</a>.  Retrieved 2018-10-20 17:57:50+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html</a>.  Retrieved 2018-11-08 17:50:31+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:ProbabilisticGrammarFuzzer,
@@ -12231,9 +12815,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html}},
-    note = {Retrieved 2018-10-20 17:57:50+02:00},
+    note = {Retrieved 2018-11-08 17:50:31+01:00},
     url = {https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html},
-    urldate = {2018-10-20 17:57:50+02:00}
+    urldate = {2018-11-08 17:50:31+01:00}
 }
 </pre>
 </div>

@@ -12104,6 +12104,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">expansion_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert (symbol, children) into a key.  `children` can be an expansion string or a derivation tree.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">expansion</span> <span class="o">=</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">children</span> <span class="o">=</span> <span class="n">expansion</span>
             <span class="n">expansion</span> <span class="o">=</span> <span class="n">all_terminals</span><span class="p">((</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">))</span>
@@ -12502,23 +12504,47 @@ Tree: 5
     <span class="k">def</span> <span class="nf">choose_node_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">):</span>
         <span class="c1"># Prefer uncovered expansions</span>
         <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">node</span>
-        <span class="n">uncovered_children</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">possible_children</span><span class="p">)</span>
+        <span class="n">uncovered_children</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">possible_children</span><span class="p">)</span>
                               <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">covered_expansions</span><span class="p">]</span>
+        <span class="n">index_map</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">possible_children</span><span class="p">)</span>
+                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">covered_expansions</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uncovered_children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># All expansions covered - use superclass method</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;All&quot;</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="s2">&quot;alternatives covered&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">choose_node_expansion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_covered_node_expansion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">)</span>
 
         <span class="c1"># select a random expansion</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">uncovered_children</span><span class="p">))</span>
-        <span class="p">(</span><span class="n">new_children_index</span><span class="p">,</span> <span class="n">new_children</span><span class="p">)</span> <span class="o">=</span> <span class="n">uncovered_children</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_uncovered_node_expansion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">uncovered_children</span><span class="p">)</span>
 
-        <span class="c1"># Save the expansion as covered</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add_coverage</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">index_map</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</pre></div>
 
-        <span class="k">return</span> <span class="n">new_children_index</span>
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The two methods <code>choose_covered_node_expansion()</code> and <code>choose_uncovered_node_expansion()</code> are provided for subclasses to hook in:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">choose_uncovered_node_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TrackingGrammarCoverageFuzzer</span><span class="o">.</span><span class="n">choose_node_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">choose_covered_node_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TrackingGrammarCoverageFuzzer</span><span class="o">.</span><span class="n">choose_node_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13052,7 +13078,7 @@ e
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">_max_symbol_expansion_coverage</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return set of all expansions in a grammar starting with `symbol`&quot;&quot;&quot;</span>
@@ -13436,16 +13462,18 @@ Tree: 8
 
         <span class="k">if</span> <span class="n">new_coverages</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># All expansions covered - use superclass method</span>
-            <span class="k">return</span> <span class="n">GrammarFuzzer</span><span class="o">.</span><span class="n">choose_node_expansion</span><span class="p">(</span>
-                <span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_covered_node_expansion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">)</span>
 
         <span class="n">max_new_coverage</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span> <span class="k">for</span> <span class="n">cov</span> <span class="ow">in</span> <span class="n">new_coverages</span><span class="p">)</span>
-        <span class="n">children_with_max_new_coverage</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">possible_children</span><span class="p">)</span>
-                                          <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_coverages</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="n">max_new_coverage</span><span class="p">]</span>
 
-        <span class="c1"># select a random expansion</span>
-        <span class="n">new_children_index</span><span class="p">,</span> <span class="n">new_children</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
-            <span class="n">children_with_max_new_coverage</span><span class="p">)</span>
+        <span class="n">children_with_max_new_coverage</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">possible_children</span><span class="p">)</span>
+                                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_coverages</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="n">max_new_coverage</span><span class="p">]</span>
+        <span class="n">index_map</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">possible_children</span><span class="p">)</span>
+                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_coverages</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="n">max_new_coverage</span><span class="p">]</span>
+
+        <span class="c1"># Select a random expansion</span>
+        <span class="n">new_children_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_uncovered_node_expansion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">children_with_max_new_coverage</span><span class="p">)</span>
+        <span class="n">new_children</span> <span class="o">=</span> <span class="n">children_with_max_new_coverage</span><span class="p">[</span><span class="n">new_children_index</span><span class="p">]</span>
 
         <span class="c1"># Save the expansion as covered</span>
         <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">)</span>
@@ -13454,7 +13482,7 @@ Tree: 8
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Now covered:&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">covered_expansions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">new_children_index</span>
+        <span class="k">return</span> <span class="n">index_map</span><span class="p">[</span><span class="n">new_children_index</span><span class="p">]</span>
 </pre></div>
 
 </div>
@@ -14165,7 +14193,7 @@ e%1ea25_
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarCoverageFuzzer.ipynb" target=_blank)>Last change: 2018-10-31 16:24:29+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarCoverageFuzzer.ipynb" target=_blank)>Last change: 2018-11-08 16:42:01+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14181,7 +14209,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html">Grammar Coverage</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html">https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html</a>.  Retrieved 2018-10-31 16:24:29+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html">Grammar Coverage</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html">https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html</a>.  Retrieved 2018-11-08 16:42:01+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:GrammarCoverageFuzzer,
@@ -14191,9 +14219,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html}},
-    note = {Retrieved 2018-10-31 16:24:29+01:00},
+    note = {Retrieved 2018-11-08 16:42:01+01:00},
     url = {https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html},
-    urldate = {2018-10-31 16:24:29+01:00}
+    urldate = {2018-11-08 16:42:01+01:00}
 }
 </pre>
 </div>

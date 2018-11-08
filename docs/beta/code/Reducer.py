@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2018-11-05 17:04:13+01:00
+# Last change: 2018-11-07 18:14:12+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -212,9 +212,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from Parser import PEGParser, canonical
+    from Parser import PEGParser
 else:
-    from .Parser import PEGParser, canonical
+    from .Parser import PEGParser
 
 
 if __package__ is None or __package__ == "":
@@ -253,7 +253,7 @@ class GrammarReducer(Reducer):
         super().__init__(runner, log=log)
         self.grammar = grammar
         self.start_symbol = start_symbol
-        self.parser = PEGParser(canonical(grammar), start_symbol)
+        self.parser = PEGParser(grammar, start_symbol)
 
 class GrammarReducer(GrammarReducer):
     def derivation_reductions(self, tree):
@@ -354,7 +354,7 @@ class GrammarReducer(GrammarReducer):
 
 class GrammarReducer(GrammarReducer):
     def parse(self, inp):
-        tree = self.parser.parse(inp)
+        tree = self.parser.parse(inp)[0]
         print(all_terminals(tree))
         return tree
 
@@ -415,7 +415,7 @@ else:
 
 
 if __name__ == "__main__":
-    inp = "1+(2*3)"
+    inp = "1 + (2 * 3)"
     grammar_reducer = GrammarReducer(mystery, EXPR_GRAMMAR)
     grammar_reducer.reduce(inp)
 
