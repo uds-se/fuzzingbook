@@ -7,14 +7,18 @@ USER root
 
 # Install required APT packages
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends graphviz inkscape bc ed texinfo groff wget
+RUN apt-get install -y --no-install-recommends graphviz inkscape bc ed texinfo groff wget vim
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
 USER $NB_UID
 
+ARG publish=no
+
 # Install required python packages
 RUN pip install matplotlib numpy pandas graphviz svglib jupyter_contrib_nbextensions autopep8 mypy notedown nbdime nbstripout
+
+RUN if [ "$publish" = "yes" ]; then pip install ipypublish autopep8 yapf ; fi
 
 # Clone the repo
 RUN cd /home/$NB_USER
@@ -45,6 +49,12 @@ RUN jupyter nbextension enable codefolding/main --user
 RUN jupyter nbextension enable execute_time/main --user
 RUN jupyter nbextension enable varInspector/main --user
 RUN jupyter nbextension enable collapsible_headings/main --user
+RUN jupyter nbextension enable select_keymap/main --user
+RUN jupyter nbextension enable spellchecker/main --user
+RUN jupyter nbextension enable scratchpad/main --user
+
+RUN if [ "$publish" = "yes" ]; then jupyter nbextension enable code_prettify/autopep8 --user ; fi
+RUN if [ "$publish" = "yes" ]; then jupyter nbextension enable code_prettify/code_prettify --user ; fi
 
 # run matplotlib once to generate the font cache
 RUN python -c "import matplotlib as mpl; mpl.use('Agg'); import pylab as plt; fig, ax = plt.subplots(); fig.savefig('test.png')"
