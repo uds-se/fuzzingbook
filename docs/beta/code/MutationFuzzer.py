@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2018-11-06 10:04:59+01:00
+# Last change: 2018-11-09 18:21:08+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -165,7 +165,7 @@ if __name__ == "__main__":
 def insert_random_character(s):
     """Returns s with a random character inserted"""
     pos = random.randint(0, len(s))
-    random_character = chr(random.randrange(32, 128))
+    random_character = chr(random.randrange(32, 127))
     # print("Inserting", repr(random_character), "at", pos)
     return s[:pos] + random_character + s[pos:]
 

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-11-08 16:42:01+01:00
+# Last change: 2018-11-11 21:09:31+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -245,9 +245,6 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     f = SimpleGrammarCoverageFuzzer(CGI_GRAMMAR)
-
-
-if __name__ == "__main__":
     for i in range(10):
         print(f.fuzz())
 
@@ -444,10 +441,165 @@ if __name__ == "__main__":
     average_length_until_full_coverage(GrammarCoverageFuzzer(CGI_GRAMMAR))
 
 
-# ## Code Coverage via Grammar Coverage
+# ## Coverage in Context
 
 if __name__ == "__main__":
-    print('\n## Code Coverage via Grammar Coverage')
+    print('\n## Coverage in Context')
+
+
+
+
+if __name__ == "__main__":
+    EXPR_GRAMMAR["<factor>"]
+
+
+# ### Extending Grammars for Context Coverage Manually
+
+if __name__ == "__main__":
+    print('\n### Extending Grammars for Context Coverage Manually')
+
+
+
+
+import copy
+
+if __name__ == "__main__":
+    dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
+    dup_expr_grammar["<factor>"][3] = "<integer-1>.<integer-2>"
+    dup_expr_grammar["<factor>"]
+
+
+if __name__ == "__main__":
+    dup_expr_grammar.update({
+        "<integer-1>": ["<digit-1><integer-1>", "<digit-1>"],
+        "<integer-2>": ["<digit-2><integer-2>", "<digit-2>"],
+        "<digit-1>":
+            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+        "<digit-2>":
+            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    })
+
+
+if __name__ == "__main__":
+    assert is_valid_grammar(dup_expr_grammar)
+
+
+if __name__ == "__main__":
+    f = GrammarCoverageFuzzer(dup_expr_grammar, start_symbol="<factor>")
+    for i in range(10):
+        print(f.fuzz())
+
+
+# ### Extending Grammars for Context Coverage Programmatically
+
+if __name__ == "__main__":
+    print('\n### Extending Grammars for Context Coverage Programmatically')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from Grammars import new_symbol
+else:
+    from .Grammars import new_symbol
+
+from GrammarFuzzer import expansion_to_children
+
+def duplicate_context(grammar, symbol, expansion=None, depth=-1):
+    """Duplicate an expansion within a grammar.
+    
+    In the given grammar, take the given expansion of the given symbol
+    (if expansion is omitted: all symbols), and replace it with a 
+    new expansion referring to a duplicate of all originally referenced rules.
+    
+    If depth is given, limit duplication to `depth` references (default: unlimited)
+    """
+    orig_grammar = copy.deepcopy(grammar)
+    _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen={})
+
+def _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen):
+    for i in range(len(grammar[symbol])):
+        if expansion is None or grammar[symbol][i] == expansion:
+            new_expansion = ""
+            for (s, c) in expansion_to_children(grammar[symbol][i]):
+                if s in seen:                 # Duplicated already
+                    new_expansion += seen[s]
+                elif c == [] or depth == 0:   # Terminal symbol or end of recursion
+                    new_expansion += s
+                else:                         # Nonterminal symbol - duplicate
+                    # Add new symbol with copy of rule
+                    new_s = new_symbol(grammar, s)
+                    grammar[new_s] = copy.deepcopy(orig_grammar[s])
+                    
+                    # Duplicate its expansions recursively
+                    # {**seen, **{s: new_s}} is seen + {s: new_s}
+                    _duplicate_context(grammar, orig_grammar, new_s, expansion=None, 
+                        depth=depth - 1, seen={**seen, **{s: new_s}})
+                    new_expansion += new_s
+            
+            grammar[symbol][i] = new_expansion
+
+if __name__ == "__main__":
+    dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
+    duplicate_context(dup_expr_grammar, "<factor>", "<integer>.<integer>")
+    dup_expr_grammar
+
+
+if __name__ == "__main__":
+    f = GrammarCoverageFuzzer(dup_expr_grammar, start_symbol="<factor>")
+    for i in range(10):
+        print(f.fuzz())
+
+
+if __name__ == "__main__":
+    dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
+    duplicate_context(dup_expr_grammar, "<factor>", "<integer>.<integer>", depth=1)
+    dup_expr_grammar
+
+
+if __name__ == "__main__":
+    assert is_valid_grammar(dup_expr_grammar)
+
+
+if __name__ == "__main__":
+    dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
+    duplicate_context(dup_expr_grammar, "<expr>")
+    len(dup_expr_grammar)
+
+
+if __name__ == "__main__":
+    f = GrammarCoverageFuzzer(dup_expr_grammar)
+    len(f.max_expansion_coverage())
+
+
+if __name__ == "__main__":
+    dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
+    duplicate_context(dup_expr_grammar, "<expr>")
+    duplicate_context(dup_expr_grammar, "<expr>")
+    len(dup_expr_grammar)
+
+
+if __name__ == "__main__":
+    f = GrammarCoverageFuzzer(dup_expr_grammar)
+    len(f.max_expansion_coverage())
+
+
+if __name__ == "__main__":
+    dup_expr_grammar["<expr>"]
+
+
+if __name__ == "__main__":
+    dup_expr_grammar["<term-1-1>"]
+
+
+if __name__ == "__main__":
+    dup_expr_grammar["<factor-1-1>"]
+
+
+# ## Covering Code by Covering Grammars
+
+if __name__ == "__main__":
+    print('\n## Covering Code by Covering Grammars')
 
 
 
@@ -635,7 +787,9 @@ LS_EBNF_GRAMMAR = {
                  ]
 }
 
-assert is_valid_grammar(LS_EBNF_GRAMMAR)
+if __name__ == "__main__":
+    assert is_valid_grammar(LS_EBNF_GRAMMAR)
+
 
 if __package__ is None or __package__ == "":
     from Grammars import convert_ebnf_grammar, srange
@@ -648,7 +802,10 @@ LS_EBNF_GRAMMAR = {
     '<options>': ['<option>*'],
     '<option>': srange("ABCFGHLOPRSTUW@abcdefghiklmnopqrstuwx1")
 }
-assert is_valid_grammar(LS_EBNF_GRAMMAR)
+
+if __name__ == "__main__":
+    assert is_valid_grammar(LS_EBNF_GRAMMAR)
+
 
 LS_GRAMMAR = convert_ebnf_grammar(LS_EBNF_GRAMMAR)
 
