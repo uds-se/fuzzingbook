@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-11-13 11:51:11+01:00
+# Last change: 2018-11-13 14:21:13+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -288,6 +288,37 @@ URL_GRAMMAR = {
 if __name__ == "__main__":
     for i in range(10):
         print(simple_grammar_fuzzer(grammar=URL_GRAMMAR, max_nonterminals=10))
+
+
+# ### A Natural Language Grammar
+
+if __name__ == "__main__":
+    print('\n### A Natural Language Grammar')
+
+
+
+
+TITLE_GRAMMAR = {
+    "<start>": ["<title>"],
+    "<title>": ["<topic>: <subtopic>"],
+    "<topic>": ["Generating Software Tests", "<fuzzing-prefix>Fuzzing", "The Fuzzing Book"],
+    "<fuzzing-prefix>": ["", "The Art of ", "The Joy of "],
+    "<subtopic>": ["<subtopic-main>",
+                   "<subtopic-prefix><subtopic-main>",
+                   "<subtopic-main><subtopic-suffix>" ],
+    "<subtopic-main>": [ "Breaking Software", 
+                   "Generating Software Tests",
+                   "Principles, Techniques and Tools" ],
+    "<subtopic-prefix>": ["", "Tools and Techniques for "],
+    "<subtopic-suffix>": [" for <reader-property> and <reader-property>", 
+                          " for <software-property> and <software-property>"],
+    "<reader-property>": ["Fun", "Profit"],
+    "<software-property>": ["Robustness", "Reliability", "Security"],
+}
+
+if __name__ == "__main__":
+    for i in range(10):
+        print(simple_grammar_fuzzer(grammar=TITLE_GRAMMAR, max_nonterminals=10))
 
 
 # ## Grammars as Mutation Seeds
