@@ -13773,19 +13773,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Fuzzing-with-Grammars">Fuzzing with Grammars<a class="anchor-link" href="#Fuzzing-with-Grammars">&#182;</a></h1><p>In the chapter on <a href="MutationFuzzer.slides.html">"Mutation-Based Fuzzing"</a>, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a <em>specification</em> of the legal inputs to a program.  These <em>grammars</em> allow for very systematic and efficient test generation, in particular for complex input formats.</p>
-
-</div>
-</div>
-</div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Prerequisites</strong></p>
-<ul>
-<li>You should know how basic fuzzing works, e.g. from the <a href="Fuzzer.slides.html">Chapter introducing fuzzing</a>.</li>
-<li>Knowledge on <a href="MutationFuzzer.slides.html">mutation-based fuzzing</a> and <a href="Coverage.slides.html">coverage</a> is <em>not</em> required yet, but still recommended.</li>
-</ul>
+<h1 id="Fuzzing-with-Grammars">Fuzzing with Grammars<a class="anchor-link" href="#Fuzzing-with-Grammars">&#182;</a></h1><p>In the chapter on <a href="MutationFuzzer.slides.html">"Mutation-Based Fuzzing"</a>, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a <em>specification</em> of the legal inputs to a program.  These <em>grammars</em> allow for very systematic and efficient test generation, in particular for complex input formats.  They also serve as the base for configuration fuzzing, API fuzzing, GUI fuzzing, and many more.</p>
 
 </div>
 </div>
@@ -13797,7 +13785,7 @@ a.anchor-link {
 
 </div>
 </div>
-</div></section></section><section><section>
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -15952,19 +15940,90 @@ http:/.user:1pasword@ww+w.goglecom:00/?abc=def&amp;x0:=abc
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>As they make a great foundation for generating software tests, we use grammars again and again in this work – and they become especially valuable when we can <em>infer</em> them automatically from a given domain, dropping the need to write them manually.  But before we get there, we first have to learn how to</p>
+<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>As they make a great foundation for generating software tests, we use grammars again and again in this book.  As a sneak preview, we can use grammars to <a href="ConfigurationFuzzer.slides.html">fuzz configurations</a>:</p>
+
+<pre><code>&lt;options&gt; ::= &lt;option&gt;*
+&lt;option&gt; ::= -h | --version | -v | -d | -i | --global-config &lt;filename&gt;</code></pre>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can use grammars for <a href="APIFuzzer.slides.html">fuzzing functions and APIs</a> and <a href="GUIFuzzer.slides.html">fuzzing graphical user interfaces</a>:</p>
+
+<pre><code>&lt;call-sequence&gt; ::= &lt;call&gt;*
+&lt;call&gt; ::= urlparse(&lt;url&gt;) | urlsplit(&lt;url&gt;)</code></pre>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can assign <a href="ProbabilisticGrammarFuzzer.slides.html">probabilities</a> and <a href="ConstraintGrammarFuzzer.slides.html">constraints</a> to individual expansions:</p>
+
+<pre><code>&lt;term&gt;: 50% &lt;factor&gt; * &lt;term&gt; |  30% &lt;factor&gt; / &lt;term&gt; | 20% &lt;factor&gt;
+&lt;integer&gt;: &lt;digit&gt;+ { &lt;integer&gt; &gt;= 100 }</code></pre>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>All these extras become especially valuable as we can</p>
+<ol>
+<li><em>infer grammars automatically</em>, dropping the need to specify them manually, and</li>
+<li><em>guide them towards specific goals</em> such as coverage or critical functions;</li>
+</ol>
+<p>which we also discuss for all techniques in this book.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To get there, however, we still have bit of homework to do.  In particular, we first have to learn how to</p>
 <ul>
 <li><a href="GrammarFuzzer.slides.html">create an efficient grammar fuzzer</a></li>
 </ul>
 
 </div>
 </div>
-</div></section></section><section><section>
+</div></div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>As one of the foundations of human language, grammars have been around as long as human language existed.  The first <em>formalization</em> of generative grammars was by Dakṣiputra Pāṇini in 350 BC \cite{Panini350bce}.</p>
-<p>\todo{Add more. Discuss LangFuzz, CSmith, Zhendong Su's work}</p>
+<h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>As one of the foundations of human language, grammars have been around as long as human language existed.  The first <em>formalization</em> of generative grammars was by Dakṣiputra Pāṇini in 350 BC \cite{Panini350bce}.  As a general means to express formal languages for both data and programs, their role in computer science cannot be overstated.  The seminal work by Chomsky \cite{Chomsky1956} introduced the central models of regular languages, context-free grammars, context-sensitive grammars, and universal grammars as they are used (and taught) in computer science as a means to specify input and programming languages aver since.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The use of grammars for <em>producing</em> test inputs goes back to Burkhardt \cite{Burkhardt1967}, to be later rediscovered and applied by Hanford \cite{Hanford1970} and Purdom \cite{Purdom1972}.  The most important use of grammar testing since then has been <em>compiler testing</em>.  Actually, grammar-based testing is one important reason why compilers and Web browsers work as they should:</p>
+<ul>
+<li><p>The <a href="https://embed.cs.utah.edu/csmith/">CSmith</a> tool \cite{Yang2011} specifically targets C programs, starting with a C grammar and then applying additional steps, such as referring to variables and functions defined earlier or ensuring integer and type safety.  Their authors have used it "to find and report more than 400 previously unknown compiler bugs."</p>
+</li>
+<li><p>The <a href="http://issta2016.cispa.saarland/interview-with-christian-holler/">LangFuzz</a> work \cite{Holler2012}, which shares two authors with this book, uses a generic grammar to produce outputs, and is used day and night to generate JavaScript programs and test their interpreters; as of today, it has found more than 2,600 bugs in browsers such as Mozilla Firefox, Google Chrome, and Microsoft Edge.</p>
+</li>
+<li><p>The <a href="http://web.cs.ucdavis.edu/~su/emi-project/">EMI Project</a> \cite{Le2014} uses grammars to stress-test C compilers, transforming known tests into alternative programs that should be semantically equivalent over all inputs.  Again, this has led to more than 100 bugs in C compilers being fixed.</p>
+</li>
+<li><p><a href="https://github.com/renatahodovan/grammarinator">Grammarinator</a> \cite{Hodovan2018} is an open-source grammar fuzzer (written in Python!), using the popular ANTLR format as grammar specification.  Like LangFuzz, it uses the grammar for both parsing and producing, and has found more than 100 issues in the <em>JerryScript</em> lightweight JavaScript engine and an associated platform.</p>
+</li>
+</ul>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Compilers and Web browsers, of course, are not only domains where grammars are needed for testing, but also domains where grammars are well-known.  Our claim in this book is that grammars can be used to generate almost <em>any</em> input, and our aim is to empower you to do precisely that.</p>
 
 </div>
 </div>
@@ -15998,277 +16057,11 @@ http:/.user:1pasword@ww+w.goglecom:00/?abc=def&amp;x0:=abc
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Solution.</strong> This is a fairly straightforward translation:</p>
-
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CHARACTERS_WITHOUT_QUOTE</span> <span class="o">=</span> <span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">digits</span>
-                            <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span>
-                            <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">punctuation</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-                            <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div></div></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[66]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">JSON_EBNF_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;json&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;json&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;element&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;element&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;ws&gt;&lt;value&gt;&lt;ws&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;value&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;object&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;array&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;number&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">,</span> <span class="s2">&quot;null&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;object&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;{&lt;ws&gt;}&quot;</span><span class="p">,</span> <span class="s2">&quot;{&lt;members&gt;}&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;members&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;member&gt;(,&lt;members&gt;)*&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;member&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;ws&gt;&lt;string&gt;&lt;ws&gt;:&lt;element&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;array&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;{&lt;ws&gt;}&quot;</span><span class="p">,</span> <span class="s2">&quot;{&lt;elements&gt;}&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;elements&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;element&gt;(,&lt;elements&gt;)*&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;element&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;ws&gt;&lt;value&gt;&lt;ws&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="s2">&quot;&lt;characters&gt;&quot;</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;characters&gt;&quot;</span><span class="p">:</span> <span class="n">srange</span><span class="p">(</span><span class="n">CHARACTERS_WITHOUT_QUOTE</span><span class="p">),</span>
-
-    <span class="s2">&quot;&lt;number&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;int&gt;&lt;frac&gt;&lt;exp&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;int&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;onenine&gt;&lt;digits&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;digits&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;onenine&gt;&lt;digits&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;digits&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;+&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s2">&quot;&lt;onenine&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;onenine&gt;&quot;</span><span class="p">:</span> <span class="n">crange</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">),</span>
-
-    <span class="s2">&quot;&lt;frac&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;.&lt;digits&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;exp&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;E&lt;sign&gt;&lt;digits&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;e&lt;sign&gt;&lt;digits&gt;&quot;</span><span class="p">],</span>
-
-    <span class="s2">&quot;&lt;sign&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">],</span>
-
-    <span class="c1"># &quot;&lt;ws&gt;&quot;: srange(string.whitespace)</span>
-
-    <span class="s2">&quot;&lt;ws&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot; &quot;</span><span class="p">]</span>
-<span class="p">}</span>
-
-<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">JSON_EBNF_GRAMMAR</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[67]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">JSON_GRAMMAR</span> <span class="o">=</span> <span class="n">convert_ebnf_grammar</span><span class="p">(</span><span class="n">JSON_EBNF_GRAMMAR</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[69]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-    <span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">JSON_GRAMMAR</span><span class="p">,</span> <span class="s1">&#39;&lt;object&gt;&#39;</span><span class="p">))</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>{ &#34;d&#34; : 59E-57 , &#34;V&#34; : { } , &#34;}&#34; : { } }
-{ }
-{ &#34;o&#34; : { } }
-{ }
-{ &#34;&#39;&#34; : false , &#34;&gt;&#34; : { } }
-{ }
-{ &#34;%&#34; : &#34;p&#34; }
-{ &#34;J&#34; : true }
-{ &#34;1&#34; : { } }
-{ }
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We get these errors because <code>simple_grammar_fuzzer()</code> first expands to a maximum number of elements, and then is limited because every further expansion would <em>increase</em> the number of nonterminals, even though these may eventually reduce the string length.  This issue is addressed in the <a href="GrammarFuzzer.slides.html">next chapter</a>, introducing a more solid algorithm for producing strings from grammars.</p>
-
-</div>
-</div>
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Exercise-2:-Finding-Bugs">Exercise 2: Finding Bugs<a class="anchor-link" href="#Exercise-2:-Finding-Bugs">&#182;</a></h3><p>The name <code>simple_grammar_fuzzer()</code> does not come by accident: The way it expands grammars is limited in several ways.  What happens if you apply <code>simple_gramar_fuzzer()</code> on <code>nonterminal_grammar</code> and <code>expr_grammar</code>, as defined above, and why?</p>
 
 </div>
 </div>
 </div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Solution</strong>.  <code>nonterminal_grammar</code> does not work because <code>simple_grammar_fuzzer()</code> eventually tries to expand the just generated nonterminal:</p>
-
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[71]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-    <span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">nonterminal_grammar</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>&lt;start&gt; -&gt; &lt;nonterminal&gt;                 &lt;nonterminal&gt;
-&lt;nonterminal&gt; -&gt; &lt;left-angle&gt;&lt;identifier&gt;&lt;right-angle&gt; &lt;left-angle&gt;&lt;identifier&gt;&lt;right-angle&gt;
-&lt;right-angle&gt; -&gt; &gt;                       &lt;left-angle&gt;&lt;identifier&gt;&gt;
-&lt;identifier&gt; -&gt; &lt;idchar&gt;&lt;identifier&gt;     &lt;left-angle&gt;&lt;idchar&gt;&lt;identifier&gt;&gt;
-&lt;left-angle&gt; -&gt; &lt;                        &lt;&lt;idchar&gt;&lt;identifier&gt;&gt;
-&lt;identifier&gt; -&gt; &lt;idchar&gt;                 &lt;&lt;idchar&gt;&lt;idchar&gt;&gt;
-&lt;idchar&gt; -&gt; m                            &lt;m&lt;idchar&gt;&gt;
-&lt;idchar&gt; -&gt; w                            &lt;mw&gt;
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-71-49bc73013dbc&gt;&#34;, line 2, in &lt;module&gt;
-    simple_grammar_fuzzer(nonterminal_grammar, log=True)
-  File &#34;&lt;ipython-input-15-6b63cc038bcf&gt;&#34;, line 9, in simple_grammar_fuzzer
-    expansions = grammar[symbol_to_expand]
-KeyError: &#39;&lt;mw&gt;&#39; (expected)
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>For <code>expr_grammar</code>, things are even worse, as <code>simple_grammar_fuzzer()</code> can start a series of infinite expansions:</p>
-
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[72]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">expr_grammar</span><span class="p">))</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-72-33e0c45a8a7e&gt;&#34;, line 3, in &lt;module&gt;
-    print(simple_grammar_fuzzer(expr_grammar))
-  File &#34;&lt;ipython-input-15-6b63cc038bcf&gt;&#34;, line 9, in simple_grammar_fuzzer
-    expansions = grammar[symbol_to_expand]
-  File &#34;&lt;ipython-input-15-6b63cc038bcf&gt;&#34;, line 9, in simple_grammar_fuzzer
-    expansions = grammar[symbol_to_expand]
-  File &#34;&lt;string&gt;&#34;, line 16, in check_time
-TimeoutError (expected)
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Both issues are addressed and discussed in the <a href="GrammarFuzzer.slides.html">next chapter</a>, introducing a more solid algorithm for producing strings from grammars.</p>
-
-</div>
-</div>
-</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -16306,15 +16099,7 @@ TimeoutError (expected)
 
 </div>
 </div>
-</div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Solution.</strong> Left as exercise to the reader.</p>
-
-</div>
-</div>
-</div></div></section><section>
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -16336,14 +16121,6 @@ TimeoutError (expected)
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Optional: Support <em>escapes</em> in regular expressions: <code>\c</code> translates to the literal character <code>c</code>; <code>\/</code> translates to <code>/</code> (and thus does not end the regular expression); <code>\\</code> translates to <code>\</code>.</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p><strong>Solution.</strong> Left as exercise to the reader.</p>
 
 </div>
 </div>
@@ -16389,7 +16166,7 @@ TimeoutError (expected)
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-    <span class="n">alt_expression_grammar</span><span class="p">()</span>
+    <span class="n">expression_grammar_fn</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -16407,9 +16184,11 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-74-2307bcdfd05a&gt;&#34;, line 2, in &lt;module&gt;
-    alt_expression_grammar()
-NameError: name &#39;alt_expression_grammar&#39; is not defined (expected)
+  File &#34;&lt;ipython-input-74-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
+    expression_grammar_fn()
+  File &#34;&lt;ipython-input-73-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
+    expr = &#34;&lt;term&gt; + &lt;expr&gt;&#34; | &#34;&lt;term&gt; - &lt;expr&gt;&#34;
+TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (expected)
 </pre>
 </div>
 </div>
@@ -16585,7 +16364,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Part-1-(a):-One-Single-Function">Part 1 (a): One Single Function<a class="anchor-link" href="#Part-1-(a):-One-Single-Function">&#182;</a></h4><p>Write a single function <code>define_grammar(fn)</code> that takes a grammar defined as function (such as <code>expression_grammar_fn</code>) and returns a regular grammar.</p>
+<h4 id="Part-1-(a):-One-Single-Function">Part 1 (a): One Single Function<a class="anchor-link" href="#Part-1-(a):-One-Single-Function">&#182;</a></h4><p>Write a single function <code>define_grammar(fn)</code> that takes a grammar defined as function (such as <code>expression_grammar_fn()</code>) and returns a regular grammar.</p>
 
 </div>
 </div>
@@ -16608,7 +16387,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We note that the grammar representation we designed previously does not allow simple generation of alternatives such as <code>srange</code> and <code>crange</code>. Further, one may find the string representation of expressions limiting. Turns out, it is simple to extend our grammar definition to support grammars such as below:</p>
+<p>We note that the grammar representation we designed previously does not allow simple generation of alternatives such as <code>srange()</code> and <code>crange()</code>. Further, one may find the string representation of expressions limiting.  It turns out that it is simple to extend our grammar definition to support grammars such as below:</p>
 
 </div>
 </div>
@@ -16674,7 +16453,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We note that we have not enabled <code>srange</code> or <code>crange</code> in the above grammar. How would you go about adding these? (<em>Hint:</em> wrap <code>define_expr</code> to look for <code>ast.Call</code>)</p>
+<p>We note that we have not enabled <code>srange()</code> or <code>crange()</code> in the above grammar. How would you go about adding these? (<em>Hint:</em> wrap <code>define_expr()</code> to look for <code>ast.Call</code>)</p>
 
 </div>
 </div>

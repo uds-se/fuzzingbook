@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2018-11-10 21:23:46+01:00
+# Last change: 2018-11-13 11:05:00+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -196,7 +196,7 @@ if __name__ == "__main__":
 
 
 POWER_GRAMMAR = {
-    "<start>": [ "power(<x>, <y>)" ],
+    "<start>": ["power(<x>, <y>)"],
     "<x>": ["1", "3"],
     "<y>": ["2", "4"]
 }
@@ -244,9 +244,9 @@ class CallGrammarMiner(CallGrammarMiner):
 
     def initial_grammar(self):
         return copy.deepcopy(
-               { START_SYMBOL: [ self.CALL_SYMBOL], 
-                 self.CALL_SYMBOL: []
-               })
+            {START_SYMBOL: [self.CALL_SYMBOL],
+                self.CALL_SYMBOL: []
+             })
 
 if __name__ == "__main__":
     m = CallGrammarMiner(power_carver)
@@ -270,7 +270,7 @@ if __name__ == "__main__":
 class CallGrammarMiner(CallGrammarMiner):
     def var_symbol(self, function_name, var, grammar):
         return new_symbol(grammar, "<" + function_name + "-" + var + ">")
-    
+
     def mine_arguments_grammar(self, function_name, arguments, grammar):
         var_grammar = {}
 
@@ -299,7 +299,8 @@ class CallGrammarMiner(CallGrammarMiner):
 
 if __name__ == "__main__":
     m = CallGrammarMiner(power_carver)
-    var_grammar, var_symbols = m.mine_arguments_grammar("power", arguments, initial_grammar)
+    var_grammar, var_symbols = m.mine_arguments_grammar(
+        "power", arguments, initial_grammar)
 
 
 if __name__ == "__main__":
@@ -328,17 +329,20 @@ class CallGrammarMiner(CallGrammarMiner):
         if self.log:
             print(function_name, arguments)
 
-        var_grammar, var_symbols = self.mine_arguments_grammar(function_name, arguments, grammar)
-        
+        var_grammar, var_symbols = self.mine_arguments_grammar(
+            function_name, arguments, grammar)
+
         function_grammar = var_grammar
         function_symbol = self.function_symbol(function_name, grammar)
 
         if len(var_symbols) > 0 and var_symbols[0].find("-self") >= 0:
             # Method call
-            function_grammar[function_symbol] = [ var_symbols[0] + "." + function_name + "(" + ", ".join(var_symbols[1:]) + ")" ]
+            function_grammar[function_symbol] = [
+                var_symbols[0] + "." + function_name + "(" + ", ".join(var_symbols[1:]) + ")"]
         else:
-            function_grammar[function_symbol] = [ function_name + "(" + ", ".join(var_symbols) + ")" ]
-        
+            function_grammar[function_symbol] = [
+                function_name + "(" + ", ".join(var_symbols) + ")"]
+
         if self.log:
             print(function_symbol, "::=", function_grammar[function_symbol])
 
@@ -346,7 +350,8 @@ class CallGrammarMiner(CallGrammarMiner):
 
 if __name__ == "__main__":
     m = CallGrammarMiner(power_carver)
-    function_grammar, function_symbol = m.mine_function_grammar("power", initial_grammar)
+    function_grammar, function_symbol = m.mine_function_grammar(
+        "power", initial_grammar)
     function_grammar
 
 
@@ -372,14 +377,15 @@ class CallGrammarMiner(CallGrammarMiner):
         fn_list = function_list
         if function_list is None:
             fn_list = self.carver.called_functions(qualified=qualified)
-            
+
         for function_name in fn_list:
             if function_list is None and (function_name.startswith("_") or function_name.startswith("<")):
-                continue # Internal function
+                continue  # Internal function
 
             # Ignore errors with mined functions
             try:
-                function_grammar, function_symbol = self.mine_function_grammar(function_name, grammar)
+                function_grammar, function_symbol = self.mine_function_grammar(
+                    function_name, grammar)
             except:
                 if function_list is not None:
                     raise
@@ -402,10 +408,10 @@ if __name__ == "__main__":
     [power_fuzzer.fuzz() for i in range(5)]
 
 
-# ### Fuzzing Web Functions
+# ## Fuzzing Web Functions
 
 if __name__ == "__main__":
-    print('\n### Fuzzing Web Functions')
+    print('\n## Fuzzing Web Functions')
 
 
 
@@ -444,7 +450,8 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    urlsplit_fuzzer = GrammarCoverageFuzzer(webbrowser_grammar, start_symbol="<urlsplit>")
+    urlsplit_fuzzer = GrammarCoverageFuzzer(
+        webbrowser_grammar, start_symbol="<urlsplit>")
     for i in range(5):
         print(urlsplit_fuzzer.fuzz())
 

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-11-11 21:09:31+01:00
+# Last change: 2018-11-13 11:25:18+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -151,7 +151,7 @@ def average_length_until_full_coverage(fuzzer):
     sum = 0
     for trial in range(trials):
         fuzzer.reset_coverage()
-        while len(fuzzer.max_expansion_coverage() 
+        while len(fuzzer.max_expansion_coverage()
                   - fuzzer.expansion_coverage()) > 0:
             s = fuzzer.fuzz()
             sum += len(s)
@@ -391,14 +391,15 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
             return self.choose_covered_node_expansion(node, possible_children)
 
         max_new_coverage = max(len(cov) for cov in new_coverages)
-        
+
         children_with_max_new_coverage = [c for (i, c) in enumerate(possible_children)
-                                            if len(new_coverages[i]) == max_new_coverage]
+                                          if len(new_coverages[i]) == max_new_coverage]
         index_map = [i for (i, c) in enumerate(possible_children)
                      if len(new_coverages[i]) == max_new_coverage]
-        
+
         # Select a random expansion
-        new_children_index = self.choose_uncovered_node_expansion(node, children_with_max_new_coverage)
+        new_children_index = self.choose_uncovered_node_expansion(
+            node, children_with_max_new_coverage)
         new_children = children_with_max_new_coverage[new_children_index]
 
         # Save the expansion as covered
@@ -507,15 +508,16 @@ from GrammarFuzzer import expansion_to_children
 
 def duplicate_context(grammar, symbol, expansion=None, depth=-1):
     """Duplicate an expansion within a grammar.
-    
+
     In the given grammar, take the given expansion of the given symbol
     (if expansion is omitted: all symbols), and replace it with a 
     new expansion referring to a duplicate of all originally referenced rules.
-    
+
     If depth is given, limit duplication to `depth` references (default: unlimited)
     """
     orig_grammar = copy.deepcopy(grammar)
-    _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen={})
+    _duplicate_context(grammar, orig_grammar, symbol,
+                       expansion, depth, seen={})
 
 def _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen):
     for i in range(len(grammar[symbol])):
@@ -530,13 +532,13 @@ def _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen):
                     # Add new symbol with copy of rule
                     new_s = new_symbol(grammar, s)
                     grammar[new_s] = copy.deepcopy(orig_grammar[s])
-                    
+
                     # Duplicate its expansions recursively
                     # {**seen, **{s: new_s}} is seen + {s: new_s}
-                    _duplicate_context(grammar, orig_grammar, new_s, expansion=None, 
-                        depth=depth - 1, seen={**seen, **{s: new_s}})
+                    _duplicate_context(grammar, orig_grammar, new_s, expansion=None,
+                                       depth=depth - 1, seen={**seen, **{s: new_s}})
                     new_expansion += new_s
-            
+
             grammar[symbol][i] = new_expansion
 
 if __name__ == "__main__":
@@ -653,7 +655,7 @@ if __name__ == "__main__":
     plt.scatter(xs, ys)
     plt.title('Coverage of cgi_decode() vs. grammar coverage')
     plt.xlabel('grammar coverage (expansions)')
-    plt.ylabel('code coverage (lines)');
+    plt.ylabel('code coverage (lines)')
 
 
 import numpy as np
@@ -708,7 +710,7 @@ if __name__ == "__main__":
     plt.scatter(xs, ys)
     plt.title('Coverage of cgi_decode() vs. grammar coverage')
     plt.xlabel('grammar coverage (expansions)')
-    plt.ylabel('code coverage (lines)');
+    plt.ylabel('code coverage (lines)')
 
 
 if __name__ == "__main__":

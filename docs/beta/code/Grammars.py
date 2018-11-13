@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-11-10 22:01:59+01:00
+# Last change: 2018-11-13 11:51:11+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -845,7 +845,7 @@ def expression_grammar_fn():
 
 if __name__ == "__main__":
     with ExpectError():
-        alt_expression_grammar()
+        expression_grammar_fn()
 
 
 import ast
