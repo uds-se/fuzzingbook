@@ -14856,7 +14856,10 @@ recursion in one of these rules, an <em>LL</em> parser will enter an infinite lo
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Next, we develop different parsers. To do that, we define a minimal interface for parsing, that is obeyed by all parsers.</p>
+<p>Next, we develop different parsers. To do that, we define a minimal interface for parsing, that is obeyed by all parsers. There are two approaches to parsing a string using a grammar.</p>
+<p>The traditional approach is to use a <em>lexer</em> (also called a <em>tokenizer</em> or a <em>scanner</em>) to first tokenize the incoming string, and feed the grammar one token at a time. The lexer is typically a smaller parser that accepts a <em>regular language</em>. The advantage of this approach is that the grammar used by the parser can eschew the details of tokenization. Further, one gets a shallow derivation tree at the end of the parsing which can be directly used for generating the <em>Abstract Syntax Tree</em>.</p>
+<p>The second approach is to use a tree pruner after the complete parse. With this approach, one uses a grammar that has the complete details of the syntax. Next, the nodes corresponding to tokens are pruned and replaced with their corresponding strings as leaf nodes. The utility of this approach is that the parser is more powerful, and further there is no artificial distinction between <em>lexing</em> and <em>parsing</em>.</p>
+<p>We use the second approach.</p>
 
 </div>
 </div>
@@ -14867,8 +14870,11 @@ recursion in one of these rules, an <em>LL</em> parser will enter an infinite lo
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Parser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">start_symbol</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">log</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">grammar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_symbol&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">START_SYMBOL</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tokens&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span>
@@ -14881,7 +14887,14 @@ recursion in one of these rules, an <em>LL</em> parser will enter an infinite lo
         <span class="n">cursor</span><span class="p">,</span> <span class="n">forest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_prefix</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cursor</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;at &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">cursor</span><span class="p">:]))</span>
-        <span class="k">return</span> <span class="n">forest</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">forest</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">prune_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[(</span><span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">),</span> <span class="p">[])])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">])</span> 
 </pre></div>
 
     </div>
@@ -14982,8 +14995,11 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Parser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">start_symbol</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">log</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">grammar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_symbol&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">START_SYMBOL</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tokens&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">set</span><span class="p">()</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="n">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
 </pre></div>
 
@@ -15921,1566 +15937,7 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Let us use our new grammar to parse a program</p>
-
-</div>
-</div>
-</div>
-</aside></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)&#39;</span>
-<span class="n">parser</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">):</span>
-    <span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-
-<div class="output_svg output_subarea ">
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
- "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
- -->
-<!-- Title: %3 Pages: 1 -->
-<svg width="1294pt" height="1094pt"
- viewBox="0.00 0.00 1293.50 1094.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 1090)">
-<title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-1090 1289.5,-1090 1289.5,4 -4,4"/>
-<!-- 0 -->
-<g id="node1" class="node">
-<title>0</title>
-<text text-anchor="middle" x="169" y="-1074.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
-</g>
-<!-- 1 -->
-<g id="node2" class="node">
-<title>1</title>
-<text text-anchor="middle" x="169" y="-1023.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;statements&gt;</text>
-</g>
-<!-- 0&#45;&gt;1 -->
-<g id="edge1" class="edge">
-<title>0&#45;&gt;1</title>
-<path fill="none" stroke="#000000" d="M169,-1070.9748C169,-1064.195 169,-1053.966 169,-1045.1331"/>
-<polygon fill="#000000" stroke="#000000" points="172.5001,-1045.0561 169,-1035.0561 165.5001,-1045.0561 172.5001,-1045.0561"/>
-</g>
-<!-- 2 -->
-<g id="node3" class="node">
-<title>2</title>
-<text text-anchor="middle" x="106" y="-972.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;statement&gt;</text>
-</g>
-<!-- 1&#45;&gt;2 -->
-<g id="edge2" class="edge">
-<title>1&#45;&gt;2</title>
-<path fill="none" stroke="#000000" d="M159.7041,-1019.9748C150.1193,-1012.2157 134.9541,-999.939 123.1799,-990.4075"/>
-<polygon fill="#000000" stroke="#000000" points="125.3087,-987.6278 115.334,-984.0561 120.9043,-993.0685 125.3087,-987.6278"/>
-</g>
-<!-- 20 -->
-<g id="node21" class="node">
-<title>20</title>
-<text text-anchor="middle" x="169" y="-972.8" font-family="Times,serif" font-size="14.00" fill="#000000">;</text>
-</g>
-<!-- 1&#45;&gt;20 -->
-<g id="edge20" class="edge">
-<title>1&#45;&gt;20</title>
-<path fill="none" stroke="#000000" d="M169,-1019.9748C169,-1013.195 169,-1002.966 169,-994.1331"/>
-<polygon fill="#000000" stroke="#000000" points="172.5001,-994.0561 169,-984.0561 165.5001,-994.0561 172.5001,-994.0561"/>
-</g>
-<!-- 21 -->
-<g id="node22" class="node">
-<title>21</title>
-<text text-anchor="middle" x="231" y="-972.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;statements&gt;</text>
-</g>
-<!-- 1&#45;&gt;21 -->
-<g id="edge21" class="edge">
-<title>1&#45;&gt;21</title>
-<path fill="none" stroke="#000000" d="M178.1483,-1019.9748C187.4894,-1012.291 202.2162,-1000.177 213.7544,-990.6859"/>
-<polygon fill="#000000" stroke="#000000" points="216.3147,-993.1119 221.8142,-984.0561 211.8678,-987.7058 216.3147,-993.1119"/>
-</g>
-<!-- 3 -->
-<g id="node4" class="node">
-<title>3</title>
-<text text-anchor="middle" x="89" y="-921.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;declaration&gt;</text>
-</g>
-<!-- 2&#45;&gt;3 -->
-<g id="edge3" class="edge">
-<title>2&#45;&gt;3</title>
-<path fill="none" stroke="#000000" d="M103.4916,-968.9748C101.1814,-962.0443 97.6699,-951.5097 94.6821,-942.5464"/>
-<polygon fill="#000000" stroke="#000000" points="98.0014,-941.4361 91.5187,-933.0561 91.3607,-943.6498 98.0014,-941.4361"/>
-</g>
-<!-- 4 -->
-<g id="node5" class="node">
-<title>4</title>
-<text text-anchor="middle" x="17" y="-870.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;def&gt;</text>
-</g>
-<!-- 3&#45;&gt;4 -->
-<g id="edge4" class="edge">
-<title>3&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M78.3762,-917.9748C67.2094,-910.065 49.4149,-897.4606 35.8547,-887.8554"/>
-<polygon fill="#000000" stroke="#000000" points="37.8508,-884.9802 27.6674,-882.0561 33.8046,-890.6924 37.8508,-884.9802"/>
-</g>
-<!-- 6 -->
-<g id="node7" class="node">
-<title>6</title>
-<text text-anchor="middle" x="54" y="-870.8" font-family="Times,serif" font-size="14.00" fill="#000000"> </text>
-</g>
-<!-- 3&#45;&gt;6 -->
-<g id="edge6" class="edge">
-<title>3&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M83.8356,-917.9748C78.0776,-909.5844 68.6943,-895.9117 61.988,-886.1397"/>
-<polygon fill="#000000" stroke="#000000" points="64.7769,-884.0179 56.2326,-877.7533 59.0053,-887.9789 64.7769,-884.0179"/>
-</g>
-<!-- 7 -->
-<g id="node8" class="node">
-<title>7</title>
-<text text-anchor="middle" x="108" y="-870.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;identifier&gt;</text>
-</g>
-<!-- 3&#45;&gt;7 -->
-<g id="edge7" class="edge">
-<title>3&#45;&gt;7</title>
-<path fill="none" stroke="#000000" d="M91.8035,-917.9748C94.3855,-911.0443 98.3101,-900.5097 101.6494,-891.5464"/>
-<polygon fill="#000000" stroke="#000000" points="104.9736,-892.6488 105.185,-882.0561 98.414,-890.205 104.9736,-892.6488"/>
-</g>
-<!-- 5 -->
-<g id="node6" class="node">
-<title>5</title>
-<text text-anchor="middle" x="17" y="-819.8" font-family="Times,serif" font-size="14.00" fill="#000000">def</text>
-</g>
-<!-- 4&#45;&gt;5 -->
-<g id="edge5" class="edge">
-<title>4&#45;&gt;5</title>
-<path fill="none" stroke="#000000" d="M17,-866.9748C17,-860.195 17,-849.966 17,-841.1331"/>
-<polygon fill="#000000" stroke="#000000" points="20.5001,-841.0561 17,-831.0561 13.5001,-841.0561 20.5001,-841.0561"/>
-</g>
-<!-- 8 -->
-<g id="node9" class="node">
-<title>8</title>
-<text text-anchor="middle" x="100" y="-819.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 7&#45;&gt;8 -->
-<g id="edge8" class="edge">
-<title>7&#45;&gt;8</title>
-<path fill="none" stroke="#000000" d="M106.8196,-866.9748C105.7561,-860.195 104.1515,-849.966 102.766,-841.1331"/>
-<polygon fill="#000000" stroke="#000000" points="106.1927,-840.3929 101.1853,-831.0561 99.2773,-841.4777 106.1927,-840.3929"/>
-</g>
-<!-- 9 -->
-<g id="node10" class="node">
-<title>9</title>
-<text text-anchor="middle" x="24" y="-768.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 8&#45;&gt;9 -->
-<g id="edge9" class="edge">
-<title>8&#45;&gt;9</title>
-<path fill="none" stroke="#000000" d="M88.7859,-815.9748C76.9988,-808.065 58.2157,-795.4606 43.9022,-785.8554"/>
-<polygon fill="#000000" stroke="#000000" points="45.514,-782.722 35.2601,-780.0561 41.6135,-788.5346 45.514,-782.722"/>
-</g>
-<!-- 11 -->
-<g id="node12" class="node">
-<title>11</title>
-<text text-anchor="middle" x="100" y="-768.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 8&#45;&gt;11 -->
-<g id="edge11" class="edge">
-<title>8&#45;&gt;11</title>
-<path fill="none" stroke="#000000" d="M100,-815.9748C100,-809.195 100,-798.966 100,-790.1331"/>
-<polygon fill="#000000" stroke="#000000" points="103.5001,-790.0561 100,-780.0561 96.5001,-790.0561 103.5001,-790.0561"/>
-</g>
-<!-- 10 -->
-<g id="node11" class="node">
-<title>10</title>
-<text text-anchor="middle" x="18" y="-717.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 9&#45;&gt;10 -->
-<g id="edge10" class="edge">
-<title>9&#45;&gt;10</title>
-<path fill="none" stroke="#000000" d="M23.1147,-764.9748C22.3171,-758.195 21.1136,-747.966 20.0745,-739.1331"/>
-<polygon fill="#000000" stroke="#000000" points="23.5335,-738.5786 18.889,-729.0561 16.5814,-739.3966 23.5335,-738.5786"/>
-</g>
-<!-- 12 -->
-<g id="node13" class="node">
-<title>12</title>
-<text text-anchor="middle" x="63" y="-717.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 11&#45;&gt;12 -->
-<g id="edge12" class="edge">
-<title>11&#45;&gt;12</title>
-<path fill="none" stroke="#000000" d="M94.5405,-764.9748C89.2939,-757.743 81.2002,-746.5868 74.5256,-737.3866"/>
-<polygon fill="#000000" stroke="#000000" points="77.1872,-735.095 68.4819,-729.0561 71.5212,-739.2056 77.1872,-735.095"/>
-</g>
-<!-- 14 -->
-<g id="node15" class="node">
-<title>14</title>
-<text text-anchor="middle" x="127" y="-717.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 11&#45;&gt;14 -->
-<g id="edge14" class="edge">
-<title>11&#45;&gt;14</title>
-<path fill="none" stroke="#000000" d="M103.9839,-764.9748C107.7328,-757.8936 113.4735,-747.05 118.2837,-737.9641"/>
-<polygon fill="#000000" stroke="#000000" points="121.414,-739.5316 122.9997,-729.0561 115.2275,-736.2564 121.414,-739.5316"/>
-</g>
-<!-- 13 -->
-<g id="node14" class="node">
-<title>13</title>
-<text text-anchor="middle" x="46" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">v</text>
-</g>
-<!-- 12&#45;&gt;13 -->
-<g id="edge13" class="edge">
-<title>12&#45;&gt;13</title>
-<path fill="none" stroke="#000000" d="M60.4916,-713.9748C58.1814,-707.0443 54.6699,-696.5097 51.6821,-687.5464"/>
-<polygon fill="#000000" stroke="#000000" points="55.0014,-686.4361 48.5187,-678.0561 48.3607,-688.6498 55.0014,-686.4361"/>
-</g>
-<!-- 15 -->
-<g id="node16" class="node">
-<title>15</title>
-<text text-anchor="middle" x="92" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 14&#45;&gt;15 -->
-<g id="edge15" class="edge">
-<title>14&#45;&gt;15</title>
-<path fill="none" stroke="#000000" d="M121.8356,-713.9748C116.8726,-706.743 109.2165,-695.5868 102.9026,-686.3866"/>
-<polygon fill="#000000" stroke="#000000" points="105.7298,-684.3208 97.1856,-678.0561 99.9582,-688.2817 105.7298,-684.3208"/>
-</g>
-<!-- 17 -->
-<g id="node18" class="node">
-<title>17</title>
-<text text-anchor="middle" x="156" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 14&#45;&gt;17 -->
-<g id="edge17" class="edge">
-<title>14&#45;&gt;17</title>
-<path fill="none" stroke="#000000" d="M131.279,-713.9748C135.3056,-706.8936 141.4716,-696.05 146.6381,-686.9641"/>
-<polygon fill="#000000" stroke="#000000" points="149.8028,-688.4791 151.7034,-678.0561 143.7178,-685.0189 149.8028,-688.4791"/>
-</g>
-<!-- 16 -->
-<g id="node17" class="node">
-<title>16</title>
-<text text-anchor="middle" x="92" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 15&#45;&gt;16 -->
-<g id="edge16" class="edge">
-<title>15&#45;&gt;16</title>
-<path fill="none" stroke="#000000" d="M92,-662.9748C92,-656.195 92,-645.966 92,-637.1331"/>
-<polygon fill="#000000" stroke="#000000" points="95.5001,-637.0561 92,-627.0561 88.5001,-637.0561 95.5001,-637.0561"/>
-</g>
-<!-- 18 -->
-<g id="node19" class="node">
-<title>18</title>
-<text text-anchor="middle" x="156" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 17&#45;&gt;18 -->
-<g id="edge18" class="edge">
-<title>17&#45;&gt;18</title>
-<path fill="none" stroke="#000000" d="M156,-662.9748C156,-656.195 156,-645.966 156,-637.1331"/>
-<polygon fill="#000000" stroke="#000000" points="159.5001,-637.0561 156,-627.0561 152.5001,-637.0561 159.5001,-637.0561"/>
-</g>
-<!-- 19 -->
-<g id="node20" class="node">
-<title>19</title>
-<text text-anchor="middle" x="156" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">r</text>
-</g>
-<!-- 18&#45;&gt;19 -->
-<g id="edge19" class="edge">
-<title>18&#45;&gt;19</title>
-<path fill="none" stroke="#000000" d="M156,-611.9748C156,-605.195 156,-594.966 156,-586.1331"/>
-<polygon fill="#000000" stroke="#000000" points="159.5001,-586.0561 156,-576.0561 152.5001,-586.0561 159.5001,-586.0561"/>
-</g>
-<!-- 22 -->
-<g id="node23" class="node">
-<title>22</title>
-<text text-anchor="middle" x="206" y="-921.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;statement&gt;</text>
-</g>
-<!-- 21&#45;&gt;22 -->
-<g id="edge22" class="edge">
-<title>21&#45;&gt;22</title>
-<path fill="none" stroke="#000000" d="M227.3112,-968.9748C223.8769,-961.969 218.6374,-951.2803 214.2131,-942.2547"/>
-<polygon fill="#000000" stroke="#000000" points="217.2483,-940.4947 209.704,-933.0561 210.9629,-943.5759 217.2483,-940.4947"/>
-</g>
-<!-- 40 -->
-<g id="node41" class="node">
-<title>40</title>
-<text text-anchor="middle" x="261" y="-921.8" font-family="Times,serif" font-size="14.00" fill="#000000">;</text>
-</g>
-<!-- 21&#45;&gt;40 -->
-<g id="edge40" class="edge">
-<title>21&#45;&gt;40</title>
-<path fill="none" stroke="#000000" d="M235.4266,-968.9748C240.2144,-960.8355 247.9263,-947.7253 253.631,-938.0273"/>
-<polygon fill="#000000" stroke="#000000" points="256.7466,-939.6338 258.8001,-929.2398 250.7131,-936.0846 256.7466,-939.6338"/>
-</g>
-<!-- 41 -->
-<g id="node42" class="node">
-<title>41</title>
-<text text-anchor="middle" x="553" y="-921.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;statements&gt;</text>
-</g>
-<!-- 21&#45;&gt;41 -->
-<g id="edge41" class="edge">
-<title>21&#45;&gt;41</title>
-<path fill="none" stroke="#000000" d="M268.5677,-970.5498C327.3055,-961.2466 440.8223,-943.2673 505.268,-933.06"/>
-<polygon fill="#000000" stroke="#000000" points="505.8445,-936.5124 515.1739,-931.4911 504.7494,-929.5986 505.8445,-936.5124"/>
-</g>
-<!-- 23 -->
-<g id="node24" class="node">
-<title>23</title>
-<text text-anchor="middle" x="206" y="-870.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;declaration&gt;</text>
-</g>
-<!-- 22&#45;&gt;23 -->
-<g id="edge23" class="edge">
-<title>22&#45;&gt;23</title>
-<path fill="none" stroke="#000000" d="M206,-917.9748C206,-911.195 206,-900.966 206,-892.1331"/>
-<polygon fill="#000000" stroke="#000000" points="209.5001,-892.0561 206,-882.0561 202.5001,-892.0561 209.5001,-892.0561"/>
-</g>
-<!-- 24 -->
-<g id="node25" class="node">
-<title>24</title>
-<text text-anchor="middle" x="169" y="-819.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;def&gt;</text>
-</g>
-<!-- 23&#45;&gt;24 -->
-<g id="edge24" class="edge">
-<title>23&#45;&gt;24</title>
-<path fill="none" stroke="#000000" d="M200.5405,-866.9748C195.2939,-859.743 187.2002,-848.5868 180.5256,-839.3866"/>
-<polygon fill="#000000" stroke="#000000" points="183.1872,-837.095 174.4819,-831.0561 177.5212,-841.2056 183.1872,-837.095"/>
-</g>
-<!-- 26 -->
-<g id="node27" class="node">
-<title>26</title>
-<text text-anchor="middle" x="206" y="-819.8" font-family="Times,serif" font-size="14.00" fill="#000000"> </text>
-</g>
-<!-- 23&#45;&gt;26 -->
-<g id="edge26" class="edge">
-<title>23&#45;&gt;26</title>
-<path fill="none" stroke="#000000" d="M206,-866.9748C206,-860.195 206,-849.966 206,-841.1331"/>
-<polygon fill="#000000" stroke="#000000" points="209.5001,-841.0561 206,-831.0561 202.5001,-841.0561 209.5001,-841.0561"/>
-</g>
-<!-- 27 -->
-<g id="node28" class="node">
-<title>27</title>
-<text text-anchor="middle" x="260" y="-819.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;identifier&gt;</text>
-</g>
-<!-- 23&#45;&gt;27 -->
-<g id="edge27" class="edge">
-<title>23&#45;&gt;27</title>
-<path fill="none" stroke="#000000" d="M213.9679,-866.9748C222.0239,-859.3663 234.6792,-847.4141 244.6833,-837.9658"/>
-<polygon fill="#000000" stroke="#000000" points="247.1325,-840.4669 251.9994,-831.0561 242.3261,-835.3778 247.1325,-840.4669"/>
-</g>
-<!-- 25 -->
-<g id="node26" class="node">
-<title>25</title>
-<text text-anchor="middle" x="169" y="-768.8" font-family="Times,serif" font-size="14.00" fill="#000000">def</text>
-</g>
-<!-- 24&#45;&gt;25 -->
-<g id="edge25" class="edge">
-<title>24&#45;&gt;25</title>
-<path fill="none" stroke="#000000" d="M169,-815.9748C169,-809.195 169,-798.966 169,-790.1331"/>
-<polygon fill="#000000" stroke="#000000" points="172.5001,-790.0561 169,-780.0561 165.5001,-790.0561 172.5001,-790.0561"/>
-</g>
-<!-- 28 -->
-<g id="node29" class="node">
-<title>28</title>
-<text text-anchor="middle" x="260" y="-768.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 27&#45;&gt;28 -->
-<g id="edge28" class="edge">
-<title>27&#45;&gt;28</title>
-<path fill="none" stroke="#000000" d="M260,-815.9748C260,-809.195 260,-798.966 260,-790.1331"/>
-<polygon fill="#000000" stroke="#000000" points="263.5001,-790.0561 260,-780.0561 256.5001,-790.0561 263.5001,-790.0561"/>
-</g>
-<!-- 29 -->
-<g id="node30" class="node">
-<title>29</title>
-<text text-anchor="middle" x="201" y="-717.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 28&#45;&gt;29 -->
-<g id="edge29" class="edge">
-<title>28&#45;&gt;29</title>
-<path fill="none" stroke="#000000" d="M251.2943,-764.9748C242.4053,-757.291 228.391,-745.177 217.4111,-735.6859"/>
-<polygon fill="#000000" stroke="#000000" points="219.5956,-732.9478 209.7414,-729.0561 215.0179,-738.2435 219.5956,-732.9478"/>
-</g>
-<!-- 31 -->
-<g id="node32" class="node">
-<title>31</title>
-<text text-anchor="middle" x="265" y="-717.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 28&#45;&gt;31 -->
-<g id="edge31" class="edge">
-<title>28&#45;&gt;31</title>
-<path fill="none" stroke="#000000" d="M260.7378,-764.9748C261.4025,-758.195 262.4053,-747.966 263.2713,-739.1331"/>
-<polygon fill="#000000" stroke="#000000" points="266.7667,-739.3499 264.2592,-729.0561 259.8001,-738.6669 266.7667,-739.3499"/>
-</g>
-<!-- 30 -->
-<g id="node31" class="node">
-<title>30</title>
-<text text-anchor="middle" x="201" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">b</text>
-</g>
-<!-- 29&#45;&gt;30 -->
-<g id="edge30" class="edge">
-<title>29&#45;&gt;30</title>
-<path fill="none" stroke="#000000" d="M201,-713.9748C201,-707.195 201,-696.966 201,-688.1331"/>
-<polygon fill="#000000" stroke="#000000" points="204.5001,-688.0561 201,-678.0561 197.5001,-688.0561 204.5001,-688.0561"/>
-</g>
-<!-- 32 -->
-<g id="node33" class="node">
-<title>32</title>
-<text text-anchor="middle" x="247" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 31&#45;&gt;32 -->
-<g id="edge32" class="edge">
-<title>31&#45;&gt;32</title>
-<path fill="none" stroke="#000000" d="M262.344,-713.9748C259.898,-707.0443 256.1799,-696.5097 253.0164,-687.5464"/>
-<polygon fill="#000000" stroke="#000000" points="256.2956,-686.3211 249.6669,-678.0561 249.6947,-688.6509 256.2956,-686.3211"/>
-</g>
-<!-- 34 -->
-<g id="node35" class="node">
-<title>34</title>
-<text text-anchor="middle" x="311" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 31&#45;&gt;34 -->
-<g id="edge34" class="edge">
-<title>31&#45;&gt;34</title>
-<path fill="none" stroke="#000000" d="M271.7875,-713.9748C278.5141,-706.517 289.005,-694.8857 297.4436,-685.53"/>
-<polygon fill="#000000" stroke="#000000" points="300.086,-687.826 304.1847,-678.0561 294.888,-683.1376 300.086,-687.826"/>
-</g>
-<!-- 33 -->
-<g id="node34" class="node">
-<title>33</title>
-<text text-anchor="middle" x="211" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">v</text>
-</g>
-<!-- 32&#45;&gt;33 -->
-<g id="edge33" class="edge">
-<title>32&#45;&gt;33</title>
-<path fill="none" stroke="#000000" d="M241.6881,-662.9748C236.2899,-655.3274 227.794,-643.2916 221.1088,-633.8208"/>
-<polygon fill="#000000" stroke="#000000" points="223.8352,-631.614 215.209,-625.4627 218.1164,-635.6508 223.8352,-631.614"/>
-</g>
-<!-- 35 -->
-<g id="node36" class="node">
-<title>35</title>
-<text text-anchor="middle" x="257" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 34&#45;&gt;35 -->
-<g id="edge35" class="edge">
-<title>34&#45;&gt;35</title>
-<path fill="none" stroke="#000000" d="M303.0321,-662.9748C294.9761,-655.3663 282.3208,-643.4141 272.3167,-633.9658"/>
-<polygon fill="#000000" stroke="#000000" points="274.6739,-631.3778 265.0006,-627.0561 269.8675,-636.4669 274.6739,-631.3778"/>
-</g>
-<!-- 37 -->
-<g id="node38" class="node">
-<title>37</title>
-<text text-anchor="middle" x="321" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 34&#45;&gt;37 -->
-<g id="edge37" class="edge">
-<title>34&#45;&gt;37</title>
-<path fill="none" stroke="#000000" d="M312.4755,-662.9748C313.8049,-656.195 315.8106,-645.966 317.5425,-637.1331"/>
-<polygon fill="#000000" stroke="#000000" points="321.0288,-637.5427 319.5184,-627.0561 314.1596,-636.1958 321.0288,-637.5427"/>
-</g>
-<!-- 36 -->
-<g id="node37" class="node">
-<title>36</title>
-<text text-anchor="middle" x="257" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 35&#45;&gt;36 -->
-<g id="edge36" class="edge">
-<title>35&#45;&gt;36</title>
-<path fill="none" stroke="#000000" d="M257,-611.9748C257,-605.195 257,-594.966 257,-586.1331"/>
-<polygon fill="#000000" stroke="#000000" points="260.5001,-586.0561 257,-576.0561 253.5001,-586.0561 260.5001,-586.0561"/>
-</g>
-<!-- 38 -->
-<g id="node39" class="node">
-<title>38</title>
-<text text-anchor="middle" x="320" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 37&#45;&gt;38 -->
-<g id="edge38" class="edge">
-<title>37&#45;&gt;38</title>
-<path fill="none" stroke="#000000" d="M320.8524,-611.9748C320.7195,-605.195 320.5189,-594.966 320.3457,-586.1331"/>
-<polygon fill="#000000" stroke="#000000" points="323.8436,-585.9855 320.1482,-576.0561 316.845,-586.1228 323.8436,-585.9855"/>
-</g>
-<!-- 39 -->
-<g id="node40" class="node">
-<title>39</title>
-<text text-anchor="middle" x="320" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">r</text>
-</g>
-<!-- 38&#45;&gt;39 -->
-<g id="edge39" class="edge">
-<title>38&#45;&gt;39</title>
-<path fill="none" stroke="#000000" d="M320,-560.9748C320,-554.195 320,-543.966 320,-535.1331"/>
-<polygon fill="#000000" stroke="#000000" points="323.5001,-535.0561 320,-525.0561 316.5001,-535.0561 323.5001,-535.0561"/>
-</g>
-<!-- 42 -->
-<g id="node43" class="node">
-<title>42</title>
-<text text-anchor="middle" x="526" y="-870.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;statement&gt;</text>
-</g>
-<!-- 41&#45;&gt;42 -->
-<g id="edge42" class="edge">
-<title>41&#45;&gt;42</title>
-<path fill="none" stroke="#000000" d="M549.0161,-917.9748C545.2672,-910.8936 539.5265,-900.05 534.7163,-890.9641"/>
-<polygon fill="#000000" stroke="#000000" points="537.7725,-889.2564 530.0003,-882.0561 531.586,-892.5316 537.7725,-889.2564"/>
-</g>
-<!-- 69 -->
-<g id="node70" class="node">
-<title>69</title>
-<text text-anchor="middle" x="581" y="-870.8" font-family="Times,serif" font-size="14.00" fill="#000000">;</text>
-</g>
-<!-- 41&#45;&gt;69 -->
-<g id="edge69" class="edge">
-<title>41&#45;&gt;69</title>
-<path fill="none" stroke="#000000" d="M557.1315,-917.9748C561.6001,-909.8355 568.7979,-896.7253 574.1223,-887.0273"/>
-<polygon fill="#000000" stroke="#000000" points="577.2022,-888.69 578.9468,-878.2398 571.0661,-885.3212 577.2022,-888.69"/>
-</g>
-<!-- 70 -->
-<g id="node71" class="node">
-<title>70</title>
-<text text-anchor="middle" x="664" y="-870.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;statements&gt;</text>
-</g>
-<!-- 41&#45;&gt;70 -->
-<g id="edge70" class="edge">
-<title>41&#45;&gt;70</title>
-<path fill="none" stroke="#000000" d="M569.3784,-917.9748C587.5776,-909.613 617.1956,-896.0047 638.449,-886.2397"/>
-<polygon fill="#000000" stroke="#000000" points="639.9289,-889.4115 647.5544,-882.0561 637.0063,-883.0508 639.9289,-889.4115"/>
-</g>
-<!-- 43 -->
-<g id="node44" class="node">
-<title>43</title>
-<text text-anchor="middle" x="526" y="-819.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;assignment&gt;</text>
-</g>
-<!-- 42&#45;&gt;43 -->
-<g id="edge43" class="edge">
-<title>42&#45;&gt;43</title>
-<path fill="none" stroke="#000000" d="M526,-866.9748C526,-860.195 526,-849.966 526,-841.1331"/>
-<polygon fill="#000000" stroke="#000000" points="529.5001,-841.0561 526,-831.0561 522.5001,-841.0561 529.5001,-841.0561"/>
-</g>
-<!-- 44 -->
-<g id="node45" class="node">
-<title>44</title>
-<text text-anchor="middle" x="467" y="-768.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;identifier&gt;</text>
-</g>
-<!-- 43&#45;&gt;44 -->
-<g id="edge44" class="edge">
-<title>43&#45;&gt;44</title>
-<path fill="none" stroke="#000000" d="M517.2943,-815.9748C508.4053,-808.291 494.391,-796.177 483.4111,-786.6859"/>
-<polygon fill="#000000" stroke="#000000" points="485.5956,-783.9478 475.7414,-780.0561 481.0179,-789.2435 485.5956,-783.9478"/>
-</g>
-<!-- 57 -->
-<g id="node58" class="node">
-<title>57</title>
-<text text-anchor="middle" x="526" y="-768.8" font-family="Times,serif" font-size="14.00" fill="#000000">=</text>
-</g>
-<!-- 43&#45;&gt;57 -->
-<g id="edge57" class="edge">
-<title>43&#45;&gt;57</title>
-<path fill="none" stroke="#000000" d="M526,-815.9748C526,-809.195 526,-798.966 526,-790.1331"/>
-<polygon fill="#000000" stroke="#000000" points="529.5001,-790.0561 526,-780.0561 522.5001,-790.0561 529.5001,-790.0561"/>
-</g>
-<!-- 58 -->
-<g id="node59" class="node">
-<title>58</title>
-<text text-anchor="middle" x="570" y="-768.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
-</g>
-<!-- 43&#45;&gt;58 -->
-<g id="edge58" class="edge">
-<title>43&#45;&gt;58</title>
-<path fill="none" stroke="#000000" d="M532.4924,-815.9748C538.8615,-808.5923 548.759,-797.1203 556.7878,-787.8142"/>
-<polygon fill="#000000" stroke="#000000" points="559.5987,-789.914 563.481,-780.0561 554.2986,-785.3414 559.5987,-789.914"/>
-</g>
-<!-- 45 -->
-<g id="node46" class="node">
-<title>45</title>
-<text text-anchor="middle" x="466" y="-717.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 44&#45;&gt;45 -->
-<g id="edge45" class="edge">
-<title>44&#45;&gt;45</title>
-<path fill="none" stroke="#000000" d="M466.8524,-764.9748C466.7195,-758.195 466.5189,-747.966 466.3457,-739.1331"/>
-<polygon fill="#000000" stroke="#000000" points="469.8436,-738.9855 466.1482,-729.0561 462.845,-739.1228 469.8436,-738.9855"/>
-</g>
-<!-- 46 -->
-<g id="node47" class="node">
-<title>46</title>
-<text text-anchor="middle" x="393" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 45&#45;&gt;46 -->
-<g id="edge46" class="edge">
-<title>45&#45;&gt;46</title>
-<path fill="none" stroke="#000000" d="M455.2286,-713.9748C443.9068,-706.065 425.8651,-693.4606 412.1166,-683.8554"/>
-<polygon fill="#000000" stroke="#000000" points="414.0177,-680.9141 403.8156,-678.0561 410.0087,-686.6524 414.0177,-680.9141"/>
-</g>
-<!-- 48 -->
-<g id="node49" class="node">
-<title>48</title>
-<text text-anchor="middle" x="466" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 45&#45;&gt;48 -->
-<g id="edge48" class="edge">
-<title>45&#45;&gt;48</title>
-<path fill="none" stroke="#000000" d="M466,-713.9748C466,-707.195 466,-696.966 466,-688.1331"/>
-<polygon fill="#000000" stroke="#000000" points="469.5001,-688.0561 466,-678.0561 462.5001,-688.0561 469.5001,-688.0561"/>
-</g>
-<!-- 47 -->
-<g id="node48" class="node">
-<title>47</title>
-<text text-anchor="middle" x="366" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 46&#45;&gt;47 -->
-<g id="edge47" class="edge">
-<title>46&#45;&gt;47</title>
-<path fill="none" stroke="#000000" d="M389.0161,-662.9748C385.181,-655.7309 379.2615,-644.5494 374.3861,-635.3403"/>
-<polygon fill="#000000" stroke="#000000" points="377.4258,-633.6016 369.6536,-626.4013 371.2393,-636.8768 377.4258,-633.6016"/>
-</g>
-<!-- 49 -->
-<g id="node50" class="node">
-<title>49</title>
-<text text-anchor="middle" x="411" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 48&#45;&gt;49 -->
-<g id="edge49" class="edge">
-<title>48&#45;&gt;49</title>
-<path fill="none" stroke="#000000" d="M457.8846,-662.9748C449.6794,-655.3663 436.7897,-643.4141 426.6004,-633.9658"/>
-<polygon fill="#000000" stroke="#000000" points="428.8612,-631.2891 419.1487,-627.0561 424.1016,-636.422 428.8612,-631.2891"/>
-</g>
-<!-- 51 -->
-<g id="node52" class="node">
-<title>51</title>
-<text text-anchor="middle" x="475" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 48&#45;&gt;51 -->
-<g id="edge51" class="edge">
-<title>48&#45;&gt;51</title>
-<path fill="none" stroke="#000000" d="M467.328,-662.9748C468.5244,-656.195 470.3295,-645.966 471.8883,-637.1331"/>
-<polygon fill="#000000" stroke="#000000" points="475.3754,-637.5122 473.6666,-627.0561 468.4819,-636.2957 475.3754,-637.5122"/>
-</g>
-<!-- 50 -->
-<g id="node51" class="node">
-<title>50</title>
-<text text-anchor="middle" x="366" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">v</text>
-</g>
-<!-- 49&#45;&gt;50 -->
-<g id="edge50" class="edge">
-<title>49&#45;&gt;50</title>
-<path fill="none" stroke="#000000" d="M404.3601,-611.9748C397.1723,-603.8286 385.5909,-590.703 377.0316,-581.0025"/>
-<polygon fill="#000000" stroke="#000000" points="379.4742,-578.4807 370.2335,-573.298 374.2253,-583.112 379.4742,-578.4807"/>
-</g>
-<!-- 52 -->
-<g id="node53" class="node">
-<title>52</title>
-<text text-anchor="middle" x="412" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 51&#45;&gt;52 -->
-<g id="edge52" class="edge">
-<title>51&#45;&gt;52</title>
-<path fill="none" stroke="#000000" d="M465.7041,-611.9748C456.1193,-604.2157 440.9541,-591.939 429.1799,-582.4075"/>
-<polygon fill="#000000" stroke="#000000" points="431.3087,-579.6278 421.334,-576.0561 426.9043,-585.0685 431.3087,-579.6278"/>
-</g>
-<!-- 54 -->
-<g id="node55" class="node">
-<title>54</title>
-<text text-anchor="middle" x="476" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 51&#45;&gt;54 -->
-<g id="edge54" class="edge">
-<title>51&#45;&gt;54</title>
-<path fill="none" stroke="#000000" d="M475.1476,-611.9748C475.2805,-605.195 475.4811,-594.966 475.6543,-586.1331"/>
-<polygon fill="#000000" stroke="#000000" points="479.155,-586.1228 475.8518,-576.0561 472.1564,-585.9855 479.155,-586.1228"/>
-</g>
-<!-- 53 -->
-<g id="node54" class="node">
-<title>53</title>
-<text text-anchor="middle" x="412" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 52&#45;&gt;53 -->
-<g id="edge53" class="edge">
-<title>52&#45;&gt;53</title>
-<path fill="none" stroke="#000000" d="M412,-560.9748C412,-554.195 412,-543.966 412,-535.1331"/>
-<polygon fill="#000000" stroke="#000000" points="415.5001,-535.0561 412,-525.0561 408.5001,-535.0561 415.5001,-535.0561"/>
-</g>
-<!-- 55 -->
-<g id="node56" class="node">
-<title>55</title>
-<text text-anchor="middle" x="476" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 54&#45;&gt;55 -->
-<g id="edge55" class="edge">
-<title>54&#45;&gt;55</title>
-<path fill="none" stroke="#000000" d="M476,-560.9748C476,-554.195 476,-543.966 476,-535.1331"/>
-<polygon fill="#000000" stroke="#000000" points="479.5001,-535.0561 476,-525.0561 472.5001,-535.0561 479.5001,-535.0561"/>
-</g>
-<!-- 56 -->
-<g id="node57" class="node">
-<title>56</title>
-<text text-anchor="middle" x="476" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">r</text>
-</g>
-<!-- 55&#45;&gt;56 -->
-<g id="edge56" class="edge">
-<title>55&#45;&gt;56</title>
-<path fill="none" stroke="#000000" d="M476,-509.9748C476,-503.195 476,-492.966 476,-484.1331"/>
-<polygon fill="#000000" stroke="#000000" points="479.5001,-484.0561 476,-474.0561 472.5001,-484.0561 479.5001,-484.0561"/>
-</g>
-<!-- 59 -->
-<g id="node60" class="node">
-<title>59</title>
-<text text-anchor="middle" x="572" y="-717.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
-</g>
-<!-- 58&#45;&gt;59 -->
-<g id="edge59" class="edge">
-<title>58&#45;&gt;59</title>
-<path fill="none" stroke="#000000" d="M570.2951,-764.9748C570.561,-758.195 570.9621,-747.966 571.3085,-739.1331"/>
-<polygon fill="#000000" stroke="#000000" points="574.809,-739.1856 571.7037,-729.0561 567.8144,-738.9112 574.809,-739.1856"/>
-</g>
-<!-- 60 -->
-<g id="node61" class="node">
-<title>60</title>
-<text text-anchor="middle" x="578" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
-</g>
-<!-- 59&#45;&gt;60 -->
-<g id="edge60" class="edge">
-<title>59&#45;&gt;60</title>
-<path fill="none" stroke="#000000" d="M572.8853,-713.9748C573.6829,-707.195 574.8864,-696.966 575.9255,-688.1331"/>
-<polygon fill="#000000" stroke="#000000" points="579.4186,-688.3966 577.111,-678.0561 572.4665,-687.5786 579.4186,-688.3966"/>
-</g>
-<!-- 61 -->
-<g id="node62" class="node">
-<title>61</title>
-<text text-anchor="middle" x="591" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;number&gt;</text>
-</g>
-<!-- 60&#45;&gt;61 -->
-<g id="edge61" class="edge">
-<title>60&#45;&gt;61</title>
-<path fill="none" stroke="#000000" d="M579.9182,-662.9748C581.6656,-656.1196 584.3118,-645.7383 586.5802,-636.8392"/>
-<polygon fill="#000000" stroke="#000000" points="589.9954,-637.6108 589.0739,-627.0561 583.2123,-635.8817 589.9954,-637.6108"/>
-</g>
-<!-- 62 -->
-<g id="node63" class="node">
-<title>62</title>
-<text text-anchor="middle" x="544" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
-</g>
-<!-- 61&#45;&gt;62 -->
-<g id="edge62" class="edge">
-<title>61&#45;&gt;62</title>
-<path fill="none" stroke="#000000" d="M584.065,-611.9748C577.1921,-604.517 566.4731,-592.8857 557.8512,-583.53"/>
-<polygon fill="#000000" stroke="#000000" points="560.3141,-581.0378 550.9635,-576.0561 555.1666,-585.7816 560.3141,-581.0378"/>
-</g>
-<!-- 65 -->
-<g id="node66" class="node">
-<title>65</title>
-<text text-anchor="middle" x="592" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">.</text>
-</g>
-<!-- 61&#45;&gt;65 -->
-<g id="edge65" class="edge">
-<title>61&#45;&gt;65</title>
-<path fill="none" stroke="#000000" d="M591.1476,-611.9748C591.2805,-605.195 591.4811,-594.966 591.6543,-586.1331"/>
-<polygon fill="#000000" stroke="#000000" points="595.155,-586.1228 591.8518,-576.0561 588.1564,-585.9855 595.155,-586.1228"/>
-</g>
-<!-- 66 -->
-<g id="node67" class="node">
-<title>66</title>
-<text text-anchor="middle" x="640" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
-</g>
-<!-- 61&#45;&gt;66 -->
-<g id="edge66" class="edge">
-<title>61&#45;&gt;66</title>
-<path fill="none" stroke="#000000" d="M598.2301,-611.9748C605.3954,-604.517 616.5706,-592.8857 625.5594,-583.53"/>
-<polygon fill="#000000" stroke="#000000" points="628.3358,-585.6921 632.7402,-576.0561 623.2881,-580.8423 628.3358,-585.6921"/>
-</g>
-<!-- 63 -->
-<g id="node64" class="node">
-<title>63</title>
-<text text-anchor="middle" x="544" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 62&#45;&gt;63 -->
-<g id="edge63" class="edge">
-<title>62&#45;&gt;63</title>
-<path fill="none" stroke="#000000" d="M544,-560.9748C544,-554.195 544,-543.966 544,-535.1331"/>
-<polygon fill="#000000" stroke="#000000" points="547.5001,-535.0561 544,-525.0561 540.5001,-535.0561 547.5001,-535.0561"/>
-</g>
-<!-- 64 -->
-<g id="node65" class="node">
-<title>64</title>
-<text text-anchor="middle" x="544" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">1</text>
-</g>
-<!-- 63&#45;&gt;64 -->
-<g id="edge64" class="edge">
-<title>63&#45;&gt;64</title>
-<path fill="none" stroke="#000000" d="M544,-509.9748C544,-503.195 544,-492.966 544,-484.1331"/>
-<polygon fill="#000000" stroke="#000000" points="547.5001,-484.0561 544,-474.0561 540.5001,-484.0561 547.5001,-484.0561"/>
-</g>
-<!-- 67 -->
-<g id="node68" class="node">
-<title>67</title>
-<text text-anchor="middle" x="640" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 66&#45;&gt;67 -->
-<g id="edge67" class="edge">
-<title>66&#45;&gt;67</title>
-<path fill="none" stroke="#000000" d="M640,-560.9748C640,-554.195 640,-543.966 640,-535.1331"/>
-<polygon fill="#000000" stroke="#000000" points="643.5001,-535.0561 640,-525.0561 636.5001,-535.0561 643.5001,-535.0561"/>
-</g>
-<!-- 68 -->
-<g id="node69" class="node">
-<title>68</title>
-<text text-anchor="middle" x="640" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
-</g>
-<!-- 67&#45;&gt;68 -->
-<g id="edge68" class="edge">
-<title>67&#45;&gt;68</title>
-<path fill="none" stroke="#000000" d="M640,-509.9748C640,-503.195 640,-492.966 640,-484.1331"/>
-<polygon fill="#000000" stroke="#000000" points="643.5001,-484.0561 640,-474.0561 636.5001,-484.0561 643.5001,-484.0561"/>
-</g>
-<!-- 71 -->
-<g id="node72" class="node">
-<title>71</title>
-<text text-anchor="middle" x="677" y="-819.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;statement&gt;</text>
-</g>
-<!-- 70&#45;&gt;71 -->
-<g id="edge71" class="edge">
-<title>70&#45;&gt;71</title>
-<path fill="none" stroke="#000000" d="M665.9182,-866.9748C667.6656,-860.1196 670.3118,-849.7383 672.5802,-840.8392"/>
-<polygon fill="#000000" stroke="#000000" points="675.9954,-841.6108 675.0739,-831.0561 669.2123,-839.8817 675.9954,-841.6108"/>
-</g>
-<!-- 72 -->
-<g id="node73" class="node">
-<title>72</title>
-<text text-anchor="middle" x="750" y="-768.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;assignment&gt;</text>
-</g>
-<!-- 71&#45;&gt;72 -->
-<g id="edge72" class="edge">
-<title>71&#45;&gt;72</title>
-<path fill="none" stroke="#000000" d="M687.7714,-815.9748C699.0932,-808.065 717.1349,-795.4606 730.8834,-785.8554"/>
-<polygon fill="#000000" stroke="#000000" points="732.9913,-788.6524 739.1844,-780.0561 728.9823,-782.9141 732.9913,-788.6524"/>
-</g>
-<!-- 73 -->
-<g id="node74" class="node">
-<title>73</title>
-<text text-anchor="middle" x="722" y="-717.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;identifier&gt;</text>
-</g>
-<!-- 72&#45;&gt;73 -->
-<g id="edge73" class="edge">
-<title>72&#45;&gt;73</title>
-<path fill="none" stroke="#000000" d="M745.8685,-764.9748C741.9808,-757.8936 736.0274,-747.05 731.0391,-737.9641"/>
-<polygon fill="#000000" stroke="#000000" points="734.0291,-736.1375 726.1484,-729.0561 727.8931,-739.5063 734.0291,-736.1375"/>
-</g>
-<!-- 86 -->
-<g id="node87" class="node">
-<title>86</title>
-<text text-anchor="middle" x="778" y="-717.8" font-family="Times,serif" font-size="14.00" fill="#000000">=</text>
-</g>
-<!-- 72&#45;&gt;86 -->
-<g id="edge86" class="edge">
-<title>72&#45;&gt;86</title>
-<path fill="none" stroke="#000000" d="M754.1315,-764.9748C758.0192,-757.8936 763.9726,-747.05 768.9609,-737.9641"/>
-<polygon fill="#000000" stroke="#000000" points="772.1069,-739.5063 773.8516,-729.0561 765.9709,-736.1375 772.1069,-739.5063"/>
-</g>
-<!-- 87 -->
-<g id="node88" class="node">
-<title>87</title>
-<text text-anchor="middle" x="915" y="-717.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
-</g>
-<!-- 72&#45;&gt;87 -->
-<g id="edge87" class="edge">
-<title>72&#45;&gt;87</title>
-<path fill="none" stroke="#000000" d="M774.3463,-764.9748C803.7091,-755.899 853.0687,-740.6424 884.8217,-730.8278"/>
-<polygon fill="#000000" stroke="#000000" points="885.9444,-734.1443 894.4648,-727.8472 883.8772,-727.4565 885.9444,-734.1443"/>
-</g>
-<!-- 74 -->
-<g id="node75" class="node">
-<title>74</title>
-<text text-anchor="middle" x="722" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 73&#45;&gt;74 -->
-<g id="edge74" class="edge">
-<title>73&#45;&gt;74</title>
-<path fill="none" stroke="#000000" d="M722,-713.9748C722,-707.195 722,-696.966 722,-688.1331"/>
-<polygon fill="#000000" stroke="#000000" points="725.5001,-688.0561 722,-678.0561 718.5001,-688.0561 725.5001,-688.0561"/>
-</g>
-<!-- 75 -->
-<g id="node76" class="node">
-<title>75</title>
-<text text-anchor="middle" x="690" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 74&#45;&gt;75 -->
-<g id="edge75" class="edge">
-<title>74&#45;&gt;75</title>
-<path fill="none" stroke="#000000" d="M717.2783,-662.9748C712.788,-655.8183 705.8863,-644.8188 700.1488,-635.6747"/>
-<polygon fill="#000000" stroke="#000000" points="703.0208,-633.6665 694.7411,-627.0561 697.0913,-637.387 703.0208,-633.6665"/>
-</g>
-<!-- 77 -->
-<g id="node78" class="node">
-<title>77</title>
-<text text-anchor="middle" x="754" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 74&#45;&gt;77 -->
-<g id="edge77" class="edge">
-<title>74&#45;&gt;77</title>
-<path fill="none" stroke="#000000" d="M726.7217,-662.9748C731.212,-655.8183 738.1137,-644.8188 743.8512,-635.6747"/>
-<polygon fill="#000000" stroke="#000000" points="746.9087,-637.387 749.2589,-627.0561 740.9792,-633.6665 746.9087,-637.387"/>
-</g>
-<!-- 76 -->
-<g id="node77" class="node">
-<title>76</title>
-<text text-anchor="middle" x="690" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">b</text>
-</g>
-<!-- 75&#45;&gt;76 -->
-<g id="edge76" class="edge">
-<title>75&#45;&gt;76</title>
-<path fill="none" stroke="#000000" d="M690,-611.9748C690,-605.195 690,-594.966 690,-586.1331"/>
-<polygon fill="#000000" stroke="#000000" points="693.5001,-586.0561 690,-576.0561 686.5001,-586.0561 693.5001,-586.0561"/>
-</g>
-<!-- 78 -->
-<g id="node79" class="node">
-<title>78</title>
-<text text-anchor="middle" x="736" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 77&#45;&gt;78 -->
-<g id="edge78" class="edge">
-<title>77&#45;&gt;78</title>
-<path fill="none" stroke="#000000" d="M751.344,-611.9748C748.898,-605.0443 745.1799,-594.5097 742.0164,-585.5464"/>
-<polygon fill="#000000" stroke="#000000" points="745.2956,-584.3211 738.6669,-576.0561 738.6947,-586.6509 745.2956,-584.3211"/>
-</g>
-<!-- 80 -->
-<g id="node81" class="node">
-<title>80</title>
-<text text-anchor="middle" x="800" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 77&#45;&gt;80 -->
-<g id="edge80" class="edge">
-<title>77&#45;&gt;80</title>
-<path fill="none" stroke="#000000" d="M760.7875,-611.9748C767.5141,-604.517 778.005,-592.8857 786.4436,-583.53"/>
-<polygon fill="#000000" stroke="#000000" points="789.086,-585.826 793.1847,-576.0561 783.888,-581.1376 789.086,-585.826"/>
-</g>
-<!-- 79 -->
-<g id="node80" class="node">
-<title>79</title>
-<text text-anchor="middle" x="705" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">v</text>
-</g>
-<!-- 78&#45;&gt;79 -->
-<g id="edge79" class="edge">
-<title>78&#45;&gt;79</title>
-<path fill="none" stroke="#000000" d="M731.4258,-560.9748C726.9258,-553.5715 719.926,-542.0557 714.2609,-532.7356"/>
-<polygon fill="#000000" stroke="#000000" points="717.1861,-530.8097 709.0011,-524.0825 711.2045,-534.4457 717.1861,-530.8097"/>
-</g>
-<!-- 81 -->
-<g id="node82" class="node">
-<title>81</title>
-<text text-anchor="middle" x="751" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 80&#45;&gt;81 -->
-<g id="edge81" class="edge">
-<title>80&#45;&gt;81</title>
-<path fill="none" stroke="#000000" d="M792.7699,-560.9748C785.6046,-553.517 774.4294,-541.8857 765.4406,-532.53"/>
-<polygon fill="#000000" stroke="#000000" points="767.7119,-529.8423 758.2598,-525.0561 762.6642,-534.6921 767.7119,-529.8423"/>
-</g>
-<!-- 83 -->
-<g id="node84" class="node">
-<title>83</title>
-<text text-anchor="middle" x="815" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 80&#45;&gt;83 -->
-<g id="edge83" class="edge">
-<title>80&#45;&gt;83</title>
-<path fill="none" stroke="#000000" d="M802.2133,-560.9748C804.2295,-554.1196 807.2829,-543.7383 809.9002,-534.8392"/>
-<polygon fill="#000000" stroke="#000000" points="813.3137,-535.6374 812.7776,-525.0561 806.5981,-533.6622 813.3137,-535.6374"/>
-</g>
-<!-- 82 -->
-<g id="node83" class="node">
-<title>82</title>
-<text text-anchor="middle" x="751" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 81&#45;&gt;82 -->
-<g id="edge82" class="edge">
-<title>81&#45;&gt;82</title>
-<path fill="none" stroke="#000000" d="M751,-509.9748C751,-503.195 751,-492.966 751,-484.1331"/>
-<polygon fill="#000000" stroke="#000000" points="754.5001,-484.0561 751,-474.0561 747.5001,-484.0561 754.5001,-484.0561"/>
-</g>
-<!-- 84 -->
-<g id="node85" class="node">
-<title>84</title>
-<text text-anchor="middle" x="805" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 83&#45;&gt;84 -->
-<g id="edge84" class="edge">
-<title>83&#45;&gt;84</title>
-<path fill="none" stroke="#000000" d="M813.5245,-509.9748C812.1951,-503.195 810.1894,-492.966 808.4575,-484.1331"/>
-<polygon fill="#000000" stroke="#000000" points="811.8404,-483.1958 806.4816,-474.0561 804.9712,-484.5427 811.8404,-483.1958"/>
-</g>
-<!-- 85 -->
-<g id="node86" class="node">
-<title>85</title>
-<text text-anchor="middle" x="805" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">r</text>
-</g>
-<!-- 84&#45;&gt;85 -->
-<g id="edge85" class="edge">
-<title>84&#45;&gt;85</title>
-<path fill="none" stroke="#000000" d="M805,-458.9748C805,-452.195 805,-441.966 805,-433.1331"/>
-<polygon fill="#000000" stroke="#000000" points="808.5001,-433.0561 805,-423.0561 801.5001,-433.0561 808.5001,-433.0561"/>
-</g>
-<!-- 88 -->
-<g id="node89" class="node">
-<title>88</title>
-<text text-anchor="middle" x="894" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
-</g>
-<!-- 87&#45;&gt;88 -->
-<g id="edge88" class="edge">
-<title>87&#45;&gt;88</title>
-<path fill="none" stroke="#000000" d="M911.9014,-713.9748C909.0477,-707.0443 904.7099,-696.5097 901.0191,-687.5464"/>
-<polygon fill="#000000" stroke="#000000" points="904.1553,-685.9702 897.1113,-678.0561 897.6825,-688.6355 904.1553,-685.9702"/>
-</g>
-<!-- 103 -->
-<g id="node104" class="node">
-<title>103</title>
-<text text-anchor="middle" x="936" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&#45;</text>
-</g>
-<!-- 87&#45;&gt;103 -->
-<g id="edge103" class="edge">
-<title>87&#45;&gt;103</title>
-<path fill="none" stroke="#000000" d="M918.0986,-713.9748C921.116,-706.6469 925.7925,-695.2896 929.6091,-686.0208"/>
-<polygon fill="#000000" stroke="#000000" points="932.8472,-687.349 933.4184,-676.7696 926.3745,-684.6837 932.8472,-687.349"/>
-</g>
-<!-- 104 -->
-<g id="node105" class="node">
-<title>104</title>
-<text text-anchor="middle" x="987" y="-666.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
-</g>
-<!-- 87&#45;&gt;104 -->
-<g id="edge104" class="edge">
-<title>87&#45;&gt;104</title>
-<path fill="none" stroke="#000000" d="M925.6238,-713.9748C936.7906,-706.065 954.5851,-693.4606 968.1453,-683.8554"/>
-<polygon fill="#000000" stroke="#000000" points="970.1954,-686.6924 976.3326,-678.0561 966.1492,-680.9802 970.1954,-686.6924"/>
-</g>
-<!-- 89 -->
-<g id="node90" class="node">
-<title>89</title>
-<text text-anchor="middle" x="894" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
-</g>
-<!-- 88&#45;&gt;89 -->
-<g id="edge89" class="edge">
-<title>88&#45;&gt;89</title>
-<path fill="none" stroke="#000000" d="M894,-662.9748C894,-656.195 894,-645.966 894,-637.1331"/>
-<polygon fill="#000000" stroke="#000000" points="897.5001,-637.0561 894,-627.0561 890.5001,-637.0561 897.5001,-637.0561"/>
-</g>
-<!-- 90 -->
-<g id="node91" class="node">
-<title>90</title>
-<text text-anchor="middle" x="894" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;identifier&gt;</text>
-</g>
-<!-- 89&#45;&gt;90 -->
-<g id="edge90" class="edge">
-<title>89&#45;&gt;90</title>
-<path fill="none" stroke="#000000" d="M894,-611.9748C894,-605.195 894,-594.966 894,-586.1331"/>
-<polygon fill="#000000" stroke="#000000" points="897.5001,-586.0561 894,-576.0561 890.5001,-586.0561 897.5001,-586.0561"/>
-</g>
-<!-- 91 -->
-<g id="node92" class="node">
-<title>91</title>
-<text text-anchor="middle" x="894" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 90&#45;&gt;91 -->
-<g id="edge91" class="edge">
-<title>90&#45;&gt;91</title>
-<path fill="none" stroke="#000000" d="M894,-560.9748C894,-554.195 894,-543.966 894,-535.1331"/>
-<polygon fill="#000000" stroke="#000000" points="897.5001,-535.0561 894,-525.0561 890.5001,-535.0561 897.5001,-535.0561"/>
-</g>
-<!-- 92 -->
-<g id="node93" class="node">
-<title>92</title>
-<text text-anchor="middle" x="870" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 91&#45;&gt;92 -->
-<g id="edge92" class="edge">
-<title>91&#45;&gt;92</title>
-<path fill="none" stroke="#000000" d="M890.4587,-509.9748C887.1619,-502.969 882.1319,-492.2803 877.8845,-483.2547"/>
-<polygon fill="#000000" stroke="#000000" points="880.9807,-481.614 873.5558,-474.0561 874.647,-484.5946 880.9807,-481.614"/>
-</g>
-<!-- 94 -->
-<g id="node95" class="node">
-<title>94</title>
-<text text-anchor="middle" x="934" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 91&#45;&gt;94 -->
-<g id="edge94" class="edge">
-<title>91&#45;&gt;94</title>
-<path fill="none" stroke="#000000" d="M899.9021,-509.9748C905.6332,-502.6677 914.5067,-491.354 921.7649,-482.0997"/>
-<polygon fill="#000000" stroke="#000000" points="924.6562,-484.0847 928.0736,-474.0561 919.1482,-479.7647 924.6562,-484.0847"/>
-</g>
-<!-- 93 -->
-<g id="node94" class="node">
-<title>93</title>
-<text text-anchor="middle" x="830" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 92&#45;&gt;93 -->
-<g id="edge93" class="edge">
-<title>92&#45;&gt;93</title>
-<path fill="none" stroke="#000000" d="M864.0979,-458.9748C857.708,-450.8278 847.4119,-437.7002 839.8035,-427.9994"/>
-<polygon fill="#000000" stroke="#000000" points="842.473,-425.7317 833.5475,-420.0231 836.965,-430.0517 842.473,-425.7317"/>
-</g>
-<!-- 95 -->
-<g id="node96" class="node">
-<title>95</title>
-<text text-anchor="middle" x="875" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 94&#45;&gt;95 -->
-<g id="edge95" class="edge">
-<title>94&#45;&gt;95</title>
-<path fill="none" stroke="#000000" d="M925.2943,-458.9748C916.4053,-451.291 902.391,-439.177 891.4111,-429.6859"/>
-<polygon fill="#000000" stroke="#000000" points="893.5956,-426.9478 883.7414,-423.0561 889.0179,-432.2435 893.5956,-426.9478"/>
-</g>
-<!-- 97 -->
-<g id="node98" class="node">
-<title>97</title>
-<text text-anchor="middle" x="939" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 94&#45;&gt;97 -->
-<g id="edge97" class="edge">
-<title>94&#45;&gt;97</title>
-<path fill="none" stroke="#000000" d="M934.7378,-458.9748C935.4025,-452.195 936.4053,-441.966 937.2713,-433.1331"/>
-<polygon fill="#000000" stroke="#000000" points="940.7667,-433.3499 938.2592,-423.0561 933.8001,-432.6669 940.7667,-433.3499"/>
-</g>
-<!-- 96 -->
-<g id="node97" class="node">
-<title>96</title>
-<text text-anchor="middle" x="864" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">v</text>
-</g>
-<!-- 95&#45;&gt;96 -->
-<g id="edge96" class="edge">
-<title>95&#45;&gt;96</title>
-<path fill="none" stroke="#000000" d="M873.3769,-407.9748C871.8984,-401.1196 869.6592,-390.7383 867.7398,-381.8392"/>
-<polygon fill="#000000" stroke="#000000" points="871.1595,-381.0934 865.6297,-372.0561 864.3169,-382.5693 871.1595,-381.0934"/>
-</g>
-<!-- 98 -->
-<g id="node99" class="node">
-<title>98</title>
-<text text-anchor="middle" x="910" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 97&#45;&gt;98 -->
-<g id="edge98" class="edge">
-<title>97&#45;&gt;98</title>
-<path fill="none" stroke="#000000" d="M934.721,-407.9748C930.6944,-400.8936 924.5284,-390.05 919.3619,-380.9641"/>
-<polygon fill="#000000" stroke="#000000" points="922.2822,-379.0189 914.2966,-372.0561 916.1972,-382.4791 922.2822,-379.0189"/>
-</g>
-<!-- 100 -->
-<g id="node101" class="node">
-<title>100</title>
-<text text-anchor="middle" x="974" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;word&gt;</text>
-</g>
-<!-- 97&#45;&gt;100 -->
-<g id="edge100" class="edge">
-<title>97&#45;&gt;100</title>
-<path fill="none" stroke="#000000" d="M944.1644,-407.9748C949.1274,-400.743 956.7835,-389.5868 963.0974,-380.3866"/>
-<polygon fill="#000000" stroke="#000000" points="966.0418,-382.2817 968.8144,-372.0561 960.2702,-378.3208 966.0418,-382.2817"/>
-</g>
-<!-- 99 -->
-<g id="node100" class="node">
-<title>99</title>
-<text text-anchor="middle" x="910" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 98&#45;&gt;99 -->
-<g id="edge99" class="edge">
-<title>98&#45;&gt;99</title>
-<path fill="none" stroke="#000000" d="M910,-356.9748C910,-350.195 910,-339.966 910,-331.1331"/>
-<polygon fill="#000000" stroke="#000000" points="913.5001,-331.0561 910,-321.0561 906.5001,-331.0561 913.5001,-331.0561"/>
-</g>
-<!-- 101 -->
-<g id="node102" class="node">
-<title>101</title>
-<text text-anchor="middle" x="974" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;alpha&gt;</text>
-</g>
-<!-- 100&#45;&gt;101 -->
-<g id="edge101" class="edge">
-<title>100&#45;&gt;101</title>
-<path fill="none" stroke="#000000" d="M974,-356.9748C974,-350.195 974,-339.966 974,-331.1331"/>
-<polygon fill="#000000" stroke="#000000" points="977.5001,-331.0561 974,-321.0561 970.5001,-331.0561 977.5001,-331.0561"/>
-</g>
-<!-- 102 -->
-<g id="node103" class="node">
-<title>102</title>
-<text text-anchor="middle" x="974" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">r</text>
-</g>
-<!-- 101&#45;&gt;102 -->
-<g id="edge102" class="edge">
-<title>101&#45;&gt;102</title>
-<path fill="none" stroke="#000000" d="M974,-305.9748C974,-299.195 974,-288.966 974,-280.1331"/>
-<polygon fill="#000000" stroke="#000000" points="977.5001,-280.0561 974,-270.0561 970.5001,-280.0561 977.5001,-280.0561"/>
-</g>
-<!-- 105 -->
-<g id="node106" class="node">
-<title>105</title>
-<text text-anchor="middle" x="1035" y="-615.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
-</g>
-<!-- 104&#45;&gt;105 -->
-<g id="edge105" class="edge">
-<title>104&#45;&gt;105</title>
-<path fill="none" stroke="#000000" d="M994.0826,-662.9748C1001.1017,-655.517 1012.0487,-643.8857 1020.8541,-634.53"/>
-<polygon fill="#000000" stroke="#000000" points="1023.5834,-636.7369 1027.8884,-627.0561 1018.486,-631.9393 1023.5834,-636.7369"/>
-</g>
-<!-- 106 -->
-<g id="node107" class="node">
-<title>106</title>
-<text text-anchor="middle" x="1012" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
-</g>
-<!-- 105&#45;&gt;106 -->
-<g id="edge106" class="edge">
-<title>105&#45;&gt;106</title>
-<path fill="none" stroke="#000000" d="M1031.6063,-611.9748C1028.4468,-604.969 1023.6264,-594.2803 1019.556,-585.2547"/>
-<polygon fill="#000000" stroke="#000000" points="1022.7093,-583.7331 1015.4077,-576.0561 1016.3282,-586.6109 1022.7093,-583.7331"/>
-</g>
-<!-- 111 -->
-<g id="node112" class="node">
-<title>111</title>
-<text text-anchor="middle" x="1059" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">*</text>
-</g>
-<!-- 105&#45;&gt;111 -->
-<g id="edge111" class="edge">
-<title>105&#45;&gt;111</title>
-<path fill="none" stroke="#000000" d="M1038.5413,-611.9748C1041.8381,-604.969 1046.8681,-594.2803 1051.1155,-585.2547"/>
-<polygon fill="#000000" stroke="#000000" points="1054.353,-586.5946 1055.4442,-576.0561 1048.0193,-583.614 1054.353,-586.5946"/>
-</g>
-<!-- 112 -->
-<g id="node113" class="node">
-<title>112</title>
-<text text-anchor="middle" x="1108" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
-</g>
-<!-- 105&#45;&gt;112 -->
-<g id="edge112" class="edge">
-<title>105&#45;&gt;112</title>
-<path fill="none" stroke="#000000" d="M1045.7714,-611.9748C1057.0932,-604.065 1075.1349,-591.4606 1088.8834,-581.8554"/>
-<polygon fill="#000000" stroke="#000000" points="1090.9913,-584.6524 1097.1844,-576.0561 1086.9823,-578.9141 1090.9913,-584.6524"/>
-</g>
-<!-- 107 -->
-<g id="node108" class="node">
-<title>107</title>
-<text text-anchor="middle" x="1012" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;number&gt;</text>
-</g>
-<!-- 106&#45;&gt;107 -->
-<g id="edge107" class="edge">
-<title>106&#45;&gt;107</title>
-<path fill="none" stroke="#000000" d="M1012,-560.9748C1012,-554.195 1012,-543.966 1012,-535.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1015.5001,-535.0561 1012,-525.0561 1008.5001,-535.0561 1015.5001,-535.0561"/>
-</g>
-<!-- 108 -->
-<g id="node109" class="node">
-<title>108</title>
-<text text-anchor="middle" x="1012" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
-</g>
-<!-- 107&#45;&gt;108 -->
-<g id="edge108" class="edge">
-<title>107&#45;&gt;108</title>
-<path fill="none" stroke="#000000" d="M1012,-509.9748C1012,-503.195 1012,-492.966 1012,-484.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1015.5001,-484.0561 1012,-474.0561 1008.5001,-484.0561 1015.5001,-484.0561"/>
-</g>
-<!-- 109 -->
-<g id="node110" class="node">
-<title>109</title>
-<text text-anchor="middle" x="1012" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 108&#45;&gt;109 -->
-<g id="edge109" class="edge">
-<title>108&#45;&gt;109</title>
-<path fill="none" stroke="#000000" d="M1012,-458.9748C1012,-452.195 1012,-441.966 1012,-433.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1015.5001,-433.0561 1012,-423.0561 1008.5001,-433.0561 1015.5001,-433.0561"/>
-</g>
-<!-- 110 -->
-<g id="node111" class="node">
-<title>110</title>
-<text text-anchor="middle" x="1019" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
-</g>
-<!-- 109&#45;&gt;110 -->
-<g id="edge110" class="edge">
-<title>109&#45;&gt;110</title>
-<path fill="none" stroke="#000000" d="M1013.0329,-407.9748C1013.9634,-401.195 1015.3674,-390.966 1016.5798,-382.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1020.0705,-382.4392 1017.9629,-372.0561 1013.1355,-381.4873 1020.0705,-382.4392"/>
-</g>
-<!-- 113 -->
-<g id="node114" class="node">
-<title>113</title>
-<text text-anchor="middle" x="1111" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
-</g>
-<!-- 112&#45;&gt;113 -->
-<g id="edge113" class="edge">
-<title>112&#45;&gt;113</title>
-<path fill="none" stroke="#000000" d="M1108.4427,-560.9748C1108.8415,-554.195 1109.4432,-543.966 1109.9628,-535.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1113.4622,-535.2444 1110.5555,-525.0561 1106.4742,-534.8333 1113.4622,-535.2444"/>
-</g>
-<!-- 114 -->
-<g id="node115" class="node">
-<title>114</title>
-<text text-anchor="middle" x="1072" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">(</text>
-</g>
-<!-- 113&#45;&gt;114 -->
-<g id="edge114" class="edge">
-<title>113&#45;&gt;114</title>
-<path fill="none" stroke="#000000" d="M1105.2454,-509.9748C1098.8889,-501.6624 1088.5675,-488.1652 1081.1099,-478.413"/>
-<polygon fill="#000000" stroke="#000000" points="1083.7147,-476.0573 1074.8599,-470.2398 1078.1541,-480.3095 1083.7147,-476.0573"/>
-</g>
-<!-- 115 -->
-<g id="node116" class="node">
-<title>115</title>
-<text text-anchor="middle" x="1113" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
-</g>
-<!-- 113&#45;&gt;115 -->
-<g id="edge115" class="edge">
-<title>113&#45;&gt;115</title>
-<path fill="none" stroke="#000000" d="M1111.2951,-509.9748C1111.561,-503.195 1111.9621,-492.966 1112.3085,-484.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1115.809,-484.1856 1112.7037,-474.0561 1108.8144,-483.9112 1115.809,-484.1856"/>
-</g>
-<!-- 136 -->
-<g id="node137" class="node">
-<title>136</title>
-<text text-anchor="middle" x="1154" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">)</text>
-</g>
-<!-- 113&#45;&gt;136 -->
-<g id="edge136" class="edge">
-<title>113&#45;&gt;136</title>
-<path fill="none" stroke="#000000" d="M1117.3448,-509.9748C1124.5679,-501.4078 1136.4344,-487.3336 1144.7021,-477.5278"/>
-<polygon fill="#000000" stroke="#000000" points="1147.4869,-479.6546 1151.2571,-469.7533 1142.1352,-475.1424 1147.4869,-479.6546"/>
-</g>
-<!-- 116 -->
-<g id="node117" class="node">
-<title>116</title>
-<text text-anchor="middle" x="1072" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
-</g>
-<!-- 115&#45;&gt;116 -->
-<g id="edge116" class="edge">
-<title>115&#45;&gt;116</title>
-<path fill="none" stroke="#000000" d="M1106.9503,-458.9748C1101.076,-451.6677 1091.9807,-440.354 1084.541,-431.0997"/>
-<polygon fill="#000000" stroke="#000000" points="1087.0679,-428.6569 1078.0745,-423.0561 1081.6123,-433.0428 1087.0679,-428.6569"/>
-</g>
-<!-- 122 -->
-<g id="node123" class="node">
-<title>122</title>
-<text text-anchor="middle" x="1115" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">+</text>
-</g>
-<!-- 115&#45;&gt;122 -->
-<g id="edge122" class="edge">
-<title>115&#45;&gt;122</title>
-<path fill="none" stroke="#000000" d="M1113.2951,-458.9748C1113.561,-452.195 1113.9621,-441.966 1114.3085,-433.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1117.809,-433.1856 1114.7037,-423.0561 1110.8144,-432.9112 1117.809,-433.1856"/>
-</g>
-<!-- 123 -->
-<g id="node124" class="node">
-<title>123</title>
-<text text-anchor="middle" x="1158" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
-</g>
-<!-- 115&#45;&gt;123 -->
-<g id="edge123" class="edge">
-<title>115&#45;&gt;123</title>
-<path fill="none" stroke="#000000" d="M1119.6399,-458.9748C1126.1538,-451.5923 1136.2762,-440.1203 1144.4875,-430.8142"/>
-<polygon fill="#000000" stroke="#000000" points="1147.341,-432.8702 1151.3329,-423.0561 1142.0922,-428.2388 1147.341,-432.8702"/>
-</g>
-<!-- 117 -->
-<g id="node118" class="node">
-<title>117</title>
-<text text-anchor="middle" x="1072" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
-</g>
-<!-- 116&#45;&gt;117 -->
-<g id="edge117" class="edge">
-<title>116&#45;&gt;117</title>
-<path fill="none" stroke="#000000" d="M1072,-407.9748C1072,-401.195 1072,-390.966 1072,-382.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1075.5001,-382.0561 1072,-372.0561 1068.5001,-382.0561 1075.5001,-382.0561"/>
-</g>
-<!-- 118 -->
-<g id="node119" class="node">
-<title>118</title>
-<text text-anchor="middle" x="1072" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;number&gt;</text>
-</g>
-<!-- 117&#45;&gt;118 -->
-<g id="edge118" class="edge">
-<title>117&#45;&gt;118</title>
-<path fill="none" stroke="#000000" d="M1072,-356.9748C1072,-350.195 1072,-339.966 1072,-331.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1075.5001,-331.0561 1072,-321.0561 1068.5001,-331.0561 1075.5001,-331.0561"/>
-</g>
-<!-- 119 -->
-<g id="node120" class="node">
-<title>119</title>
-<text text-anchor="middle" x="1072" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
-</g>
-<!-- 118&#45;&gt;119 -->
-<g id="edge119" class="edge">
-<title>118&#45;&gt;119</title>
-<path fill="none" stroke="#000000" d="M1072,-305.9748C1072,-299.195 1072,-288.966 1072,-280.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1075.5001,-280.0561 1072,-270.0561 1068.5001,-280.0561 1075.5001,-280.0561"/>
-</g>
-<!-- 120 -->
-<g id="node121" class="node">
-<title>120</title>
-<text text-anchor="middle" x="1072" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 119&#45;&gt;120 -->
-<g id="edge120" class="edge">
-<title>119&#45;&gt;120</title>
-<path fill="none" stroke="#000000" d="M1072,-254.9748C1072,-248.195 1072,-237.966 1072,-229.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1075.5001,-229.0561 1072,-219.0561 1068.5001,-229.0561 1075.5001,-229.0561"/>
-</g>
-<!-- 121 -->
-<g id="node122" class="node">
-<title>121</title>
-<text text-anchor="middle" x="1072" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">4</text>
-</g>
-<!-- 120&#45;&gt;121 -->
-<g id="edge121" class="edge">
-<title>120&#45;&gt;121</title>
-<path fill="none" stroke="#000000" d="M1072,-203.9748C1072,-197.195 1072,-186.966 1072,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1075.5001,-178.0561 1072,-168.0561 1068.5001,-178.0561 1075.5001,-178.0561"/>
-</g>
-<!-- 124 -->
-<g id="node125" class="node">
-<title>124</title>
-<text text-anchor="middle" x="1158" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
-</g>
-<!-- 123&#45;&gt;124 -->
-<g id="edge124" class="edge">
-<title>123&#45;&gt;124</title>
-<path fill="none" stroke="#000000" d="M1158,-407.9748C1158,-401.195 1158,-390.966 1158,-382.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1161.5001,-382.0561 1158,-372.0561 1154.5001,-382.0561 1161.5001,-382.0561"/>
-</g>
-<!-- 125 -->
-<g id="node126" class="node">
-<title>125</title>
-<text text-anchor="middle" x="1158" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
-</g>
-<!-- 124&#45;&gt;125 -->
-<g id="edge125" class="edge">
-<title>124&#45;&gt;125</title>
-<path fill="none" stroke="#000000" d="M1158,-356.9748C1158,-350.195 1158,-339.966 1158,-331.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1161.5001,-331.0561 1158,-321.0561 1154.5001,-331.0561 1161.5001,-331.0561"/>
-</g>
-<!-- 126 -->
-<g id="node127" class="node">
-<title>126</title>
-<text text-anchor="middle" x="1158" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;number&gt;</text>
-</g>
-<!-- 125&#45;&gt;126 -->
-<g id="edge126" class="edge">
-<title>125&#45;&gt;126</title>
-<path fill="none" stroke="#000000" d="M1158,-305.9748C1158,-299.195 1158,-288.966 1158,-280.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1161.5001,-280.0561 1158,-270.0561 1154.5001,-280.0561 1161.5001,-280.0561"/>
-</g>
-<!-- 127 -->
-<g id="node128" class="node">
-<title>127</title>
-<text text-anchor="middle" x="1158" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
-</g>
-<!-- 126&#45;&gt;127 -->
-<g id="edge127" class="edge">
-<title>126&#45;&gt;127</title>
-<path fill="none" stroke="#000000" d="M1158,-254.9748C1158,-248.195 1158,-237.966 1158,-229.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1161.5001,-229.0561 1158,-219.0561 1154.5001,-229.0561 1161.5001,-229.0561"/>
-</g>
-<!-- 128 -->
-<g id="node129" class="node">
-<title>128</title>
-<text text-anchor="middle" x="1136" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 127&#45;&gt;128 -->
-<g id="edge128" class="edge">
-<title>127&#45;&gt;128</title>
-<path fill="none" stroke="#000000" d="M1154.7538,-203.9748C1151.7317,-196.969 1147.1209,-186.2803 1143.2275,-177.2547"/>
-<polygon fill="#000000" stroke="#000000" points="1146.4342,-175.8519 1139.2595,-168.0561 1140.0067,-178.6246 1146.4342,-175.8519"/>
-</g>
-<!-- 130 -->
-<g id="node131" class="node">
-<title>130</title>
-<text text-anchor="middle" x="1203" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
-</g>
-<!-- 127&#45;&gt;130 -->
-<g id="edge130" class="edge">
-<title>127&#45;&gt;130</title>
-<path fill="none" stroke="#000000" d="M1164.6399,-203.9748C1171.1538,-196.5923 1181.2762,-185.1203 1189.4875,-175.8142"/>
-<polygon fill="#000000" stroke="#000000" points="1192.341,-177.8702 1196.3329,-168.0561 1187.0922,-173.2388 1192.341,-177.8702"/>
-</g>
-<!-- 129 -->
-<g id="node130" class="node">
-<title>129</title>
-<text text-anchor="middle" x="1136" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
-</g>
-<!-- 128&#45;&gt;129 -->
-<g id="edge129" class="edge">
-<title>128&#45;&gt;129</title>
-<path fill="none" stroke="#000000" d="M1136,-152.9748C1136,-146.195 1136,-135.966 1136,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1139.5001,-127.0561 1136,-117.0561 1132.5001,-127.0561 1139.5001,-127.0561"/>
-</g>
-<!-- 131 -->
-<g id="node132" class="node">
-<title>131</title>
-<text text-anchor="middle" x="1191" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 130&#45;&gt;131 -->
-<g id="edge131" class="edge">
-<title>130&#45;&gt;131</title>
-<path fill="none" stroke="#000000" d="M1201.2294,-152.9748C1199.6164,-146.1196 1197.1737,-135.7383 1195.0798,-126.8392"/>
-<polygon fill="#000000" stroke="#000000" points="1198.4753,-125.9886 1192.7779,-117.0561 1191.6614,-127.5919 1198.4753,-125.9886"/>
-</g>
-<!-- 133 -->
-<g id="node134" class="node">
-<title>133</title>
-<text text-anchor="middle" x="1258" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
-</g>
-<!-- 130&#45;&gt;133 -->
-<g id="edge133" class="edge">
-<title>130&#45;&gt;133</title>
-<path fill="none" stroke="#000000" d="M1211.1154,-152.9748C1219.3206,-145.3663 1232.2103,-133.4141 1242.3996,-123.9658"/>
-<polygon fill="#000000" stroke="#000000" points="1244.8984,-126.422 1249.8513,-117.0561 1240.1388,-121.2891 1244.8984,-126.422"/>
-</g>
-<!-- 132 -->
-<g id="node133" class="node">
-<title>132</title>
-<text text-anchor="middle" x="1191" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">0</text>
-</g>
-<!-- 131&#45;&gt;132 -->
-<g id="edge132" class="edge">
-<title>131&#45;&gt;132</title>
-<path fill="none" stroke="#000000" d="M1191,-101.9748C1191,-95.195 1191,-84.966 1191,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1194.5001,-76.0561 1191,-66.0561 1187.5001,-76.0561 1194.5001,-76.0561"/>
-</g>
-<!-- 134 -->
-<g id="node135" class="node">
-<title>134</title>
-<text text-anchor="middle" x="1258" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
-</g>
-<!-- 133&#45;&gt;134 -->
-<g id="edge134" class="edge">
-<title>133&#45;&gt;134</title>
-<path fill="none" stroke="#000000" d="M1258,-101.9748C1258,-95.195 1258,-84.966 1258,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1261.5001,-76.0561 1258,-66.0561 1254.5001,-76.0561 1261.5001,-76.0561"/>
-</g>
-<!-- 135 -->
-<g id="node136" class="node">
-<title>135</title>
-<text text-anchor="middle" x="1258" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">0</text>
-</g>
-<!-- 134&#45;&gt;135 -->
-<g id="edge135" class="edge">
-<title>134&#45;&gt;135</title>
-<path fill="none" stroke="#000000" d="M1258,-50.9748C1258,-44.195 1258,-33.966 1258,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="1261.5001,-25.0561 1258,-15.0561 1254.5001,-25.0561 1261.5001,-25.0561"/>
-</g>
-</g>
-</svg>
-
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div><aside class="notes">
-
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The derivation tree is rather finely detailed. We can reduce the granularity by defining nodes that should be tokens.</p>
+<p>Let us use our new grammar to parse a program. But before that, our grammar is rather detailed, and we need to define our token nodes.</p>
 
 </div>
 </div>
@@ -17488,7 +15945,7 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 </aside><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">VAR_TOKENS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&lt;def&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;number&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;identifier&gt;&#39;</span><span class="p">}</span>
@@ -17498,63 +15955,15 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 </div>
 </div>
 
-</div><aside class="notes">
-
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>We develop a <code>LangFuzzer</code> class that generates recombined inputs. We use the tokens defined previously to prune and unparse the tree first.</p>
-
-</div>
-</div>
-</div>
-</aside></div></section><section>
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LangFuzzer</span><span class="p">(</span><span class="n">Fuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">parser</span>
-
-    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strings</span><span class="p">):</span>
-        <span class="n">trees</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-                <span class="n">trees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">trees</span>
-
-    <span class="k">def</span> <span class="nf">prune_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
-        <span class="n">name</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="n">tree</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[(</span><span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">),</span> <span class="p">[])])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">])</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div><aside class="notes">
-
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>As we see below, the trees are now sufficiently pruned.</p>
-
-</div>
-</div>
-</div>
-</aside></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tf</span> <span class="o">=</span> <span class="n">LangFuzzer</span><span class="p">(</span><span class="n">VAR_TOKENS</span><span class="p">,</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">))</span>
-<span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">parse</span><span class="p">([</span><span class="n">mystring</span><span class="p">]):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)&#39;</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="n">VAR_TOKENS</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">):</span>
     <span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 </pre></div>
 
@@ -18292,7 +16701,17 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 </div>
 </div>
 
-</div></section><section>
+</div><aside class="notes">
+
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We develop a <code>LangFuzzer</code> class that generates recombined inputs.</p>
+
+</div>
+</div>
+</div>
+</aside></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -18303,7 +16722,7 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystrings</span> <span class="o">=</span> <span class="p">[</span>
@@ -18334,12 +16753,12 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 </aside></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LangFuzzer</span><span class="p">(</span><span class="n">LangFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">parser</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LangFuzzer</span><span class="p">(</span><span class="n">Fuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fragments</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">cgrammar</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">traverse_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
@@ -18362,7 +16781,7 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
         <span class="bp">self</span><span class="o">.</span><span class="n">trees</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-                <span class="n">tree</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traverse_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+                <span class="n">tree</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traverse_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">trees</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">tree</span><span class="p">,</span> <span class="n">nodes</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
                     <span class="n">symbol</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
@@ -18378,10 +16797,10 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lf</span> <span class="o">=</span> <span class="n">LangFuzzer</span><span class="p">(</span><span class="n">VAR_TOKENS</span><span class="p">,</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lf</span> <span class="o">=</span> <span class="n">LangFuzzer</span><span class="p">(</span><span class="n">PEGParser</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="n">VAR_TOKENS</span><span class="p">))</span>
 <span class="n">fragments</span> <span class="o">=</span> <span class="n">lf</span><span class="o">.</span><span class="n">fragment</span><span class="p">(</span><span class="n">mystrings</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">fragments</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">fragments</span><span class="p">[</span><span class="n">key</span><span class="p">])))</span>
@@ -18436,15 +16855,15 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">random</span>
 
 
 <span class="k">class</span> <span class="nc">LangFuzzer</span><span class="p">(</span><span class="n">LangFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">strings</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">parser</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">strings</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fragments</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">cgrammar</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fragment</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span>
     
@@ -18487,10 +16906,10 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lf</span> <span class="o">=</span> <span class="n">LangFuzzer</span><span class="p">(</span><span class="n">VAR_TOKENS</span><span class="p">,</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">),</span> <span class="n">mystrings</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">lf</span> <span class="o">=</span> <span class="n">LangFuzzer</span><span class="p">(</span><span class="n">PEGParser</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="n">VAR_TOKENS</span><span class="p">),</span> <span class="n">mystrings</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">lf</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
 </pre></div>
@@ -18627,7 +17046,7 @@ def avar;def bvar;avar=y;bvar=avar-3*(4+300)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">PEG_SURPRISE</span> <span class="o">=</span> <span class="p">{</span>
@@ -18652,7 +17071,7 @@ def avar;def bvar;avar=y;bvar=avar-3*(4+300)
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">strings</span> <span class="o">=</span> <span class="p">[]</span>
@@ -19039,7 +17458,7 @@ def avar;def bvar;avar=y;bvar=avar-3*(4+300)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[38]:</div>
+    <div class="prompt output_prompt">Out[36]:</div>
 
 
 
@@ -19064,10 +17483,10 @@ def avar;def bvar;avar=y;bvar=avar-3*(4+300)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">peg</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">PEG_SURPRISE</span><span class="p">,</span> <span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">peg</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">PEG_SURPRISE</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">:</span>
     <span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">peg</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -19227,9 +17646,9 @@ def avar;def bvar;avar=y;bvar=avar-3*(4+300)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-39-00586f0a77d6&gt;&#34;, line 4, in &lt;module&gt;
+  File &#34;&lt;ipython-input-37-dec55ebf796e&gt;&#34;, line 4, in &lt;module&gt;
     for tree in peg.parse(s):
-  File &#34;&lt;ipython-input-12-5da6f43bfcbf&gt;&#34;, line 15, in parse
+  File &#34;&lt;ipython-input-12-7a0a0d883ea8&gt;&#34;, line 18, in parse
     raise SyntaxError(&#34;at &#34; + repr(text[cursor:]))
   File &#34;&lt;string&gt;&#34;, line None
 SyntaxError: at &#39;aa&#39; (expected)
@@ -19483,7 +17902,7 @@ SyntaxError: at &#39;aa&#39; (expected)
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Column</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -19513,7 +17932,7 @@ SyntaxError: at &#39;aa&#39; (expected)
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Column</span><span class="p">(</span><span class="n">Column</span><span class="p">):</span>
@@ -19544,7 +17963,7 @@ SyntaxError: at &#39;aa&#39; (expected)
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Item</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -19569,7 +17988,7 @@ SyntaxError: at &#39;aa&#39; (expected)
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Item</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
@@ -19602,7 +18021,7 @@ We also store a references to all the child states (that is, all states that ori
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">State</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
@@ -19677,12 +18096,12 @@ We also store a references to all the child states (that is, all states that ori
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">NearleyParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="n">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">letters</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
@@ -19703,7 +18122,7 @@ We also store a references to all the child states (that is, all states that ori
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">NearleyParser</span><span class="p">(</span><span class="n">NearleyParser</span><span class="p">):</span>
@@ -19750,7 +18169,7 @@ We also store a references to all the child states (that is, all states that ori
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">NearleyParser</span><span class="p">(</span><span class="n">NearleyParser</span><span class="p">):</span>
@@ -19783,7 +18202,7 @@ If the letter matches what we have, then create a new state by advancing the cur
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">NearleyParser</span><span class="p">(</span><span class="n">NearleyParser</span><span class="p">):</span>
@@ -19816,7 +18235,7 @@ For example, say we have states as below.</p>
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">NearleyParser</span><span class="p">(</span><span class="n">NearleyParser</span><span class="p">):</span>
@@ -19848,7 +18267,7 @@ For example, say we have states as below.</p>
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">NearleyParser</span><span class="p">(</span><span class="n">NearleyParser</span><span class="p">):</span>
@@ -19887,7 +18306,7 @@ For example, say we have states as below.</p>
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">NearleyParser</span><span class="p">(</span><span class="n">NearleyParser</span><span class="p">):</span>
@@ -19923,7 +18342,7 @@ For example, say we have states as below.</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[58]:</div>
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;12*(2+2)/31&#39;</span>
@@ -20400,7 +18819,7 @@ For example, say we have states as below.</p>
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">State</span><span class="p">(</span><span class="n">State</span><span class="p">):</span>
@@ -20422,7 +18841,7 @@ For example, say we have states as below.</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[61]:</div>
+<div class="prompt input_prompt">In&nbsp;[59]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">NearleyParser</span><span class="p">):</span>
@@ -20455,7 +18874,7 @@ For example, say we have states as below.</p>
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="prompt input_prompt">In&nbsp;[60]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
@@ -20475,7 +18894,7 @@ For example, say we have states as below.</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="prompt input_prompt">In&nbsp;[61]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
@@ -20509,7 +18928,7 @@ For example, say we have states as below.</p>
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
@@ -20548,7 +18967,7 @@ For example, say we have states as below.</p>
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
@@ -20598,7 +19017,7 @@ For example, say we have states as below.</p>
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[66]:</div>
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
@@ -20616,7 +19035,7 @@ For example, say we have states as below.</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[67]:</div>
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">A3_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
@@ -20638,7 +19057,7 @@ For example, say we have states as below.</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[68]:</div>
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;(1+24)-33&#39;</span>
@@ -20967,7 +19386,7 @@ For example, say we have states as below.</p>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[69]:</div>
+<div class="prompt input_prompt">In&nbsp;[67]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
@@ -20999,7 +19418,7 @@ For example, say we have states as below.</p>
 </aside></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[72]:</div>
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">EPSILON</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
@@ -21018,7 +19437,7 @@ For example, say we have states as below.</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[73]:</div>
+<div class="prompt input_prompt">In&nbsp;[71]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;a&#39;</span>
@@ -21061,7 +19480,7 @@ For example, say we have states as below.</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[74]:</div>
+<div class="prompt input_prompt">In&nbsp;[72]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fixpoint</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
@@ -21083,7 +19502,7 @@ For example, say we have states as below.</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[75]:</div>
+<div class="prompt input_prompt">In&nbsp;[73]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -21101,7 +19520,7 @@ For example, say we have states as below.</p>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[76]:</div>
+<div class="prompt input_prompt">In&nbsp;[74]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
@@ -21117,7 +19536,7 @@ For example, say we have states as below.</p>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[76]:</div>
+    <div class="prompt output_prompt">Out[74]:</div>
 
 
 
@@ -21142,7 +19561,7 @@ For example, say we have states as below.</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[77]:</div>
+<div class="prompt input_prompt">In&nbsp;[75]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">nullable_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">nullables</span><span class="p">):</span>
@@ -21169,7 +19588,7 @@ For example, say we have states as below.</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[78]:</div>
+<div class="prompt input_prompt">In&nbsp;[76]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">grammar</span> <span class="ow">in</span> <span class="p">{</span>
@@ -21193,8 +19612,8 @@ For example, say we have states as below.</p>
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;A&gt;&#39;}
-E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
+<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;E&gt;&#39;}
+E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 </pre>
 </div>
 </div>
@@ -21215,7 +19634,7 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </aside></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[79]:</div>
+<div class="prompt input_prompt">In&nbsp;[77]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
@@ -21247,7 +19666,7 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[80]:</div>
+<div class="prompt input_prompt">In&nbsp;[78]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;a&#39;</span>
@@ -21820,7 +20239,7 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[81]:</div>
+<div class="prompt input_prompt">In&nbsp;[79]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PackratParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
@@ -21863,11 +20282,11 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[82]:</div>
+<div class="prompt input_prompt">In&nbsp;[80]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s2">&quot;1+(2*3)&quot;</span>
-<span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">PackratParser</span><span class="p">(</span><span class="n">EXPR_GRAMMAR_NS</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">):</span>
+<span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">PackratParser</span><span class="p">(</span><span class="n">EXPR_GRAMMAR_NS</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">):</span>
     <span class="k">assert</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="o">==</span> <span class="n">mystring</span>
     <span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 </pre></div>
@@ -22199,7 +20618,7 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[87]:</div>
+<div class="prompt input_prompt">In&nbsp;[85]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">splitlst</span><span class="p">(</span><span class="n">predicate</span><span class="p">,</span> <span class="n">iterable</span><span class="p">):</span>
@@ -22263,7 +20682,7 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[88]:</div>
+<div class="prompt input_prompt">In&nbsp;[86]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">LeoParser</span><span class="p">(</span><span class="n">RR_GRAMMAR</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;aaaaaa&#39;</span><span class="p">)</span>
@@ -22357,7 +20776,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[89]:</div>
+<div class="prompt input_prompt">In&nbsp;[87]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">LeoParser</span><span class="p">(</span><span class="n">LR_GRAMMAR</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;aaaaaa&#39;</span><span class="p">)</span>
@@ -22426,7 +20845,7 @@ a chart[6]
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[89]:</div>
+    <div class="prompt output_prompt">Out[87]:</div>
 
 
 
@@ -22449,7 +20868,42 @@ a chart[6]
 </div>
 </div>
 
-</div></section><section>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[88]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">RR_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ab&lt;A&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span>
+<span class="p">}</span>
+<span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;abababab&#39;</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[89]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">RR_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ab&lt;B&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;&lt;B&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">],</span>
+<span class="p">}</span>
+<span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;abababab&#39;</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -22534,23 +20988,23 @@ a chart[6]
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;(&#39;: {&#39;(&#39;},
- &#39;0&#39;: {&#39;0&#39;},
- &#39;8&#39;: {&#39;8&#39;},
- &#39;+&#39;: {&#39;+&#39;},
- &#39;1&#39;: {&#39;1&#39;},
- &#39;6&#39;: {&#39;6&#39;},
- &#39;-&#39;: {&#39;-&#39;},
- &#39;9&#39;: {&#39;9&#39;},
- &#39;.&#39;: {&#39;.&#39;},
- &#39;4&#39;: {&#39;4&#39;},
+<pre>{&#39;2&#39;: {&#39;2&#39;},
  &#39;/&#39;: {&#39;/&#39;},
+ &#39;8&#39;: {&#39;8&#39;},
+ &#39;0&#39;: {&#39;0&#39;},
+ &#39;.&#39;: {&#39;.&#39;},
+ &#39;7&#39;: {&#39;7&#39;},
+ &#39;4&#39;: {&#39;4&#39;},
+ &#39;6&#39;: {&#39;6&#39;},
  &#39;)&#39;: {&#39;)&#39;},
  &#39;3&#39;: {&#39;3&#39;},
- &#39;7&#39;: {&#39;7&#39;},
- &#39;*&#39;: {&#39;*&#39;},
- &#39;2&#39;: {&#39;2&#39;},
  &#39;5&#39;: {&#39;5&#39;},
+ &#39;+&#39;: {&#39;+&#39;},
+ &#39;9&#39;: {&#39;9&#39;},
+ &#39;1&#39;: {&#39;1&#39;},
+ &#39;-&#39;: {&#39;-&#39;},
+ &#39;(&#39;: {&#39;(&#39;},
+ &#39;*&#39;: {&#39;*&#39;},
  &#39;&lt;start&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
  &#39;&lt;expr&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
  &#39;&lt;term&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
@@ -23120,8 +21574,8 @@ a chart[6]
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LangFuzzer2</span><span class="p">(</span><span class="n">LangFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">strings</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">strings</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">strings</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">strings</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">gfuzz</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">grammar</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">check_diversity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool</span><span class="p">):</span>
@@ -23166,8 +21620,8 @@ a chart[6]
 <div class="prompt input_prompt">In&nbsp;[103]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">)</span>
-<span class="n">lf</span> <span class="o">=</span> <span class="n">LangFuzzer2</span><span class="p">(</span><span class="n">VAR_TOKENS</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">mystrings</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="n">VAR_TOKENS</span><span class="p">)</span>
+<span class="n">lf</span> <span class="o">=</span> <span class="n">LangFuzzer2</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">mystrings</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">lf</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
 </pre></div>
@@ -23186,106 +21640,106 @@ a chart[6]
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>def x;def y;def z;x=10;y=20;z=(x+y)*(x-a)
-def abc;abc=12+(3+b)
-def a;bvar=avar-3*(4+300);a=1.3;b=a-1*(4+3+(2/a))
-def b;abc=12+(3+3.3)
-def a;def b;def c;a=1;b=2;def a;def b;a=1.3;b=a-1*(4+3+(2/a))
-def a;def b;def c;a=1;b=2;c=a+b
-def avar;def bvar;avar=1.3;bvar=avar-2*(4+300)
+<pre>def x;def y;def z;x=10;y=20;z=(x+y)*(x-y)
+def x;def y;def x;x=23;y=51;z=x*x-y*y
+def abc;def c;a=1;b=2;c=a+b
+def a;def b;def avar;a=1;b=2;c=a+b
+def a;def b;a=0.3;b=a-1*(4+3+(2/a))
+def a;def b;def c;a=1.3;b=2;c=a+b
+def x;def y;def z;x=10;y=20;z=(1.3)*(x-y)
 x=23;def b;def c;def d;a=10;b=20;c=34;d=-b+(b*b-4*a*c)/(2*a)
-def abc;abc=(b*b-4*a*c)/(2*a)
+def abc;abb=12+(3+3.3)
 def avar;def d;avar=1.3;bvar=avar-3*(4+300)
 def a;def b;def c;a=1;b=2;c=a+b
-def x;def y;def z;x=10;y=20;z=(x+y)*(x-y)
-def avar;def bvar;avar=1.3;bvar=b-3*(4+300)
-def a;def b;def c;a=1;b=2;c=a+d
-def a;def b;def d;b=a-1*(4+3+(2/a))
-def avar;def bvar;avar=4;bvar=avar-3*(4+300)
+def x;def y;def b;x=10;y=20;z=(x+y)*(x-y)
+def avar;def bvar;avar=1.3;a=avar-3*(4+300)
+def a;def b;def c;a=1;b=10;c=a+b
+def a;def b;a=3;b=a-1*(4+3+(2/a))
+def avar;def bvar;avd=1.3;bvar=avar-3*(4+300)
+def a;def a;def c;a=1;b=2;c=a+b
 def a;def b;def c;a=1;b=2;c=a+b
-def a;def b;def c;a=1;b=2;c=a+b
-def a;def b;def c;a=1;def bvar;c=a+b
-def a;def b;def c;def d;a=10;b=20;abc=12+(3+3.3)
-def a;def b;a=1.3;b=a-1*3.3
-def avar;def bvar;avar=1.3;bvar=avar-3*(4+c)
-def a;def b;def c;a=1;b=2;c=2/a
-def a;def b;def d;a=1;b=2;c=a+b
-def x;def y;def bvar;x=23;y=51;z=x*x-y*y
-def a;def b;def c;a=1;b=2;y=51
-def abc;abc=12+(1)
-def x;def y;def z;x=10;y=20;z=(x+y)*(x-3*(4+300))
-def a;def b;a=1.3;b=y-1*(4+3+(2/a))
-def a;def b;def c;def b;a=10;b=20;c=34;d=-b+(b*b-4*a*c)/(2*a)
-def x;def y;def z;x=10;x=23;y=51;z=x*x-y*y
-def a;def b;def c;a=1;b=2;def a;def b;a=1.3;b=a-1*(4+3+(2/a))
-def a;def b;c=a+b;def d;a=10;b=20;c=34;d=-b+(b*b-4*a*c)/(2*a)
-def abc;abc=12+(3+34)
-def x;def y;def z;x=a*c;y=20;z=(x+y)*(x-y)
-def avar;def bvar;avar=1.3;bvar=y-3*(4+300)
-def abc;abc=12+(3+3.3)
-def avar;a=10;b=20;c=34;d=-b+(b*b-4*a*c)/(2*a)
-def a;def b;def c;def d;b=20;b=20;c=34;d=-b+(b*b-4*a*c)/(2*a)
-def abc;abc=12+(3+3.3)
-def a;def b;def x;a=1;b=2;c=a+b
-def x;def y;def z;x=10;y=20;z=12+(3+3.3)
-def z;def y;def z;x=10;y=20;z=(x+y)*(x-y)
-def x;def y;def z;x=23;y=51;z=x*x-a*y
-def a;def b;def x;def y;def z;x=23;y=51;z=x*x-y*y
-def x;def y;def z;x=23;y=51;z=x*x-y*y
+def a;def b;def c;y=1;b=2;c=a+b
+def a;def b;def c;a=1;a=2;c=a+b
+def abc;abc=12+a*c
+def abc;ay=12+(3+3.3)
+def a;def b;def c;a=1;b=20;c=a+b
+def a;def a;def c;a=1;b=2;c=a+b
+def x;def y;def z;avar=23;y=51;z=x*x-y*y
+def a;def b;def c;a=5;b=2;c=a+b
+def abc;abc=12+(1+3.3)
+def x;def y;def z;def x;def y;def z;x=10;y=20;z=(x+y)*(x-y)
 def a;def b;a=1.3;b=a-1*(4+3+(2/a))
-def x;def y;def z;x=51;y=51;z=x*x-y*y
-def a;def b;def c;a=1;b=2;c=y+b
-d=-b+(b*b-4*a*c)/(2*a);def y;def z;x=23;y=51;z=x*x-y*y
+def abc;abc=c+(3+3.3)
+def a;def b;def c;a=00;b=2;c=a+b
+def a;def b;def c;def d;a=10;b=20;c=34;d=-b+(b*b-4*a*c)/(2*c)
+def aa;abc=12+(3+3.3)
+def x;def y;def z;x=10;y=x+y;z=(x+y)*(x-y)
+def avar;def bvar;avar=1.3;abc=avar-3*(4+300)
+def abc;def b
 def x;def y;def z;x=23;y=51;z=x*x-y*y
-def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)
-def x;def y;def avar;x=23;y=51;z=x*x-y*y
-def abc;abc=12+(2+3.3)
-def avar;def bvar;avar=1.3;x=23
-def x;def y;def z;x=10;y=20;z=(3*(4+300)+y)*(x-y)
-def abc;avar=1.3
 def a;def b;def c;def d;a=10;b=20;c=34;d=-b+(b*b-4*a*c)/(2*a)
-def avar;def bvar;avar=1.3;bvar=avar-(2/a)
-def b;def y;def z;x=23;y=51;z=x*x-y*y
-def a;def b;def c;z=(x+y)*(x-y);b=2;c=a+b
-def a;def b;a=1.3;b=a-1*(4+3+(2/4))
-def avar;def bvar;avar=1.3;bvar=avar-3*((2/a))
-def a;def b;def c;def bvar;a=10;b=20;c=34;d=-b+(b*b-4*a*c)/(2*a)
-def avar;def bvar;avar=1.3;bvar=avar-3*(y*y+300)
-def x;def y;def z;x=10;y=20;a=1.3
-def x;def y;def z;x=23;y=51;z=x*x-y*z
-def a;def b;a=1.3;b=a-1*(4+3+(10))
-def a;def c;a=1.3;b=a-1*(4+3+(2/a))
-def x;def y;def z;x=23;y=51;z=x*x-y*y
-def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)
-def x;def y;def z;x=23;y=51;b=x*x-y*y
-def x;def y;def z;x=23;y=51;z=x*x-y*y
-def a;def b;def c;def d;a=10;x=20;c=34;d=-b+(b*b-4*a*c)/(2*a)
-def abc;abc=12+(x-y)
-def a;def b;def c;def d;a=10;b=20;c=34;d=-b+(b*b-4*a*c)/(2*a)
-def avar;def bvar;avar=1.3;bvar=avar-(2*a)
-def a;def b;def a;a=1;b=2;c=a+b
-def abc;abc=12+(3+4)
-def x;def y;def z;x=23;y=51;z=x*x-x*y
-def a;def b;z=1.3;b=a-1*(4+3+(2/a))
-def c;def b;def c;a=1;b=2;c=a+b
-def x;def y;def z;x=23;def a;z=x*x-y*y
-def abc;def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)
-def x;def y;def z;x=23;y=51;y=20
-def x;def b;def z;x=23;y=51;z=x*x-y*y
-def a;def b;a=1.3;b=a-1*(4+3+(b/a))
-def x;def y;def z;x=avar-3*(4+300);y=20;z=(x+y)*(x-y)
-def a;def b;def x;a=1;b=2;c=a+b
-def avar;def bvar;avar=1.3;bvar=avar-3*(4+2)
+def xbc;abc=12+(3+3.3)
+def a;def b;def c;a=1;b=2;c=a+b
+def x;def y;def z;x=10;y=20;z=(x+y)*12
 def x;def y;def z;x=10;y=20;z=(x+y)*(x-y)
-def x;def y;def z;x=23;y=10;z=x*x-y*y
-def a;def b;c=34;d=-b+(b*b-4*a*c)/(2*a)
-def x;def y;def z;x=23;y=51;x=x*x-y*y
-def x;def y;def z;x=10;y=20;z=(b+y)*(x-y)
-def a;def b;a=1.3;b=a-4*(4+3+(2/a))
-def abc;abc=12+(3+a*c)
-def a;def b;a=1.3;b=a-1*12
-def avar;def bvar;x=10;y=20;z=(x+y)*(x-y)
-def x;def y;def z;x=23;y=51;z=x*x-y*bvar
+def x;def y;def z;x=0;y=51;z=x*x-y*y
+def a;def b;def c;a=20;b=2;c=a+b
+def a;def y;def z;x=23;y=51;z=x*x-y*y
+def x;def y;def z;x=23;v=51;z=x*x-y*y
+def a;def b;def c;def d;a=10;b=20;c=34;d=-b+(b*b-2*a*c)/(2*a)
+def a;def b;def c;def d;a=10;b=20;c=34;d=-b+(-b+(b*b-4*a*c)/(2*a))/(2*a)
+def y;def y;def z;x=23;y=51;z=x*x-y*y
+def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)
+def x;def y;def z;b=23;y=51;z=x*x-y*y
+def abc;abc=12+(3+avar)
+def avar;def bvar;avar=1.3;bvar=avar-3*(4+310)
+def a;def b;a=1;b=a-1*(4+3+(2/a))
+def x;def y;def z;y=23;y=51;z=x*x-y*y
+def a;def b;def c;a=1;b=2;c=a+b
+def abc;abc=(b*b-4*a*c)/(2*a)+(3+3.3)
+def abar;def bvar;avar=1.3;bvar=avar-3*(4+300)
+def a;def b;def c;a=1;b=2;a=a+b
+def a;def b;def c;def d;a=10;b=20;y=20;d=-b+(b*b-4*a*c)/(2*a)
+def x;def y;def z;b=23;y=51;z=x*x-y*y
+def x;def y;def z;x=10;y=20;z=(x+y)*(x-y)
+def avar;def bvar;avar=1.3;bvar=avar-avar*(4+300)
+def a;def b;def c;a=1;b=2;c=a+a
+def a;def b;def c;def d;a=10;b=20;c=34;d=-b+(b*b-x-y)/(2*a)
+def a;def b;def c;a=1;b=2;c=y*y+b
+def x;def y;def z;x=23;y=51;z=x*y-y*y
+def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)
+def abc;abc=12+(3+3.3)
+def avar;def avar;avar=1.3;bvar=avar-3*(4+300)
+def x;def y;def z;x=23;y=51;z=x*x-b*y
+def x;def y;def z;x=23;x=51;z=x*x-y*y
+def a;def b;def c;def d;a=10;b=20;c=34;d=-b+(b*b-4*a*y)/(2*a)
+def a;def b;def c;a=1;b=2;c=3+b
+def a;def b;a=1.3;b=a-1*(4+3+(x*x))
+def abc;abc=1+(3+3.3)
+def x;def y;def z;x=10;y=20;x=(x+y)*(x-y)
+def a;def bvar;def c;a=1;b=2;c=a+b
+def abc;abc=12+(3+3.00)
+def x;def y;def z;x=23;y=51;def b;a=1.3;b=a-1*(4+3+(2/a))
+def x;def y;def z;abc=12+(3+3.3);y=51;z=x*x-y*y
+def avar;def bvar;avar=1.3;a=1
+def abc;def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)
+def x;def y;def z;x=23;y=51;z=x*x-2*a
+def x;def b;def z;x=23;y=51;z=x*x-y*y
+def a;def b;a=1.3;b=a-1*(4+x+(2/a))
+def avar;def var;avar=1.3;bvar=avar-3*(4+300)
+def x;def y;def z;x=10;y=20;z=(x+y)*(x-y)
+def avar;def bvar;avar=1.3;bvar=avar-3*2
+def x;def y;def z;a=10;y=20;z=(x+y)*(x-y)
+def x;def y;def z;x=23;y=51;z=x*x-y*y
+def a;def b;a=34;b=a-1*(4+3+(2/a))
+def x;def y;def z;x=23;y=51;z=x*x-23*y
+def x;def y;def z;x=10;y=20;z=(x+y)*(x-b)
+def a;def b;a=1.3;b=a-1*(4+1+(2/a))
+def abc;abc=12+(3+0.3)
+def a;def b;a=1.3;b=a-1*(4+3+12)
+def avar;def by;avar=1.3;bvar=avar-3*(4+300)
+def x;def y;def z;def a;y=51;z=x*x-y*y
+def x;def y;b=2;x=23;y=51;z=x*x-y*y
 </pre>
 </div>
 </div>

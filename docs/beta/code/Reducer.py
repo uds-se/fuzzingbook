@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2018-11-07 18:14:12+01:00
+# Last change: 2018-11-13 11:58:42+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -253,7 +253,7 @@ class GrammarReducer(Reducer):
         super().__init__(runner, log=log)
         self.grammar = grammar
         self.start_symbol = start_symbol
-        self.parser = PEGParser(grammar, start_symbol)
+        self.parser = PEGParser(grammar, start_symbol=start_symbol)
 
 class GrammarReducer(GrammarReducer):
     def derivation_reductions(self, tree):
