@@ -22,6 +22,7 @@ TODO_CHAPTERS = \
 	Reducer.ipynb \
 	Carver.ipynb \
 	APIFuzzer.ipynb \
+	WebFuzzer.ipynb \
 	GrammarMiner.ipynb
 	# ConstraintGrammarFuzzer.ipynb
 	# GUIFuzzer.ipynb
