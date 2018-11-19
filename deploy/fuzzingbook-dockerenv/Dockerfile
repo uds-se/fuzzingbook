@@ -7,7 +7,7 @@ USER root
 
 # Install required APT packages
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends graphviz inkscape bc ed texinfo groff wget vim
+RUN apt-get install -y --no-install-recommends graphviz curl inkscape bc ed texinfo groff wget vim
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 

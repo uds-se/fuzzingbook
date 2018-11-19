@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Make artifacts in container
+docker exec -it fuzzing-book-instance /bin/bash -c 'cd fuzzingbook && make html; make slides; make code; make word; make markdown'
+
+# Create/clear the output folder on the host
+[[ -d 'build-output' ]] && rm -r build-output
+mkdir build-output
+
+# Copy all relevant artifacts to host
+CONTAINER_ID=$(docker ps -q --filter name=fuzzing-book-instance)
+docker cp $CONTAINER_ID:/home/jovyan/fuzzingbook/html build-output
+docker cp $CONTAINER_ID:/home/jovyan/fuzzingbook/markdown build-output
+docker cp $CONTAINER_ID:/home/jovyan/fuzzingbook/slides build-output 
+docker cp $CONTAINER_ID:/home/jovyan/fuzzingbook/word build-output
+docker cp $CONTAINER_ID:/home/jovyan/fuzzingbook/code build-output
+
+# If the user is not in the docker group and started this script with sudo, we need
+# to reclaim the output directory with permissions for the user
+[[ -z "${SUDO_USER}" ]] || chown -R $SUDO_USER:$SUDO_USER build-output

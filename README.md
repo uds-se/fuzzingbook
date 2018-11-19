@@ -76,9 +76,11 @@ If mybinder.org does not work or match your needs, you have a number of alternat
 
 3. If you want to use the book in a classroom, and depend on your users having access to the interactive notebooks, consider using or deploying a [JupyterHub](http://jupyter.org/hub) or [BinderHub](https://github.com/jupyterhub/binderhub) instance.
 
+4. **Run the notebook locally** in a Docker container. For more information, see [How to use the book with Docker](https://github.com/uds-se/fuzzingbook/blob/master/deploy/README.md).  
+
 #### Can I run the code on my Windows machine?
 
-We try to keep the code as general as possible, but occasionally, when we interact with the operating system, we assume a Unix-like environment (because that is what Binder provides).  To run these examples on your own Windows machine, you can install a Linux VM or a Docker environment.  Instructions on how to do this are welcome.
+We try to keep the code as general as possible, but occasionally, when we interact with the operating system, we assume a Unix-like environment (because that is what Binder provides).  To run these examples on your own Windows machine, you can install a Linux VM or a [Docker environment](https://github.com/uds-se/fuzzingbook/blob/master/deploy/README.md).
 
 #### Can't you run your own dedicated cloud service?
 
@@ -91,23 +93,23 @@ Technically, yes; but this would cost money and effort, which we'd rather spend 
 The contents of this book will include topics such as:
 
 1. Introduction to Testing
-1. Basic Fuzzing
-1. Coverage
-1. Mutation-Based Fuzzing
-1. Fuzzing with Grammars
-1. Efficient Grammar Fuzzing
-1. Grammar Coverage
-1. Configuration Fuzzing
-1. Parsing and Mutating Inputs
-1. Probabilistic Testing
-1. Reducing Failure-Inducing Inputs
-1. Fuzzing Function Calls
-1. Fuzzing User Interfaces
-1. Search-Based Testing
-1. Symbolic Testing
-1. Mining Grammars
-1. Fuzzing and Invariants
-1. Protection and Repair
+2. Basic Fuzzing
+3. Coverage
+4. Mutation-Based Fuzzing
+5. Fuzzing with Grammars
+6. Efficient Grammar Fuzzing
+7. Grammar Coverage
+8. Configuration Fuzzing
+9. Parsing and Mutating Inputs
+10. Probabilistic Testing
+11. Reducing Failure-Inducing Inputs
+12. Fuzzing Function Calls
+13. Fuzzing User Interfaces
+14. Search-Based Testing
+15. Symbolic Testing
+16. Mining Grammars
+17. Fuzzing and Invariants
+18. Protection and Repair
 
 See the table of contents in the menu above for those chapters that are already done.
 
