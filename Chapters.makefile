@@ -6,11 +6,11 @@ PUBLIC_CHAPTERS = \
 	Intro_Testing.ipynb \
 	Fuzzer.ipynb \
 	Coverage.ipynb \
-	MutationFuzzer.ipynb
+	MutationFuzzer.ipynb \
+	Grammars.ipynb
 
 # Chapters that are ready for release
 READY_CHAPTERS = \
-	Grammars.ipynb \
 	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
 	ConfigurationFuzzer.ipynb
@@ -22,6 +22,7 @@ TODO_CHAPTERS = \
 	Reducer.ipynb \
 	Carver.ipynb \
 	APIFuzzer.ipynb \
+	WebFuzzer.ipynb \
 	GrammarMiner.ipynb
 	# ConstraintGrammarFuzzer.ipynb
 	# GUIFuzzer.ipynb

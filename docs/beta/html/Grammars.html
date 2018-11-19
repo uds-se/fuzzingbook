@@ -11793,7 +11793,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/Grammars.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Fuzzing with Grammars - Generating Software Tests" />
-<meta property="og:description" content="In the chapter on &quot;Mutation-Based Fuzzing&quot;, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a specification of the legal inputs to a program.  These grammars allow for very systematic and efficient test generation, in particular for complex input formats.Prerequisites You should know how basic fuzzing works, e.g. from the Chapter introducing fuzzing. Knowledge on mutation-based fuzzing and coverage is not required yet, but still recommended." />
+<meta property="og:description" content="In the chapter on &quot;Mutation-Based Fuzzing&quot;, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a specification of the legal inputs to a program.  These grammars allow for very systematic and efficient test generation, in particular for complex input formats.  They also serve as the base for configuration fuzzing, API fuzzing, GUI fuzzing, and many more.Prerequisites You should know how basic fuzzing works, e.g. from the Chapter introducing fuzzing. Knowledge on mutation-based fuzzing and coverage is not required yet, but still recommended." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11869,7 +11869,7 @@ MathJax.Hub.Config({
 <li><a href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
 <li><a href="Coverage.html">Getting Coverage</a></li>
 <li><a href="MutationFuzzer.html">Mutation-Based Fuzzing</a></li>
-<li><a href="Grammars.html" class="this_page">Fuzzing with Grammars&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
+<li><a href="Grammars.html" class="this_page">Fuzzing with Grammars</a></li>
 <li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 <li><a href="GrammarCoverageFuzzer.html">Grammar Coverage&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 <li><a href="ConfigurationFuzzer.html">Testing Configurations&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
@@ -11878,12 +11878,13 @@ MathJax.Hub.Config({
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Carver.html">Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="APIFuzzer.html">Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="WebFuzzer.html">Web GUI Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="GrammarMiner.html">Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 
            <li><a href="https://www.fuzzingbook.org/beta/#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
      </li>
-     <li class="has-sub"><a href="#"><span title="Fuzzing with Grammars"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Fuzzing with Grammars <i class="fa fa-fw fa-warning"></i></span></a>
+     <li class="has-sub"><a href="#"><span title="Fuzzing with Grammars"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Fuzzing with Grammars</span></a>
         <ul>
            <li><a href="#Input-Languages">Input Languages</a></li>
 <li><a href="#Grammars">Grammars</a></li>
@@ -11945,7 +11946,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-with-Grammars">Fuzzing with Grammars<a class="anchor-link" href="#Fuzzing-with-Grammars">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-warning"></i>&nbsp;This chapter is still under review ("beta").  It may change at any time.</em></p><p>In the chapter on <a href="MutationFuzzer.html">"Mutation-Based Fuzzing"</a>, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a <em>specification</em> of the legal inputs to a program.  These <em>grammars</em> allow for very systematic and efficient test generation, in particular for complex input formats.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-with-Grammars">Fuzzing with Grammars<a class="anchor-link" href="#Fuzzing-with-Grammars">&#182;</a></h1><p>In the chapter on <a href="MutationFuzzer.html">"Mutation-Based Fuzzing"</a>, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a <em>specification</em> of the legal inputs to a program.  These <em>grammars</em> allow for very systematic and efficient test generation, in particular for complex input formats.  They also serve as the base for configuration fuzzing, API fuzzing, GUI fuzzing, and many more.</p>
 </div>
 </div>
 </div>
@@ -12770,6 +12771,90 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="A-Natural-Language-Grammar">A Natural Language Grammar<a class="anchor-link" href="#A-Natural-Language-Grammar">&#182;</a></h3><p>Finally, grammars are not limited to <em>formal</em> languages such as computer inputs, but can also be used to produce <em>natural language</em>.  This is the grammar we used to pick a title for this book:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">TITLE_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;title&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;title&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;topic&gt;: &lt;subtopic&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;topic&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Generating Software Tests&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;fuzzing-prefix&gt;Fuzzing&quot;</span><span class="p">,</span> <span class="s2">&quot;The Fuzzing Book&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;fuzzing-prefix&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;The Art of &quot;</span><span class="p">,</span> <span class="s2">&quot;The Joy of &quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;subtopic&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;subtopic-main&gt;&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;&lt;subtopic-prefix&gt;&lt;subtopic-main&gt;&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;&lt;subtopic-main&gt;&lt;subtopic-suffix&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;subtopic-main&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Breaking Software&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;Generating Software Tests&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;Principles, Techniques and Tools&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;subtopic-prefix&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;Tools and Techniques for &quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;subtopic-suffix&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot; for &lt;reader-property&gt; and &lt;reader-property&gt;&quot;</span><span class="p">,</span>
+                          <span class="s2">&quot; for &lt;software-property&gt; and &lt;software-property&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;reader-property&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Fun&quot;</span><span class="p">,</span> <span class="s2">&quot;Profit&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;software-property&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Robustness&quot;</span><span class="p">,</span> <span class="s2">&quot;Reliability&quot;</span><span class="p">,</span> <span class="s2">&quot;Security&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">titles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">titles</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+    <span class="n">titles</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span>
+        <span class="n">grammar</span><span class="o">=</span><span class="n">TITLE_GRAMMAR</span><span class="p">,</span> <span class="n">max_nonterminals</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">titles</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;Fuzzing: Generating Software Tests&#39;,
+ &#39;Fuzzing: Principles, Techniques and Tools&#39;,
+ &#39;Generating Software Tests: Breaking Software&#39;,
+ &#39;Generating Software Tests: Breaking Software for Robustness and Robustness&#39;,
+ &#39;Generating Software Tests: Principles, Techniques and Tools&#39;,
+ &#39;Generating Software Tests: Principles, Techniques and Tools for Profit and Fun&#39;,
+ &#39;Generating Software Tests: Tools and Techniques for Principles, Techniques and Tools&#39;,
+ &#39;The Fuzzing Book: Breaking Software&#39;,
+ &#39;The Fuzzing Book: Generating Software Tests for Profit and Profit&#39;,
+ &#39;The Fuzzing Book: Generating Software Tests for Robustness and Robustness&#39;}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>(If you find that there is redundancy ("Robustness and Robustness") in here: In <a href="CoverageGrammarFuzzer.html">our chapter on coverage-based fuzzing</a>, we will show how to cover each expansion only once.  And if you like some alternatives more than others, <a href="ProbabilisticGrammarFuzzer.html">probabilistic grammar fuzzing</a> will be there for you.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammars-as-Mutation-Seeds">Grammars as Mutation Seeds<a class="anchor-link" href="#Grammars-as-Mutation-Seeds">&#182;</a></h2><p>One very useful property of grammars is that they produce mostly valid inputs.  From a syntactical standpoint, the inputs are actually <em>always</em> valid, as they satisfy the constraints of the given grammar.  (Of course, one needs a valid grammar in the first place.)  However, there are also <em>semantical</em> properties that cannot be easily expressed in a grammar.  If, say, for a URL, the port range is supposed to be between 1024 and 2048, this is hard to write in a grammar.  If one has to satisfy more complex constraints, one quickly reaches the limits of what a grammar can express.</p>
 </div>
 </div>
@@ -12830,16 +12915,16 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;https://user:password@fuzzingbook.com:80/abc&#39;,
- &#39;ftp://fuzzingbook.com:8080?x85=def&amp;x18=def&#39;,
- &#39;ftp://fuzzingbook.com/def?x41=def&#39;,
- &#39;https://www.google.com:80/?abc=31&#39;,
- &#39;https://cispa.saarland&#39;,
- &#39;ftps://user:password@cispa.saarland:7?def=abc&#39;,
- &#39;http://www.google.com/x85&#39;,
- &#39;http://user:password@www.google.com:00/?abc=def&amp;x08=abc&#39;,
- &#39;http://cispa.saarland/x39?def=abc&#39;,
- &#39;ftps://www.google.com&#39;]
+<pre>[&#39;ftps://user:password@www.google.com:80&#39;,
+ &#39;http://cispa.saarland/&#39;,
+ &#39;ftp://www.google.com:42/&#39;,
+ &#39;ftps://user:password@fuzzingbook.com:39?abc=abc&#39;,
+ &#39;https://www.google.com?x33=1&amp;x06=1&#39;,
+ &#39;http://www.google.com:02/&#39;,
+ &#39;https://user:password@www.google.com/&#39;,
+ &#39;ftp://cispa.saarland:8080/?abc=abc&amp;def=def&amp;abc=5&#39;,
+ &#39;http://www.google.com:80/def?def=abc&#39;,
+ &#39;http://user:password@cispa.saarland/&#39;]
 </pre>
 </div>
 
@@ -12877,26 +12962,26 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>https://user:password@fuzzingbook.com:80/abc
-ftp://fuzzingbook.com:8080?x85=def&amp;x18=def
-ftp://fuzzingbook.com/def?x41=def
-https://www.google.com:80/?abc=31
-https://cispa.saarland
-ftps://user:password@cispa.saarland:7?def=abc
-http://www.google.com/x85
-http://user:password@www.google.com:00/?abc=def&amp;x08=abc
-http://cispa.saarland/x39?def=abc
-ftps://www.google.com
-http://ww.3google.cm/x85
-xttp://www.gMoglecom/x85
-fTps://7ww.Nogn.cdzm
-htp:u//wwwe.google.com/885
-ftp:/+fuzingbk.aom:880x85=df&amp;x18=def
-xttip:/&#39;wvH.goofl1e.com/x81
-ftp://fwUzzingbook.com/def?41=df
-ftp:/i/fuzzingbook.com/def?y41=def
-ftp//f!uz&gt;zijgbookncomG(odef;x41=daf
-http:/.user:1pasword@ww+w.goglecom:00/?abc=def&amp;x0:=abc
+<pre>ftps://user:password@www.google.com:80
+http://cispa.saarland/
+ftp://www.google.com:42/
+ftps://user:password@fuzzingbook.com:39?abc=abc
+https://www.google.com?x33=1&amp;x06=1
+http://www.google.com:02/
+https://user:password@www.google.com/
+ftp://cispa.saarland:8080/?abc=abc&amp;def=def&amp;abc=5
+http://www.google.com:80/def?def=abc
+http://user:password@cispa.saarland/
+Eh4tp:www.coogle.com:80/def?d%f=abc
+ftps://}ser:passwod@fuzzingbook.com:9?abc=abc
+uftp//cispa.sRaarland:808&amp;0?abc=abc&amp;def=defabc=5
+http://user:paswor9d@cispar.saarland/v
+ftp://Www.gogle.cAom:42/
+hht://userC:qassMword@cispy.csaarland/
+httx://ww.googlecom:80defde`f=ac
+htt://cispq.waarlnd/
+htFtp	://cmspa./saarna(md/
+ft:/www.google.com:42
 </pre>
 </div>
 
@@ -13110,7 +13195,7 @@ http:/.user:1pasword@ww+w.goglecom:00/?abc=def&amp;x0:=abc
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;cC&#39;, &#39;b&#39;, &#39;rQ&#39;, &#39;8&#39;, &#39;h&#39;, &#39;M&#39;, &#39;0&#39;, &#39;I&#39;, &#39;z&#39;, &#39;YI&#39;]
+<pre>[&#39;b&#39;, &#39;d&#39;, &#39;X3b&#39;, &#39;n0&#39;, &#39;7&#39;, &#39;v&#39;, &#39;z&#39;, &#39;X&#39;, &#39;g&#39;, &#39;Pfed&#39;]
 </pre>
 </div>
 
@@ -14117,7 +14202,57 @@ http:/.user:1pasword@ww+w.goglecom:00/?abc=def&amp;x0:=abc
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>As they make a great foundation for generating software tests, we use grammars again and again in this work – and they become especially valuable when we can <em>infer</em> them automatically from a given domain, dropping the need to write them manually.  But before we get there, we first have to learn how to</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>As they make a great foundation for generating software tests, we use grammars again and again in this book.  As a sneak preview, we can use grammars to <a href="ConfigurationFuzzer.html">fuzz configurations</a>:</p>
+
+<pre><code>&lt;options&gt; ::= &lt;option&gt;*
+&lt;option&gt; ::= -h | --version | -v | -d | -i | --global-config &lt;filename&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can use grammars for <a href="APIFuzzer.html">fuzzing functions and APIs</a> and <a href="GUIFuzzer.html">fuzzing graphical user interfaces</a>:</p>
+
+<pre><code>&lt;call-sequence&gt; ::= &lt;call&gt;*
+&lt;call&gt; ::= urlparse(&lt;url&gt;) | urlsplit(&lt;url&gt;)</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can assign <a href="ProbabilisticGrammarFuzzer.html">probabilities</a> and <a href="ConstraintGrammarFuzzer.html">constraints</a> to individual expansions:</p>
+
+<pre><code>&lt;term&gt;: 50% &lt;factor&gt; * &lt;term&gt; |  30% &lt;factor&gt; / &lt;term&gt; | 20% &lt;factor&gt;
+&lt;integer&gt;: &lt;digit&gt;+ { &lt;integer&gt; &gt;= 100 }</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>All these extras become especially valuable as we can</p>
+<ol>
+<li><em>infer grammars automatically</em>, dropping the need to specify them manually, and</li>
+<li><em>guide them towards specific goals</em> such as coverage or critical functions;</li>
+</ol>
+<p>which we also discuss for all techniques in this book.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To get there, however, we still have bit of homework to do.  In particular, we first have to learn how to</p>
 <ul>
 <li><a href="GrammarFuzzer.html">create an efficient grammar fuzzer</a></li>
 </ul>
@@ -14129,8 +14264,35 @@ http:/.user:1pasword@ww+w.goglecom:00/?abc=def&amp;x0:=abc
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>As one of the foundations of human language, grammars have been around as long as human language existed.  The first <em>formalization</em> of generative grammars was by Dakṣiputra Pāṇini in 350 BC [<a href="https://en.wikipedia.org/wiki/P%C4%81%E1%B9%87ini%23A%E1%B9%A3%E1%B9%AD%C4%81dhy%C4%81y%C4%AB">Dakṣiputra Pāṇini, 350 BCE.</a>].</p>
-<p>\todo{Add more. Discuss LangFuzz, CSmith, Zhendong Su's work}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>As one of the foundations of human language, grammars have been around as long as human language existed.  The first <em>formalization</em> of generative grammars was by Dakṣiputra Pāṇini in 350 BC [<a href="https://en.wikipedia.org/wiki/P%C4%81%E1%B9%87ini%23A%E1%B9%A3%E1%B9%AD%C4%81dhy%C4%81y%C4%AB">Dakṣiputra Pāṇini, 350 BCE.</a>].  As a general means to express formal languages for both data and programs, their role in computer science cannot be overstated.  The seminal work by Chomsky [<a href="https://chomsky.info/wp-content/uploads/195609-.pdf">Chomsky <em>et al</em>, 1956.</a>] introduced the central models of regular languages, context-free grammars, context-sensitive grammars, and universal grammars as they are used (and taught) in computer science as a means to specify input and programming languages aver since.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The use of grammars for <em>producing</em> test inputs goes back to Burkhardt [<a href="https://doi.org/10.1007/BF02235512">Burkhardt <em>et al</em>, 1967.</a>], to be later rediscovered and applied by Hanford [<a href="https://doi.org/10.1147/sj.94.0242">Hanford <em>et al</em>, 1970.</a>] and Purdom [<a href="https://doi.org/10.1007/BF01932308">Purdom <em>et al</em>, 1972.</a>].  The most important use of grammar testing since then has been <em>compiler testing</em>.  Actually, grammar-based testing is one important reason why compilers and Web browsers work as they should:</p>
+<ul>
+<li><p>The <a href="https://embed.cs.utah.edu/csmith/">CSmith</a> tool [<a href="https://doi.org/10.1145/1993498.1993532">Yang <em>et al</em>, 2011.</a>] specifically targets C programs, starting with a C grammar and then applying additional steps, such as referring to variables and functions defined earlier or ensuring integer and type safety.  Their authors have used it "to find and report more than 400 previously unknown compiler bugs."</p>
+</li>
+<li><p>The <a href="http://issta2016.cispa.saarland/interview-with-christian-holler/">LangFuzz</a> work [<a href="http://dl.acm.org/citation.cfm?id=2362793.2362831">Holler <em>et al</em>, 2012.</a>], which shares two authors with this book, uses a generic grammar to produce outputs, and is used day and night to generate JavaScript programs and test their interpreters; as of today, it has found more than 2,600 bugs in browsers such as Mozilla Firefox, Google Chrome, and Microsoft Edge.</p>
+</li>
+<li><p>The <a href="http://web.cs.ucdavis.edu/~su/emi-project/">EMI Project</a> [<a href="https://doi.org/10.1145/2594291.2594334">Le <em>et al</em>, 2014.</a>] uses grammars to stress-test C compilers, transforming known tests into alternative programs that should be semantically equivalent over all inputs.  Again, this has led to more than 100 bugs in C compilers being fixed.</p>
+</li>
+<li><p><a href="https://github.com/renatahodovan/grammarinator">Grammarinator</a> [<a href="https://www.researchgate.net/publication/328510752_Grammarinator_a_grammar-based_open_source_fuzzer">Hodován <em>et al</em>, 2018.</a>] is an open-source grammar fuzzer (written in Python!), using the popular ANTLR format as grammar specification.  Like LangFuzz, it uses the grammar for both parsing and producing, and has found more than 100 issues in the <em>JerryScript</em> lightweight JavaScript engine and an associated platform.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Compilers and Web browsers, of course, are not only domains where grammars are needed for testing, but also domains where grammars are well-known.  Our claim in this book is that grammars can be used to generate almost <em>any</em> input, and our aim is to empower you to do precisely that.</p>
 </div>
 </div>
 </div>
@@ -14300,7 +14462,7 @@ http:/.user:1pasword@ww+w.goglecom:00/?abc=def&amp;x0:=abc
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-    <span class="n">alt_expression_grammar</span><span class="p">()</span>
+    <span class="n">expression_grammar_fn</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -14312,9 +14474,11 @@ http:/.user:1pasword@ww+w.goglecom:00/?abc=def&amp;x0:=abc
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-74-2307bcdfd05a&gt;&#34;, line 2, in &lt;module&gt;
-    alt_expression_grammar()
-NameError: name &#39;alt_expression_grammar&#39; is not defined (expected)
+  File &#34;&lt;ipython-input-76-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
+    expression_grammar_fn()
+  File &#34;&lt;ipython-input-75-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
+    expr = &#34;&lt;term&gt; + &lt;expr&gt;&#34; | &#34;&lt;term&gt; - &lt;expr&gt;&#34;
+TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (expected)
 </pre>
 </div>
 
@@ -14493,7 +14657,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-1-(a):-One-Single-Function">Part 1 (a): One Single Function<a class="anchor-link" href="#Part-1-(a):-One-Single-Function">&#182;</a></h4><p>Write a single function <code>define_grammar(fn)</code> that takes a grammar defined as function (such as <code>expression_grammar_fn</code>) and returns a regular grammar.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-1-(a):-One-Single-Function">Part 1 (a): One Single Function<a class="anchor-link" href="#Part-1-(a):-One-Single-Function">&#182;</a></h4><p>Write a single function <code>define_grammar(fn)</code> that takes a grammar defined as function (such as <code>expression_grammar_fn()</code>) and returns a regular grammar.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/Grammars.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -14513,7 +14677,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We note that the grammar representation we designed previously does not allow simple generation of alternatives such as <code>srange</code> and <code>crange</code>. Further, one may find the string representation of expressions limiting. Turns out, it is simple to extend our grammar definition to support grammars such as below:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We note that the grammar representation we designed previously does not allow simple generation of alternatives such as <code>srange()</code> and <code>crange()</code>. Further, one may find the string representation of expressions limiting.  It turns out that it is simple to extend our grammar definition to support grammars such as below:</p>
 </div>
 </div>
 </div>
@@ -14527,13 +14691,37 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_name</span><span class="p">(</span><span class="n">o</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">id</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="k">else</span> <span class="n">o</span><span class="o">.</span><span class="n">s</span>
+</pre></div>
 
-<span class="k">def</span> <span class="nf">define_expr</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_expr</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">BinOp</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Add</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">define_expr</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">left</span><span class="p">),</span> <span class="n">define_name</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">right</span><span class="p">))</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">define_name</span><span class="p">(</span><span class="n">op</span><span class="p">),)</span>
+</pre></div>
 
-<span class="k">def</span> <span class="nf">define_ex_grammar</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_ex_grammar</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">define_grammar</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">define_expr</span><span class="p">)</span>
 </pre></div>
 
@@ -14583,7 +14771,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We note that we have not enabled <code>srange</code> or <code>crange</code> in the above grammar. How would you go about adding these? (<em>Hint:</em> wrap <code>define_expr</code> to look for <code>ast.Call</code>)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We note that we have not enabled <code>srange()</code> or <code>crange()</code> in the above grammar. How would you go about adding these? (<em>Hint:</em> wrap <code>define_expr()</code> to look for <code>ast.Call</code>)</p>
 </div>
 </div>
 </div>
@@ -14631,7 +14819,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-11-10 22:01:59+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-11-13 18:19:42+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14647,7 +14835,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2018-11-10 22:01:59+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2018-11-13 18:19:42+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Grammars,
@@ -14657,9 +14845,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Grammars.html}},
-    note = {Retrieved 2018-11-10 22:01:59+01:00},
+    note = {Retrieved 2018-11-13 18:19:42+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Grammars.html},
-    urldate = {2018-11-10 22:01:59+01:00}
+    urldate = {2018-11-13 18:19:42+01:00}
 }
 </pre>
 </div>

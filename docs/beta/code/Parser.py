@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-11 21:56:56+01:00
+# Last change: 2018-11-18 15:05:04+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -182,8 +182,11 @@ if __name__ == "__main__":
 
 
 class Parser(object):
-    def __init__(self, grammar, start_symbol=START_SYMBOL, log=False):
-        self.start_symbol, self._grammar, self.log = start_symbol, grammar, log
+    def __init__(self, grammar, **kwargs):
+        self._grammar = grammar
+        self.start_symbol=kwargs.get('start_symbol') or START_SYMBOL 
+        self.log = kwargs.get('log') or False
+        self.tokens = kwargs.get('tokens') or set()
 
     def grammar(self):
         return self._grammar
@@ -196,7 +199,14 @@ class Parser(object):
         cursor, forest = self.parse_prefix(text)
         if cursor < len(text):
             raise SyntaxError("at " + repr(text[cursor:]))
-        return forest
+        return [self.prune_tree(tree) for tree in forest]
+
+    def prune_tree(self, tree):
+        name, children = tree
+        if name in self.tokens:
+            return (name, [(all_terminals(tree), [])])
+        else:
+            return (name, [self.prune_tree(c) for c in children]) 
 
 # ## Parsing Expression Grammars
 
@@ -264,8 +274,11 @@ if __name__ == "__main__":
 
 
 class Parser(Parser):
-    def __init__(self, grammar, start_symbol=START_SYMBOL, log=False):
-        self.start_symbol, self._grammar, self.log = start_symbol, grammar, log
+    def __init__(self, grammar, **kwargs):
+        self._grammar = grammar
+        self.start_symbol=kwargs.get('start_symbol') or START_SYMBOL 
+        self.log = kwargs.get('log') or False
+        self.tokens = kwargs.get('tokens') or set()        
         self.cgrammar = canonical(grammar)
 
 # #### The Parser
@@ -384,36 +397,12 @@ VAR_GRAMMAR = {
     list(string.digits),
 }
 
-if __name__ == "__main__":
-    mystring = 'def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)'
-    parser = PEGParser(VAR_GRAMMAR)
-    for tree in parser.parse(mystring):
-        display_tree(tree)
-
-
 VAR_TOKENS = {'<def>', '<number>', '<identifier>'}
 
-class LangFuzzer(Fuzzer):
-    def __init__(self, tokens, parser):
-        self.tokens, self.parser = tokens, parser
-
-    def parse(self, strings):
-        trees = []
-        for string in strings:
-            for tree in self.parser.parse(string):
-                trees.append(self.prune_tree(tree))
-        return trees
-
-    def prune_tree(self, tree):
-        name, children = tree
-        if name in self.tokens:
-            return (name, [(all_terminals(tree), [])])
-        else:
-            return (name, [self.prune_tree(c) for c in children])
-
 if __name__ == "__main__":
-    tf = LangFuzzer(VAR_TOKENS, PEGParser(VAR_GRAMMAR))
-    for tree in tf.parse([mystring]):
+    mystring = 'def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)'
+    parser = PEGParser(VAR_GRAMMAR, tokens=VAR_TOKENS)
+    for tree in parser.parse(mystring):
         display_tree(tree)
 
 
@@ -429,9 +418,9 @@ if __name__ == "__main__":
     ]
 
 
-class LangFuzzer(LangFuzzer):
-    def __init__(self, tokens, parser):
-        self.tokens, self.parser = tokens, parser
+class LangFuzzer(Fuzzer):
+    def __init__(self, parser):
+        self.parser = parser
         self.fragments = {k: [] for k in self.parser.cgrammar}
 
     def traverse_tree(self, node):
@@ -454,7 +443,7 @@ class LangFuzzer(LangFuzzer):
         self.trees = []
         for string in strings:
             for tree in self.parser.parse(string):
-                tree, nodes = self.traverse_tree(self.prune_tree(tree))
+                tree, nodes = self.traverse_tree(tree)
                 self.trees.append((tree, nodes))
                 for node in nodes:
                     symbol = nodes[node][0]
@@ -463,7 +452,7 @@ class LangFuzzer(LangFuzzer):
         return self.fragments
 
 if __name__ == "__main__":
-    lf = LangFuzzer(VAR_TOKENS, PEGParser(VAR_GRAMMAR))
+    lf = LangFuzzer(PEGParser(VAR_GRAMMAR, tokens=VAR_TOKENS))
     fragments = lf.fragment(mystrings)
     for key in fragments:
         print("%s: %d" % (key, len(fragments[key])))
@@ -473,8 +462,8 @@ import random
 
 
 class LangFuzzer(LangFuzzer):
-    def __init__(self, tokens, parser, strings):
-        self.tokens, self.parser = tokens, parser
+    def __init__(self, parser, strings):
+        self.parser = parser
         self.fragments = {k: [] for k in self.parser.cgrammar}
         self.fragment(strings)
     
@@ -500,7 +489,7 @@ class LangFuzzer(LangFuzzer):
         return all_terminals(modified)
 
 if __name__ == "__main__":
-    lf = LangFuzzer(VAR_TOKENS, PEGParser(VAR_GRAMMAR), mystrings)
+    lf = LangFuzzer(PEGParser(VAR_GRAMMAR, tokens=VAR_TOKENS), mystrings)
     for i in range(100):
         print(lf.fuzz())
 
@@ -531,7 +520,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    peg = PEGParser(PEG_SURPRISE, '<A>')
+    peg = PEGParser(PEG_SURPRISE, start_symbol='<A>')
     for s in strings:
         with ExpectError():
             for tree in peg.parse(s):
@@ -671,8 +660,8 @@ if __name__ == "__main__":
 
 
 class NearleyParser(Parser):
-    def __init__(self, grammar, start_symbol=START_SYMBOL, log=False):
-        super().__init__(grammar, start_symbol, log)
+    def __init__(self, grammar, **kwargs):
+        super().__init__(grammar, **kwargs)
         self.cgrammar = canonical(grammar, letters=True)
 
 class NearleyParser(NearleyParser):
@@ -1192,7 +1181,7 @@ class PackratParser(Parser):
 
 if __name__ == "__main__":
     mystring = "1+(2*3)"
-    for tree in PackratParser(EXPR_GRAMMAR_NS, START_SYMBOL).parse(mystring):
+    for tree in PackratParser(EXPR_GRAMMAR_NS).parse(mystring):
         assert all_terminals(tree) == mystring
         display_tree(tree)
 
@@ -1327,6 +1316,19 @@ if __name__ == "__main__":
     result = LeoParser(LR_GRAMMAR, log=True).parse('aaaaaa')
     result
 
+
+RR_GRAMMAR = {
+    '<start>': ['<A>'],
+    '<A>': ['ab<A>', ''],
+}
+mystring = 'abababab'
+
+RR_GRAMMAR = {
+    '<start>': ['<A>'],
+    '<A>': ['ab<B>', ''],
+    '<B>': ['<A>'],
+}
+mystring = 'abababab'
 
 # ### Exercise 6 _First set of a nonterminal_
 
@@ -1523,8 +1525,8 @@ if __name__ == "__main__":
 
 
 class LangFuzzer2(LangFuzzer):
-    def __init__(self, tokens, parser, strings):
-        super().__init__(tokens, parser, strings)
+    def __init__(self, parser, strings):
+        super().__init__(parser, strings)
         self.gfuzz = GrammarFuzzer(parser.grammar())
 
     def check_diversity(self, pool):
@@ -1559,8 +1561,8 @@ class LangFuzzer2(LangFuzzer):
         return all_terminals(modified)
 
 if __name__ == "__main__":
-    parser = EarleyParser(VAR_GRAMMAR)
-    lf = LangFuzzer2(VAR_TOKENS, parser, mystrings)
+    parser = EarleyParser(VAR_GRAMMAR, tokens=VAR_TOKENS)
+    lf = LangFuzzer2(parser, mystrings)
     for i in range(100):
         print(lf.fuzz())
 

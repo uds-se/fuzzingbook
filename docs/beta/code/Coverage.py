@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2018-11-09 10:16:13+01:00
+# Last change: 2018-11-13 11:03:52+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -139,7 +139,7 @@ import sys
 def cgi_decode_traced(s):
     global coverage
     coverage = []
-    sys.settrace(traceit) # Turn on
+    sys.settrace(traceit)  # Turn on
     cgi_decode(s)
     sys.settrace(None)    # Turn off
 
@@ -361,7 +361,7 @@ if __name__ == "__main__":
     plt.plot(cumulative_coverage)
     plt.title('Coverage of cgi_decode() with random inputs')
     plt.xlabel('# of inputs')
-    plt.ylabel('lines covered');
+    plt.ylabel('lines covered')
 
 
 if __name__ == "__main__":
@@ -383,9 +383,9 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     plt.plot(average_coverage)
-    plt.title('Average coverage of cgi_decode() with random inputs');
+    plt.title('Average coverage of cgi_decode() with random inputs')
     plt.xlabel('# of inputs')
-    plt.ylabel('lines covered');
+    plt.ylabel('lines covered')
 
 
 # ## Getting Coverage from External Programs
@@ -806,7 +806,7 @@ if __name__ == "__main__":
     plt.plot(cumulative_branch_coverage)
     plt.title('Branch coverage of cgi_decode() with random inputs')
     plt.xlabel('# of inputs')
-    plt.ylabel('line pairs covered');
+    plt.ylabel('line pairs covered')
 
 
 if __name__ == "__main__":
@@ -850,7 +850,7 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     plt.plot(average_coverage)
-    plt.title('Average branch coverage of cgi_decode() with random inputs');
+    plt.title('Average branch coverage of cgi_decode() with random inputs')
     plt.xlabel('# of inputs')
-    plt.ylabel('line pairs covered');
+    plt.ylabel('line pairs covered')
 

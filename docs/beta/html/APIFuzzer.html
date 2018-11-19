@@ -11869,7 +11869,7 @@ MathJax.Hub.Config({
 <li><a href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
 <li><a href="Coverage.html">Getting Coverage</a></li>
 <li><a href="MutationFuzzer.html">Mutation-Based Fuzzing</a></li>
-<li><a href="Grammars.html">Fuzzing with Grammars&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
+<li><a href="Grammars.html">Fuzzing with Grammars</a></li>
 <li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 <li><a href="GrammarCoverageFuzzer.html">Grammar Coverage&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 <li><a href="ConfigurationFuzzer.html">Testing Configurations&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
@@ -11878,6 +11878,7 @@ MathJax.Hub.Config({
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Carver.html">Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="APIFuzzer.html" class="this_page">Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="WebFuzzer.html">Web GUI Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="GrammarMiner.html">Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 
            <li><a href="https://www.fuzzingbook.org/beta/#News" class="more_coming">More Chapters Coming!</a></li>
@@ -11887,6 +11888,7 @@ MathJax.Hub.Config({
         <ul>
            <li><a href="#Fuzzing-a-Function">Fuzzing a Function</a></li>
 <li><a href="#Mining-API-Grammars">Mining API Grammars</a></li>
+<li><a href="#Fuzzing-Web-Functions">Fuzzing Web Functions</a></li>
 <li><a href="#Lessons-Learned">Lessons Learned</a></li>
 <li><a href="#Next-Steps">Next Steps</a></li>
 <li><a href="#Background">Background</a></li>
@@ -12656,7 +12658,7 @@ void test() {
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">POWER_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;power(&lt;x&gt;, &lt;y&gt;)&quot;</span> <span class="p">],</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;power(&lt;x&gt;, &lt;y&gt;)&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;x&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;y&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">]</span>
 <span class="p">}</span>
@@ -12797,9 +12799,9 @@ void test() {
 
     <span class="k">def</span> <span class="nf">initial_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span>
-               <span class="p">{</span> <span class="n">START_SYMBOL</span><span class="p">:</span> <span class="p">[</span> <span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">],</span> 
-                 <span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">:</span> <span class="p">[]</span>
-               <span class="p">})</span>
+            <span class="p">{</span><span class="n">START_SYMBOL</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">:</span> <span class="p">[]</span>
+             <span class="p">})</span>
 </pre></div>
 
 </div>
@@ -12923,7 +12925,8 @@ void test() {
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">power_carver</span><span class="p">)</span>
-<span class="n">var_grammar</span><span class="p">,</span> <span class="n">var_symbols</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_arguments_grammar</span><span class="p">(</span><span class="s2">&quot;power&quot;</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">initial_grammar</span><span class="p">)</span>
+<span class="n">var_grammar</span><span class="p">,</span> <span class="n">var_symbols</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_arguments_grammar</span><span class="p">(</span>
+    <span class="s2">&quot;power&quot;</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">initial_grammar</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12948,7 +12951,7 @@ void test() {
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;], &#39;&lt;power-y&gt;&#39;: [&#39;4&#39;, &#39;2&#39;]}
+<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;1&#39;, &#39;3&#39;], &#39;&lt;power-y&gt;&#39;: [&#39;4&#39;, &#39;2&#39;]}
 </pre>
 </div>
 
@@ -13011,16 +13014,19 @@ void test() {
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>
 
-        <span class="n">var_grammar</span><span class="p">,</span> <span class="n">var_symbols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mine_arguments_grammar</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+        <span class="n">var_grammar</span><span class="p">,</span> <span class="n">var_symbols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mine_arguments_grammar</span><span class="p">(</span>
+            <span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
 
         <span class="n">function_grammar</span> <span class="o">=</span> <span class="n">var_grammar</span>
         <span class="n">function_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function_symbol</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">var_symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;-self&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Method call</span>
-            <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span> <span class="n">var_symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span> <span class="p">]</span>
+            <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">var_symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span> <span class="p">]</span>
+            <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">function_symbol</span><span class="p">,</span> <span class="s2">&quot;::=&quot;</span><span class="p">,</span> <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">])</span>
@@ -13040,7 +13046,8 @@ void test() {
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">power_carver</span><span class="p">)</span>
-<span class="n">function_grammar</span><span class="p">,</span> <span class="n">function_symbol</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_function_grammar</span><span class="p">(</span><span class="s2">&quot;power&quot;</span><span class="p">,</span> <span class="n">initial_grammar</span><span class="p">)</span>
+<span class="n">function_grammar</span><span class="p">,</span> <span class="n">function_symbol</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_function_grammar</span><span class="p">(</span>
+    <span class="s2">&quot;power&quot;</span><span class="p">,</span> <span class="n">initial_grammar</span><span class="p">)</span>
 <span class="n">function_grammar</span>
 </pre></div>
 
@@ -13052,7 +13059,7 @@ void test() {
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;],
+<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;1&#39;, &#39;3&#39;],
  &#39;&lt;power-y&gt;&#39;: [&#39;4&#39;, &#39;2&#39;],
  &#39;&lt;power&gt;&#39;: [&#39;power(&lt;power-x&gt;, &lt;power-y&gt;)&#39;]}
 </pre>
@@ -13139,11 +13146,12 @@ void test() {
 
         <span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="n">fn_list</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">function_list</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)):</span>
-                <span class="k">continue</span> <span class="c1"># Internal function</span>
+                <span class="k">continue</span>  <span class="c1"># Internal function</span>
 
             <span class="c1"># Ignore errors with mined functions</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">function_grammar</span><span class="p">,</span> <span class="n">function_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mine_function_grammar</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+                <span class="n">function_grammar</span><span class="p">,</span> <span class="n">function_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mine_function_grammar</span><span class="p">(</span>
+                    <span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">function_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span>
@@ -13191,7 +13199,7 @@ void test() {
 <div class="output_text output_subarea output_execute_result">
 <pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;call&gt;&#39;],
  &#39;&lt;call&gt;&#39;: [&#39;&lt;power&gt;&#39;],
- &#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;],
+ &#39;&lt;power-x&gt;&#39;: [&#39;1&#39;, &#39;3&#39;],
  &#39;&lt;power-y&gt;&#39;: [&#39;4&#39;, &#39;2&#39;],
  &#39;&lt;power&gt;&#39;: [&#39;power(&lt;power-x&gt;, &lt;power-y&gt;)&#39;]}
 </pre>
@@ -13226,7 +13234,7 @@ void test() {
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;power(3, 4)&#39;, &#39;power(1, 2)&#39;, &#39;power(3, 2)&#39;, &#39;power(3, 2)&#39;, &#39;power(3, 4)&#39;]
+<pre>[&#39;power(1, 4)&#39;, &#39;power(3, 2)&#39;, &#39;power(1, 2)&#39;, &#39;power(1, 2)&#39;, &#39;power(1, 4)&#39;]
 </pre>
 </div>
 
@@ -13244,7 +13252,7 @@ void test() {
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Fuzzing-Web-Functions">Fuzzing Web Functions<a class="anchor-link" href="#Fuzzing-Web-Functions">&#182;</a></h3><p>Let us now apply our grammar miner on a larger API – the <code>urlparse</code> API we already encountered during carving.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Fuzzing-Web-Functions">Fuzzing Web Functions<a class="anchor-link" href="#Fuzzing-Web-Functions">&#182;</a></h2><p>Let us now apply our grammar miner on a larger API – the <code>urlparse</code> API we already encountered during carving.</p>
 </div>
 </div>
 </div>
@@ -13330,7 +13338,7 @@ void test() {
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[&#39;&lt;webbrowser&gt;&#39;, &#39;&lt;urlopen&gt;&#39;, &#39;&lt;build_opener&gt;&#39;, &#39;&lt;getproxies&gt;&#39;, &#39;&lt;getproxies_environment&gt;&#39;, &#39;&lt;items&gt;&#39;, &#39;&lt;encode&gt;&#39;, &#39;&lt;getproxies_macosx_sysconf&gt;&#39;, &#39;&lt;add_handler&gt;&#39;, &#39;&lt;add_parent&gt;&#39;, &#39;&lt;open&gt;&#39;, &#39;&lt;full_url&gt;&#39;, &#39;&lt;unwrap&gt;&#39;, &#39;&lt;splittag&gt;&#39;, &#39;&lt;splittype&gt;&#39;, &#39;&lt;compile&gt;&#39;, &#39;&lt;isstring&gt;&#39;, &#39;&lt;parse&gt;&#39;, &#39;&lt;tell&gt;&#39;, &#39;&lt;get&gt;&#39;, &#39;&lt;match&gt;&#39;, &#39;&lt;opengroup&gt;&#39;, &#39;&lt;groups&gt;&#39;, &#39;&lt;append&gt;&#39;, &#39;&lt;closegroup&gt;&#39;, &#39;&lt;getwidth&gt;&#39;, &#39;&lt;fix_flags&gt;&#39;, &#39;&lt;splithost&gt;&#39;, &#39;&lt;unquote&gt;&#39;, &#39;&lt;data&gt;&#39;, &#39;&lt;request_host&gt;&#39;, &#39;&lt;urlparse&gt;&#39;, &#39;&lt;urlsplit&gt;&#39;, &#39;&lt;do_request_&gt;&#39;, &#39;&lt;has_proxy&gt;&#39;, &#39;&lt;has_header&gt;&#39;, &#39;&lt;add_unredirected_header&gt;&#39;, &#39;&lt;http_open&gt;&#39;, &#39;&lt;do_open&gt;&#39;, &#39;&lt;get_method&gt;&#39;, &#39;&lt;create_connection&gt;&#39;, &#39;&lt;getaddrinfo&gt;&#39;, &#39;&lt;search_function&gt;&#39;, &#39;&lt;normalize_encoding&gt;&#39;, &#39;&lt;getregentry&gt;&#39;, &#39;&lt;readable&gt;&#39;, &#39;&lt;begin&gt;&#39;, &#39;&lt;parsestr&gt;&#39;, &#39;&lt;push&gt;&#39;, &#39;&lt;pushlines&gt;&#39;, &#39;&lt;readline&gt;&#39;, &#39;&lt;header_source_parse&gt;&#39;, &#39;&lt;set_raw&gt;&#39;, &#39;&lt;get_content_type&gt;&#39;, &#39;&lt;header_fetch_parse&gt;&#39;, &#39;&lt;get_content_maintype&gt;&#39;, &#39;&lt;set_payload&gt;&#39;, &#39;&lt;get_full_url&gt;&#39;, &#39;&lt;http_response&gt;&#39;, &#39;&lt;info&gt;&#39;, &#39;&lt;error&gt;&#39;, &#39;&lt;http_error_302&gt;&#39;, &#39;&lt;urlunparse&gt;&#39;, &#39;&lt;urlunsplit&gt;&#39;, &#39;&lt;quote&gt;&#39;, &#39;&lt;quote_from_bytes&gt;&#39;, &#39;&lt;urljoin&gt;&#39;, &#39;&lt;redirect_request&gt;&#39;, &#39;&lt;flush&gt;&#39;, &#39;&lt;https_open&gt;&#39;, &#39;&lt;match_hostname&gt;&#39;, &#39;&lt;ip_address&gt;&#39;, &#39;&lt;getcode&gt;&#39;]
+<pre>[&#39;&lt;webbrowser&gt;&#39;, &#39;&lt;urlopen&gt;&#39;, &#39;&lt;build_opener&gt;&#39;, &#39;&lt;getproxies&gt;&#39;, &#39;&lt;getproxies_environment&gt;&#39;, &#39;&lt;encode&gt;&#39;, &#39;&lt;getproxies_macosx_sysconf&gt;&#39;, &#39;&lt;add_handler&gt;&#39;, &#39;&lt;add_parent&gt;&#39;, &#39;&lt;open&gt;&#39;, &#39;&lt;full_url&gt;&#39;, &#39;&lt;unwrap&gt;&#39;, &#39;&lt;splittag&gt;&#39;, &#39;&lt;splittype&gt;&#39;, &#39;&lt;compile&gt;&#39;, &#39;&lt;isstring&gt;&#39;, &#39;&lt;parse&gt;&#39;, &#39;&lt;tell&gt;&#39;, &#39;&lt;get&gt;&#39;, &#39;&lt;match&gt;&#39;, &#39;&lt;opengroup&gt;&#39;, &#39;&lt;groups&gt;&#39;, &#39;&lt;append&gt;&#39;, &#39;&lt;closegroup&gt;&#39;, &#39;&lt;getwidth&gt;&#39;, &#39;&lt;fix_flags&gt;&#39;, &#39;&lt;splithost&gt;&#39;, &#39;&lt;unquote&gt;&#39;, &#39;&lt;data&gt;&#39;, &#39;&lt;request_host&gt;&#39;, &#39;&lt;urlparse&gt;&#39;, &#39;&lt;urlsplit&gt;&#39;, &#39;&lt;do_request_&gt;&#39;, &#39;&lt;has_proxy&gt;&#39;, &#39;&lt;has_header&gt;&#39;, &#39;&lt;add_unredirected_header&gt;&#39;, &#39;&lt;http_open&gt;&#39;, &#39;&lt;do_open&gt;&#39;, &#39;&lt;get_method&gt;&#39;, &#39;&lt;create_connection&gt;&#39;, &#39;&lt;getaddrinfo&gt;&#39;, &#39;&lt;search_function&gt;&#39;, &#39;&lt;normalize_encoding&gt;&#39;, &#39;&lt;getregentry&gt;&#39;, &#39;&lt;readable&gt;&#39;, &#39;&lt;begin&gt;&#39;, &#39;&lt;parsestr&gt;&#39;, &#39;&lt;push&gt;&#39;, &#39;&lt;pushlines&gt;&#39;, &#39;&lt;readline&gt;&#39;, &#39;&lt;header_source_parse&gt;&#39;, &#39;&lt;set_raw&gt;&#39;, &#39;&lt;get_content_type&gt;&#39;, &#39;&lt;header_fetch_parse&gt;&#39;, &#39;&lt;get_content_maintype&gt;&#39;, &#39;&lt;set_payload&gt;&#39;, &#39;&lt;get_full_url&gt;&#39;, &#39;&lt;http_response&gt;&#39;, &#39;&lt;info&gt;&#39;, &#39;&lt;error&gt;&#39;, &#39;&lt;http_error_302&gt;&#39;, &#39;&lt;urlunparse&gt;&#39;, &#39;&lt;urlunsplit&gt;&#39;, &#39;&lt;quote&gt;&#39;, &#39;&lt;quote_from_bytes&gt;&#39;, &#39;&lt;urljoin&gt;&#39;, &#39;&lt;redirect_request&gt;&#39;, &#39;&lt;flush&gt;&#39;, &#39;&lt;https_open&gt;&#39;, &#39;&lt;match_hostname&gt;&#39;, &#39;&lt;ip_address&gt;&#39;, &#39;&lt;getcode&gt;&#39;]
 </pre>
 </div>
 
@@ -13395,8 +13403,8 @@ void test() {
 
 <div class="output_text output_subarea output_execute_result">
 <pre>[&#34;&#39;https://www.example.com&#39;&#34;,
- &#34;&#39;http://www.fuzzingbook.org&#39;&#34;,
- &#34;&#39;https://www.fuzzingbook.org/&#39;&#34;]
+ &#34;&#39;https://www.fuzzingbook.org/&#39;&#34;,
+ &#34;&#39;http://www.fuzzingbook.org&#39;&#34;]
 </pre>
 </div>
 
@@ -13449,7 +13457,8 @@ void test() {
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlsplit_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">webbrowser_grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;urlsplit&gt;&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlsplit_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span>
+    <span class="n">webbrowser_grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;urlsplit&gt;&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">urlsplit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
 </pre></div>
@@ -13463,10 +13472,10 @@ void test() {
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>urlsplit(&#39;https://www.example.com&#39;, &#39;&#39;, True)
-urlsplit(&#39;http://www.fuzzingbook.org&#39;, &#39;http&#39;, True)
-urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
+urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;http&#39;, True)
 urlsplit(&#39;http://www.fuzzingbook.org&#39;, &#39;&#39;, True)
 urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
+urlsplit(&#39;http://www.fuzzingbook.org&#39;, &#39;&#39;, True)
 </pre>
 </div>
 
@@ -13528,7 +13537,7 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>2.4459994165226817e-05
+<pre>1.646499731577933e-05
 </pre>
 </div>
 
@@ -13553,7 +13562,7 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>2.646669566005585
+<pre>0.08834425899840426
 </pre>
 </div>
 
@@ -13576,7 +13585,7 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>108204.01460962664
+<pre>5365.579921093519
 </pre>
 </div>
 
@@ -13678,7 +13687,7 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/APIFuzzer.ipynb" target=_blank)>Last change: 2018-11-10 21:23:46+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/APIFuzzer.ipynb" target=_blank)>Last change: 2018-11-13 11:05:00+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13694,7 +13703,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">Fuzzing APIs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">https://www.fuzzingbook.org/beta/html/APIFuzzer.html</a>.  Retrieved 2018-11-10 21:23:46+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">Fuzzing APIs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">https://www.fuzzingbook.org/beta/html/APIFuzzer.html</a>.  Retrieved 2018-11-13 11:05:00+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:APIFuzzer,
@@ -13704,9 +13713,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/APIFuzzer.html}},
-    note = {Retrieved 2018-11-10 21:23:46+01:00},
+    note = {Retrieved 2018-11-13 11:05:00+01:00},
     url = {https://www.fuzzingbook.org/beta/html/APIFuzzer.html},
-    urldate = {2018-11-10 21:23:46+01:00}
+    urldate = {2018-11-13 11:05:00+01:00}
 }
 </pre>
 </div>

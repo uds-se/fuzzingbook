@@ -595,9 +595,9 @@ run: check-import check-code
 	
 # Todo checks
 check-todo todo:
-	@grep '\\todo' $(PUBLIC_SOURCES); \
+	@grep '\\todo' $(PUBLIC_SOURCES) $(READY_SOURCES); \
 	if [ $$? = 0 ]; then exit 1; else \
-	echo "No todos in $(PUBLIC_CHAPTERS:%.ipynb=%)"; exit 0; fi
+	echo "No todos in $(PUBLIC_CHAPTERS:%.ipynb=%) $(READY_CHAPTERS:%.ipynb=%)"; exit 0; fi
 
 # Spell checks
 NBSPELLCHECK = utils/nbspellcheck.py
@@ -745,7 +745,7 @@ endif
 # Table of contents
 .PHONY: toc
 toc: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb
-$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py Makefile
+$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py $(CHAPTERS_MAKEFILE)
 	$(RM) $@
 	$(PYTHON) utils/nbtoc.py \
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \

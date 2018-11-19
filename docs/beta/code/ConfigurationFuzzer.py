@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2018-11-10 13:18:18+01:00
+# Last change: 2018-11-11 22:50:14+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -813,6 +813,14 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     print('\n## Background')
+
+
+
+
+# ## Exercises
+
+if __name__ == "__main__":
+    print('\n## Exercises')
 
 
 
