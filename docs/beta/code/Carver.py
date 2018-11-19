@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2018-11-08 21:09:35+01:00
+# Last change: 2018-11-18 14:40:05+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -54,7 +54,7 @@ def webbrowser(url):
     response = urllib.request.urlopen(url)
     if response.getcode() == 200:
         contents = response.read()
-    return contents
+    return contents.decode("utf8")
 
 if __package__ is None or __package__ == "":
     from Timer import Timer

@@ -19612,8 +19612,8 @@ For example, say we have states as below.</p>
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;E&gt;&#39;}
-E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
+<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;S&gt;&#39;}
+E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 </pre>
 </div>
 </div>
@@ -20207,8 +20207,14 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Further-Information">Further Information<a class="anchor-link" href="#Further-Information">&#182;</a></h2><ul>
-<li>Parsing with arbitrary context free grammars is reducible to boolean matrix multiplication~\cite{Valiant1975} (and the reverse~\cite{Lee2002}) which is at present bounded by $O(2^{23728639}$) ~\cite{LeGall2014}</li>
+<li><em>LL</em> and <em>LR</em> are the main traditions in parsing, where <em>LL</em> (left-to-right, leftmost derivation) represents a top-down approach, and LR (left-to-right, rightmost derivation) represents a bottom up approach (another way to look at it is that LL parsers compute the derivation tree incrementally in pre-order while LR parsers compute the derivation tree in post-order~\cite{pingali2015graphical}). A grammar is LL(k) if it can be parsed by an LL parser with k lookahead tokens. Similarly LR(k) corresponds to an LR parser with k lookahead tokens. LL(*) (used by ANTLR) on the other hand is a grammar representation that uses regular expression like predicates (similar to advanced PEGs -- see Exercise 7.3) rather than a fixed lookahead. Both LL(k) and LR(k) grammars have $O(n)$ parsers.</li>
+<li>Pingali et al.~\cite{pingali2015graphical} presents a unified parsing theory that unites LL and LR parsing. They show that LL and LR parsers can be considered optimizations of Earley parsing.</li>
+<li>In terms of representable languages, LL(k) $\subset$ LL(k+1) and LL(k) $\subset$ LR(1). All deterministic context free languages have an LR(1) grammar.</li>
+<li>There exist Context Free Languages with strings that can not be unambiguously parsed (called <em>inherently ambiguous languages</em>) ~\cite{ogden1968helpful}. Hence, there exist CFL for which one can't provide an LR grammar.</li>
+<li>The other main parsing algorithms for CFG are GLL~\cite{scott2010gll}, GLR~\cite{tomita1987efficient,tomita2012generalized}, and CYK~\cite{grune1990parsing}.</li>
+<li>Parsing with arbitrary Context Free Grammars is reducible to boolean matrix multiplication~\cite{Valiant1975} (and the reverse~\cite{Lee2002}) which is at present bounded by $O(2^{23728639}$) ~\cite{LeGall2014}.</li>
 <li>The actual class of languages that is expressible in PEG is currently unknown. In particular, we know that PEGs can express certain languages such as $a^n b^n c^n$. However, we do not know if there exist Context-Free languages that are not expressible with PEGs.</li>
+<li>In Section 2.3, we provided an instance of counter-intuitive PEG grammar. While important for our purposes (we use grammars for generation of inputs) this is not a criticism of parsing with PEGs. PEG focuses on writing grammars for a language, and not necessarily in interpreting what language an arbitrary PEG might yield. Given a Context-Free Language to parse, it is almost always possible to write a grammar for it in PEG, and given that 1) a PEG can parse any string in $O(n)$ time, and 2) at present we know of no CFL that can't be expressed as a PEG, and 3) compared with <em>LR</em> grammars, a PEG is often more intuitive because it allows top-down interpretation, when writing a parser for a language, PEGs should be the first choice.</li>
 </ul>
 
 </div>
@@ -20988,23 +20994,23 @@ a chart[6]
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;)&#39;: {&#39;)&#39;},
+<pre>{&#39;+&#39;: {&#39;+&#39;},
  &#39;3&#39;: {&#39;3&#39;},
- &#39;/&#39;: {&#39;/&#39;},
  &#39;(&#39;: {&#39;(&#39;},
- &#39;0&#39;: {&#39;0&#39;},
- &#39;1&#39;: {&#39;1&#39;},
- &#39;2&#39;: {&#39;2&#39;},
  &#39;4&#39;: {&#39;4&#39;},
- &#39;*&#39;: {&#39;*&#39;},
- &#39;6&#39;: {&#39;6&#39;},
- &#39;8&#39;: {&#39;8&#39;},
- &#39;9&#39;: {&#39;9&#39;},
  &#39;-&#39;: {&#39;-&#39;},
- &#39;+&#39;: {&#39;+&#39;},
- &#39;.&#39;: {&#39;.&#39;},
- &#39;7&#39;: {&#39;7&#39;},
  &#39;5&#39;: {&#39;5&#39;},
+ &#39;7&#39;: {&#39;7&#39;},
+ &#39;2&#39;: {&#39;2&#39;},
+ &#39;)&#39;: {&#39;)&#39;},
+ &#39;0&#39;: {&#39;0&#39;},
+ &#39;8&#39;: {&#39;8&#39;},
+ &#39;/&#39;: {&#39;/&#39;},
+ &#39;1&#39;: {&#39;1&#39;},
+ &#39;.&#39;: {&#39;.&#39;},
+ &#39;6&#39;: {&#39;6&#39;},
+ &#39;*&#39;: {&#39;*&#39;},
+ &#39;9&#39;: {&#39;9&#39;},
  &#39;&lt;start&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
  &#39;&lt;expr&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
  &#39;&lt;term&gt;&#39;: {&#39;(&#39;, &#39;+&#39;, &#39;-&#39;, &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},

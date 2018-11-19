@@ -11878,6 +11878,7 @@ MathJax.Hub.Config({
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Carver.html">Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="APIFuzzer.html">Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="WebFuzzer.html">Web GUI Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="GrammarMiner.html">Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 
            <li><a href="https://www.fuzzingbook.org/beta/#News" class="more_coming">More Chapters Coming!</a></li>
@@ -19339,8 +19340,8 @@ For example, say we have states as below.</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;E&gt;&#39;}
-E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
+<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;S&gt;&#39;}
+E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 </pre>
 </div>
 
@@ -19909,8 +19910,14 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Further-Information">Further Information<a class="anchor-link" href="#Further-Information">&#182;</a></h2><ul>
-<li>Parsing with arbitrary context free grammars is reducible to boolean matrix multiplication~[<a href="https://doi.org/10.1016/S0022-0000(75)80046-8">Valiant <em>et al</em>, 1975.</a>] (and the reverse~[<a href="https://doi.org/10.1145/505241.505242">Lee <em>et al</em>, 2002.</a>]) which is at present bounded by $O(2^{23728639}$) ~[<a href="https://doi.org/10.1145/2608628.2608664">Le Gall <em>et al</em>, 2014.</a>]</li>
+<li><em>LL</em> and <em>LR</em> are the main traditions in parsing, where <em>LL</em> (left-to-right, leftmost derivation) represents a top-down approach, and LR (left-to-right, rightmost derivation) represents a bottom up approach (another way to look at it is that LL parsers compute the derivation tree incrementally in pre-order while LR parsers compute the derivation tree in post-order~[Pingali <em>et al</em>, 2015.]). A grammar is LL(k) if it can be parsed by an LL parser with k lookahead tokens. Similarly LR(k) corresponds to an LR parser with k lookahead tokens. LL(*) (used by ANTLR) on the other hand is a grammar representation that uses regular expression like predicates (similar to advanced PEGs -- see Exercise 7.3) rather than a fixed lookahead. Both LL(k) and LR(k) grammars have $O(n)$ parsers.</li>
+<li>Pingali et al.~[Pingali <em>et al</em>, 2015.] presents a unified parsing theory that unites LL and LR parsing. They show that LL and LR parsers can be considered optimizations of Earley parsing.</li>
+<li>In terms of representable languages, LL(k) $\subset$ LL(k+1) and LL(k) $\subset$ LR(1). All deterministic context free languages have an LR(1) grammar.</li>
+<li>There exist Context Free Languages with strings that can not be unambiguously parsed (called <em>inherently ambiguous languages</em>) ~[Ogden <em>et al</em>, 1968.]. Hence, there exist CFL for which one can't provide an LR grammar.</li>
+<li>The other main parsing algorithms for CFG are GLL~[Scott <em>et al</em>, 2010.], GLR~[Tomita <em>et al</em>, 1987., Tomita <em>et al</em>, 2012.], and CYK~[Grune <em>et al</em>, 1990.].</li>
+<li>Parsing with arbitrary Context Free Grammars is reducible to boolean matrix multiplication~[<a href="https://doi.org/10.1016/S0022-0000(75)80046-8">Valiant <em>et al</em>, 1975.</a>] (and the reverse~[<a href="https://doi.org/10.1145/505241.505242">Lee <em>et al</em>, 2002.</a>]) which is at present bounded by $O(2^{23728639}$) ~[<a href="https://doi.org/10.1145/2608628.2608664">Le Gall <em>et al</em>, 2014.</a>].</li>
 <li>The actual class of languages that is expressible in PEG is currently unknown. In particular, we know that PEGs can express certain languages such as $a^n b^n c^n$. However, we do not know if there exist Context-Free languages that are not expressible with PEGs.</li>
+<li>In Section 2.3, we provided an instance of counter-intuitive PEG grammar. While important for our purposes (we use grammars for generation of inputs) this is not a criticism of parsing with PEGs. PEG focuses on writing grammars for a language, and not necessarily in interpreting what language an arbitrary PEG might yield. Given a Context-Free Language to parse, it is almost always possible to write a grammar for it in PEG, and given that 1) a PEG can parse any string in $O(n)$ time, and 2) at present we know of no CFL that can't be expressed as a PEG, and 3) compared with <em>LR</em> grammars, a PEG is often more intuitive because it allows top-down interpretation, when writing a parser for a language, PEGs should be the first choice.</li>
 </ul>
 </div>
 </div>
@@ -20869,7 +20876,7 @@ It should result in the following table:</p>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2018-11-13 11:58:42+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2018-11-18 15:05:04+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -20885,7 +20892,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2018-11-13 11:58:42+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2018-11-18 15:05:04+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Parser,
@@ -20895,9 +20902,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Parser.html}},
-    note = {Retrieved 2018-11-13 11:58:42+01:00},
+    note = {Retrieved 2018-11-18 15:05:04+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Parser.html},
-    urldate = {2018-11-13 11:58:42+01:00}
+    urldate = {2018-11-18 15:05:04+01:00}
 }
 </pre>
 </div>
