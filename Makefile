@@ -791,6 +791,20 @@ binder/binder.log: .FORCE
 	jupyter-repo2docker --debug $(GITHUB_REPO) 2>&1 | tee $@
 
 
+## Docker services (experimental)
+docker:
+	docker pull fuzzingbook/student
+	-docker run -d -p 8888:8888 --name fuzzing-book-instance fuzzingbook/student
+
+docker-start:
+	docker start fuzzing-book-instance
+	sleep 2
+	@URL=$$(docker exec -it fuzzing-book-instance jupyter notebook list | grep http | awk '{ print $$1 }'); echo $$URL; open $$URL
+
+docker-stop:
+	docker stop fuzzing-book-instance
+	
+
 
 ## Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot *.fls *.fdb_latexmk \
