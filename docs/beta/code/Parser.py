@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-20 15:28:57+01:00
+# Last change: 2018-11-20 15:49:15+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -1333,23 +1333,27 @@ mystring3 = 'abababab'
 
 class Tagged:
     def __init__(self, tbl):
-        self.col = [{} for _ in tbl]
-        self.tbl = tbl
+        self.col, self.tbl = [{} for _ in tbl], tbl
 
-    def get(self, var, frm):  # [(state, end)]
-        lst = []
-        for c in range(0, frm + 1):
-            st_dict = self.col[c]
-            for state in st_dict:
-                ends_ = st_dict[state]
-                ends = [s for s in ends_ if s > frm]
-                st_dict[state] = ends
-                for e in ends:
+    @lru_cache(maxsize=None)
+    def get(self, frm, var):
+        if frm == -1:
+            return []
+
+        def filter_states(ends):
+            lst = []
+            for (state, e) in ends:
+                if e > frm and state.name == var:
                     sc = state.copy()
-                    sc.s_col = self.tbl[frm]
-                    sc.e_col = self.tbl[e]
+                    sc.s_col, sc.e_col = self.tbl[frm], self.tbl[e]
                     lst.append((sc, e))
-        return lst
+            return lst
+
+        lst = filter_states(self.get(frm - 1, var))
+        st_dict = self.col[frm]
+        ends = [(state, s) for state in st_dict for s in st_dict[state]
+                if s > frm]
+        return lst + filter_states(ends)
 
 
 class LeoParser(LeoParser):
@@ -1379,7 +1383,7 @@ class LeoParser(LeoParser):
             ends = ([(var, frm + len(var))]
                     if frm < til and chart[frm + 1].letter == var else [])
         else:
-            tagged_ends = self.tagged_array.get(var, frm)
+            tagged_ends = self.tagged_array.get(frm, var)
 
             ends = [(s, s.e_col.index) for s in chart[frm].states
                     if s.name == var and not s.tag] + tagged_ends
