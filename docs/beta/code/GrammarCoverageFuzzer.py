@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-11-19 10:46:38+01:00
+# Last change: 2018-11-20 08:17:57-08:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -328,9 +328,8 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
     def new_child_coverage(self, symbol, children, max_depth=float('inf')):
         """Return new coverage that would be obtained by expanding (symbol, children)"""
         new_cov = self._new_child_coverage(children, max_depth)
-        for c in children:
-            new_cov.add(self.expansion_key(symbol, children))
-        new_cov -= self.expansion_coverage()   # set subtraction
+        new_cov.add(self.expansion_key(symbol, children))
+        new_cov -= self.expansion_coverage()   # -= is set subtraction
         return new_cov
 
 if __name__ == "__main__":
