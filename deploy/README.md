@@ -53,23 +53,40 @@ Now just follow the instructions to open the notebook in your browser. You can c
 docker exec -it fuzzing-book-instance jupyter notebook list
 ```
 
-# Notes
---------------------------------------
-## `bin` directory
+# Deploy a JupyterHub to local server
+
+If you want to install the fuzzingbook in a server, to be used by multiple users during a lecture we recommend you to use the official [jupyterhub-deploy-docker](https://github.com/jupyterhub/jupyterhub-deploy-docker)
+
+We provide a precompiled image which works with this setup.
+
+First, pull our precompiled `user` image with the following command:
+
+```bash
+docker pull fuzzingbook/user
+```
+
+Then configure the `DOCKER_NOTEBOOK_IMAGE` environment variable to point to `fuzzingbook/user`. This variable is used by the Docker spawner process. 
+Finally, follow [these instructions](https://github.com/jupyterhub/jupyterhub-deploy-docker/blob/master/README.md) to finish setting up the server.
+
+__Note:__ We recommend you to add a redirection from the default HTTP port (80) to the HTTPS port (443). You can use a Docker container to  
+
+### Notes
+
+#### `bin` directory
 The bin folder contains many of the instructions here as shorthand-scripts.
 
-## Stopping the container
+#### Stopping the container
 ```bash
 docker stop fuzzing-book-instance
 ```
 
-## Restarting an existing container
+#### Restarting an existing container
 ```bash
 docker stop fuzzing-book-instance
 docker start fuzzing-book-instance
 ```
 
-## Updating the book
+#### Updating the book
 The book auto-updates every time the container is started, but if you made changes that prevent an update due to merge conflicts, you will have to manually resolve them in a console:
 ```bash
 docker exec -it fuzzing-book-instance bash
@@ -85,7 +102,7 @@ git reset --hard
 git pull
 ```
 
-## Uninstalling
+#### Uninstalling
 To delete the docker container and image, execute the following commands:
 ```shell
 docker stop fuzzing-book-instance
@@ -93,5 +110,5 @@ docker rm fuzzing-book-instance
 docker rmi fuzzing-book
 ```
 
-## 'Make'ing the book/ Generating static book
+#### Making the book/ Generating static book
 If you have a container built with the publish option, you can use the `bin/make` script to obtain the HTML, Markdown, Word, Slides and static code versions of the book. A folder called build-output will be generated containing the items.
