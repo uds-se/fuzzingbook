@@ -1,25 +1,48 @@
-# How to: Install the interactive fuzzing book on a local docker container
+# Run with Docker
 
-## Step 1: Install Docker
-Follow the installation procedure recommended at docker.com, or, if you are using Linux, refer to your distribution for information on the installation process.
+The first step is to download and install [Docker](https://www.docker.com/). Follow the installation procedure recommended at docker.com, or, if you are using Linux, refer to your distribution for information on the installation process.
 
-Once installed, make sure Docker works by typing `docker info` in a shell. If there are no errors, you can proceed to Step 2.
+Once installed, make sure Docker works by typing `docker info` in a shell.
 
-## Step 2: Set up the image
+## Running with our precompiled image
+
+We recommend that you use our precompiled image to run the fuzzingbook locally. Our precompiled image is available in the DockerHub servers and you can pull it with the following command.
+
+```bash
+docker pull fuzzingbook/student
+```
+
+Once the download is complete you can run the image with:
+
+```bash
+docker run -d -p 8888:8888 --name fuzzing-book-instance fuzzingbook/student
+```
+
+And copy the link from the terminal into your browser to execute it. If you don’t see a link you can execute: 
+
+```bash
+docker exec -it fuzzing-book-instance jupyter notebook list
+```
+
+One the container is started it will keep running in the background until you stop it.
+
+## Build the Docker image yourself
+
 Run the following command to build the docker image for the book container:
+
 ```bash
 docker build --build-arg publish=no -t 'fuzzing-book' fuzzingbook-dockerenv
 ```
 
 If you want to contribute to the book or generate static builds of the book (HTML, slides, etc.) please use the publish argument:
+
 ```bash
 docker build --build-arg publish=yes -t 'fuzzing-book' fuzzingbook-dockerenv
 ```
 
 These commands are also available as scripts in `bin/create-(publish/student)-build`.
 
-## Step 3: Creating an instance of the image
-Run the following command to start up an instance of the fuzzing book container for the first time and connect it to your local port 8888.
+Finally, run the following command to start up an instance of the fuzzing book container for the first time and connect it to your local port 8888. You can then follow the instructions to open the notebook in your browser.
 
 ```bash
 docker run -d -p 8888:8888 --name fuzzing-book-instance fuzzing-book
@@ -43,9 +66,6 @@ docker stop fuzzing-book-instance
 ## Restarting an existing container
 ```bash
 docker stop fuzzing-book-instance
-```
-
-```bash
 docker start fuzzing-book-instance
 ```
 

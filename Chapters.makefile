@@ -7,11 +7,11 @@ PUBLIC_CHAPTERS = \
 	Fuzzer.ipynb \
 	Coverage.ipynb \
 	MutationFuzzer.ipynb \
-	Grammars.ipynb
+	Grammars.ipynb \
+	GrammarFuzzer.ipynb
 
 # Chapters that are ready for release
 READY_CHAPTERS = \
-	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
 	ConfigurationFuzzer.ipynb
 

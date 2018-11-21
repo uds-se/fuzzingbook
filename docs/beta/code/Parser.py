@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-18 15:05:04+01:00
+# Last change: 2018-11-20 15:49:15+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -1229,11 +1229,12 @@ RR_GRAMMAR = {
 }
 
 if __name__ == "__main__":
-    result = EarleyParser(LR_GRAMMAR, log=True).parse('aaaaaa')
+    mystring = 'aaaaaa'
+    result = EarleyParser(LR_GRAMMAR, log=True).parse(mystring)
 
 
 if __name__ == "__main__":
-    result = EarleyParser(RR_GRAMMAR, log=True).parse('aaaaaa')
+    result = EarleyParser(RR_GRAMMAR, log=True).parse(mystring)
 
 
 class State(State):
@@ -1309,26 +1310,104 @@ class LeoParser(LeoParser):
             self.earley_complete(col, state)
 
 if __name__ == "__main__":
-    result = LeoParser(RR_GRAMMAR, log=True).parse('aaaaaa')
+    result = LeoParser(RR_GRAMMAR, log=True).parse(mystring)
 
 
 if __name__ == "__main__":
-    result = LeoParser(LR_GRAMMAR, log=True).parse('aaaaaa')
+    result = LeoParser(LR_GRAMMAR, log=True).parse(mystring)
     result
 
 
-RR_GRAMMAR = {
+RR_GRAMMAR2 = {
     '<start>': ['<A>'],
     '<A>': ['ab<A>', ''],
 }
-mystring = 'abababab'
+mystring2 = 'abababab'
 
-RR_GRAMMAR = {
+RR_GRAMMAR3 = {
     '<start>': ['<A>'],
     '<A>': ['ab<B>', ''],
     '<B>': ['<A>'],
 }
-mystring = 'abababab'
+mystring3 = 'abababab'
+
+class Tagged:
+    def __init__(self, tbl):
+        self.col, self.tbl = [{} for _ in tbl], tbl
+
+    @lru_cache(maxsize=None)
+    def get(self, frm, var):
+        if frm == -1:
+            return []
+
+        def filter_states(ends):
+            lst = []
+            for (state, e) in ends:
+                if e > frm and state.name == var:
+                    sc = state.copy()
+                    sc.s_col, sc.e_col = self.tbl[frm], self.tbl[e]
+                    lst.append((sc, e))
+            return lst
+
+        lst = filter_states(self.get(frm - 1, var))
+        st_dict = self.col[frm]
+        ends = [(state, s) for state in st_dict for s in st_dict[state]
+                if s > frm]
+        return lst + filter_states(ends)
+
+
+class LeoParser(LeoParser):
+    def parse(self, text):
+        cursor, states = self.parse_prefix(text)
+        if cursor != len(text):
+            return []
+        table = self.chart_parse(text, self.start_symbol)
+        f_table = self.reverse(table)
+
+        self.tagged_array = Tagged(f_table)
+        for i, col in enumerate(f_table):
+            tcol = self.tagged_array.col[i]
+            for state in col.states:
+                if state.tag:
+                    if state not in tcol:
+                        tcol[state] = set()
+                    tcol[state].add(state.e_col.index)
+
+        start = next(s for s in states if s.finished())
+        return self.extract_trees(self.parse_forest(f_table, start))
+
+    def parse_paths(self, expr_, chart, frm, til):
+        var, *expr = expr_
+        ends = None
+        if var not in self.cgrammar:
+            ends = ([(var, frm + len(var))]
+                    if frm < til and chart[frm + 1].letter == var else [])
+        else:
+            tagged_ends = self.tagged_array.get(frm, var)
+
+            ends = [(s, s.e_col.index) for s in chart[frm].states
+                    if s.name == var and not s.tag] + tagged_ends
+
+        paths = []
+        for state, end in ends:
+            if not expr:
+                paths.extend([[state]] if end == til else [])
+            else:
+                res = self.parse_paths(expr, chart, end, til)
+                paths.extend([[state] + r for r in res])
+        return paths
+
+if __name__ == "__main__":
+    p = LeoParser(RR_GRAMMAR)
+    for tree in p.parse(mystring):
+        display_tree(tree)
+
+
+if __name__ == "__main__":
+    p = LeoParser(RR_GRAMMAR2)
+    for tree in p.parse(mystring2):
+        display_tree(tree)
+
 
 # ### Exercise 6 _First set of a nonterminal_
 
