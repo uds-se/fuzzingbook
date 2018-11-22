@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-20 15:49:15+01:00
+# Last change: 2018-11-21 06:05:31-08:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -84,9 +84,15 @@ def display_tree(derivation_tree,
     traverse_tree(dot, derivation_tree)
     display(dot)
     
-def all_terminals(tree):
+def all_terminals(tree, grammar=None):
     symbol, children, *_ = tree
-    return ''.join(all_terminals(c) for c in children) if children else symbol
+    if children:
+        return ''.join(all_terminals(c, grammar) for c in children)
+    else:
+        if grammar is not None:
+             return '' if symbol in grammar else symbol
+        else:
+            return symbol
 
 if __name__ == "__main__":
     mystring = '1+2'
@@ -503,7 +509,7 @@ if __name__ == "__main__":
 
 
 PEG_SURPRISE = {
-    "<A>": ["a<A>a","aa"]
+    "<A>": ["a<A>a", "aa"]
 }
 
 if __name__ == "__main__":
@@ -562,10 +568,10 @@ if __name__ == "__main__":
     pp_grammar(canonical(EXPR_GRAMMAR_NS))
 
 
-# ### Nearley Parser
+# ### Earley Parser
 
 if __name__ == "__main__":
-    print('\n### Nearley Parser')
+    print('\n### Earley Parser')
 
 
 
@@ -627,9 +633,9 @@ if __name__ == "__main__":
 
 
 class State(Item):
-    def __init__(self, name, expr, dot, s_col, children=[]):
+    def __init__(self, name, expr, dot, s_col):
         super().__init__(name, expr, dot)
-        self.s_col, self.e_col, self.children = s_col, None, children[:]
+        self.s_col, self.e_col = s_col, None
 
     def __str__(self):
         return self.name + ':= ' + ' '.join([
@@ -638,8 +644,7 @@ class State(Item):
         ]) + "(%d,%d)" % (self.s_col.index, self.e_col.index)
 
     def _t(self):
-        return (self.name, self.expr, self.dot, self.s_col.index,
-                tuple(self.children))
+        return (self.name, self.expr, self.dot, self.s_col.index)
 
     def __hash__(self):
         return hash(self._t())
@@ -648,8 +653,7 @@ class State(Item):
         return self._t() == other._t()
 
     def advance(self):
-        return State(self.name, self.expr, self.dot + 1, self.s_col,
-                     self.children)
+        return State(self.name, self.expr, self.dot + 1, self.s_col)
 
 # #### The Parser
 
@@ -659,12 +663,12 @@ if __name__ == "__main__":
 
 
 
-class NearleyParser(Parser):
+class EarleyParser(Parser):
     def __init__(self, grammar, **kwargs):
         super().__init__(grammar, **kwargs)
         self.cgrammar = canonical(grammar, letters=True)
 
-class NearleyParser(NearleyParser):
+class EarleyParser(EarleyParser):
     def chart_parse(self, words, start):
         alt = tuple(*self.cgrammar[start])
         chart = [Column(i, tok) for i, tok in enumerate([None, *words])]
@@ -679,8 +683,8 @@ if __name__ == "__main__":
 
 
 
-class NearleyParser(NearleyParser):
-    def predict(self, col, sym):
+class EarleyParser(EarleyParser):
+    def predict(self, col, sym, state):
         for alt in self.cgrammar[sym]:
             col.add(State(sym, tuple(alt), 0, col))
 
@@ -692,7 +696,7 @@ if __name__ == "__main__":
 
 
 
-class NearleyParser(NearleyParser):
+class EarleyParser(EarleyParser):
     def scan(self, col, state, letter):
         if letter == col.letter:
             col.add(state.advance())
@@ -705,16 +709,16 @@ if __name__ == "__main__":
 
 
 
-class NearleyParser(NearleyParser):
+class EarleyParser(EarleyParser):
     def complete(self, col, state):
-        return self.nearley_complete(col, state)
+        return self.earley_complete(col, state)
 
-    def nearley_complete(self, col, state):
+    def earley_complete(self, col, state):
         parent_states = [
             st for st in state.s_col.states if st.at_dot() == state.name
         ]
         for st in parent_states:
-            col.add(st.advance()).children.append(state)
+            col.add(st.advance())
 
 # ##### Fill chart
 
@@ -724,7 +728,7 @@ if __name__ == "__main__":
 
 
 
-class NearleyParser(NearleyParser):
+class EarleyParser(EarleyParser):
     def fill_chart(self, chart):
         for i, col in enumerate(chart):
             for state in col.states:
@@ -733,7 +737,7 @@ class NearleyParser(NearleyParser):
                 else:
                     sym = state.at_dot()
                     if sym in self.cgrammar:
-                        self.predict(col, sym)
+                        self.predict(col, sym, state)
                     else:
                         if i + 1 >= len(chart):
                             continue
@@ -750,7 +754,7 @@ if __name__ == "__main__":
 
 
 
-class NearleyParser(NearleyParser):
+class EarleyParser(EarleyParser):
     def parse_prefix(self, text):
         table = self.chart_parse(text, self.start_symbol)
         for col in reversed(table):
@@ -758,100 +762,6 @@ class NearleyParser(NearleyParser):
             if states:
                 return col.index, states
         return -1, []
-
-    def parse(self, text):
-        cursor, states = self.parse_prefix(list(text))
-        if cursor != len(text):
-            return []
-        for state in states:
-            if state.finished():
-                yield self.derivation_tree(state)
-
-    def process_expr(self, expr, children):
-        terms = iter([(i, []) for i in expr if i not in self.cgrammar])
-        nts = iter([self.derivation_tree(i) for i in children])
-        return [next(terms if i not in self.cgrammar else nts) for i in expr]
-
-    def derivation_tree(self, state):
-        return (state.name, self.process_expr(state.expr, state.children))
-
-if __name__ == "__main__":
-    mystring = '12*(2+2)/31'
-    nearley = NearleyParser(EXPR_GRAMMAR_NS)
-    for tree in nearley.parse(mystring):
-        assert mystring == all_terminals(tree)
-        display_tree(tree)
-
-
-# #### Ambiguous parsing
-
-if __name__ == "__main__":
-    print('\n#### Ambiguous parsing')
-
-
-
-
-if __name__ == "__main__":
-    mystring = '1+2+3'
-    nearley = NearleyParser(A1_GRAMMAR)
-    for tree in nearley.parse(mystring):
-        assert mystring == all_terminals(tree)
-        display_tree(tree)
-
-
-# ### Earley Parser
-
-if __name__ == "__main__":
-    print('\n### Earley Parser')
-
-
-
-
-# #### States
-
-if __name__ == "__main__":
-    print('\n#### States')
-
-
-
-
-class State(State):
-    def __init__(self, name, expr, dot, s_col):
-        self.name, self.expr, self.dot = name, expr, dot
-        self.s_col, self.e_col = s_col, None
-
-    def _t(self):
-        return (self.name, self.expr, self.dot, self.s_col.index)
-
-    def advance(self):
-        return State(self.name, self.expr, self.dot + 1, self.s_col)
-
-# #### The Parser
-
-if __name__ == "__main__":
-    print('\n#### The Parser')
-
-
-
-
-class EarleyParser(NearleyParser):
-    def complete(self, col, state):
-        return self.earley_complete(col, state)
-
-    def earley_complete(self, col, state):
-        parent_states = [
-            st for st in state.s_col.states if st.at_dot() == state.name
-        ]
-        for st in parent_states:
-            col.add(st.advance())
-
-# ##### Parse
-
-if __name__ == "__main__":
-    print('\n##### Parse')
-
-
-
 
 class EarleyParser(EarleyParser):
     def reverse(self, table):
@@ -863,9 +773,6 @@ class EarleyParser(EarleyParser):
         return f_table
 
 class EarleyParser(EarleyParser):
-    def extract_trees(self, forest):
-        return [self.extract_a_tree(forest)]
-
     def parse(self, text):
         cursor, states = self.parse_prefix(text)
         if cursor != len(text):
@@ -908,8 +815,8 @@ if __name__ == "__main__":
 
 
 class EarleyParser(EarleyParser):
-    def parse_paths(self, expr_, chart, frm, til):
-        var, *expr = expr_
+    def parse_paths(self, named_expr, chart, frm, til):
+        var, *expr = named_expr
         starts = None
         if var not in self.cgrammar:
             starts = ([(var, frm + len(var))]
@@ -942,23 +849,30 @@ class EarleyParser(EarleyParser):
             return (name, [])
         return (name, [self.extract_a_tree(p) for p in paths[0]])
 
+    def extract_trees(self, forest):
+        return [self.extract_a_tree(forest)]
+
 A3_GRAMMAR = {
-        "<start>":
-        ["<expr>"],
-        "<expr>":
-        ["<expr>+<expr>", "<expr>-<expr>","(<expr>)", "<integer>"],
-        "<integer>":
-        ["<digit><integer>", "<digit>"],
-        "<digit>":
-        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-        }
+    "<start>": ["<expr>"],
+    "<expr>": ["<expr>+<expr>", "<expr>-<expr>", "(<expr>)", "<integer>"],
+    "<integer>": ["<digit><integer>", "<digit>"],
+    "<digit>": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+}
 
 if __name__ == "__main__":
     mystring = '(1+24)-33'
-    earley = EarleyParser(A3_GRAMMAR)
-    for tree in earley.parse(mystring):
+    parser = EarleyParser(A3_GRAMMAR)
+    for tree in parser.parse(mystring):
         assert all_terminals(tree) == mystring
         display_tree(tree)
+
+
+# #### Ambiguous parsing
+
+if __name__ == "__main__":
+    print('\n#### Ambiguous parsing')
+
+
 
 
 # ##### extract_trees
@@ -982,10 +896,19 @@ class EarleyParser(EarleyParser):
 
 if __name__ == "__main__":
     mystring = '12+23-34'
-    earley = EarleyParser(A1_GRAMMAR)
-    for tree in earley.parse(mystring):
+    parser = EarleyParser(A1_GRAMMAR)
+    for tree in parser.parse(mystring):
         assert mystring == all_terminals(tree)
         display_tree(tree)
+
+
+if __name__ == "__main__":
+    gf = GrammarFuzzer(A1_GRAMMAR)
+    for i in range(5):
+        s = gf.fuzz()
+        print(i, s)
+        for tree in parser.parse(s):
+            assert all_terminals(tree, A1_GRAMMAR) == s
 
 
 # #### The Aycock Epsilon fix
@@ -997,8 +920,8 @@ if __name__ == "__main__":
 
 
 E_GRAMMAR_1 = {
-    '<start>': ['<A>','<B>'],
-    '<A>': ['a',''],
+    '<start>': ['<A>', '<B>'],
+    '<A>': ['a', ''],
     '<B>': ['b']
 }
 
@@ -1012,8 +935,8 @@ E_GRAMMAR = {
 
 if __name__ == "__main__":
     mystring = 'a'
-    earley = EarleyParser(E_GRAMMAR)
-    trees = earley.parse(mystring)
+    parser = EarleyParser(E_GRAMMAR)
+    trees = parser.parse(mystring)
     print(trees)
 
 
@@ -1080,31 +1003,83 @@ if __name__ == "__main__":
 
 
 class EarleyParser(EarleyParser):
-    def fill_chart(self, chart):
-        epsilon = nullable(self.cgrammar)
-        for i, col in enumerate(chart):
-            for state in col.states:
-                if state.finished():
-                    self.complete(col, state)
-                else:
-                    sym = state.at_dot()
-                    if sym in self.cgrammar:
-                        self.predict(col, sym)
-                        if sym in epsilon:
-                            col.add(state.advance())
-                    else:
-                        if i + 1 >= len(chart):
-                            continue
-                        self.scan(chart[i + 1], state, sym)
-            if self.log:
-                print(col)
-        return chart
+    def __init__(self, grammar, **kwargs):
+        super().__init__(grammar, **kwargs)
+        self.cgrammar = canonical(grammar, letters=True)
+        self.epsilon = nullable(self.cgrammar)
+
+    def predict(self, col, sym, state):
+        for alt in self.cgrammar[sym]:
+            col.add(State(sym, tuple(alt), 0, col))
+        if sym in self.epsilon:
+            col.add(state.advance())
 
 if __name__ == "__main__":
     mystring = 'a'
-    earley = EarleyParser(E_GRAMMAR)
-    for tree in earley.parse(mystring):
+    parser = EarleyParser(E_GRAMMAR)
+    for tree in parser.parse(mystring):
         display_tree(tree)
+
+
+# #### More Earley parsing
+
+if __name__ == "__main__":
+    print('\n#### More Earley parsing')
+
+
+
+
+# ## Testing the parsers
+
+if __name__ == "__main__":
+    print('\n## Testing the parsers')
+
+
+
+
+def prod_line_grammar(nt, t):
+    g = {
+        '<start>': ['<SYMBOLS>'],
+        '<SYMBOLS>': ['<SYMBOL><SYMBOLS>', '<SYMBOL>'],
+        '<SYMBOL>': ['<NT>', '<T>'],
+        '<NT>': ['<NT_><ALPHA><_NT>'],
+        '<NT_>': ['<'],
+        '<_NT>': ['>'],
+        '<ALPHA>': nt,
+        '<T>': t
+    }
+    if not nt:
+        g['<NT>'] = ['']
+    return g
+
+
+def make_alt(nt, t, num_alts):
+    prod_grammar = prod_line_grammar(nt, t)
+    gf = GrammarFuzzer(prod_grammar, min_nonterminals=3, max_nonterminals=5)
+    name = "<%s>" % ''.join(random.choices(string.ascii_uppercase, k=3))
+    return (name, [gf.fuzz() for _ in range(num_alts)])
+
+def make_grammar():
+    a = list(string.ascii_lowercase)
+    grammar = {}
+    name = None
+    for _ in range(2):
+        name, rules = make_alt([k[1:-1] for k in grammar.keys()], a, 3)
+        grammar[name] = rules
+    grammar[START_SYMBOL] = [name]
+    return grammar
+
+if __name__ == "__main__":
+    for i in range(5):
+        my_grammar = make_grammar()
+        pp_grammar(canonical(my_grammar))
+        parser = EarleyParser(my_grammar)
+        mygf = GrammarFuzzer(my_grammar)
+        s = mygf.fuzz()
+        print(s)
+        for tree in parser.parse(s):
+            assert all_terminals(tree) == s
+            display_tree(tree)
 
 
 # ## Further Information
@@ -1315,7 +1290,8 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     result = LeoParser(LR_GRAMMAR, log=True).parse(mystring)
-    result
+    for tree in result:
+        print(all_terminals(tree, grammar=LR_GRAMMAR))
 
 
 RR_GRAMMAR2 = {
@@ -1400,12 +1376,14 @@ class LeoParser(LeoParser):
 if __name__ == "__main__":
     p = LeoParser(RR_GRAMMAR)
     for tree in p.parse(mystring):
+        assert all_terminals(tree, RR_GRAMMAR) == mystring
         display_tree(tree)
 
 
 if __name__ == "__main__":
     p = LeoParser(RR_GRAMMAR2)
     for tree in p.parse(mystring2):
+        assert all_terminals(tree, RR_GRAMMAR2) == mystring2
         display_tree(tree)
 
 

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2018-11-11 22:50:14+01:00
+# Last change: 2018-11-20 08:17:57-08:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -381,39 +381,43 @@ class OptionGrammarMiner(OptionGrammarMiner):
 
 if __name__ == "__main__":
     miner = OptionGrammarMiner(process_numbers, log=True)
-    ebnf_grammar = miner.mine_ebnf_grammar()
+    process_numbers_grammar = miner.mine_ebnf_grammar()
 
 
 if __name__ == "__main__":
-    ebnf_grammar["<start>"]
+    process_numbers_grammar
 
 
 if __name__ == "__main__":
-    ebnf_grammar["<group>"]
+    process_numbers_grammar["<start>"]
 
 
 if __name__ == "__main__":
-    ebnf_grammar["<option>"]
+    process_numbers_grammar["<group>"]
 
 
 if __name__ == "__main__":
-    ebnf_grammar["<arguments>"]
+    process_numbers_grammar["<option>"]
 
 
 if __name__ == "__main__":
-    ebnf_grammar["<integers>"]
+    process_numbers_grammar["<arguments>"]
 
 
 if __name__ == "__main__":
-    ebnf_grammar["<int>"]
+    process_numbers_grammar["<integers>"]
 
 
 if __name__ == "__main__":
-    assert is_valid_grammar(ebnf_grammar)
+    process_numbers_grammar["<int>"]
 
 
 if __name__ == "__main__":
-    grammar = convert_ebnf_grammar(ebnf_grammar)
+    assert is_valid_grammar(process_numbers_grammar)
+
+
+if __name__ == "__main__":
+    grammar = convert_ebnf_grammar(process_numbers_grammar)
     assert is_valid_grammar(grammar)
 
 
