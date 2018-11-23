@@ -14,15 +14,17 @@ RUN rm -rf /var/lib/apt/lists/*
 USER $NB_UID
 
 ARG publish=no
+ARG branch=master
 
 # Install required python packages
 RUN pip install matplotlib numpy pandas graphviz svglib jupyter_contrib_nbextensions autopep8 mypy notedown nbdime nbstripout
 
 RUN if [ "$publish" = "yes" ]; then pip install ipypublish autopep8 yapf ; fi
 
+WORKDIR /home/$NB_USER
+
 # Clone the repo
-RUN cd /home/$NB_USER
-RUN git clone https://github.com/uds-se/fuzzingbook.git
+RUN git clone --branch ${branch} https://github.com/uds-se/fuzzingbook.git
 RUN fix-permissions /home/$NB_USER/fuzzingbook
 
 USER root
@@ -32,7 +34,7 @@ USER root
 RUN nbdime extensions --enable
 RUN nbdime config-git --enable --global
 #RUN nbstripout --install --attributes .gitattributes
-RUN cd fuzzingbook
+WORKDIR /home/$NB_USER/fuzzingbook
 
 # enable nbdime for JupyterLab
 RUN conda install -c conda-forge nodejs # you
@@ -66,12 +68,9 @@ RUN jupyter trust /home/$NB_USER/fuzzingbook/notebooks/*.ipynb /home/$NB_USER/fu
 
 # Copy Andreas' css to jupyter
 RUN mkdir /home/$NB_USER/.jupyter/custom
-RUN cd /home/$NB_USER/.jupyter/custom
 RUN fix-permissions /home/$NB_USER/.jupyter
-RUN wget https://github.com/uds-se/fuzzingbook/blob/master/docs/beta/notebooks/custom.css
+RUN wget -O /home/$NB_USER/.jupyter/custom/custom.css https://github.com/uds-se/fuzzingbook/blob/master/docs/beta/notebooks/custom.css
 RUN ls
-RUN cd /home/$NB_USER/fuzzingbook
-RUN mv custom.css /home/$NB_USER/.jupyter/custom/
 
 # Fix directory permissions
 RUN fix-permissions /home/$NB_USER/.local
