@@ -23,6 +23,7 @@ TODO_CHAPTERS = \
 	Carver.ipynb \
 	APIFuzzer.ipynb \
 	WebFuzzer.ipynb \
+	InformationFlow.ipynb \
 	GrammarMiner.ipynb
 	# ConstraintGrammarFuzzer.ipynb
 	# GUIFuzzer.ipynb
