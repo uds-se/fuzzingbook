@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-11-23 15:41:01+01:00
+# Last change: 2018-11-23 19:18:05+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -299,7 +299,7 @@ def expansion_to_children(expansion):
     if isinstance(expansion, tuple):
         expansion = expansion[0]
 
-    if expansion == "":  # Special case: empty expansion
+    if expansion == "":  # Special case: epsilon expansion
         return [("", [])]
 
     strings = re.split(RE_NONTERMINAL, expansion)

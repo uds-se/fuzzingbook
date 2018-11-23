@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2018-11-23 16:06:32+01:00
+# Last change: 2018-11-23 18:44:46+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -346,10 +346,10 @@ if __name__ == "__main__":
     os.system(r'rm -fr program program.*')
 
 
-# #### Checking Information Leaks
+# #### Information Leaks
 
 if __name__ == "__main__":
-    print('\n#### Checking Information Leaks')
+    print('\n#### Information Leaks')
 
 
 
@@ -411,6 +411,7 @@ if __name__ == "__main__":
         for i in range(10):
             s = heartbeat(fuzzer(), random.randint(1, 500))
             assert not s.find(uninitialized_memory_marker)
+            assert not s.find("secret")
 
 
 # ### Program-Specific Checkers

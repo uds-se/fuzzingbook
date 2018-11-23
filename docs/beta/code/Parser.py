@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-23 15:41:01+01:00
+# Last change: 2018-11-23 19:11:10+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -36,6 +36,14 @@ if __name__ == "__main__":
 
 
 
+# ## Have a title here
+
+if __name__ == "__main__":
+    print('\n## Have a title here')
+
+
+
+
 import fuzzingbook_utils
 
 if __package__ is None or __package__ == "":
@@ -50,21 +58,19 @@ from ExpectError import ExpectError
 from IPython.display import display
 
 import re
-from graphviz import Digraph
 
+from graphviz import Digraph
 
 def annotated_symbol(s, a):
     return re.sub(r'([^a-zA-Z0-9" ])', r"\\\1", s) + (" (%s)" % a if a else '')
-
 
 def annotated_node(node, id):
     symbol, children, *annotation = node
     return symbol, children, ''.join(str(a) for a in annotation)
 
-
 def display_tree(derivation_tree,
-                           annotated_node=annotated_node,
-                           annotate=annotated_symbol):
+                 annotated_node=annotated_node,
+                 annotate=annotated_symbol):
     counter = 0
 
     def traverse_tree(dot, tree, id=0):
@@ -83,14 +89,14 @@ def display_tree(derivation_tree,
     dot.attr('node', shape='plain')
     traverse_tree(dot, derivation_tree)
     display(dot)
-    
+
 def all_terminals(tree, grammar=None):
     symbol, children, *_ = tree
     if children:
         return ''.join(all_terminals(c, grammar) for c in children)
     else:
         if grammar is not None:
-             return '' if symbol in grammar else symbol
+            return '' if symbol in grammar else symbol
         else:
             return symbol
 
@@ -190,7 +196,7 @@ if __name__ == "__main__":
 class Parser(object):
     def __init__(self, grammar, **kwargs):
         self._grammar = grammar
-        self.start_symbol=kwargs.get('start_symbol') or START_SYMBOL 
+        self.start_symbol = kwargs.get('start_symbol') or START_SYMBOL
         self.log = kwargs.get('log') or False
         self.tokens = kwargs.get('tokens') or set()
 
@@ -212,7 +218,7 @@ class Parser(object):
         if name in self.tokens:
             return (name, [(all_terminals(tree), [])])
         else:
-            return (name, [self.prune_tree(c) for c in children]) 
+            return (name, [self.prune_tree(c) for c in children])
 
 # ## Parsing Expression Grammars
 
@@ -223,22 +229,20 @@ if __name__ == "__main__":
 
 
 PEG1 = {
-    '<start>': ['a','b']
+    '<start>': ['a', 'b']
 }
 
 PEG2 = {
-    '<start>': ['ab','abc']
+    '<start>': ['ab', 'abc']
 }
 
-# ### Packrat Parser for _PEGs_
+# ### The Packrat Parser for Predicate Expression Grammars
 
 if __name__ == "__main__":
-    print('\n### Packrat Parser for _PEGs_')
+    print('\n### The Packrat Parser for Predicate Expression Grammars')
 
 
 
-
-from functools import reduce, lru_cache
 
 def canonical(grammar, letters=False):
     def split(rule):
@@ -282,15 +286,15 @@ if __name__ == "__main__":
 class Parser(Parser):
     def __init__(self, grammar, **kwargs):
         self._grammar = grammar
-        self.start_symbol=kwargs.get('start_symbol') or START_SYMBOL 
+        self.start_symbol = kwargs.get('start_symbol') or START_SYMBOL
         self.log = kwargs.get('log') or False
-        self.tokens = kwargs.get('tokens') or set()        
+        self.tokens = kwargs.get('tokens') or set()
         self.cgrammar = canonical(grammar)
 
-# #### The Parser
+# ### The Parser
 
 if __name__ == "__main__":
-    print('\n#### The Parser')
+    print('\n### The Parser')
 
 
 
@@ -300,10 +304,10 @@ class PEGParser(Parser):
         cursor, tree = self.unify_key(self.start_symbol, text, 0)
         return cursor, [tree]
 
-# ##### Unify Key
+# #### Unify Key
 
 if __name__ == "__main__":
-    print('\n##### Unify Key')
+    print('\n#### Unify Key')
 
 
 
@@ -321,10 +325,10 @@ class PEGParser(PEGParser):
                 return (to, (key, res))
         return 0, None
 
-# ##### Unify Rule
+# #### Unify Rule
 
 if __name__ == "__main__":
-    print('\n##### Unify Rule')
+    print('\n#### Unify Rule')
 
 
 
@@ -339,15 +343,20 @@ class PEGParser(PEGParser):
             results.append(res)
         return at, results
 
+from functools import lru_cache
+
 class PEGParser(PEGParser):
     @lru_cache(maxsize=None)
     def unify_key(self, key, text, at=0):
         if key not in self.cgrammar:
-            if text[at:].startswith(key): return at + len(key), (key, [])
-            else: return at, None
+            if text[at:].startswith(key):
+                return at + len(key), (key, [])
+            else:
+                return at, None
         for rule in self.cgrammar[key]:
             to, res = self.unify_rule(rule, text, at)
-            if res: return (to, (key, res))
+            if res:
+                return (to, (key, res))
         return 0, None
 
 if __name__ == "__main__":
@@ -365,10 +374,10 @@ if __name__ == "__main__":
         display_tree(tree)
 
 
-# ### Recombining Parsed Inputs
+# ## Recombining Parsed Inputs
 
 if __name__ == "__main__":
-    print('\n### Recombining Parsed Inputs')
+    print('\n## Recombining Parsed Inputs')
 
 
 
@@ -382,6 +391,13 @@ if __name__ == "__main__":
 
 
 import string
+
+if __package__ is None or __package__ == "":
+    from Grammars import crange
+else:
+    from .Grammars import crange
+
+
 VAR_GRAMMAR = {
     '<start>': ['<statements>'],
     '<statements>': ['<statement>;<statements>', '<statement>'],
@@ -391,16 +407,14 @@ VAR_GRAMMAR = {
     '<def>': ['def'],
     '<identifier>': ['<word>'],
     '<word>': ['<alpha><word>', '<alpha>'],
-    '<alpha>':
-    list(string.ascii_letters),
+    '<alpha>': list(string.ascii_letters),
     '<expr>': ['<term>+<expr>', '<term>-<expr>', '<term>'],
     '<term>': ['<factor>*<term>', '<factor>/<term>', '<factor>'],
     '<factor>':
     ['+<factor>', '-<factor>', '(<expr>)', '<identifier>', '<number>'],
     '<number>': ['<integer>.<integer>', '<integer>'],
     '<integer>': ['<digit><integer>', '<digit>'],
-    '<digit>':
-    list(string.digits),
+    '<digit>': crange('0', '9')
 }
 
 VAR_TOKENS = {'<def>', '<number>', '<identifier>'}
@@ -466,20 +480,20 @@ if __name__ == "__main__":
 
 import random
 
-
 class LangFuzzer(LangFuzzer):
     def __init__(self, parser, strings):
         self.parser = parser
         self.fragments = {k: [] for k in self.parser.cgrammar}
         self.fragment(strings)
-    
+
     def generate_new_tree(self, node, choice):
         name, children, id = node
         if id == choice:
             return random.choice(self.fragments[name])
         else:
-            return (name, [self.generate_new_tree(c, choice) for c in children])
-        
+            return (name, [self.generate_new_tree(c, choice)
+                           for c in children])
+
     def candidate(self):
         tree, nodes = random.choice(self.trees)
         interesting_nodes = [
@@ -488,7 +502,7 @@ class LangFuzzer(LangFuzzer):
         ]
         node = random.choice(interesting_nodes)
         return tree, node
-    
+
     def fuzz(self):
         tree, node = self.candidate()
         modified = self.generate_new_tree(tree, node)
@@ -534,10 +548,10 @@ if __name__ == "__main__":
             print(s)
 
 
-# ## Context Free Grammars
+# ## Parsing Context-Free Grammars
 
 if __name__ == "__main__":
-    print('\n## Context Free Grammars')
+    print('\n## Parsing Context-Free Grammars')
 
 
 
@@ -549,7 +563,8 @@ def rules(grammar):
 
 EXPR_GRAMMAR_NS = {}
 for key, alts in canonical(EXPR_GRAMMAR).items():
-    EXPR_GRAMMAR_NS[key] = [''.join(sym.strip() for sym in alt) for alt in alts]
+    EXPR_GRAMMAR_NS[key] = [''.join(sym.strip()
+                                    for sym in alt) for alt in alts]
 
 if __name__ == "__main__":
     rules(EXPR_GRAMMAR_NS)
@@ -568,18 +583,18 @@ if __name__ == "__main__":
     pp_grammar(canonical(EXPR_GRAMMAR_NS))
 
 
-# ### Earley Parser
+# ### The Earley Parser
 
 if __name__ == "__main__":
-    print('\n### Earley Parser')
+    print('\n### The Earley Parser')
 
 
 
 
-# #### Columns
+# ### Columns
 
 if __name__ == "__main__":
-    print('\n#### Columns')
+    print('\n### Columns')
 
 
 
@@ -602,10 +617,10 @@ class Column(Column):
         state.e_col = self
         return self._unique[state]
 
-# #### Item
+# ### Items
 
 if __name__ == "__main__":
-    print('\n#### Item')
+    print('\n### Items')
 
 
 
@@ -624,10 +639,10 @@ class Item(Item):
     def at_dot(self):
         return self.expr[self.dot] if self.dot < len(self.expr) else None
 
-# #### States
+# ### States
 
 if __name__ == "__main__":
-    print('\n#### States')
+    print('\n### States')
 
 
 
@@ -655,10 +670,10 @@ class State(Item):
     def advance(self):
         return State(self.name, self.expr, self.dot + 1, self.s_col)
 
-# #### The Parser
+# ### The Parsing Algorithm
 
 if __name__ == "__main__":
-    print('\n#### The Parser')
+    print('\n### The Parsing Algorithm')
 
 
 
@@ -675,10 +690,10 @@ class EarleyParser(EarleyParser):
         chart[0].add(State(start, alt, 0, chart[0]))
         return self.fill_chart(chart)
 
-# ##### Predict
+# ### Predicting States
 
 if __name__ == "__main__":
-    print('\n##### Predict')
+    print('\n### Predicting States')
 
 
 
@@ -688,10 +703,10 @@ class EarleyParser(EarleyParser):
         for alt in self.cgrammar[sym]:
             col.add(State(sym, tuple(alt), 0, col))
 
-# ##### Scan
+# ### Scanning Tokens
 
 if __name__ == "__main__":
-    print('\n##### Scan')
+    print('\n### Scanning Tokens')
 
 
 
@@ -701,10 +716,10 @@ class EarleyParser(EarleyParser):
         if letter == col.letter:
             col.add(state.advance())
 
-# ##### Complete
+# ### Completing Processing
 
 if __name__ == "__main__":
-    print('\n##### Complete')
+    print('\n### Completing Processing')
 
 
 
@@ -720,10 +735,10 @@ class EarleyParser(EarleyParser):
         for st in parent_states:
             col.add(st.advance())
 
-# ##### Fill chart
+# ### Filling the Chart
 
 if __name__ == "__main__":
-    print('\n##### Fill chart')
+    print('\n### Filling the Chart')
 
 
 
@@ -746,10 +761,10 @@ class EarleyParser(EarleyParser):
                 print(col)
         return chart
 
-# ##### Parse
+# ### The Parse Method
 
 if __name__ == "__main__":
-    print('\n##### Parse')
+    print('\n### The Parse Method')
 
 
 
@@ -782,10 +797,10 @@ class EarleyParser(EarleyParser):
         start = next(s for s in states if s.finished())
         return self.extract_trees(self.parse_forest(f_table, start))
 
-# ##### Parse Forests
+# ### Parsing Forests
 
 if __name__ == "__main__":
-    print('\n##### Parse Forests')
+    print('\n### Parsing Forests')
 
 
 
@@ -806,10 +821,10 @@ class EarleyParser(EarleyParser):
             paths_.append(pathexpr_)
         return (state.name, paths_)
 
-# ##### Parse Paths
+# ### Parsing Paths
 
 if __name__ == "__main__":
-    print('\n##### Parse Paths')
+    print('\n### Parsing Paths')
 
 
 
@@ -834,10 +849,10 @@ class EarleyParser(EarleyParser):
                 paths.extend([[state] + r for r in res])
         return paths
 
-# ##### extract_a_tree
+# ### Extracting Trees
 
 if __name__ == "__main__":
-    print('\n##### extract_a_tree')
+    print('\n### Extracting Trees')
 
 
 
@@ -867,18 +882,10 @@ if __name__ == "__main__":
         display_tree(tree)
 
 
-# #### Ambiguous parsing
+# ### Ambiguous Parsing
 
 if __name__ == "__main__":
-    print('\n#### Ambiguous parsing')
-
-
-
-
-# ##### extract_trees
-
-if __name__ == "__main__":
-    print('\n##### extract_trees')
+    print('\n### Ambiguous Parsing')
 
 
 
@@ -911,10 +918,10 @@ if __name__ == "__main__":
             assert all_terminals(tree, A1_GRAMMAR) == s
 
 
-# #### The Aycock Epsilon fix
+# ### The Aycock Epsilon Fix
 
 if __name__ == "__main__":
-    print('\n#### The Aycock Epsilon fix')
+    print('\n### The Aycock Epsilon Fix')
 
 
 
@@ -927,10 +934,10 @@ E_GRAMMAR_1 = {
 
 EPSILON = ''
 E_GRAMMAR = {
-        '<start>': ['<S>'],
-        '<S>': ['<A><A><A><A>'],
-        '<A>': ['a', '<E>'],
-        '<E>': [EPSILON]
+    '<start>': ['<S>'],
+    '<S>': ['<A><A><A><A>'],
+    '<A>': ['a', '<E>'],
+    '<E>': [EPSILON]
 }
 
 if __name__ == "__main__":
@@ -940,10 +947,10 @@ if __name__ == "__main__":
     print(trees)
 
 
-# ##### Fixpoint
+# #### Fixpoint
 
 if __name__ == "__main__":
-    print('\n##### Fixpoint')
+    print('\n#### Fixpoint')
 
 
 
@@ -970,17 +977,16 @@ if __name__ == "__main__":
     my_sqrt(2)
 
 
-# ##### Nullable
+# #### Nullable
 
 if __name__ == "__main__":
-    print('\n##### Nullable')
+    print('\n#### Nullable')
 
 
 
 
 def nullable_expr(expr, nullables):
     return all(token in nullables for token in expr)
-
 
 def nullable(grammar):
     productions = rules(grammar)
@@ -1021,53 +1027,73 @@ if __name__ == "__main__":
         display_tree(tree)
 
 
-# #### More Earley parsing
+# ### More Earley Parsing
 
 if __name__ == "__main__":
-    print('\n#### More Earley parsing')
+    print('\n### More Earley Parsing')
 
 
 
 
-# ## Testing the parsers
+# ## Testing the Parsers
 
 if __name__ == "__main__":
-    print('\n## Testing the parsers')
+    print('\n## Testing the Parsers')
 
 
 
 
-def prod_line_grammar(nt, t):
+def prod_line_grammar(nonterminals, terminals):
     g = {
         '<start>': ['<SYMBOLS>'],
         '<SYMBOLS>': ['<SYMBOL><SYMBOLS>', '<SYMBOL>'],
-        '<SYMBOL>': ['<NT>', '<T>'],
-        '<NT>': ['<NT_><ALPHA><_NT>'],
-        '<NT_>': ['<'],
-        '<_NT>': ['>'],
-        '<ALPHA>': nt,
-        '<T>': t
+        '<SYMBOL>': ['<NONTERMINALS>', '<TERMINALS>'],
+        '<NONTERMINALS>': ['<LANGLE><ALPHA><RANGLE>'],
+        '<LANGLE>': ['<'],
+        '<RANGLE>': ['>'],
+        '<ALPHA>': nonterminals,
+        '<TERMINALS>': terminals
     }
-    if not nt:
-        g['<NT>'] = ['']
+
+    if not nonterminals:
+        g['<NONTERMINALS>'] = ['']
+
     return g
 
+if __name__ == "__main__":
+    prod_line_grammar(["A", "B", "C"], ["1", "2", "3"])
 
-def make_alt(nt, t, num_alts):
-    prod_grammar = prod_line_grammar(nt, t)
+
+def make_rule(nonterminals, terminals, num_alts):
+    prod_grammar = prod_line_grammar(nonterminals, terminals)
+
     gf = GrammarFuzzer(prod_grammar, min_nonterminals=3, max_nonterminals=5)
     name = "<%s>" % ''.join(random.choices(string.ascii_uppercase, k=3))
+
     return (name, [gf.fuzz() for _ in range(num_alts)])
 
-def make_grammar():
+if __name__ == "__main__":
+    make_rule(["A", "B", "C"], ["1", "2", "3"], 3)
+
+
+def make_grammar(num_symbols=3, num_alts=3):
     a = list(string.ascii_lowercase)
     grammar = {}
     name = None
-    for _ in range(2):
-        name, rules = make_alt([k[1:-1] for k in grammar.keys()], a, 3)
-        grammar[name] = rules
+    for _ in range(num_symbols):
+        name, expansions = make_rule([k[1:-1]
+                                      for k in grammar.keys()], a, num_alts)
+        grammar[name] = expansions
+
     grammar[START_SYMBOL] = [name]
+
+    # assert is_valid_grammar(grammar)
+
     return grammar
+
+if __name__ == "__main__":
+    make_grammar()
+
 
 if __name__ == "__main__":
     for i in range(5):
@@ -1114,10 +1140,10 @@ if __name__ == "__main__":
 
 
 
-# ### Exercise 1 An alternative _Packrat_
+# ### Exercise 1: An Alternative Packrat
 
 if __name__ == "__main__":
-    print('\n### Exercise 1 An alternative _Packrat_')
+    print('\n### Exercise 1: An Alternative Packrat')
 
 
 
@@ -1161,34 +1187,34 @@ if __name__ == "__main__":
         display_tree(tree)
 
 
-# ### Exercise 2 _More PEG Syntax_
+# ### Exercise 2: More PEG Syntax
 
 if __name__ == "__main__":
-    print('\n### Exercise 2 _More PEG Syntax_')
+    print('\n### Exercise 2: More PEG Syntax')
 
 
 
 
-# ### Exercise 3 _PEG Predicates_
-
-if __name__ == "__main__":
-    print('\n### Exercise 3 _PEG Predicates_')
-
-
-
-
-# ### Exercise 4 _Earley Fill Chart_
+# ### Exercise 3: PEG Predicates
 
 if __name__ == "__main__":
-    print('\n### Exercise 4 _Earley Fill Chart_')
+    print('\n### Exercise 3: PEG Predicates')
 
 
 
 
-# ### Exercise 5 _Leo Parser_
+# ### Exercise 4: Earley Fill Chart
 
 if __name__ == "__main__":
-    print('\n### Exercise 5 _Leo Parser_')
+    print('\n### Exercise 4: Earley Fill Chart')
+
+
+
+
+# ### Exercise 5: Leo Parser
+
+if __name__ == "__main__":
+    print('\n### Exercise 5: Leo Parser')
 
 
 
@@ -1227,7 +1253,6 @@ class State(State):
             for p in [*self.expr[:self.dot], '|', *self.expr[self.dot:]]
         ]) + "(%d,%d)" % (self.s_col.index, self.e_col.index)
 
-
 class LeoParser(EarleyParser):
     def complete(self, col, state):
         return self.leo_complete(col, state)
@@ -1239,10 +1264,14 @@ class LeoParser(EarleyParser):
         else:
             self.earley_complete(col, state)
 
-def splitlst(predicate, iterable):
-    return reduce(lambda res, e: res[predicate(e)].append(e) or res, iterable,
-                  ([], []))
+    def deterministic_reduction(self, state):
+        ...
 
+from functools import reduce
+
+def splitlst(predicate, iterable):
+    return reduce(lambda res, e: res[predicate(e)].append(e)
+                  or res, iterable, ([], []))
 
 class LeoParser(LeoParser):
     def check_single_item(self, st, remain):
@@ -1331,7 +1360,6 @@ class Tagged:
                 if s > frm]
         return lst + filter_states(ends)
 
-
 class LeoParser(LeoParser):
     def parse(self, text):
         cursor, states = self.parse_prefix(text)
@@ -1387,10 +1415,10 @@ if __name__ == "__main__":
         display_tree(tree)
 
 
-# ### Exercise 6 _First set of a nonterminal_
+# ### Exercise 6: First Set of a Nonterminal
 
 if __name__ == "__main__":
-    print('\n### Exercise 6 _First set of a nonterminal_')
+    print('\n### Exercise 6: First Set of a Nonterminal')
 
 
 
@@ -1409,7 +1437,6 @@ def first_expr(expr, first, nullable):
             break
     return tokens
 
-
 @fixpoint
 def firstset_(arg):
     (rules, first, epsilon) = arg
@@ -1421,16 +1448,15 @@ if __name__ == "__main__":
     firstset(canonical(EXPR_GRAMMAR_NS), EPSILON)
 
 
-# ### Exercise 7 _Follow set of a nonterminal_
+# ### Exercise 7: Follow Set of a Nonterminal
 
 if __name__ == "__main__":
-    print('\n### Exercise 7 _Follow set of a nonterminal_')
+    print('\n### Exercise 7: Follow Set of a Nonterminal')
 
 
 
 
 EOF = '\0'
-
 
 def followset(grammar, start):
     follow = {i: set() for i in grammar}
@@ -1456,10 +1482,18 @@ if __name__ == "__main__":
     followset(canonical(A1_GRAMMAR), START_SYMBOL)
 
 
-# ### Exercise 8 _LL(1) parse table_
+# ### Exercise 8: A LL(1) Parser
 
 if __name__ == "__main__":
-    print('\n### Exercise 8 _LL(1) parse table_')
+    print('\n### Exercise 8: A LL(1) Parser')
+
+
+
+
+# #### Part 1: A LL(1) Parsing Table
+
+if __name__ == "__main__":
+    print('\n#### Part 1: A LL(1) Parsing Table')
 
 
 
@@ -1467,13 +1501,12 @@ if __name__ == "__main__":
 class LL1Parser(Parser):
     def parse_table(self):
         self.my_rules = rules(self.cgrammar)
-        # .. fill in here to produce
-        # self.table = ...
-    
+        self.table = ...          # fill in here to produce
+
     def rules(self):
         for i, rule in enumerate(self.my_rules):
             print(i, rule)
-            
+
     def show_table(self):
         ts = list(sorted(terminals(self.cgrammar)))
         print('Rule Name\t| %s' % ' | '.join(t for t in ts))
@@ -1484,7 +1517,7 @@ class LL1Parser(Parser):
 
 if __name__ == "__main__":
     for i, r in enumerate(rules(canonical(A2_GRAMMAR))):
-        print("%d\t %s := %s" %(i, r[0], r[1]))
+        print("%d\t %s := %s" % (i, r[0], r[1]))
 
 
 class LL1Parser(LL1Parser):
@@ -1503,7 +1536,7 @@ class LL1Parser(LL1Parser):
         follow = followset(self.cgrammar, self.start_symbol)
 
         ptable = [(i, self.predict(rule, first, follow, epsilon))
-                  for i,rule in enumerate(self.my_rules)]
+                  for i, rule in enumerate(self.my_rules)]
 
         parse_tbl = {k: {} for k in self.cgrammar}
 
@@ -1519,10 +1552,10 @@ if __name__ == "__main__":
     ll1parser.show_table()
 
 
-# ### Exercise 9 _LL(1) parser_
+# #### Part 2: The Parser
 
 if __name__ == "__main__":
-    print('\n### Exercise 9 _LL(1) parser_')
+    print('\n#### Part 2: The Parser')
 
 
 
@@ -1573,10 +1606,10 @@ if __name__ == "__main__":
     display_tree(tree)
 
 
-# ### Exercise 10 A different LangFuzzer
+# ### Exercise 9: A Different LangFuzzer
 
 if __name__ == "__main__":
-    print('\n### Exercise 10 A different LangFuzzer')
+    print('\n### Exercise 9: A Different LangFuzzer')
 
 
 
