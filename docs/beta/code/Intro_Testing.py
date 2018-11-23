@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
-# Last change: 2018-11-05 16:38:54+01:00
+# Last change: 2018-11-23 10:03:22+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -224,12 +224,12 @@ if __name__ == "__main__":
 
 
 
-def exposed_sqrt(s):
-    x = int(s)
+def sqrt_program(arg):
+    x = int(arg)
     print('The root of', x, 'is', my_sqrt(x))
 
 if __name__ == "__main__":
-    exposed_sqrt("4")
+    sqrt_program("4")
 
 
 if __package__ is None or __package__ == "":
@@ -240,19 +240,18 @@ else:
 
 if __name__ == "__main__":
     with ExpectTimeout(1):
-        x = -1
-        print('The root of', x, 'is', my_sqrt(x))
+        sqrt_program("-1")
 
 
-def exposed_sqrt(s):
-    x = int(s)
+def sqrt_program(arg):
+    x = int(arg)
     if x < 0:
         print("Illegal Input")
     else:
         print('The root of', x, 'is', my_sqrt(x))
 
 if __name__ == "__main__":
-    exposed_sqrt("-1")
+    sqrt_program("-1")
 
 
 if __package__ is None or __package__ == "":
@@ -263,12 +262,12 @@ else:
 
 if __name__ == "__main__":
     with ExpectError():
-        exposed_sqrt("xyzzy")
+        sqrt_program("xyzzy")
 
 
-def exposed_sqrt(s):
+def sqrt_program(arg):
     try:
-        x = float(s)
+        x = float(arg)
     except ValueError:
         print("Illegal Input")
     else:
@@ -278,15 +277,15 @@ def exposed_sqrt(s):
             print('The root of', x, 'is', my_sqrt(x))
 
 if __name__ == "__main__":
-    exposed_sqrt("4")
+    sqrt_program("4")
 
 
 if __name__ == "__main__":
-    exposed_sqrt("-1")
+    sqrt_program("-1")
 
 
 if __name__ == "__main__":
-    exposed_sqrt("xyzzy")
+    sqrt_program("xyzzy")
 
 
 # ## The Limits of Testing
