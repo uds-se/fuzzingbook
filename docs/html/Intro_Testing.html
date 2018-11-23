@@ -12545,7 +12545,7 @@ approx = 3.0000000000393214
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0.020728144998429343
+<pre>0.023157160001574084
 </pre>
 </div>
 
@@ -12604,7 +12604,7 @@ approx = 3.0000000000393214
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0.025624057001550682
+<pre>0.025190000014845282
 </pre>
 </div>
 
@@ -12721,7 +12721,16 @@ approx = 3.0000000000393214
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>At this point, we may make <code>my_sqrt()</code> available to other programmers, who may then embed it in their code.  At some point, it will have to process input that comes from <em>third parties</em>, i.e. is not under control by the programmer.  Let us simulate this <em>system input</em> by assuming a function <code>exposed_sqrt()</code> whose input is a string under third-party control:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>At this point, we may make <code>my_sqrt()</code> available to other programmers, who may then embed it in their code.  At some point, it will have to process input that comes from <em>third parties</em>, i.e. is not under control by the programmer.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us simulate this <em>system input</em> by assuming a <em>program</em> <code>sqrt_program()</code> whose input is a string under third-party control:</p>
 </div>
 </div>
 </div>
@@ -12733,8 +12742,8 @@ approx = 3.0000000000393214
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exposed_sqrt</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">sqrt_program</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The root of&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 </pre></div>
 
@@ -12746,7 +12755,19 @@ approx = 3.0000000000393214
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We can easily invoke <code>exposed_sqrt()</code> with some system input:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We assume that <code>sqrt_program</code> is a program which accepts system input from the command line, as in</p>
+<div class="highlight"><pre><span></span>$ sqrt_program <span class="m">4</span>
+<span class="m">2</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can easily invoke <code>sqrt_program()</code> with some system input:</p>
 </div>
 </div>
 </div>
@@ -12758,7 +12779,7 @@ approx = 3.0000000000393214
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;4&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sqrt_program</span><span class="p">(</span><span class="s2">&quot;4&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12778,7 +12799,7 @@ approx = 3.0000000000393214
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>What's the problem?  Well, the problem is that we do not check external inputs for validity.  Try invoking <code>exposed_sqrt(-1)</code>, for instance.  What happens?</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>What's the problem?  Well, the problem is that we do not check external inputs for validity.  Try invoking <code>sqrt_program(-1)</code>, for instance.  What happens?</p>
 </div>
 </div>
 </div>
@@ -12814,8 +12835,7 @@ approx = 3.0000000000393214
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The root of&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="n">sqrt_program</span><span class="p">(</span><span class="s2">&quot;-1&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12827,12 +12847,14 @@ approx = 3.0000000000393214
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-25-51d1d547b921&gt;&#34;, line 3, in &lt;module&gt;
+  File &#34;&lt;ipython-input-25-add01711282b&gt;&#34;, line 2, in &lt;module&gt;
+    sqrt_program(&#34;-1&#34;)
+  File &#34;&lt;ipython-input-22-53e8ec8bb3ca&gt;&#34;, line 3, in sqrt_program
     print(&#39;The root of&#39;, x, &#39;is&#39;, my_sqrt(x))
-  File &#34;&lt;ipython-input-1-f91e5d79a1e7&gt;&#34;, line 7, in my_sqrt
-    guess = (approx + x / approx) / 2
-  File &#34;&lt;ipython-input-1-f91e5d79a1e7&gt;&#34;, line 7, in my_sqrt
-    guess = (approx + x / approx) / 2
+  File &#34;&lt;ipython-input-1-f91e5d79a1e7&gt;&#34;, line 5, in my_sqrt
+    while approx != guess:
+  File &#34;&lt;ipython-input-1-f91e5d79a1e7&gt;&#34;, line 5, in my_sqrt
+    while approx != guess:
   File &#34;&lt;string&gt;&#34;, line 16, in check_time
 TimeoutError (expected)
 </pre>
@@ -12856,8 +12878,8 @@ TimeoutError (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exposed_sqrt</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">sqrt_program</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Illegal Input&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -12884,7 +12906,7 @@ TimeoutError (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;-1&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sqrt_program</span><span class="p">(</span><span class="s2">&quot;-1&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12904,7 +12926,7 @@ TimeoutError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>But wait!  What happens if <code>exposed_sqrt()</code> is not invoked with a number?  Then we would try to convert a non-number string, which would also result in a runtime error:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>But wait!  What happens if <code>sqrt_program()</code> is not invoked with a number?  Then we would try to convert a non-number string, which would also result in a runtime error:</p>
 </div>
 </div>
 </div>
@@ -12931,7 +12953,7 @@ TimeoutError (expected)
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-    <span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;xyzzy&quot;</span><span class="p">)</span>
+    <span class="n">sqrt_program</span><span class="p">(</span><span class="s2">&quot;xyzzy&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12943,10 +12965,10 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-29-15370172e011&gt;&#34;, line 2, in &lt;module&gt;
-    exposed_sqrt(&#34;xyzzy&#34;)
-  File &#34;&lt;ipython-input-26-259e53fd8dc6&gt;&#34;, line 2, in exposed_sqrt
-    x = int(s)
+  File &#34;&lt;ipython-input-29-8c5aae65a938&gt;&#34;, line 2, in &lt;module&gt;
+    sqrt_program(&#34;xyzzy&#34;)
+  File &#34;&lt;ipython-input-26-ea86281b33cf&gt;&#34;, line 2, in sqrt_program
+    x = int(arg)
 ValueError: invalid literal for int() with base 10: &#39;xyzzy&#39; (expected)
 </pre>
 </div>
@@ -12968,9 +12990,9 @@ ValueError: invalid literal for int() with base 10: &#39;xyzzy&#39; (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exposed_sqrt</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">sqrt_program</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Illegal Input&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -12991,7 +13013,7 @@ ValueError: invalid literal for int() with base 10: &#39;xyzzy&#39; (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;4&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sqrt_program</span><span class="p">(</span><span class="s2">&quot;4&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13014,7 +13036,7 @@ ValueError: invalid literal for int() with base 10: &#39;xyzzy&#39; (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;-1&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sqrt_program</span><span class="p">(</span><span class="s2">&quot;-1&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13037,7 +13059,7 @@ ValueError: invalid literal for int() with base 10: &#39;xyzzy&#39; (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exposed_sqrt</span><span class="p">(</span><span class="s2">&quot;xyzzy&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sqrt_program</span><span class="p">(</span><span class="s2">&quot;xyzzy&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13665,7 +13687,7 @@ AssertionError (expected)
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Intro_Testing.ipynb" target=_blank)>Last change: 2018-11-05 16:38:54+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Intro_Testing.ipynb" target=_blank)>Last change: 2018-11-23 10:03:22+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13681,7 +13703,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Intro_Testing.html">Introduction to Software Testing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Intro_Testing.html">https://www.fuzzingbook.org/html/Intro_Testing.html</a>.  Retrieved 2018-11-05 16:38:54+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Intro_Testing.html">Introduction to Software Testing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Intro_Testing.html">https://www.fuzzingbook.org/html/Intro_Testing.html</a>.  Retrieved 2018-11-23 10:03:22+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Intro_Testing,
@@ -13691,9 +13713,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/Intro_Testing.html}},
-    note = {Retrieved 2018-11-05 16:38:54+01:00},
+    note = {Retrieved 2018-11-23 10:03:22+01:00},
     url = {https://www.fuzzingbook.org/html/Intro_Testing.html},
-    urldate = {2018-11-05 16:38:54+01:00}
+    urldate = {2018-11-23 10:03:22+01:00}
 }
 </pre>
 </div>
