@@ -16,7 +16,7 @@ ARG PUBLISH
 # I'd prefer mounting the clone from the host machine into the container which would
 # drastically reduce the size of the image—not just because of the size of the Git 
 # repository, but also because all of the dependencies we have to install to bring a 
-# Git client. This almost doubles the size of the image.
+# Git client. This almost doubles the size of the
 ARG BRANCH=master
 
 # The directory that is used for the clone and for the jupyter notebook as base
@@ -27,7 +27,8 @@ ARG BASEDIR=work
 # and dependencies without changing the actual routines within the Dockerfile.
 ENV TINI_VERSION=0.18.0 \
     FUZZMANAGER_VERSION=0.3.2 \
-    FUZZINGBOOK_VERSION=0.1
+    FUZZINGBOOK_VERSION=0.1 \
+    GRCOV_VERSION=0.3.2
 
 # Set the default shell from /bin/sh to /bin/bash. 
 SHELL ["/bin/bash", "-c"]
@@ -80,12 +81,17 @@ RUN set -x \
     python3 \
     python3-distutils \
     git \
+    npm \
   && apt-get install --no-install-recommends -y $(<fuzzingbook-packages.txt) \
   && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
   && python3 get-pip.py \
   && curl -o fuzzmanager-requirements.txt https://raw.githubusercontent.com/MozillaSecurity/FuzzManager/${FUZZMANAGER_VERSION}/server/requirements.txt \
-  && pip3 install jupyter -r fuzzingbook-requirements.txt -r fuzzmanager-requirements.txt https://github.com/MozillaSecurity/FuzzManager/archive/${FUZZMANAGER_VERSION}.tar.gz \
-  && rm -f fuzzingbook-requirements.txt fuzzmanager-requirements.txt fuzzingbook-packages.txt \
+  && pip3 install jupyter jupyterhub -r fuzzingbook-requirements.txt -r fuzzmanager-requirements.txt https://github.com/MozillaSecurity/FuzzManager/archive/${FUZZMANAGER_VERSION}.tar.gz \
+  && npm install -g configurable-http-proxy \
+  && curl -o grcov-linux-x86_64.tar.bz2 --location https://github.com/mozilla/grcov/releases/download/v${GRCOV_VERSION}/grcov-linux-x86_64.tar.bz2 \
+  && tar xjf grcov-linux-x86_64.tar.bz2 \
+  && mv grcov /usr/local/bin/ \
+  && rm -f fuzzingbook-requirements.txt fuzzmanager-requirements.txt fuzzingbook-packages.txt grcov-linux-x86_64.tar.bz2 \
   && apt-get clean \
   && rm -rf /var/cache/apt/archives /var/lib/apt/lists/*
 
@@ -98,9 +104,11 @@ ENTRYPOINT ["/tini", "--"]
 USER ${FB_USER}
 WORKDIR /home/${FB_USER}
 
-# clone the fuzzingbook repository and use it as working directory for 
-# the jupyter instance. 
-RUN git clone --branch ${BRANCH} https://github.com/uds-se/fuzzingbook.git ${BASEDIR} \
+# Clone the fuzzingbook repository and use it as working directory for 
+# the jupyter instance. We shallow clone and omit history at this point
+# to speed up initial build process. You can change (remove the switch)
+# this at any time to get a full clone.
+RUN git clone --branch ${BRANCH} --depth 1 https://github.com/uds-se/fuzzingbook.git ${BASEDIR} \
   && nbdime extensions --enable \
   && jupyter nbextension enable nbdime --py \
   && nbdime config-git --enable --global \
@@ -124,5 +132,12 @@ RUN git clone --branch ${BRANCH} https://github.com/uds-se/fuzzingbook.git ${BAS
      done || true \
   && shopt -s globstar \
   && jupyter trust ${BASEDIR}/**/*.ipynb \
-  && mkdir -p .jupyter/custom && cp ${BASEDIR}/docs/beta/notebooks/custom.css .jupyter/custom/
+  && mkdir -p .jupyter/custom && cp ${BASEDIR}/docs/beta/notebooks/custom.css .jupyter/custom/ \
+  && git clone --branch ${FUZZMANAGER_VERSION} --depth 1 https://github.com/MozillaSecurity/FuzzManager \
+  && python3 FuzzManager/server/manage.py migrate \
+  && python3 FuzzManager/server/manage.py createsuperuser --username demo --email demo@example.com --no-input \
+  && python3 FuzzManager/server/manage.py shell -c 'from django.contrib.auth.models import User; user = User.objects.get(username="demo"); user.set_password("demo"); user.save();' \
+  && sed -ie 's/ALLOWED_HOSTS = \[\]/ALLOWED_HOSTS = \[ "0.0.0.0" \]/g' FuzzManager/server/server/settings.py
+
+# I am running notebook here. Feel free to change this to hub, lab, or whatever you guys prefer.
 CMD /usr/local/bin/jupyter notebook --ip=0.0.0.0 --port=8080 ${HOME}/${BASEDIR}
