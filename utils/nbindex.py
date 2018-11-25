@@ -23,7 +23,7 @@ def format_class(s):
 def format_text(s):
     return s
 
-def title_to_label(s):
+def title_to_fragment(s):
     return "#" + s.replace(" ", "-")
 
 ITEMS = {
@@ -49,8 +49,9 @@ index = {}
 
 def collect_index(notebook_name):
     notebook_path = notebook_name
-    label = ""
+    fragment = ""
     title = None
+    subtitle = None
 
     # load the notebook
     with io.open(notebook_path, 'r', encoding='utf-8') as f:
@@ -59,9 +60,11 @@ def collect_index(notebook_name):
     for cell in notebook.cells:
         if cell.cell_type == 'markdown':
             for match in RE_LOCATION.findall(cell.source):
-                label = title_to_label(match)
                 if title is None:
                     title = match
+                else:
+                    subtitle = match
+                fragment = title_to_fragment(match)
             
         for (tp, regex, formatter) in ITEMS.get(cell.cell_type, []):
             for match in regex.findall(cell.source):
@@ -69,8 +72,11 @@ def collect_index(notebook_name):
                 if entry not in index:
                     index[entry] = []
 
-                link = notebook_name + label
-                index[entry].append((title, link))
+                link = notebook_name + fragment
+                listed_title = title
+                if subtitle is not None:
+                    listed_title += " (" + subtitle + ")"
+                index[entry].append((listed_title, link))
                 
 def index_key(entry):
     s = entry.upper()
@@ -84,15 +90,18 @@ def index_markdown():
     entries.sort(key=index_key)
     current_letter = None
     for entry in entries:
+        
         entry_letter = index_key(entry)[0]
         if entry_letter != current_letter:
             if current_letter is not None:
                 s += "\n"
             current_letter = entry_letter
             s += "## " + entry_letter + "\n"
-            
+
         s += "* " + entry + " - "
-        s += ", ".join(["[" + title + "](" + link + ")" for title, link in index[entry]])
+
+        occurrences = index[entry]
+        s += ", ".join(["[" + title + "](" + link + ")" for title, link in occurrences])
         s += "\n"
 
     return s
