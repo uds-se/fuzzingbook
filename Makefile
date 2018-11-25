@@ -70,7 +70,7 @@ endif
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
-HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html)
+HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(HTML_TARGET)BookIndex.html
 SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
 PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py) $(CODE_TARGET)setup.py $(CODE_TARGET)__init__.py
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
@@ -386,8 +386,7 @@ $(DOCS_TARGET)index.html: \
 
 # 404.html comes with absolute links (/html/) such that it works anywhare
 # https://help.github.com/articles/creating-a-custom-404-page-for-your-github-pages-site/
-$(DOCS_TARGET)404.html: \
-	$(FULL_NOTEBOOKS)/404.ipynb $(HTML_DEPS)
+$(DOCS_TARGET)404.html: $(FULL_NOTEBOOKS)/404.ipynb $(HTML_DEPS)
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
@@ -397,8 +396,7 @@ $(DOCS_TARGET)404.html: \
 	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
 	@$(OPEN) $@
 
-$(HTML_TARGET)%.html: \
-	$(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
+$(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
@@ -750,6 +748,13 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py $(CHAPTERS_MA
 	$(PYTHON) utils/nbtoc.py \
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
 		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
+		
+# Index
+.PHONY: index
+index: $(NOTEBOOKS)/BookIndex.ipynb
+$(NOTEBOOKS)/BookIndex.ipynb: utils/nbindex.py $(CHAPTERS_MAKEFILE) $(SOURCES)
+	$(RM) $@
+	(cd $(NOTEBOOKS); $(PYTHON) ../utils/nbindex.py $(TOC_CHAPTERS)) > $@
 
 ## Python packages
 # After this, you can do 'pip install fuzzingbook' 
