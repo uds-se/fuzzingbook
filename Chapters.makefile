@@ -25,10 +25,12 @@ TODO_CHAPTERS = \
 	WebFuzzer.ipynb \
 	InformationFlow.ipynb \
 	GrammarMiner.ipynb
+	# Oracles.ipynb
 	# ConstraintGrammarFuzzer.ipynb
 	# GUIFuzzer.ipynb
 	# SearchBasedFuzzer.ipynb
 	# SymbolicFuzzer.ipynb
+	# FuzzingInTheLarge.ipynb
 
 # Appendices for the book
 APPENDICES = \
