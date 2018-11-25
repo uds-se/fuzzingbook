@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-11-23 19:18:05+01:00
+# Last change: 2018-11-25 14:58:15+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -417,7 +417,7 @@ class GrammarFuzzer(GrammarFuzzer):
         # `index_map` translates an index in `expandable_children`
         # back into the original index in `children`
         index_map = [i for (i, c) in enumerate(children)
-                     if self.any_possible_expansions(c)]
+                     if c in expandable_children]
 
         # Select a random child
         child_to_be_expanded = \

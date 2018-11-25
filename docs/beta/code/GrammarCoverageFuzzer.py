@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-11-23 15:41:01+01:00
+# Last change: 2018-11-25 14:54:51+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -177,7 +177,7 @@ class SimpleGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
         uncovered_children = [c for (i, c) in enumerate(possible_children)
                               if self.expansion_key(symbol, c) not in self.covered_expansions]
         index_map = [i for (i, c) in enumerate(possible_children)
-                     if self.expansion_key(symbol, c) not in self.covered_expansions]
+                     if c in uncovered_children]
 
         if len(uncovered_children) == 0:
             # All expansions covered - use superclass method
