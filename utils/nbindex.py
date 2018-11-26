@@ -30,7 +30,8 @@ def format_class(s):
 
 
 def format_method(s):
-    return format_code(s + "()") + " method"
+    # return format_code(s + "()") + " method"
+    return format_function(s)
 
 
 def format_emph(s):
@@ -59,11 +60,12 @@ ITEMS = {
             r"^ *([A-Z][A-Z0-9_]+) += ", re.MULTILINE), format_code)
     ],
     'markdown': [
-        ("def_1", re.compile(r"[^_]_([a-zA-Z]+)_[^_]"), format_emph),
-        ("def_2", re.compile(r"[^_]_([a-zA-Z]+ [a-zA-Z]+)_[^_]"), format_emph),
+        # ("def_1", re.compile(r"[^_]_([a-zA-Z]+)_[^_]"), format_emph),
+        # ("def_2", re.compile(r"[^_]_([a-zA-Z]+ [a-zA-Z]+)_[^_]"), format_emph),
         ("def*1", re.compile(r"[^*]\*([a-zA-Z]+)\*[^*]"), format_emph_index),
         ("def*2",
          re.compile(r"[^*]\*([a-zA-Z]+ [a-zA-Z]+)\*[^*]"), format_emph_index),
+        ("link", re.compile(r"\[(.*)]\(https?:"), format_emph_index),
         ("ref`function", re.compile(r"`([a-zA-Z0-9_]+)\(`"), format_function),
         ("ref`constant", re.compile(r"`([A-Z][A-Z0-9_]+)`"), format_code),
     ]
