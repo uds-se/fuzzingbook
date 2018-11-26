@@ -6,6 +6,9 @@ usage:
 python nbindex.py A.ipynb B.ipynb C.ipynb
 """
 
+# TODO: Include index in HTML creation
+
+
 import io
 import os
 import sys
@@ -179,7 +182,8 @@ with `*term*` instead of `_term_`.
             "nbconvert_exporter": "python",
             "pygments_lexer": "ipython3",
             "version": "3.6.6"
-        }
+        },
+         "toc-autonumbering": False
     }
 
     sys.stdout.buffer.write(nbformat.writes(index_notebook).encode('utf-8'))
