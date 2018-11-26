@@ -76,7 +76,7 @@ PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py) $(CODE_TARGET)setup.py $(
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
 MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 EPUBS     = $(SOURCE_FILES:%.ipynb=$(EPUB_TARGET)%.epub)
-FULLS     = $(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb)
+FULLS     = $(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb) $(FULL_NOTEBOOKS)/BookIndex.ipynb
 DEPENDS   = $(SOURCE_FILES:%.ipynb=$(DEPEND_TARGET)%.ipynb_depend)
 
 CHAPTER_PYS = $(CHAPTERS:%.ipynb=$(CODE_TARGET)%.py)
@@ -572,7 +572,7 @@ stats: $(SOURCES)
 # Run all code.  This should produce no failures.
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
 $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
-	$(PYTHON) $< > $@ 2>&1 || (echo "Error while running $(PYTHON)" >> $@; tail $@; exit 1)
+	$(PYTHON) $< > $@ 2>&1 || (echo "Error while running $<" >> $@; tail $@; exit 1)
 
 .PHONY: check-code
 check-code: code $(PYS_OUT)
@@ -752,7 +752,8 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py $(CHAPTERS_MA
 # Index
 .PHONY: index
 index: $(NOTEBOOKS)/BookIndex.ipynb
-$(NOTEBOOKS)/BookIndex.ipynb: utils/nbindex.py $(CHAPTERS_MAKEFILE) $(SOURCES)
+$(NOTEBOOKS)/BookIndex.ipynb $(DOCS_TARGET)notebooks/BookIndex.ipynb: \
+	utils/nbindex.py $(CHAPTERS_MAKEFILE) $(SOURCES)
 	$(RM) $@
 	(cd $(NOTEBOOKS); $(PYTHON) ../utils/nbindex.py $(TOC_CHAPTERS)) > $@
 
