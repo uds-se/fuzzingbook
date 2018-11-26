@@ -44,9 +44,7 @@ menu_start = r"""
         </ol>
      </li>
      <li class="has-sub"><a href="#"><span title="__CHAPTER_TITLE__"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">__CHAPTER_TITLE_BETA__</span></a>
-        <ul>
            <__ALL_SECTIONS_MENU__>
-        </ul>
      </li>
      """
 
@@ -213,18 +211,18 @@ def get_description(notebook):
 def get_sections(notebook):
     """Return the section titles from a notebook file"""
     contents = get_text_contents(notebook)
-    matches = re.findall(r'^# (.*)', contents, re.MULTILINE)
+    matches = re.findall(r'^(# .*)', contents, re.MULTILINE)
     if len(matches) >= 5:
         # Multiple top sections (book?) - use these
         pass
     else:
-        # Use sections instead
-        matches = re.findall(r'^## (.*)', contents, re.MULTILINE)
-        
+        # Use sections and subsections instead
+        matches = re.findall(r'^(###? .*)', contents, re.MULTILINE)
+
     sections = [match.replace(r'\n', '') for match in matches]
     # print("Sections", repr(sections).encode('utf-8'))
     return sections
-    
+
     
 def anchor(title):
     """Return an anchor '#a-title' for a title 'A title'"""
@@ -433,9 +431,27 @@ if is_ready_chapter:
 
 sections = get_sections(chapter_ipynb_file)
 all_sections_menu = ""
+current_depth = 1
 for section in sections:
-    item = '<li><a href="%s">%s</a></li>\n' % (anchor(section), section)
-    all_sections_menu += item
+    depth = section.count('#')
+    while section.startswith('#') or section.startswith(' '):
+        section = section[1:]
+
+    if depth == current_depth:
+        all_sections_menu += '</li>'
+    
+    if depth > current_depth:
+        all_sections_menu += "<ul>" * (depth - current_depth)
+
+    if depth < current_depth:
+        all_sections_menu += "</ul></li>" * (current_depth - depth)
+
+    all_sections_menu += '<li class="has-sub"><a href="%s">%s</a>\n' % (anchor(section), section)
+    current_depth = depth
+
+while current_depth > 1:
+    all_sections_menu += '</ul></li>'
+    current_depth -= 1
 
 
 # Construct chapter menu
