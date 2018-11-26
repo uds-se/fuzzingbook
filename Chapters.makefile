@@ -35,7 +35,8 @@ TODO_CHAPTERS = \
 # Appendices for the book
 APPENDICES = \
 	ExpectError.ipynb \
-	Timer.ipynb
+	Timer.ipynb \
+	RailroadDiagrams.ipynb
 
 # Additional notebooks for special pages (not to be included in distributions)
 FRONTMATTER = \
