@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-11-25 14:58:15+01:00
+# Last change: 2018-11-26 16:40:09+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -210,32 +210,75 @@ if __name__ == "__main__":
     assert dot_escape("\\n") == "\\\\n"
 
 
-def display_tree(derivation_tree, log=False):
-    """Visualize a derivation tree as SVG using the graphviz/dot package."""
+def extract_node(node, id):
+    symbol, children, *annotation = node
+    return symbol, children, ''.join(str(a) for a in annotation)
 
+def default_node_attr(dot, nid, symbol, ann):
+    dot.node(repr(nid), dot_escape(symbol))
+
+def default_edge_attr(dot, start_node, stop_node):
+    dot.edge(repr(start_node), repr(stop_node))
+
+def default_graph_attr(dot):
+    dot.attr('node', shape='plain')
+
+def display_tree(derivation_tree,
+                 log=False,
+                 extract_node=extract_node,
+                 node_attr=default_node_attr,
+                 edge_attr=default_edge_attr,
+                 graph_attr=default_graph_attr):
     counter = 0
 
     def traverse_tree(dot, tree, id=0):
-        (symbol, children) = tree
-        dot.node(repr(id), dot_escape(symbol))
+        (symbol, children, annotation) = extract_node(tree, id)
+        node_attr(dot, id, symbol, annotation)
 
-        if children is not None:
+        if children:
             for child in children:
-                nonlocal counter  # Assign each node a unique identifier
+                nonlocal counter
                 counter += 1
                 child_id = counter
-                dot.edge(repr(id), repr(child_id))
+                edge_attr(dot, id, child_id)
                 traverse_tree(dot, child, child_id)
 
     dot = Digraph(comment="Derivation Tree")
-    dot.attr('node', shape='plain')
+    graph_attr(dot)
     traverse_tree(dot, derivation_tree)
     if log:
         print(dot)
     display(dot)
 
+
 if __name__ == "__main__":
     display_tree(derivation_tree)
+
+
+def display_annotated_tree(tree, a_nodes, a_edges, log=False):
+    def graph_attr(dot):
+        dot.attr('node', shape='plain')
+        dot.graph_attr['rankdir'] = 'LR'
+
+    def annotate_node(dot, nid, symbol, ann):
+        if nid in a_nodes:
+            dot.node(repr(nid), "%s (%s)" %(dot_escape(symbol), a_nodes[nid]))
+        else:
+            dot.node(repr(nid), dot_escape(symbol))
+
+    def annotate_edge(dot, start_node, stop_node):
+        if (start_node,stop_node) in a_edges:
+            dot.edge(repr(start_node), repr(stop_node), a_edges[(start_node,stop_node)])
+        else:
+            dot.edge(repr(start_node), repr(stop_node))
+
+    display_tree(tree, log=log,
+                 node_attr=annotate_node,
+                 edge_attr=annotate_edge,
+                 graph_attr=graph_attr)
+
+if __name__ == "__main__":
+    display_annotated_tree(derivation_tree, {3:'plus'},{(1,3):'op'},log=False)
 
 
 def all_terminals(tree):
@@ -254,6 +297,17 @@ def all_terminals(tree):
 
 if __name__ == "__main__":
     all_terminals(derivation_tree)
+
+
+def tree_to_string(tree):
+    symbol, children, *_ = tree
+    if children:
+        return ''.join(tree_to_string(c) for c in children)
+    else:
+        return '' if is_nonterminal(symbol) else symbol
+
+if __name__ == "__main__":
+    tree_to_string(derivation_tree)
 
 
 # ## Expanding a Node

@@ -11793,7 +11793,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/Grammars.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Fuzzing with Grammars - Generating Software Tests" />
-<meta property="og:description" content="In the chapter on &quot;Mutation-Based Fuzzing&quot;, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a specification of the legal inputs to a program.  These grammars allow for very systematic and efficient test generation, in particular for complex input formats.  They also serve as the base for configuration fuzzing, API fuzzing, GUI fuzzing, and many more.Prerequisites You should know how basic fuzzing works, e.g. from the Chapter introducing fuzzing. Knowledge on mutation-based fuzzing and coverage is not required yet, but still recommended." />
+<meta property="og:description" content="In the chapter on &quot;Mutation-Based Fuzzing&quot;, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a specification of the legal inputs to a program.  Specifying inputs via a grammar allows for very systematic and efficient test generation, in particular for complex input formats.  Grammars also serve as the base for configuration fuzzing, API fuzzing, GUI fuzzing, and many more.Prerequisites You should know how basic fuzzing works, e.g. from the Chapter introducing fuzzing. Knowledge on mutation-based fuzzing and coverage is not required yet, but still recommended." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11947,7 +11947,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-with-Grammars">Fuzzing with Grammars<a class="anchor-link" href="#Fuzzing-with-Grammars">&#182;</a></h1><p>In the chapter on <a href="MutationFuzzer.html">"Mutation-Based Fuzzing"</a>, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a <em>specification</em> of the legal inputs to a program.  These <em>grammars</em> allow for very systematic and efficient test generation, in particular for complex input formats.  They also serve as the base for configuration fuzzing, API fuzzing, GUI fuzzing, and many more.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-with-Grammars">Fuzzing with Grammars<a class="anchor-link" href="#Fuzzing-with-Grammars">&#182;</a></h1><p>In the chapter on <a href="MutationFuzzer.html">"Mutation-Based Fuzzing"</a>, we have seen how to use extra hints – such as sample input files – to speed up test generation.  In this chapter, we take this idea one step further, by providing a <em>specification</em> of the legal inputs to a program.  Specifying inputs via a <em>grammar</em> allows for very systematic and efficient test generation, in particular for complex input formats.  Grammars also serve as the base for configuration fuzzing, API fuzzing, GUI fuzzing, and many more.</p>
 </div>
 </div>
 </div>
@@ -12005,7 +12005,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammars">Grammars<a class="anchor-link" href="#Grammars">&#182;</a></h2><p>The middle ground between regular expressions and Turing machines is covered by <em>grammars</em>.  Grammars are among the most popular (and best understood) formalisms to formally specify input languages.  Using a grammar, one can express a wide range of the properties of an input language.  Grammars are particularly great for expressing the <em>syntactical structure</em> of an input, and are the formalism of choice to express nested or recursive inputs.  The grammars we use are so-called <em>context-free</em> grammars, one of the easiest and most popular grammar formalisms.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammars">Grammars<a class="anchor-link" href="#Grammars">&#182;</a></h2><p>The middle ground between regular expressions and Turing machines is covered by <em>grammars</em>.  Grammars are among the most popular (and best understood) formalisms to formally specify input languages.  Using a grammar, one can express a wide range of the properties of an input language.  Grammars are particularly great for expressing the <em>syntactical structure</em> of an input, and are the formalism of choice to express nested or recursive inputs.  The grammars we use are so-called <em>context-free grammars</em>, one of the easiest and most popular grammar formalisms.</p>
 </div>
 </div>
 </div>
@@ -12014,12 +12014,12 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Rules-and-Expansions">Rules and Expansions<a class="anchor-link" href="#Rules-and-Expansions">&#182;</a></h3><p>A grammar consists of a <em>start symbol</em> and a set of <em>rules</em> which indicate how the start symbol (and other symbols) can be expanded.  As an example, consider the following grammar, denoting a sequence of two digits:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Rules-and-Expansions">Rules and Expansions<a class="anchor-link" href="#Rules-and-Expansions">&#182;</a></h3><p>A grammar consists of a <em>start symbol</em> and a set of <em>expansion rules</em> (or simply <em>rules</em>) which indicate how the start symbol (and other symbols) can be expanded.  As an example, consider the following grammar, denoting a sequence of two digits:</p>
 
 <pre><code>&lt;start&gt; ::= &lt;digit&gt;&lt;digit&gt;
 &lt;digit&gt; ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
-<p>To read such a grammar, start with the starting symbol (<code>&lt;start&gt;</code>).  A rule <code>&lt;A&gt; ::= &lt;B&gt;</code> means that the symbol on the left side (<code>&lt;A&gt;</code>) can be replaced by the string on the right side (<code>&lt;B&gt;</code>).  In the above grammar, <code>&lt;start&gt;</code> would be replaced by <code>&lt;digit&gt;&lt;digit&gt;</code>.</p>
-<p>In this string again, <code>&lt;digit&gt;</code> would be replaced by the string on the right side of the <code>&lt;digit&gt;</code> rule.  The special operator <code>|</code> denotes <em>alternatives</em>, meaning that any of the digits can be chosen for an expansion.  Each <code>&lt;digit&gt;</code> thus would be expanded into one of the given digits, eventually yielding a string between <code>00</code> and <code>99</code>.  There are no further expansions for <code>0</code> to <code>9</code>, so we are all set.</p>
+<p>To read such a grammar, start with the start symbol (<code>&lt;start&gt;</code>).  An expansion rule <code>&lt;A&gt; ::= &lt;B&gt;</code> means that the symbol on the left side (<code>&lt;A&gt;</code>) can be replaced by the string on the right side (<code>&lt;B&gt;</code>).  In the above grammar, <code>&lt;start&gt;</code> would be replaced by <code>&lt;digit&gt;&lt;digit&gt;</code>.</p>
+<p>In this string again, <code>&lt;digit&gt;</code> would be replaced by the string on the right side of the <code>&lt;digit&gt;</code> rule.  The special operator <code>|</code> denotes <em>expansion alternatives</em> (or simply <em>alternatives</em>), meaning that any of the digits can be chosen for an expansion.  Each <code>&lt;digit&gt;</code> thus would be expanded into one of the given digits, eventually yielding a string between <code>00</code> and <code>99</code>.  There are no further expansions for <code>0</code> to <code>9</code>, so we are all set.</p>
 </div>
 </div>
 </div>
@@ -12379,7 +12379,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Simple-Grammar-Fuzzer">A Simple Grammar Fuzzer<a class="anchor-link" href="#A-Simple-Grammar-Fuzzer">&#182;</a></h2><p>Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (<code>"&lt;start&gt;"</code>) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (<code>max_symbols</code>) on the number of symbols.  Furthermore, to avoid being stuck in a situation where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Simple-Grammar-Fuzzer">A Simple Grammar Fuzzer<a class="anchor-link" href="#A-Simple-Grammar-Fuzzer">&#182;</a></h2><p>Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (<code>&lt;start&gt;</code>) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (<code>max_symbols</code>) on the number of symbols.  Furthermore, to avoid being stuck in a situation where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.</p>
 </div>
 </div>
 </div>
@@ -12781,7 +12781,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="A-Natural-Language-Grammar">A Natural Language Grammar<a class="anchor-link" href="#A-Natural-Language-Grammar">&#182;</a></h3><p>Finally, grammars are not limited to <em>formal</em> languages such as computer inputs, but can also be used to produce <em>natural language</em>.  This is the grammar we used to pick a title for this book:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="A-Natural-Language-Grammar">A Natural Language Grammar<a class="anchor-link" href="#A-Natural-Language-Grammar">&#182;</a></h3><p>Finally, grammars are not limited to <em>formal languages</em> such as computer inputs, but can also be used to produce <em>natural language</em>.  This is the grammar we used to pick a title for this book:</p>
 </div>
 </div>
 </div>
@@ -13337,7 +13337,7 @@ ft:/www.google.com:42
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Operators such as <code>+</code> are frequently introduced as handy <em>shortcuts</em> in grammars.  Formally, our grammars come in the so-called <a href="https://en.wikipedia.org/wiki/Backus-Naur_form">Backus-Naur form</a>, or BNF for short.  Operators <em>extend</em> BNF to so-called <em>extended</em> BNF, or EBNF for short:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Operators such as <code>+</code> are frequently introduced as handy <em>shortcuts</em> in grammars.  Formally, our grammars come in the so-called <a href="https://en.wikipedia.org/wiki/Backus-Naur_form">Backus-Naur form</a>, or <em>BNF</em> for short.  Operators <em>extend</em> BNF to so-called _extended BNF<em>, or </em>EBNF* for short:</p>
 <ul>
 <li>The form <code>&lt;symbol&gt;?</code> indicates that <code>&lt;symbol&gt;</code> is optional – that is, it can occur 0 or 1 times.</li>
 <li>The form <code>&lt;symbol&gt;+</code> indicates that <code>&lt;symbol&gt;</code> can occur 1 or more times repeatedly.</li>
@@ -14224,7 +14224,7 @@ ft:/www.google.com:42
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We can use grammars for <a href="APIFuzzer.html">fuzzing functions and APIs</a> and <a href="GUIFuzzer.html">fuzzing graphical user interfaces</a>:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can use grammars for <a href="APIFuzzer.html">fuzzing functions and APIs</a> and <a href="WebFuzzer.html">fuzzing graphical user interfaces</a>:</p>
 
 <pre><code>&lt;call-sequence&gt; ::= &lt;call&gt;*
 &lt;call&gt; ::= urlparse(&lt;url&gt;) | urlsplit(&lt;url&gt;)</code></pre>
@@ -14831,7 +14831,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-11-23 16:59:00+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-11-26 11:32:21+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14847,7 +14847,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2018-11-23 16:59:00+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2018-11-26 11:32:21+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Grammars,
@@ -14857,9 +14857,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Grammars.html}},
-    note = {Retrieved 2018-11-23 16:59:00+01:00},
+    note = {Retrieved 2018-11-26 11:32:21+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Grammars.html},
-    urldate = {2018-11-23 16:59:00+01:00}
+    urldate = {2018-11-26 11:32:21+01:00}
 }
 </pre>
 </div>

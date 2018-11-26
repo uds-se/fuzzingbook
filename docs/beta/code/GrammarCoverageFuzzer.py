@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-11-25 14:54:51+01:00
+# Last change: 2018-11-26 10:52:08+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -80,24 +80,22 @@ class TrackingGrammarCoverageFuzzer(GrammarFuzzer):
     def expansion_coverage(self):
         return self.covered_expansions
 
-class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
-    def expansion_key(self, symbol, expansion):
-        """Convert (symbol, children) into a key.  `children` can be an expansion string or a derivation tree."""
-        if isinstance(expansion, tuple):
-            expansion = expansion[0]
-        if not isinstance(expansion, str):
-            children = expansion
-            expansion = all_terminals((symbol, children))
-        return symbol + " -> " + expansion
+def expansion_key(symbol, expansion):
+    """Convert (symbol, children) into a key.  `children` can be an expansion string or a derivation tree."""
+    if isinstance(expansion, tuple):
+        expansion = expansion[0]
+    if not isinstance(expansion, str):
+        children = expansion
+        expansion = all_terminals((symbol, children))
+    return symbol + " -> " + expansion
 
 if __name__ == "__main__":
-    f = TrackingGrammarCoverageFuzzer(EXPR_GRAMMAR)
-    f.expansion_key(START_SYMBOL, EXPR_GRAMMAR[START_SYMBOL][0])
+    expansion_key(START_SYMBOL, EXPR_GRAMMAR[START_SYMBOL][0])
 
 
 if __name__ == "__main__":
     children = [("<expr>", None), (" + ", []), ("<term>", None)]
-    f.expansion_key("<expr>", children)
+    expansion_key("<expr>", children)
 
 
 class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
@@ -106,7 +104,7 @@ class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
         expansions = set()
         for nonterminal in self.grammar:
             for expansion in self.grammar[nonterminal]:
-                expansions.add(self.expansion_key(nonterminal, expansion))
+                expansions.add(expansion_key(nonterminal, expansion))
         return expansions
 
 if __name__ == "__main__":
@@ -116,7 +114,7 @@ if __name__ == "__main__":
 
 class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
     def add_coverage(self, symbol, new_children):
-        key = self.expansion_key(symbol, new_children)
+        key = expansion_key(symbol, new_children)
 
         if self.log and key not in self.covered_expansions:
             print("Now covered:", key)
@@ -175,7 +173,7 @@ class SimpleGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
         # Prefer uncovered expansions
         (symbol, children) = node
         uncovered_children = [c for (i, c) in enumerate(possible_children)
-                              if self.expansion_key(symbol, c) not in self.covered_expansions]
+                              if expansion_key(symbol, c) not in self.covered_expansions]
         index_map = [i for (i, c) in enumerate(possible_children)
                      if c in uncovered_children]
 
@@ -274,7 +272,7 @@ class GrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
 
         symbols_seen.add(symbol)
         for expansion in self.grammar[symbol]:
-            key = self.expansion_key(symbol, expansion)
+            key = expansion_key(symbol, expansion)
             if key in cov:
                 continue
 
@@ -328,7 +326,7 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
     def new_child_coverage(self, symbol, children, max_depth=float('inf')):
         """Return new coverage that would be obtained by expanding (symbol, children)"""
         new_cov = self._new_child_coverage(children, max_depth)
-        new_cov.add(self.expansion_key(symbol, children))
+        new_cov.add(expansion_key(symbol, children))
         new_cov -= self.expansion_coverage()   # -= is set subtraction
         return new_cov
 
@@ -402,7 +400,7 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
         new_children = children_with_max_new_coverage[new_children_index]
 
         # Save the expansion as covered
-        key = self.expansion_key(symbol, new_children)
+        key = expansion_key(symbol, new_children)
 
         if self.log:
             print("Now covered:", key)

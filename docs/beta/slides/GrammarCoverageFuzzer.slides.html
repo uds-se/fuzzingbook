@@ -13848,7 +13848,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In this set <code>covered_expansions</code>, we store individual expansions seen as pairs of (<em>symbol</em>, <em>expansion</em>), using the method <code>expansion_key()</code> to generate a string representation for the pair.</p>
+<p>In this set <code>covered_expansions</code>, we store individual expansions seen as pairs of (<em>symbol</em>, <em>expansion</em>), using the function <code>expansion_key()</code> to generate a string representation for the pair.</p>
 
 </div>
 </div>
@@ -13858,15 +13858,14 @@ a.anchor-link {
 <div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">expansion_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Convert (symbol, children) into a key.  `children` can be an expansion string or a derivation tree.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-            <span class="n">expansion</span> <span class="o">=</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">children</span> <span class="o">=</span> <span class="n">expansion</span>
-            <span class="n">expansion</span> <span class="o">=</span> <span class="n">all_terminals</span><span class="p">((</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">symbol</span> <span class="o">+</span> <span class="s2">&quot; -&gt; &quot;</span> <span class="o">+</span> <span class="n">expansion</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert (symbol, children) into a key.  `children` can be an expansion string or a derivation tree.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">expansion</span> <span class="o">=</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="n">expansion</span>
+        <span class="n">expansion</span> <span class="o">=</span> <span class="n">all_terminals</span><span class="p">((</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">symbol</span> <span class="o">+</span> <span class="s2">&quot; -&gt; &quot;</span> <span class="o">+</span> <span class="n">expansion</span>
 </pre></div>
 
     </div>
@@ -13879,8 +13878,7 @@ a.anchor-link {
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">f</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="n">START_SYMBOL</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expansion_key</span><span class="p">(</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="n">START_SYMBOL</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
 </pre></div>
 
     </div>
@@ -13922,7 +13920,7 @@ a.anchor-link {
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">children</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot; + &quot;</span><span class="p">,</span> <span class="p">[]),</span> <span class="p">(</span><span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span>
-<span class="n">f</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+<span class="n">expansion_key</span><span class="p">(</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -13969,7 +13967,7 @@ a.anchor-link {
         <span class="n">expansions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">nonterminal</span><span class="p">]:</span>
-                <span class="n">expansions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">nonterminal</span><span class="p">,</span> <span class="n">expansion</span><span class="p">))</span>
+                <span class="n">expansions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">nonterminal</span><span class="p">,</span> <span class="n">expansion</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">expansions</span>
 </pre></div>
 
@@ -14036,7 +14034,7 @@ a.anchor-link {
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">add_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">):</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">covered_expansions</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Now covered:&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
@@ -14337,7 +14335,7 @@ Tree: 5
         <span class="c1"># Prefer uncovered expansions</span>
         <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">node</span>
         <span class="n">uncovered_children</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">possible_children</span><span class="p">)</span>
-                              <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">covered_expansions</span><span class="p">]</span>
+                              <span class="k">if</span> <span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">covered_expansions</span><span class="p">]</span>
         <span class="n">index_map</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">possible_children</span><span class="p">)</span>
                      <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">uncovered_children</span><span class="p">]</span>
 
@@ -15009,7 +15007,7 @@ e
 
         <span class="n">symbols_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]:</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cov</span><span class="p">:</span>
                 <span class="k">continue</span>
 
@@ -15196,7 +15194,7 @@ e
     <span class="k">def</span> <span class="nf">new_child_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)):</span>
         <span class="sd">&quot;&quot;&quot;Return new coverage that would be obtained by expanding (symbol, children)&quot;&quot;&quot;</span>
         <span class="n">new_cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_new_child_coverage</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">)</span>
-        <span class="n">new_cov</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">))</span>
+        <span class="n">new_cov</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">))</span>
         <span class="n">new_cov</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>   <span class="c1"># -= is set subtraction</span>
         <span class="k">return</span> <span class="n">new_cov</span>
 </pre></div>
@@ -15433,7 +15431,7 @@ Tree: 8
         <span class="n">new_children</span> <span class="o">=</span> <span class="n">children_with_max_new_coverage</span><span class="p">[</span><span class="n">new_children_index</span><span class="p">]</span>
 
         <span class="c1"># Save the expansion as covered</span>
-        <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Now covered:&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
@@ -16768,8 +16766,8 @@ e%1ea25_
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>array([[1.        , 0.92857115],
-       [0.92857115, 1.        ]])</pre>
+<pre>array([[1.        , 0.92819006],
+       [0.92819006, 1.        ]])</pre>
 </div>
 
 </div>

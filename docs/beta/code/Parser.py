@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-23 19:11:10+01:00
+# Last change: 2018-11-26 16:40:15+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -36,12 +36,20 @@ if __name__ == "__main__":
 
 
 
-# ## Have a title here
+# ## An Ad Hoc Parser
 
 if __name__ == "__main__":
-    print('\n## Have a title here')
+    print('\n## An Ad Hoc Parser')
 
 
+
+
+if __name__ == "__main__":
+    mystring = """\
+    1997,Ford,E350
+    2000,Mercury,Cougar\
+    """
+    print(mystring)
 
 
 import fuzzingbook_utils
@@ -52,56 +60,98 @@ else:
     from .Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL, is_valid_grammar
 
 from Fuzzer import Fuzzer
-from GrammarFuzzer import GrammarFuzzer
+from GrammarFuzzer import GrammarFuzzer, display_tree, tree_to_string, dot_escape
 from ExpectError import ExpectError
+from Timer import Timer
 
-from IPython.display import display
+def parse(mystring):
+    children = []
+    tree = (START_SYMBOL, children)
+    for i,line in enumerate(mystring.split('\n')):
+        children.append(("record %d" %i, [(cell,[]) for cell in line.split(',')]))
+    return tree
 
-import re
-
-from graphviz import Digraph
-
-def annotated_symbol(s, a):
-    return re.sub(r'([^a-zA-Z0-9" ])', r"\\\1", s) + (" (%s)" % a if a else '')
-
-def annotated_node(node, id):
-    symbol, children, *annotation = node
-    return symbol, children, ''.join(str(a) for a in annotation)
-
-def display_tree(derivation_tree,
-                 annotated_node=annotated_node,
-                 annotate=annotated_symbol):
-    counter = 0
-
-    def traverse_tree(dot, tree, id=0):
-        (symbol, children, annotation) = annotated_node(tree, id)
-        dot.node(repr(id), annotate(symbol, annotation))
-
-        if children is not None:
-            for child in children:
-                nonlocal counter
-                counter += 1
-                child_id = counter
-                dot.edge(repr(id), repr(child_id))
-                traverse_tree(dot, child, child_id)
-
-    dot = Digraph(comment="Derivation Tree")
+def lr_graph(dot):
     dot.attr('node', shape='plain')
-    traverse_tree(dot, derivation_tree)
-    display(dot)
-
-def all_terminals(tree, grammar=None):
-    symbol, children, *_ = tree
-    if children:
-        return ''.join(all_terminals(c, grammar) for c in children)
-    else:
-        if grammar is not None:
-            return '' if symbol in grammar else symbol
-        else:
-            return symbol
+    dot.graph_attr['rankdir'] = 'LR'
 
 if __name__ == "__main__":
-    mystring = '1+2'
+    tree = parse(mystring)
+    display_tree(tree, graph_attr=lr_graph)
+
+
+if __name__ == "__main__":
+    mystring = '''\
+    1997,Ford,E350,"ac, abs, moon",3000.00\
+    '''
+    print(mystring)
+
+
+def highlight_node(predicate):
+    def hl_node(dot, nid, symbol, ann):
+        if predicate(dot, nid, symbol, ann):
+            dot.node(repr(nid), dot_escape(symbol), fontcolor='red')
+        else:
+            dot.node(repr(nid), dot_escape(symbol))
+    return hl_node
+
+if __name__ == "__main__":
+    tree = parse(mystring)
+    bad_nodes = {5,6,7,12,13,20,22,23,24,25}
+    hl_predicate = lambda _d,nid,_s,_a: nid in bad_nodes 
+    highlight_err_node = highlight_node(hl_predicate)
+    display_tree(tree, log=False, node_attr=highlight_err_node, graph_attr=lr_graph)
+
+
+def parse_quote(string, i):
+    v = string[i+1:].find('"')
+    return v+i+1 if v >= 0 else -1
+    
+def find_comma(string, i):
+    slen = len(string)
+    while i < slen:
+        if string[i] == '"':
+            i = parse_quote(string, i)
+        if string[i] == ',':
+            return i
+        i+=1
+    return -1
+        
+def comma_split(string):
+    slen = len(string)
+    i = 0
+    while i < slen:
+        c = find_comma(string, i)
+        if c == -1:
+            yield string[i:]
+            return
+        else:
+            yield string[i:c]
+        i = c+1
+
+def parse(mystring):
+    children = []
+    tree = (START_SYMBOL, children)
+    for i,line in enumerate(mystring.split('\n')):
+        children.append(("record %d" %i, [(cell,[]) for cell in comma_split(line)]))
+    return tree
+
+if __name__ == "__main__":
+    tree = parse(mystring)
+    display_tree(tree, graph_attr=lr_graph)
+
+
+if __name__ == "__main__":
+    mystring = '''\
+    1999,Chevy,"Venture \\"Extended Edition, Very Large\\"",,5000.00\
+    '''
+    print(mystring)
+
+
+if __name__ == "__main__":
+    tree = parse(mystring)
+    bad_nodes = {4,5}
+    display_tree(tree, log=False, node_attr=highlight_err_node, graph_attr=lr_graph)
 
 
 # ## Grammars
@@ -120,12 +170,16 @@ A1_GRAMMAR = {
 }
 
 if __name__ == "__main__":
+    mystring = '1+2'
+
+
+if __name__ == "__main__":
     tree = ('<start>', [('<expr>',
                          [('<expr>', [('<integer>', [('<digit>', [('1', [])])])]),
                           ('+', []),
                           ('<expr>', [('<integer>', [('<digit>', [('2',
                                                                    [])])])])])])
-    assert mystring == all_terminals(tree)
+    assert mystring == tree_to_string(tree)
     display_tree(tree)
 
 
@@ -140,14 +194,14 @@ A2_GRAMMAR = {
 
 if __name__ == "__main__":
     tree = ('<start>', [('<expr>', [('<integer>', [('<digit>', [('1', [])]),
-                                                   ('<integer_>', [('', [])])]),
+                                                   ('<integer_>', [])]),
                                     ('<expr_>', [('+', []),
                                                  ('<expr>',
                                                   [('<integer>',
                                                     [('<digit>', [('2', [])]),
-                                                     ('<integer_>', [('', [])])]),
-                                                   ('<expr_>', [('', [])])])])])])
-    assert mystring == all_terminals(tree)
+                                                     ('<integer_>', [])]),
+                                                   ('<expr_>', [])])])])])
+    assert mystring == tree_to_string(tree)
     display_tree(tree)
 
 
@@ -157,6 +211,25 @@ if __name__ == "__main__":
     print('\n#### Recursion')
 
 
+
+
+LR_GRAMMAR = {
+    '<start>': ['<A>'],
+    '<A>': ['<A>a', ''],
+}
+
+if __name__ == "__main__":
+    mystring = 'aaaaaa'
+    display_tree(('<start>', (('<A>', (('<A>', (('<A>', []), ('a', []))), ('a', []))), ('a', []))))
+
+
+RR_GRAMMAR = {
+    '<start>': ['<A>'],
+    '<A>': ['a<A>', ''],
+}
+
+if __name__ == "__main__":
+    display_tree(('<start>', (('<A>', (('a', []), ('<A>', (('a', []), ('<A>', (('a', []), ('<A>', []))))))),)))
 
 
 # #### Ambiguity
@@ -176,7 +249,7 @@ if __name__ == "__main__":
                            ('<expr>', [('<integer>',
                                         [('<digit>', [('2', [])])])])]), ('+', []),
                ('<expr>', [('<integer>', [('<digit>', [('3', [])])])])])])
-    assert mystring == all_terminals(tree)
+    assert mystring == tree_to_string(tree)
     display_tree(tree)
 
 
@@ -189,7 +262,7 @@ if __name__ == "__main__":
                            ('+', []),
                            ('<expr>', [('<integer>', [('<digit>', [('3',
                                                                     [])])])])])])])
-    assert all_terminals(tree) == mystring
+    assert tree_to_string(tree) == mystring
     display_tree(tree)
 
 
@@ -216,7 +289,7 @@ class Parser(object):
     def prune_tree(self, tree):
         name, children = tree
         if name in self.tokens:
-            return (name, [(all_terminals(tree), [])])
+            return (name, [(tree_to_string(tree), [])])
         else:
             return (name, [self.prune_tree(c) for c in children])
 
@@ -243,6 +316,8 @@ if __name__ == "__main__":
 
 
 
+
+import re
 
 def canonical(grammar, letters=False):
     def split(rule):
@@ -363,14 +438,14 @@ if __name__ == "__main__":
     mystring = "1 + (2 * 3)"
     peg = PEGParser(EXPR_GRAMMAR)
     for tree in peg.parse(mystring):
-        assert all_terminals(tree) == mystring
+        assert tree_to_string(tree) == mystring
         display_tree(tree)
 
 
 if __name__ == "__main__":
     mystring = "1 * (2 + 3.35)"
     for tree in peg.parse(mystring):
-        assert all_terminals(tree) == mystring
+        assert tree_to_string(tree) == mystring
         display_tree(tree)
 
 
@@ -401,10 +476,8 @@ else:
 VAR_GRAMMAR = {
     '<start>': ['<statements>'],
     '<statements>': ['<statement>;<statements>', '<statement>'],
-    '<statement>': ['<declaration>', '<assignment>'],
-    '<declaration>': ['<def> <identifier>'],
+    '<statement>': ['<assignment>'],
     '<assignment>': ['<identifier>=<expr>'],
-    '<def>': ['def'],
     '<identifier>': ['<word>'],
     '<word>': ['<alpha><word>', '<alpha>'],
     '<alpha>': list(string.ascii_letters),
@@ -417,24 +490,33 @@ VAR_GRAMMAR = {
     '<digit>': crange('0', '9')
 }
 
-VAR_TOKENS = {'<def>', '<number>', '<identifier>'}
+if __name__ == "__main__":
+    mystring = 'va=10;vb=20'
+    hl_predicate = lambda _d,_n,symbol,_a: symbol in {'<number>', '<identifier>'}
+
+    parser = PEGParser(VAR_GRAMMAR)
+    for tree in parser.parse(mystring):
+        display_tree(tree, node_attr=highlight_node(hl_predicate))
+
+
+VAR_TOKENS = {'<number>', '<identifier>'}
 
 if __name__ == "__main__":
-    mystring = 'def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)'
+    mystring = 'avar=1.3;bvar=avar-3*(4+300)'
     parser = PEGParser(VAR_GRAMMAR, tokens=VAR_TOKENS)
     for tree in parser.parse(mystring):
-        display_tree(tree)
+        display_tree(tree, node_attr=highlight_node(hl_predicate))
 
 
 if __name__ == "__main__":
     mystrings = [
-        'def abc;abc=12+(3+3.3)',
-        'def a;def b;def c;a=1;b=2;c=a+b',
-        'def avar;def bvar;avar=1.3;bvar=avar-3*(4+300)',
-        'def a;def b;a=1.3;b=a-1*(4+3+(2/a))',
-        'def a;def b;def c;def d;a=10;b=20;c=34;d=-b+(b*b-4*a*c)/(2*a)',
-        'def x;def y;def z;x=10;y=20;z=(x+y)*(x-y)',
-        'def x;def y;def z;x=23;y=51;z=x*x-y*y',
+        'abc=12+(3+3.3)',
+        'a=1;b=2;c=a+b',
+        'avar=1.3;bvar=avar-3*(4+300)',
+        'a=1.3;b=a-1*(4+3+(2/a))',
+        'a=10;b=20;c=34;d=-b+(b*b-4*a*c)/(2*a)',
+        'x=10;y=20;z=(x+y)*(x-y)',
+        'x=23;y=51;z=x*x-y*y',
     ]
 
 
@@ -486,14 +568,15 @@ class LangFuzzer(LangFuzzer):
         self.fragments = {k: [] for k in self.parser.cgrammar}
         self.fragment(strings)
 
-    def generate_new_tree(self, node, choice):
-        name, children, id = node
-        if id == choice:
-            return random.choice(self.fragments[name])
-        else:
-            return (name, [self.generate_new_tree(c, choice)
-                           for c in children])
+# ##### Candidate
 
+if __name__ == "__main__":
+    print('\n##### Candidate')
+
+
+
+
+class LangFuzzer(LangFuzzer):
     def candidate(self):
         tree, nodes = random.choice(self.trees)
         interesting_nodes = [
@@ -503,15 +586,94 @@ class LangFuzzer(LangFuzzer):
         node = random.choice(interesting_nodes)
         return tree, node
 
+if __name__ == "__main__":
+    random.seed(1)
+    lf = LangFuzzer(PEGParser(VAR_GRAMMAR, tokens=VAR_TOKENS), mystrings)
+    tree, node = lf.candidate()
+    hl_predicate = lambda _d,nid,_s,_a: nid in {node}
+    display_tree(tree, node_attr=highlight_node(hl_predicate))
+
+
+# ##### Generate New Tree
+
+if __name__ == "__main__":
+    print('\n##### Generate New Tree')
+
+
+
+
+class LangFuzzer(LangFuzzer):
+    def generate_new_tree(self, node, choice):
+        name, children, id = node
+        if id == choice:
+            return random.choice(self.fragments[name])
+        else:
+            return (name, [self.generate_new_tree(c, choice)
+                           for c in children])
+
+if __name__ == "__main__":
+    random.seed(1)
+    lf = LangFuzzer(PEGParser(VAR_GRAMMAR, tokens=VAR_TOKENS), mystrings)
+    tree, node = lf.candidate()
+    hl_predicate = lambda _d,nid,_s,_a: nid in {node}
+    new_tree = lf.generate_new_tree(tree, node)
+    display_tree(new_tree, node_attr=highlight_node(hl_predicate))
+
+
+# ##### Fuzz
+
+if __name__ == "__main__":
+    print('\n##### Fuzz')
+
+
+
+
+class LangFuzzer(LangFuzzer):
     def fuzz(self):
         tree, node = self.candidate()
         modified = self.generate_new_tree(tree, node)
-        return all_terminals(modified)
+        return tree_to_string(modified)
 
 if __name__ == "__main__":
     lf = LangFuzzer(PEGParser(VAR_GRAMMAR, tokens=VAR_TOKENS), mystrings)
-    for i in range(100):
+    for i in range(10):
         print(lf.fuzz())
+
+
+if __name__ == "__main__":
+    trials = 100
+
+    lf = LangFuzzer(PEGParser(VAR_GRAMMAR, tokens=VAR_TOKENS), mystrings)
+    valid = []
+    time = 0
+    for i in range(trials):
+        with Timer() as t:
+            s = lf.fuzz()
+            try:
+                exec(s,{},{})
+                valid.append((s, t.elapsed_time()))
+            except:
+                pass
+            time += t.elapsed_time()
+    print("%d valid strings, that is LangFuzzer generated %f%% valid entries" % (len(valid), len(valid)*100.0/trials ))
+    print("Total time of %f seconds" % time)
+
+
+if __name__ == "__main__":
+    gf = GrammarFuzzer(VAR_GRAMMAR)
+    valid = []
+    time = 0
+    for i in range(trials):
+        with Timer() as t:
+            s = gf.fuzz()
+            try:
+                exec(s,{},{})
+                valid.append(s)
+            except:
+                pass
+            time += t.elapsed_time()
+    print("%d valid strings, that is GrammarFuzzer generated %f%% valid entries" % (len(valid), len(valid)*100.0/trials ))
+    print("Total time of %f seconds" % time)
 
 
 # ###  Problems with PEG
@@ -534,7 +696,7 @@ if __name__ == "__main__":
         for _ in range(e):
             tree = f.expand_tree_once(tree)
         tree = f.expand_tree_with_strategy(tree, f.expand_node_min_cost)
-        strings.append(all_terminals(tree))
+        strings.append(tree_to_string(tree))
         display_tree(tree)
     strings
 
@@ -561,6 +723,11 @@ def rules(grammar):
             for key, choices in grammar.items()
             for choice in choices]
 
+def terminals(grammar):
+    return set(token
+               for key, choice in rules(grammar)
+               for token in choice if token not in grammar)
+
 EXPR_GRAMMAR_NS = {}
 for key, alts in canonical(EXPR_GRAMMAR).items():
     EXPR_GRAMMAR_NS[key] = [''.join(sym.strip()
@@ -569,11 +736,6 @@ for key, alts in canonical(EXPR_GRAMMAR).items():
 if __name__ == "__main__":
     rules(EXPR_GRAMMAR_NS)
 
-
-def terminals(grammar):
-    return set(token
-               for key, choice in rules(grammar)
-               for token in choice if token not in grammar)
 
 if __name__ == "__main__":
     terminals(canonical(EXPR_GRAMMAR_NS))
@@ -590,6 +752,15 @@ if __name__ == "__main__":
 
 
 
+
+SAMPLE_GRAMMAR = {
+    '<start>': ['<A><B>'],
+    '<A>': ['a<B>c', 'a<A>'],
+    '<B>': ['b<C>', '<D>'],
+    '<C>': ['c'],
+    '<D>': ['d']
+}
+C_SAMPLE_GRAMMAR = canonical(SAMPLE_GRAMMAR)
 
 # ### Columns
 
@@ -639,6 +810,24 @@ class Item(Item):
     def at_dot(self):
         return self.expr[self.dot] if self.dot < len(self.expr) else None
 
+if __name__ == "__main__":
+    item_name = '<B>'
+    item_expr = C_SAMPLE_GRAMMAR[item_name][1]
+    an_item = Item(item_name,tuple(item_expr), 0)
+
+
+if __name__ == "__main__":
+    an_item.at_dot()
+
+
+if __name__ == "__main__":
+    another_item = an_item.advance()
+
+
+if __name__ == "__main__":
+    another_item.finished()
+
+
 # ### States
 
 if __name__ == "__main__":
@@ -669,6 +858,23 @@ class State(Item):
 
     def advance(self):
         return State(self.name, self.expr, self.dot + 1, self.s_col)
+
+if __name__ == "__main__":
+    col_0 = Column(0, None)
+    item_name = START_SYMBOL
+    item_expr = tuple(*C_SAMPLE_GRAMMAR[START_SYMBOL])
+    s = State(item_name, item_expr, 0, col_0)
+    col_0.add(s)
+    s.at_dot()
+
+
+if __name__ == "__main__":
+    sym = s.at_dot()
+    for alt in C_SAMPLE_GRAMMAR[sym]:
+        col_0.add(State(sym, tuple(alt), 0, col_0))
+    for state in col_0.states:
+        print(state)
+
 
 # ### The Parsing Algorithm
 
@@ -878,7 +1084,7 @@ if __name__ == "__main__":
     mystring = '(1+24)-33'
     parser = EarleyParser(A3_GRAMMAR)
     for tree in parser.parse(mystring):
-        assert all_terminals(tree) == mystring
+        assert tree_to_string(tree) == mystring
         display_tree(tree)
 
 
@@ -905,7 +1111,7 @@ if __name__ == "__main__":
     mystring = '12+23-34'
     parser = EarleyParser(A1_GRAMMAR)
     for tree in parser.parse(mystring):
-        assert mystring == all_terminals(tree)
+        assert mystring == tree_to_string(tree)
         display_tree(tree)
 
 
@@ -915,7 +1121,7 @@ if __name__ == "__main__":
         s = gf.fuzz()
         print(i, s)
         for tree in parser.parse(s):
-            assert all_terminals(tree, A1_GRAMMAR) == s
+            assert tree_to_string(tree) == s
 
 
 # ### The Aycock Epsilon Fix
@@ -1104,7 +1310,7 @@ if __name__ == "__main__":
         s = mygf.fuzz()
         print(s)
         for tree in parser.parse(s):
-            assert all_terminals(tree) == s
+            assert tree_to_string(tree) == s
             display_tree(tree)
 
 
@@ -1183,7 +1389,7 @@ class PackratParser(Parser):
 if __name__ == "__main__":
     mystring = "1+(2*3)"
     for tree in PackratParser(EXPR_GRAMMAR_NS).parse(mystring):
-        assert all_terminals(tree) == mystring
+        assert tree_to_string(tree) == mystring
         display_tree(tree)
 
 
@@ -1320,7 +1526,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     result = LeoParser(LR_GRAMMAR, log=True).parse(mystring)
     for tree in result:
-        print(all_terminals(tree, grammar=LR_GRAMMAR))
+        print(tree_to_string(tree))
 
 
 RR_GRAMMAR2 = {
@@ -1404,14 +1610,14 @@ class LeoParser(LeoParser):
 if __name__ == "__main__":
     p = LeoParser(RR_GRAMMAR)
     for tree in p.parse(mystring):
-        assert all_terminals(tree, RR_GRAMMAR) == mystring
+        assert tree_to_string(tree) == mystring
         display_tree(tree)
 
 
 if __name__ == "__main__":
     p = LeoParser(RR_GRAMMAR2)
     for tree in p.parse(mystring2):
-        assert all_terminals(tree, RR_GRAMMAR2) == mystring2
+        assert tree_to_string(tree) == mystring2
         display_tree(tree)
 
 
@@ -1648,7 +1854,7 @@ class LangFuzzer2(LangFuzzer):
         tree, node = self.candidate()
         tree_with_a_hole = self.generate_new_tree(tree, node)
         modified = self.gfuzz.expand_tree(tree_with_a_hole)
-        return all_terminals(modified)
+        return tree_to_string(modified)
 
 if __name__ == "__main__":
     parser = EarleyParser(VAR_GRAMMAR, tokens=VAR_TOKENS)
