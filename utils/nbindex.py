@@ -6,8 +6,6 @@ usage:
 python nbindex.py A.ipynb B.ipynb C.ipynb
 """
 
-# TODO: Include index in HTML creation
-
 
 import io
 import os
@@ -63,14 +61,11 @@ ITEMS = {
             r"^ *([A-Z][A-Z0-9_]+) += ", re.MULTILINE), format_code)
     ],
     'markdown': [
-        # ("def_1", re.compile(r"[^_]_([a-zA-Z]+)_[^_]"), format_emph),
-        # ("def_2", re.compile(r"[^_]_([a-zA-Z]+ [a-zA-Z]+)_[^_]"), format_emph),
-        ("def*1", re.compile(r"[^*]\*([a-zA-Z]+)\*[^*]"), format_emph_index),
-        ("def*2",
-         re.compile(r"[^*]\*([a-zA-Z]+ [a-zA-Z]+)\*[^*]"), format_emph_index),
-        ("link", re.compile(r"\[(.*)]\(https?:"), format_emph_index),
-        ("ref`function", re.compile(r"`([a-zA-Z0-9_]+)\(`"), format_function),
-        ("ref`constant", re.compile(r"`([A-Z][A-Z0-9_]+)`"), format_code),
+        # ("_term_", re.compile(r"[^_]_([a-zA-Z]+)_[^_]"), format_emph),
+        ("*term*", re.compile(r"[^*]\*([a-zA-Z][a-zA-Z0-9-_ ]*[a-zA-Z])\*[^*]"), format_emph_index),
+        ("[link]", re.compile(r"\[(.*)]\(https?:"), format_emph_index),
+        ("`function()`", re.compile(r"`([a-zA-Z0-9_]+)\(`"), format_function),
+        ("`constant`", re.compile(r"`([A-Z][A-Z0-9_]+)`"), format_code),
     ]
 }
 
@@ -117,9 +112,12 @@ def index_key(entry):
         s = s[1:]
     return s if len(s) > 0 else entry
 
+LETTERS_PER_SECTION = 5
 
 def index_markdown():
     index_sections = []
+    
+    # Create entries, one cell per letter
     entries = list(index.keys())
     entries.sort(key=index_key)
     current_letter = None
@@ -130,9 +128,10 @@ def index_markdown():
         if entry_letter != current_letter:
             if s != "":
                 index_sections.append(s)
+                s = ""
 
             current_letter = entry_letter
-            s = "## " + entry_letter + "\n\n"
+            s = "### " + entry_letter + "\n\n"
 
         s += "* " + entry + " &mdash; "
 
@@ -143,9 +142,21 @@ def index_markdown():
 
     if s != "":
         index_sections.append(s)
-
-    return index_sections
-
+    
+    # Insert in-between titles
+    ## A-E
+    ### A
+    ### B
+    new_index_sections = []
+    while len(index_sections) > 0:
+        sublist = index_sections[:LETTERS_PER_SECTION]
+        index_sections = index_sections[LETTERS_PER_SECTION:]
+        first_letter = sublist[0][len("### ")]
+        last_letter = sublist[-1][len("### ")]
+        # Having &ndash; here breaks fragment links
+        new_index_sections += ["## " + first_letter + "-" + last_letter] + sublist
+    
+    return new_index_sections
 
 if __name__ == "__main__":
     index = {}
