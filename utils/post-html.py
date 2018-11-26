@@ -410,28 +410,14 @@ if include_beta:
 notebook_html += "notebooks/"
 
 # Construct sections menu
-all_sections_menu = ""
+
 basename = os.path.splitext(os.path.basename(chapter_html_file))[0]
 chapter_ipynb_file = os.path.join("notebooks", basename + ".ipynb")
-if args.home:
-    chapter_html = site_html
-    chapter_notebook_ipynb = notebook_html + "00_Table_of_Contents.ipynb"
-else:
-    chapter_html = site_html + "html/" + basename + ".html"
-    chapter_notebook_ipynb = notebook_html + basename + ".ipynb"
 
-chapter_title = get_title(chapter_ipynb_file)
-chapter_title_beta = chapter_title
-is_todo_chapter = include_beta and chapter_ipynb_file in todo_chapters
-is_ready_chapter = include_beta and chapter_ipynb_file in ready_chapters
-if is_todo_chapter:
-    chapter_title_beta += " " + todo_suffix
-if is_ready_chapter:
-    chapter_title_beta += " " + ready_suffix
-
-sections = get_sections(chapter_ipynb_file)
 all_sections_menu = ""
+sections = get_sections(chapter_ipynb_file)
 current_depth = 1
+
 for section in sections:
     depth = section.count('#')
     while section.startswith('#') or section.startswith(' '):
@@ -455,27 +441,76 @@ while current_depth > 1:
 
 
 # Construct chapter menu
+
+if args.home:
+    chapter_html = site_html
+    chapter_notebook_ipynb = notebook_html + "00_Table_of_Contents.ipynb"
+else:
+    chapter_html = site_html + "html/" + basename + ".html"
+    chapter_notebook_ipynb = notebook_html + basename + ".ipynb"
+
+chapter_title = get_title(chapter_ipynb_file)
+chapter_title_beta = chapter_title
+is_todo_chapter = include_beta and chapter_ipynb_file in todo_chapters
+is_ready_chapter = include_beta and chapter_ipynb_file in ready_chapters
+if is_todo_chapter:
+    chapter_title_beta += " " + todo_suffix
+if is_ready_chapter:
+    chapter_title_beta += " " + ready_suffix
+
 if args.home:
     link_class = ' class="this_page"'
 else:
     link_class = ''
 all_chapters_menu = '<li><a href="%s"%s><i class="fa fa-fw fa-home"></i> About this book</a></li>\n' % (site_html, link_class)
 
-for menu_ipynb_file in all_chapters:
+this_chapter_counter = 1
+for counter, menu_ipynb_file in enumerate(all_chapters):
+    if menu_ipynb_file == chapter_ipynb_file:
+        this_chapter_counter = counter
+
+CHAPTERS_PER_MENU = 5
+
+in_sublist = False
+for counter, menu_ipynb_file in enumerate(all_chapters):
     basename = os.path.splitext(os.path.basename(menu_ipynb_file))[0]
-    title = get_title(menu_ipynb_file)
+    title = '<span class="chnum">' + repr(counter + 1) + "</span> "
+
     if menu_ipynb_file == chapter_ipynb_file:
         link_class = ' class="this_page"'
+        # title += ' &bull;'
     else:
         link_class = ''
+    title += get_title(menu_ipynb_file)
+
     beta_indicator = ''
     if menu_ipynb_file in ready_chapters:
         beta_indicator = "&nbsp;" + ready_suffix
     if menu_ipynb_file in todo_chapters:
         beta_indicator = "&nbsp;" + todo_suffix
     menu_html_file = menu_prefix + basename + ".html"
-    item = '<li><a href="%s"%s>%s%s</a></li>\n' % (menu_html_file, link_class, title, beta_indicator)
+    
+    if counter // CHAPTERS_PER_MENU == this_chapter_counter // CHAPTERS_PER_MENU:
+        if in_sublist:
+            all_chapters_menu += "</ul>"
+            in_sublist = False
+    elif counter % CHAPTERS_PER_MENU == 0:
+        if in_sublist:
+            all_chapters_menu += "</ul>"
+        subtitle = "Chapters " + repr(counter + 1) + "&ndash;" + \
+            repr(min(len(all_chapters), counter + CHAPTERS_PER_MENU))
+        all_chapters_menu += '<li class="has-sub"><a href="%s" class="chapters">%s%s' \
+            % (menu_html_file, subtitle, beta_indicator)
+        all_chapters_menu += ' <i class="fa fa-fw fa-caret-right"></i></a><ul>'
+        in_sublist = True
+    
+    item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
+        (menu_html_file, link_class, title, beta_indicator)
     all_chapters_menu += item
+    
+if in_sublist:
+    all_chapters_menu += "</ul>"
+    in_sublist = False
 
 # Description
 description = html.escape(get_description(chapter_ipynb_file))
