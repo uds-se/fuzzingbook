@@ -70,13 +70,13 @@ endif
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
-HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(HTML_TARGET)BookIndex.html
+HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(HTML_TARGET)00_Index.html
 SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
 PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py) $(CODE_TARGET)setup.py $(CODE_TARGET)__init__.py
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
 MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 EPUBS     = $(SOURCE_FILES:%.ipynb=$(EPUB_TARGET)%.epub)
-FULLS     = $(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb) $(FULL_NOTEBOOKS)/BookIndex.ipynb
+FULLS     = $(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb) $(FULL_NOTEBOOKS)/00_Index.ipynb
 DEPENDS   = $(SOURCE_FILES:%.ipynb=$(DEPEND_TARGET)%.ipynb_depend)
 
 CHAPTER_PYS = $(CHAPTERS:%.ipynb=$(CODE_TARGET)%.py)
@@ -395,6 +395,13 @@ $(DOCS_TARGET)404.html: $(FULL_NOTEBOOKS)/404.ipynb $(HTML_DEPS)
 	$(PYTHON) utils/post-html.py --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
 	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
 	@$(OPEN) $@
+	
+$(DOCS_TARGET)html/00_Index.html: $(DOCS_TARGET)notebooks/00_Index.ipynb $(HTML_DEPS)
+	$(CONVERT_TO_HTML) $<
+	@cd $(HTML_TARGET) && $(RM) -r 00_Index.nbpub.log 00_Index_files
+	@cd $(DOCS_TARGET)html && $(RM) -r 00_Index.nbpub.log 00_Index_files
+	mv $(HTML_TARGET)00_Index.html $@
+	$(PYTHON) utils/post-html.py $(POST_HTML_OPTIONS) $@
 
 $(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
@@ -626,7 +633,7 @@ metadata: $(ADD_METADATA)
 
 ## Publishing
 .PHONY: docs
-docs: publish-notebooks publish-html publish-code publish-dist \
+docs: publish-notebooks publish-index publish-html publish-code publish-dist \
 	publish-slides publish-pics \
 	$(DOCS_TARGET)index.html $(DOCS_TARGET)404.html README.md binder/postBuild
 	@echo "Now use 'make publish-all' to commit changes to docs."
@@ -644,7 +651,7 @@ publish: docs
 
 # Add/update HTML code in repository
 .PHONY: publish-html
-publish-html: html
+publish-html: html $(DOCS_TARGET)html/00_Index.html
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)html || $(MKDIR) $(DOCS_TARGET)html
 	cp -pr $(HTML_TARGET) $(DOCS_TARGET)html
@@ -710,6 +717,9 @@ publish-notebooks: full-notebooks
 	@test -d $(DOCS_TARGET)notebooks || $(MKDIR) $(DOCS_TARGET)notebooks
 	cp -pr $(FULL_NOTEBOOKS)/* $(DOCS_TARGET)notebooks
 
+.PHONY: publish-index
+publish-index: $(DOCS_TARGET)notebooks/00_Index.ipynb
+
 .PHONY: publish-pics
 publish-pics: $(NOTEBOOKS)/PICS
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
@@ -751,10 +761,9 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py $(CHAPTERS_MA
 		
 # Index
 .PHONY: index
-index: $(NOTEBOOKS)/BookIndex.ipynb
-$(NOTEBOOKS)/BookIndex.ipynb $(DOCS_TARGET)notebooks/BookIndex.ipynb: \
-	utils/nbindex.py $(CHAPTERS_MAKEFILE) $(SOURCES)
-	$(RM) $@
+index: $(NOTEBOOKS)/00_Index.ipynb
+$(NOTEBOOKS)/00_Index.ipynb $(DOCS_TARGET)notebooks/00_Index.ipynb: \
+	utils/nbindex.py $(SOURCES) $(CHAPTERS_MAKEFILE)
 	(cd $(NOTEBOOKS); $(PYTHON) ../utils/nbindex.py $(TOC_CHAPTERS)) > $@
 
 ## Python packages
