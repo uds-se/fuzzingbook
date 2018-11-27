@@ -5,7 +5,7 @@ This is a minimal docker image to serve all dependencies and tools for the Fuzzi
 ## Installation
 
 ```
-docker pull SaschaJust/fuzzingbook
+docker pull sjust/fuzzingbook
 ```
 
 ## Using the image
