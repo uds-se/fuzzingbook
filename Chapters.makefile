@@ -8,16 +8,16 @@ PUBLIC_CHAPTERS = \
 	Coverage.ipynb \
 	MutationFuzzer.ipynb \
 	Grammars.ipynb \
-	GrammarFuzzer.ipynb
+	GrammarFuzzer.ipynb \
+	GrammarCoverageFuzzer.ipynb
 
 # Chapters that are ready for release
 READY_CHAPTERS = \
-	GrammarCoverageFuzzer.ipynb \
-	ConfigurationFuzzer.ipynb
+	ConfigurationFuzzer.ipynb \
+	Parser.ipynb
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
 	Reducer.ipynb \
 	Carver.ipynb \
