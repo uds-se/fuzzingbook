@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-11-26 11:32:21+01:00
+# Last change: 2018-11-27 15:26:30+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -201,6 +201,70 @@ if __name__ == "__main__":
         print(simple_grammar_fuzzer(grammar=EXPR_GRAMMAR, max_nonterminals=5))
 
 
+# ## Visualizing Grammars as Railroad Diagrams
+
+if __name__ == "__main__":
+    print('\n## Visualizing Grammars as Railroad Diagrams')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from RailroadDiagrams import NonTerminal, Terminal, Choice, HorizontalChoice, Sequence, Diagram, show_diagram
+else:
+    from .RailroadDiagrams import NonTerminal, Terminal, Choice, HorizontalChoice, Sequence, Diagram, show_diagram
+
+from IPython.display import SVG, HTML, display
+
+def syntax_diagram_symbol(symbol):
+    if is_nonterminal(symbol):
+        return NonTerminal(symbol[1:-1])
+    else:
+        return Terminal(symbol)
+
+if __name__ == "__main__":
+    SVG(show_diagram(syntax_diagram_symbol('<term>')))
+
+
+def syntax_diagram_expr(expansion):
+    symbols = [sym for sym in re.split(RE_NONTERMINAL, expansion) if sym != ""]
+    if len(symbols) == 0:
+        symbols = [""]  # special case: empty expansion
+    
+    return Sequence(*[syntax_diagram_symbol(sym) for sym in symbols])
+
+if __name__ == "__main__":
+    display(SVG(show_diagram(syntax_diagram_expr(EXPR_GRAMMAR['<term>'][0]))))
+
+
+from itertools import zip_longest
+
+def syntax_diagram_alt(alt):
+    max_len = 5
+    l = len(alt)
+    if l > max_len:
+        iter_len = l // max_len
+        alts = list(zip_longest(*[alt[i::iter_len] for i in range(iter_len)]))
+        exprs = [[syntax_diagram_expr(expr) for expr in alt
+                  if expr is not None] for alt in alts]
+        choices = [Choice(len(expr)//2,*expr) for expr in exprs]
+        return HorizontalChoice(*choices)
+    else:
+        return Choice(l//2,*[syntax_diagram_expr(expr) for expr in alt])
+
+if __name__ == "__main__":
+    display(SVG(show_diagram(syntax_diagram_alt(EXPR_GRAMMAR['<digit>']))))
+
+
+def syntax_diagram(grammar):
+    for key in grammar:
+        print("%s" % key[1:-1])
+        display(SVG(show_diagram(syntax_diagram_alt(grammar[key]))))
+
+if __name__ == "__main__":
+    syntax_diagram(EXPR_GRAMMAR)
+
+
 # ## Some Grammars
 
 if __name__ == "__main__":
@@ -240,6 +304,10 @@ CGI_GRAMMAR = {
     "<other>":  # Actually, could be _all_ letters
         ["0", "1", "2", "3", "4", "5", "a", "b", "c", "d", "e", "-", "_"],
 }
+
+if __name__ == "__main__":
+    syntax_diagram(CGI_GRAMMAR)
+
 
 if __name__ == "__main__":
     for i in range(10):
@@ -286,6 +354,10 @@ URL_GRAMMAR = {
 }
 
 if __name__ == "__main__":
+    syntax_diagram(URL_GRAMMAR)
+
+
+if __name__ == "__main__":
     for i in range(10):
         print(simple_grammar_fuzzer(grammar=URL_GRAMMAR, max_nonterminals=10))
 
@@ -315,6 +387,10 @@ TITLE_GRAMMAR = {
     "<reader-property>": ["Fun", "Profit"],
     "<software-property>": ["Robustness", "Reliability", "Security"],
 }
+
+if __name__ == "__main__":
+    syntax_diagram(TITLE_GRAMMAR)
+
 
 if __name__ == "__main__":
     titles = set()
@@ -352,8 +428,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    for i in range(20):
-        print(m.fuzz())
+    [m.fuzz() for i in range(20)]
 
 
 # ## Grammar Shortcuts

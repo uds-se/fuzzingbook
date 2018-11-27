@@ -11891,7 +11891,7 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Covering-Grammar-Expansions">Covering Grammar Expansions</a>
 </ul></li><li class="has-sub"><a href="#Deep-Foresight">Deep Foresight</a>
 <ul><li class="has-sub"><a href="#Determining-Maximum-per-Symbol-Coverage">Determining Maximum per-Symbol Coverage</a>
-</li><li class="has-sub"><a href="#Determining-Children-with-new-Coverage">Determining Children with new Coverage</a>
+</li><li class="has-sub"><a href="#Determining-yet-Uncovered-Children">Determining yet Uncovered Children</a>
 </li><li class="has-sub"><a href="#Adaptive-Lookahead">Adaptive Lookahead</a>
 </li><li class="has-sub"><a href="#All-Together">All Together</a>
 </ul></li><li class="has-sub"><a href="#Coverage-in-Context">Coverage in Context</a>
@@ -11975,7 +11975,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Covering-Grammar-Elements">Covering Grammar Elements<a class="anchor-link" href="#Covering-Grammar-Elements">&#182;</a></h2><p>During testing, it is important to maximize <em>variety</em>: The more diverse the inputs, the quicker we will cover the functionality of a program.  One way to maximize such variety is to aim for <em>coverage</em> of grammar elements: If we already have seen some expansion, we can prefer other possible expansion candidates out of the set of possible expansions.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Covering-Grammar-Elements">Covering Grammar Elements<a class="anchor-link" href="#Covering-Grammar-Elements">&#182;</a></h2><p>The aim of test generation is to cover all functionality of a program – hopefully including the failing functionality, of course.  This functionality, however, is tied to the structure of the input: If we fail to produce certain input elements, then the associated code and functionality will not be triggered either, nixing our chances to find a bug in there.</p>
+<p>As an example, consider our expression grammar <code>EXPR_GRAMMAR</code> from the <a href="Grammars.html">chapter on grammars.</a>.  If we do not produce negative numbers, then negative numbers will not be tested.  If we do not produce floating-point numbers, then floating-point numbers will not ne tested.  Our aim must thus be to <em>cover all possible expansions</em>.</p>
 </div>
 </div>
 </div>
@@ -11984,37 +11985,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>As an example, consider the grammar</p>
-
-<pre><code>grammar
-&lt;start&gt; ::= &lt;digit&gt;&lt;digit&gt;
-&lt;digit&gt; ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9</code></pre>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let us assume we have already produced a <code>0</code> in the first expansion of <code>&lt;digit&gt;</code>.  As it comes to expand the next digit, we would mark the <code>0</code> expansion as already covered, and choose one of the yet uncovered alternatives.  Only when we have covered all alternatives would we go back and consider expansions covered before.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracking-Grammar-Coverage">Tracking Grammar Coverage<a class="anchor-link" href="#Tracking-Grammar-Coverage">&#182;</a></h3></div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>This concept of coverage is very easy to implement.  We introduce a class <code>GrammarCoverageFuzzer</code> that keeps track of the current grammar coverage achieved:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>One way to maximize such variety is to <em>track</em> the expansions that occur during grammar production: If we already have seen some expansion, we can prefer other possible expansion candidates out of the set of possible expansions.  Consider the following rule in our expression grammar:</p>
 </div>
 </div>
 </div>
@@ -12040,11 +12011,60 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">DIGIT_GRAMMAR</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">CGI_GRAMMAR</span><span class="p">,</span> <span class="n">URL_GRAMMAR</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">is_valid_grammar</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">CGI_GRAMMAR</span><span class="p">,</span> <span class="n">URL_GRAMMAR</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">is_valid_grammar</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us assume we have already produced an <code>&lt;integer&gt;</code> in the first expansion of <code>&lt;factor&gt;</code>.  As it comes to expand the next factor, we would mark the <code>&lt;integer&gt;</code> expansion as already covered, and choose one of the yet uncovered alternatives such as <code>-&lt;factor&gt;</code> (a negative number) or <code>&lt;integer&gt;.&lt;integer&gt;</code> (a floating-point number).  Only when we have covered all alternatives would we go back and reconsider expansions covered before.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracking-Grammar-Coverage">Tracking Grammar Coverage<a class="anchor-link" href="#Tracking-Grammar-Coverage">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This concept of coverage is very easy to implement.  We introduce a class <code>GrammarCoverageFuzzer</code> that keeps track of the current grammar coverage achieved:</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -12202,13 +12222,24 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return set of all expansions in a grammar&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols_seen</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="n">symbols_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+
         <span class="n">expansions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">nonterminal</span><span class="p">]:</span>
-                <span class="n">expansions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">nonterminal</span><span class="p">,</span> <span class="n">expansion</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]:</span>
+            <span class="n">expansions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="n">nonterminals</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+                <span class="n">expansions</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_expansion_coverage</span><span class="p">(</span><span class="n">nonterminal</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">expansions</span>
+
+    <span class="k">def</span> <span class="nf">max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">symbols_seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12222,8 +12253,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">DIGIT_GRAMMAR</span><span class="p">)</span>
-<span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expr_fuzzer</span> <span class="o">=</span> <span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
+<span class="n">expr_fuzzer</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12234,16 +12265,30 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;start&gt; -&gt; 0&#39;,
- &#39;&lt;start&gt; -&gt; 1&#39;,
- &#39;&lt;start&gt; -&gt; 2&#39;,
- &#39;&lt;start&gt; -&gt; 3&#39;,
- &#39;&lt;start&gt; -&gt; 4&#39;,
- &#39;&lt;start&gt; -&gt; 5&#39;,
- &#39;&lt;start&gt; -&gt; 6&#39;,
- &#39;&lt;start&gt; -&gt; 7&#39;,
- &#39;&lt;start&gt; -&gt; 8&#39;,
- &#39;&lt;start&gt; -&gt; 9&#39;}
+<pre>{&#39;&lt;digit&gt; -&gt; 0&#39;,
+ &#39;&lt;digit&gt; -&gt; 1&#39;,
+ &#39;&lt;digit&gt; -&gt; 2&#39;,
+ &#39;&lt;digit&gt; -&gt; 3&#39;,
+ &#39;&lt;digit&gt; -&gt; 4&#39;,
+ &#39;&lt;digit&gt; -&gt; 5&#39;,
+ &#39;&lt;digit&gt; -&gt; 6&#39;,
+ &#39;&lt;digit&gt; -&gt; 7&#39;,
+ &#39;&lt;digit&gt; -&gt; 8&#39;,
+ &#39;&lt;digit&gt; -&gt; 9&#39;,
+ &#39;&lt;expr&gt; -&gt; &lt;term&gt;&#39;,
+ &#39;&lt;expr&gt; -&gt; &lt;term&gt; + &lt;expr&gt;&#39;,
+ &#39;&lt;expr&gt; -&gt; &lt;term&gt; - &lt;expr&gt;&#39;,
+ &#39;&lt;factor&gt; -&gt; (&lt;expr&gt;)&#39;,
+ &#39;&lt;factor&gt; -&gt; +&lt;factor&gt;&#39;,
+ &#39;&lt;factor&gt; -&gt; -&lt;factor&gt;&#39;,
+ &#39;&lt;factor&gt; -&gt; &lt;integer&gt;&#39;,
+ &#39;&lt;factor&gt; -&gt; &lt;integer&gt;.&lt;integer&gt;&#39;,
+ &#39;&lt;integer&gt; -&gt; &lt;digit&gt;&#39;,
+ &#39;&lt;integer&gt; -&gt; &lt;digit&gt;&lt;integer&gt;&#39;,
+ &#39;&lt;start&gt; -&gt; &lt;expr&gt;&#39;,
+ &#39;&lt;term&gt; -&gt; &lt;factor&gt;&#39;,
+ &#39;&lt;term&gt; -&gt; &lt;factor&gt; * &lt;term&gt;&#39;,
+ &#39;&lt;term&gt; -&gt; &lt;factor&gt; / &lt;term&gt;&#39;}
 </pre>
 </div>
 
@@ -12277,6 +12322,9 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
         <span class="n">index</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">choose_node_expansion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_coverage</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">index</span>
+
+    <span class="k">def</span> <span class="nf">missing_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12287,7 +12335,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>With this, we can now systematically check which expansions already have been covered – and which ones still have to be covered.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>With this, we can now systematically check which expansions already have been covered – and which ones still have to be covered.  To keep things simple, let us focus on <code>&lt;digit&gt;</code> expansions only.</p>
 </div>
 </div>
 </div>
@@ -12299,8 +12347,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">DIGIT_GRAMMAR</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span> <span class="o">=</span> <span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12311,9 +12359,9 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 9
+<pre>Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 9
 Tree: 9
 &#39;9&#39;
 </pre>
@@ -12336,7 +12384,7 @@ Tree: 9
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12347,9 +12395,9 @@ Tree: 9
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 0
+<pre>Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 0
 Tree: 0
 &#39;0&#39;
 </pre>
@@ -12372,7 +12420,7 @@ Tree: 0
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12383,9 +12431,9 @@ Tree: 0
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 5
+<pre>Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 5
 Tree: 5
 &#39;5&#39;
 </pre>
@@ -12417,7 +12465,7 @@ Tree: 5
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -12428,7 +12476,86 @@ Tree: 5
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;start&gt; -&gt; 0&#39;, &#39;&lt;start&gt; -&gt; 5&#39;, &#39;&lt;start&gt; -&gt; 9&#39;}
+<pre>{&#39;&lt;digit&gt; -&gt; 0&#39;, &#39;&lt;digit&gt; -&gt; 5&#39;, &#39;&lt;digit&gt; -&gt; 9&#39;}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is the set of all expansions we can cover:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;digit&gt; -&gt; 0&#39;,
+ &#39;&lt;digit&gt; -&gt; 1&#39;,
+ &#39;&lt;digit&gt; -&gt; 2&#39;,
+ &#39;&lt;digit&gt; -&gt; 3&#39;,
+ &#39;&lt;digit&gt; -&gt; 4&#39;,
+ &#39;&lt;digit&gt; -&gt; 5&#39;,
+ &#39;&lt;digit&gt; -&gt; 6&#39;,
+ &#39;&lt;digit&gt; -&gt; 7&#39;,
+ &#39;&lt;digit&gt; -&gt; 8&#39;,
+ &#39;&lt;digit&gt; -&gt; 9&#39;}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is the missing coverage:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">missing_expansion_coverage</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;digit&gt; -&gt; 1&#39;,
+ &#39;&lt;digit&gt; -&gt; 2&#39;,
+ &#39;&lt;digit&gt; -&gt; 3&#39;,
+ &#39;&lt;digit&gt; -&gt; 4&#39;,
+ &#39;&lt;digit&gt; -&gt; 6&#39;,
+ &#39;&lt;digit&gt; -&gt; 7&#39;,
+ &#39;&lt;digit&gt; -&gt; 8&#39;}
 </pre>
 </div>
 
@@ -12454,9 +12581,9 @@ Tree: 5
 
     <span class="nb">sum</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+        <span class="c1"># print(trial, end=&quot; &quot;)</span>
         <span class="n">fuzzer</span><span class="o">.</span><span class="n">reset_coverage</span><span class="p">()</span>
-        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span>
-                  <span class="o">-</span> <span class="n">fuzzer</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">missing_expansion_coverage</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
             <span class="nb">sum</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 
@@ -12474,7 +12601,8 @@ Tree: 5
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">average_length_until_full_coverage</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">average_length_until_full_coverage</span><span class="p">(</span><span class="n">digit_fuzzer</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12485,7 +12613,40 @@ Tree: 5
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>130.82
+<pre>28.4
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>For full expressions, this takes a bit longer:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expr_fuzzer</span> <span class="o">=</span> <span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
+<span class="n">average_length_until_full_coverage</span><span class="p">(</span><span class="n">expr_fuzzer</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>138.12
 </pre>
 </div>
 
@@ -12567,7 +12728,7 @@ Tree: 5
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>By returning the set of expansions covered so far, we can invoke the fuzzer multiple times, each time adding to the grammar coverage.  Using the <code>DIGIT_GRAMMAR</code> grammar, for instance, the fuzzer produces one digit after the other:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>By returning the set of expansions covered so far, we can invoke the fuzzer multiple times, each time adding to the grammar coverage.  Using the <code>EXPR_GRAMMAR</code> grammar to produce digits, for instance, the fuzzer produces one digit after the other:</p>
 </div>
 </div>
 </div>
@@ -12579,7 +12740,7 @@ Tree: 5
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">DIGIT_GRAMMAR</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 </pre></div>
 
@@ -12591,11 +12752,11 @@ Tree: 5
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 4
-Tree: 4
-&#39;4&#39;
+<pre>Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 5
+Tree: 5
+&#39;5&#39;
 </pre>
 </div>
 
@@ -12604,7 +12765,7 @@ Tree: 4
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;4&#39;
+<pre>&#39;5&#39;
 </pre>
 </div>
 
@@ -12627,11 +12788,11 @@ Tree: 4
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 6
-Tree: 6
-&#39;6&#39;
+<pre>Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 2
+Tree: 2
+&#39;2&#39;
 </pre>
 </div>
 
@@ -12640,7 +12801,7 @@ Tree: 6
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;6&#39;
+<pre>&#39;2&#39;
 </pre>
 </div>
 
@@ -12663,11 +12824,11 @@ Tree: 6
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 0
-Tree: 0
-&#39;0&#39;
+<pre>Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 1
+Tree: 1
+&#39;1&#39;
 </pre>
 </div>
 
@@ -12676,7 +12837,7 @@ Tree: 0
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;0&#39;
+<pre>&#39;1&#39;
 </pre>
 </div>
 
@@ -12708,7 +12869,7 @@ Tree: 0
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;start&gt; -&gt; 0&#39;, &#39;&lt;start&gt; -&gt; 4&#39;, &#39;&lt;start&gt; -&gt; 6&#39;}
+<pre>{&#39;&lt;digit&gt; -&gt; 1&#39;, &#39;&lt;digit&gt; -&gt; 2&#39;, &#39;&lt;digit&gt; -&gt; 5&#39;}
 </pre>
 </div>
 
@@ -12741,41 +12902,41 @@ Tree: 0
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 2
-Tree: 2
-&#39;2&#39;
-Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 9
+<pre>Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 0
+Tree: 0
+&#39;0&#39;
+Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 9
 Tree: 9
 &#39;9&#39;
-Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 5
-Tree: 5
-&#39;5&#39;
-Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 1
-Tree: 1
-&#39;1&#39;
-Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 8
-Tree: 8
-&#39;8&#39;
-Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 7
+Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 7
 Tree: 7
 &#39;7&#39;
-Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 3
+Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 4
+Tree: 4
+&#39;4&#39;
+Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 8
+Tree: 8
+&#39;8&#39;
+Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 3
 Tree: 3
 &#39;3&#39;
+Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 6
+Tree: 6
+&#39;6&#39;
 </pre>
 </div>
 
@@ -12816,7 +12977,7 @@ Tree: 3
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let us apply this on a more complex grammar – e.g., the expression grammar.  We see that after a few iterations, we cover each and every digit, operator, and expansion:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us apply this on a more complex grammar – e.g., the full expression grammar.  We see that after a few iterations, we cover each and every digit, operator, and expansion:</p>
 </div>
 </div>
 </div>
@@ -12841,16 +13002,16 @@ Tree: 3
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>084.7
-2 / 3 / 6 / 3 / 0 - -5 * 1 + 4 * 9 / 3
-(+0 / 0 - 0 - 2) - +8.1 * 5 + 1 * 7 - 7
-7477.0
-66.0 * +6 / 2 + 4 / 4 - 6 * 4 + 2
-(8 / 2 * 7) * (7 / 7) / 3 * 6 + 15.306
-+2
-39 / +-(3 * 7 * 4 - 2 + 0 / 4) / 41 / 3 / 2
-(++(6) * 0 * 7 / 0 - 0 * 2 + 07 * 5 / 9)
--((63) + 1 + 1 + 1) * +8 * -+-2.4 - +(1.3 - 0 * 5)
+<pre>+(0.31 / (5) / 9 + 4 * 6 / 3 - 8 - 7) * -2
++++2 / 87360
+((4) * 0 - 1) / -9.6 + 7 / 6 + 1 * 8 + 7 * 8
+++++26 / -64.45
+(8 / 1 / 6 + 9 + 7 + 8) * 1.1 / 0 * 1
+7.7
+++(3.5 / 3) - (-4 + 3) / (8 / 0) / -4 * 2 / 1
++(90 / --(28 * 8 / 5 + 5 / (5 / 8))) - +9.36 / 2.5 * (5 * (7 * 6 * 5) / 8)
+9.11 / 7.28
+1 / (9 - 5 * 6) / 6 / 7 / 7 + 1 + 1 - 7 * -3
 </pre>
 </div>
 
@@ -12914,7 +13075,7 @@ Tree: 3
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>49.36
+<pre>52.28
 </pre>
 </div>
 
@@ -12923,10 +13084,54 @@ Tree: 3
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Deep-Foresight">Deep Foresight<a class="anchor-link" href="#Deep-Foresight">&#182;</a></h2><p>Selecting expansions for individual rules is a good start; however, it is not sufficient, as the following example shows.  We apply our coverage fuzzer on the CGI grammar:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Deep-Foresight">Deep Foresight<a class="anchor-link" href="#Deep-Foresight">&#182;</a></h2><p>Selecting expansions for individual rules is a good start; however, it is not sufficient, as the following example shows.  We apply our coverage fuzzer on the CGI grammar from the <a href="Coverage.html">chapter on coverage</a>:</p>
 </div>
 </div>
 </div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CGI_GRAMMAR</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;string&gt;&#39;],
+ &#39;&lt;string&gt;&#39;: [&#39;&lt;letter&gt;&#39;, &#39;&lt;letter&gt;&lt;string&gt;&#39;],
+ &#39;&lt;letter&gt;&#39;: [&#39;&lt;plus&gt;&#39;, &#39;&lt;percent&gt;&#39;, &#39;&lt;other&gt;&#39;],
+ &#39;&lt;plus&gt;&#39;: [&#39;+&#39;],
+ &#39;&lt;percent&gt;&#39;: [&#39;%&lt;hexdigit&gt;&lt;hexdigit&gt;&#39;],
+ &#39;&lt;hexdigit&gt;&#39;: [&#39;0&#39;,
+  &#39;1&#39;,
+  &#39;2&#39;,
+  &#39;3&#39;,
+  &#39;4&#39;,
+  &#39;5&#39;,
+  &#39;6&#39;,
+  &#39;7&#39;,
+  &#39;8&#39;,
+  &#39;9&#39;,
+  &#39;a&#39;,
+  &#39;b&#39;,
+  &#39;c&#39;,
+  &#39;d&#39;,
+  &#39;e&#39;,
+  &#39;f&#39;],
+ &#39;&lt;other&gt;&#39;: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;-&#39;, &#39;_&#39;]}
+</pre>
+</div>
+
 </div>
 
 <div class="input_code">
@@ -12948,16 +13153,16 @@ Tree: 3
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>%361
-+%4f
-c%a05
-%d5
-4+
-%7b
-0b-3
-e
-%2e
-%81
+<pre>c
++%a6++
++-
++
+++
+%18%b7
++e
+_
+d2+%e3
+%d0
 </pre>
 </div>
 
@@ -12989,12 +13194,19 @@ e
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;hexdigit&gt; -&gt; 9&#39;,
+<pre>{&#39;&lt;hexdigit&gt; -&gt; 2&#39;,
+ &#39;&lt;hexdigit&gt; -&gt; 4&#39;,
+ &#39;&lt;hexdigit&gt; -&gt; 5&#39;,
+ &#39;&lt;hexdigit&gt; -&gt; 9&#39;,
  &#39;&lt;hexdigit&gt; -&gt; c&#39;,
- &#39;&lt;other&gt; -&gt; 2&#39;,
- &#39;&lt;other&gt; -&gt; _&#39;,
+ &#39;&lt;hexdigit&gt; -&gt; f&#39;,
+ &#39;&lt;other&gt; -&gt; 0&#39;,
+ &#39;&lt;other&gt; -&gt; 1&#39;,
+ &#39;&lt;other&gt; -&gt; 3&#39;,
+ &#39;&lt;other&gt; -&gt; 4&#39;,
+ &#39;&lt;other&gt; -&gt; 5&#39;,
  &#39;&lt;other&gt; -&gt; a&#39;,
- &#39;&lt;other&gt; -&gt; d&#39;}
+ &#39;&lt;other&gt; -&gt; b&#39;}
 </pre>
 </div>
 
@@ -13236,7 +13448,7 @@ e
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Determining-Children-with-new-Coverage">Determining Children with new Coverage<a class="anchor-link" href="#Determining-Children-with-new-Coverage">&#182;</a></h3><p>The definition of <code>max_symbol_expansion_coverage()</code> allows us to determine the <em>new</em> coverage for each child.  To this end, we <em>subtract</em> the coverage already seen (<code>expansion_coverage()</code>) from the coverage that could be obtained.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Determining-yet-Uncovered-Children">Determining yet Uncovered Children<a class="anchor-link" href="#Determining-yet-Uncovered-Children">&#182;</a></h3><p>The definition of <code>max_symbol_expansion_coverage()</code> allows us to determine the <em>missing coverage</em> for each child.  To this end, we <em>subtract</em> the coverage already seen (<code>expansion_coverage()</code>) from the coverage that could be obtained.</p>
 </div>
 </div>
 </div>
@@ -13285,7 +13497,7 @@ e
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">DIGIT_GRAMMAR</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 </pre></div>
 
@@ -13297,11 +13509,11 @@ e
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;start&gt;
-Expanding &lt;start&gt; randomly
-Now covered: &lt;start&gt; -&gt; 8
-Tree: 8
-&#39;8&#39;
+<pre>Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 2
+Tree: 2
+&#39;2&#39;
 </pre>
 </div>
 
@@ -13310,7 +13522,7 @@ Tree: 8
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;8&#39;
+<pre>&#39;2&#39;
 </pre>
 </div>
 
@@ -13342,7 +13554,7 @@ Tree: 8
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;start&gt; -&gt; 8&#39;}
+<pre>{&#39;&lt;digit&gt; -&gt; 2&#39;}
 </pre>
 </div>
 
@@ -13351,7 +13563,7 @@ Tree: 8
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>When we go through the individual expansion possibilities for <code>START_SYMBOL</code>, we see that all expansions offer additional coverage, <em>except</em> for the one we have just seen.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>When we go through the individual expansion possibilities for <code>&lt;digit&gt;</code>, we see that all expansions offer additional coverage, <em>except</em> for the one we have just seen.</p>
 </div>
 </div>
 </div>
@@ -13363,9 +13575,9 @@ Tree: 8
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="n">DIGIT_GRAMMAR</span><span class="p">[</span><span class="n">START_SYMBOL</span><span class="p">]:</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">]:</span>
     <span class="n">children</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">expansion_to_children</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">new_child_coverage</span><span class="p">(</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">children</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">new_child_coverage</span><span class="p">(</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">children</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -13376,16 +13588,16 @@ Tree: 8
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0 {&#39;&lt;start&gt; -&gt; 0&#39;}
-1 {&#39;&lt;start&gt; -&gt; 1&#39;}
-2 {&#39;&lt;start&gt; -&gt; 2&#39;}
-3 {&#39;&lt;start&gt; -&gt; 3&#39;}
-4 {&#39;&lt;start&gt; -&gt; 4&#39;}
-5 {&#39;&lt;start&gt; -&gt; 5&#39;}
-6 {&#39;&lt;start&gt; -&gt; 6&#39;}
-7 {&#39;&lt;start&gt; -&gt; 7&#39;}
-8 set()
-9 {&#39;&lt;start&gt; -&gt; 9&#39;}
+<pre>0 {&#39;&lt;digit&gt; -&gt; 0&#39;}
+1 {&#39;&lt;digit&gt; -&gt; 1&#39;}
+2 set()
+3 {&#39;&lt;digit&gt; -&gt; 3&#39;}
+4 {&#39;&lt;digit&gt; -&gt; 4&#39;}
+5 {&#39;&lt;digit&gt; -&gt; 5&#39;}
+6 {&#39;&lt;digit&gt; -&gt; 6&#39;}
+7 {&#39;&lt;digit&gt; -&gt; 7&#39;}
+8 {&#39;&lt;digit&gt; -&gt; 8&#39;}
+9 {&#39;&lt;digit&gt; -&gt; 9&#39;}
 </pre>
 </div>
 
@@ -13516,7 +13728,7 @@ Tree: 8
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;(3 / 7 * 9 + 6) * -5.8 / +0 * 7 - 14.2&#39;
+<pre>&#39;-4.02 / (1) * +3 + 5.9 / 7 * 8 - 6&#39;
 </pre>
 </div>
 
@@ -13571,7 +13783,7 @@ Tree: 8
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>50.92
+<pre>50.74
 </pre>
 </div>
 
@@ -13605,11 +13817,10 @@ Tree: 8
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>%68+41
-e%1ea25_
-%c2%ab%97-c
-%3fb0d
-%d53%4024
+<pre>%18%d03
+%c3%94%7f+cd
+%a6%b5%e2%5e%4c-54e01a2
+%5eb%7cb_ec%a0+
 </pre>
 </div>
 
@@ -13641,7 +13852,7 @@ e%1ea25_
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>214.44
+<pre>211.34
 </pre>
 </div>
 
@@ -13664,7 +13875,7 @@ e%1ea25_
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>68.02
+<pre>68.64
 </pre>
 </div>
 
@@ -13687,7 +13898,7 @@ e%1ea25_
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>40.26
+<pre>40.38
 </pre>
 </div>
 
@@ -13728,7 +13939,7 @@ e%1ea25_
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Our coverage production, as defined above, will ensure that all <code>&lt;integer&gt;</code> expansions (i.e., all <code>&lt;digit&gt;</code> expansions) are covered.  However, the individual digits would be <em>distributed</em> across all occurrences of <code>&lt;integer&gt;</code> in the grammar.  If our coverage-based fuzzer produces, say, <code>1234.56</code>  and <code>7890</code>, we would have full coverage of all integer expansions, but <code>&lt;integer&gt;.&lt;integer&gt;</code> and <code>&lt;integer&gt;</code> in the <code>&lt;factor&gt;</code> expansions above would be covered only by a fraction of the digits.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Our coverage production, as defined above, will ensure that all <code>&lt;integer&gt;</code> expansions (i.e., all <code>&lt;digit&gt;</code> expansions) are covered.  However, the individual digits would be <em>distributed</em> across all occurrences of <code>&lt;integer&gt;</code> in the grammar.  If our coverage-based fuzzer produces, say, <code>1234.56</code>  and <code>7890</code>, we would have full coverage of all digit expansions.  However, <code>&lt;integer&gt;.&lt;integer&gt;</code> and <code>&lt;integer&gt;</code> in the <code>&lt;factor&gt;</code> expansions above would individually cover only a fraction of the digits.  If floating-point numbers and whole numbers have different functions that read them in, we would like each of these functions to be tested with all digits; maybe we would also like the whole and fractional part of a floating-point number to be tested with all digits each.</p>
 </div>
 </div>
 </div>
@@ -13737,7 +13948,7 @@ e%1ea25_
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Ignoring the context in which a symbol is used (in our case, the various uses of <code>&lt;integer&gt;</code> in the <code>&lt;factor&gt;</code> context) can be useful if we can assume that all occurrences of this symbol are treated alike anyway.  If not, though, one way to ensure that an occurrence of a symbol is systematically covered independently of other occurrences is to assign the occurrence to a new symbol which is a <em>duplicate</em> of the old symbol.  We will first show how to <em>manually</em> create such duplicates, and then a dedicated function which does it automatically.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Ignoring the context in which a symbol is used (in our case, the various uses of <code>&lt;integer&gt;</code> and <code>&lt;digit&gt;</code> in the <code>&lt;factor&gt;</code> context) can be useful if we can assume that all occurrences of this symbol are treated alike anyway.  If not, though, one way to ensure that an occurrence of a symbol is systematically covered independently of other occurrences is to assign the occurrence to a new symbol which is a <em>duplicate</em> of the old symbol.  We will first show how to <em>manually</em> create such duplicates, and then a dedicated function which does it automatically.</p>
 </div>
 </div>
 </div>
@@ -13863,16 +14074,16 @@ e%1ea25_
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>+16.1
-(-8136 * (0 * 2 + 9) / 5 * 5.4 / 4 - 7)
-2.026
-3.75
-780.3
-9.98
-4143.85
-8
-((9 + 9) / -9 / 8 * 6 + 8.8 / 2 * 2 + 3)
--201.7
+<pre>-(43.76 / 8.0 * 5.5 / 6.9 * 6 / 4 + +03)
+(90.1 - 1 * 7.3 * 9 + 5 / 8 / 7)
+2.8
+1.2
+10.4
+2
+4386
+7
+0
+08929.4302
 </pre>
 </div>
 
@@ -13961,7 +14172,7 @@ e%1ea25_
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The gist of the work takes place in this helper function.  The additional parameter <code>seen</code> keeps track of symbols already expanded and avoids infinite recursion.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The bulk of the work takes place in this helper function.  The additional parameter <code>seen</code> keeps track of symbols already expanded and avoids infinite recursion.</p>
 </div>
 </div>
 </div>
@@ -14078,16 +14289,16 @@ e%1ea25_
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>2.0
--+7
-((3 * 6 / 9 - 2 + 1) + 5.74 * 4 / 5)
-087
-351.6296
-060.5
-28.3
-9.548
-493.081
-16.2
+<pre>(57.5)
+2
++-(1 / 3 + 6 / 0 - 7 * 59 * 3 + 8 * 4)
+374.88
+5.709
+0.93
+01.1
+892.27
+219.50
+6.636
 </pre>
 </div>
 
@@ -14213,7 +14424,7 @@ e%1ea25_
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>2001
+<pre>1981
 </pre>
 </div>
 
@@ -14272,7 +14483,7 @@ e%1ea25_
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>3978
+<pre>1981
 </pre>
 </div>
 
@@ -14399,7 +14610,16 @@ e%1ea25_
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="CGI-Grammars">CGI Grammars<a class="anchor-link" href="#CGI-Grammars">&#182;</a></h3><p>Let us explore this relationship on one of our grammars – say, the CGI decoder.  We compute a mapping <code>coverages</code> where in <code>coverages[x]</code> = <code>{y_1, y_2, ...}</code>, <code>x</code> is the grammar coverage obtained, and <code>y_n</code> is the code coverage obtained for the <code>n</code>-th run:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="CGI-Grammars">CGI Grammars<a class="anchor-link" href="#CGI-Grammars">&#182;</a></h3><p>Let us explore this relationship on one of our grammars – say, the CGI decoder from the <a href="Coverage.html">chapter on coverage</a>.  We compute a mapping <code>coverages</code> where in <code>coverages[x]</code> = <code>{y_1, y_2, ...}</code>, <code>x</code> is the grammar coverage obtained, and <code>y_n</code> is the code coverage obtained for the <code>n</code>-th run.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We first compute the maximum coverage, as in the the <a href="Coverage.html">chapter on coverage</a>:</p>
 </div>
 </div>
 </div>
@@ -14425,6 +14645,36 @@ e%1ea25_
 
 <div class="inner_cell">
 <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_max</span><span class="p">:</span>
+    <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span>
+    <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;%20&#39;</span><span class="p">)</span>
+    <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;abc&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;%?a&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Now, we run our experiment:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">,</span> <span class="n">max_nonterminals</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">coverages</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -14432,6 +14682,7 @@ e%1ea25_
 <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
     <span class="n">f</span><span class="o">.</span><span class="n">reset_coverage</span><span class="p">()</span>
     <span class="n">overall_cov</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">max_cov</span> <span class="o">=</span> <span class="mi">30</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
@@ -14439,8 +14690,8 @@ e%1ea25_
             <span class="n">cgi_decode</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
         <span class="n">overall_cov</span> <span class="o">|=</span> <span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
 
-        <span class="n">x</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">())</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">overall_cov</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">())</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">overall_cov</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coverages</span><span class="p">:</span>
             <span class="n">coverages</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">coverages</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -14505,6 +14756,7 @@ e%1ea25_
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/matplotlib.pyplot.html" class="import" target="_blank">matplotlib.pyplot</a></span> <span class="k">as</span> <span class="nn"><a href="https://docs.python.org/3/library/plt.html" class="import" target="_blank">plt</a></span>
+<span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/matplotlib.ticker.html" class="import" target="_blank">matplotlib.ticker</a></span> <span class="k">as</span> <span class="nn"><a href="https://docs.python.org/3/library/mtick.html" class="import" target="_blank">mtick</a></span>
 </pre></div>
 
 </div>
@@ -14518,10 +14770,17 @@ e%1ea25_
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;coverage&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mtick</span><span class="o">.</span><span class="n">PercentFormatter</span><span class="p">())</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mtick</span><span class="o">.</span><span class="n">PercentFormatter</span><span class="p">())</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">ys</span><span class="p">))</span>
+
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Coverage of cgi_decode() vs. grammar coverage&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;grammar coverage (expansions)&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;code coverage (lines)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">);</span>
 </pre></div>
 
 </div>
@@ -14531,17 +14790,8 @@ e%1ea25_
 
 <div class="output_area">
 
-<div class="output_text output_subarea output_execute_result">
-<pre>Text(0,0.5,&#39;code coverage (lines)&#39;)
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
 <div class="output_image output_png output_subarea ">
-<img src="data:image/png;base64,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
+<img src="data:image/png;base64,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
 "
 >
 
@@ -14561,7 +14811,7 @@ e%1ea25_
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>This also translates into a correlation coefficient of about 0.8, indicating a strong correlation:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>This also translates into a correlation coefficient of about 0.9, indicating a strong correlation:</p>
 </div>
 </div>
 </div>
@@ -14598,8 +14848,54 @@ e%1ea25_
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>array([[1.        , 0.79173661],
-       [0.79173661, 1.        ]])
+<pre>array([[1.        , 0.81663071],
+       [0.81663071, 1.        ]])
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is also confirmed by the Spearman rank correlation:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/scipy.stats.html" class="import" target="_blank">scipy.stats</a></span> <span class="k">import</span> <span class="n">spearmanr</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">spearmanr</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>SpearmanrResult(correlation=0.937547293248041, pvalue=1.0928720949027369e-09)
 </pre>
 </div>
 
@@ -14631,6 +14927,42 @@ e%1ea25_
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Again, we first compute the maximum coverage, making an educated guess as in the the <a href="Coverage.html">chapter on coverage</a>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_max</span><span class="p">:</span>
+    <span class="n">urlparse</span><span class="p">(</span><span class="s2">&quot;http://foo.bar/path&quot;</span><span class="p">)</span>
+    <span class="n">urlparse</span><span class="p">(</span><span class="s2">&quot;https://foo.bar#fragment&quot;</span><span class="p">)</span>
+    <span class="n">urlparse</span><span class="p">(</span><span class="s2">&quot;ftp://user:password@foo.bar?query=value&quot;</span><span class="p">)</span>
+    <span class="n">urlparse</span><span class="p">(</span><span class="s2">&quot;ftps://127.0.0.1/?x=1&amp;y=2&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here comes the actual experiment:</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -14651,8 +14983,8 @@ e%1ea25_
             <span class="n">urlparse</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
         <span class="n">overall_cov</span> <span class="o">|=</span> <span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
 
-        <span class="n">x</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">())</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">overall_cov</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">())</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">overall_cov</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">coverages</span><span class="p">:</span>
             <span class="n">coverages</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">coverages</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
@@ -14684,10 +15016,17 @@ e%1ea25_
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Coverage of cgi_decode() vs. grammar coverage&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;coverage&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mtick</span><span class="o">.</span><span class="n">PercentFormatter</span><span class="p">())</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mtick</span><span class="o">.</span><span class="n">PercentFormatter</span><span class="p">())</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">xs</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">ys</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Coverage of urlparse() vs. grammar coverage&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;grammar coverage (expansions)&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;code coverage (lines)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">);</span>
 </pre></div>
 
 </div>
@@ -14697,17 +15036,8 @@ e%1ea25_
 
 <div class="output_area">
 
-<div class="output_text output_subarea output_execute_result">
-<pre>Text(0,0.5,&#39;code coverage (lines)&#39;)
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
 <div class="output_image output_png output_subarea ">
-<img src="data:image/png;base64,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
+<img src="data:image/png;base64,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
 "
 >
 
@@ -14718,7 +15048,7 @@ e%1ea25_
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Here, we have an even stronger correlation of almost .95:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here, we have an even stronger correlation of more than .95:</p>
 </div>
 </div>
 </div>
@@ -14741,8 +15071,40 @@ e%1ea25_
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>array([[1.        , 0.92819006],
-       [0.92819006, 1.        ]])
+<pre>array([[1.        , 0.94110679],
+       [0.94110679, 1.        ]])
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is also confirmed by the Spearman rank correlation:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">spearmanr</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>SpearmanrResult(correlation=1.0, pvalue=0.0)
 </pre>
 </div>
 
@@ -14769,7 +15131,7 @@ e%1ea25_
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Equivalent-Elements">Equivalent Elements<a class="anchor-link" href="#Equivalent-Elements">&#182;</a></h4><p>First, some grammar elements are treated uniformly by a program even though the grammar sees them as different symbols.  In the host name of a URL, for instance, we can have many different characters, although a URL-handling program treats them all the same.  Likewise, individual digits, once composed into a number, make less of a difference than the value of the number itself.  Hence, achieving variety in digits or characters will not yield a large difference in functionality.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Equivalent-Elements">Equivalent Elements<a class="anchor-link" href="#Equivalent-Elements">&#182;</a></h4><p>First, some grammar elements are treated uniformly by a program even though the grammar sees them as different symbols.  In the host name of a URL, for instance, we can have many different characters, although a URL-handling program treats them all the same.  Likewise, individual digits, once composed into a number, make less of a difference than the value of the number itself.  Hence, achieving variety in digits or characters will not necessarily yield a large difference in functionality.</p>
 </div>
 </div>
 </div>
@@ -14778,7 +15140,7 @@ e%1ea25_
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Deep-Data-Processing">Deep Data Processing<a class="anchor-link" href="#Deep-Data-Processing">&#182;</a></h4><p>Second, the way the data is processed can make a large difference.  Consider the input to a <em>media player</em>, consisting of compressed media data.  While processing the media data, the media player will show differences in behavior (notably in its output), but these differences cannot be directly triggered through individual elements of the media data.  Likewise, a <em>machine learner</em> that is trained on a large set of inputs typically will not have its behavior controlled by a single syntactic element of the input.  (Well, it could, but then, we would not need a machine learner.)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>This problem can be addressed by <em>differentiating elements dependent on their context</em>, and covering alternatives for each context, as discussed above.  The key is to identify the contexts in which variety is required, and those where it is not.</p>
 </div>
 </div>
 </div>
@@ -14787,7 +15149,17 @@ e%1ea25_
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>In these cases of "deep" data processing, achieving coverage in the grammar will not necessarily induce code coverage.  We still can make use of the grammar to produce <em>valid</em> inputs, but will have to rely on chance and patience to cover functionality and trigger bugs.  <em>Some</em> parts of the input, though, can still be covered: <em>Metadata</em> (such as author name or composer for the media player) or <em>configuration data</em> (such as settings for the machine learner) can and should be covered systematically; we will see how this is done <a href="ConfigurationFuzzer.html">in the chapter on "Configuration fuzzing"</a>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Deep-Data-Processing">Deep Data Processing<a class="anchor-link" href="#Deep-Data-Processing">&#182;</a></h4><p>Second, the way the data is processed can make a large difference.  Consider the input to a <em>media player</em>, consisting of compressed media data.  While processing the media data, the media player will show differences in behavior (notably in its output), but these differences cannot be directly triggered through individual elements of the media data.  Likewise, a <em>machine learner</em> that is trained on a large set of inputs typically will not have its behavior controlled by a single syntactic element of the input.  (Well, it could, but then, we would not need a machine learner.)  In these cases of "deep" data processing, achieving structural coverage in the grammar will not necessarily induce code coverage.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>One way to address this problem is to achieve not only <em>syntactic</em>, but actually <em>semantic</em> variety.  In the <a href="ConstraintGrammarFuzzer.html">chapter on fuzzing with constraints</a>, we will see how to specifically generate and filter input values, especially numerical values.  Such generators can also be applied in context, such that each and every facet of the input can be controlled individually.
+Also, in the above examples, <em>some</em> parts of the input can still be covered structurally: <em>Metadata</em> (such as author name or composer for the media player) or <em>configuration data</em> (such as settings for the machine learner) can and should be covered systematically; we will see how this is done <a href="ConfigurationFuzzer.html">in the chapter on "Configuration fuzzing"</a>.</p>
 </div>
 </div>
 </div>
@@ -14798,6 +15170,7 @@ e%1ea25_
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li>Achieving <em>grammar coverage</em> quickly results in a large variety of inputs.</li>
+<li>Duplicating grammar rules allows to cover elements in specific <em>contexts</em>.</li>
 <li>Achieving grammar coverage can help in obtaining <em>code coverage</em>.</li>
 </ul>
 </div>
@@ -14810,7 +15183,7 @@ e%1ea25_
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>From here, you can learn how to</p>
 <ul>
-<li><a href="ConfigurationFuzzer.html">use grammar coverage to systematically test configurations</a></li>
+<li><a href="ConfigurationFuzzer.html">use grammar coverage to systematically test configurations</a>.</li>
 </ul>
 </div>
 </div>
@@ -14907,7 +15280,7 @@ e%1ea25_
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarCoverageFuzzer.ipynb" target=_blank)>Last change: 2018-11-26 10:52:08+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarCoverageFuzzer.ipynb" target=_blank)>Last change: 2018-11-27 14:14:40+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14923,7 +15296,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html">Grammar Coverage</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html">https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html</a>.  Retrieved 2018-11-26 10:52:08+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html">Grammar Coverage</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html">https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html</a>.  Retrieved 2018-11-27 14:14:40+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:GrammarCoverageFuzzer,
@@ -14933,9 +15306,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html}},
-    note = {Retrieved 2018-11-26 10:52:08+01:00},
+    note = {Retrieved 2018-11-27 14:14:40+01:00},
     url = {https://www.fuzzingbook.org/beta/html/GrammarCoverageFuzzer.html},
-    urldate = {2018-11-26 10:52:08+01:00}
+    urldate = {2018-11-27 14:14:40+01:00}
 }
 </pre>
 </div>
