@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2018-11-23 10:13:16+01:00
+# Last change: 2018-11-26 11:29:48+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -292,6 +292,68 @@ if __name__ == "__main__":
 
 
 
+# #### Checking Memory Accesses
+
+if __name__ == "__main__":
+    print('\n#### Checking Memory Accesses')
+
+
+
+
+if __name__ == "__main__":
+    with open("program.c", "w") as f:
+        f.write("""
+    #include <stdlib.h>
+    #include <string.h>
+
+    int main(int argc, char** argv) {
+        /* Create an array with 100 bytes, initialized with 42 */
+        char *buf = malloc(100);
+        memset(buf, 42, 100);
+
+        /* Read the N-th element, with N being the first command-line argument */
+        int index = atoi(argv[1]);
+        char val = buf[index];
+
+        /* Clean up memory so we don't leak */
+        free(buf);
+        return val;
+    }
+        """)
+
+
+if __name__ == "__main__":
+    print(open("program.c").read())
+
+
+if __name__ == "__main__":
+    import os
+    os.system(r'clang -fsanitize=address -g -o program program.c')
+
+
+if __name__ == "__main__":
+    import os
+    os.system(r'./program 99; echo $?')
+
+
+if __name__ == "__main__":
+    import os
+    os.system(r'./program 110')
+
+
+if __name__ == "__main__":
+    import os
+    os.system(r'rm -fr program program.*')
+
+
+# #### Information Leaks
+
+if __name__ == "__main__":
+    print('\n#### Information Leaks')
+
+
+
+
 if __name__ == "__main__":
     s = ("<space for reply>" + fuzzer(100)
          + "<secret-certificate>" + fuzzer(100)
@@ -349,6 +411,7 @@ if __name__ == "__main__":
         for i in range(10):
             s = heartbeat(fuzzer(), random.randint(1, 500))
             assert not s.find(uninitialized_memory_marker)
+            assert not s.find("secret")
 
 
 # ### Program-Specific Checkers
