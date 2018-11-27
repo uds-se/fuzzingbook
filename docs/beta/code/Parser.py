@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-27 14:17:45+01:00
+# Last change: 2018-11-27 15:30:45+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -52,14 +52,14 @@ def process_vehicle(vehicle):
         if year > 2010:
             print("It is a recent model!")
         else:
-            print("It is an old buy reliable model!")
+            print("It is an old but reliable model!")
     elif kind == 'car':
         print("We have a %s %s car from %s vintage." % (company, model, year))
         iyear = int(year)
         if year > 2016:
             print("It is a recent model!")
         else:
-            print("It is an old buy reliable model!")
+            print("It is an old but reliable model!")
     else:
         raise Exception('Invalid entry')
 
@@ -135,22 +135,30 @@ if __name__ == "__main__":
 from copy import deepcopy
 import random
 
+
 class PooledGrammarFuzzer(GrammarFuzzer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._expansion_cache = {
-            '<letters>':
-            [[('<car>', [])],
-             [('<van>', [])]]
-        }
+        self._node_cache = {}
 
-    def expansion_to_children(self, expansion):
-        if expansion in self._expansion_cache and random.randint(0, 1) == 1:
-            return deepcopy(random.choice(self._expansion_cache[expansion]))
-        return super().expansion_to_children(expansion)
+    def update_cache(self, key, values):
+        self._node_cache[key] = values
+
+    def expand_node_randomly(self, node):
+        (symbol, children) = node
+        assert children is None
+        if symbol in self._node_cache:
+            if random.randint(0, 1) == 1:
+                return super().expand_node_randomly(node)
+            return deepcopy(random.choice(self._node_cache[symbol]))
+        return super().expand_node_randomly(node)
 
 if __name__ == "__main__":
     gf = PooledGrammarFuzzer(CSV_GRAMMAR)
+    gf.update_cache('<item>', [
+        ('<item>', [('<car>', [])]),
+        ('<item>', [('<van>', [])]),
+    ])
     trials = 10
     valid = []
     time = 0
@@ -160,7 +168,7 @@ if __name__ == "__main__":
             print(vehicle_info)
             process_vehicle(vehicle_info)
         except Exception as e:
-            print("\t",e)
+            print("\t", e)
 
 
 # ## An Ad Hoc Parser
@@ -579,10 +587,10 @@ if __name__ == "__main__":
 
 
 
-# ### A Simple Grammar-based Mutational Fuzzer
+# ### A Grammar-based Mutational Fuzzer
 
 if __name__ == "__main__":
-    print('\n### A Simple Grammar-based Mutational Fuzzer')
+    print('\n### A Grammar-based Mutational Fuzzer')
 
 
 
