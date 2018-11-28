@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-28 00:47:40-08:00
+# Last change: 2018-11-28 00:52:10-08:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    gf = GrammarFuzzer(CSV_GRAMMAR)
+    gf = GrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     trials = 1000
     valid = []
     time = 0
@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    gf = GrammarFuzzer(CSV_GRAMMAR)
+    gf = GrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     trials = 10
     valid = []
     time = 0
@@ -156,10 +156,10 @@ class PooledGrammarFuzzer(GrammarFuzzer):
         return super().expand_node_randomly(node)
 
 if __name__ == "__main__":
-    gf = PooledGrammarFuzzer(CSV_GRAMMAR)
+    gf = PooledGrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     gf.update_cache('<item>', [
-        ('<item>', [('<car>', [])]),
-        ('<item>', [('<van>', [])]),
+        ('<item>', [('car', [])]),
+        ('<item>', [('van', [])]),
     ])
     trials = 10
     valid = []
@@ -167,10 +167,12 @@ if __name__ == "__main__":
     for i in range(trials):
         vehicle_info = gf.fuzz()
         try:
-            print(vehicle_info)
+            print(repr(vehicle_info), end="")
             process_vehicle(vehicle_info)
         except Exception as e:
             print("\t", e)
+        else:
+            print()
 
 
 # ## An Ad Hoc Parser
