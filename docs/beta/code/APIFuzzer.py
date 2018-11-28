@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2018-11-26 01:08:49-08:00
+# Last change: 2018-11-28 20:49:39+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -424,8 +424,8 @@ else:
 
 if __name__ == "__main__":
     with CallCarver() as webbrowser_carver:
-        webbrowser("http://www.fuzzingbook.org")
-        webbrowser("https://www.example.com")
+        webbrowser("https://www.fuzzingbook.org")
+        webbrowser("http://www.example.com")
 
 
 if __name__ == "__main__":

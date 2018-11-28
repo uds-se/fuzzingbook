@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2018-11-26 03:51:43-08:00
+# Last change: 2018-11-28 20:48:22+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -530,10 +530,6 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     probabilistic_ip_address_grammar["<address>"]
-
-
-if __name__ == "__main__":
-    del probabilistic_ip_address_grammar["<octet>"]
 
 
 if __name__ == "__main__":
