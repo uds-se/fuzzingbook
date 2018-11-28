@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-28 00:37:34-08:00
+# Last change: 2018-11-28 00:47:40-08:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
 
 def process_vehicle(vehicle):
-    year, kind, company, model = vehicle.split(',')
+    year, kind, company, model, *_ = vehicle.split(',')
     if kind == 'van':
         print("We have a %s %s van from %s vintage." % (company, model, year))
         iyear = int(year)
@@ -126,10 +126,12 @@ if __name__ == "__main__":
     for i in range(trials):
         vehicle_info = gf.fuzz()
         try:
-            print(vehicle_info)
+            print(repr(vehicle_info), end="")
             process_vehicle(vehicle_info)
         except Exception as e:
             print("\t", e)
+        else:
+            print()
 
 
 from copy import deepcopy
