@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2018-11-28 18:53:34+01:00
+# Last change: 2018-11-28 20:53:26+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -130,7 +130,7 @@ class tstr_(str):
 
 
 class tstr(tstr_):
-    def __init__(self, value, taint=None, parent=None):
+    def __init__(self, value, taint=None, parent=None, **kwargs):
         self.parent = parent
         l = len(self)
         if taint:
@@ -191,40 +191,12 @@ class tstr(tstr):
         return tstr_iterator(self)
 
     def __getitem__(self, key):
-        def get_interval(key):
-            return ((0 if key.start is None else key.start),
-                    (len(res) if key.stop is None else key.stop))
-
         res = super().__getitem__(key)
         if type(key) == int:
             key = len(self) + key if key < 0 else key
             return tstr(res, [self._taint[key]], self)
         elif type(key) == slice:
-            if res:
-                return tstr(res, self._taint[key], self)
-            # Result is an empty string
-            t = tstr(res, self._taint[key], self)
-            key_start, key_stop = get_interval(key)
-            cursor = 0
-            if key_start < len(self):
-                assert key_stop < len(self)
-                cursor = self._taint[key_stop]
-            else:
-                if len(self) == 0:
-                    # if the original string was empty, we assume that any
-                    # empty string produced from it should carry the same taint.
-                    cursor = self.x()
-                else:
-                    # Key start was not in the string. We can reply only
-                    # if the key start was just outside the string, in
-                    # which case, we guess.
-                    if key_start != len(self):
-                        raise taint.TaintException('Can\'t guess the taint')
-                    cursor = self._taint[len(self) - 1] + 1
-            # _tcursor gets created only for empty strings.
-            t._tcursor = cursor
-            return t
-
+            return tstr(res, self._taint[key], self)
         else:
             assert False
 
@@ -279,11 +251,7 @@ class tstr(tstr):
         if self._taint:
             return self._taint[i]
         else:
-            if i != 0:
-                raise taint.TaintException('Invalid request idx')
-            # self._tcursor gets created only for empty strings.
-            # use the exception to determine which ones need it.
-            return self._tcursor
+            raise taint.TaintException('Invalid request idx')
 
     def get_first_mapped_char(self):
         for i in self._taint:
@@ -296,11 +264,6 @@ class tstr(tstr):
 
     def is_idx_tainted(self, idx):
         return self._taint[idx] != -1
-
-if __name__ == "__main__":
-    print(repr(t[11:]))
-    print(t[11:].x(), t[11:]._taint)
-
 
 if __name__ == "__main__":
     my_str = tstr('abcdefghijkl', taint=list(range(4,16)))
@@ -326,7 +289,7 @@ if __name__ == "__main__":
 
 
 class tstr(tstr):
-    def __add__(self, other):  #concatenation (+)
+    def __add__(self, other):
         if type(other) is tstr:
             return tstr(str.__add__(self, other), (self._taint + other._taint), self)
         else:
@@ -665,6 +628,273 @@ for name, fn in inspect.getmembers(str, callable):
     if name in ['__format__', '__rmod__', '__mod__', 'format_map', 'format',
                '__mul__','__rmul__','center','zfill', 'decode', 'encode', 'splitlines']:
         setattr(tstr, name, make_str_abort_wrapper(fn))
+
+# ## EOF Tracker
+
+if __name__ == "__main__":
+    print('\n## EOF Tracker')
+
+
+
+
+# ### Slice
+
+if __name__ == "__main__":
+    print('\n### Slice')
+
+
+
+
+class eoftstr(tstr):
+    def __getitem__(self, key):
+        def get_interval(key):
+            return ((0 if key.start is None else key.start),
+                    (len(res) if key.stop is None else key.stop))
+
+        res = super().__getitem__(key)
+        if type(key) == int:
+            key = len(self) + key if key < 0 else key
+            return eoftstr(res, [self._taint[key]], self)
+        elif type(key) == slice:
+            if res:
+                return eoftstr(res, self._taint[key], self)
+            # Result is an empty string
+            t = eoftstr(res, self._taint[key], self)
+            key_start, key_stop = get_interval(key)
+            cursor = 0
+            if key_start < len(self):
+                assert key_stop < len(self)
+                cursor = self._taint[key_stop]
+            else:
+                if len(self) == 0:
+                    # if the original string was empty, we assume that any
+                    # empty string produced from it should carry the same taint.
+                    cursor = self.x()
+                else:
+                    # Key start was not in the string. We can reply only
+                    # if the key start was just outside the string, in
+                    # which case, we guess.
+                    if key_start != len(self):
+                        raise taint.TaintException('Can\'t guess the taint')
+                    cursor = self._taint[len(self) - 1] + 1
+            # _tcursor gets created only for empty strings.
+            t._tcursor = cursor
+            return t
+
+        else:
+            assert False
+
+class eoftstr(eoftstr):
+    def get_mapped_char_idx(self, i):
+        if self._taint:
+            return self._taint[i]
+        else:
+            if i != 0:
+                raise taint.TaintException('Invalid request idx')
+            # self._tcursor gets created only for empty strings.
+            # use the exception to determine which ones need it.
+            return self._tcursor
+
+if __name__ == "__main__":
+    t = eoftstr('hello world')
+    print(repr(t[11:]))
+    print(t[11:].x(), t[11:]._taint)
+
+
+# ## A Comparison Tracker
+
+if __name__ == "__main__":
+    print('\n## A Comparison Tracker')
+
+
+
+
+# ### Operators
+
+if __name__ == "__main__":
+    print('\n### Operators')
+
+
+
+
+class Op(enum.Enum):
+    LT = 0
+    LE = enum.auto()
+    EQ = enum.auto()
+    NE = enum.auto()
+    GT = enum.auto()
+    GE = enum.auto()
+    IN = enum.auto()
+    NOT_IN = enum.auto()
+    IS = enum.auto()
+    IS_NOT = enum.auto()
+    FIND_STR = enum.auto()
+
+
+COMPARE_OPERATORS = {
+    Op.EQ: lambda x, y: x == y,
+    Op.NE: lambda x, y: x != y,
+    Op.IN: lambda x, y: x in y,
+    Op.NOT_IN: lambda x, y: x not in y,
+    Op.FIND_STR: lambda x, y: x.find(y)
+}
+
+Comparisons = []
+
+# ### Instructions
+
+if __name__ == "__main__":
+    print('\n### Instructions')
+
+
+
+
+class Instr:
+    def __init__(self, o, a, b):
+        self.opA = a
+        self.opB = b
+        self.op = o
+
+    def o(self):
+        if self.op == Op.EQ:
+            return 'eq'
+        elif self.op == Op.NE:
+            return 'ne'
+        else:
+            return '?'
+
+    def opS(self):
+        if not self.opA.has_taint() and type(self.opB) is tstr:
+            return (self.opB, self.opA)
+        else:
+            return (self.opA, self.opB)
+
+    @property
+    def op_A(self):
+        return self.opS()[0]
+
+    @property
+    def op_B(self):
+        return self.opS()[1]
+
+    def __repr__(self):
+        return "%s,%s,%s" % (self.o(), repr(self.opA), repr(self.opB))
+
+    def __str__(self):
+        if self.op == Op.EQ:
+            if str(self.opA) == str(self.opB):
+                return "%s = %s" % (repr(self.opA), repr(self.opB))
+            else:
+                return "%s != %s" % (repr(self.opA), repr(self.opB))
+        elif self.op == Op.NE:
+            if str(self.opA) == str(self.opB):
+                return "%s = %s" % (repr(self.opA), repr(self.opB))
+            else:
+                return "%s != %s" % (repr(self.opA), repr(self.opB))
+        elif self.op == Op.IN:
+            if str(self.opA) in str(self.opB):
+                return "%s in %s" % (repr(self.opA), repr(self.opB))
+            else:
+                return "%s not in %s" % (repr(self.opA), repr(self.opB))
+        elif self.op == Op.NOT_IN:
+            if str(self.opA) in str(self.opB):
+                return "%s in %s" % (repr(self.opA), repr(self.opB))
+            else:
+                return "%s not in %s" % (repr(self.opA), repr(self.opB))
+        else:
+            assert False
+
+# ### Equivalance
+
+if __name__ == "__main__":
+    print('\n### Equivalance')
+
+
+
+
+class ctstr(eoftstr):
+    def with_comparisons(self, comparisons):
+        self.comparisons = comparisons
+        return self
+
+def make_ctstr_wrapper(fun, name):
+    def proxy(*args, **kwargs):
+        res = fun(*args, **kwargs)
+        if isinstance(res, tstr):
+            if isinstance(args[0],ctstr):
+                s = str(res)
+                p = args[0]
+                t = res._taint
+                c = args[0].comparisons
+                return ctstr(s, parent=p, taint=t).with_comparisons(c)
+            else:
+                print("IMPORTANT>>", args[0].__class__)
+                return res
+        else:
+            return res
+    return proxy
+
+
+for name, fn in inspect.getmembers(ctstr, callable):
+    if name not in set([
+            '__class__', '__new__', '__str__', '__init__', '__repr__',
+            '__getattribute__','__init_subclass__','__setattr__', '__len__',
+            'with_comparisons'
+    ]):
+        setattr(ctstr, name, make_ctstr_wrapper(fn, name))
+
+class ctstr(ctstr):
+    def __eq__(self, other):
+        if len(self) == 0 and len(other) == 0:
+            self.comparisons.append(Instr(Op.EQ, self, other))
+            return True
+        elif len(self) == 0:
+            self.comparisons.append(Instr(Op.EQ, self, other[0]))
+            return False
+        elif len(other) == 0:
+            self.comparisons.append(Instr(Op.EQ, self[0], other))
+            return False
+        elif len(self) == 1 and len(other) == 1:
+            self.comparisons.append(Instr(Op.EQ, self, other))
+            return super().__eq__(other)
+        else:
+            if not self[0] == other[0]:
+                return False
+            return self[1:] == other[1:]
+
+if __name__ == "__main__":
+    t = ctstr('hello world', taint=100).with_comparisons([])
+    print(t.comparisons)
+    t == 'hello'
+    for c in t.comparisons:
+        print(repr(c))
+
+
+class ctstr(ctstr):
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+if __name__ == "__main__":
+    t = ctstr('hello', taint=100).with_comparisons([])
+    print(t.comparisons)
+    t != 'bye'
+    for c in t.comparisons:
+        print(repr(c))
+
+
+class ctstr(ctstr):
+    def __contains__(self, other):
+        self.comparisons.append(Instr(Op.IN, self, other))
+        return super().__contains__(other)
+
+class ctstr(ctstr):
+    def find(self, sub, start=None, end=None):
+        if start == None:
+            start_val = 0
+        if end == None:
+            end_val = len(self)
+        self.comparisons.append(Instr(Op.IN, self[start_val:end_val], sub))
+        return super().find(sub, start, end)
 
 # ## Lessons Learned
 
