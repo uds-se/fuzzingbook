@@ -808,7 +808,7 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py $(CHAPTERS_MA
 index: $(NOTEBOOKS)/00_Index.ipynb
 $(NOTEBOOKS)/00_Index.ipynb $(DOCS_TARGET)notebooks/00_Index.ipynb: \
 	utils/nbindex.py $(SOURCES) $(CHAPTERS_MAKEFILE)
-	(cd $(NOTEBOOKS); $(PYTHON) ../utils/nbindex.py $(TOC_CHAPTERS)) > $@
+	(cd $(NOTEBOOKS); $(PYTHON) ../utils/nbindex.py $(TOC_CHAPTERS) $(APPENDICES)) > $@
 
 ## Python packages
 # After this, you can do 'pip install fuzzingbook' 
