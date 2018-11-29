@@ -56,7 +56,7 @@ CODE_TARGET    := beta/$(CODE_TARGET)
 BETA_FLAG = --include-ready --include-todo
 endif
 
-# Files to apear in the table of contents
+# Files to appear in the table of contents
 ifndef BETA
 TOC_CHAPTERS := $(PUBLIC_CHAPTERS)
 TOC_APPENDICES = $(APPENDICES)
@@ -65,6 +65,13 @@ ifdef BETA
 TOC_CHAPTERS := $(CHAPTERS)
 TOC_APPENDICES = $(APPENDICES)
 endif
+
+# Files to appear on the Web page
+DOCS = \
+	$(FRONTMATTER:%.ipynb=%) \
+	$(TOC_CHAPTERS:%.ipynb=%) \
+	$(APPENDICES:%.ipynb=%) \
+	$(EXTRAS:%.ipynb=%)
 
 
 # Various derived files
@@ -649,25 +656,38 @@ publish: docs
 	-git commit -m "Doc update" $(DOCS_TARGET) binder README.md
 	@echo "Now use 'make push' to place docs on website and trigger a mybinder update"
 
-# Add/update HTML code in repository
-.PHONY: publish-html
-publish-html: html $(DOCS_TARGET)html/00_Index.html
+# Add/update HTML code in Web pages
+.PHONY: publish-html publish-html-setup
+publish-html: html publish-html-setup \
+	$(DOCS_TARGET)html/00_Index.html \
+	$(DOCS_TARGET)html/custom.css \
+	$(DOCS_TARGET)html/favicon \
+	$(DOCS:%=$(DOCS_TARGET)html/%.html) \
+	$(DOCS:%=$(DOCS_TARGET)html/%_files)
+	
+publish-html-setup:
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)html || $(MKDIR) $(DOCS_TARGET)html
-	cp -pr $(HTML_TARGET) $(DOCS_TARGET)html
+	
+$(DOCS_TARGET)html/%: $(HTML_TARGET)%
+	cp -pr $< $@
 
-.PHONY: publish-code
-publish-code: code
+# Add/update Python code on Web pages
+.PHONY: publish-code publish-code-setup
+publish-code: code publish-code-setup \
+	$(DOCS_TARGET)code/LICENSE.md \
+	$(DOCS_TARGET)code/README.md \
+	$(DOCS_TARGET)code/fuzzingbook_utils \
+	$(DOCS_TARGET)code/setup.py \
+	$(PUBLIC_CHAPTERS:%.ipynb=$(DOCS_TARGET)code/%.py) \
+	$(APPENDICES:%.ipynb=$(DOCS_TARGET)code/%.py)
+
+publish-code-setup:
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
-	$(RM) -r $(DOCS_TARGET)code
 	@test -d $(DOCS_TARGET)code || $(MKDIR) $(DOCS_TARGET)code
-	cp -pr $(CODE_TARGET) $(DOCS_TARGET)code
-	$(RM) $(DOCS_TARGET)code/*.py.out $(DOCS_TARGET)code/*.cfg $(DOCS_TARGET)code/*.in
-	$(RM) -r $(DOCS_TARGET)code/__pycache__ \
-	 	$(DOCS_TARGET)code/fuzzingbook_utils/__pycache__
-	for file in $(EXTRAS:%.ipynb=%.py) $(FRONTMATTER:%.ipynb=%.py); do \
-		$(RM) $(DOCS_TARGET)code/$$file; \
-	done
+	
+$(DOCS_TARGET)code/%: $(CODE_TARGET)%
+	cp -pr $< $@
 
 .PHONY: dist publish-dist
 dist publish-dist: check-import check-code publish-code delete-betas toc \
@@ -705,21 +725,42 @@ $(DOCS_TARGET)dist/fuzzingbook-notebooks.zip: $(FULLS) $(CHAPTERS_MAKEFILE)
 	mv $(DOCS_TARGET)fuzzingbook-notebooks.zip $@
 	@echo "Created notebook distribution files in $(DOCS_TARGET)dist"
 
-.PHONY: publish-slides
-publish-slides: slides
+
+# Add/update slides on Web pages
+.PHONY: publish-slides publish-slides-setup
+publish-slides: slides publish-slides-setup \
+	$(PUBLIC_CHAPTERS:%.ipynb=$(DOCS_TARGET)slides/%.slides.html) \
+	$(APPENDICES:%.ipynb=$(DOCS_TARGET)slides/%.slides.html)
+	
+publish-slides-setup:
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)slides || $(MKDIR) $(DOCS_TARGET)slides
-	cp -pr $(SLIDES_TARGET) $(DOCS_TARGET)slides
 
-.PHONY: publish-notebooks
-publish-notebooks: full-notebooks
+$(DOCS_TARGET)slides/%: $(SLIDES_TARGET)%
+	cp -pr $< $@
+
+
+# Add/update notebooks on Web pages
+.PHONY: publish-notebooks publish-notebooks-setup
+publish-notebooks: full-notebooks publish-notebooks-setup \
+	$(DOCS_TARGET)notebooks/custom.css \
+	$(DOCS_TARGET)notebooks/fuzzingbook.bib \
+	$(DOCS_TARGET)notebooks/LICENSE.md \
+	$(DOCS_TARGET)notebooks/README.md \
+	$(DOCS:%=$(DOCS_TARGET)notebooks/%.ipynb)
+	
+publish-notebooks-setup:
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)notebooks || $(MKDIR) $(DOCS_TARGET)notebooks
-	cp -pr $(FULL_NOTEBOOKS)/* $(DOCS_TARGET)notebooks
+
+$(DOCS_TARGET)notebooks/%: $(FULL_NOTEBOOKS)/%
+	cp -pr $< $@
 
 .PHONY: publish-index
 publish-index: $(DOCS_TARGET)notebooks/00_Index.ipynb
 
+
+# Add/update pics on Web pages
 .PHONY: publish-pics
 publish-pics: $(NOTEBOOKS)/PICS
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
@@ -728,27 +769,27 @@ publish-pics: $(NOTEBOOKS)/PICS
 	$(RM) -fr $(DOCS_TARGET)html/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)html
 	$(RM) -fr $(DOCS_TARGET)slides/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)slides
 
-ifndef BETA
-# Remove all chapters marked as beta
-.PHONY: delete-betas
-delete-betas: publish-code publish-html publish-slides
-	@cd $(DOCS_TARGET); \
-	for chapter in $(BETA_CHAPTERS); do \
-	    module=$$(basename $$chapter .ipynb); \
-		echo "Removing '$$module' (beta)"; \
-		$(RM) code/$$module.py; \
-		$(RM) html/$$module.html; \
-		$(RM) -r html/$${module}_files; \
-		$(RM) notebooks/$$module.ipynb; \
-		$(RM) slides/$$module.slides.html; \
-	done
-endif
-
-ifdef BETA
-# On the beta site, we don't delete stuff
+# ifndef BETA
+# # Remove all chapters marked as beta
+# .PHONY: delete-betas
+# delete-betas: publish-code publish-html publish-slides
+# 	@cd $(DOCS_TARGET); \
+# 	for chapter in $(BETA_CHAPTERS); do \
+# 	    module=$$(basename $$chapter .ipynb); \
+# 		echo "Removing '$$module' (beta)"; \
+# 		$(RM) code/$$module.py; \
+# 		$(RM) html/$$module.html; \
+# 		$(RM) -r html/$${module}_files; \
+# 		$(RM) notebooks/$$module.ipynb; \
+# 		$(RM) slides/$$module.slides.html; \
+# 	done
+# endif
+#
+# ifdef BETA
+# # On the beta site, we don't delete stuff
 .PHONY: delete-betas
 delete-betas:
-endif
+# endif
 
 # Table of contents
 .PHONY: toc
