@@ -596,8 +596,8 @@ check-code: code $(PYS_OUT)
 IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
 .PHONY: check-import check-imports
 check-import check-imports: code
-	echo "#!/usr/bin/env $(PYTHON)" > $(CODE_TARGET)import_all.py
-	(for file in $(IMPORTS); do echo import $$file; done) >> $(CODE_TARGET)import_all.py
+	@echo "#!/usr/bin/env $(PYTHON)" > $(CODE_TARGET)import_all.py
+	@(for file in $(IMPORTS); do echo import $$file; done) >> $(CODE_TARGET)import_all.py
 	cd $(CODE_TARGET); $(PYTHON) import_all.py 2>&1 | tee import_all.py.out
 	@test ! -s $(CODE_TARGET)import_all.py.out && echo "All import checks passed."
 	@$(RM) $(CODE_TARGET)import_all.py*
@@ -761,13 +761,16 @@ publish-index: $(DOCS_TARGET)notebooks/00_Index.ipynb
 
 
 # Add/update pics on Web pages
-.PHONY: publish-pics
-publish-pics: $(NOTEBOOKS)/PICS
+.PHONY: publish-pics publish-pics-setup
+publish-pics: publish-pics-setup $(NOTEBOOKS)/PICS
+	cp -pr $(NOTEBOOKS)/PICS $(DOCS_TARGET)notebooks
+
+publish-pics-setup:
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)PICS || $(MKDIR) $(DOCS_TARGET)PICS
-	cp -pr $(NOTEBOOKS)/PICS $(DOCS_TARGET)notebooks
 	$(RM) -fr $(DOCS_TARGET)html/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)html
 	$(RM) -fr $(DOCS_TARGET)slides/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)slides
+
 
 # ifndef BETA
 # # Remove all chapters marked as beta
