@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2018-11-25 14:59:06+01:00
+# Last change: 2018-12-03 14:33:12+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -829,10 +829,167 @@ if __name__ == "__main__":
 
 
 
-# ### Exercise 1: Configuration Files
+# ### Exercise 1: #ifdef Configuration Fuzzing
 
 if __name__ == "__main__":
-    print('\n### Exercise 1: Configuration Files')
+    print('\n### Exercise 1: #ifdef Configuration Fuzzing')
+
+
+
+
+# #### Part 1: Extract Preprocessor Variables
+
+if __name__ == "__main__":
+    print('\n#### Part 1: Extract Preprocessor Variables')
+
+
+
+
+if __name__ == "__main__":
+    filename = "xmlparse.c"
+
+    open(filename, "w").write(
+    """
+    #if defined(_WIN32) && !defined(LOAD_LIBRARY_SEARCH_SYSTEM32)
+    # define LOAD_LIBRARY_SEARCH_SYSTEM32  0x00000800
+    #endif
+
+    #if !defined(HAVE_GETRANDOM) && !defined(HAVE_SYSCALL_GETRANDOM) \
+        && !defined(HAVE_ARC4RANDOM_BUF) && !defined(HAVE_ARC4RANDOM) \
+        && !defined(XML_DEV_URANDOM) \
+        && !defined(_WIN32) \
+        && !defined(XML_POOR_ENTROPY)
+    # error 
+    #endif
+
+    #if !defined(TIOCSWINSZ) || defined(__SCO__) || defined(__UNIXWARE__)
+    #define USE_SYSV_ENVVARS	/* COLUMNS/LINES vs. TERMCAP */
+    #endif
+
+    #ifdef XML_UNICODE_WCHAR_T
+    #define XML_T(x) (const wchar_t)x
+    #define XML_L(x) L ## x
+    #else
+    #define XML_T(x) (const unsigned short)x
+    #define XML_L(x) x
+    #endif
+
+    int fun(int x) { return XML_T(x); }
+    """);
+
+
+import re
+
+if __name__ == "__main__":
+    re_cpp_if_directive = re.compile(r"\s*#\s*(el)?if")
+    re_cpp_identifier = re.compile(r"[a-zA-Z_$]+")
+
+    def cpp_identifiers(lines):
+        identifiers = set()
+        for line in lines:
+            if re_cpp_if_directive.match(line):
+                identifiers |= set(re_cpp_identifier.findall(line))
+
+        # These are preprocessor keywords
+        identifiers -= { "if", "ifdef", "ifndef", "defined" }
+        return identifiers
+
+
+if __name__ == "__main__":
+    cpp_ids = cpp_identifiers(open("xmlparse.c").readlines())
+    cpp_ids
+
+
+# #### Part 2: Derive an Option Grammar
+
+if __name__ == "__main__":
+    print('\n#### Part 2: Derive an Option Grammar')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from Grammars import new_symbol
+else:
+    from .Grammars import new_symbol
+
+
+if __name__ == "__main__":
+    cpp_grammar = {
+        "<start>": ["cc -c<options> " + filename],
+        "<options>": ["<option>", "<options><option>"],
+        "<option>": []
+    }
+    for id in cpp_ids:
+        s = new_symbol(cpp_grammar, "<" + id + ">")
+        cpp_grammar["<option>"].append(s)
+        cpp_grammar[s] = [" -D" + id]
+
+    cpp_grammar
+
+
+if __name__ == "__main__":
+    assert is_valid_grammar(cpp_grammar)
+
+
+# #### Part 3: C Preprocessor Configuration Fuzzing
+
+if __name__ == "__main__":
+    print('\n#### Part 3: C Preprocessor Configuration Fuzzing')
+
+
+
+
+if __name__ == "__main__":
+    g = GrammarCoverageFuzzer(cpp_grammar)
+    g.fuzz()
+
+
+if __package__ is None or __package__ == "":
+    from Fuzzer import ProgramRunner
+else:
+    from .Fuzzer import ProgramRunner
+
+
+if __name__ == "__main__":
+    for i in range(10):
+        invocation = g.fuzz()
+        print("$", invocation)
+        # subprocess.call(invocation, shell=True)
+        cc_runner = ProgramRunner(invocation.split(' '))
+        (result, outcome) = cc_runner.run()
+        print(result.stderr, end="")
+
+
+if __name__ == "__main__":
+    pairwise_cpp_grammar = deepcopy(cpp_grammar)
+    pairwise_cpp_grammar["<option>"] = pairwise(cpp_grammar["<option>"])
+    pairwise_cpp_grammar["<option>"][:10]
+
+
+if __name__ == "__main__":
+    for i in range(10):
+        invocation = g.fuzz()
+        print("$", invocation)
+        # subprocess.call(invocation, shell=True)
+        cc_runner = ProgramRunner(invocation.split(' '))
+        (result, outcome) = cc_runner.run()
+        print(result.stderr, end="")
+
+
+if __name__ == "__main__":
+    os.remove("xmlparse.c")
+
+
+if __name__ == "__main__":
+    if os.path.exists("xmlparse.o"):
+        os.remove("xmlparse.o")
+
+
+# ### Exercise 2: .ini Configuration Fuzzing
+
+if __name__ == "__main__":
+    print('\n### Exercise 2: .ini Configuration Fuzzing')
 
 
 
@@ -906,10 +1063,10 @@ if __name__ == "__main__":
     os.remove("example.ini")
 
 
-# ### Exercise 2: C Option Fuzzing
+# ### Exercise 3: Extracting and Fuzzing C Command-Line Options
 
 if __name__ == "__main__":
-    print('\n### Exercise 2: C Option Fuzzing')
+    print('\n### Exercise 3: Extracting and Fuzzing C Command-Line Options')
 
 
 
@@ -930,10 +1087,10 @@ if __name__ == "__main__":
 
 
 
-# ### Exercise 3: Expansions in Context
+# ### Exercise 4: Expansions in Context
 
 if __name__ == "__main__":
-    print('\n### Exercise 3: Expansions in Context')
+    print('\n### Exercise 4: Expansions in Context')
 
 
 

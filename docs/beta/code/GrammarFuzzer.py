@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-12-03 22:09:42+01:00
+# Last change: 2018-12-04 17:08:54+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -193,7 +193,6 @@ if __name__ == "__main__":
 
 
 from graphviz import Digraph
-
 from IPython.display import display
 
 import re
