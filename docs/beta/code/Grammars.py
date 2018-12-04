@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-11-28 20:36:36+01:00
+# Last change: 2018-12-03 15:29:19+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -227,6 +227,11 @@ if __name__ == "__main__":
 
 
 def syntax_diagram_expr(expansion):
+    # In later chapters, we allow expansions to be tuples,
+    # with the expansion being the first element
+    if isinstance(expansion, tuple):
+        expansion = expansion[0]
+
     symbols = [sym for sym in re.split(RE_NONTERMINAL, expansion) if sym != ""]
     if len(symbols) == 0:
         symbols = [""]  # special case: empty expansion
@@ -234,7 +239,7 @@ def syntax_diagram_expr(expansion):
     return Sequence(*[syntax_diagram_symbol(sym) for sym in symbols])
 
 if __name__ == "__main__":
-    display(SVG(show_diagram(syntax_diagram_expr(EXPR_GRAMMAR['<term>'][0]))))
+    SVG(show_diagram(syntax_diagram_expr(EXPR_GRAMMAR['<term>'][0])))
 
 
 from itertools import zip_longest
@@ -253,7 +258,7 @@ def syntax_diagram_alt(alt):
         return Choice(l//2,*[syntax_diagram_expr(expr) for expr in alt])
 
 if __name__ == "__main__":
-    display(SVG(show_diagram(syntax_diagram_alt(EXPR_GRAMMAR['<digit>']))))
+    SVG(show_diagram(syntax_diagram_alt(EXPR_GRAMMAR['<digit>'])))
 
 
 def syntax_diagram(grammar):

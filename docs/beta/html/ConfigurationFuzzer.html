@@ -11905,9 +11905,10 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Next-Steps">Next Steps</a>
 </li><li class="has-sub"><a href="#Background">Background</a>
 </li><li class="has-sub"><a href="#Exercises">Exercises</a>
-<ul><li class="has-sub"><a href="#Exercise-1:-Configuration-Files">Exercise 1: Configuration Files</a>
-</li><li class="has-sub"><a href="#Exercise-2:-C-Option-Fuzzing">Exercise 2: C Option Fuzzing</a>
-</li><li class="has-sub"><a href="#Exercise-3:-Expansions-in-Context">Exercise 3: Expansions in Context</a>
+<ul><ul><li class="has-sub"><a href="#Exercise-1:-#ifdef-Configuration-Fuzzing">Exercise 1: #ifdef Configuration Fuzzing</a>
+</ul></li><li class="has-sub"><a href="#Exercise-2:-.ini-Configuration-Fuzzing">Exercise 2: .ini Configuration Fuzzing</a>
+</li><li class="has-sub"><a href="#Exercise-3:-Extracting-and-Fuzzing-C-Command-Line-Options">Exercise 3: Extracting and Fuzzing C Command-Line Options</a>
+</li><li class="has-sub"><a href="#Exercise-4:-Expansions-in-Context">Exercise 4: Expansions in Context</a>
 </ul></li></ul></li>
      </li>
      
@@ -12386,15 +12387,8 @@ SystemExit: 2 (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Mining-Configuration-Options">Mining Configuration Options<a class="anchor-link" href="#Mining-Configuration-Options">&#182;</a></h2></div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>In this section, we try to extract option and argument information right out of a program, such that we do not have to specify a configuration grammar.  The aim is to have a configuration fuzzer that works on the options and arguments of an arbitrary program, as long as it follows specific conventions for processing its arguments.  In the case of Python programs, this means using the <code>argparse</code> module.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Mining-Configuration-Options">Mining Configuration Options<a class="anchor-link" href="#Mining-Configuration-Options">&#182;</a></h2><p>In this section, we try to extract option and argument information right out of a program, such that we do not have to specify a configuration grammar.  The aim is to have a configuration fuzzer that works on the options and arguments of an arbitrary program, as long as it follows specific conventions for processing its arguments.  In the case of Python programs, this means using the <code>argparse</code> module.</p>
+<p>Our idea is as follows: We execute the given program up to the point where the arguments are actually parsed – that is, <code>argparse.parse_args()</code> is invoked.  Up to this point, we track all calls into the argument parser, notably those calls that define arguments and options (<code>add_argument()</code>).  From these, we construct the grammar.</p>
 </div>
 </div>
 </div>
@@ -12403,24 +12397,7 @@ SystemExit: 2 (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Our idea is as follows: We execute the given program up to the point where the arguments are actually parsed – that is, <code>argparse.parse_args()</code> is invoked.  Up to this point, we track all calls into the argument parser, notably those calls that define arguments and options (<code>add_argument()</code>).  From these, we construct the grammar.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracking-Arguments">Tracking Arguments<a class="anchor-link" href="#Tracking-Arguments">&#182;</a></h3></div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let us illustrate this approach with a simple experiment: We define a trace function (see <a href="Coverage.html">our chapter on coverage</a> for details) that is active while <code>process_numbers</code> is invoked.  If we have a call to a method <code>add_argument</code>, we access and print out the local variables (which at this point are the arguments to the method).</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracking-Arguments">Tracking Arguments<a class="anchor-link" href="#Tracking-Arguments">&#182;</a></h3><p>Let us illustrate this approach with a simple experiment: We define a trace function (see <a href="Coverage.html">our chapter on coverage</a> for details) that is active while <code>process_numbers</code> is invoked.  If we have a call to a method <code>add_argument</code>, we access and print out the local variables (which at this point are the arguments to the method).</p>
 </div>
 </div>
 </div>
@@ -12505,9 +12482,9 @@ SystemExit: 2 (expected)
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>add_argument {&#39;kwargs&#39;: {&#39;action&#39;: &#39;help&#39;, &#39;default&#39;: &#39;==SUPPRESS==&#39;, &#39;help&#39;: &#39;show this help message and exit&#39;}, &#39;args&#39;: (&#39;-h&#39;, &#39;--help&#39;), &#39;self&#39;: ArgumentParser(prog=&#39;ipykernel_launcher.py&#39;, usage=None, description=&#39;Process some integers.&#39;, formatter_class=&lt;class &#39;argparse.HelpFormatter&#39;&gt;, conflict_handler=&#39;error&#39;, add_help=True)}
 add_argument {&#39;kwargs&#39;: {&#39;metavar&#39;: &#39;N&#39;, &#39;type&#39;: &lt;class &#39;int&#39;&gt;, &#39;nargs&#39;: &#39;+&#39;, &#39;help&#39;: &#39;an integer for the accumulator&#39;}, &#39;args&#39;: (&#39;integers&#39;,), &#39;self&#39;: ArgumentParser(prog=&#39;ipykernel_launcher.py&#39;, usage=None, description=&#39;Process some integers.&#39;, formatter_class=&lt;class &#39;argparse.HelpFormatter&#39;&gt;, conflict_handler=&#39;error&#39;, add_help=True)}
-add_argument {&#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function sum&gt;, &#39;help&#39;: &#39;sum the integers&#39;}, &#39;args&#39;: (&#39;--sum&#39;,), &#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x1031295c0&gt;}
-add_argument {&#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function min&gt;, &#39;help&#39;: &#39;compute the minimum&#39;}, &#39;args&#39;: (&#39;--min&#39;,), &#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x1031295c0&gt;}
-add_argument {&#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function max&gt;, &#39;help&#39;: &#39;compute the maximum&#39;}, &#39;args&#39;: (&#39;--max&#39;,), &#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x1031295c0&gt;}
+add_argument {&#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function sum&gt;, &#39;help&#39;: &#39;sum the integers&#39;}, &#39;args&#39;: (&#39;--sum&#39;,), &#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x104d1bc88&gt;}
+add_argument {&#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function min&gt;, &#39;help&#39;: &#39;compute the minimum&#39;}, &#39;args&#39;: (&#39;--min&#39;,), &#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x104d1bc88&gt;}
+add_argument {&#39;kwargs&#39;: {&#39;dest&#39;: &#39;accumulate&#39;, &#39;action&#39;: &#39;store_const&#39;, &#39;const&#39;: &lt;built-in function max&gt;, &#39;help&#39;: &#39;compute the maximum&#39;}, &#39;args&#39;: (&#39;--max&#39;,), &#39;self&#39;: &lt;argparse._MutuallyExclusiveGroup object at 0x104d1bc88&gt;}
 6
 </pre>
 </div>
@@ -14083,15 +14060,7 @@ def twice(x=2):
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Classes-for-Fuzzing-Configuration-Options">Classes for Fuzzing Configuration Options<a class="anchor-link" href="#Classes-for-Fuzzing-Configuration-Options">&#182;</a></h2></div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now create reusable classes that we can use for testing arbitrary programs.  (Okay, make that "arbitrary programs that are written in Python and use the <code>argparse</code> module to process command-line arguments.")</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Classes-for-Fuzzing-Configuration-Options">Classes for Fuzzing Configuration Options<a class="anchor-link" href="#Classes-for-Fuzzing-Configuration-Options">&#182;</a></h2><p>Let us now create reusable classes that we can use for testing arbitrary programs.  (Okay, make that "arbitrary programs that are written in Python and use the <code>argparse</code> module to process command-line arguments.")</p>
 </div>
 </div>
 </div>
@@ -14332,15 +14301,7 @@ def twice(x=2):
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Autopep8">Example: Autopep8<a class="anchor-link" href="#Example:-Autopep8">&#182;</a></h3></div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let us apply this on the <code>autopep8</code> runner:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Autopep8">Example: Autopep8<a class="anchor-link" href="#Example:-Autopep8">&#182;</a></h3><p>Let us apply our newly defined classes on the <code>autopep8</code> runner:</p>
 </div>
 </div>
 </div>
@@ -15077,7 +15038,7 @@ $$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>This mechanism of creating configurations by extending grammars can be easily extended to other configuration targets.  One may want to explore a greater number of configurations, or expansions in specific contexts.  The exercises, below, have a number of options ready for you.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>This mechanism of creating configurations by extending grammars can be easily extended to other configuration targets.  One may want to explore a greater number of configurations, or expansions in specific contexts.  The <a href="#Exercises">exercises</a>, below, have a number of options ready for you.</p>
 </div>
 </div>
 </div>
@@ -15143,7 +15104,168 @@ $$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Configuration-Files">Exercise 1: Configuration Files<a class="anchor-link" href="#Exercise-1:-Configuration-Files">&#182;</a></h3><p>Besides command-line options, a second important source of configurations are <em>configuration files</em>.  In this exercise, we will consider the very simple configuration language provided by the Python <code>ConfigParser</code> module, which is very similar to what is found in Microsoft Windows <em>.ini</em> files.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-#ifdef-Configuration-Fuzzing">Exercise 1: #ifdef Configuration Fuzzing<a class="anchor-link" href="#Exercise-1:-#ifdef-Configuration-Fuzzing">&#182;</a></h3><p>In C programs, the <em>C preprocessor</em> can be used to choose which code parts should be compiled and which ones should not.  As an example, in the C code</p>
+<div class="highlight"><pre><span></span><span class="cp">#ifdef LONG_FOO</span>
+<span class="kt">long</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+<span class="cp">#else</span>
+<span class="kt">int</span> <span class="nf">foo</span><span class="p">()</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+<span class="cp">#endif</span>
+</pre></div>
+<p>the compiler will compile the function <code>foo()</code> with return type<code>long</code> if the <em>preprocessor variable</em> <code>LONG_FOO</code> is defined, and with return type <code>int</code> if not.  Such preprocessor variables are either set in the source files (using <code>#define</code>, as in <code>#define LONG_FOO</code>) or on the C compiler command line (using <code>-D&lt;variable&gt;</code> or <code>-D&lt;variable&gt;=&lt;value&gt;</code>, as in <code>-DLONG_FOO</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Such <em>conditional compilation</em> is used to configure C programs towards their environment.  System-specific code can contain lots of conditional compilation.  As an example, consider this excerpt of <code>xmlparse.c</code>, the XML parser that is part of the Python runtime library:</p>
+<div class="highlight"><pre><span></span><span class="cp">#if defined(_WIN32) &amp;&amp; !defined(LOAD_LIBRARY_SEARCH_SYSTEM32)</span>
+<span class="cp"># define LOAD_LIBRARY_SEARCH_SYSTEM32  0x00000800</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#if !defined(HAVE_GETRANDOM) &amp;&amp; !defined(HAVE_SYSCALL_GETRANDOM) \</span>
+<span class="cp">    &amp;&amp; !defined(HAVE_ARC4RANDOM_BUF) &amp;&amp; !defined(HAVE_ARC4RANDOM) \</span>
+<span class="cp">    &amp;&amp; !defined(XML_DEV_URANDOM) \</span>
+<span class="cp">    &amp;&amp; !defined(_WIN32) \</span>
+<span class="cp">    &amp;&amp; !defined(XML_POOR_ENTROPY)</span>
+<span class="cp"># error</span>
+<span class="cp">#endif</span>
+
+<span class="cp">#if !defined(TIOCSWINSZ) || defined(__SCO__) || defined(__UNIXWARE__)</span>
+<span class="cp">#define USE_SYSV_ENVVARS    </span><span class="cm">/* COLUMNS/LINES vs. TERMCAP */</span><span class="cp"></span>
+<span class="cp">#endif</span>
+
+<span class="cp">#ifdef XML_UNICODE_WCHAR_T</span>
+<span class="cp">#define XML_T(x) (const wchar_t)x</span>
+<span class="cp">#define XML_L(x) L ## x</span>
+<span class="cp">#else</span>
+<span class="cp">#define XML_T(x) (const unsigned short)x</span>
+<span class="cp">#define XML_L(x) x</span>
+<span class="cp">#endif</span>
+
+<span class="kt">int</span> <span class="nf">fun</span><span class="p">(</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">XML_T</span><span class="p">(</span><span class="n">x</span><span class="p">);</span> <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>A typical configuration for the C preprocessor on the above code could be <code>cc -c -D_WIN32 -DXML_POOR_ENTROPY -DXML_UNICODE_WCHAR_T xmlparse.c</code>, defining the given preprocessor variables and selecting the appropriate code fragments.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Since the compiler can only compile one configuration at a time (implying that we can also only <em>test</em> one resulting executable at a time), your task is to find out which of these configurations actually compile.  To this end, proceed in three steps.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-1:-Extract-Preprocessor-Variables">Part 1: Extract Preprocessor Variables<a class="anchor-link" href="#Part-1:-Extract-Preprocessor-Variables">&#182;</a></h4><p>Write a <em>function</em> <code>cpp_identifiers()</code> that, given a set of lines (say, from <code>open(filename).readlines()</code>), extracts all preprocessor variables referenced in <code>#if</code> or <code>#ifdef</code> preprocessor instructions.  Apply <code>ifdef_identifiers()</code> on the sample C input above, such that</p>
+<div class="highlight"><pre><span></span><span class="n">cpp_identifiers</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;xmlparse.c&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">())</span>
+</pre></div>
+<p>returns the set</p>
+<div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;_WIN32&#39;</span><span class="p">,</span> <span class="s1">&#39;LOAD_LIBRARY_SEARCH_SYSTEM32&#39;</span><span class="p">,</span> <span class="s1">&#39;HAVE_GETRANDOM&#39;</span><span class="p">,</span> <span class="s1">&#39;HAVE_SYSCALL_GETRANDOM&#39;</span><span class="p">,</span> <span class="s1">&#39;HAVE_ARC4RANDOM_BUF&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">}</span>
+</pre></div>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ConfigurationFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-2:-Derive-an-Option-Grammar">Part 2: Derive an Option Grammar<a class="anchor-link" href="#Part-2:-Derive-an-Option-Grammar">&#182;</a></h4><p>With the help of <code>cpp_identifiers()</code>, create a grammar which has C compiler invocations with a list of options, where each option takes the form <code>-D&lt;variable&gt;</code> for a preprocessor variable <code>&lt;variable&gt;</code>.  Using this grammar <code>cpp_grammar</code>, a fuzzer</p>
+<div class="highlight"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">cpp_grammar</span><span class="p">)</span>
+</pre></div>
+<p>would create C compiler invocations such as</p>
+<div class="highlight"><pre><span></span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+<span class="p">[</span><span class="s1">&#39;cc -DHAVE_SYSCALL_GETRANDOM xmlparse.c&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;cc -D__SCO__ -DRANDOM_BUF -DXML_UNICODE_WCHAR_T -D__UNIXWARE__ xmlparse.c&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;cc -DXML_POOR_ENTROPY xmlparse.c&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;cc -DRANDOM xmlparse.c&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;cc -D_WIN xmlparse.c&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;cc -DHAVE_ARC xmlparse.c&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</pre></div>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ConfigurationFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-3:-C-Preprocessor-Configuration-Fuzzing">Part 3: C Preprocessor Configuration Fuzzing<a class="anchor-link" href="#Part-3:-C-Preprocessor-Configuration-Fuzzing">&#182;</a></h4><p>Using the grammar just produced, use a <code>GrammarCoverageFuzzer</code> to</p>
+<ol>
+<li>Test each processor variable individually</li>
+<li>Test each pair of processor variables, using <code>pairwise()</code>.</li>
+</ol>
+<p>What happens if you actually run the invocations?</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ConfigurationFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;xmlparse.c&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ConfigurationFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;xmlparse.o&quot;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;xmlparse.o&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ConfigurationFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-.ini-Configuration-Fuzzing">Exercise 2: .ini Configuration Fuzzing<a class="anchor-link" href="#Exercise-2:-.ini-Configuration-Fuzzing">&#182;</a></h3><p>Besides command-line options, another important source of configurations are <em>configuration files</em>.  In this exercise, we will consider the very simple configuration language provided by the Python <code>ConfigParser</code> module, which is very similar to what is found in Microsoft Windows <em>.ini</em> files.</p>
 </div>
 </div>
 </div>
@@ -15411,7 +15533,7 @@ forwardx11 = no
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-C-Option-Fuzzing">Exercise 2: C Option Fuzzing<a class="anchor-link" href="#Exercise-2:-C-Option-Fuzzing">&#182;</a></h3><p>In C programs, the <code>getopt()</code> function are frequently used to process configuration options.  A call</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-3:-Extracting-and-Fuzzing-C-Command-Line-Options">Exercise 3: Extracting and Fuzzing C Command-Line Options<a class="anchor-link" href="#Exercise-3:-Extracting-and-Fuzzing-C-Command-Line-Options">&#182;</a></h3><p>In C programs, the <code>getopt()</code> function are frequently used to process configuration options.  A call</p>
 
 <pre><code>getopt(argc, argv, "bf:")</code></pre>
 <p>indicates that the program accepts two options <code>-b</code> and <code>-f</code>, with <code>-f</code> taking an argument (as indicated by the following colon).</p>
@@ -15453,7 +15575,7 @@ forwardx11 = no
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-3:-Expansions-in-Context">Exercise 3: Expansions in Context<a class="anchor-link" href="#Exercise-3:-Expansions-in-Context">&#182;</a></h3><p>In our above option configurations, we have multiple symbols which all expand to the same integer.  For instance, the <code>--line-range</code> option of <code>autopep8</code> takes two <code>&lt;line&gt;</code> parameters which both expand into the same <code>&lt;int&gt;</code> symbol:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-4:-Expansions-in-Context">Exercise 4: Expansions in Context<a class="anchor-link" href="#Exercise-4:-Expansions-in-Context">&#182;</a></h3><p>In our above option configurations, we have multiple symbols which all expand to the same integer.  For instance, the <code>--line-range</code> option of <code>autopep8</code> takes two <code>&lt;line&gt;</code> parameters which both expand into the same <code>&lt;int&gt;</code> symbol:</p>
 
 <pre><code>&lt;option&gt; ::= ... | --line-range &lt;line&gt; &lt;line&gt; | ...
 &lt;line&gt; ::= &lt;int&gt;
@@ -15610,7 +15732,7 @@ forwardx11 = no
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConfigurationFuzzer.ipynb" target=_blank)>Last change: 2018-11-25 14:59:06+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConfigurationFuzzer.ipynb" target=_blank)>Last change: 2018-12-03 14:33:12+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -15626,7 +15748,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html">Testing Configurations</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html">https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html</a>.  Retrieved 2018-11-25 14:59:06+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html">Testing Configurations</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html">https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html</a>.  Retrieved 2018-12-03 14:33:12+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:ConfigurationFuzzer,
@@ -15636,9 +15758,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html}},
-    note = {Retrieved 2018-11-25 14:59:06+01:00},
+    note = {Retrieved 2018-12-03 14:33:12+01:00},
     url = {https://www.fuzzingbook.org/beta/html/ConfigurationFuzzer.html},
-    urldate = {2018-11-25 14:59:06+01:00}
+    urldate = {2018-12-03 14:33:12+01:00}
 }
 </pre>
 </div>

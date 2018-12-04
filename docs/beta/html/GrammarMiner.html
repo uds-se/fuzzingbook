@@ -11889,10 +11889,16 @@ MathJax.Hub.Config({
            <ul><li class="has-sub"><a href="#A-Simple-Grammar-Miner">A Simple Grammar Miner</a>
 <ul><li class="has-sub"><a href="#Function-Under-Test">Function Under Test</a>
 </ul></li><li class="has-sub"><a href="#Tracing-Variable-Values">Tracing Variable Values</a>
-<ul><li class="has-sub"><a href="#Extracting-a-Grammar">Extracting a Grammar</a>
+<ul><li class="has-sub"><a href="#Recording-Occurrence-of-Input-Values.">Recording Occurrence of Input Values.</a>
+</li><li class="has-sub"><a href="#Trace">Trace</a>
+</li><li class="has-sub"><a href="#Extracting-a-Grammar">Extracting a Grammar</a>
 </li><li class="has-sub"><a href="#Merging-Grammars">Merging Grammars</a>
 </li><li class="has-sub"><a href="#Fuzzing">Fuzzing</a>
-</ul></li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
+</ul></li><li class="has-sub"><a href="#Grammar-Miner-with-Stack">Grammar Miner with Stack</a>
+<ul><li class="has-sub"><a href="#Restrict-The-Input-Window">Restrict The Input Window</a>
+</li><li class="has-sub"><a href="#Keep-Track-of-The-Stack">Keep Track of The Stack</a>
+</ul></li><li class="has-sub"><a href="#Tainted-Grammar-Miner">Tainted Grammar Miner</a>
+</li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps">Next Steps</a>
 </li><li class="has-sub"><a href="#Background">Background</a>
 </li><li class="has-sub"><a href="#Exercises">Exercises</a>
@@ -11963,10 +11969,47 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">fuzzingbook_utils</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/sys.html" class="import" target="_blank">sys</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Simple-Grammar-Miner">A Simple Grammar Miner<a class="anchor-link" href="#A-Simple-Grammar-Miner">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Say we want to obtain the grammar for the function <code>urlparse</code> from the <em>Python</em> distribution.</p>
+</div>
 </div>
 </div>
 </div>
@@ -11985,26 +12028,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/urllib.parse.html" class="import" target="_blank">urllib.parse</a></span> <span class="k">import</span> <span class="n">urlparse</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">FUNCTION</span> <span class="o">=</span> <span class="n">urlparse</span>
-<span class="n">INPUTS</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;http://user:pass@www.google.com:80/?q=path#ref&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;https://www.cispa.saarland:80/&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;http://www.fuzzingbook.org/#News&#39;</span><span class="p">,</span>
-<span class="p">]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/urllib.parse.html" class="import" target="_blank">urllib.parse</a></span> <span class="k">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">clear_cache</span>
+<span class="n">FUNCTION</span> <span class="o">=</span> <span class="n">urlparse</span>
 </pre></div>
 
 </div>
@@ -12020,13 +12045,35 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We have a few inputs that can be used, as listed below:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We use two <em>global</em> variables -- <code>the_values</code> is used to keep track of variable assignments and <code>the_input</code> to keep track of the current input string. We will show later how to avoid these globals.</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/sys.html" class="import" target="_blank">sys</a></span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">INPUTS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;http://user:pass@www.google.com:80/?q=path#ref&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;https://www.cispa.saarland:80/&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;http://www.fuzzingbook.org/#News&#39;</span><span class="p">,</span>
+<span class="p">]</span>
 </pre></div>
 
 </div>
@@ -12034,19 +12081,53 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Recording-Occurrence-of-Input-Values.">Recording Occurrence of Input Values.<a class="anchor-link" href="#Recording-Occurrence-of-Input-Values.">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The function <code>traceit()</code> is used to record all <em>non trivial</em> string variables (with length more than 2 characters) and values occurring during execution.</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># We store individual variable/value pairs here</span>
-<span class="k">global</span> <span class="n">the_values</span>
-<span class="n">the_values</span> <span class="o">=</span> <span class="p">{}</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Tracer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputstr</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputstr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">the_values</span> <span class="o">=</span> <span class="n">inputstr</span><span class="p">,</span> <span class="p">{}</span>
 
-<span class="c1"># The current input string</span>
-<span class="k">global</span> <span class="n">the_input</span>
-<span class="n">the_input</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oldtrace</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">gettrace</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oldtrace</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="n">my_vars</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">var</span><span class="p">:</span> <span class="n">value</span>
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span>
+            <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputstr</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">the_values</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">my_vars</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceit</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputstr</span>
 </pre></div>
 
 </div>
@@ -12054,31 +12135,12 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># We record all string variables and values occurring during execution</span>
-<span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
-    <span class="k">global</span> <span class="n">the_values</span>
-    <span class="n">variables</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-
-    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-        <span class="c1"># print(var, value)</span>
-
-        <span class="c1"># Save all non-trivial string values that also occur in the input</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span>
-                <span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">the_input</span><span class="p">:</span>
-            <span class="n">the_values</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="k">return</span> <span class="n">traceit</span>
-</pre></div>
-
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Trace">Trace<a class="anchor-link" href="#Trace">&#182;</a></h3><p>The <code>trace_function()</code> hooks into the Python trace functionality.</p>
 </div>
-</div></div>
+</div>
 </div>
 </div>
 
@@ -12088,37 +12150,12 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Trace function</span>
-<span class="k">def</span> <span class="nf">trace_function</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
-    <span class="c1"># We obtain a mapping of variables to values</span>
-    <span class="k">global</span> <span class="n">the_input</span>
-    <span class="n">the_input</span> <span class="o">=</span> <span class="nb">input</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">Tracer</span><span class="p">(</span><span class="n">INPUTS</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">as</span> <span class="n">tracer</span><span class="p">:</span>
+    <span class="n">FUNCTION</span><span class="p">(</span><span class="n">tracer</span><span class="p">())</span>
 
-    <span class="k">global</span> <span class="n">the_values</span>
-    <span class="n">the_values</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="n">traceit</span><span class="p">)</span>
-    <span class="n">o</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">the_input</span><span class="p">)</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">the_values</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">values</span> <span class="o">=</span> <span class="n">trace_function</span><span class="p">(</span><span class="n">FUNCTION</span><span class="p">,</span> <span class="n">INPUTS</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">var</span> <span class="o">+</span> <span class="s2">&quot; = &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">var</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">var</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">tracer</span><span class="o">.</span><span class="n">the_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">var</span> <span class="o">+</span> <span class="s2">&quot; = &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -12153,11 +12190,20 @@ query = &#39;q=path&#39;
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">fuzzingbook_utils</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">syntax_diagram</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Convert a variable name into a grammar nonterminal</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -12167,22 +12213,7 @@ query = &#39;q=path&#39;
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">START_SYMBOL</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Convert a variable name into a grammar nonterminal</span>
-<span class="k">def</span> <span class="nf">nonterminal</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">nonterminal</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
     <span class="k">return</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">var</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span>
 </pre></div>
 
@@ -12211,30 +12242,25 @@ query = &#39;q=path&#39;
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Obtain a grammar for a specific input</span>
-<span class="k">def</span> <span class="nf">get_grammar</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_grammar</span><span class="p">(</span><span class="n">tracer</span><span class="p">):</span>
+    <span class="n">traces</span><span class="p">,</span> <span class="n">my_input</span> <span class="o">=</span> <span class="n">tracer</span><span class="o">.</span><span class="n">the_values</span><span class="p">,</span> <span class="n">tracer</span><span class="o">.</span><span class="n">inputstr</span>
     <span class="c1"># Here&#39;s our initial grammar</span>
-    <span class="n">grammar</span> <span class="o">=</span> <span class="p">{</span><span class="n">START_SYMBOL</span><span class="p">:</span> <span class="p">[</span><span class="nb">input</span><span class="p">]}</span>
-
-    <span class="c1"># Trace execution</span>
-    <span class="n">values</span> <span class="o">=</span> <span class="n">trace_function</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="p">{</span><span class="n">START_SYMBOL</span><span class="p">:</span> <span class="p">[</span><span class="n">my_input</span><span class="p">]}</span>
 
     <span class="c1"># Replace as listed above</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">new_rules</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
-                <span class="n">repl_alternatives</span> <span class="o">=</span> <span class="n">grammar</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">repl_alternatives</span><span class="p">)):</span>
-                    <span class="n">repl</span> <span class="o">=</span> <span class="n">repl_alternatives</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">repl</span><span class="p">:</span>
-                        <span class="c1"># Replace value by nonterminal name</span>
-                        <span class="n">alt_key</span> <span class="o">=</span> <span class="n">nonterminal</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
-                        <span class="n">repl_alternatives</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">repl</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">alt_key</span><span class="p">)</span>
-                        <span class="n">new_rules</span> <span class="o">=</span> <span class="n">new_rules</span> <span class="o">+</span> <span class="p">[(</span><span class="n">var</span><span class="p">,</span> <span class="n">alt_key</span><span class="p">,</span> <span class="n">value</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">traces</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">repl_alternatives</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">repl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">repl_alternatives</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">repl</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="c1"># Replace value by nonterminal name</span>
+                    <span class="n">alt_key</span> <span class="o">=</span> <span class="n">nonterminal</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+                    <span class="n">repl_alternatives</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">repl</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">alt_key</span><span class="p">)</span>
+                    <span class="n">new_rules</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">var</span><span class="p">,</span> <span class="n">alt_key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_rules</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">new_rules</span><span class="p">:</span>
             <span class="k">break</span>  <span class="c1"># Nothing to expand anymore</span>
 
         <span class="k">for</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">alt_key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">new_rules</span><span class="p">:</span>
@@ -12242,13 +12268,22 @@ query = &#39;q=path&#39;
             <span class="n">grammar</span><span class="p">[</span><span class="n">alt_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
 
             <span class="c1"># Do not expand this again</span>
-            <span class="k">del</span> <span class="n">values</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">traces</span><span class="p">[</span><span class="n">var</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">grammar</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">set</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>First, trace the execution:</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -12258,7 +12293,11 @@ query = &#39;q=path&#39;
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar</span> <span class="o">=</span> <span class="n">get_grammar</span><span class="p">(</span><span class="n">FUNCTION</span><span class="p">,</span> <span class="n">INPUTS</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">Tracer</span><span class="p">(</span><span class="n">INPUTS</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">as</span> <span class="n">tracer</span><span class="p">:</span>
+    <span class="n">FUNCTION</span><span class="p">(</span><span class="n">tracer</span><span class="p">())</span>
+
+<span class="n">grammar</span> <span class="o">=</span> <span class="n">get_grammar</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
 <span class="n">grammar</span>
 </pre></div>
 
@@ -12270,12 +12309,12 @@ query = &#39;q=path&#39;
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;url&gt;&#39;],
- &#39;&lt;url&gt;&#39;: [&#39;&lt;scheme&gt;://&lt;netloc&gt;/?&lt;query&gt;#&lt;fragment&gt;&#39;],
- &#39;&lt;scheme&gt;&#39;: [&#39;http&#39;],
- &#39;&lt;fragment&gt;&#39;: [&#39;ref&#39;],
- &#39;&lt;query&gt;&#39;: [&#39;q=path&#39;],
- &#39;&lt;netloc&gt;&#39;: [&#39;user:pass@www.google.com:80&#39;]}
+<pre>{&#39;&lt;start&gt;&#39;: {&#39;&lt;url&gt;&#39;},
+ &#39;&lt;url&gt;&#39;: {&#39;&lt;scheme&gt;://&lt;netloc&gt;/?&lt;query&gt;#&lt;fragment&gt;&#39;},
+ &#39;&lt;scheme&gt;&#39;: {&#39;http&#39;},
+ &#39;&lt;netloc&gt;&#39;: {&#39;user:pass@www.google.com:80&#39;},
+ &#39;&lt;fragment&gt;&#39;: {&#39;ref&#39;},
+ &#39;&lt;query&gt;&#39;: {&#39;q=path&#39;}}
 </pre>
 </div>
 
@@ -12287,7 +12326,10 @@ query = &#39;q=path&#39;
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar</span> <span class="o">=</span> <span class="n">get_grammar</span><span class="p">(</span><span class="n">FUNCTION</span><span class="p">,</span> <span class="n">INPUTS</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">Tracer</span><span class="p">(</span><span class="n">INPUTS</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">as</span> <span class="n">tracer</span><span class="p">:</span>
+    <span class="n">FUNCTION</span><span class="p">(</span><span class="n">tracer</span><span class="p">())</span>
+<span class="n">grammar</span> <span class="o">=</span> <span class="n">get_grammar</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
 <span class="n">grammar</span>
 </pre></div>
 
@@ -12299,11 +12341,11 @@ query = &#39;q=path&#39;
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;url&gt;&#39;],
- &#39;&lt;url&gt;&#39;: [&#39;&lt;scheme&gt;:&lt;rest&gt;&#39;],
- &#39;&lt;rest&gt;&#39;: [&#39;//&lt;netloc&gt;/&#39;],
- &#39;&lt;scheme&gt;&#39;: [&#39;https&#39;],
- &#39;&lt;netloc&gt;&#39;: [&#39;www.cispa.saarland:80&#39;]}
+<pre>{&#39;&lt;start&gt;&#39;: {&#39;&lt;url&gt;&#39;},
+ &#39;&lt;url&gt;&#39;: {&#39;&lt;scheme&gt;:&lt;rest&gt;&#39;},
+ &#39;&lt;rest&gt;&#39;: {&#39;//&lt;netloc&gt;/&#39;},
+ &#39;&lt;scheme&gt;&#39;: {&#39;https&#39;},
+ &#39;&lt;netloc&gt;&#39;: {&#39;www.cispa.saarland:80&#39;}}
 </pre>
 </div>
 
@@ -12315,7 +12357,10 @@ query = &#39;q=path&#39;
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar</span> <span class="o">=</span> <span class="n">get_grammar</span><span class="p">(</span><span class="n">FUNCTION</span><span class="p">,</span> <span class="n">INPUTS</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">Tracer</span><span class="p">(</span><span class="n">INPUTS</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">as</span> <span class="n">tracer</span><span class="p">:</span>
+    <span class="n">FUNCTION</span><span class="p">(</span><span class="n">tracer</span><span class="p">())</span>
+<span class="n">grammar</span> <span class="o">=</span> <span class="n">get_grammar</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
 <span class="n">grammar</span>
 </pre></div>
 
@@ -12327,11 +12372,11 @@ query = &#39;q=path&#39;
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;url&gt;&#39;],
- &#39;&lt;url&gt;&#39;: [&#39;&lt;scheme&gt;://&lt;netloc&gt;/#&lt;fragment&gt;&#39;],
- &#39;&lt;scheme&gt;&#39;: [&#39;http&#39;],
- &#39;&lt;netloc&gt;&#39;: [&#39;www.fuzzingbook.org&#39;],
- &#39;&lt;fragment&gt;&#39;: [&#39;News&#39;]}
+<pre>{&#39;&lt;start&gt;&#39;: {&#39;&lt;url&gt;&#39;},
+ &#39;&lt;url&gt;&#39;: {&#39;&lt;scheme&gt;://&lt;netloc&gt;/#&lt;fragment&gt;&#39;},
+ &#39;&lt;scheme&gt;&#39;: {&#39;http&#39;},
+ &#39;&lt;netloc&gt;&#39;: {&#39;www.fuzzingbook.org&#39;},
+ &#39;&lt;fragment&gt;&#39;: {&#39;News&#39;}}
 </pre>
 </div>
 
@@ -12352,22 +12397,28 @@ query = &#39;q=path&#39;
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">merge_grammars</span><span class="p">(</span><span class="n">g1</span><span class="p">,</span> <span class="n">g2</span><span class="p">):</span>
-    <span class="n">merged_grammar</span> <span class="o">=</span> <span class="n">g1</span>
-    <span class="k">for</span> <span class="n">key2</span> <span class="ow">in</span> <span class="n">g2</span><span class="p">:</span>
-        <span class="n">repl2</span> <span class="o">=</span> <span class="n">g2</span><span class="p">[</span><span class="n">key2</span><span class="p">]</span>
-        <span class="n">key_found</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">for</span> <span class="n">key1</span> <span class="ow">in</span> <span class="n">g1</span><span class="p">:</span>
-            <span class="n">repl1</span> <span class="o">=</span> <span class="n">g1</span><span class="p">[</span><span class="n">key1</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">repl</span> <span class="ow">in</span> <span class="n">repl2</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">key1</span> <span class="o">==</span> <span class="n">key2</span><span class="p">:</span>
-                    <span class="n">key_found</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">if</span> <span class="n">repl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">repl1</span><span class="p">:</span>
-                        <span class="c1"># Extend existing rule</span>
-                        <span class="n">merged_grammar</span><span class="p">[</span><span class="n">key1</span><span class="p">]</span> <span class="o">=</span> <span class="n">repl1</span> <span class="o">+</span> <span class="p">[</span><span class="n">repl</span><span class="p">]</span>
+    <span class="n">merged_grammar</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">g1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">g2</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">merged_grammar</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">g1</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span> <span class="o">|</span> <span class="n">g2</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">merged_grammar</span>
+</pre></div>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">key_found</span><span class="p">:</span>
-            <span class="c1"># Add new rule</span>
-            <span class="n">merged_grammar</span><span class="p">[</span><span class="n">key2</span><span class="p">]</span> <span class="o">=</span> <span class="n">repl2</span>
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_merged_grammar</span><span class="p">(</span><span class="n">traces</span><span class="p">):</span>
+    <span class="n">merged_grammar</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">traces</span><span class="p">:</span>
+        <span class="n">grammar</span> <span class="o">=</span> <span class="n">get_grammar</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">merged_grammar</span> <span class="o">=</span> <span class="n">merge_grammars</span><span class="p">(</span><span class="n">merged_grammar</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">merged_grammar</span>
 </pre></div>
@@ -12383,32 +12434,15 @@ query = &#39;q=path&#39;
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_merged_grammar</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-    <span class="n">merged_grammar</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">for</span> <span class="nb">input</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
-        <span class="n">grammar</span> <span class="o">=</span> <span class="n">get_grammar</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span>
-        <span class="c1"># print(repr(input) + &quot; -&gt;\n&quot; + grammar_to_string(grammar))</span>
-        <span class="k">if</span> <span class="n">merged_grammar</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">merged_grammar</span> <span class="o">=</span> <span class="n">grammar</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">merged_grammar</span> <span class="o">=</span> <span class="n">merge_grammars</span><span class="p">(</span><span class="n">merged_grammar</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">traces</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">inputstr</span> <span class="ow">in</span> <span class="n">INPUTS</span><span class="p">:</span>
+    <span class="n">clear_cache</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">Tracer</span><span class="p">(</span><span class="n">inputstr</span><span class="p">)</span> <span class="k">as</span> <span class="n">tracer</span><span class="p">:</span>
+        <span class="n">FUNCTION</span><span class="p">(</span><span class="n">tracer</span><span class="p">())</span>
+    <span class="n">traces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">merged_grammar</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar</span> <span class="o">=</span> <span class="n">get_merged_grammar</span><span class="p">(</span><span class="n">FUNCTION</span><span class="p">,</span> <span class="n">INPUTS</span><span class="p">)</span>
-<span class="n">grammar</span>
+<span class="n">grammar</span> <span class="o">=</span> <span class="n">get_merged_grammar</span><span class="p">(</span><span class="n">traces</span><span class="p">)</span>
+<span class="n">syntax_diagram</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12418,19 +12452,376 @@ query = &#39;q=path&#39;
 
 <div class="output_area">
 
-<div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;url&gt;&#39;],
- &#39;&lt;url&gt;&#39;: [&#39;&lt;scheme&gt;://&lt;netloc&gt;/?&lt;query&gt;#&lt;fragment&gt;&#39;,
-  &#39;&lt;scheme&gt;:&lt;rest&gt;&#39;,
-  &#39;&lt;scheme&gt;://&lt;netloc&gt;/#&lt;fragment&gt;&#39;],
- &#39;&lt;scheme&gt;&#39;: [&#39;http&#39;, &#39;https&#39;],
- &#39;&lt;netloc&gt;&#39;: [&#39;user:pass@www.google.com:80&#39;,
-  &#39;www.cispa.saarland:80&#39;,
-  &#39;www.fuzzingbook.org&#39;],
- &#39;&lt;fragment&gt;&#39;: [&#39;ref&#39;, &#39;News&#39;],
- &#39;&lt;query&gt;&#39;: [&#39;q=path&#39;],
- &#39;&lt;rest&gt;&#39;: [&#39;//&lt;netloc&gt;/&#39;]}
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>start
 </pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 165.5 62" width="165.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M125.5 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M105.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M105.5 31h0.0"/><rect height="22" width="45.5" x="60.0" y="20"/><text x="82.75" y="35">url</text></g></g><path d="M105.5 31h20"/></g><path d="M 125.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>url
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="122" viewBox="0 0 643.5 122" width="643.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M603.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h65.5"/><path d="M518.0 31h65.5"/><g class="non-terminal">
+<path d="M125.5 31h0.0"/><path d="M196.5 31h0.0"/><rect height="22" width="71.0" x="125.5" y="20"/><text x="161.0" y="35">scheme</text></g><path d="M196.5 31h10"/><path d="M206.5 31h10"/><g class="terminal">
+<path d="M216.5 31h0.0"/><path d="M262.0 31h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="216.5" y="20"/><text x="239.25" y="35">://</text></g><path d="M262.0 31h10"/><path d="M272.0 31h10"/><g class="non-terminal">
+<path d="M282.0 31h0.0"/><path d="M353.0 31h0.0"/><rect height="22" width="71.0" x="282.0" y="20"/><text x="317.5" y="35">netloc</text></g><path d="M353.0 31h10"/><path d="M363.0 31h10"/><g class="terminal">
+<path d="M373.0 31h0.0"/><path d="M410.0 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="373.0" y="20"/><text x="391.5" y="35">/#</text></g><path d="M410.0 31h10"/><path d="M420.0 31h10"/><g class="non-terminal">
+<path d="M430.0 31h0.0"/><path d="M518.0 31h0.0"/><rect height="22" width="88.0" x="430.0" y="20"/><text x="474.0" y="35">fragment</text></g></g><path d="M583.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h165.0"/><path d="M418.5 61h165.0"/><g class="non-terminal">
+<path d="M225.0 61h0.0"/><path d="M296.0 61h0.0"/><rect height="22" width="71.0" x="225.0" y="50"/><text x="260.5" y="65">scheme</text></g><path d="M296.0 61h10"/><path d="M306.0 61h10"/><g class="terminal">
+<path d="M316.0 61h0.0"/><path d="M344.5 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="316.0" y="50"/><text x="330.25" y="65">:</text></g><path d="M344.5 61h10"/><path d="M354.5 61h10"/><g class="non-terminal">
+<path d="M364.5 61h0.0"/><path d="M418.5 61h0.0"/><rect height="22" width="54.0" x="364.5" y="50"/><text x="391.5" y="65">rest</text></g></g><path d="M583.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h0.0"/><path d="M583.5 91h0.0"/><g class="non-terminal">
+<path d="M60.0 91h0.0"/><path d="M131.0 91h0.0"/><rect height="22" width="71.0" x="60.0" y="80"/><text x="95.5" y="95">scheme</text></g><path d="M131.0 91h10"/><path d="M141.0 91h10"/><g class="terminal">
+<path d="M151.0 91h0.0"/><path d="M196.5 91h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="151.0" y="80"/><text x="173.75" y="95">://</text></g><path d="M196.5 91h10"/><path d="M206.5 91h10"/><g class="non-terminal">
+<path d="M216.5 91h0.0"/><path d="M287.5 91h0.0"/><rect height="22" width="71.0" x="216.5" y="80"/><text x="252.0" y="95">netloc</text></g><path d="M287.5 91h10"/><path d="M297.5 91h10"/><g class="terminal">
+<path d="M307.5 91h0.0"/><path d="M344.5 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="307.5" y="80"/><text x="326.0" y="95">/?</text></g><path d="M344.5 91h10"/><path d="M354.5 91h10"/><g class="non-terminal">
+<path d="M364.5 91h0.0"/><path d="M427.0 91h0.0"/><rect height="22" width="62.5" x="364.5" y="80"/><text x="395.75" y="95">query</text></g><path d="M427.0 91h10"/><path d="M437.0 91h10"/><g class="terminal">
+<path d="M447.0 91h0.0"/><path d="M475.5 91h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="447.0" y="80"/><text x="461.25" y="95">#</text></g><path d="M475.5 91h10"/><path d="M485.5 91h10"/><g class="non-terminal">
+<path d="M495.5 91h0.0"/><path d="M583.5 91h0.0"/><rect height="22" width="88.0" x="495.5" y="80"/><text x="539.5" y="95">fragment</text></g></g><path d="M583.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 603.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>scheme
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="92" viewBox="0 0 182.5 92" width="182.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M142.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="20"/><text x="91.25" y="35">https</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h4.25"/><path d="M118.25 61h4.25"/><g class="terminal">
+<path d="M64.25 61h0.0"/><path d="M118.25 61h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="64.25" y="50"/><text x="91.25" y="65">http</text></g></g><path d="M122.5 61h20"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>netloc
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="122" viewBox="0 0 369.5 122" width="369.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M329.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><rect height="22" rx="10" ry="10" width="249.5" x="60.0" y="20"/><text x="184.75" y="35">user:pass@www.google.com:80</text></g></g><path d="M309.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h34.0"/><path d="M275.5 61h34.0"/><g class="terminal">
+<path d="M94.0 61h0.0"/><path d="M275.5 61h0.0"/><rect height="22" rx="10" ry="10" width="181.5" x="94.0" y="50"/><text x="184.75" y="65">www.fuzzingbook.org</text></g></g><path d="M309.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h25.5"/><path d="M284.0 91h25.5"/><g class="terminal">
+<path d="M85.5 91h0.0"/><path d="M284.0 91h0.0"/><rect height="22" rx="10" ry="10" width="198.5" x="85.5" y="80"/><text x="184.75" y="95">www.cispa.saarland:80</text></g></g><path d="M309.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 329.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>fragment
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="92" viewBox="0 0 174.0 92" width="174.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M134.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h4.25"/><path d="M109.75 31h4.25"/><g class="terminal">
+<path d="M64.25 31h0.0"/><path d="M109.75 31h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="64.25" y="20"/><text x="87.0" y="35">ref</text></g></g><path d="M114.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M114.0 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M114.0 61h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="60.0" y="50"/><text x="87.0" y="65">News</text></g></g><path d="M114.0 61h20"/></g><path d="M 134.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>query
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 191.0 62" width="191.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M151.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M131.0 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" rx="10" ry="10" width="71.0" x="60.0" y="20"/><text x="95.5" y="35">q=path</text></g></g><path d="M131.0 31h20"/></g><path d="M 151.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>rest
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 296.5 62" width="296.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M256.5 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M236.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M97.0 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="20"/><text x="78.5" y="35">//</text></g><path d="M97.0 31h10"/><path d="M107.0 31h10"/><g class="non-terminal">
+<path d="M117.0 31h0.0"/><path d="M188.0 31h0.0"/><rect height="22" width="71.0" x="117.0" y="20"/><text x="152.5" y="35">netloc</text></g><path d="M188.0 31h10"/><path d="M198.0 31h10"/><g class="terminal">
+<path d="M208.0 31h0.0"/><path d="M236.5 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="208.0" y="20"/><text x="222.25" y="35">/</text></g></g><path d="M236.5 31h20"/></g><path d="M 256.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
 </div>
 
 </div>
@@ -12476,17 +12867,1643 @@ query = &#39;q=path&#39;
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>http://www.fuzzingbook.org/?q=path#News
-https://www.cispa.saarland:80/
-http://www.fuzzingbook.org/#ref
-https://www.fuzzingbook.org/#News
-https://user:pass@www.google.com:80/
-http://user:pass@www.google.com:80/
-https://www.fuzzingbook.org/#ref
-http://user:pass@www.google.com:80/
-http://www.cispa.saarland:80/?q=path#News
+<pre>http://user:pass@www.google.com:80/#ref
 http://www.fuzzingbook.org/
+http://www.cispa.saarland:80/
+https://www.fuzzingbook.org/?q=path#News
+http://www.fuzzingbook.org/
+https://www.cispa.saarland:80/#ref
+http://www.cispa.saarland:80/?q=path#News
+https://user:pass@www.google.com:80/
+https://www.fuzzingbook.org/
+https://www.cispa.saarland:80/?q=path#News
 </pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammar-Miner-with-Stack">Grammar Miner with Stack<a class="anchor-link" href="#Grammar-Miner-with-Stack">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Restrict-The-Input-Window">Restrict The Input Window<a class="anchor-link" href="#Restrict-The-Input-Window">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Vars</span><span class="p">:</span>
+    <span class="n">Namespaced</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">istack</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defs</span> <span class="o">=</span> <span class="p">{</span><span class="n">START_SYMBOL</span><span class="p">:</span> <span class="n">i</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">istack</span> <span class="o">=</span> <span class="n">istack</span>
+
+    <span class="k">def</span> <span class="nf">varname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Vars</span><span class="o">.</span><span class="n">Namespaced</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">var</span>
+        <span class="n">class_name</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+        <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span> <span class="o">==</span> <span class="s1">&#39;__new__&#39;</span><span class="p">:</span>
+            <span class="n">class_name</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">[</span><span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">class_name</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">istack</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="n">qual_var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varname</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">defs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qual_var</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">defs</span><span class="p">[</span><span class="n">qual_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Keep-Track-of-The-Stack">Keep Track of The Stack<a class="anchor-link" href="#Keep-Track-of-The-Stack">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">InputStack</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">has</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">val</span> <span class="ow">in</span> <span class="n">var</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+            <span class="n">my_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">my_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">v</span><span class="p">)}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">my_inputs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We need to modify <code>traceit()</code> to be aware of events now:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">StackTracer</span><span class="p">(</span><span class="n">Tracer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputstr</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inputstr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">istack</span> <span class="o">=</span> <span class="n">InputStack</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vars</span> <span class="o">=</span> <span class="n">Vars</span><span class="p">(</span><span class="n">inputstr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">istack</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="n">fun</span><span class="p">,</span> <span class="n">fn</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fn</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;urllib/parse.py&#39;</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceit</span>
+
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;call&#39;</span><span class="p">:</span>
+            <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_varnames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                           <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_argcount</span><span class="p">)]</span>
+            <span class="n">my_parameters</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                             <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">param_names</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">istack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">my_parameters</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">my_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="o">.</span><span class="n">update_vars</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceit</span>
+
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;return&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">istack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceit</span>
+
+        <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;exception&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceit</span>
+
+        <span class="n">variables</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span>
+        <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="o">.</span><span class="n">update_vars</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceit</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>For each (VAR, VALUE) found:</p>
+<ul>
+<li>We search for occurrences of VALUE in the grammar</li>
+<li>We replace them by VAR</li>
+<li>We add a new rule VAR -&gt; VALUE to the grammar</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_grammar</span><span class="p">(</span><span class="n">tracer</span><span class="p">):</span>
+    <span class="n">assignments</span><span class="p">,</span> <span class="n">my_input</span> <span class="o">=</span> <span class="n">tracer</span><span class="o">.</span><span class="n">vars</span><span class="o">.</span><span class="n">defs</span><span class="p">,</span> <span class="n">tracer</span><span class="o">.</span><span class="n">istack</span>
+    <span class="n">my_grammar</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">assignments</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">nt_var</span> <span class="o">=</span> <span class="n">var</span> <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="n">START_SYMBOL</span> <span class="k">else</span> <span class="n">nonterminal</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">my_grammar</span><span class="p">:</span>
+            <span class="n">append</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">repl_alternatives</span> <span class="ow">in</span> <span class="n">my_grammar</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">alt</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">repl</span> <span class="ow">in</span> <span class="n">repl_alternatives</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">repl</span><span class="p">:</span>
+                        <span class="n">repl</span> <span class="o">=</span> <span class="n">repl</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">nt_var</span><span class="p">)</span>
+                        <span class="n">alt</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">repl</span><span class="p">)</span>
+                        <span class="n">append</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">alt</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">repl</span><span class="p">)</span>
+                <span class="n">my_grammar</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">alt</span>
+            <span class="k">if</span> <span class="n">append</span><span class="p">:</span>
+                <span class="n">my_grammar</span><span class="p">[</span><span class="n">nt_var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">value</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">my_grammar</span><span class="p">[</span><span class="n">nt_var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">value</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">my_grammar</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">StackTracer</span><span class="p">(</span><span class="n">INPUTS</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">as</span> <span class="n">tracer</span><span class="p">:</span>
+    <span class="n">FUNCTION</span><span class="p">(</span><span class="n">tracer</span><span class="p">())</span>
+<span class="n">grammar</span> <span class="o">=</span> <span class="n">get_grammar</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
+<span class="n">grammar</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: {&#39;&lt;urlparse:url&gt;&#39;},
+ &#39;&lt;urlparse:url&gt;&#39;: {&#39;&lt;urlsplit:url&gt;&#39;},
+ &#39;&lt;urlsplit:url&gt;&#39;: {&#39;&lt;urlsplit:scheme&gt;:&lt;_splitnetloc:url&gt;&#39;},
+ &#39;&lt;urlsplit:scheme&gt;&#39;: {&#39;&lt;urlparse:scheme&gt;&#39;},
+ &#39;&lt;_splitnetloc:url&gt;&#39;: {&#39;//&lt;urlsplit:netloc&gt;/?&lt;urlsplit:query&gt;#&lt;urlsplit:fragment&gt;&#39;},
+ &#39;&lt;urlsplit:netloc&gt;&#39;: {&#39;&lt;urlparse:netloc&gt;&#39;},
+ &#39;&lt;urlsplit:fragment&gt;&#39;: {&#39;&lt;urlparse:fragment&gt;&#39;},
+ &#39;&lt;urlsplit:query&gt;&#39;: {&#39;&lt;urlparse:query&gt;&#39;},
+ &#39;&lt;urlparse:scheme&gt;&#39;: {&#39;http&#39;},
+ &#39;&lt;urlparse:fragment&gt;&#39;: {&#39;ref&#39;},
+ &#39;&lt;urlparse:query&gt;&#39;: {&#39;q=path&#39;},
+ &#39;&lt;urlparse:netloc&gt;&#39;: {&#39;user:pass@www.google.com:80&#39;}}
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">traces</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">inputstr</span> <span class="ow">in</span> <span class="n">INPUTS</span><span class="p">:</span>
+    <span class="n">clear_cache</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">StackTracer</span><span class="p">(</span><span class="n">inputstr</span><span class="p">)</span> <span class="k">as</span> <span class="n">tracer</span><span class="p">:</span>
+        <span class="n">FUNCTION</span><span class="p">(</span><span class="n">tracer</span><span class="p">())</span>
+    <span class="n">traces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
+<span class="n">grammar</span> <span class="o">=</span> <span class="n">get_merged_grammar</span><span class="p">(</span><span class="n">traces</span><span class="p">)</span>
+<span class="n">syntax_diagram</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>start
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 242.0 62" width="242.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M202.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M182.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M182.0 31h0.0"/><rect height="22" width="122.0" x="60.0" y="20"/><text x="121.0" y="35">urlparse:url</text></g></g><path d="M182.0 31h20"/></g><path d="M 202.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlparse:url
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 242.0 62" width="242.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M202.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M182.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M182.0 31h0.0"/><rect height="22" width="122.0" x="60.0" y="20"/><text x="121.0" y="35">urlsplit:url</text></g></g><path d="M182.0 31h20"/></g><path d="M 202.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:url
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="92" viewBox="0 0 492.0 92" width="492.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M452.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h0.0"/><path d="M432.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M207.5 31h0.0"/><rect height="22" width="147.5" x="60.0" y="20"/><text x="133.75" y="35">urlsplit:scheme</text></g><path d="M207.5 31h10"/><path d="M217.5 31h10"/><g class="terminal">
+<path d="M227.5 31h0.0"/><path d="M256.0 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="227.5" y="20"/><text x="241.75" y="35">:</text></g><path d="M256.0 31h10"/><path d="M266.0 31h10"/><g class="non-terminal">
+<path d="M276.0 31h0.0"/><path d="M432.0 31h0.0"/><rect height="22" width="156.0" x="276.0" y="20"/><text x="354.0" y="35">_splitnetloc:url</text></g></g><path d="M432.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h12.75"/><path d="M419.25 61h12.75"/><g class="non-terminal">
+<path d="M72.75 61h0.0"/><path d="M220.25 61h0.0"/><rect height="22" width="147.5" x="72.75" y="50"/><text x="146.5" y="65">urlsplit:scheme</text></g><path d="M220.25 61h10"/><path d="M230.25 61h10"/><g class="terminal">
+<path d="M240.25 61h0.0"/><path d="M268.75 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="240.25" y="50"/><text x="254.5" y="65">:</text></g><path d="M268.75 61h10"/><path d="M278.75 61h10"/><g class="non-terminal">
+<path d="M288.75 61h0.0"/><path d="M419.25 61h0.0"/><rect height="22" width="130.5" x="288.75" y="50"/><text x="354.0" y="65">urlsplit:rest</text></g></g><path d="M432.0 61h20"/></g><path d="M 452.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:scheme
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 267.5 62" width="267.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M227.5 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M207.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M207.5 31h0.0"/><rect height="22" width="147.5" x="60.0" y="20"/><text x="133.75" y="35">urlparse:scheme</text></g></g><path d="M207.5 31h20"/></g><path d="M 227.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>_splitnetloc:url
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="122" viewBox="0 0 773.5 122" width="773.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M733.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h103.75"/><path d="M609.75 31h103.75"/><g class="terminal">
+<path d="M163.75 31h0.0"/><path d="M200.75 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="163.75" y="20"/><text x="182.25" y="35">//</text></g><path d="M200.75 31h10"/><path d="M210.75 31h10"/><g class="non-terminal">
+<path d="M220.75 31h0.0"/><path d="M368.25 31h0.0"/><rect height="22" width="147.5" x="220.75" y="20"/><text x="294.5" y="35">urlsplit:netloc</text></g><path d="M368.25 31h10"/><path d="M378.25 31h10"/><g class="terminal">
+<path d="M388.25 31h0.0"/><path d="M425.25 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="388.25" y="20"/><text x="406.75" y="35">/#</text></g><path d="M425.25 31h10"/><path d="M435.25 31h10"/><g class="non-terminal">
+<path d="M445.25 31h0.0"/><path d="M609.75 31h0.0"/><rect height="22" width="164.5" x="445.25" y="20"/><text x="527.5" y="35">urlsplit:fragment</text></g></g><path d="M713.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h200.25"/><path d="M513.25 61h200.25"/><g class="terminal">
+<path d="M260.25 61h0.0"/><path d="M297.25 61h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="260.25" y="50"/><text x="278.75" y="65">//</text></g><path d="M297.25 61h10"/><path d="M307.25 61h10"/><g class="non-terminal">
+<path d="M317.25 61h0.0"/><path d="M464.75 61h0.0"/><rect height="22" width="147.5" x="317.25" y="50"/><text x="391.0" y="65">urlsplit:netloc</text></g><path d="M464.75 61h10"/><path d="M474.75 61h10"/><g class="terminal">
+<path d="M484.75 61h0.0"/><path d="M513.25 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="484.75" y="50"/><text x="499.0" y="65">/</text></g></g><path d="M713.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h0.0"/><path d="M713.5 91h0.0"/><g class="terminal">
+<path d="M60.0 91h0.0"/><path d="M97.0 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="80"/><text x="78.5" y="95">//</text></g><path d="M97.0 91h10"/><path d="M107.0 91h10"/><g class="non-terminal">
+<path d="M117.0 91h0.0"/><path d="M264.5 91h0.0"/><rect height="22" width="147.5" x="117.0" y="80"/><text x="190.75" y="95">urlsplit:netloc</text></g><path d="M264.5 91h10"/><path d="M274.5 91h10"/><g class="terminal">
+<path d="M284.5 91h0.0"/><path d="M321.5 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="284.5" y="80"/><text x="303.0" y="95">/?</text></g><path d="M321.5 91h10"/><path d="M331.5 91h10"/><g class="non-terminal">
+<path d="M341.5 91h0.0"/><path d="M480.5 91h0.0"/><rect height="22" width="139.0" x="341.5" y="80"/><text x="411.0" y="95">urlsplit:query</text></g><path d="M480.5 91h10"/><path d="M490.5 91h10"/><g class="terminal">
+<path d="M500.5 91h0.0"/><path d="M529.0 91h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="500.5" y="80"/><text x="514.75" y="95">#</text></g><path d="M529.0 91h10"/><path d="M539.0 91h10"/><g class="non-terminal">
+<path d="M549.0 91h0.0"/><path d="M713.5 91h0.0"/><rect height="22" width="164.5" x="549.0" y="80"/><text x="631.25" y="95">urlsplit:fragment</text></g></g><path d="M713.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 733.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:netloc
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 267.5 62" width="267.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M227.5 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M207.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M207.5 31h0.0"/><rect height="22" width="147.5" x="60.0" y="20"/><text x="133.75" y="35">urlparse:netloc</text></g></g><path d="M207.5 31h20"/></g><path d="M 227.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:fragment
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 284.5 62" width="284.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M244.5 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M224.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M224.5 31h0.0"/><rect height="22" width="164.5" x="60.0" y="20"/><text x="142.25" y="35">urlparse:fragment</text></g></g><path d="M224.5 31h20"/></g><path d="M 244.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:query
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 259.0 62" width="259.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M219.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M199.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M199.0 31h0.0"/><rect height="22" width="139.0" x="60.0" y="20"/><text x="129.5" y="35">urlparse:query</text></g></g><path d="M199.0 31h20"/></g><path d="M 219.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlparse:scheme
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="92" viewBox="0 0 182.5 92" width="182.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M142.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="20"/><text x="91.25" y="35">https</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h4.25"/><path d="M118.25 61h4.25"/><g class="terminal">
+<path d="M64.25 61h0.0"/><path d="M118.25 61h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="64.25" y="50"/><text x="91.25" y="65">http</text></g></g><path d="M122.5 61h20"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlparse:fragment
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="92" viewBox="0 0 174.0 92" width="174.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M134.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h4.25"/><path d="M109.75 31h4.25"/><g class="terminal">
+<path d="M64.25 31h0.0"/><path d="M109.75 31h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="64.25" y="20"/><text x="87.0" y="35">ref</text></g></g><path d="M114.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M114.0 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M114.0 61h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="60.0" y="50"/><text x="87.0" y="65">News</text></g></g><path d="M114.0 61h20"/></g><path d="M 134.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlparse:query
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 191.0 62" width="191.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M151.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M131.0 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" rx="10" ry="10" width="71.0" x="60.0" y="20"/><text x="95.5" y="35">q=path</text></g></g><path d="M131.0 31h20"/></g><path d="M 151.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlparse:netloc
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="122" viewBox="0 0 369.5 122" width="369.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M329.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><rect height="22" rx="10" ry="10" width="249.5" x="60.0" y="20"/><text x="184.75" y="35">user:pass@www.google.com:80</text></g></g><path d="M309.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h34.0"/><path d="M275.5 61h34.0"/><g class="terminal">
+<path d="M94.0 61h0.0"/><path d="M275.5 61h0.0"/><rect height="22" rx="10" ry="10" width="181.5" x="94.0" y="50"/><text x="184.75" y="65">www.fuzzingbook.org</text></g></g><path d="M309.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h25.5"/><path d="M284.0 91h25.5"/><g class="terminal">
+<path d="M85.5 91h0.0"/><path d="M284.0 91h0.0"/><rect height="22" rx="10" ry="10" width="198.5" x="85.5" y="80"/><text x="184.75" y="95">www.cispa.saarland:80</text></g></g><path d="M309.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 329.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:rest
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 276.0 62" width="276.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M236.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M216.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M216.0 31h0.0"/><rect height="22" width="156.0" x="60.0" y="20"/><text x="138.0" y="35">_splitnetloc:url</text></g></g><path d="M216.0 31h20"/></g><path d="M 236.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Tainted-Grammar-Miner">Tainted Grammar Miner<a class="anchor-link" href="#Tainted-Grammar-Miner">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="InformationFlow.html" class="import" target="_blank">InformationFlow</a></span> <span class="k">import</span> <span class="n">tstr</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TaintedInputStack</span><span class="p">(</span><span class="n">InputStack</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">has</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">is_from</span><span class="p">(</span><span class="n">var1</span><span class="p">,</span> <span class="n">var2</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">var1</span>
+            <span class="k">while</span> <span class="nb">type</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="n">tstr</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">var2</span><span class="p">)</span> <span class="o">==</span>  <span class="nb">id</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">parent</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">is_from</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="n">tainted</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tstr</span><span class="p">)}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">:</span>
+            <span class="n">my_inputs</span> <span class="o">=</span> <span class="n">tainted</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">my_inputs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">tainted</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">v</span><span class="p">)}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">my_inputs</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TaintedVars</span><span class="p">(</span><span class="n">Vars</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">tstr</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">istack</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="n">qual_var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varname</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">defs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">qual_var</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">defs</span><span class="p">[</span><span class="n">qual_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">([(</span><span class="n">key</span><span class="p">,</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defs</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TaintedTracer</span><span class="p">(</span><span class="n">StackTracer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputstr</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">inputstr</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">istack</span> <span class="o">=</span> <span class="n">TaintedInputStack</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vars</span> <span class="o">=</span> <span class="n">TaintedVars</span><span class="p">(</span><span class="n">inputstr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">istack</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tstr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputstr</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">traces</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">inputstr</span> <span class="ow">in</span> <span class="n">INPUTS</span><span class="p">:</span>
+    <span class="n">clear_cache</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">TaintedTracer</span><span class="p">(</span><span class="n">inputstr</span><span class="p">)</span> <span class="k">as</span> <span class="n">tracer</span><span class="p">:</span>
+        <span class="n">FUNCTION</span><span class="p">(</span><span class="n">tracer</span><span class="p">())</span>
+    <span class="n">traces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tracer</span><span class="p">)</span>
+<span class="n">grammar</span> <span class="o">=</span> <span class="n">get_merged_grammar</span><span class="p">(</span><span class="n">traces</span><span class="p">)</span>
+<span class="n">syntax_diagram</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>start
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 242.0 62" width="242.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M202.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M182.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M182.0 31h0.0"/><rect height="22" width="122.0" x="60.0" y="20"/><text x="121.0" y="35">urlparse:url</text></g></g><path d="M182.0 31h20"/></g><path d="M 202.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlparse:url
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 242.0 62" width="242.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M202.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M182.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M182.0 31h0.0"/><rect height="22" width="122.0" x="60.0" y="20"/><text x="121.0" y="35">urlsplit:url</text></g></g><path d="M182.0 31h20"/></g><path d="M 202.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:url
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="92" viewBox="0 0 358.5 92" width="358.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M318.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h8.5"/><path d="M290.0 31h8.5"/><g class="terminal">
+<path d="M68.5 31h0.0"/><path d="M139.5 31h0.0"/><rect height="22" rx="10" ry="10" width="71.0" x="68.5" y="20"/><text x="104.0" y="35">https:</text></g><path d="M139.5 31h10"/><path d="M149.5 31h10"/><g class="non-terminal">
+<path d="M159.5 31h0.0"/><path d="M290.0 31h0.0"/><rect height="22" width="130.5" x="159.5" y="20"/><text x="224.75" y="35">urlsplit:rest</text></g></g><path d="M298.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M298.5 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M122.5 61h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="50"/><text x="91.25" y="65">http:</text></g><path d="M122.5 61h10"/><path d="M132.5 61h10"/><g class="non-terminal">
+<path d="M142.5 61h0.0"/><path d="M298.5 61h0.0"/><rect height="22" width="156.0" x="142.5" y="50"/><text x="220.5" y="65">_splitnetloc:url</text></g></g><path d="M298.5 61h20"/></g><path d="M 318.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>_splitnetloc:url
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="122" viewBox="0 0 773.5 122" width="773.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M733.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h103.75"/><path d="M609.75 31h103.75"/><g class="terminal">
+<path d="M163.75 31h0.0"/><path d="M200.75 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="163.75" y="20"/><text x="182.25" y="35">//</text></g><path d="M200.75 31h10"/><path d="M210.75 31h10"/><g class="non-terminal">
+<path d="M220.75 31h0.0"/><path d="M368.25 31h0.0"/><rect height="22" width="147.5" x="220.75" y="20"/><text x="294.5" y="35">urlsplit:netloc</text></g><path d="M368.25 31h10"/><path d="M378.25 31h10"/><g class="terminal">
+<path d="M388.25 31h0.0"/><path d="M425.25 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="388.25" y="20"/><text x="406.75" y="35">/#</text></g><path d="M425.25 31h10"/><path d="M435.25 31h10"/><g class="non-terminal">
+<path d="M445.25 31h0.0"/><path d="M609.75 31h0.0"/><rect height="22" width="164.5" x="445.25" y="20"/><text x="527.5" y="35">urlsplit:fragment</text></g></g><path d="M713.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h200.25"/><path d="M513.25 61h200.25"/><g class="terminal">
+<path d="M260.25 61h0.0"/><path d="M297.25 61h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="260.25" y="50"/><text x="278.75" y="65">//</text></g><path d="M297.25 61h10"/><path d="M307.25 61h10"/><g class="non-terminal">
+<path d="M317.25 61h0.0"/><path d="M464.75 61h0.0"/><rect height="22" width="147.5" x="317.25" y="50"/><text x="391.0" y="65">urlsplit:netloc</text></g><path d="M464.75 61h10"/><path d="M474.75 61h10"/><g class="terminal">
+<path d="M484.75 61h0.0"/><path d="M513.25 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="484.75" y="50"/><text x="499.0" y="65">/</text></g></g><path d="M713.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h0.0"/><path d="M713.5 91h0.0"/><g class="terminal">
+<path d="M60.0 91h0.0"/><path d="M97.0 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="80"/><text x="78.5" y="95">//</text></g><path d="M97.0 91h10"/><path d="M107.0 91h10"/><g class="non-terminal">
+<path d="M117.0 91h0.0"/><path d="M264.5 91h0.0"/><rect height="22" width="147.5" x="117.0" y="80"/><text x="190.75" y="95">urlsplit:netloc</text></g><path d="M264.5 91h10"/><path d="M274.5 91h10"/><g class="terminal">
+<path d="M284.5 91h0.0"/><path d="M321.5 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="284.5" y="80"/><text x="303.0" y="95">/?</text></g><path d="M321.5 91h10"/><path d="M331.5 91h10"/><g class="non-terminal">
+<path d="M341.5 91h0.0"/><path d="M480.5 91h0.0"/><rect height="22" width="139.0" x="341.5" y="80"/><text x="411.0" y="95">urlsplit:query</text></g><path d="M480.5 91h10"/><path d="M490.5 91h10"/><g class="terminal">
+<path d="M500.5 91h0.0"/><path d="M529.0 91h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="500.5" y="80"/><text x="514.75" y="95">#</text></g><path d="M529.0 91h10"/><path d="M539.0 91h10"/><g class="non-terminal">
+<path d="M549.0 91h0.0"/><path d="M713.5 91h0.0"/><rect height="22" width="164.5" x="549.0" y="80"/><text x="631.25" y="95">urlsplit:fragment</text></g></g><path d="M713.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 733.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:netloc
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 267.5 62" width="267.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M227.5 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M207.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M207.5 31h0.0"/><rect height="22" width="147.5" x="60.0" y="20"/><text x="133.75" y="35">urlparse:netloc</text></g></g><path d="M207.5 31h20"/></g><path d="M 227.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:fragment
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 284.5 62" width="284.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M244.5 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M224.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M224.5 31h0.0"/><rect height="22" width="164.5" x="60.0" y="20"/><text x="142.25" y="35">urlparse:fragment</text></g></g><path d="M224.5 31h20"/></g><path d="M 244.5 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:query
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 259.0 62" width="259.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M219.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M199.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M199.0 31h0.0"/><rect height="22" width="139.0" x="60.0" y="20"/><text x="129.5" y="35">urlparse:query</text></g></g><path d="M199.0 31h20"/></g><path d="M 219.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlparse:fragment
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="92" viewBox="0 0 174.0 92" width="174.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M134.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h4.25"/><path d="M109.75 31h4.25"/><g class="terminal">
+<path d="M64.25 31h0.0"/><path d="M109.75 31h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="64.25" y="20"/><text x="87.0" y="35">ref</text></g></g><path d="M114.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M114.0 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M114.0 61h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="60.0" y="50"/><text x="87.0" y="65">News</text></g></g><path d="M114.0 61h20"/></g><path d="M 134.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlparse:query
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 191.0 62" width="191.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M151.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M131.0 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" rx="10" ry="10" width="71.0" x="60.0" y="20"/><text x="95.5" y="35">q=path</text></g></g><path d="M131.0 31h20"/></g><path d="M 151.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlparse:netloc
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="122" viewBox="0 0 369.5 122" width="369.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M329.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><rect height="22" rx="10" ry="10" width="249.5" x="60.0" y="20"/><text x="184.75" y="35">user:pass@www.google.com:80</text></g></g><path d="M309.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h34.0"/><path d="M275.5 61h34.0"/><g class="terminal">
+<path d="M94.0 61h0.0"/><path d="M275.5 61h0.0"/><rect height="22" rx="10" ry="10" width="181.5" x="94.0" y="50"/><text x="184.75" y="65">www.fuzzingbook.org</text></g></g><path d="M309.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h25.5"/><path d="M284.0 91h25.5"/><g class="terminal">
+<path d="M85.5 91h0.0"/><path d="M284.0 91h0.0"/><rect height="22" rx="10" ry="10" width="198.5" x="85.5" y="80"/><text x="184.75" y="95">www.cispa.saarland:80</text></g></g><path d="M309.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 329.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit:rest
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 276.0 62" width="276.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M236.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M216.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M216.0 31h0.0"/><rect height="22" width="156.0" x="60.0" y="20"/><text x="138.0" y="35">_splitnetloc:url</text></g></g><path d="M216.0 31h20"/></g><path d="M 236.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
 </div>
 
 </div>
@@ -12594,7 +14611,7 @@ http://www.fuzzingbook.org/
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarMiner.ipynb" target=_blank)>Last change: 2018-11-07 12:36:32+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarMiner.ipynb" target=_blank)>Last change: 2018-12-04 16:01:08+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -12610,7 +14627,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">Mining Input Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">https://www.fuzzingbook.org/beta/html/GrammarMiner.html</a>.  Retrieved 2018-11-07 12:36:32+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">Mining Input Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">https://www.fuzzingbook.org/beta/html/GrammarMiner.html</a>.  Retrieved 2018-12-04 16:01:08+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:GrammarMiner,
@@ -12620,9 +14637,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/GrammarMiner.html}},
-    note = {Retrieved 2018-11-07 12:36:32+01:00},
+    note = {Retrieved 2018-12-04 16:01:08+01:00},
     url = {https://www.fuzzingbook.org/beta/html/GrammarMiner.html},
-    urldate = {2018-11-07 12:36:32+01:00}
+    urldate = {2018-12-04 16:01:08+01:00}
 }
 </pre>
 </div>
