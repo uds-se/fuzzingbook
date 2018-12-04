@@ -11795,25 +11795,26 @@ MathJax.Hub.Config({
 <meta property="og:title" content="Information Flow - Generating Software Tests" />
 <meta property="og:description" content="# Information Flow
 
-In this chapter, we detail how to track information flows in python by tainting input strings, and tracking the taint across string operations.
+In this chapter, we explore in depth how to track information flows in python by tainting input strings, and tracking the taint across string operations.
 
 Some material on `eval` exploitation is adapted from the excellent blog post by Ned Batchelder.
 
 Prerequisites
 
  You should have read the chapter on coverage.
+ Some knowledge of inheritance in Python is required.
 
-Setting up our infrastructure
+We first setup our infrastructure so that we can make use of previously defined functions.
 
-Say we want to implement a calculator service in Python. A really simple way to do that is to rely on the `eval()` function in Python. Since we do not want our users to be able to execute arbitrary commands on our server, we use `eval()` with empty `locals` and `globals`
+Say we want to implement a calculator service in Python. A rather easy way to do that is to rely on the `eval()` function in Python. However, unrestricted `eval()` can be used by users to execute arbitrary commands. Since we want to restrict our users to using only the calculator functionality, and do not want the users to trash our server, we use `eval()` with empty `locals` and `globals` (as recommended elsewhere).
 
-It wors as expected:
+It works as expected:
 
 Does it?
 
 As you can see from the error, `eval()` completed successfully, with the system command `ls` executing successfully. It is easy enough for the user to see the output if needed.
 
-The problem is that the Python `builtins` is inserted by default when one uses `eval()`. We can avoid this by restricting `builtins` in `eval` explicitly.
+The problem is that the Python `builtins` is inserted by default when one uses `eval()`. We can avoid this by restricting `builtins` in `eval` explicitly (again as recommended elsewhere).
 
 Does it help?
 
@@ -11823,35 +11824,72 @@ The problem here is that when the user has a way to inject uninterpreted strings
 
 ## A Simple Taint Tracker
 
-For capturing information flows we need a new string class. The idea is to use the new tainted string class `tstr` as a wrapper on the original `str` class.
+For capturing information flows we need a new string class. The idea is to use the new tainted string class `tstr` as a wrapper on the original `str` class. However, `str` is an immutable class. Hence, it does not call its `init` method after being constructed. This means that any subclasses of `str` also will not get the `init` called. If we want to get our initialization routine called, we need to hook into `new` and return an instance of our own class.
 
- We need to write the `tstr.new()` method because we want to track the parent object responsible for the taint (essentially because we want to customize the object creation, and `init` is too late for that.).
+We need to write the `new()` method because we want to track the parent object responsible for the taint during our initialization `tstr.init()`. Hence, we define a class `tstr` that subclasses `str`, and enables its subclasses to initialize using `init()`.
 
-The taint map in variable `taint` contains non-overlapping taints mapped to the original string.
+There are various levels of taint tracking that one can perform. The simplest is to track that a string fragment originated in an untrusted environment, and has not undergone a taint removal process. For this, we simply need to wrap the original string in the untrusted environment with `tstr`, and produce `tstr` instances on each operation that results in another string frament. Distinguishing various untrusted sources may be accomplished by tainting each instances as separate instances (called colors in dynamic taint research). You will see an instance of this technique in the chapter on Grammar Mining.
 
-By default, when we wrap a string, it is tainted. Hence we also need a way to `untaint` the string.
+In this chapter, we carry character level taints. That is, given a fragment that resulted from a portion of the original tainted string, one will be able to tell which portion of the input string the fragment was taken from. In essence, each input character index from a tainted source gets its own color.
 
-However, the taint does not transition from the whole string to parts.
+More complex tainting such as bitmap taints are possible where a single character may result from multiple tainted character indexes (such as checksum operations on strings). We do not consider these in this chapter.
+
+We now define our initialization code in `init()`.
+
+The variable `taint` contains non-overlapping taints mapped to the original string. The variable `parent` holds a reference to the `tstr` instance from which this instance was derived.
+
+For example, if we wrap `hello` in `tstr`, then we should be able to access its taint in indices `0..4`
+
+We can also specify the starting taint as below -- `6..10`
+
+`repr()` and `str()` returns an untainted `str` instance.
+
+By default, when we wrap a string, it is tainted. Hence we also need a way to `untaint` the string. One way is to simply return a `str` instance as above. However, one may sometimes wish to remove taint from an existing instance. This is accomplished with `untaint()`. During `untaint()`, we simply set the taint indexes to `-1`. This method comes with a pair method `hastaint()` which checks whether a `tstr` instance is currently tainted.
+
+While the basic tainted string creation works, we have not completed the taint transition. For example, getting a substring does not transfer taint from the original string.
+
+In Python, the substring as shown above is implemented using `slice`. We implement this next.
+
+### Create
+
+We need to create new substrings that are wrapped in `tstr`. However, we also want to allow our subclasses to create their own instances. Hence we provide a `create()` method that produces a new `tstr` instance.
+
+### Index
+
+In Python, indexing is provided through `getitem()`. Indexing on positive integers is simple enough. However, it has two additional wrinkles. The first is that, if the index is negative, that many characters are counted from the end of the string which lies just after the last character. That is, the last character has a negative index `-1`
+
+The other wrinkle is that `getitem()` can accept a slice. We discuss this next.
 
 ### Slice
 
-The Python `slice` operator `n:m` relies on the object being an `iterator`. Hence, we define the `iter()` method.
-
-The Python `slice` operator `n:m` relies on the object being an `iterator`. Hence, we define the `iter()` method.
+The Python `slice` operator `n:m` relies on the object being an `iterator`. Hence, we define the `iter()` method, which returns a custom `iterator`.
 
 #### The iterator class
-The `iter()` method requires a supporting `iterator` object.
+The `iter()` method requires a supporting `iterator` object. The `iterator` is used to save the state of the current iteration, which it does by keeping a reference to the original `tstr`, and the current index of iteration `stridx`.
 
-### Helper Methods
-We define a few helper methods that deals with the mapped taint index.
+Bringing all these together:
 
 ### Concatenation
 
-Implementing concatenation is straight forward:
+If two tainted strings are concatenated together, it may be desirable to transer the taints from each to the corresponding portion of the resulting string. The concatenation of strings is accomplished by overriding `add()`.
 
-Testing concatenations
+Testing concatenations between two `tstr` instances:
+
+What if a `tstr` is concatenated with a `str`?
+
+One wrinkle here is that when adding a `tstr` and a `str`, the user may place the `str` first, in which case, the `add()` method will be called on the `str` instance. Not on the `tstr` instance. However, Python provides a solution. If one defines `radd()` on the `tstr` instance, that method will be called rather than `str.add()`
+
+We test it out:
+
+These methods: `slicing` and `concatenation` is sufficient to implement other string methods that result in a string, and does not change the character underneath (i.e no case change). Hence, we look at a helper method next.
+
+### Extract tainted string.
+
+Given a specific input index, the method `x()` extracts the corresponding tainted portion from a `tstr`. As a convenience it supports `slices` along with `ints`.
 
 ### Replace
+
+The `replace()` method replaces a portion of the string with another.
 
 ### Split
 
@@ -11883,6 +11921,8 @@ Sometimes we want to know where an empty string came from. That is, if an empty 
 
 
 For detecting EOF, we need to carry the cursor. The main idea is the cursor indicates the taint of the character in front of it.
+
+We add an additional method `t()` that takes in a taint index, and returns the taint at that index. If it is an empty string, it gives you a possible location of that empty string.
 
 ## A Comparison Tracker
 
@@ -12028,9 +12068,11 @@ Solution. Solution for the exercise
      </li>
      <li class="has-sub"><a href="#"><span title="Information Flow"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Information Flow <i class="fa fa-fw fa-wrench"></i></span></a>
            <ul><li class="has-sub"><a href="#A-Simple-Taint-Tracker">A Simple Taint Tracker</a>
-<ul><li class="has-sub"><a href="#Slice">Slice</a>
-</li><li class="has-sub"><a href="#Helper-Methods">Helper Methods</a>
+<ul><li class="has-sub"><a href="#Create">Create</a>
+</li><li class="has-sub"><a href="#Index">Index</a>
+</li><li class="has-sub"><a href="#Slice">Slice</a>
 </li><li class="has-sub"><a href="#Concatenation">Concatenation</a>
+</li><li class="has-sub"><a href="#Extract-tainted-string.">Extract tainted string.</a>
 </li><li class="has-sub"><a href="#Replace">Replace</a>
 </li><li class="has-sub"><a href="#Split">Split</a>
 </li><li class="has-sub"><a href="#Strip">Strip</a>
@@ -12098,7 +12140,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Information-Flow">Information Flow<a class="anchor-link" href="#Information-Flow">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-wrench"></i>&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p><p>In this chapter, we detail how to track information flows in python by tainting input strings, and tracking the taint across string operations.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Information-Flow">Information Flow<a class="anchor-link" href="#Information-Flow">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-wrench"></i>&nbsp;This chapter is work in progress ("beta").  It is incomplete and may change at any time.</em></p><p>In this chapter, we explore in depth how to track information flows in python by tainting input strings, and tracking the taint across string operations.</p>
 </div>
 </div>
 </div>
@@ -12119,6 +12161,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
 <ul>
 <li>You should have read the <a href="Coverage.html">chapter on coverage</a>.</li>
+<li>Some knowledge of inheritance in Python is required.</li>
 </ul>
 </div>
 </div>
@@ -12128,7 +12171,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Setting up our infrastructure</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We first setup our infrastructure so that we can make use of previously defined functions.</p>
 </div>
 </div>
 </div>
@@ -12177,107 +12220,10 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="o">%%</span><span class="k">html</span>
-&lt;div&gt;
-&lt;style&gt;
-div.todo {
-    color:red;
-    font-weight: bold;
-}
-div.todo::before {
-    content: &quot;TODO: &quot;;
-}
-div.done {
-    color:blue;
-    font-weight: bold;
-}
-div.done::after {
-    content: &quot; :DONE&quot;;
-}
-
-&lt;/style&gt;
-&lt;script&gt;
-  function todo_toggle() {
-    if (todo_shown){
-      $(&#39;div.todo&#39;).hide(&#39;500&#39;);
-      $(&#39;div.done&#39;).hide(&#39;500&#39;);
-      $(&#39;#toggleButton&#39;).val(&#39;Show Todo&#39;)
-    } else {
-      $(&#39;div.todo&#39;).show(&#39;500&#39;);
-      $(&#39;div.done&#39;).show(&#39;500&#39;);
-      $(&#39;#toggleButton&#39;).val(&#39;Hide Todo&#39;)
-    }
-    todo_shown = !todo_shown
-  }
-  $( document ).ready(function(){
-    todo_shown=false;
-    $(&#39;div.todo&#39;).hide()
-  });
-&lt;/script&gt;
-&lt;form action=&quot;javascript:todo_toggle()&quot;&gt;&lt;input type=&quot;submit&quot; id=&quot;toggleButton&quot; value=&quot;Show Todo&quot;&gt;&lt;/form&gt;
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_html rendered_html output_subarea ">
-
-<div>
-<style>
-div.todo {
-    color:red;
-    font-weight: bold;
-}
-div.todo::before {
-    content: "TODO: ";
-}
-div.done {
-    color:blue;
-    font-weight: bold;
-}
-div.done::after {
-    content: " :DONE";
-}
-
-</style>
-<script>
-  function todo_toggle() {
-    if (todo_shown){
-      $('div.todo').hide('500');
-      $('div.done').hide('500');
-      $('#toggleButton').val('Show Todo')
-    } else {
-      $('div.todo').show('500');
-      $('div.done').show('500');
-      $('#toggleButton').val('Hide Todo')
-    }
-    todo_shown = !todo_shown
-  }
-  $( document ).ready(function(){
-    todo_shown=false;
-    $('div.todo').hide()
-  });
-</script>
-<form action="javascript:todo_toggle()"><input type="submit" id="toggleButton" value="Show Todo"></form>
-
-</div>
-
-</div>
-
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Say we want to implement a calculator service in Python. A really simple way to do that is to rely on the <code>eval()</code> function in Python. Since we do not want our users to be able to execute arbitrary commands on our server, we use <code>eval()</code> with empty <code>locals</code> and <code>globals</code></p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Say we want to implement a <em>calculator</em> service in Python. A rather easy way to do that is to rely on the <code>eval()</code> function in Python. However, unrestricted <code>eval()</code> can be used by users to execute arbitrary commands. Since we want to restrict our users to using only the <em>calculator</em> functionality, and do not want the users to trash our server, we use <code>eval()</code> with empty <code>locals</code> and <code>globals</code> (as recommended <a href="https://www.programiz.com/python-programming/methods/built-in/eval">elsewhere</a>).</p>
 </div>
 </div>
 </div>
@@ -12302,7 +12248,7 @@ div.done::after {
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>It wors as expected:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>It works as expected:</p>
 </div>
 </div>
 </div>
@@ -12359,9 +12305,9 @@ div.done::after {
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-7-fa5e36f86ceb&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-6-fa5e36f86ceb&gt;&#34;, line 2, in &lt;module&gt;
     my_calculator(&#39;__import__(&#34;os&#34;).popen(&#34;ls&#34;).read()&#39;)
-  File &#34;&lt;ipython-input-5-6f467d89b376&gt;&#34;, line 3, in my_calculator
+  File &#34;&lt;ipython-input-4-6f467d89b376&gt;&#34;, line 3, in my_calculator
     print(&#34;The result of %s was %d&#34; % (my_input, result))
 TypeError: %d format: a number is required, not str (expected)
 </pre>
@@ -12384,7 +12330,7 @@ TypeError: %d format: a number is required, not str (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_calculator</span><span class="p">(</span><span class="s2">&quot;1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(&#39;ls&#39;).read()) else 0&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_calculator</span><span class="p">(</span><span class="s2">&quot;1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(&#39;pwd&#39;).read()) else 0&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12395,41 +12341,9 @@ TypeError: %d format: a number is required, not str (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>00_Index.ipynb
-404.ipynb
-APIFuzzer.ipynb
-BugBoard.ipynb
-CISPACourse.ipynb
-Carver.ipynb
-ConfigurationFuzzer.ipynb
-Coverage.ipynb
-ExpectError.ipynb
-Fuzzer.ipynb
-GrammarCoverageFuzzer.ipynb
-GrammarFuzzer.ipynb
-GrammarMiner.ipynb
-Grammars.ipynb
-Guide_for_Authors.ipynb
-InformationFlow.ipynb
-Intro_Testing.ipynb
-Makefile
-MutationFuzzer.ipynb
-PICS
-Parser.ipynb
-ProbabilisticGrammarFuzzer.ipynb
-Project_MutationFuzzing.ipynb
-README.md
-RailroadDiagrams.ipynb
-Reducer.ipynb
-Security Testing
-Template.ipynb
-Timer.ipynb
-WebFuzzer.ipynb
-data
-fuzzingbook_utils
-index.ipynb
+<pre>/Users/zeller/Projects/fuzzingbook/notebooks
 
-The result of 1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(&#39;ls&#39;).read()) else 0 was 0
+The result of 1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(&#39;pwd&#39;).read()) else 0 was 0
 </pre>
 </div>
 
@@ -12438,7 +12352,7 @@ The result of 1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The problem is that the Python <code>__builtins__</code> is <a href="https://docs.python.org/3/library/functions.html#eval">inserted by default</a> when one uses <code>eval()</code>. We can avoid this by restricting <code>__builtins__</code> in <code>eval</code> explicitly.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The problem is that the Python <code>__builtins__</code> is <a href="https://docs.python.org/3/library/functions.html#eval">inserted by default</a> when one uses <code>eval()</code>. We can avoid this by restricting <code>__builtins__</code> in <code>eval</code> explicitly (again as recommended <a href="http://lybniz2.sourceforge.net/safeeval.html">elsewhere</a>).</p>
 </div>
 </div>
 </div>
@@ -12476,7 +12390,7 @@ The result of 1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-    <span class="n">my_calculator</span><span class="p">(</span><span class="s2">&quot;1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(&#39;ls&#39;).read()) else 0&quot;</span><span class="p">)</span>
+    <span class="n">my_calculator</span><span class="p">(</span><span class="s2">&quot;1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(&#39;pwd&#39;).read()) else 0&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12488,9 +12402,9 @@ The result of 1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-10-94a838db0042&gt;&#34;, line 2, in &lt;module&gt;
-    my_calculator(&#34;1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(&#39;ls&#39;).read()) else 0&#34;)
-  File &#34;&lt;ipython-input-9-c99d6999853d&gt;&#34;, line 2, in my_calculator
+  File &#34;&lt;ipython-input-9-f0be0201d3f7&gt;&#34;, line 2, in &lt;module&gt;
+    my_calculator(&#34;1 if __builtins__[&#39;print&#39;](__import__(&#39;os&#39;).popen(&#39;pwd&#39;).read()) else 0&#34;)
+  File &#34;&lt;ipython-input-8-c99d6999853d&gt;&#34;, line 2, in my_calculator
     result = eval(my_input, {&#34;__builtins__&#34;:None}, {})
   File &#34;&lt;string&gt;&#34;, line 1, in &lt;module&gt;
 TypeError: &#39;NoneType&#39; object is not subscriptable (expected)
@@ -12514,7 +12428,7 @@ TypeError: &#39;NoneType&#39; object is not subscriptable (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_calculator</span><span class="p">(</span><span class="s2">&quot;1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).popen(&#39;ls&#39;).read()) for x in ([x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == &#39;Sized&#39;][0].__len__.__globals__[&#39;__builtins__&#39;],)] else 0&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_calculator</span><span class="p">(</span><span class="s2">&quot;1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).popen(&#39;pwd&#39;).read()) for x in ([x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == &#39;Sized&#39;][0].__len__.__globals__[&#39;__builtins__&#39;],)] else 0&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12525,41 +12439,9 @@ TypeError: &#39;NoneType&#39; object is not subscriptable (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>00_Index.ipynb
-404.ipynb
-APIFuzzer.ipynb
-BugBoard.ipynb
-CISPACourse.ipynb
-Carver.ipynb
-ConfigurationFuzzer.ipynb
-Coverage.ipynb
-ExpectError.ipynb
-Fuzzer.ipynb
-GrammarCoverageFuzzer.ipynb
-GrammarFuzzer.ipynb
-GrammarMiner.ipynb
-Grammars.ipynb
-Guide_for_Authors.ipynb
-InformationFlow.ipynb
-Intro_Testing.ipynb
-Makefile
-MutationFuzzer.ipynb
-PICS
-Parser.ipynb
-ProbabilisticGrammarFuzzer.ipynb
-Project_MutationFuzzing.ipynb
-README.md
-RailroadDiagrams.ipynb
-Reducer.ipynb
-Security Testing
-Template.ipynb
-Timer.ipynb
-WebFuzzer.ipynb
-data
-fuzzingbook_utils
-index.ipynb
+<pre>/Users/zeller/Projects/fuzzingbook/notebooks
 
-The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).popen(&#39;ls&#39;).read()) for x in ([x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == &#39;Sized&#39;][0].__len__.__globals__[&#39;__builtins__&#39;],)] else 0 was 1
+The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).popen(&#39;pwd&#39;).read()) for x in ([x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == &#39;Sized&#39;][0].__len__.__globals__[&#39;__builtins__&#39;],)] else 0 was 1
 </pre>
 </div>
 
@@ -12585,9 +12467,8 @@ The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).pop
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>For capturing information flows we need a new string class. The idea is to use the new tainted string class <code>tstr</code> as a wrapper on the original <code>str</code> class.</p>
-<p>We need to write the <code>tstr.__new__()</code> method because we want to track the parent object responsible for the taint (essentially because we want to customize the object creation, and <code>__init__</code> is <a href="https://docs.python.org/3/reference/datamodel.html#basic-customization">too late</a> for that.).</p>
-<p>The taint map in variable <code>_taint</code> contains non-overlapping taints mapped to the original string.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>For capturing information flows we need a new string class. The idea is to use the new tainted string class <code>tstr</code> as a wrapper on the original <code>str</code> class. However, <code>str</code> is an <em>immutable</em> class. Hence, it does not call its <code>__init__</code> method after being constructed. This means that any subclasses of <code>str</code> also will not get the <code>__init__</code> called. If we want to get our initialization routine called, we need to <a href="https://docs.python.org/3/reference/datamodel.html#basic-customization">hook into <code>__new__</code></a> and return an instance of our own class.</p>
+<p>We need to write the <code>__new__()</code> method because we want to track the parent object responsible for the taint during our initialization <code>tstr.__init__()</code>. Hence, we define a class <code>tstr_</code> that subclasses <code>str</code>, and enables its subclasses to initialize using <code>__init__()</code>.</p>
 </div>
 </div>
 </div>
@@ -12602,22 +12483,56 @@ The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).pop
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr_</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">tstr_</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</pre></div>
 
-<span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr_</span><span class="p">):</span>
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>There are various levels of taint tracking that one can perform. The simplest is to track that a string fragment originated in an untrusted environment, and has not undergone a taint removal process. For this, we simply need to wrap the original string in the untrusted environment with <code>tstr</code>, and produce <code>tstr</code> instances on each operation that results in another string frament. Distinguishing various untrusted sources may be accomplished by tainting each instances as separate instances (called <em>colors</em> in dynamic taint research). You will see an instance of this technique in the chapter on <a href="GrammarMining.html">Grammar Mining</a>.</p>
+<p>In this chapter, we carry <em>character level</em> taints. That is, given a fragment that resulted from a portion of the original tainted string, one will be able to tell which portion of the input string the fragment was taken from. In essence, each input character index from a tainted source gets its own color.</p>
+<p>More complex tainting such as <em>bitmap taints</em> are possible where a single character may result from multiple tainted character indexes (such as <em>checksum</em> operations on strings). We do not consider these in this chapter.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We now define our initialization code in <code>__init__()</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The variable <code>taint</code> contains non-overlapping taints mapped to the original string. The variable <code>parent</code> holds a reference to the <code>tstr</code> instance from which this instance was derived.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr_</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">taint</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">taint</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">taint</span><span class="p">,</span> <span class="n">taint</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">taint</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span> <span class="o">=</span> <span class="n">taint</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
-
-    <span class="k">def</span> <span class="nf">has_taint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="kc">True</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">taint</span><span class="p">:</span>
+            <span class="n">taint</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">taint</span><span class="p">,</span> <span class="n">taint</span> <span class="o">+</span> <span class="n">l</span><span class="p">))</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">taint</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">taint</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span> <span class="o">==</span> <span class="n">l</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -12631,6 +12546,15 @@ The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).pop
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>For example, if we wrap <code>hello</code> in <code>tstr</code>, then we should be able to access its taint in indices <code>0..4</code></p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -12638,7 +12562,7 @@ The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).pop
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
-<span class="n">t</span><span class="o">.</span><span class="n">has_taint</span><span class="p">(),</span> <span class="n">t</span><span class="o">.</span><span class="n">_taint</span>
+<span class="n">t</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
 </div>
@@ -12649,10 +12573,19 @@ The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).pop
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(True, [0, 1, 2, 3, 4])
+<pre>[0, 1, 2, 3, 4]
 </pre>
 </div>
 
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can also specify the starting taint as below -- <code>6..10</code></p>
+</div>
+</div>
+</div>
 </div>
 
 <div class="input_code">
@@ -12662,7 +12595,7 @@ The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).pop
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;world&#39;</span><span class="p">,</span> <span class="n">taint</span> <span class="o">=</span> <span class="mi">6</span><span class="p">)</span>
-<span class="n">t</span><span class="o">.</span><span class="n">_taint</span>
+<span class="n">t</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
 </div>
@@ -12682,7 +12615,7 @@ The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).pop
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>By default, when we wrap a string, it is tainted. Hence we also need a way to <code>untaint</code> the string.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p><code>repr()</code> and <code>str()</code> returns an untainted <code>str</code> instance.</p>
 </div>
 </div>
 </div>
@@ -12694,10 +12627,45 @@ The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).pop
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">type</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>str
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>By default, when we wrap a string, it is tainted. Hence we also need a way to <code>untaint</code> the string. One way is to simply return a <code>str</code> instance as above. However, one may sometimes wish to remove taint from an existing instance. This is accomplished with <code>untaint()</code>. During <code>untaint()</code>, we simply set the taint indexes to <code>-1</code>. This method comes with a pair method <code>has_taint()</code> which checks whether a <code>tstr</code> instance is currently tainted.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span> <span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">untaint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span> <span class="o">=</span>  <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="o">=</span>  <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">has_taint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="kc">True</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12733,7 +12701,7 @@ The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).pop
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>However, the taint does not transition from the whole string to parts.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>While the basic tainted string creation works, we have not completed the taint transition. For example, getting a substring does not transfer taint from the original string.</p>
 </div>
 </div>
 </div>
@@ -12759,12 +12727,152 @@ The result of 1 if [x[&#39;print&#39;](x[&#39;__import__&#39;](&#39;os&#39;).pop
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-17-52a72710ddb2&gt;&#34;, line 3, in &lt;module&gt;
+  File &#34;&lt;ipython-input-18-52a72710ddb2&gt;&#34;, line 3, in &lt;module&gt;
     t[0:5].has_taint()
 AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expected)
 </pre>
 </div>
 
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>In Python, the substring as shown above is implemented using <code>slice</code>. We implement this next.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Create">Create<a class="anchor-link" href="#Create">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We need to create new substrings that are wrapped in <code>tstr</code>. However, we also want to allow our subclasses to create their own instances. Hence we provide a <code>create()</code> method that produces a new <code>tstr</code> instance.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">taint</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">tstr</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">taint</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">hello</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+<span class="n">world</span> <span class="o">=</span> <span class="n">hello</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;world&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">world</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">world</span><span class="o">.</span><span class="n">taint</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>([0, 1, 2, 3, 4], [6, 7, 8, 9, 10])
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Index">Index<a class="anchor-link" href="#Index">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>In Python, indexing is provided through <code>__getitem__()</code>. Indexing on positive integers is simple enough. However, it has two additional wrinkles. The first is that, if the index is negative, that many characters are counted from the end of the string which lies just after the last character. That is, the last character has a negative index <code>-1</code></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="n">key</span> <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">key</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">slice</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="kc">False</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">hello</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+<span class="n">hello</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">hello</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(&#39;h&#39;, &#39;o&#39;)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The other wrinkle is that <code>__getitem__()</code> can accept a slice. We discuss this next.</p>
+</div>
+</div>
+</div>
 </div>
 
 <div class="input_markdown">
@@ -12778,7 +12886,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The Python <code>slice</code> operator <code>[n:m]</code> relies on the object being an <code>iterator</code>. Hence, we define the <code>__iter__()</code> method.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The Python <code>slice</code> operator <code>[n:m]</code> relies on the object being an <code>iterator</code>. Hence, we define the <code>__iter__()</code> method, which returns a custom <code>iterator</code>.</p>
 </div>
 </div>
 </div>
@@ -12793,19 +12901,6 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">tstr_iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">taint</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">tstr</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">taint</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="n">key</span> <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">key</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">slice</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="kc">False</span>
 </pre></div>
 
 </div>
@@ -12816,16 +12911,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The Python <code>slice</code> operator <code>[n:m]</code> relies on the object being an <code>iterator</code>. Hence, we define the <code>__iter__()</code> method.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="The-iterator-class">The iterator class<a class="anchor-link" href="#The-iterator-class">&#182;</a></h4><p>The <code>__iter__()</code> method requires a supporting <code>iterator</code> object.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="The-iterator-class">The iterator class<a class="anchor-link" href="#The-iterator-class">&#182;</a></h4><p>The <code>__iter__()</code> method requires a supporting <code>iterator</code> object. The <code>iterator</code> is used to save the state of the current iteration, which it does by keeping a reference to the original <code>tstr</code>, and the current index of iteration <code>_str_idx</code>.</p>
 </div>
 </div>
 </div>
@@ -12856,6 +12942,15 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Bringing all these together:</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -12883,130 +12978,6 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Helper-Methods">Helper Methods<a class="anchor-link" href="#Helper-Methods">&#182;</a></h3><p>We define a few helper methods that deals with the mapped taint index.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
-    <span class="k">class</span> <span class="nc">TaintException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-        <span class="k">pass</span>
-
-    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">taint</span><span class="o">.</span><span class="n">TaintException</span><span class="p">(</span><span class="s1">&#39;Invalid mapped char idx in tstr&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">v</span>
-
-    <span class="k">def</span> <span class="nf">_x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mapped_char_idx</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">get_mapped_char_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">taint</span><span class="o">.</span><span class="n">TaintException</span><span class="p">(</span><span class="s1">&#39;Invalid request idx&#39;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">get_first_mapped_char</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">i</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
-
-    <span class="k">def</span> <span class="nf">is_tpos_contained</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tpos</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">tpos</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span>
-
-    <span class="k">def</span> <span class="nf">is_idx_tainted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;abcdefghijkl&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">16</span><span class="p">)))</span>
-<span class="n">my_str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span><span class="n">my_str</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span><span class="n">my_str</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_text output_subarea output_execute_result">
-<pre>(4, 15, 14)
-</pre>
-</div>
-
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">my_str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
-<span class="n">s</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="n">s</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_text output_subarea output_execute_result">
-<pre>(4, 7)
-</pre>
-</div>
-
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">my_str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">),</span><span class="n">s</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_text output_subarea output_execute_result">
-<pre>(11, 14)
-</pre>
-</div>
-
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h3 id="Concatenation">Concatenation<a class="anchor-link" href="#Concatenation">&#182;</a></h3></div>
 </div>
 </div>
@@ -13015,7 +12986,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Implementing concatenation is straight forward:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>If two tainted strings are concatenated together, it may be desirable to transer the taints from each to the corresponding portion of the resulting string. The concatenation of strings is accomplished by overriding <code>__add__()</code>.</p>
 </div>
 </div>
 </div>
@@ -13030,9 +13001,9 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_taint</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">_taint</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">taint</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_taint</span> <span class="o">+</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">other</span><span class="p">]))</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="o">+</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">other</span><span class="p">]))</span>
 </pre></div>
 
 </div>
@@ -13043,7 +13014,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Testing concatenations</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Testing concatenations between two <code>tstr</code> instances:</p>
 </div>
 </div>
 </div>
@@ -13057,12 +13028,8 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str1</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
 <span class="n">my_str2</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;world&quot;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
-<span class="n">my_str3</span> <span class="o">=</span> <span class="s2">&quot;bye&quot;</span>
 <span class="n">v</span> <span class="o">=</span> <span class="n">my_str1</span> <span class="o">+</span> <span class="n">my_str2</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
-
-<span class="n">w</span> <span class="o">=</span> <span class="n">my_str1</span> <span class="o">+</span> <span class="n">my_str3</span> <span class="o">+</span> <span class="n">my_str2</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13074,10 +13041,52 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>[0, 1, 2, 3, 4, 6, 7, 8, 9, 10]
-[0, 1, 2, 3, 4, -1, -1, -1, 6, 7, 8, 9, 10]
 </pre>
 </div>
 
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>What if a <code>tstr</code> is concatenated with a <code>str</code>?</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str3</span> <span class="o">=</span> <span class="s2">&quot;bye&quot;</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">my_str1</span> <span class="o">+</span> <span class="n">my_str3</span> <span class="o">+</span> <span class="n">my_str2</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[0, 1, 2, 3, 4, -1, -1, -1, 6, 7, 8, 9, 10]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>One wrinkle here is that when adding a <code>tstr</code> and a <code>str</code>, the user may place the <code>str</code> first, in which case, the <code>__add__()</code> method will be called on the <code>str</code> instance. Not on the <code>tstr</code> instance. However, Python provides a solution. If one defines <code>__radd__()</code> on the <code>tstr</code> instance, that method will be called rather than <code>str.__add__()</code></p>
+</div>
+</div>
+</div>
 </div>
 
 <div class="input_code">
@@ -13087,15 +13096,22 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>  <span class="c1">#concatenation (+) -- other is not tstr</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">),</span> <span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_taint</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">),</span> <span class="p">([</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">other</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">taint</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">taint</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span> <span class="k">else</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">other</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">),</span> <span class="p">(</span><span class="n">taint</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">))</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We test it out:</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -13108,7 +13124,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str1</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span>
 <span class="n">my_str2</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;world&quot;</span><span class="p">)</span>
 <span class="n">v</span> <span class="o">=</span> <span class="n">my_str1</span> <span class="o">+</span> <span class="n">my_str2</span>
-<span class="n">v</span><span class="o">.</span><span class="n">_taint</span>
+<span class="n">v</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
 </div>
@@ -13128,7 +13144,127 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>These methods: <code>slicing</code> and <code>concatenation</code> is sufficient to implement other string methods that result in a string, and does not change the character underneath (i.e no case change). Hence, we look at a helper method next.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Extract-tainted-string.">Extract tainted string.<a class="anchor-link" href="#Extract-tainted-string.">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Given a specific input index, the method <code>x()</code> extracts the corresponding tainted portion from a <code>tstr</code>. As a convenience it supports <code>slices</code> along with <code>ints</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">TaintException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">taint</span><span class="o">.</span><span class="n">TaintException</span><span class="p">(</span><span class="s1">&#39;Invalid request idx&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span> <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">i</span><span class="p">]]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">start</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">stop</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">i</span><span class="o">.</span><span class="n">step</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span> <span class="k">if</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">r</span><span class="p">]]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;abcdefghijkl&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="mi">101</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;b&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">101</span><span class="p">,</span><span class="mi">105</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h3 id="Replace">Replace<a class="anchor-link" href="#Replace">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>replace()</code> method replaces a portion of the string with another.</p>
+</div>
 </div>
 </div>
 </div>
@@ -13141,8 +13277,8 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">old_taint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span>
-        <span class="n">b_taint</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">_taint</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span> <span class="k">else</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="n">old_taint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span>
+        <span class="n">b_taint</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">taint</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span> <span class="k">else</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
         <span class="n">mystr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -13170,7 +13306,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;aa cde aa&quot;</span><span class="p">)</span>
 <span class="n">res</span> <span class="o">=</span> <span class="n">my_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;aa&#39;</span><span class="p">,</span> <span class="s1">&#39;bb&#39;</span><span class="p">)</span>
-<span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">_taint</span>
+<span class="n">res</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
 </div>
@@ -13264,11 +13400,11 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;ab cdef ghij kl&#39;</span><span class="p">)</span>
 <span class="n">ab</span><span class="p">,</span> <span class="n">cdef</span><span class="p">,</span> <span class="n">ghij</span><span class="p">,</span> <span class="n">kl</span> <span class="o">=</span> <span class="n">my_str</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">ab</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">cdef</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">ghij</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">kl</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ab</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">cdef</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">ghij</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">kl</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 
 <span class="n">my_str</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;ab   cdef ghij    kl&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="n">ab</span><span class="p">,</span> <span class="n">cdef</span><span class="p">,</span> <span class="n">ghij</span><span class="p">,</span> <span class="n">kl</span> <span class="o">=</span> <span class="n">my_str</span><span class="o">.</span><span class="n">rsplit</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">ab</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">cdef</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">ghij</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">kl</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ab</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">cdef</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">ghij</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">kl</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13294,11 +13430,11 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;ab cdef ghij kl&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">)))</span>
 <span class="n">ab</span><span class="p">,</span> <span class="n">cdef</span><span class="p">,</span> <span class="n">ghij</span><span class="p">,</span> <span class="n">kl</span> <span class="o">=</span> <span class="n">my_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">ab</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">cdef</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">kl</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ab</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">cdef</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">kl</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 
 <span class="n">my_str</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;ab   cdef ghij    kl&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)))</span>
 <span class="n">ab</span><span class="p">,</span> <span class="n">cdef</span><span class="p">,</span> <span class="n">ghij</span><span class="p">,</span> <span class="n">kl</span> <span class="o">=</span> <span class="n">my_str</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">ab</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">cdef</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">kl</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ab</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">cdef</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">kl</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13357,7 +13493,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str1</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;  abc  &quot;</span><span class="p">)</span>
 <span class="n">v</span> <span class="o">=</span> <span class="n">my_str1</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-<span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">_taint</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
 </div>
@@ -13382,7 +13518,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str1</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;  abc  &quot;</span><span class="p">)</span>
 <span class="n">v</span> <span class="o">=</span> <span class="n">my_str1</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
-<span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">_taint</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
 </div>
@@ -13407,7 +13543,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str1</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;  abc  &quot;</span><span class="p">)</span>
 <span class="n">v</span> <span class="o">=</span> <span class="n">my_str1</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
-<span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">_taint</span>
+<span class="n">v</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
 </div>
@@ -13444,10 +13580,10 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
         <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">expandtabs</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
         <span class="n">all_parts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">parts</span><span class="p">):</span>
-            <span class="n">all_parts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+            <span class="n">all_parts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_parts</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
-                <span class="n">all_parts</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="n">l</span><span class="p">)</span>
+                <span class="n">all_parts</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">*</span> <span class="n">l</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">all_parts</span><span class="p">)</span>
 </pre></div>
 
@@ -13466,7 +13602,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <span class="n">my_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s2">&quot;ab</span><span class="se">\t</span><span class="s2">cd&quot;</span><span class="p">)</span>
 <span class="n">v1</span> <span class="o">=</span> <span class="n">my_str</span><span class="o">.</span><span class="n">expandtabs</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 <span class="n">v2</span> <span class="o">=</span> <span class="n">my_tstr</span><span class="o">.</span><span class="n">expandtabs</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v1</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">my_tstr</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">v2</span><span class="p">),</span> <span class="n">v2</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v1</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">my_tstr</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">v2</span><span class="p">),</span> <span class="n">v2</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13493,10 +13629,10 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
     <span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterable</span><span class="p">):</span>
         <span class="n">mystr</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="n">mytaint</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">sep_taint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span>
+        <span class="n">sep_taint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span>
         <span class="n">lst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
-            <span class="n">staint</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">_taint</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span> <span class="k">else</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">staint</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">taint</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span> <span class="k">else</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
             <span class="n">mytaint</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">staint</span><span class="p">)</span>
             <span class="n">mystr</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
@@ -13520,9 +13656,9 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;ab cd&quot;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">),</span> <span class="n">v3</span> <span class="o">=</span> <span class="n">my_str</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="s1">&#39;ef&#39;</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">v1</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">v2</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">v1</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">v2</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 <span class="n">v4</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">v2</span><span class="p">,</span><span class="n">v3</span><span class="p">,</span><span class="n">v1</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">v4</span><span class="p">,</span> <span class="n">v4</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">v4</span><span class="p">,</span> <span class="n">v4</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13548,9 +13684,9 @@ cdefab [103, 104, -1, -1, 100, 101]
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;ab cd&quot;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">),</span> <span class="n">v3</span> <span class="o">=</span> <span class="n">my_str</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="s1">&#39;ef&#39;</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">v1</span><span class="o">.</span><span class="n">_taint</span><span class="p">,</span> <span class="n">v2</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">v1</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">v2</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 <span class="n">v4</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">v2</span><span class="p">,</span><span class="n">v3</span><span class="p">,</span><span class="n">v1</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">v4</span><span class="p">,</span> <span class="n">v4</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">v4</span><span class="p">,</span> <span class="n">v4</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13586,11 +13722,11 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
     <span class="k">def</span> <span class="nf">partition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sep</span><span class="p">):</span>
         <span class="n">partA</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">partB</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">partA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">sep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">):</span> <span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sep</span><span class="p">)]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">partB</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sep</span><span class="p">):]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">partA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">sep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">):</span> <span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sep</span><span class="p">)]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">partB</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sep</span><span class="p">):]))</span>
 
     <span class="k">def</span> <span class="nf">rpartition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sep</span><span class="p">):</span>
         <span class="n">partA</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">partB</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">partA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">sep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">):</span> <span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sep</span><span class="p">)]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">partB</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sep</span><span class="p">):]))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">partA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">sep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">):</span> <span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sep</span><span class="p">)]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">partB</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">partA</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sep</span><span class="p">):]))</span>
 </pre></div>
 
 </div>
@@ -13620,7 +13756,7 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
             <span class="n">t</span> <span class="o">=</span> <span class="n">fillchar</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">t</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">*</span> <span class="n">initial</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">*</span> <span class="n">initial</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">rjust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">fillchar</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">):</span>
         <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">fillchar</span><span class="p">)</span>
@@ -13629,7 +13765,7 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
             <span class="n">t</span> <span class="o">=</span> <span class="n">fillchar</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">t</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span> <span class="o">+</span> <span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">*</span> <span class="n">final</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="o">+</span> <span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">*</span> <span class="n">final</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13654,7 +13790,7 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_str_wrapper_eq_taint</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">proxy</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">proxy</span>
 
 <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">callable</span><span class="p">):</span>
@@ -13674,7 +13810,7 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;aa&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-<span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">_taint</span>
+<span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
 </div>
@@ -13826,17 +13962,17 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
         <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="n">key</span> <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">key</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
         <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">slice</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="c1"># Result is an empty string</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="n">key_start</span><span class="p">,</span> <span class="n">key_stop</span> <span class="o">=</span> <span class="n">get_interval</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="n">cursor</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">if</span> <span class="n">key_start</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="k">assert</span> <span class="n">key_stop</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-                <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="n">key_stop</span><span class="p">]</span>
+                <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">key_stop</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="c1"># if the original string was empty, we assume that any</span>
@@ -13848,7 +13984,7 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
                     <span class="c1"># which case, we guess.</span>
                     <span class="k">if</span> <span class="n">key_start</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                         <span class="k">raise</span> <span class="n">taint</span><span class="o">.</span><span class="n">TaintException</span><span class="p">(</span><span class="s1">&#39;Can</span><span class="se">\&#39;</span><span class="s1">t guess the taint&#39;</span><span class="p">)</span>
-                    <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="c1"># _tcursor gets created only for empty strings.</span>
             <span class="n">t</span><span class="o">.</span><span class="n">_tcursor</span> <span class="o">=</span> <span class="n">cursor</span>
             <span class="k">return</span> <span class="n">t</span>
@@ -13862,6 +13998,15 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We add an additional method <code>t()</code> that takes in a taint index, and returns the taint at that index. If it is an empty string, it gives you a possible location of that empty string.</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -13869,9 +14014,9 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">eoftstr</span><span class="p">(</span><span class="n">eoftstr</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">get_mapped_char_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_taint</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">taint</span><span class="o">.</span><span class="n">TaintException</span><span class="p">(</span><span class="s1">&#39;Invalid request idx&#39;</span><span class="p">)</span>
@@ -13893,7 +14038,7 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">eoftstr</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">11</span><span class="p">:]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">11</span><span class="p">:]</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">t</span><span class="p">[</span><span class="mi">11</span><span class="p">:]</span><span class="o">.</span><span class="n">_taint</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">11</span><span class="p">:]</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="mi">11</span><span class="p">:]</span><span class="o">.</span><span class="n">t</span><span class="p">())</span>
 </pre></div>
 
 </div>
@@ -13905,7 +14050,7 @@ cd,ef,ab [103, 104, 0, -1, -1, 0, 100, 101]
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>&#39;&#39;
-11 []
+[] 11
 </pre>
 </div>
 
@@ -14319,7 +14464,7 @@ eq,&#39;h&#39;,&#39;b&#39;
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2018-12-04 16:01:08+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2018-12-04 18:01:05+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14335,7 +14480,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">https://www.fuzzingbook.org/beta/html/InformationFlow.html</a>.  Retrieved 2018-12-04 16:01:08+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">https://www.fuzzingbook.org/beta/html/InformationFlow.html</a>.  Retrieved 2018-12-04 18:01:05+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:InformationFlow,
@@ -14345,9 +14490,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/InformationFlow.html}},
-    note = {Retrieved 2018-12-04 16:01:08+01:00},
+    note = {Retrieved 2018-12-04 18:01:05+01:00},
     url = {https://www.fuzzingbook.org/beta/html/InformationFlow.html},
-    urldate = {2018-12-04 16:01:08+01:00}
+    urldate = {2018-12-04 18:01:05+01:00}
 }
 </pre>
 </div>
