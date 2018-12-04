@@ -24,7 +24,7 @@ And copy the link from the terminal into your browser to execute it. If you donâ
 docker exec -it fuzzing-book-instance jupyter notebook list
 ```
 
-One the container is started it will keep running in the background until you stop it.
+Once the container is started it will keep running in the background until you stop it.
 
 ## Build the Docker image yourself
 
