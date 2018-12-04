@@ -11870,8 +11870,9 @@ MathJax.Hub.Config({
 <li><a href="Coverage.html"><span class="chnum">3</span> Getting Coverage</a></li>
 <li><a href="MutationFuzzer.html"><span class="chnum">4</span> Mutation-Based Fuzzing</a></li>
 <li><a href="Grammars.html" class="this_page"><span class="chnum">5</span> Fuzzing with Grammars</a></li>
-<li class="has-sub"><a href="GrammarFuzzer.html" class="chapters">Chapters 6&ndash;7 <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="GrammarFuzzer.html"><span class="chnum">6</span> Efficient Grammar Fuzzing</a></li>
+<li class="has-sub"><a href="GrammarFuzzer.html" class="chapters">Chapters 6&ndash;8 <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="GrammarFuzzer.html"><span class="chnum">6</span> Efficient Grammar Fuzzing</a></li>
 <li><a href="GrammarCoverageFuzzer.html"><span class="chnum">7</span> Grammar Coverage</a></li>
+<li><a href="ConfigurationFuzzer.html"><span class="chnum">8</span> Testing Configurations</a></li>
 </ul>
            <li><a href="https://www.fuzzingbook.org/#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
@@ -12728,6 +12729,11 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">syntax_diagram_expr</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+    <span class="c1"># In later chapters, we allow expansions to be tuples,</span>
+    <span class="c1"># with the expansion being the first element</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">expansion</span> <span class="o">=</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
     <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">sym</span> <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">RE_NONTERMINAL</span><span class="p">,</span> <span class="n">expansion</span><span class="p">)</span> <span class="k">if</span> <span class="n">sym</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span>  <span class="c1"># special case: empty expansion</span>
@@ -12746,7 +12752,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">SVG</span><span class="p">(</span><span class="n">show_diagram</span><span class="p">(</span><span class="n">syntax_diagram_expr</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="s1">&#39;&lt;term&gt;&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]))))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">SVG</span><span class="p">(</span><span class="n">show_diagram</span><span class="p">(</span><span class="n">syntax_diagram_expr</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="s1">&#39;&lt;term&gt;&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])))</span>
 </pre></div>
 
 </div>
@@ -12756,7 +12762,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_area">
 
-<div class="output_image output_svg output_subarea ">
+<div class="output_image output_svg output_subarea output_execute_result">
 <svg class="railroad-diagram" height="62" viewBox="0 0 310.5 62" width="310.5" xmlns="http://www.w3.org/2000/svg">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
@@ -12859,7 +12865,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">SVG</span><span class="p">(</span><span class="n">show_diagram</span><span class="p">(</span><span class="n">syntax_diagram_alt</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="s1">&#39;&lt;digit&gt;&#39;</span><span class="p">]))))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">SVG</span><span class="p">(</span><span class="n">show_diagram</span><span class="p">(</span><span class="n">syntax_diagram_alt</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="s1">&#39;&lt;digit&gt;&#39;</span><span class="p">])))</span>
 </pre></div>
 
 </div>
@@ -12869,7 +12875,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_area">
 
-<div class="output_image output_svg output_subarea ">
+<div class="output_image output_svg output_subarea output_execute_result">
 <svg class="railroad-diagram" height="109" viewBox="0 0 522.5 109" width="522.5" xmlns="http://www.w3.org/2000/svg">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
@@ -17409,7 +17415,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-11-28 20:36:36+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-12-03 15:29:19+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -17425,7 +17431,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Grammars.html">https://www.fuzzingbook.org/html/Grammars.html</a>.  Retrieved 2018-11-28 20:36:36+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Grammars.html">https://www.fuzzingbook.org/html/Grammars.html</a>.  Retrieved 2018-12-03 15:29:19+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Grammars,
@@ -17435,9 +17441,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/Grammars.html}},
-    note = {Retrieved 2018-11-28 20:36:36+01:00},
+    note = {Retrieved 2018-12-03 15:29:19+01:00},
     url = {https://www.fuzzingbook.org/html/Grammars.html},
-    urldate = {2018-11-28 20:36:36+01:00}
+    urldate = {2018-12-03 15:29:19+01:00}
 }
 </pre>
 </div>
