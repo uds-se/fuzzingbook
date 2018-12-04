@@ -11967,7 +11967,15 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Covering-Grammar-Elements">Covering Grammar Elements<a class="anchor-link" href="#Covering-Grammar-Elements">&#182;</a></h2><p>The aim of test generation is to cover all functionality of a program – hopefully including the failing functionality, of course.  This functionality, however, is tied to the structure of the input: If we fail to produce certain input elements, then the associated code and functionality will not be triggered either, nixing our chances to find a bug in there.</p>
-<p>As an example, consider our expression grammar <code>EXPR_GRAMMAR</code> from the <a href="Grammars.html">chapter on grammars.</a>.  If we do not produce negative numbers, then negative numbers will not be tested.  If we do not produce floating-point numbers, then floating-point numbers will not ne tested.  Our aim must thus be to <em>cover all possible expansions</em>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As an example, consider our expression grammar <code>EXPR_GRAMMAR</code> from the <a href="Grammars.html">chapter on grammars.</a>.  If we do not produce negative numbers, then negative numbers will not be tested.  If we do not produce floating-point numbers, then floating-point numbers will not ne tested.  Our aim must thus be to <em>cover all possible expansions</em>.</p>
 </div>
 </div>
 </div>
@@ -12045,15 +12053,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracking-Grammar-Coverage">Tracking Grammar Coverage<a class="anchor-link" href="#Tracking-Grammar-Coverage">&#182;</a></h3></div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>This concept of coverage is very easy to implement.  We introduce a class <code>GrammarCoverageFuzzer</code> that keeps track of the current grammar coverage achieved:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracking-Grammar-Coverage">Tracking Grammar Coverage<a class="anchor-link" href="#Tracking-Grammar-Coverage">&#182;</a></h3><p>This concept of <em>grammar coverage</em> is very easy to implement.  We introduce a class <code>GrammarCoverageFuzzer</code> that keeps track of the current grammar coverage achieved:</p>
 </div>
 </div>
 </div>
@@ -12200,7 +12200,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We can compute the set of possible expansions in a grammar by enumerating all expansions:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can compute the set of possible expansions in a grammar by enumerating all expansions.  The method <code>max_expansion_coverage()</code> traverses the grammar recursively starting from the given symbol (by default: the grammar start symbol) and accumulates all expansions in the set <code>expansions</code>.  With the <code>max_depth</code> parameter (default: $\infty$), we can control how deep the grammar exploration should go; we will need this later in the chapter.</p>
 </div>
 </div>
 </div>
@@ -12213,28 +12213,46 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">_max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return set of all expansions in a grammar&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols_seen</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">max_depth</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
 
-        <span class="n">symbols_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symbols_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
 
         <span class="n">expansions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]:</span>
             <span class="n">expansions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="n">nonterminals</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
-                <span class="n">expansions</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_expansion_coverage</span><span class="p">(</span><span class="n">nonterminal</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">nonterminal</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbols_seen</span><span class="p">:</span>
+                    <span class="n">expansions</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_expansion_coverage</span><span class="p">(</span><span class="n">nonterminal</span><span class="p">,</span> <span class="n">max_depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">expansions</span>
 
-    <span class="k">def</span> <span class="nf">max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">symbols_seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;Return set of all expansions in a grammar starting with `symbol`&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">symbol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symbols_seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_expansion_coverage</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">symbol</span> <span class="o">==</span> <span class="n">START_SYMBOL</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_symbols_seen</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cov</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can use <code>max_expansion_coverage()</code> to compute all the expansions within the expression grammar:</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -12313,7 +12331,29 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
         <span class="n">index</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">choose_node_expansion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_coverage</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">index</span>
+</pre></div>
 
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The method <code>missing_expansion_coverage()</code> is a helper method that returns the expansions that still have to be covered:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">missing_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
 </pre></div>
@@ -12326,7 +12366,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>With this, we can now systematically check which expansions already have been covered – and which ones still have to be covered.  To keep things simple, let us focus on <code>&lt;digit&gt;</code> expansions only.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us show how tracking works.  To keep things simple, let us focus on <code>&lt;digit&gt;</code> expansions only.</p>
 </div>
 </div>
 </div>
@@ -12731,26 +12771,13 @@ Tree: 5
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">)</span>
 <span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 </pre></div>
 
 </div>
 </div></div>
 </div>
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 5
-Tree: 5
-&#39;5&#39;
-</pre>
-</div>
-
 </div>
 
 <div class="output_area">
@@ -12778,19 +12805,6 @@ Tree: 5
 
 <div class="output_area">
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 2
-Tree: 2
-&#39;2&#39;
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
 <div class="output_text output_subarea output_execute_result">
 <pre>&#39;2&#39;
 </pre>
@@ -12810,19 +12824,6 @@ Tree: 2
 </div>
 </div></div>
 </div>
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 1
-Tree: 1
-&#39;1&#39;
-</pre>
-</div>
-
 </div>
 
 <div class="output_area">
@@ -12882,7 +12883,7 @@ Tree: 1
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">):</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">(),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12893,41 +12894,7 @@ Tree: 1
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 0
-Tree: 0
-&#39;0&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 9
-Tree: 9
-&#39;9&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 7
-Tree: 7
-&#39;7&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 4
-Tree: 4
-&#39;4&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 8
-Tree: 8
-&#39;8&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 3
-Tree: 3
-&#39;3&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 6
-Tree: 6
-&#39;6&#39;
+<pre>0 9 7 4 8 3 6 
 </pre>
 </div>
 
@@ -12948,7 +12915,7 @@ Tree: 6
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">missing_expansion_coverage</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -13023,7 +12990,7 @@ Tree: 6
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">missing_expansion_coverage</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -13174,7 +13141,7 @@ d2+%e3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">missing_expansion_coverage</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -13259,7 +13226,7 @@ d2+%e3
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Determining-Maximum-per-Symbol-Coverage">Determining Maximum per-Symbol Coverage<a class="anchor-link" href="#Determining-Maximum-per-Symbol-Coverage">&#182;</a></h3><p>To address this problem, we introduce a new class <code>GrammarCoverageFuzzer</code> that builds on <code>SimpleGrammarCoverageFuzzer</code>, but with a better strategy.  First, we need to compute the <em>maximum set of expansions</em> that can be reached from a particular symbol. The idea is to later compute the <em>intersection</em> of this set and the expansions already covered, such that we can favor those expansions with a non-empty intersection.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Determining-Maximum-per-Symbol-Coverage">Determining Maximum per-Symbol Coverage<a class="anchor-link" href="#Determining-Maximum-per-Symbol-Coverage">&#182;</a></h3><p>To address this problem, we introduce a new class <code>GrammarCoverageFuzzer</code> that builds on <code>SimpleGrammarCoverageFuzzer</code>, but with a better strategy.  First, we need to compute the <em>maximum set of expansions</em> that can be reached from a particular symbol, as we already have implemented in <code>max_expansion_coverage()</code>.  The idea is to later compute the <em>intersection</em> of this set and the expansions already covered, such that we can favor those expansions with a non-empty intersection.</p>
 </div>
 </div>
 </div>
@@ -13268,7 +13235,7 @@ d2+%e3
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Our method <code>max_symbol_expansion_coverage()</code> computes this maximum set of expansions.  The helper method <code>_max_symbol_expansion_coverage()</code> does the heavy lifting, iterating through the grammar up to a given depth and tracking which symbols (<code>symbols_seen</code>) and which coverage (<code>cov</code>) has already been seen:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The first step – computing the maximum set of expansions that can be reached from a symbol – is already implemented.  By passing a <code>symbol</code> parameter to <code>max_expansion_coverage()</code>, we can compute the possible expansions for every symbol:</p>
 </div>
 </div>
 </div>
@@ -13280,80 +13247,8 @@ d2+%e3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">_max_symbol_expansion_coverage</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return set of all expansions in a grammar starting with `symbol`&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">max_depth</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">)</span>
-
-        <span class="n">symbols_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]:</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cov</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="n">cov</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">nonterminals</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">symbols_seen</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="n">new_cov</span><span class="p">,</span> <span class="n">new_symbols_seen</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_max_symbol_expansion_coverage</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">max_depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">))</span>
-                <span class="n">cov</span> <span class="o">|=</span> <span class="n">new_cov</span>
-                <span class="n">symbols_seen</span> <span class="o">|=</span> <span class="n">new_symbols_seen</span>
-
-        <span class="k">return</span> <span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The main method <code>max_symbol_expansion_coverage()</code> simply returns the coverage that can be achieved:</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">GrammarCoverageFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">max_symbol_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)):</span>
-        <span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_symbol_expansion_coverage</span><span class="p">(</span>
-            <span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="nb">set</span><span class="p">(),</span> <span class="nb">set</span><span class="p">())</span>
-        <span class="k">return</span> <span class="n">cov</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>With this, we can compute the possible expansions for every symbol</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">f</span><span class="o">.</span><span class="n">max_symbol_expansion_coverage</span><span class="p">(</span><span class="s1">&#39;&lt;integer&gt;&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">(</span><span class="s1">&#39;&lt;integer&gt;&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13387,7 +13282,7 @@ d2+%e3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_symbol_expansion_coverage</span><span class="p">(</span><span class="s1">&#39;&lt;digit&gt;&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">(</span><span class="s1">&#39;&lt;digit&gt;&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13416,7 +13311,7 @@ d2+%e3
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The maximum coverage achievable in a grammar is the same as starting with the start symbol:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Determining-yet-Uncovered-Children">Determining yet Uncovered Children<a class="anchor-link" href="#Determining-yet-Uncovered-Children">&#182;</a></h3><p>We can now start to implement <code>GrammarCoverageFuzzer</code>.  Computing <code>max_expansion_coverage()</code> allows us to determine the <em>missing coverage</em> for each child.  To this end, we <em>subtract</em> the coverage already seen (<code>expansion_coverage()</code>) from the coverage that could be obtained.</p>
 </div>
 </div>
 </div>
@@ -13428,35 +13323,12 @@ d2+%e3
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">==</span> <span class="n">f</span><span class="o">.</span><span class="n">max_symbol_expansion_coverage</span><span class="p">(</span><span class="n">START_SYMBOL</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Determining-yet-Uncovered-Children">Determining yet Uncovered Children<a class="anchor-link" href="#Determining-yet-Uncovered-Children">&#182;</a></h3><p>The definition of <code>max_symbol_expansion_coverage()</code> allows us to determine the <em>missing coverage</em> for each child.  To this end, we <em>subtract</em> the coverage already seen (<code>expansion_coverage()</code>) from the coverage that could be obtained.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">GrammarCoverageFuzzer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">_new_child_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
         <span class="n">new_cov</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">c_symbol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">c_symbol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">:</span>
-                <span class="n">new_cov</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_symbol_expansion_coverage</span><span class="p">(</span>
+                <span class="n">new_cov</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">(</span>
                     <span class="n">c_symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_cov</span>
 
@@ -14126,7 +13998,7 @@ Tree: 2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">new_symbol</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">new_symbol</span><span class="p">,</span> <span class="n">unreachable_nonterminals</span>
 <span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">expansion_to_children</span>
 </pre></div>
 
@@ -14141,7 +14013,7 @@ Tree: 2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">duplicate_context</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">duplicate_context</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;Duplicate an expansion within a grammar.</span>
 
 <span class="sd">    In the given grammar, take the given expansion of the given symbol</span>
@@ -14153,6 +14025,10 @@ Tree: 2
     <span class="n">orig_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
     <span class="n">_duplicate_context</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">orig_grammar</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span>
                        <span class="n">expansion</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="p">{})</span>
+
+    <span class="c1"># After duplication, we may have unreachable rules; delete them</span>
+    <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="n">unreachable_nonterminals</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">grammar</span><span class="p">[</span><span class="n">nonterminal</span><span class="p">]</span>
 </pre></div>
 
 </div>
@@ -14357,7 +14233,7 @@ Tree: 2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>By default, <code>depth</code> is set to <code>-1</code>, indicating unlimited duplication.  True unbounded duplication could lead to problems for a recursive grammar such as <code>EXPR_GRAMMAR</code>, so <code>duplicate_context()</code> is set to no longer duplicate symbols once duplicated.  Still, if we apply it to duplicate <em>all</em> <code>&lt;expr&gt;</code> expansions, we obtain a grammar with no less than 296 rules:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>By default, <code>depth</code> is set to $\infty$, indicating unlimited duplication.  True unbounded duplication could lead to problems for a recursive grammar such as <code>EXPR_GRAMMAR</code>, so <code>duplicate_context()</code> is set to no longer duplicate symbols once duplicated.  Still, if we apply it to duplicate <em>all</em> <code>&lt;expr&gt;</code> expansions, we obtain a grammar with no less than 296 rules:</p>
 </div>
 </div>
 </div>
@@ -14371,6 +14247,20 @@ Tree: 2
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
 <span class="n">duplicate_context</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">)</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">)</span>
 </pre></div>
 
@@ -14382,7 +14272,7 @@ Tree: 2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>296
+<pre>292
 </pre>
 </div>
 
@@ -14391,7 +14281,7 @@ Tree: 2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>This gives us more than 2000 expansions to cover:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>This gives us almost 2000 expansions to cover:</p>
 </div>
 </div>
 </div>
@@ -14438,7 +14328,7 @@ Tree: 2
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
 <span class="n">duplicate_context</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">)</span>
-<span class="n">duplicate_context</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">)</span>
+<span class="n">duplicate_context</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;expr-1&gt;&quot;</span><span class="p">)</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">)</span>
 </pre></div>
 
@@ -14450,7 +14340,7 @@ Tree: 2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>586
+<pre>594
 </pre>
 </div>
 
@@ -14474,7 +14364,7 @@ Tree: 2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>1981
+<pre>3994
 </pre>
 </div>
 
@@ -14506,7 +14396,7 @@ Tree: 2
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;&lt;term-1-1&gt; + &lt;expr-4-1&gt;&#39;, &#39;&lt;term-5-1&gt; - &lt;expr-8-1&gt;&#39;, &#39;&lt;term-9-1&gt;&#39;]
+<pre>[&#39;&lt;term-1&gt; + &lt;expr-4&gt;&#39;, &#39;&lt;term-5&gt; - &lt;expr-8&gt;&#39;, &#39;&lt;term-9&gt;&#39;]
 </pre>
 </div>
 
@@ -15256,7 +15146,7 @@ Also, in the above examples, <em>some</em> parts of the input can still be cover
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-Caching">Exercise 2: Caching<a class="anchor-link" href="#Exercise-2:-Caching">&#182;</a></h3><p>The value of <code>max_symbol_expansion_coverage()</code> depends on the grammar only.  Change the implementation such that the values are precomputed for each symbol upon initialization (<code>__init__()</code>); this way, <code>max_symbol_expansion_coverage()</code> can simply lookup the value in the table.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-Caching">Exercise 2: Caching<a class="anchor-link" href="#Exercise-2:-Caching">&#182;</a></h3><p>The value of <code>max_expansion_coverage()</code> depends on the grammar only.  Change the implementation such that the values are precomputed for each symbol and depth upon initialization (<code>__init__()</code>); this way, <code>max_expansion_coverage()</code> can simply lookup the value in the table.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/GrammarCoverageFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -15271,7 +15161,7 @@ Also, in the above examples, <em>some</em> parts of the input can still be cover
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarCoverageFuzzer.ipynb" target=_blank)>Last change: 2018-11-27 14:14:40+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarCoverageFuzzer.ipynb" target=_blank)>Last change: 2018-11-28 20:41:01+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -15287,7 +15177,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html">Grammar Coverage</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html">https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html</a>.  Retrieved 2018-11-27 14:14:40+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html">Grammar Coverage</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html">https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html</a>.  Retrieved 2018-11-28 20:41:01+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:GrammarCoverageFuzzer,
@@ -15297,9 +15187,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html}},
-    note = {Retrieved 2018-11-27 14:14:40+01:00},
+    note = {Retrieved 2018-11-28 20:41:01+01:00},
     url = {https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html},
-    urldate = {2018-11-27 14:14:40+01:00}
+    urldate = {2018-11-28 20:41:01+01:00}
 }
 </pre>
 </div>

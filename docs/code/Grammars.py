@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-11-27 15:26:30+01:00
+# Last change: 2018-11-28 20:36:36+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -739,12 +739,29 @@ def def_used_nonterminals(grammar, start_symbol=START_SYMBOL):
 
     return defined_nonterminals, used_nonterminals
 
+def reachable_nonterminals(grammar, start_symbol=START_SYMBOL):
+    reachable = set()
+    
+    def _find_reachable_nonterminals(grammar, symbol):
+        nonlocal reachable
+        reachable.add(symbol)
+        for expansion in grammar.get(symbol, []):
+            for nonterminal in nonterminals(expansion):
+                if nonterminal not in reachable:
+                    _find_reachable_nonterminals(grammar, nonterminal)
+    
+    _find_reachable_nonterminals(grammar, start_symbol)
+    return reachable
+
+def unreachable_nonterminals(grammar):
+    return grammar.keys() - reachable_nonterminals(grammar)
+
 def is_valid_grammar(grammar, start_symbol=START_SYMBOL):
     defined_nonterminals, used_nonterminals = def_used_nonterminals(
         grammar, start_symbol)
     if defined_nonterminals is None or used_nonterminals is None:
         return False
-
+    
     for unused_nonterminal in defined_nonterminals - used_nonterminals:
         print(repr(unused_nonterminal) + ": defined, but not used",
               file=sys.stderr)
@@ -752,7 +769,12 @@ def is_valid_grammar(grammar, start_symbol=START_SYMBOL):
         print(repr(undefined_nonterminal) + ": used, but not defined",
               file=sys.stderr)
 
-    return used_nonterminals == defined_nonterminals
+    unreachable = unreachable_nonterminals(grammar)
+    for unreachable_nonterminal in unreachable:
+        print(repr(unreachable_nonterminal) + ": unreachable from " + START_SYMBOL,
+              file=sys.stderr)
+
+    return used_nonterminals == defined_nonterminals and len(unreachable) == 0
 
 if __name__ == "__main__":
     assert is_valid_grammar(EXPR_GRAMMAR)

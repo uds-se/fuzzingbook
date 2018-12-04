@@ -13794,11 +13794,18 @@ a.anchor-link {
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Covering-Grammar-Elements">Covering Grammar Elements<a class="anchor-link" href="#Covering-Grammar-Elements">&#182;</a></h2><p>The aim of test generation is to cover all functionality of a program – hopefully including the failing functionality, of course.  This functionality, however, is tied to the structure of the input: If we fail to produce certain input elements, then the associated code and functionality will not be triggered either, nixing our chances to find a bug in there.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <p>As an example, consider our expression grammar <code>EXPR_GRAMMAR</code> from the <a href="Grammars.slides.html">chapter on grammars.</a>.  If we do not produce negative numbers, then negative numbers will not be tested.  If we do not produce floating-point numbers, then floating-point numbers will not ne tested.  Our aim must thus be to <em>cover all possible expansions</em>.</p>
 
 </div>
 </div>
-</div></section></section><section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -13806,7 +13813,7 @@ a.anchor-link {
 
 </div>
 </div>
-</div></section><section>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[3]:</div>
@@ -13839,7 +13846,7 @@ a.anchor-link {
 </div>
 </div>
 
-</div><div class="fragment">
+</div></div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -13847,18 +13854,11 @@ a.anchor-link {
 
 </div>
 </div>
-</div></div></section><section>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Tracking-Grammar-Coverage">Tracking Grammar Coverage<a class="anchor-link" href="#Tracking-Grammar-Coverage">&#182;</a></h3>
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>This concept of coverage is very easy to implement.  We introduce a class <code>GrammarCoverageFuzzer</code> that keeps track of the current grammar coverage achieved:</p>
+<h3 id="Tracking-Grammar-Coverage">Tracking Grammar Coverage<a class="anchor-link" href="#Tracking-Grammar-Coverage">&#182;</a></h3><p>This concept of <em>grammar coverage</em> is very easy to implement.  We introduce a class <code>GrammarCoverageFuzzer</code> that keeps track of the current grammar coverage achieved:</p>
 
 </div>
 </div>
@@ -13992,42 +13992,59 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We can compute the set of possible expansions in a grammar by enumerating all expansions:</p>
+<p>We can compute the set of possible expansions in a grammar by enumerating all expansions.  The method <code>max_expansion_coverage()</code> traverses the grammar recursively starting from the given symbol (by default: the grammar start symbol) and accumulates all expansions in the set <code>expansions</code>.  With the <code>max_depth</code> parameter (default: $\infty$), we can control how deep the grammar exploration should go; we will need this later in the chapter.</p>
 
 </div>
 </div>
-</div><div class="fragment">
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">_max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return set of all expansions in a grammar&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols_seen</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">max_depth</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
         
-        <span class="n">symbols_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symbols_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
         
         <span class="n">expansions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]:</span>
             <span class="n">expansions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="n">nonterminals</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
-                <span class="n">expansions</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_expansion_coverage</span><span class="p">(</span><span class="n">nonterminal</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">)</span>
-        
+                <span class="k">if</span> <span class="n">nonterminal</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbols_seen</span><span class="p">:</span>
+                    <span class="n">expansions</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_expansion_coverage</span><span class="p">(</span><span class="n">nonterminal</span><span class="p">,</span> <span class="n">max_depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">expansions</span>
     
-    <span class="k">def</span> <span class="nf">max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">symbols_seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">max_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;Return set of all expansions in a grammar starting with `symbol`&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">symbol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symbols_seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_expansion_coverage</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">symbol</span> <span class="o">==</span> <span class="n">START_SYMBOL</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_symbols_seen</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cov</span>
 </pre></div>
 
     </div>
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can use <code>max_expansion_coverage()</code> to compute all the expansions within the expression grammar:</p>
+
+</div>
+</div>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[11]:</div>
@@ -14111,7 +14128,27 @@ a.anchor-link {
         <span class="n">index</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">choose_node_expansion</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add_coverage</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">index</span>
-    
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The method <code>missing_expansion_coverage()</code> is a helper method that returns the expansions that still have to be covered:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">missing_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
 </pre></div>
@@ -14124,14 +14161,14 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>With this, we can now systematically check which expansions already have been covered – and which ones still have to be covered.  To keep things simple, let us focus on <code>&lt;digit&gt;</code> expansions only.</p>
+<p>Let us show how tracking works.  To keep things simple, let us focus on <code>&lt;digit&gt;</code> expansions only.</p>
 
 </div>
 </div>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span> <span class="o">=</span> <span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -14163,61 +14200,13 @@ Tree: 9
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[13]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;9&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 0
-Tree: 0
-&#39;0&#39;
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-
     <div class="prompt output_prompt">Out[14]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;0&#39;</pre>
+<pre>&#39;9&#39;</pre>
 </div>
 
 </div>
@@ -14250,6 +14239,54 @@ Tree: 0
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Tree: &lt;digit&gt;
 Expanding &lt;digit&gt; randomly
+Now covered: &lt;digit&gt; -&gt; 0
+Tree: 0
+&#39;0&#39;
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[15]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;0&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Tree: &lt;digit&gt;
+Expanding &lt;digit&gt; randomly
 Now covered: &lt;digit&gt; -&gt; 5
 Tree: 5
 &#39;5&#39;
@@ -14259,7 +14296,7 @@ Tree: 5
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[15]:</div>
+    <div class="prompt output_prompt">Out[16]:</div>
 
 
 
@@ -14273,7 +14310,7 @@ Tree: 5
 </div>
 </div>
 
-</div></div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -14281,10 +14318,10 @@ Tree: 5
 
 </div>
 </div>
-</div><div class="fragment">
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
@@ -14300,7 +14337,7 @@ Tree: 5
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[16]:</div>
+    <div class="prompt output_prompt">Out[17]:</div>
 
 
 
@@ -14314,7 +14351,7 @@ Tree: 5
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -14322,10 +14359,10 @@ Tree: 5
 
 </div>
 </div>
-</div></div><div class="fragment">
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span>
@@ -14341,7 +14378,7 @@ Tree: 5
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[17]:</div>
+    <div class="prompt output_prompt">Out[18]:</div>
 
 
 
@@ -14364,7 +14401,7 @@ Tree: 5
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -14372,10 +14409,10 @@ Tree: 5
 
 </div>
 </div>
-</div></div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">missing_expansion_coverage</span><span class="p">()</span>
@@ -14391,7 +14428,7 @@ Tree: 5
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[18]:</div>
+    <div class="prompt output_prompt">Out[19]:</div>
 
 
 
@@ -14411,7 +14448,7 @@ Tree: 5
 </div>
 </div>
 
-</div></section><section>
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -14422,7 +14459,7 @@ Tree: 5
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">average_length_until_full_coverage</span><span class="p">(</span><span class="n">fuzzer</span><span class="p">):</span>
@@ -14446,7 +14483,7 @@ Tree: 5
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">digit_fuzzer</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="kc">False</span>
@@ -14463,7 +14500,7 @@ Tree: 5
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[20]:</div>
+    <div class="prompt output_prompt">Out[21]:</div>
 
 
 
@@ -14488,7 +14525,7 @@ Tree: 5
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">expr_fuzzer</span> <span class="o">=</span> <span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
@@ -14505,7 +14542,7 @@ Tree: 5
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[21]:</div>
+    <div class="prompt output_prompt">Out[22]:</div>
 
 
 
@@ -14536,7 +14573,7 @@ Tree: 5
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">):</span>
@@ -14573,7 +14610,7 @@ Tree: 5
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">):</span>
@@ -14599,10 +14636,10 @@ Tree: 5
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">)</span>
 <span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 </pre></div>
 
@@ -14616,76 +14653,13 @@ Tree: 5
 
 <div class="output_area">
 
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 5
-Tree: 5
-&#39;5&#39;
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[24]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;5&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 2
-Tree: 2
-&#39;2&#39;
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-
     <div class="prompt output_prompt">Out[25]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;2&#39;</pre>
+<pre>&#39;5&#39;</pre>
 </div>
 
 </div>
@@ -14712,22 +14686,40 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt"></div>
+    <div class="prompt output_prompt">Out[26]:</div>
 
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 1
-Tree: 1
-&#39;1&#39;
-</pre>
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;2&#39;</pre>
+</div>
+
+</div>
+
 </div>
 </div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[26]:</div>
+    <div class="prompt output_prompt">Out[27]:</div>
 
 
 
@@ -14752,7 +14744,7 @@ Tree: 1
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
@@ -14768,7 +14760,7 @@ Tree: 1
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[27]:</div>
+    <div class="prompt output_prompt">Out[28]:</div>
 
 
 
@@ -14793,11 +14785,11 @@ Tree: 1
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">):</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">fuzz</span><span class="p">(),</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -14814,49 +14806,14 @@ Tree: 1
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 0
-Tree: 0
-&#39;0&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 9
-Tree: 9
-&#39;9&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 7
-Tree: 7
-&#39;7&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 4
-Tree: 4
-&#39;4&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 8
-Tree: 8
-&#39;8&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 3
-Tree: 3
-&#39;3&#39;
-Tree: &lt;digit&gt;
-Expanding &lt;digit&gt; randomly
-Now covered: &lt;digit&gt; -&gt; 6
-Tree: 6
-&#39;6&#39;
-</pre>
+<pre>0 9 7 4 8 3 6 </pre>
 </div>
 </div>
 
 </div>
 </div>
 
-</div></div></section><section>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -14864,13 +14821,13 @@ Tree: 6
 
 </div>
 </div>
-</div><div class="fragment">
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">missing_expansion_coverage</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -14883,7 +14840,7 @@ Tree: 6
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[29]:</div>
+    <div class="prompt output_prompt">Out[30]:</div>
 
 
 
@@ -14908,7 +14865,7 @@ Tree: 6
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
@@ -14958,10 +14915,10 @@ Tree: 6
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">missing_expansion_coverage</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -14974,7 +14931,7 @@ Tree: 6
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[31]:</div>
+    <div class="prompt output_prompt">Out[32]:</div>
 
 
 
@@ -14999,7 +14956,7 @@ Tree: 6
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">average_length_until_full_coverage</span><span class="p">(</span><span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">))</span>
@@ -15015,7 +14972,7 @@ Tree: 6
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[32]:</div>
+    <div class="prompt output_prompt">Out[33]:</div>
 
 
 
@@ -15040,7 +14997,7 @@ Tree: 6
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">CGI_GRAMMAR</span>
@@ -15056,7 +15013,7 @@ Tree: 6
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[33]:</div>
+    <div class="prompt output_prompt">Out[34]:</div>
 
 
 
@@ -15091,10 +15048,10 @@ Tree: 6
 </div>
 </div>
 
-</div><div class="fragment">
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">)</span>
@@ -15133,7 +15090,7 @@ d2+%e3
 </div>
 </div>
 
-</div></div></section><section>
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -15144,10 +15101,10 @@ d2+%e3
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">missing_expansion_coverage</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -15160,7 +15117,7 @@ d2+%e3
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[35]:</div>
+    <div class="prompt output_prompt">Out[36]:</div>
 
 
 
@@ -15197,7 +15154,7 @@ d2+%e3
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">CGI_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;letter&gt;&quot;</span><span class="p">]</span>
@@ -15213,7 +15170,7 @@ d2+%e3
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[36]:</div>
+    <div class="prompt output_prompt">Out[37]:</div>
 
 
 
@@ -15250,7 +15207,7 @@ d2+%e3
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Determining-Maximum-per-Symbol-Coverage">Determining Maximum per-Symbol Coverage<a class="anchor-link" href="#Determining-Maximum-per-Symbol-Coverage">&#182;</a></h3><p>To address this problem, we introduce a new class <code>GrammarCoverageFuzzer</code> that builds on <code>SimpleGrammarCoverageFuzzer</code>, but with a better strategy.  First, we need to compute the <em>maximum set of expansions</em> that can be reached from a particular symbol. The idea is to later compute the <em>intersection</em> of this set and the expansions already covered, such that we can favor those expansions with a non-empty intersection.</p>
+<h3 id="Determining-Maximum-per-Symbol-Coverage">Determining Maximum per-Symbol Coverage<a class="anchor-link" href="#Determining-Maximum-per-Symbol-Coverage">&#182;</a></h3><p>To address this problem, we introduce a new class <code>GrammarCoverageFuzzer</code> that builds on <code>SimpleGrammarCoverageFuzzer</code>, but with a better strategy.  First, we need to compute the <em>maximum set of expansions</em> that can be reached from a particular symbol, as we already have implemented in <code>max_expansion_coverage()</code>.  The idea is to later compute the <em>intersection</em> of this set and the expansions already covered, such that we can favor those expansions with a non-empty intersection.</p>
 
 </div>
 </div>
@@ -15258,86 +15215,18 @@ d2+%e3
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Our method <code>max_symbol_expansion_coverage()</code> computes this maximum set of expansions.  The helper method <code>_max_symbol_expansion_coverage()</code> does the heavy lifting, iterating through the grammar up to a given depth and tracking which symbols (<code>symbols_seen</code>) and which coverage (<code>cov</code>) has already been seen:</p>
+<p>The first step – computing the maximum set of expansions that can be reached from a symbol – is already implemented.  By passing a <code>symbol</code> parameter to <code>max_expansion_coverage()</code>, we can compute the possible expansions for every symbol:</p>
 
 </div>
 </div>
 </div></div></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">_max_symbol_expansion_coverage</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return set of all expansions in a grammar starting with `symbol`&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">max_depth</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">)</span>
-
-        <span class="n">symbols_seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]:</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">expansion_key</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cov</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="n">cov</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">nonterminals</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">symbols_seen</span><span class="p">:</span>
-                    <span class="k">continue</span>
-                <span class="n">new_cov</span><span class="p">,</span> <span class="n">new_symbols_seen</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_max_symbol_expansion_coverage</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">max_depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">))</span>
-                <span class="n">cov</span> <span class="o">|=</span> <span class="n">new_cov</span>
-                <span class="n">symbols_seen</span> <span class="o">|=</span> <span class="n">new_symbols_seen</span>
-
-        <span class="k">return</span> <span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The main method <code>max_symbol_expansion_coverage()</code> simply returns the coverage that can be achieved:</p>
-
-</div>
-</div>
-</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[38]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">GrammarCoverageFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">max_symbol_expansion_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)):</span>
-        <span class="n">cov</span><span class="p">,</span> <span class="n">symbols_seen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_symbol_expansion_coverage</span><span class="p">(</span>
-            <span class="n">symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">,</span> <span class="nb">set</span><span class="p">(),</span> <span class="nb">set</span><span class="p">())</span>
-        <span class="k">return</span> <span class="n">cov</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>With this, we can compute the possible expansions for every symbol</p>
-
-</div>
-</div>
-</div></div></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">f</span><span class="o">.</span><span class="n">max_symbol_expansion_coverage</span><span class="p">(</span><span class="s1">&#39;&lt;integer&gt;&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">(</span><span class="s1">&#39;&lt;integer&gt;&#39;</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -15350,7 +15239,7 @@ d2+%e3
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[39]:</div>
+    <div class="prompt output_prompt">Out[38]:</div>
 
 
 
@@ -15378,10 +15267,10 @@ d2+%e3
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_symbol_expansion_coverage</span><span class="p">(</span><span class="s1">&#39;&lt;digit&gt;&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">(</span><span class="s1">&#39;&lt;digit&gt;&#39;</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -15394,7 +15283,7 @@ d2+%e3
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[40]:</div>
+    <div class="prompt output_prompt">Out[39]:</div>
 
 
 
@@ -15417,47 +15306,26 @@ d2+%e3
 </div>
 </div>
 
-</div><div class="fragment">
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The maximum coverage achievable in a grammar is the same as starting with the start symbol:</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">==</span> <span class="n">f</span><span class="o">.</span><span class="n">max_symbol_expansion_coverage</span><span class="p">(</span><span class="n">START_SYMBOL</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Determining-yet-Uncovered-Children">Determining yet Uncovered Children<a class="anchor-link" href="#Determining-yet-Uncovered-Children">&#182;</a></h3><p>The definition of <code>max_symbol_expansion_coverage()</code> allows us to determine the <em>missing coverage</em> for each child.  To this end, we <em>subtract</em> the coverage already seen (<code>expansion_coverage()</code>) from the coverage that could be obtained.</p>
+<h3 id="Determining-yet-Uncovered-Children">Determining yet Uncovered Children<a class="anchor-link" href="#Determining-yet-Uncovered-Children">&#182;</a></h3><p>We can now start to implement <code>GrammarCoverageFuzzer</code>.  Computing <code>max_expansion_coverage()</code> allows us to determine the <em>missing coverage</em> for each child.  To this end, we <em>subtract</em> the coverage already seen (<code>expansion_coverage()</code>) from the coverage that could be obtained.</p>
 
 </div>
 </div>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">GrammarCoverageFuzzer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">_new_child_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">):</span>
         <span class="n">new_cov</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">c_symbol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">c_symbol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">:</span>
-                <span class="n">new_cov</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_symbol_expansion_coverage</span><span class="p">(</span>
+                <span class="n">new_cov</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">(</span>
                     <span class="n">c_symbol</span><span class="p">,</span> <span class="n">max_depth</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_cov</span>
 
@@ -15484,7 +15352,7 @@ d2+%e3
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -15516,7 +15384,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[43]:</div>
+    <div class="prompt output_prompt">Out[41]:</div>
 
 
 
@@ -15541,7 +15409,7 @@ Tree: 2
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
@@ -15557,7 +15425,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[44]:</div>
+    <div class="prompt output_prompt">Out[42]:</div>
 
 
 
@@ -15582,7 +15450,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">]:</span>
@@ -15640,7 +15508,7 @@ Tree: 2
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">GrammarCoverageFuzzer</span><span class="p">):</span>
@@ -15676,7 +15544,7 @@ Tree: 2
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">GrammarCoverageFuzzer</span><span class="p">):</span>
@@ -15725,7 +15593,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">min_nonterminals</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
@@ -15742,7 +15610,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[48]:</div>
+    <div class="prompt output_prompt">Out[46]:</div>
 
 
 
@@ -15759,7 +15627,7 @@ Tree: 2
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">f</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
@@ -15775,7 +15643,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[49]:</div>
+    <div class="prompt output_prompt">Out[47]:</div>
 
 
 
@@ -15800,7 +15668,7 @@ Tree: 2
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">average_length_until_full_coverage</span><span class="p">(</span><span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">))</span>
@@ -15816,7 +15684,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[50]:</div>
+    <div class="prompt output_prompt">Out[48]:</div>
 
 
 
@@ -15841,7 +15709,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">,</span> <span class="n">min_nonterminals</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
@@ -15885,7 +15753,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">average_length_until_full_coverage</span><span class="p">(</span><span class="n">TrackingGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">))</span>
@@ -15901,7 +15769,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[52]:</div>
+    <div class="prompt output_prompt">Out[50]:</div>
 
 
 
@@ -15918,7 +15786,7 @@ Tree: 2
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">average_length_until_full_coverage</span><span class="p">(</span><span class="n">SimpleGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">))</span>
@@ -15934,7 +15802,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[53]:</div>
+    <div class="prompt output_prompt">Out[51]:</div>
 
 
 
@@ -15951,7 +15819,7 @@ Tree: 2
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">average_length_until_full_coverage</span><span class="p">(</span><span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">))</span>
@@ -15967,7 +15835,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[54]:</div>
+    <div class="prompt output_prompt">Out[52]:</div>
 
 
 
@@ -15992,7 +15860,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">]</span>
@@ -16008,7 +15876,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[55]:</div>
+    <div class="prompt output_prompt">Out[53]:</div>
 
 
 
@@ -16057,7 +15925,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
@@ -16075,7 +15943,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[57]:</div>
+    <div class="prompt output_prompt">Out[55]:</div>
 
 
 
@@ -16092,7 +15960,7 @@ Tree: 2
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[58]:</div>
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
@@ -16120,7 +15988,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">)</span>
@@ -16198,10 +16066,10 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="prompt input_prompt">In&nbsp;[60]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">duplicate_context</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">duplicate_context</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)):</span>
     <span class="sd">&quot;&quot;&quot;Duplicate an expansion within a grammar.</span>
 
 <span class="sd">    In the given grammar, take the given expansion of the given symbol</span>
@@ -16213,6 +16081,10 @@ Tree: 2
     <span class="n">orig_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
     <span class="n">_duplicate_context</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">orig_grammar</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span>
                        <span class="n">expansion</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="p">{})</span>
+    
+    <span class="c1"># After duplication, we may have unreachable rules; delete them</span>
+    <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="n">unreachable_nonterminals</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">grammar</span><span class="p">[</span><span class="n">nonterminal</span><span class="p">]</span>
 </pre></div>
 
     </div>
@@ -16230,7 +16102,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="prompt input_prompt">In&nbsp;[61]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">_duplicate_context</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">orig_grammar</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">seen</span><span class="p">):</span>
@@ -16271,7 +16143,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
@@ -16289,7 +16161,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[64]:</div>
+    <div class="prompt output_prompt">Out[62]:</div>
 
 
 
@@ -16329,7 +16201,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">)</span>
@@ -16379,7 +16251,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[66]:</div>
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
@@ -16397,7 +16269,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[66]:</div>
+    <div class="prompt output_prompt">Out[64]:</div>
 
 
 
@@ -16426,18 +16298,31 @@ Tree: 2
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>By default, <code>depth</code> is set to <code>-1</code>, indicating unlimited duplication.  True unbounded duplication could lead to problems for a recursive grammar such as <code>EXPR_GRAMMAR</code>, so <code>duplicate_context()</code> is set to no longer duplicate symbols once duplicated.  Still, if we apply it to duplicate <em>all</em> <code>&lt;expr&gt;</code> expansions, we obtain a grammar with no less than 296 rules:</p>
+<p>By default, <code>depth</code> is set to $\infty$, indicating unlimited duplication.  True unbounded duplication could lead to problems for a recursive grammar such as <code>EXPR_GRAMMAR</code>, so <code>duplicate_context()</code> is set to no longer duplicate symbols once duplicated.  Still, if we apply it to duplicate <em>all</em> <code>&lt;expr&gt;</code> expansions, we obtain a grammar with no less than 296 rules:</p>
 
 </div>
 </div>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[68]:</div>
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
 <span class="n">duplicate_context</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[67]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">)</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">)</span>
 </pre></div>
 
@@ -16451,13 +16336,13 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[68]:</div>
+    <div class="prompt output_prompt">Out[67]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>296</pre>
+<pre>292</pre>
 </div>
 
 </div>
@@ -16469,14 +16354,14 @@ Tree: 2
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This gives us more than 2000 expansions to cover:</p>
+<p>This gives us almost 2000 expansions to cover:</p>
 
 </div>
 </div>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[69]:</div>
+<div class="prompt input_prompt">In&nbsp;[68]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">)</span>
@@ -16493,7 +16378,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[69]:</div>
+    <div class="prompt output_prompt">Out[68]:</div>
 
 
 
@@ -16518,13 +16403,47 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[70]:</div>
+<div class="prompt input_prompt">In&nbsp;[69]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
 <span class="n">duplicate_context</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">)</span>
-<span class="n">duplicate_context</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">)</span>
+<span class="n">duplicate_context</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;expr-1&gt;&quot;</span><span class="p">)</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[69]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>594</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">())</span>
 </pre></div>
 
     </div>
@@ -16543,41 +16462,7 @@ Tree: 2
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>586</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[71]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">dup_expr_grammar</span><span class="p">)</span>
-<span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">max_expansion_coverage</span><span class="p">())</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[71]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>1981</pre>
+<pre>3994</pre>
 </div>
 
 </div>
@@ -16596,10 +16481,43 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[72]:</div>
+<div class="prompt input_prompt">In&nbsp;[71]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[71]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;&lt;term-1&gt; + &lt;expr-4&gt;&#39;, &#39;&lt;term-5&gt; - &lt;expr-8&gt;&#39;, &#39;&lt;term-9&gt;&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[72]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;term-1-1&gt;&quot;</span><span class="p">]</span>
 </pre></div>
 
     </div>
@@ -16618,39 +16536,6 @@ Tree: 2
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;&lt;term-1-1&gt; + &lt;expr-4-1&gt;&#39;, &#39;&lt;term-5-1&gt; - &lt;expr-8-1&gt;&#39;, &#39;&lt;term-9-1&gt;&#39;]</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[73]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;term-1-1&gt;&quot;</span><span class="p">]</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[73]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
 <pre>[&#39;&lt;factor-1-1&gt; * &lt;term-1-1&gt;&#39;, &#39;&lt;factor-2-1&gt; / &lt;term-1-1&gt;&#39;, &#39;&lt;factor-3-1&gt;&#39;]</pre>
 </div>
 
@@ -16662,7 +16547,7 @@ Tree: 2
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[74]:</div>
+<div class="prompt input_prompt">In&nbsp;[73]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">dup_expr_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;factor-1-1&gt;&quot;</span><span class="p">]</span>
@@ -16678,7 +16563,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[74]:</div>
+    <div class="prompt output_prompt">Out[73]:</div>
 
 
 
@@ -16736,7 +16621,7 @@ Tree: 2
 
 </div>
 </div>
-</div><div class="fragment">
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -16744,10 +16629,10 @@ Tree: 2
 
 </div>
 </div>
-</div></div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[76]:</div>
+<div class="prompt input_prompt">In&nbsp;[75]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_max</span><span class="p">:</span>
@@ -16764,7 +16649,7 @@ Tree: 2
 </div>
 </div>
 
-</div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -16772,10 +16657,10 @@ Tree: 2
 
 </div>
 </div>
-</div></div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[77]:</div>
+<div class="prompt input_prompt">In&nbsp;[76]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">,</span> <span class="n">max_nonterminals</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -16804,7 +16689,7 @@ Tree: 2
 </div>
 </div>
 
-</div></section><section>
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -16815,7 +16700,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[78]:</div>
+<div class="prompt input_prompt">In&nbsp;[77]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">xs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">coverages</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -16834,10 +16719,10 @@ Tree: 2
 
 </div>
 </div>
-</div></div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[81]:</div>
+<div class="prompt input_prompt">In&nbsp;[80]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;coverage&quot;</span><span class="p">)</span>
@@ -16879,7 +16764,7 @@ Tree: 2
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -16898,7 +16783,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[83]:</div>
+<div class="prompt input_prompt">In&nbsp;[82]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
@@ -16914,7 +16799,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[83]:</div>
+    <div class="prompt output_prompt">Out[82]:</div>
 
 
 
@@ -16940,7 +16825,7 @@ Tree: 2
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[85]:</div>
+<div class="prompt input_prompt">In&nbsp;[84]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">spearmanr</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
@@ -16956,7 +16841,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[85]:</div>
+    <div class="prompt output_prompt">Out[84]:</div>
 
 
 
@@ -16986,10 +16871,10 @@ Tree: 2
 
 </div>
 </div>
-</div></div></section><section>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[87]:</div>
+<div class="prompt input_prompt">In&nbsp;[86]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_max</span><span class="p">:</span>
@@ -17003,7 +16888,7 @@ Tree: 2
 </div>
 </div>
 
-</div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -17011,10 +16896,10 @@ Tree: 2
 
 </div>
 </div>
-</div></div><div class="fragment">
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[88]:</div>
+<div class="prompt input_prompt">In&nbsp;[87]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">URL_GRAMMAR</span><span class="p">,</span> <span class="n">max_nonterminals</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
@@ -17045,7 +16930,7 @@ Tree: 2
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[89]:</div>
+<div class="prompt input_prompt">In&nbsp;[88]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">xs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">coverages</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
@@ -17056,10 +16941,10 @@ Tree: 2
 </div>
 </div>
 
-</div><div class="fragment">
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[90]:</div>
+<div class="prompt input_prompt">In&nbsp;[89]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;coverage&quot;</span><span class="p">)</span>
@@ -17101,7 +16986,7 @@ Tree: 2
 </div>
 </div>
 
-</div></div></section><section>
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -17112,7 +16997,7 @@ Tree: 2
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[91]:</div>
+<div class="prompt input_prompt">In&nbsp;[90]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
@@ -17128,7 +17013,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[91]:</div>
+    <div class="prompt output_prompt">Out[90]:</div>
 
 
 
@@ -17154,7 +17039,7 @@ Tree: 2
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[92]:</div>
+<div class="prompt input_prompt">In&nbsp;[91]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">spearmanr</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span>
@@ -17170,7 +17055,7 @@ Tree: 2
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[92]:</div>
+    <div class="prompt output_prompt">Out[91]:</div>
 
 
 
@@ -17208,7 +17093,7 @@ Tree: 2
 
 </div>
 </div>
-</div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -17216,7 +17101,7 @@ Tree: 2
 
 </div>
 </div>
-</div></section><section>
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -17271,7 +17156,7 @@ Also, in the above examples, <em>some</em> parts of the input can still be cover
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[93]:</div>
+<div class="prompt input_prompt">In&nbsp;[92]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">LS_EBNF_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
@@ -17299,7 +17184,7 @@ Also, in the above examples, <em>some</em> parts of the input can still be cover
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Exercise-2:-Caching">Exercise 2: Caching<a class="anchor-link" href="#Exercise-2:-Caching">&#182;</a></h3><p>The value of <code>max_symbol_expansion_coverage()</code> depends on the grammar only.  Change the implementation such that the values are precomputed for each symbol upon initialization (<code>__init__()</code>); this way, <code>max_symbol_expansion_coverage()</code> can simply lookup the value in the table.</p>
+<h3 id="Exercise-2:-Caching">Exercise 2: Caching<a class="anchor-link" href="#Exercise-2:-Caching">&#182;</a></h3><p>The value of <code>max_expansion_coverage()</code> depends on the grammar only.  Change the implementation such that the values are precomputed for each symbol and depth upon initialization (<code>__init__()</code>); this way, <code>max_expansion_coverage()</code> can simply lookup the value in the table.</p>
 
 </div>
 </div>

@@ -11871,9 +11871,9 @@ MathJax.Hub.Config({
 <li><a href="MutationFuzzer.html"><span class="chnum">4</span> Mutation-Based Fuzzing</a></li>
 <li><a href="Grammars.html"><span class="chnum">5</span> Fuzzing with Grammars</a></li>
 </ul><li><a href="GrammarFuzzer.html"><span class="chnum">6</span> Efficient Grammar Fuzzing</a></li>
-<li><a href="GrammarCoverageFuzzer.html"><span class="chnum">7</span> Grammar Coverage&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
+<li><a href="GrammarCoverageFuzzer.html"><span class="chnum">7</span> Grammar Coverage</a></li>
 <li><a href="ConfigurationFuzzer.html"><span class="chnum">8</span> Testing Configurations&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
-<li><a href="Parser.html"><span class="chnum">9</span> Parsing and Recombining Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="Parser.html"><span class="chnum">9</span> Parsing and Recombining Inputs&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 <li><a href="ProbabilisticGrammarFuzzer.html" class="this_page"><span class="chnum">10</span> Probabilistic Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li class="has-sub"><a href="Reducer.html" class="chapters">Chapters 11&ndash;15&nbsp;<i class="fa fa-fw fa-wrench"></i> <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="Reducer.html"><span class="chnum">11</span> Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 <li><a href="Carver.html"><span class="chnum">12</span> Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
@@ -11895,13 +11895,18 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Directed-Fuzzing">Directed Fuzzing</a>
 </li><li class="has-sub"><a href="#Probabilities-in-Context">Probabilities in Context</a>
 </li><li class="has-sub"><a href="#Learning-Probabilities-from-Samples">Learning Probabilities from Samples</a>
-</li><li class="has-sub"><a href="#Auto-Tuning-Probabilities">Auto-Tuning Probabilities</a>
-</li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
+<ul><li class="has-sub"><a href="#Counting-Expansions">Counting Expansions</a>
+</li><li class="has-sub"><a href="#Assigning-Probabilities">Assigning Probabilities</a>
+</li><li class="has-sub"><a href="#Testing-Common-Features">Testing Common Features</a>
+</li><li class="has-sub"><a href="#Testing-Uncommon-Features">Testing Uncommon Features</a>
+</li><li class="has-sub"><a href="#Learning-Probabilities-from-Input-Slices">Learning Probabilities from Input Slices</a>
+</li><li class="has-sub"><a href="#Detecting-Unnatural-Numbers">Detecting Unnatural Numbers</a>
+</ul></li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps">Next Steps</a>
 </li><li class="has-sub"><a href="#Background">Background</a>
 </li><li class="has-sub"><a href="#Exercises">Exercises</a>
-<ul><li class="has-sub"><a href="#Exercise-1">Exercise 1</a>
-</li><li class="has-sub"><a href="#Exercise-2">Exercise 2</a>
+<ul><li class="has-sub"><a href="#Exercise-1:-Probabilistic-Fuzzing-with-Coverage">Exercise 1: Probabilistic Fuzzing with Coverage</a>
+</li><li class="has-sub"><a href="#Exercise-2:-Learning-Probabilities-in-Context">Exercise 2: Learning Probabilities in Context</a>
 </ul></li></ul></li>
      </li>
      
@@ -12264,24 +12269,12 @@ which gives us:</p>
 <span class="n">fig1</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 <span class="n">ax1</span><span class="o">.</span><span class="n">pie</span><span class="p">(</span><span class="n">digit_probs</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">,</span> <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">autopct</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%1.1f%%</span><span class="s1">&#39;</span><span class="p">,</span>
         <span class="n">counterclock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">startangle</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
-<span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">);</span>
 </pre></div>
 
 </div>
 </div></div>
 </div>
-</div>
-
-<div class="output_area">
-
-<div class="output_text output_subarea output_execute_result">
-<pre>(-1.1041718227191182,
- 1.113239311797736,
- -1.1089130120830595,
- 1.1004244326732968)
-</pre>
-</div>
-
 </div>
 
 <div class="output_area">
@@ -12413,7 +12406,7 @@ which gives us:</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">all_terminals</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">all_terminals</span><span class="p">,</span> <span class="n">display_tree</span>
 </pre></div>
 
 </div>
@@ -12427,7 +12420,7 @@ which gives us:</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">crange</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">crange</span><span class="p">,</span> <span class="n">syntax_diagram</span>
 </pre></div>
 
 </div>
@@ -12771,6 +12764,504 @@ which gives us:</p>
 
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">syntax_diagram</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>start
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="62" viewBox="0 0 174.0 62" width="174.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 31h0.0"/><path d="M134.0 31h0.0"/><path d="M40.0 31h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M114.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M114.0 31h0.0"/><rect height="22" width="54.0" x="60.0" y="20"/><text x="87.0" y="35">expr</text></g></g><path d="M114.0 31h20"/></g><path d="M 134.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>expr
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="122" viewBox="0 0 313.5 122" width="313.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M273.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h0.0"/><path d="M253.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M114.0 31h0.0"/><rect height="22" width="54.0" x="60.0" y="20"/><text x="87.0" y="35">term</text></g><path d="M114.0 31h10"/><path d="M124.0 31h10"/><g class="terminal">
+<path d="M134.0 31h0.0"/><path d="M179.5 31h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="134.0" y="20"/><text x="156.75" y="35"> + </text></g><path d="M179.5 31h10"/><path d="M189.5 31h10"/><g class="non-terminal">
+<path d="M199.5 31h0.0"/><path d="M253.5 31h0.0"/><rect height="22" width="54.0" x="199.5" y="20"/><text x="226.5" y="35">expr</text></g></g><path d="M253.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M253.5 61h0.0"/><g class="non-terminal">
+<path d="M60.0 61h0.0"/><path d="M114.0 61h0.0"/><rect height="22" width="54.0" x="60.0" y="50"/><text x="87.0" y="65">term</text></g><path d="M114.0 61h10"/><path d="M124.0 61h10"/><g class="terminal">
+<path d="M134.0 61h0.0"/><path d="M179.5 61h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="134.0" y="50"/><text x="156.75" y="65"> - </text></g><path d="M179.5 61h10"/><path d="M189.5 61h10"/><g class="non-terminal">
+<path d="M199.5 61h0.0"/><path d="M253.5 61h0.0"/><rect height="22" width="54.0" x="199.5" y="50"/><text x="226.5" y="65">expr</text></g></g><path d="M253.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h69.75"/><path d="M183.75 91h69.75"/><g class="non-terminal">
+<path d="M129.75 91h0.0"/><path d="M183.75 91h0.0"/><rect height="22" width="54.0" x="129.75" y="80"/><text x="156.75" y="95">term</text></g></g><path d="M253.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 273.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>term
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="122" viewBox="0 0 330.5 122" width="330.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M290.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h0.0"/><path d="M270.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" width="71.0" x="60.0" y="20"/><text x="95.5" y="35">factor</text></g><path d="M131.0 31h10"/><path d="M141.0 31h10"/><g class="terminal">
+<path d="M151.0 31h0.0"/><path d="M196.5 31h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="151.0" y="20"/><text x="173.75" y="35"> * </text></g><path d="M196.5 31h10"/><path d="M206.5 31h10"/><g class="non-terminal">
+<path d="M216.5 31h0.0"/><path d="M270.5 31h0.0"/><rect height="22" width="54.0" x="216.5" y="20"/><text x="243.5" y="35">term</text></g></g><path d="M270.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M270.5 61h0.0"/><g class="non-terminal">
+<path d="M60.0 61h0.0"/><path d="M131.0 61h0.0"/><rect height="22" width="71.0" x="60.0" y="50"/><text x="95.5" y="65">factor</text></g><path d="M131.0 61h10"/><path d="M141.0 61h10"/><g class="terminal">
+<path d="M151.0 61h0.0"/><path d="M196.5 61h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="151.0" y="50"/><text x="173.75" y="65"> / </text></g><path d="M196.5 61h10"/><path d="M206.5 61h10"/><g class="non-terminal">
+<path d="M216.5 61h0.0"/><path d="M270.5 61h0.0"/><rect height="22" width="54.0" x="216.5" y="50"/><text x="243.5" y="65">term</text></g></g><path d="M270.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h69.75"/><path d="M200.75 91h69.75"/><g class="non-terminal">
+<path d="M129.75 91h0.0"/><path d="M200.75 91h0.0"/><rect height="22" width="71.0" x="129.75" y="80"/><text x="165.25" y="95">factor</text></g></g><path d="M270.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 290.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>factor
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="182" viewBox="0 0 381.5 182" width="381.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 81v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 91h0.0"/><path d="M341.5 91h0.0"/><path d="M40.0 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 61h71.0"/><path d="M250.5 61h71.0"/><g class="terminal">
+<path d="M131.0 61h0.0"/><path d="M159.5 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="131.0" y="50"/><text x="145.25" y="65">-</text></g><path d="M159.5 61h10"/><path d="M169.5 61h10"/><g class="non-terminal">
+<path d="M179.5 61h0.0"/><path d="M250.5 61h0.0"/><rect height="22" width="71.0" x="179.5" y="50"/><text x="215.0" y="65">factor</text></g></g><path d="M321.5 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h71.0"/><path d="M250.5 31h71.0"/><g class="terminal">
+<path d="M131.0 31h0.0"/><path d="M159.5 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="131.0" y="20"/><text x="145.25" y="35">+</text></g><path d="M159.5 31h10"/><path d="M169.5 31h10"/><g class="non-terminal">
+<path d="M179.5 31h0.0"/><path d="M250.5 31h0.0"/><rect height="22" width="71.0" x="179.5" y="20"/><text x="215.0" y="35">factor</text></g></g><path d="M321.5 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M40.0 91h20"/><g>
+<path d="M60.0 91h55.25"/><path d="M266.25 91h55.25"/><g class="terminal">
+<path d="M115.25 91h0.0"/><path d="M143.75 91h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="115.25" y="80"/><text x="129.5" y="95">(</text></g><path d="M143.75 91h10"/><path d="M153.75 91h10"/><g class="non-terminal">
+<path d="M163.75 91h0.0"/><path d="M217.75 91h0.0"/><rect height="22" width="54.0" x="163.75" y="80"/><text x="190.75" y="95">expr</text></g><path d="M217.75 91h10"/><path d="M227.75 91h10"/><g class="terminal">
+<path d="M237.75 91h0.0"/><path d="M266.25 91h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="237.75" y="80"/><text x="252.0" y="95">)</text></g></g><path d="M321.5 91h20"/><path d="M40.0 91a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 121h74.0"/><path d="M247.5 121h74.0"/><g class="non-terminal">
+<path d="M134.0 121h0.0"/><path d="M247.5 121h0.0"/><rect height="22" width="113.5" x="134.0" y="110"/><text x="190.75" y="125">leadinteger</text></g></g><path d="M321.5 121a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M40.0 91a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 151h0.0"/><path d="M321.5 151h0.0"/><g class="non-terminal">
+<path d="M60.0 151h0.0"/><path d="M173.5 151h0.0"/><rect height="22" width="113.5" x="60.0" y="140"/><text x="116.75" y="155">leadinteger</text></g><path d="M173.5 151h10"/><path d="M183.5 151h10"/><g class="terminal">
+<path d="M193.5 151h0.0"/><path d="M222.0 151h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="193.5" y="140"/><text x="207.75" y="155">.</text></g><path d="M222.0 151h10"/><path d="M232.0 151h10"/><g class="non-terminal">
+<path d="M242.0 151h0.0"/><path d="M321.5 151h0.0"/><rect height="22" width="79.5" x="242.0" y="140"/><text x="281.75" y="155">integer</text></g></g><path d="M321.5 151a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M 341.5 91 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>leadinteger
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="92" viewBox="0 0 316.0 92" width="316.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M276.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h0.0"/><path d="M256.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M156.5 31h0.0"/><rect height="22" width="96.5" x="60.0" y="20"/><text x="108.25" y="35">leaddigit</text></g><path d="M156.5 31h10"/><path d="M166.5 31h10"/><g class="non-terminal">
+<path d="M176.5 31h0.0"/><path d="M256.0 31h0.0"/><rect height="22" width="79.5" x="176.5" y="20"/><text x="216.25" y="35">integer</text></g></g><path d="M256.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h49.75"/><path d="M206.25 61h49.75"/><g class="non-terminal">
+<path d="M109.75 61h0.0"/><path d="M206.25 61h0.0"/><rect height="22" width="96.5" x="109.75" y="50"/><text x="158.0" y="65">leaddigit</text></g></g><path d="M256.0 61h20"/></g><path d="M 276.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>leaddigit
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="80" viewBox="0 0 876.5 80" width="876.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 30v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 40h0.0"/><path d="M836.5 40h0.0"/><path d="M40.0 40a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10h678.0"/><path d="M138.5 60h678.0a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10"/><path d="M40.0 40h10"/><g>
+<path d="M50.0 40h0.0"/><path d="M118.5 40h0.0"/><path d="M50.0 40h20"/><g>
+<path d="M70.0 40h0.0"/><path d="M98.5 40h0.0"/><g class="terminal">
+<path d="M70.0 40h0.0"/><path d="M98.5 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="29"/><text x="84.25" y="44">1</text></g></g><path d="M98.5 40h20"/></g><path d="M118.5 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M118.5 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
+<path d="M138.5 40h0.0"/><path d="M207.0 40h0.0"/><path d="M138.5 40h20"/><g>
+<path d="M158.5 40h0.0"/><path d="M187.0 40h0.0"/><g class="terminal">
+<path d="M158.5 40h0.0"/><path d="M187.0 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="29"/><text x="172.75" y="44">2</text></g></g><path d="M187.0 40h20"/></g><path d="M207.0 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M207.0 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
+<path d="M227.0 40h0.0"/><path d="M295.5 40h0.0"/><path d="M227.0 40h20"/><g>
+<path d="M247.0 40h0.0"/><path d="M275.5 40h0.0"/><g class="terminal">
+<path d="M247.0 40h0.0"/><path d="M275.5 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="29"/><text x="261.25" y="44">3</text></g></g><path d="M275.5 40h20"/></g><path d="M295.5 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M295.5 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
+<path d="M315.5 40h0.0"/><path d="M384.0 40h0.0"/><path d="M315.5 40h20"/><g>
+<path d="M335.5 40h0.0"/><path d="M364.0 40h0.0"/><g class="terminal">
+<path d="M335.5 40h0.0"/><path d="M364.0 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="29"/><text x="349.75" y="44">4</text></g></g><path d="M364.0 40h20"/></g><path d="M384.0 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M384.0 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
+<path d="M404.0 40h0.0"/><path d="M472.5 40h0.0"/><path d="M404.0 40h20"/><g>
+<path d="M424.0 40h0.0"/><path d="M452.5 40h0.0"/><g class="terminal">
+<path d="M424.0 40h0.0"/><path d="M452.5 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="29"/><text x="438.25" y="44">5</text></g></g><path d="M452.5 40h20"/></g><path d="M472.5 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M472.5 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
+<path d="M492.5 40h0.0"/><path d="M561.0 40h0.0"/><path d="M492.5 40h20"/><g>
+<path d="M512.5 40h0.0"/><path d="M541.0 40h0.0"/><g class="terminal">
+<path d="M512.5 40h0.0"/><path d="M541.0 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="512.5" y="29"/><text x="526.75" y="44">6</text></g></g><path d="M541.0 40h20"/></g><path d="M561.0 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M561.0 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
+<path d="M581.0 40h0.0"/><path d="M649.5 40h0.0"/><path d="M581.0 40h20"/><g>
+<path d="M601.0 40h0.0"/><path d="M629.5 40h0.0"/><g class="terminal">
+<path d="M601.0 40h0.0"/><path d="M629.5 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="601.0" y="29"/><text x="615.25" y="44">7</text></g></g><path d="M629.5 40h20"/></g><path d="M649.5 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M649.5 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
+<path d="M669.5 40h0.0"/><path d="M738.0 40h0.0"/><path d="M669.5 40h20"/><g>
+<path d="M689.5 40h0.0"/><path d="M718.0 40h0.0"/><g class="terminal">
+<path d="M689.5 40h0.0"/><path d="M718.0 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="689.5" y="29"/><text x="703.75" y="44">8</text></g></g><path d="M718.0 40h20"/></g><path d="M738.0 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M738.0 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
+<path d="M758.0 40h0.0"/><path d="M826.5 40h0.0"/><path d="M758.0 40h20"/><g>
+<path d="M778.0 40h0.0"/><path d="M806.5 40h0.0"/><g class="terminal">
+<path d="M778.0 40h0.0"/><path d="M806.5 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="778.0" y="29"/><text x="792.25" y="44">9</text></g></g><path d="M806.5 40h20"/></g><path d="M826.5 40h10"/></g><path d="M 836.5 40 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>integer
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="92" viewBox="0 0 282.0 92" width="282.0" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 61h0.0"/><path d="M242.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h0.0"/><path d="M222.0 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><rect height="22" width="62.5" x="60.0" y="20"/><text x="91.25" y="35">digit</text></g><path d="M122.5 31h10"/><path d="M132.5 31h10"/><g class="non-terminal">
+<path d="M142.5 31h0.0"/><path d="M222.0 31h0.0"/><rect height="22" width="79.5" x="142.5" y="20"/><text x="182.25" y="35">integer</text></g></g><path d="M222.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h49.75"/><path d="M172.25 61h49.75"/><g class="non-terminal">
+<path d="M109.75 61h0.0"/><path d="M172.25 61h0.0"/><rect height="22" width="62.5" x="109.75" y="50"/><text x="141.0" y="65">digit</text></g></g><path d="M222.0 61h20"/></g><path d="M 242.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>digit
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<svg class="railroad-diagram" height="109" viewBox="0 0 522.5 109" width="522.5" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(.5 .5)">
+<style>/* <![CDATA[ */
+    svg.railroad-diagram {
+        background-color:hsl(100,100%,100%);
+    }
+    svg.railroad-diagram path {
+        stroke-width:3;
+        stroke:black;
+        fill:rgba(0,0,0,0);
+    }
+    svg.railroad-diagram text {
+        font:bold 14px monospace;
+        text-anchor:middle;
+    }
+    svg.railroad-diagram text.label{
+        text-anchor:start;
+    }
+    svg.railroad-diagram text.comment{
+        font:italic 12px monospace;
+    }
+    svg.railroad-diagram rect{
+        stroke-width:3;
+        stroke:black;
+        fill:hsl(0,62%,82%);
+    }
+
+/* ]]> */
+</style><g>
+<path d="M20 59v20m10 -20v20m-10 -10h20"/></g><g>
+<path d="M40 69h0.0"/><path d="M482.5 69h0.0"/><path d="M40.0 69a10 10 0 0 0 10 -10v-29a10 10 0 0 1 10 -10h324.0"/><path d="M138.5 89h324.0a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10"/><path d="M40.0 69h10"/><g>
+<path d="M50.0 69h0.0"/><path d="M118.5 69h0.0"/><path d="M50.0 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M70.0 39h0.0"/><path d="M98.5 39h0.0"/><g class="terminal">
+<path d="M70.0 39h0.0"/><path d="M98.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="28"/><text x="84.25" y="43">0</text></g></g><path d="M98.5 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M50.0 69h20"/><g>
+<path d="M70.0 69h0.0"/><path d="M98.5 69h0.0"/><g class="terminal">
+<path d="M70.0 69h0.0"/><path d="M98.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="58"/><text x="84.25" y="73">1</text></g></g><path d="M98.5 69h20"/></g><path d="M118.5 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M118.5 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
+<path d="M138.5 69h0.0"/><path d="M207.0 69h0.0"/><path d="M138.5 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M158.5 39h0.0"/><path d="M187.0 39h0.0"/><g class="terminal">
+<path d="M158.5 39h0.0"/><path d="M187.0 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="28"/><text x="172.75" y="43">2</text></g></g><path d="M187.0 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M138.5 69h20"/><g>
+<path d="M158.5 69h0.0"/><path d="M187.0 69h0.0"/><g class="terminal">
+<path d="M158.5 69h0.0"/><path d="M187.0 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="58"/><text x="172.75" y="73">3</text></g></g><path d="M187.0 69h20"/></g><path d="M207.0 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M207.0 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
+<path d="M227.0 69h0.0"/><path d="M295.5 69h0.0"/><path d="M227.0 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M247.0 39h0.0"/><path d="M275.5 39h0.0"/><g class="terminal">
+<path d="M247.0 39h0.0"/><path d="M275.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="28"/><text x="261.25" y="43">4</text></g></g><path d="M275.5 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M227.0 69h20"/><g>
+<path d="M247.0 69h0.0"/><path d="M275.5 69h0.0"/><g class="terminal">
+<path d="M247.0 69h0.0"/><path d="M275.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="58"/><text x="261.25" y="73">5</text></g></g><path d="M275.5 69h20"/></g><path d="M295.5 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M295.5 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
+<path d="M315.5 69h0.0"/><path d="M384.0 69h0.0"/><path d="M315.5 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M335.5 39h0.0"/><path d="M364.0 39h0.0"/><g class="terminal">
+<path d="M335.5 39h0.0"/><path d="M364.0 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="28"/><text x="349.75" y="43">6</text></g></g><path d="M364.0 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M315.5 69h20"/><g>
+<path d="M335.5 69h0.0"/><path d="M364.0 69h0.0"/><g class="terminal">
+<path d="M335.5 69h0.0"/><path d="M364.0 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="58"/><text x="349.75" y="73">7</text></g></g><path d="M364.0 69h20"/></g><path d="M384.0 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M384.0 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
+<path d="M404.0 69h0.0"/><path d="M472.5 69h0.0"/><path d="M404.0 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
+<path d="M424.0 39h0.0"/><path d="M452.5 39h0.0"/><g class="terminal">
+<path d="M424.0 39h0.0"/><path d="M452.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="28"/><text x="438.25" y="43">8</text></g></g><path d="M452.5 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M404.0 69h20"/><g>
+<path d="M424.0 69h0.0"/><path d="M452.5 69h0.0"/><g class="terminal">
+<path d="M424.0 69h0.0"/><path d="M452.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="58"/><text x="438.25" y="73">9</text></g></g><path d="M452.5 69h20"/></g><path d="M472.5 69h10"/></g><path d="M 482.5 69 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -13074,13 +13565,13 @@ the "remaining" probability is distributed equally over all $u_j$; in other word
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-39-79503424e212&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-40-79503424e212&gt;&#34;, line 2, in &lt;module&gt;
     assert is_valid_probabilistic_grammar({&#34;&lt;start&gt;&#34;: [(&#34;1&#34;, opts(prob=0.5))]})
-  File &#34;&lt;ipython-input-35-c1c25dbf0315&gt;&#34;, line 7, in is_valid_probabilistic_grammar
+  File &#34;&lt;ipython-input-36-c1c25dbf0315&gt;&#34;, line 7, in is_valid_probabilistic_grammar
     prob_dist = exp_probabilities(expansions, nonterminal)
-  File &#34;&lt;ipython-input-30-9042a394542d&gt;&#34;, line 3, in exp_probabilities
+  File &#34;&lt;ipython-input-31-9042a394542d&gt;&#34;, line 3, in exp_probabilities
     prob_dist = prob_distribution(probabilities, nonterminal)
-  File &#34;&lt;ipython-input-31-57a3f95cf4ed&gt;&#34;, line 6, in prob_distribution
+  File &#34;&lt;ipython-input-32-57a3f95cf4ed&gt;&#34;, line 6, in prob_distribution
     assert abs(sum(probabilities) - 1.0) &lt; epsilon,             nonterminal + &#34;: sum of probabilities must be 1.0&#34;
 AssertionError: &lt;start&gt;: sum of probabilities must be 1.0 (expected)
 </pre>
@@ -13108,13 +13599,13 @@ AssertionError: &lt;start&gt;: sum of probabilities must be 1.0 (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-40-79fe851796f9&gt;&#34;, line 3, in &lt;module&gt;
+  File &#34;&lt;ipython-input-41-79fe851796f9&gt;&#34;, line 3, in &lt;module&gt;
     {&#34;&lt;start&gt;&#34;: [(&#34;1&#34;, opts(prob=1.5)), &#34;2&#34;]})
-  File &#34;&lt;ipython-input-35-c1c25dbf0315&gt;&#34;, line 7, in is_valid_probabilistic_grammar
+  File &#34;&lt;ipython-input-36-c1c25dbf0315&gt;&#34;, line 7, in is_valid_probabilistic_grammar
     prob_dist = exp_probabilities(expansions, nonterminal)
-  File &#34;&lt;ipython-input-30-9042a394542d&gt;&#34;, line 3, in exp_probabilities
+  File &#34;&lt;ipython-input-31-9042a394542d&gt;&#34;, line 3, in exp_probabilities
     prob_dist = prob_distribution(probabilities, nonterminal)
-  File &#34;&lt;ipython-input-31-57a3f95cf4ed&gt;&#34;, line 13, in prob_distribution
+  File &#34;&lt;ipython-input-32-57a3f95cf4ed&gt;&#34;, line 13, in prob_distribution
     assert 0 &lt;= sum_of_specified_probabilities &lt;= 1.0,         nonterminal + &#34;: sum of specified probabilities must be between 0.0 and 1.0&#34;
 AssertionError: &lt;start&gt;: sum of specified probabilities must be between 0.0 and 1.0 (expected)
 </pre>
@@ -13381,7 +13872,7 @@ AssertionError: &lt;start&gt;: sum of specified probabilities must be between 0.
     <span class="n">expansions</span> <span class="o">=</span> <span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">expansions</span><span class="p">)):</span>
         <span class="n">exp</span> <span class="o">=</span> <span class="n">expansions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">exp_string</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="o">==</span> <span class="n">expansion</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">exp_string</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="o">==</span> <span class="n">exp_string</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
             <span class="n">new_opts</span> <span class="o">=</span> <span class="n">exp_opts</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">opts</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">new_opts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">new_opts</span> <span class="o">=</span> <span class="n">opts</span>
@@ -13393,6 +13884,8 @@ AssertionError: &lt;start&gt;: sum of specified probabilities must be between 0.
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp_string</span><span class="p">(</span><span class="n">exp</span><span class="p">),</span> <span class="n">new_opts</span><span class="p">)</span>
             <span class="k">return</span>
+
+    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;no expansion &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; -&gt; &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">exp_string</span><span class="p">(</span><span class="n">expansion</span><span class="p">)))</span>
 </pre></div>
 
 </div>
@@ -13854,8 +14347,7 @@ http://fuzzingbook.com:80/?abc=def
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_ip_fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">(</span>
-    <span class="n">probabilistic_ip_address_grammar</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_ip_fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">probabilistic_ip_address_grammar</span><span class="p">)</span>
 <span class="n">probabilistic_ip_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 </pre></div>
 
@@ -13946,29 +14438,6 @@ http://fuzzingbook.com:80/?abc=def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Our original <code>&lt;octet&gt;</code> definition is now no longer required:</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">del</span> <span class="n">probabilistic_ip_address_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;octet&gt;&quot;</span><span class="p">]</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>We can now assign different probabilities to each of the <code>&lt;octet&gt;</code> symbols.  For instance, we can force specific expansions by setting their probability to 100%:</p>
 </div>
 </div>
@@ -14054,30 +14523,22 @@ http://fuzzingbook.com:80/?abc=def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Learning-Probabilities-from-Samples">Learning Probabilities from Samples<a class="anchor-link" href="#Learning-Probabilities-from-Samples">&#182;</a></h2><p>Probabilities need not be set manually all the time.  They can also be <em>learned</em> from other sources.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Learning-Probabilities-from-Samples">Learning Probabilities from Samples<a class="anchor-link" href="#Learning-Probabilities-from-Samples">&#182;</a></h2><p>Probabilities need not be set manually all the time.  They can also be <em>learned</em> from other sources, notably by counting <em>how frequently individual expansions occur in a given set of inputs</em>.  This is useful in a number of situations, including:</p>
+<ol>
+<li>Test <em>common</em> features.  The idea is that during testing, one may want to focus on frequently occurring (or frequently used) features first, to ensure correct functionality for the most common usages.</li>
+<li>Test <em>uncommon</em> features.  Here, the idea is to have test generation focus on features that are rarely seen (or not seen at all) in inputs.  This is the same motivation as with <a href="GrammarCoverageFuzzer.html">grammar coverage</a>, but from a probabilistic standpoint.</li>
+<li>Focus on specific <em>slices</em>.  One may have a set of inputs that is of particular interest (for instance, because they exercise a critical functionality, or recently have discovered bugs).  Using this learned distribution for fuzzing allows us to <em>focus</em> on precisely these functionalities of interest.</li>
+</ol>
+<p>Let us first introduce counting expansions and learning probabilities, and then detail these scenarios.</p>
 </div>
 </div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">display_tree</span>
-</pre></div>
-
-</div>
-</div></div>
 </div>
 </div>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>\todo{Note that this doesn't work for EarleyParsers:}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Counting-Expansions">Counting Expansions<a class="anchor-link" href="#Counting-Expansions">&#182;</a></h3><p>We start with implementing a means to take a set of inputs and determine the number of expansions in that set.  To this end, we need the <em>parsers</em> introduced <a href="Parser.html">in the previous chapter</a> to transform a string input into a derivation tree.  For our IP address grammar, this is how this works:</p>
 </div>
 </div>
 </div>
@@ -14089,7 +14550,7 @@ http://fuzzingbook.com:80/?abc=def
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Parser.html" class="import" target="_blank">Parser</a></span> <span class="k">import</span> <span class="n">EarleyParser</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Parser.html" class="import" target="_blank">Parser</a></span> <span class="k">import</span> <span class="n">Parser</span><span class="p">,</span> <span class="n">EarleyParser</span><span class="p">,</span> <span class="n">PEGParser</span>
 </pre></div>
 
 </div>
@@ -14103,7 +14564,21 @@ http://fuzzingbook.com:80/?abc=def
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">IP_ADDRESS_GRAMMAR</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">IP_ADDRESS_TOKENS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;&lt;octet&gt;&quot;</span><span class="p">}</span>  <span class="c1"># EarleyParser needs explicit tokens</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">IP_ADDRESS_GRAMMAR</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="n">IP_ADDRESS_TOKENS</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14118,248 +14593,6 @@ http://fuzzingbook.com:80/?abc=def
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_image output_svg output_subarea ">
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
- "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Generated by graphviz version 2.40.1 (20161225.0304)
- -->
-<!-- Title: %3 Pages: 1 -->
-<svg width="312pt" height="176pt"
- viewBox="0.00 0.00 311.50 176.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 172)">
-<title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-172 307.5,-172 307.5,4 -4,4"/>
-<!-- 0 -->
-<g id="node1" class="node">
-<title>0</title>
-<text text-anchor="middle" x="156" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
-</g>
-<!-- 1 -->
-<g id="node2" class="node">
-<title>1</title>
-<text text-anchor="middle" x="156" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;address&gt;</text>
-</g>
-<!-- 0&#45;&gt;1 -->
-<g id="edge1" class="edge">
-<title>0&#45;&gt;1</title>
-<path fill="none" stroke="#000000" d="M156,-152.9748C156,-146.195 156,-135.966 156,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="159.5001,-127.0561 156,-117.0561 152.5001,-127.0561 159.5001,-127.0561"/>
-</g>
-<!-- 2 -->
-<g id="node3" class="node">
-<title>2</title>
-<text text-anchor="middle" x="30" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;octet&gt;</text>
-</g>
-<!-- 1&#45;&gt;2 -->
-<g id="edge2" class="edge">
-<title>1&#45;&gt;2</title>
-<path fill="none" stroke="#000000" d="M137.4083,-101.9748C116.4706,-93.5 82.2183,-79.636 58.0311,-69.8459"/>
-<polygon fill="#000000" stroke="#000000" points="59.2507,-66.5638 48.668,-66.0561 56.6243,-73.0524 59.2507,-66.5638"/>
-</g>
-<!-- 6 -->
-<g id="node7" class="node">
-<title>6</title>
-<text text-anchor="middle" x="72" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">.</text>
-</g>
-<!-- 1&#45;&gt;6 -->
-<g id="edge6" class="edge">
-<title>1&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M142.6646,-101.8813C127.9152,-93.3792 103.5216,-79.0931 83,-66 82.9026,-65.9378 82.8048,-65.8752 82.7066,-65.8123"/>
-<polygon fill="#000000" stroke="#000000" points="84.4091,-62.7383 74.1652,-60.0339 80.4867,-68.5362 84.4091,-62.7383"/>
-</g>
-<!-- 7 -->
-<g id="node8" class="node">
-<title>7</title>
-<text text-anchor="middle" x="114" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;octet&gt;</text>
-</g>
-<!-- 1&#45;&gt;7 -->
-<g id="edge7" class="edge">
-<title>1&#45;&gt;7</title>
-<path fill="none" stroke="#000000" d="M149.8028,-101.9748C143.7231,-94.5923 134.2755,-83.1203 126.6117,-73.8142"/>
-<polygon fill="#000000" stroke="#000000" points="129.2815,-71.5504 120.2227,-66.0561 123.878,-76.0004 129.2815,-71.5504"/>
-</g>
-<!-- 9 -->
-<g id="node10" class="node">
-<title>9</title>
-<text text-anchor="middle" x="156" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">.</text>
-</g>
-<!-- 1&#45;&gt;9 -->
-<g id="edge9" class="edge">
-<title>1&#45;&gt;9</title>
-<path fill="none" stroke="#000000" d="M156,-101.9748C156,-95.195 156,-84.966 156,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="159.5001,-76.0561 156,-66.0561 152.5001,-76.0561 159.5001,-76.0561"/>
-</g>
-<!-- 10 -->
-<g id="node11" class="node">
-<title>10</title>
-<text text-anchor="middle" x="198" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;octet&gt;</text>
-</g>
-<!-- 1&#45;&gt;10 -->
-<g id="edge10" class="edge">
-<title>1&#45;&gt;10</title>
-<path fill="none" stroke="#000000" d="M162.1972,-101.9748C168.2769,-94.5923 177.7245,-83.1203 185.3883,-73.8142"/>
-<polygon fill="#000000" stroke="#000000" points="188.122,-76.0004 191.7773,-66.0561 182.7185,-71.5504 188.122,-76.0004"/>
-</g>
-<!-- 12 -->
-<g id="node13" class="node">
-<title>12</title>
-<text text-anchor="middle" x="240" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">.</text>
-</g>
-<!-- 1&#45;&gt;12 -->
-<g id="edge12" class="edge">
-<title>1&#45;&gt;12</title>
-<path fill="none" stroke="#000000" d="M168.7812,-101.8574C183.2033,-93.2153 207.3454,-78.693 228,-66 228.4396,-65.7299 228.8877,-65.4536 229.3402,-65.174"/>
-<polygon fill="#000000" stroke="#000000" points="231.3415,-68.0506 237.9675,-59.7834 227.6322,-62.1142 231.3415,-68.0506"/>
-</g>
-<!-- 13 -->
-<g id="node14" class="node">
-<title>13</title>
-<text text-anchor="middle" x="282" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;octet&gt;</text>
-</g>
-<!-- 1&#45;&gt;13 -->
-<g id="edge13" class="edge">
-<title>1&#45;&gt;13</title>
-<path fill="none" stroke="#000000" d="M174.5917,-101.9748C195.5294,-93.5 229.7817,-79.636 253.9689,-69.8459"/>
-<polygon fill="#000000" stroke="#000000" points="255.3757,-73.0524 263.332,-66.0561 252.7493,-66.5638 255.3757,-73.0524"/>
-</g>
-<!-- 3 -->
-<g id="node4" class="node">
-<title>3</title>
-<text text-anchor="middle" x="4" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">1</text>
-</g>
-<!-- 2&#45;&gt;3 -->
-<g id="edge3" class="edge">
-<title>2&#45;&gt;3</title>
-<path fill="none" stroke="#000000" d="M26.1636,-50.9748C22.592,-43.969 17.1429,-33.2803 12.5416,-24.2547"/>
-<polygon fill="#000000" stroke="#000000" points="15.5122,-22.3755 7.8521,-15.0561 9.2759,-25.5548 15.5122,-22.3755"/>
-</g>
-<!-- 4 -->
-<g id="node5" class="node">
-<title>4</title>
-<text text-anchor="middle" x="30" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
-</g>
-<!-- 2&#45;&gt;4 -->
-<g id="edge4" class="edge">
-<title>2&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M30,-50.9748C30,-44.195 30,-33.966 30,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="33.5001,-25.0561 30,-15.0561 26.5001,-25.0561 33.5001,-25.0561"/>
-</g>
-<!-- 5 -->
-<g id="node6" class="node">
-<title>5</title>
-<text text-anchor="middle" x="56" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">7</text>
-</g>
-<!-- 2&#45;&gt;5 -->
-<g id="edge5" class="edge">
-<title>2&#45;&gt;5</title>
-<path fill="none" stroke="#000000" d="M33.8364,-50.9748C37.408,-43.969 42.8571,-33.2803 47.4584,-24.2547"/>
-<polygon fill="#000000" stroke="#000000" points="50.7241,-25.5548 52.1479,-15.0561 44.4878,-22.3755 50.7241,-25.5548"/>
-</g>
-<!-- 8 -->
-<g id="node9" class="node">
-<title>8</title>
-<text text-anchor="middle" x="114" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">0</text>
-</g>
-<!-- 7&#45;&gt;8 -->
-<g id="edge8" class="edge">
-<title>7&#45;&gt;8</title>
-<path fill="none" stroke="#000000" d="M114,-50.9748C114,-44.195 114,-33.966 114,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="117.5001,-25.0561 114,-15.0561 110.5001,-25.0561 117.5001,-25.0561"/>
-</g>
-<!-- 11 -->
-<g id="node12" class="node">
-<title>11</title>
-<text text-anchor="middle" x="198" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">0</text>
-</g>
-<!-- 10&#45;&gt;11 -->
-<g id="edge11" class="edge">
-<title>10&#45;&gt;11</title>
-<path fill="none" stroke="#000000" d="M198,-50.9748C198,-44.195 198,-33.966 198,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="201.5001,-25.0561 198,-15.0561 194.5001,-25.0561 201.5001,-25.0561"/>
-</g>
-<!-- 14 -->
-<g id="node15" class="node">
-<title>14</title>
-<text text-anchor="middle" x="282" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">1</text>
-</g>
-<!-- 13&#45;&gt;14 -->
-<g id="edge14" class="edge">
-<title>13&#45;&gt;14</title>
-<path fill="none" stroke="#000000" d="M282,-50.9748C282,-44.195 282,-33.966 282,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="285.5001,-25.0561 282,-15.0561 278.5001,-25.0561 285.5001,-25.0561"/>
-</g>
-</g>
-</svg>
-
-</div>
-
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>\todo{FIXME: "127" should be one string}</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>\todo{Temporary fix: Use PEGParser intead}</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">IP_ADDRESS_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;octet&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">decrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Parser.html" class="import" target="_blank">Parser</a></span> <span class="k">import</span> <span class="n">PEGParser</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">IP_ADDRESS_GRAMMAR</span><span class="p">)</span>
-<span class="n">tree</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 </pre></div>
 
@@ -14529,10 +14762,16 @@ http://fuzzingbook.com:80/?abc=def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><ol>
-<li>Count individual expansions over a sample as weights.</li>
-<li>Assign these as probabilities to the grammar.</li>
-</ol>
+<div class="text_cell_render border-box-sizing rendered_html"><p>In a tree such as this one, we can now <em>count</em> individual expansions.  In the above tree, for instance, we have two expansions of <code>&lt;octet&gt;</code> into <code>0</code>, one into <code>1</code>, and one into <code>127</code>.  In other words, the expansion <code>&lt;octet&gt;</code> into <code>0</code> makes up 50% of all expansions seen; the expansions into <code>127</code> and <code>1</code> make up 25% each, and the other ones 0%.  These are the probabilities we'd like to assign to our "learned" grammar.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We introduce a class <code>ExpansionCountMiner</code> which allows us to count how frequently individual expansions take place.  Its initialization method takes a parser (say, an <code>EarleyParser</code>) that would be initialized with the appropriate grammar.</p>
 </div>
 </div>
 </div>
@@ -14545,13 +14784,35 @@ http://fuzzingbook.com:80/?abc=def
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ExpansionCountMiner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">parser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">parser</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">Parser</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">grammar</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The attribute <code>expansion_counts</code> holds the expansions seen; adding a tree with <code>add_tree()</code> traverses the given tree and adds all expansions seen.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarCoverageFuzzer.html" class="import" target="_blank">GrammarCoverageFuzzer</a></span> <span class="k">import</span> <span class="n">expansion_key</span>
 </pre></div>
 
 </div>
@@ -14565,7 +14826,7 @@ http://fuzzingbook.com:80/?abc=def
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarCoverageFuzzer.html" class="import" target="_blank">GrammarCoverageFuzzer</a></span> <span class="k">import</span> <span class="n">expansion_key</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">is_nonterminal</span>
 </pre></div>
 
 </div>
@@ -14595,11 +14856,37 @@ http://fuzzingbook.com:80/?abc=def
 
     <span class="k">def</span> <span class="nf">add_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
         <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
-            <span class="p">(</span><span class="n">child_symbol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">c</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_coverage</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="p">(</span><span class="n">child_symbol</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_tree</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_nonterminal</span><span class="p">(</span><span class="n">symbol</span><span class="p">):</span>
+            <span class="k">return</span>
 
+        <span class="n">direct_children</span> <span class="o">=</span> <span class="p">[(</span><span class="n">symbol</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_nonterminal</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="p">[])</span> <span class="k">for</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_coverage</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">direct_children</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_tree</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The method <code>count_expansions()</code> is the one facing the public; it takes a list of inputs, parses them, and processes the resulting trees.  The method <code>counts()</code> returns the counts found.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ExpansionCountMiner</span><span class="p">(</span><span class="n">ExpansionCountMiner</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">count_expansions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">:</span>
             <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">inp</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -14614,17 +14901,35 @@ http://fuzzingbook.com:80/?abc=def
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us try this out on our IP address grammar.  We create an <code>ExpansionCountMiner</code> for our IP address grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expansion_count_miner</span> <span class="o">=</span> <span class="n">ExpansionCountMiner</span><span class="p">(</span><span class="n">IP_ADDRESS_GRAMMAR</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expansion_count_miner</span> <span class="o">=</span> <span class="n">ExpansionCountMiner</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">IP_ADDRESS_GRAMMAR</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="n">IP_ADDRESS_TOKENS</span><span class="p">))</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We parse a (small) set of IP addresses and count the expansions occurring:</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -14635,52 +14940,7 @@ http://fuzzingbook.com:80/?abc=def
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">expansion_count_miner</span><span class="o">.</span><span class="n">count_expansions</span><span class="p">([</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="s2">&quot;1.2.3.4&quot;</span><span class="p">])</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Found &lt;start&gt; -&gt; &lt;address&gt;
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 127
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 0
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 0
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 1
-Found &lt;start&gt; -&gt; &lt;address&gt;
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 1
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 2
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 3
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 4
-</pre>
-</div>
-
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expansion_count_miner</span><span class="o">.</span><span class="n">counts</span><span class="p">()</span>
+<span class="n">expansion_count_miner</span><span class="o">.</span><span class="n">counts</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -14692,9 +14952,8 @@ Found &lt;octet&gt; -&gt; 4
 
 <div class="output_text output_subarea output_execute_result">
 <pre>{&#39;&lt;start&gt; -&gt; &lt;address&gt;&#39;: 2,
- &#39;&lt;address&gt; -&gt; &lt;octet&gt;&#39;: 8,
+ &#39;&lt;address&gt; -&gt; &lt;octet&gt;.&lt;octet&gt;.&lt;octet&gt;.&lt;octet&gt;&#39;: 2,
  &#39;&lt;octet&gt; -&gt; 127&#39;: 1,
- &#39;&lt;address&gt; -&gt; .&#39;: 6,
  &#39;&lt;octet&gt; -&gt; 0&#39;: 2,
  &#39;&lt;octet&gt; -&gt; 1&#39;: 2,
  &#39;&lt;octet&gt; -&gt; 2&#39;: 1,
@@ -14705,6 +14964,44 @@ Found &lt;octet&gt; -&gt; 4
 
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>You see that we have one expansion into <code>127</code>, and two into <code>0</code>.  These are the counts we can use to assign probabilities.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Assigning-Probabilities">Assigning Probabilities<a class="anchor-link" href="#Assigning-Probabilities">&#182;</a></h3><p>The distribution of counts, as determined by <code>ExpansionCountMiner</code> is what we can use to assign probabilities to our grammar.  To this end, we introduce a subclass <code>ProbabilisticGrammarMiner</code> whose method <code>set_expansion_probabilities()</code> processes all expansions of a given symbol, checks whether it occurs in a given count distribution, and assigns probabilities using the following formula.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Given a set $T$ of derivation trees (as mined from samples), we determine the probabilities $p_i$ for each alternative $a_i$ of a symbol $S \rightarrow a_1 | \dots | a_n$ as</p>
+<p>$$p_i = \frac{\text{Expansions of $S \rightarrow a_i$ in $T$}}{\text{Expansions of $S$ in $T$}}$$</p>
+<p>Should $S$ not occur at all in $T$, then $p_i$ is <em>unspecified</em>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here is the implementation of <code>set_expansion_probabilities()</code>, implementing the above formula:</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -14712,9 +15009,7 @@ Found &lt;octet&gt; -&gt; 4
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProbabilisticGrammarMiner</span><span class="p">(</span><span class="n">ExpansionCountMiner</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">set_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">counts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">set_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_expansion_probabilities</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">counts</span><span class="p">)</span>
 
@@ -14728,16 +15023,22 @@ Found &lt;octet&gt; -&gt; 4
         <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">expansion_counts</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">expansions</span><span class="p">):</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">expansion_counts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">/</span> <span class="n">total</span> <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="c1"># if self.log:</span>
+            <span class="c1">#     print(&quot;Setting&quot;, expansion_key(symbol, expansion), p)</span>
             <span class="n">set_prob</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">mine_probabilistic_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">count_expansions</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_probabilities</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The typical use of <code>ProbabilisticGrammarMiner</code> is through <code>mine_probabilistic_grammar()</code>, which first determines a distribution from a set of inputs, and then sets the probabilities accordingly.</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -14747,8 +15048,11 @@ Found &lt;octet&gt; -&gt; 4
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_grammar_miner</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarMiner</span><span class="p">(</span><span class="n">IP_ADDRESS_GRAMMAR</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">probabilistic_ip_address_grammar</span> <span class="o">=</span> <span class="n">probabilistic_grammar_miner</span><span class="o">.</span><span class="n">mine_probabilistic_grammar</span><span class="p">([</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="s2">&quot;1.2.3.4&quot;</span><span class="p">])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProbabilisticGrammarMiner</span><span class="p">(</span><span class="n">ProbabilisticGrammarMiner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">mine_probabilistic_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count_expansions</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span>
 </pre></div>
 
 </div>
@@ -14756,36 +15060,50 @@ Found &lt;octet&gt; -&gt; 4
 </div>
 </div>
 
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Found &lt;start&gt; -&gt; &lt;address&gt;
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 127
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 0
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 0
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 1
-Found &lt;start&gt; -&gt; &lt;address&gt;
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 1
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 2
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 3
-Found &lt;address&gt; -&gt; .
-Found &lt;address&gt; -&gt; &lt;octet&gt;
-Found &lt;octet&gt; -&gt; 4
-</pre>
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us put this to use.  We create a grammar miner for IP addresses:</p>
+</div>
+</div>
+</div>
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_grammar_miner</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarMiner</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">IP_ADDRESS_GRAMMAR</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="n">IP_ADDRESS_TOKENS</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We now use <code>mine_probabilistic_grammar()</code> to mine the grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_ip_address_grammar</span> <span class="o">=</span> <span class="n">probabilistic_grammar_miner</span><span class="o">.</span><span class="n">mine_probabilistic_grammar</span><span class="p">([</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span> <span class="s2">&quot;1.2.3.4&quot;</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
 </div>
 
 <div class="input_code">
@@ -14802,14 +15120,59 @@ Found &lt;octet&gt; -&gt; 4
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's the resulting distribution of octets in our grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_ip_fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">(</span>
-    <span class="n">probabilistic_ip_address_grammar</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="p">[</span><span class="n">expansion</span> <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="n">probabilistic_ip_address_grammar</span><span class="p">[</span><span class="s1">&#39;&lt;octet&gt;&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">exp_prob</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;0&#39;, {&#39;prob&#39;: 0.25}),
+ (&#39;1&#39;, {&#39;prob&#39;: 0.25}),
+ (&#39;2&#39;, {&#39;prob&#39;: 0.125}),
+ (&#39;3&#39;, {&#39;prob&#39;: 0.125}),
+ (&#39;4&#39;, {&#39;prob&#39;: 0.125}),
+ (&#39;127&#39;, {&#39;prob&#39;: 0.125})]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we use these probabilities for fuzzing, we will get the same distribution of octets as in our sample:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_ip_fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">probabilistic_ip_address_grammar</span><span class="p">)</span>
 <span class="p">[</span><span class="n">probabilistic_ip_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
 </pre></div>
 
@@ -14821,16 +15184,16 @@ Found &lt;octet&gt; -&gt; 4
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;0.1.1.4&#39;,
- &#39;1.2.0.4&#39;,
- &#39;4.2.1.0&#39;,
- &#39;4.1.4.0&#39;,
- &#39;0.3.1.2&#39;,
- &#39;1.0.4.3&#39;,
- &#39;1.1.127.127&#39;,
- &#39;0.4.2.4&#39;,
- &#39;1.0.4.127&#39;,
- &#39;4.3.1.0&#39;]
+<pre>[&#39;4.2.2.0&#39;,
+ &#39;2.1.4.0&#39;,
+ &#39;0.1.3.127&#39;,
+ &#39;0.3.0.127&#39;,
+ &#39;4.0.2.1&#39;,
+ &#39;3.127.0.0&#39;,
+ &#39;2.2.1.1&#39;,
+ &#39;4.0.1.0&#39;,
+ &#39;2.4.0.1&#39;,
+ &#39;0.0.3.127&#39;]
 </pre>
 </div>
 
@@ -14839,13 +15202,1023 @@ Found &lt;octet&gt; -&gt; 4
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Auto-Tuning-Probabilities">Auto-Tuning Probabilities<a class="anchor-link" href="#Auto-Tuning-Probabilities">&#182;</a></h2><ol>
-<li>First, generate a set of inputs.</li>
-<li>Then, measure coverage.</li>
-<li>Pick the slice of inputs that satisfies a particular goal (say, coverage).</li>
-<li>Learn probabilities from these.</li>
-<li>Repeat :-)</li>
-</ol>
+<div class="text_cell_render border-box-sizing rendered_html"><p>By learning from a sample, we can thus adjust our fuzzing towards the (syntactic) properties of this very sample.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Testing-Common-Features">Testing Common Features<a class="anchor-link" href="#Testing-Common-Features">&#182;</a></h3><p>Let us now get to our three usage scenarios.  The first scenario is to create probability distributions right out of a sample, and to use these very distributions during test generation.  This helps focusing test generation on those features that are <em>most commonly used</em>, which thus minimizes the risk of customers encountering failures.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To illustrate testing of common features, we choose the URL domain.  Let us assume that we are running some Web-related service, and this is a sample of the URLs our customers access most:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">URL_SAMPLE</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;https://user:password@cispa.saarland:80/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://fuzzingbook.com?def=56&amp;x89=3&amp;x46=48&amp;def=def&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://cispa.saarland:80/def?def=7&amp;x23=abc&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://fuzzingbook.com:80/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://fuzzingbook.com:80/abc?def=abc&amp;abc=x14&amp;def=abc&amp;abc=2&amp;def=38&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ftps://fuzzingbook.com/x87&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://user:password@fuzzingbook.com:6?def=54&amp;x44=abc&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;http://fuzzingbook.com:80?x33=25&amp;def=8&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;http://fuzzingbook.com:8080/def&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Using the Earley parser from the <a href="Parsers.html">chapter on parsers</a>, we can parse any of these inputs into a parse tree; we have to specify a token set, though.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">URL_TOKENS</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;&lt;scheme&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;userinfo&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;host&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;port&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;id&gt;&quot;</span><span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">url_parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">URL_GRAMMAR</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="n">URL_TOKENS</span><span class="p">)</span>
+<span class="n">url_input</span> <span class="o">=</span> <span class="n">URL_SAMPLE</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">url_input</span><span class="p">)</span>
+<span class="n">display_tree</span><span class="p">(</span><span class="n">url_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">url_input</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>https://cispa.saarland:80/def?def=7&amp;x23=abc
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="509pt" height="380pt"
+ viewBox="0.00 0.00 508.50 380.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 376)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-376 504.5,-376 504.5,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="122" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="122" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;url&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="#000000" d="M122,-356.9748C122,-350.195 122,-339.966 122,-331.1331"/>
+<polygon fill="#000000" stroke="#000000" points="125.5001,-331.0561 122,-321.0561 118.5001,-331.0561 125.5001,-331.0561"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="29" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;scheme&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M108.2775,-305.9748C93.4417,-297.839 69.5489,-284.7365 51.8664,-275.0397"/>
+<polygon fill="#000000" stroke="#000000" points="53.2298,-271.7956 42.7788,-270.0561 49.864,-277.9333 53.2298,-271.7956"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="78" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">:</text>
+</g>
+<!-- 1&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>1&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M115.5076,-305.9748C107.9059,-297.1636 95.2781,-282.5269 86.8,-272.6999"/>
+<polygon fill="#000000" stroke="#000000" points="89.2273,-270.1555 80.0449,-264.8702 83.9272,-274.7282 89.2273,-270.1555"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="100" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">/</text>
+</g>
+<!-- 1&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>1&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M118.7538,-305.9748C115.4191,-298.2442 110.1499,-286.0294 106.0448,-276.5129"/>
+<polygon fill="#000000" stroke="#000000" points="109.2444,-275.0937 102.0697,-267.298 102.8169,-277.8664 109.2444,-275.0937"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="122" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">/</text>
+</g>
+<!-- 1&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>1&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M122,-305.9748C122,-299.195 122,-288.966 122,-280.1331"/>
+<polygon fill="#000000" stroke="#000000" points="125.5001,-280.0561 122,-270.0561 118.5001,-280.0561 125.5001,-280.0561"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="176" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;authority&gt;</text>
+</g>
+<!-- 1&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>1&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M129.9679,-305.9748C138.0239,-298.3663 150.6792,-286.4141 160.6833,-276.9658"/>
+<polygon fill="#000000" stroke="#000000" points="163.1325,-279.4669 167.9994,-270.0561 158.3261,-274.3778 163.1325,-279.4669"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="248" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;path&gt;</text>
+</g>
+<!-- 1&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>1&#45;&gt;13</title>
+<path fill="none" stroke="#000000" d="M138.2143,-306.937C158.8687,-298.577 194.8929,-283.9957 220.0217,-273.8246"/>
+<polygon fill="#000000" stroke="#000000" points="221.435,-277.0284 229.3913,-270.0321 218.8087,-270.5398 221.435,-277.0284"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+<text text-anchor="middle" x="322" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;query&gt;</text>
+</g>
+<!-- 1&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>1&#45;&gt;17</title>
+<path fill="none" stroke="#000000" d="M138.0288,-309.4127C170.4665,-301.141 244.5057,-282.261 288.1248,-271.1382"/>
+<polygon fill="#000000" stroke="#000000" points="289.1667,-274.4846 297.9918,-268.6221 287.437,-267.7016 289.1667,-274.4846"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="29" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">https</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M29,-254.9748C29,-248.195 29,-237.966 29,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="32.5001,-229.0561 29,-219.0561 25.5001,-229.0561 32.5001,-229.0561"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="126" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;host&gt;</text>
+</g>
+<!-- 7&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>7&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M168.6223,-254.9748C161.2369,-247.4417 149.6768,-235.6503 140.458,-226.2472"/>
+<polygon fill="#000000" stroke="#000000" points="142.9079,-223.7466 133.4079,-219.0561 137.9094,-228.6471 142.9079,-223.7466"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="166" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">:</text>
+</g>
+<!-- 7&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>7&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M174.5245,-254.9748C173.1951,-248.195 171.1894,-237.966 169.4575,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="172.8404,-228.1958 167.4816,-219.0561 165.9712,-229.5427 172.8404,-228.1958"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="206" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;port&gt;</text>
+</g>
+<!-- 7&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>7&#45;&gt;11</title>
+<path fill="none" stroke="#000000" d="M180.4266,-254.9748C184.592,-247.8936 190.9706,-237.05 196.3152,-227.9641"/>
+<polygon fill="#000000" stroke="#000000" points="199.5018,-229.45 201.5552,-219.0561 193.4682,-225.9009 199.5018,-229.45"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="126" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">cispa.saarland</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M126,-203.9748C126,-197.195 126,-186.966 126,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="129.5001,-178.0561 126,-168.0561 122.5001,-178.0561 129.5001,-178.0561"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="206" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">80</text>
+</g>
+<!-- 11&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>11&#45;&gt;12</title>
+<path fill="none" stroke="#000000" d="M206,-203.9748C206,-197.195 206,-186.966 206,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="209.5001,-178.0561 206,-168.0561 202.5001,-178.0561 209.5001,-178.0561"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="246" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">/</text>
+</g>
+<!-- 13&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>13&#45;&gt;14</title>
+<path fill="none" stroke="#000000" d="M247.7049,-254.9748C247.439,-248.195 247.0379,-237.966 246.6915,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="250.1856,-228.9112 246.2963,-219.0561 243.191,-229.1856 250.1856,-228.9112"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="280" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
+</g>
+<!-- 13&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>13&#45;&gt;15</title>
+<path fill="none" stroke="#000000" d="M252.7217,-254.9748C257.212,-247.8183 264.1137,-236.8188 269.8512,-227.6747"/>
+<polygon fill="#000000" stroke="#000000" points="272.9087,-229.387 275.2589,-219.0561 266.9792,-225.6665 272.9087,-229.387"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="274" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">def</text>
+</g>
+<!-- 15&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>15&#45;&gt;16</title>
+<path fill="none" stroke="#000000" d="M279.1147,-203.9748C278.3171,-197.195 277.1136,-186.966 276.0745,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="279.5335,-177.5786 274.889,-168.0561 272.5814,-178.3966 279.5335,-177.5786"/>
+</g>
+<!-- 18 -->
+<g id="node19" class="node">
+<title>18</title>
+<text text-anchor="middle" x="322" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">?</text>
+</g>
+<!-- 17&#45;&gt;18 -->
+<g id="edge18" class="edge">
+<title>17&#45;&gt;18</title>
+<path fill="none" stroke="#000000" d="M322,-254.9748C322,-248.195 322,-237.966 322,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="325.5001,-229.0561 322,-219.0561 318.5001,-229.0561 325.5001,-229.0561"/>
+</g>
+<!-- 19 -->
+<g id="node20" class="node">
+<title>19</title>
+<text text-anchor="middle" x="375" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;params&gt;</text>
+</g>
+<!-- 17&#45;&gt;19 -->
+<g id="edge19" class="edge">
+<title>17&#45;&gt;19</title>
+<path fill="none" stroke="#000000" d="M329.8203,-254.9748C337.6489,-247.4417 349.9026,-235.6503 359.6745,-226.2472"/>
+<polygon fill="#000000" stroke="#000000" points="362.3687,-228.5119 367.1476,-219.0561 357.515,-223.4679 362.3687,-228.5119"/>
+</g>
+<!-- 20 -->
+<g id="node21" class="node">
+<title>20</title>
+<text text-anchor="middle" x="327" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;param&gt;</text>
+</g>
+<!-- 19&#45;&gt;20 -->
+<g id="edge20" class="edge">
+<title>19&#45;&gt;20</title>
+<path fill="none" stroke="#000000" d="M367.9174,-203.9748C360.8983,-196.517 349.9513,-184.8857 341.1459,-175.53"/>
+<polygon fill="#000000" stroke="#000000" points="343.514,-172.9393 334.1116,-168.0561 338.4166,-177.7369 343.514,-172.9393"/>
+</g>
+<!-- 27 -->
+<g id="node28" class="node">
+<title>27</title>
+<text text-anchor="middle" x="376" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&amp;</text>
+</g>
+<!-- 19&#45;&gt;27 -->
+<g id="edge27" class="edge">
+<title>19&#45;&gt;27</title>
+<path fill="none" stroke="#000000" d="M375.1476,-203.9748C375.2805,-197.195 375.4811,-186.966 375.6543,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="379.155,-178.1228 375.8518,-168.0561 372.1564,-177.9855 379.155,-178.1228"/>
+</g>
+<!-- 28 -->
+<g id="node29" class="node">
+<title>28</title>
+<text text-anchor="middle" x="435" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;params&gt;</text>
+</g>
+<!-- 19&#45;&gt;28 -->
+<g id="edge28" class="edge">
+<title>19&#45;&gt;28</title>
+<path fill="none" stroke="#000000" d="M383.8532,-203.9748C392.8929,-196.291 407.1447,-184.177 418.3107,-174.6859"/>
+<polygon fill="#000000" stroke="#000000" points="420.7578,-177.1994 426.1105,-168.0561 416.2243,-171.8658 420.7578,-177.1994"/>
+</g>
+<!-- 21 -->
+<g id="node22" class="node">
+<title>21</title>
+<text text-anchor="middle" x="289" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
+</g>
+<!-- 20&#45;&gt;21 -->
+<g id="edge21" class="edge">
+<title>20&#45;&gt;21</title>
+<path fill="none" stroke="#000000" d="M321.393,-152.9748C315.9484,-145.6677 307.5187,-134.354 300.6233,-125.0997"/>
+<polygon fill="#000000" stroke="#000000" points="303.4115,-122.9837 294.63,-117.0561 297.7983,-127.1661 303.4115,-122.9837"/>
+</g>
+<!-- 23 -->
+<g id="node24" class="node">
+<title>23</title>
+<text text-anchor="middle" x="325" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">=</text>
+</g>
+<!-- 20&#45;&gt;23 -->
+<g id="edge23" class="edge">
+<title>20&#45;&gt;23</title>
+<path fill="none" stroke="#000000" d="M326.7049,-152.9748C326.439,-146.195 326.0379,-135.966 325.6915,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="329.1856,-126.9112 325.2963,-117.0561 322.191,-127.1856 329.1856,-126.9112"/>
+</g>
+<!-- 24 -->
+<g id="node25" class="node">
+<title>24</title>
+<text text-anchor="middle" x="364" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;nat&gt;</text>
+</g>
+<!-- 20&#45;&gt;24 -->
+<g id="edge24" class="edge">
+<title>20&#45;&gt;24</title>
+<path fill="none" stroke="#000000" d="M332.4595,-152.9748C337.7061,-145.743 345.7998,-134.5868 352.4744,-125.3866"/>
+<polygon fill="#000000" stroke="#000000" points="355.4788,-127.2056 358.5181,-117.0561 349.8128,-123.095 355.4788,-127.2056"/>
+</g>
+<!-- 22 -->
+<g id="node23" class="node">
+<title>22</title>
+<text text-anchor="middle" x="289" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">def</text>
+</g>
+<!-- 21&#45;&gt;22 -->
+<g id="edge22" class="edge">
+<title>21&#45;&gt;22</title>
+<path fill="none" stroke="#000000" d="M289,-101.9748C289,-95.195 289,-84.966 289,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="292.5001,-76.0561 289,-66.0561 285.5001,-76.0561 292.5001,-76.0561"/>
+</g>
+<!-- 25 -->
+<g id="node26" class="node">
+<title>25</title>
+<text text-anchor="middle" x="362" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 24&#45;&gt;25 -->
+<g id="edge25" class="edge">
+<title>24&#45;&gt;25</title>
+<path fill="none" stroke="#000000" d="M363.7049,-101.9748C363.439,-95.195 363.0379,-84.966 362.6915,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="366.1856,-75.9112 362.2963,-66.0561 359.191,-76.1856 366.1856,-75.9112"/>
+</g>
+<!-- 26 -->
+<g id="node27" class="node">
+<title>26</title>
+<text text-anchor="middle" x="362" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">7</text>
+</g>
+<!-- 25&#45;&gt;26 -->
+<g id="edge26" class="edge">
+<title>25&#45;&gt;26</title>
+<path fill="none" stroke="#000000" d="M362,-50.9748C362,-44.195 362,-33.966 362,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="365.5001,-25.0561 362,-15.0561 358.5001,-25.0561 365.5001,-25.0561"/>
+</g>
+<!-- 29 -->
+<g id="node30" class="node">
+<title>29</title>
+<text text-anchor="middle" x="438" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;param&gt;</text>
+</g>
+<!-- 28&#45;&gt;29 -->
+<g id="edge29" class="edge">
+<title>28&#45;&gt;29</title>
+<path fill="none" stroke="#000000" d="M435.4427,-152.9748C435.8415,-146.195 436.4432,-135.966 436.9628,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="440.4622,-127.2444 437.5555,-117.0561 433.4742,-126.8333 440.4622,-127.2444"/>
+</g>
+<!-- 30 -->
+<g id="node31" class="node">
+<title>30</title>
+<text text-anchor="middle" x="415" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
+</g>
+<!-- 29&#45;&gt;30 -->
+<g id="edge30" class="edge">
+<title>29&#45;&gt;30</title>
+<path fill="none" stroke="#000000" d="M434.6063,-101.9748C431.4468,-94.969 426.6264,-84.2803 422.556,-75.2547"/>
+<polygon fill="#000000" stroke="#000000" points="425.7093,-73.7331 418.4077,-66.0561 419.3282,-76.6109 425.7093,-73.7331"/>
+</g>
+<!-- 32 -->
+<g id="node33" class="node">
+<title>32</title>
+<text text-anchor="middle" x="451" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">=</text>
+</g>
+<!-- 29&#45;&gt;32 -->
+<g id="edge32" class="edge">
+<title>29&#45;&gt;32</title>
+<path fill="none" stroke="#000000" d="M439.9182,-101.9748C441.6656,-95.1196 444.3118,-84.7383 446.5802,-75.8392"/>
+<polygon fill="#000000" stroke="#000000" points="449.9954,-76.6108 449.0739,-66.0561 443.2123,-74.8817 449.9954,-76.6108"/>
+</g>
+<!-- 33 -->
+<g id="node34" class="node">
+<title>33</title>
+<text text-anchor="middle" x="487" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
+</g>
+<!-- 29&#45;&gt;33 -->
+<g id="edge33" class="edge">
+<title>29&#45;&gt;33</title>
+<path fill="none" stroke="#000000" d="M445.2301,-101.9748C452.3954,-94.517 463.5706,-82.8857 472.5594,-73.53"/>
+<polygon fill="#000000" stroke="#000000" points="475.3358,-75.6921 479.7402,-66.0561 470.2881,-70.8423 475.3358,-75.6921"/>
+</g>
+<!-- 31 -->
+<g id="node32" class="node">
+<title>31</title>
+<text text-anchor="middle" x="415" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">x23</text>
+</g>
+<!-- 30&#45;&gt;31 -->
+<g id="edge31" class="edge">
+<title>30&#45;&gt;31</title>
+<path fill="none" stroke="#000000" d="M415,-50.9748C415,-44.195 415,-33.966 415,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="418.5001,-25.0561 415,-15.0561 411.5001,-25.0561 418.5001,-25.0561"/>
+</g>
+<!-- 34 -->
+<g id="node35" class="node">
+<title>34</title>
+<text text-anchor="middle" x="487" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">abc</text>
+</g>
+<!-- 33&#45;&gt;34 -->
+<g id="edge34" class="edge">
+<title>33&#45;&gt;34</title>
+<path fill="none" stroke="#000000" d="M487,-50.9748C487,-44.195 487,-33.966 487,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="490.5001,-25.0561 487,-15.0561 483.5001,-25.0561 490.5001,-25.0561"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us apply our <code>ProbabilisticGrammarMiner</code> class on these inputs, using the above <code>url_parser</code> parser, and obtain a probabilistic URL grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_grammar_miner</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarMiner</span><span class="p">(</span><span class="n">url_parser</span><span class="p">)</span>
+<span class="n">probabilistic_url_grammar</span> <span class="o">=</span> <span class="n">probabilistic_grammar_miner</span><span class="o">.</span><span class="n">mine_probabilistic_grammar</span><span class="p">(</span><span class="n">URL_SAMPLE</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>These are the counts we obtained during parsing:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">probabilistic_grammar_miner</span><span class="o">.</span><span class="n">counts</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>{&#39;&lt;start&gt; -&gt; &lt;url&gt;&#39;: 9, &#39;&lt;url&gt; -&gt; &lt;scheme&gt;://&lt;authority&gt;&lt;path&gt;&lt;query&gt;&#39;: 9, &#39;&lt;scheme&gt; -&gt; https&#39;: 6, &#39;&lt;authority&gt; -&gt; &lt;userinfo&gt;@&lt;host&gt;:&lt;port&gt;&#39;: 2, &#39;&lt;userinfo&gt; -&gt; user:password&#39;: 2, &#39;&lt;host&gt; -&gt; cispa.saarland&#39;: 2, &#39;&lt;port&gt; -&gt; 80&#39;: 5, &#39;&lt;path&gt; -&gt; /&#39;: 2, &#39;&lt;query&gt; -&gt; &lt;query&gt;&#39;: 4, &#39;&lt;authority&gt; -&gt; &lt;host&gt;&#39;: 2, &#39;&lt;host&gt; -&gt; fuzzingbook.com&#39;: 7, &#39;&lt;path&gt; -&gt; &lt;path&gt;&#39;: 3, &#39;&lt;query&gt; -&gt; ?&lt;params&gt;&#39;: 5, &#39;&lt;params&gt; -&gt; &lt;param&gt;&amp;&lt;params&gt;&#39;: 10, &#39;&lt;param&gt; -&gt; &lt;id&gt;=&lt;nat&gt;&#39;: 9, &#39;&lt;id&gt; -&gt; def&#39;: 11, &#39;&lt;nat&gt; -&gt; &lt;digit&gt;&lt;digit&gt;&#39;: 5, &#39;&lt;digit&gt; -&gt; 5&#39;: 3, &#39;&lt;digit&gt; -&gt; 6&#39;: 1, &#39;&lt;id&gt; -&gt; x89&#39;: 1, &#39;&lt;nat&gt; -&gt; &lt;digit&gt;&#39;: 4, &#39;&lt;digit&gt; -&gt; 3&#39;: 2, &#39;&lt;id&gt; -&gt; x46&#39;: 1, &#39;&lt;digit&gt; -&gt; 4&#39;: 2, &#39;&lt;digit&gt; -&gt; 8&#39;: 3, &#39;&lt;params&gt; -&gt; &lt;param&gt;&#39;: 5, &#39;&lt;param&gt; -&gt; &lt;id&gt;=&lt;id&gt;&#39;: 6, &#39;&lt;authority&gt; -&gt; &lt;host&gt;:&lt;port&gt;&#39;: 5, &#39;&lt;path&gt; -&gt; /&lt;id&gt;&#39;: 4, &#39;&lt;digit&gt; -&gt; 7&#39;: 1, &#39;&lt;id&gt; -&gt; x23&#39;: 1, &#39;&lt;id&gt; -&gt; abc&#39;: 7, &#39;&lt;id&gt; -&gt; x14&#39;: 1, &#39;&lt;digit&gt; -&gt; 2&#39;: 2, &#39;&lt;scheme&gt; -&gt; ftps&#39;: 1, &#39;&lt;id&gt; -&gt; x87&#39;: 1, &#39;&lt;port&gt; -&gt; 6&#39;: 1, &#39;&lt;id&gt; -&gt; x44&#39;: 1, &#39;&lt;scheme&gt; -&gt; http&#39;: 2, &#39;&lt;id&gt; -&gt; x33&#39;: 1, &#39;&lt;port&gt; -&gt; 8080&#39;: 1}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>These counts translate into individual probabilities.  We see that in our sample, most URLs use the <code>https:</code> scheme, whereas there is no input using the <code>ftp:</code> scheme.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_url_grammar</span><span class="p">[</span><span class="s1">&#39;&lt;scheme&gt;&#39;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;http&#39;, {&#39;prob&#39;: 0.2222222222222222}),
+ (&#39;https&#39;, {&#39;prob&#39;: 0.6666666666666666}),
+ (&#39;ftp&#39;, {&#39;prob&#39;: 0.0}),
+ (&#39;ftps&#39;, {&#39;prob&#39;: 0.1111111111111111})]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Likewise, we see that most given URLs have multiple parameters:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_url_grammar</span><span class="p">[</span><span class="s1">&#39;&lt;params&gt;&#39;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;&lt;param&gt;&#39;, {&#39;prob&#39;: 0.3333333333333333}),
+ (&#39;&lt;param&gt;&amp;&lt;params&gt;&#39;, {&#39;prob&#39;: 0.6666666666666666})]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>When we use this probabilistic grammar for fuzzing, these distributions are reflected in our generated inputs – no <code>ftp:</code> schemes either, and most inputs have multiple parameters.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">probabilistic_url_grammar</span><span class="p">)</span>
+<span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;https://fuzzingbook.com/def?def=abc&amp;def=abc&amp;def=def&amp;def=abc&amp;abc=def&amp;def=def&amp;abc=def&#39;,
+ &#39;http://fuzzingbook.com:80/def?def=7&amp;def=abc&amp;abc=88&#39;,
+ &#39;https://cispa.saarland/def?def=2&#39;,
+ &#39;http://user:password@fuzzingbook.com:80/def?abc=abc&amp;def=78&#39;,
+ &#39;http://cispa.saarland:80/?def=54&amp;def=abc&#39;,
+ &#39;https://fuzzingbook.com:80/def?def=def&#39;,
+ &#39;http://fuzzingbook.com:80/abc?abc=abc&amp;abc=def&amp;def=85&amp;abc=7&amp;def=6&amp;abc=2&amp;def=abc&#39;,
+ &#39;https://fuzzingbook.com/abc?def=32&amp;def=3&amp;abc=4&#39;,
+ &#39;http://fuzzingbook.com/def?abc=24&amp;def=def&amp;def=48&#39;,
+ &#39;https://cispa.saarland:80/?abc=abc&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Being able to replicate a probability distribution learned from a sample is not only important for focusing on commonly used features.  It can also help in achieving <em>valid inputs</em>, in particular if one learns probabilities <em>in context</em>, as discussed above: If within a given context, some elements are more likely than others (because they depend on each other), a learned probability distribution will reflect this; and hence, inputs generated from this learned probability distribution will have a higher chance to be valid, too.  We will explore this further in the <a href="#Exercises">exercises</a>, below.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Testing-Uncommon-Features">Testing Uncommon Features<a class="anchor-link" href="#Testing-Uncommon-Features">&#182;</a></h3><p>So far, we have focused on <em>common</em> features; but from a testing perspective, one may just as well test <em>uncommon</em> features – that is, features that rarely occur in our usage samples and therefore would be less exercised in practice.  This is a common scenario in security testing, where one focuses on uncommon (and possibly lesser-known) features, as fewer users means fewer bugs reported, and thus more bugs left to be found and exploited.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To have our probabilistic grammar fuzzer focus on <em>uncommon</em> features, we <em>change the learned probabilities</em> such that commonly occuring features (i.e., those with a high learned probability) get a low probability, and vice versa: The last shall be first, and the first last.  A particularly simple way to achieve such an <em>inversion</em> of probabilities is to <em>swap</em> them: The alternatives with the highest and lowest probability swaps their probabilities, as so the alternatives with the second highest and second lowest probability, the alternatives with the third highest and lowest, and so on.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The function <code>invert_expansion()</code> takes an expansion (a list of alternatives) from a grammar and returns a new inverted expansion in which the probabilities have been swapped according to the rule above.  It creates a list of indexes, sorts it by increasing probability, and then for each $n$-th element, assigns it the probability of the $n$-th last element in the indexes.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">invert_expansion</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">sort_by_prob</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">index</span><span class="p">,</span> <span class="n">prob</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="k">return</span> <span class="n">prob</span> <span class="k">if</span> <span class="n">prob</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="n">inverted_expansion</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span>
+    <span class="n">indexes</span> <span class="o">=</span> <span class="p">[(</span><span class="n">index</span><span class="p">,</span> <span class="n">exp_prob</span><span class="p">(</span><span class="n">alternative</span><span class="p">))</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">alternative</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">expansion</span><span class="p">)]</span>
+    <span class="n">indexes</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">sort_by_prob</span><span class="p">)</span>
+    <span class="n">indexes</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">)):</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indexes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">j</span>
+        <span class="c1"># print(indexes[j], &quot;gets&quot;, indexes[k])</span>
+        <span class="n">inverted_expansion</span><span class="p">[</span><span class="n">indexes</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;prob&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expansion</span><span class="p">[</span><span class="n">indexes</span><span class="p">[</span><span class="n">k</span><span class="p">]][</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;prob&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">inverted_expansion</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's <code>invert_expansion()</code> in action.  This is out original probability distribution for URL schemes:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_url_grammar</span><span class="p">[</span><span class="s1">&#39;&lt;scheme&gt;&#39;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;http&#39;, {&#39;prob&#39;: 0.2222222222222222}),
+ (&#39;https&#39;, {&#39;prob&#39;: 0.6666666666666666}),
+ (&#39;ftp&#39;, {&#39;prob&#39;: 0.0}),
+ (&#39;ftps&#39;, {&#39;prob&#39;: 0.1111111111111111})]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>And this is the "inverted" distribution.  We see that the <code>ftp:</code> scheme, which previously had a probability of zero, now has the highest probability, whereas the most common scheme, <code>https:</code>, now has the previous zero probability of the <code>ftp:</code> scheme.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">invert_expansion</span><span class="p">(</span><span class="n">probabilistic_url_grammar</span><span class="p">[</span><span class="s1">&#39;&lt;scheme&gt;&#39;</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;http&#39;, {&#39;prob&#39;: 0.1111111111111111}),
+ (&#39;https&#39;, {&#39;prob&#39;: 0.0}),
+ (&#39;ftp&#39;, {&#39;prob&#39;: 0.6666666666666666}),
+ (&#39;ftps&#39;, {&#39;prob&#39;: 0.2222222222222222})]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>One nice feature of this reshuffling of probabilities is that the sum of probabilities stays unchanged; no normalization is needed.  Another nice feature is that the inversion of the inversion returns the original distribution:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">invert_expansion</span><span class="p">(</span><span class="n">invert_expansion</span><span class="p">(</span><span class="n">probabilistic_url_grammar</span><span class="p">[</span><span class="s1">&#39;&lt;scheme&gt;&#39;</span><span class="p">]))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;http&#39;, {&#39;prob&#39;: 0.2222222222222222}),
+ (&#39;https&#39;, {&#39;prob&#39;: 0.6666666666666666}),
+ (&#39;ftp&#39;, {&#39;prob&#39;: 0.0}),
+ (&#39;ftps&#39;, {&#39;prob&#39;: 0.1111111111111111})]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Note that our implementation does not universally satisfy this property: If two alternatives $a_1$ and $a_2$ in the expansion share the same probability, then the second inversion may assign different probabilities to $a_1$ and $a_2$.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can apply this inversion of expansions across the entire grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">invert_probs</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
+    <span class="n">inverted_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
+        <span class="n">inverted_grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="n">invert_expansion</span><span class="p">(</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">inverted_grammar</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This means that probabilities would be swapped for each and every expansion:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_url_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;0&#39;, {&#39;prob&#39;: 0.0}),
+ (&#39;1&#39;, {&#39;prob&#39;: 0.0}),
+ (&#39;2&#39;, {&#39;prob&#39;: 0.14285714285714285}),
+ (&#39;3&#39;, {&#39;prob&#39;: 0.14285714285714285}),
+ (&#39;4&#39;, {&#39;prob&#39;: 0.14285714285714285}),
+ (&#39;5&#39;, {&#39;prob&#39;: 0.21428571428571427}),
+ (&#39;6&#39;, {&#39;prob&#39;: 0.07142857142857142}),
+ (&#39;7&#39;, {&#39;prob&#39;: 0.07142857142857142}),
+ (&#39;8&#39;, {&#39;prob&#39;: 0.21428571428571427}),
+ (&#39;9&#39;, {&#39;prob&#39;: 0.0})]
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inverted_probabilistic_url_grammar</span> <span class="o">=</span> <span class="n">invert_probs</span><span class="p">(</span><span class="n">probabilistic_url_grammar</span><span class="p">)</span>
+<span class="n">inverted_probabilistic_url_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[(&#39;0&#39;, {&#39;prob&#39;: 0.21428571428571427}),
+ (&#39;1&#39;, {&#39;prob&#39;: 0.21428571428571427}),
+ (&#39;2&#39;, {&#39;prob&#39;: 0.07142857142857142}),
+ (&#39;3&#39;, {&#39;prob&#39;: 0.07142857142857142}),
+ (&#39;4&#39;, {&#39;prob&#39;: 0.0}),
+ (&#39;5&#39;, {&#39;prob&#39;: 0.0}),
+ (&#39;6&#39;, {&#39;prob&#39;: 0.14285714285714285}),
+ (&#39;7&#39;, {&#39;prob&#39;: 0.14285714285714285}),
+ (&#39;8&#39;, {&#39;prob&#39;: 0.0}),
+ (&#39;9&#39;, {&#39;prob&#39;: 0.14285714285714285})]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we now use this "inverted" grammar for fuzzing, the generated inputs will focus on the <em>complement of the input samples</em>.  We will get plenty of tests of user/password features, as well as <code>ftp:</code> schemes – in essence, all the features present in our language, but rarely used (if at all) in our input samples.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">inverted_probabilistic_url_grammar</span><span class="p">)</span>
+<span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;ftp://www.google.com&#39;,
+ &#39;ftp://www.google.com/&#39;,
+ &#39;ftp://www.google.com/&#39;,
+ &#39;ftp://user:password@cispa.saarland&#39;,
+ &#39;ftps://www.google.com/&#39;,
+ &#39;ftp://user:password@www.google.com/&#39;,
+ &#39;ftp://user:password@www.google.com&#39;,
+ &#39;ftp://www.google.com/&#39;,
+ &#39;ftp://user:password@www.google.com&#39;,
+ &#39;ftp://user:password@www.google.com/&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Besides having <em>only</em> common or <em>only</em> uncommon features, one can also create mixed forms – for instance, testing uncommon features in a common context.  This can be helpful for security testing, where one may want an innocuous (common) "envelope" combined with an (uncommon) "payload".  It all depends on where and how we tune the probabilities.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Learning-Probabilities-from-Input-Slices">Learning Probabilities from Input Slices<a class="anchor-link" href="#Learning-Probabilities-from-Input-Slices">&#182;</a></h3><p>In our previous examples, we have learned from <em>all</em> inputs to generate common or uncommon inputs.  However, we can also learn from a <em>subset</em> of inputs to focus on the features present in that subset (or, conversely, to <em>avoid</em> its features).  If we know, for instance, that there is some subset of inputs that covers a functionality of interest (say, because it is particularly critical or because it has been recently changed), we can learn from this very subset and focus our test generation on its features.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To illustrate this approach, let us use the CGI grammar introduced in the <a href="Coverage.html">chapter on coverage</a>.  We have a special interest in Line 25 in our CGI decoder – that is, the line that processes a <code>%</code> character followed by two valid hexadecimal digits:</p>
+<div class="highlight"><pre><span></span><span class="o">...</span>
+        <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span><span class="p">:</span>
+            <span class="n">digit_high</span><span class="p">,</span> <span class="n">digit_low</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+            <span class="k">if</span> <span class="n">digit_high</span> <span class="ow">in</span> <span class="n">hex_values</span> <span class="ow">and</span> <span class="n">digit_low</span> <span class="ow">in</span> <span class="n">hex_values</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">hex_values</span><span class="p">[</span><span class="n">digit_high</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span> <span class="o">+</span> <span class="n">hex_values</span><span class="p">[</span><span class="n">digit_low</span><span class="p">]</span> <span class="c1">### Line 25</span>
+                <span class="n">t</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="o">...</span>
+</pre></div>
+<p>Let us assume that we do not know precisely under which conditions Line 25 is executed – but still, we'd like to test it thoroughly.  With our probability learning tools, we can learn these conditions, though.  We start with a set of random inputs and consider the subset that covers Line 25.</p>
 </div>
 </div>
 </div>
@@ -14901,6 +16274,15 @@ Found &lt;octet&gt; -&gt; 4
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>These are all the random inputs that cover Line 25:</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -14933,10 +16315,19 @@ Found &lt;octet&gt; -&gt; 4
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[&#39;+%60_+%33&#39;, &#39;+%70&#39;, &#39;%7b%c4&#39;, &#39;+%dc&#39;, &#39;%eea&#39;, &#39;%b6&#39;, &#39;2%e5&#39;, &#39;+%63%9e&#39;, &#39;%77&#39;, &#39;%f8e-0&#39;, &#39;%65%71%ac+b53&#39;, &#39;%1f&#39;, &#39;%9f-%1e&#39;, &#39;%01&#39;, &#39;%ec%02%cc&#39;, &#39;b%db_&#39;, &#39;%78+&#39;, &#39;%68&#39;, &#39;+%c5c&#39;, &#39;0%71%e9&#39;, &#39;%53&#39;, &#39;%7e3+&#39;, &#39;%e7+a&#39;, &#39;+%4c%48%6c&#39;, &#39;+3%8f++++&#39;, &#39;%28&#39;, &#39;%22&#39;, &#39;%71&#39;, &#39;3%c02+5&#39;, &#39;%e4+&#39;, &#39;%06%ca&#39;, &#39;%50-+&#39;, &#39;a%b6+&#39;, &#39;%0d&#39;, &#39;+%1c&#39;, &#39;%65++&#39;, &#39;%b9225&#39;, &#39;%13+b&#39;, &#39;%32&#39;, &#39;-1%b11%d8&#39;, &#39;%08&#39;, &#39;%a3&#39;, &#39;%fe&#39;, &#39;+%82%ed%42&#39;, &#39;%d5&#39;, &#39;%5bc&#39;, &#39;%b0&#39;, &#39;%47&#39;, &#39;b+%20&#39;, &#39;%d7&#39;, &#39;0+%17&#39;, &#39;%a5&#39;, &#39;%84&#39;, &#39;e+4%fc&#39;, &#39;d%6f+++1a&#39;]
+<pre>[&#39;%36%c1%d2c2%4f++e&#39;, &#39;%2c%90+&#39;, &#39;c++%8b&#39;, &#39;a+%95&#39;, &#39;%76%00&#39;, &#39;%71&#39;, &#39;%a2&#39;, &#39;%39%51%db%7c%66&#39;, &#39;%2a&#39;, &#39;%b9225&#39;, &#39;%13+b&#39;, &#39;%32&#39;, &#39;-1%b11%d8&#39;, &#39;%08&#39;, &#39;%a3&#39;, &#39;%fe&#39;, &#39;+%82%ed%42&#39;, &#39;%d5&#39;, &#39;%5bc&#39;, &#39;%b0&#39;, &#39;%47&#39;, &#39;b+%20&#39;, &#39;%d7&#39;, &#39;0+%17&#39;, &#39;%a5&#39;, &#39;%84&#39;, &#39;e+4%fc&#39;, &#39;d%6f+++1a&#39;, &#39;d+%95+&#39;, &#39;%1e&#39;, &#39;%244&#39;, &#39;%3c&#39;, &#39;5%75+%99%3c&#39;, &#39;%80%74+a&#39;, &#39;%a7&#39;, &#39;%c1%da&#39;, &#39;%c5+&#39;, &#39;b%44&#39;, &#39;%70%c4_3&#39;, &#39;4%63&#39;, &#39;%364+&#39;, &#39;%79%ab&#39;, &#39;%8a%f6&#39;, &#39;%53%43&#39;, &#39;+++%55+b5&#39;, &#39;%51+++&#39;, &#39;+%28&#39;, &#39;1%1c+&#39;, &#39;+%41%9b&#39;, &#39;%0d%20&#39;, &#39;+%3d+%c2&#39;]
 </pre>
 </div>
 
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Actually, about half of the inputs cover Line 25:</p>
+</div>
+</div>
+</div>
 </div>
 
 <div class="input_code">
@@ -14956,7 +16347,7 @@ Found &lt;octet&gt; -&gt; 4
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.55
+<pre>0.51
 </pre>
 </div>
 
@@ -14965,7 +16356,7 @@ Found &lt;octet&gt; -&gt; 4
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Now use this sample for setting probabilities:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now learn a probabilistic grammar from this slice of inputs:</p>
 </div>
 </div>
 </div>
@@ -14977,7 +16368,7 @@ Found &lt;octet&gt; -&gt; 4
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_grammar_miner</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarMiner</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_grammar_miner</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarMiner</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">))</span>
 <span class="n">probabilistic_cgi_grammar</span> <span class="o">=</span> <span class="n">probabilistic_grammar_miner</span><span class="o">.</span><span class="n">mine_probabilistic_grammar</span><span class="p">(</span><span class="n">coverage_slice</span><span class="p">)</span>
 </pre></div>
 
@@ -14992,7 +16383,30 @@ Found &lt;octet&gt; -&gt; 4
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_cgi_grammar</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_probabilistic_grammar</span><span class="p">(</span><span class="n">probabilistic_cgi_grammar</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that percentage signs are very likely to occur:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_cgi_grammar</span><span class="p">[</span><span class="s1">&#39;&lt;letter&gt;&#39;</span><span class="p">]</span>
 </pre></div>
 
 </div>
@@ -15003,59 +16417,20 @@ Found &lt;octet&gt; -&gt; 4
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;start&gt;&#39;: [(&#39;&lt;string&gt;&#39;, {&#39;prob&#39;: None})],
- &#39;&lt;string&gt;&#39;: [(&#39;&lt;letter&gt;&#39;, {&#39;prob&#39;: 1.0}),
-  (&#39;&lt;letter&gt;&lt;string&gt;&#39;, {&#39;prob&#39;: 0.0})],
- &#39;&lt;letter&gt;&#39;: [(&#39;&lt;plus&gt;&#39;, {&#39;prob&#39;: 0.2246376811594203}),
-  (&#39;&lt;percent&gt;&#39;, {&#39;prob&#39;: 0.5072463768115942}),
-  (&#39;&lt;other&gt;&#39;, {&#39;prob&#39;: 0.26811594202898553})],
- &#39;&lt;plus&gt;&#39;: [(&#39;+&#39;, {&#39;prob&#39;: None})],
- &#39;&lt;percent&gt;&#39;: [(&#39;%&lt;hexdigit&gt;&lt;hexdigit&gt;&#39;, {&#39;prob&#39;: None})],
- &#39;&lt;hexdigit&gt;&#39;: [(&#39;0&#39;, {&#39;prob&#39;: 0.07857142857142857}),
-  (&#39;1&#39;, {&#39;prob&#39;: 0.07142857142857142}),
-  (&#39;2&#39;, {&#39;prob&#39;: 0.05714285714285714}),
-  (&#39;3&#39;, {&#39;prob&#39;: 0.05}),
-  (&#39;4&#39;, {&#39;prob&#39;: 0.05}),
-  (&#39;5&#39;, {&#39;prob&#39;: 0.06428571428571428}),
-  (&#39;6&#39;, {&#39;prob&#39;: 0.07142857142857142}),
-  (&#39;7&#39;, {&#39;prob&#39;: 0.09285714285714286}),
-  (&#39;8&#39;, {&#39;prob&#39;: 0.07142857142857142}),
-  (&#39;9&#39;, {&#39;prob&#39;: 0.02857142857142857}),
-  (&#39;a&#39;, {&#39;prob&#39;: 0.02857142857142857}),
-  (&#39;b&#39;, {&#39;prob&#39;: 0.05714285714285714}),
-  (&#39;c&#39;, {&#39;prob&#39;: 0.09285714285714286}),
-  (&#39;d&#39;, {&#39;prob&#39;: 0.05}),
-  (&#39;e&#39;, {&#39;prob&#39;: 0.08571428571428572}),
-  (&#39;f&#39;, {&#39;prob&#39;: 0.05})],
- &#39;&lt;other&gt;&#39;: [(&#39;0&#39;, {&#39;prob&#39;: 0.08108108108108109}),
-  (&#39;1&#39;, {&#39;prob&#39;: 0.08108108108108109}),
-  (&#39;2&#39;, {&#39;prob&#39;: 0.10810810810810811}),
-  (&#39;3&#39;, {&#39;prob&#39;: 0.10810810810810811}),
-  (&#39;4&#39;, {&#39;prob&#39;: 0.02702702702702703}),
-  (&#39;5&#39;, {&#39;prob&#39;: 0.08108108108108109}),
-  (&#39;a&#39;, {&#39;prob&#39;: 0.10810810810810811}),
-  (&#39;b&#39;, {&#39;prob&#39;: 0.10810810810810811}),
-  (&#39;c&#39;, {&#39;prob&#39;: 0.05405405405405406}),
-  (&#39;d&#39;, {&#39;prob&#39;: 0.02702702702702703}),
-  (&#39;e&#39;, {&#39;prob&#39;: 0.05405405405405406}),
-  (&#39;-&#39;, {&#39;prob&#39;: 0.10810810810810811}),
-  (&#39;_&#39;, {&#39;prob&#39;: 0.05405405405405406})]}
+<pre>[(&#39;&lt;plus&gt;&#39;, {&#39;prob&#39;: 0.2318840579710145}),
+ (&#39;&lt;percent&gt;&#39;, {&#39;prob&#39;: 0.5362318840579711}),
+ (&#39;&lt;other&gt;&#39;, {&#39;prob&#39;: 0.2318840579710145})]
 </pre>
 </div>
 
 </div>
 
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_probabilistic_grammar</span><span class="p">(</span><span class="n">probabilistic_cgi_grammar</span><span class="p">)</span>
-</pre></div>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Using this grammar, we can now generate tests that specifically target Line 25:</p>
 </div>
-</div></div>
+</div>
 </div>
 </div>
 
@@ -15077,19 +16452,10 @@ Found &lt;octet&gt; -&gt; 4
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[&#39;b&#39;, &#39;+&#39;, &#39;+&#39;, &#39;%5e&#39;, &#39;d&#39;, &#39;%52&#39;, &#39;%44&#39;, &#39;+&#39;, &#39;2&#39;, &#39;%57&#39;, &#39;+&#39;, &#39;%8e&#39;, &#39;%12&#39;, &#39;%40&#39;, &#39;%c7&#39;, &#39;2&#39;, &#39;%0e&#39;, &#39;%58&#39;, &#39;+&#39;, &#39;+&#39;]
+<pre>[&#39;%44&#39;, &#39;%17&#39;, &#39;+&#39;, &#39;_%3b&#39;, &#39;%91%74&#39;, &#39;b&#39;, &#39;b&#39;, &#39;%40+b%e1%35%f7+c4%7a%37&#39;, &#39;%21%f6%59a&#39;, &#39;2b&#39;, &#39;%ba&#39;, &#39;%d9%29eab+++%c1+&#39;, &#39;3&#39;, &#39;%60e2&#39;, &#39;%71%f2+&#39;, &#39;++%3b&#39;, &#39;0%03%70+%34%6e&#39;, &#39;e&#39;, &#39;%65a&#39;, &#39;+%5aac+&#39;]
 </pre>
 </div>
 
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>\todo{Check: does this result in greater coverage?}</p>
-</div>
-</div>
-</div>
 </div>
 
 <div class="input_code">
@@ -15113,6 +16479,15 @@ Found &lt;octet&gt; -&gt; 4
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that the fraction of inputs that cover Line 25 is much higher already, showing that our focusing works:</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -15134,45 +16509,7 @@ Found &lt;octet&gt; -&gt; 4
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">coverage_slice</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>[&#39;%29&#39;, &#39;%ec&#39;, &#39;%6e&#39;, &#39;%81&#39;, &#39;%5e&#39;, &#39;%c7&#39;, &#39;%d8&#39;, &#39;%c1&#39;, &#39;%e7&#39;, &#39;%e5&#39;, &#39;%ea&#39;, &#39;%ce&#39;, &#39;%28&#39;, &#39;%87&#39;, &#39;%e6&#39;, &#39;%d4&#39;, &#39;%57&#39;, &#39;%18&#39;, &#39;%c8&#39;, &#39;%73&#39;, &#39;%86&#39;, &#39;%d0&#39;, &#39;%76&#39;, &#39;%ab&#39;, &#39;%07&#39;, &#39;%3c&#39;, &#39;%16&#39;, &#39;%69&#39;, &#39;%77&#39;, &#39;%65&#39;, &#39;%b0&#39;, &#39;%5c&#39;, &#39;%34&#39;, &#39;%4f&#39;, &#39;%0c&#39;, &#39;%92&#39;, &#39;%17&#39;]
-</pre>
-</div>
-
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_grammar_miner</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarMiner</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">,</span> <span class="n">parser</span><span class="o">=</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">CGI_GRAMMAR</span><span class="p">))</span>
-<span class="n">probabilistic_cgi_grammar</span> <span class="o">=</span> <span class="n">probabilistic_grammar_miner</span><span class="o">.</span><span class="n">mine_probabilistic_grammar</span><span class="p">(</span><span class="n">coverage_slice</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_cgi_grammar</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">coverage_slice</span><span class="p">)</span> <span class="o">/</span> <span class="n">trials</span>
 </pre></div>
 
 </div>
@@ -15183,46 +16520,19 @@ Found &lt;octet&gt; -&gt; 4
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;start&gt;&#39;: [(&#39;&lt;string&gt;&#39;, {&#39;prob&#39;: None})],
- &#39;&lt;string&gt;&#39;: [(&#39;&lt;letter&gt;&#39;, {&#39;prob&#39;: 1.0}),
-  (&#39;&lt;letter&gt;&lt;string&gt;&#39;, {&#39;prob&#39;: 0.0})],
- &#39;&lt;letter&gt;&#39;: [(&#39;&lt;plus&gt;&#39;, {&#39;prob&#39;: 0.0}),
-  (&#39;&lt;percent&gt;&#39;, {&#39;prob&#39;: 1.0}),
-  (&#39;&lt;other&gt;&#39;, {&#39;prob&#39;: 0.0})],
- &#39;&lt;plus&gt;&#39;: [(&#39;+&#39;, {&#39;prob&#39;: None})],
- &#39;&lt;percent&gt;&#39;: [(&#39;%&lt;hexdigit&gt;&lt;hexdigit&gt;&#39;, {&#39;prob&#39;: None})],
- &#39;&lt;hexdigit&gt;&#39;: [(&#39;0&#39;, {&#39;prob&#39;: 0.05405405405405406}),
-  (&#39;1&#39;, {&#39;prob&#39;: 0.06756756756756757}),
-  (&#39;2&#39;, {&#39;prob&#39;: 0.04054054054054054}),
-  (&#39;3&#39;, {&#39;prob&#39;: 0.04054054054054054}),
-  (&#39;4&#39;, {&#39;prob&#39;: 0.04054054054054054}),
-  (&#39;5&#39;, {&#39;prob&#39;: 0.06756756756756757}),
-  (&#39;6&#39;, {&#39;prob&#39;: 0.0945945945945946}),
-  (&#39;7&#39;, {&#39;prob&#39;: 0.13513513513513514}),
-  (&#39;8&#39;, {&#39;prob&#39;: 0.0945945945945946}),
-  (&#39;9&#39;, {&#39;prob&#39;: 0.04054054054054054}),
-  (&#39;a&#39;, {&#39;prob&#39;: 0.02702702702702703}),
-  (&#39;b&#39;, {&#39;prob&#39;: 0.02702702702702703}),
-  (&#39;c&#39;, {&#39;prob&#39;: 0.10810810810810811}),
-  (&#39;d&#39;, {&#39;prob&#39;: 0.04054054054054054}),
-  (&#39;e&#39;, {&#39;prob&#39;: 0.10810810810810811}),
-  (&#39;f&#39;, {&#39;prob&#39;: 0.013513513513513514})],
- &#39;&lt;other&gt;&#39;: [(&#39;0&#39;, {&#39;prob&#39;: None}),
-  (&#39;1&#39;, {&#39;prob&#39;: None}),
-  (&#39;2&#39;, {&#39;prob&#39;: None}),
-  (&#39;3&#39;, {&#39;prob&#39;: None}),
-  (&#39;4&#39;, {&#39;prob&#39;: None}),
-  (&#39;5&#39;, {&#39;prob&#39;: None}),
-  (&#39;a&#39;, {&#39;prob&#39;: None}),
-  (&#39;b&#39;, {&#39;prob&#39;: None}),
-  (&#39;c&#39;, {&#39;prob&#39;: None}),
-  (&#39;d&#39;, {&#39;prob&#39;: None}),
-  (&#39;e&#39;, {&#39;prob&#39;: None}),
-  (&#39;-&#39;, {&#39;prob&#39;: None}),
-  (&#39;_&#39;, {&#39;prob&#39;: None})]}
+<pre>0.76
 </pre>
 </div>
 
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Repeating this one more time yields an even higher focusing:</p>
+</div>
+</div>
+</div>
 </div>
 
 <div class="input_code">
@@ -15231,8 +16541,145 @@ Found &lt;octet&gt; -&gt; 4
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">probabilistic_cgi_fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">probabilistic_cgi_grammar</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">([</span><span class="n">probabilistic_cgi_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">)])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">probabilistic_cgi_grammar</span> <span class="o">=</span> <span class="n">probabilistic_grammar_miner</span><span class="o">.</span><span class="n">mine_probabilistic_grammar</span><span class="p">(</span><span class="n">coverage_slice</span><span class="p">)</span>
+    <span class="n">probabilistic_cgi_fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">probabilistic_cgi_grammar</span><span class="p">)</span>
+
+    <span class="n">trials</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">coverage</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
+        <span class="n">cgi_input</span> <span class="o">=</span> <span class="n">probabilistic_cgi_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
+            <span class="n">cgi_decode</span><span class="p">(</span><span class="n">cgi_input</span><span class="p">)</span>
+        <span class="n">coverage</span><span class="p">[</span><span class="n">cgi_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
+
+    <span class="n">coverage_slice</span> <span class="o">=</span> <span class="p">[</span><span class="n">cgi_input</span> <span class="k">for</span> <span class="n">cgi_input</span> <span class="ow">in</span> <span class="n">coverage</span> 
+                      <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span> <span class="ow">in</span> <span class="n">coverage</span><span class="p">[</span><span class="n">cgi_input</span><span class="p">]]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">coverage_slice</span><span class="p">)</span> <span class="o">/</span> <span class="n">trials</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0.85
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>By learning (and re-learning) probabilities from a subset of sample inputs, we can <em>specialize</em> fuzzers towards the properties of that subset – in our case, inputs that contain percentage signs and valid hexadecimal letters.  The degree to which we can specialize things is induced by the number of variables we can control – in our case, the probabilitites for the individual rules.  Adding more context to the grammar, as discussed in the <a href="GrammarCoverageFuzzer.html">chapter on coverage fuzzing</a>, will increase the number of variables, and thus the amount of specialization.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>A high degree of specialization, however, limits our possibilities to explore combinations that fall <em>outside</em> of the selected scope, and limit our possibilities to find bugs induced by these combinations.  This tradeoff is known as <em>exploration vs. exploitation</em> in machine learning – shall one try to explore as many (possibly shallow) combinations as possible, or focus (exploit) specific areas?  In the end, it all depends on where the bugs are, and where we are most likely to find them.  Assigning and learning probabilities allows us to control the search strategies – from the common to the uncommon to specific subsets.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Detecting-Unnatural-Numbers">Detecting Unnatural Numbers<a class="anchor-link" href="#Detecting-Unnatural-Numbers">&#182;</a></h3><p>Let us close this chapter by getting back to our introductory example.  We said that Benford's law allows us not only to produce, but also to detect "unnatural" lead digit distributions such as the ones produced by simple random choices.</p>
+<p>If we use the regular <code>GrammarFuzzer</code> class (which ignores probabilities) to generate (random) lead digits, this is the distribution we get for each leading digit:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sample_size</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">random_integer_fuzzer</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;leaddigit&gt;&quot;</span><span class="p">)</span>
+<span class="n">random_integers</span> <span class="o">=</span> <span class="p">[</span><span class="n">random_integer_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sample_size</span><span class="p">)]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">random_counts</span> <span class="o">=</span> <span class="p">[</span> <span class="n">random_integers</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">crange</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">)</span> <span class="p">]</span>
+<span class="n">random_counts</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[122, 123, 116, 98, 117, 105, 99, 114, 106]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>(For simplicity, we use the simple list <code>count()</code> method here rather than deploying the full-fledged <code>ProbabilisticGrammarMiner</code>.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we had a natural distribution of lead digits, this is what we would expect:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expected_prob_counts</span> <span class="o">=</span> <span class="p">[</span> <span class="n">exp_prob</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">[</span><span class="s2">&quot;&lt;leaddigit&gt;&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">sample_size</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span> <span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">expected_prob_counts</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -15243,7 +16690,7 @@ Found &lt;octet&gt; -&gt; 4
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[&#39;%ea&#39;, &#39;%94&#39;, &#39;%d1&#39;, &#39;%87&#39;, &#39;%7e&#39;, &#39;%67&#39;, &#39;%87&#39;, &#39;%f7&#39;, &#39;%98&#39;, &#39;%ca&#39;, &#39;%6c&#39;, &#39;%7c&#39;, &#39;%62&#39;, &#39;%76&#39;, &#39;%87&#39;, &#39;%55&#39;, &#39;%ed&#39;, &#39;%7e&#39;, &#39;%7e&#39;, &#39;%66&#39;]
+<pre>[301.0, 176.0, 125.0, 97.0, 79.0, 67.0, 58.0, 51.0, 46.0]
 </pre>
 </div>
 
@@ -15252,10 +16699,139 @@ Found &lt;octet&gt; -&gt; 4
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>And if we had a random distribution, we would expect an equal distribution:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expected_random_counts</span> <span class="o">=</span> <span class="p">[</span> <span class="n">sample_size</span> <span class="o">/</span> <span class="mi">9</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span> <span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">expected_random_counts</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[111.11111111111111, 111.11111111111111, 111.11111111111111, 111.11111111111111, 111.11111111111111, 111.11111111111111, 111.11111111111111, 111.11111111111111, 111.11111111111111]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Which distribution better matches our <code>random_counts</code> lead digits?  To this end, we run a $\chi^2$-test to compare the distribution we found (<code>random_counts</code>) against the "natural" lead digit distribution <code>expected_prob_counts</code> and the random distribution <code>expected_random_counts</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/scipy.stats.html" class="import" target="_blank">scipy.stats</a></span> <span class="k">import</span> <span class="n">chisquare</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>It turns out that there is a zero chance (<code>pvalue</code> = 0.0) that the observed distribution follows a "natural" distribution:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">chisquare</span><span class="p">(</span><span class="n">random_counts</span><span class="p">,</span> <span class="n">expected_prob_counts</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Power_divergenceResult(statistic=347.96491895076656, pvalue=2.4618008235897177e-70)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>However, there is a 97% chance that the observed behavior follows a random distribution:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">chisquare</span><span class="p">(</span><span class="n">random_counts</span><span class="p">,</span> <span class="n">expected_random_counts</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>Power_divergenceResult(statistic=6.38, pvalue=0.6047465691667375)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Hence, if you find some numbers published and doubt their validity, you can run the above test to check whether they are likely to be natural.  Better yet, insist that authors use Jupyter notebooks to produce their results, such that you can check every step of the calculation :-)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
-<li><em>Lesson one</em></li>
-<li><em>Lesson two</em></li>
-<li><em>Lesson three</em></li>
+<li>By specifying probabilities, one can steer fuzzing towards input features of interest.</li>
+<li>Learning probabilities from samples allows one to focus on features that are common or uncommon in input samples.</li>
+<li>Learning probabilities from a subset of samples allows one to produce more similar inputs.</li>
 </ul>
 </div>
 </div>
@@ -15265,12 +16841,13 @@ Found &lt;octet&gt; -&gt; 4
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p><em>Link to subsequent chapters (notebooks) here, as in:</em></p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>Now that we have brought together probabilities and grammars (and revisited parsers and grammars), we have created a foundation for many applications.  Our next chapters will focus on</p>
 <ul>
-<li><a href="MutationFuzzer.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
-<li><a href="Grammars.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
-<li><a href="Reducer.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
+<li>how to <a href="Reducer.html"><em>reduce</em> failing inputs to a minimum</a></li>
+<li>how to <a href="Carver.html">carve</a> and <a href="APIFuzzer.html">produce</a> tests at the function level </li>
+<li>how to <a href="WebFuzzer.html">automatically test (Web) user interfaces</a></li>
 </ul>
+<p>Enjoy!</p>
 </div>
 </div>
 </div>
@@ -15280,6 +16857,7 @@ Found &lt;octet&gt; -&gt; 4
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>Our exposition of Benford's law follows <a href="https://brilliant.org/wiki/benfords-law/">this article</a>.</p>
+<p>[Unresolved citation: Learn&amp;Fuzz) and \cite{Godefroid's work.]</p>
 </div>
 </div>
 </div>
@@ -15288,13 +16866,7 @@ Found &lt;octet&gt; -&gt; 4
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2><p>Close the chapter with a few exercises such that people have things to do.  In Jupyter Notebook, use the <code>exercise2</code> nbextension to add solutions that can be interactively viewed or hidden:</p>
-<ul>
-<li>Mark the <em>last</em> cell of the exercise (this should be a <em>text</em> cell) as well as <em>all</em> cells of the solution.  (Use the <code>rubberband</code> nbextension and use Shift+Drag to mark multiple cells.)</li>
-<li>Click on the <code>solution</code> button at the top.</li>
-</ul>
-<p>(Alternatively, just copy the exercise and solution cells below with their metadata.)</p>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -15302,7 +16874,7 @@ Found &lt;octet&gt; -&gt; 4
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1">Exercise 1<a class="anchor-link" href="#Exercise-1">&#182;</a></h3><p>Create a class <code>ProbabilisticGrammarCoverageFuzzer</code> that extends <code>GrammarCoverageFuzzer</code> with probabilistic capabilities.  The idea is to first cover all uncovered expansions (like <code>GrammarCoverageFuzzer</code>) and once all expansions are covered, to proceed by probabilities (like <code>ProbabilisticGrammarFuzzer</code>).  To this end, define new instances of the <code>choose_covered_node_expansion()</code> and <code>choose_uncovered_node_expansion()</code> methods that choose an expansion based on the given weights.  If you are an advanced programmer, realize the class via <em>multiple inheritance</em> from <code>GrammarCoverageFuzzer</code> and <code>ProbabilisticGrammarFuzzer</code> to achieve this.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Probabilistic-Fuzzing-with-Coverage">Exercise 1: Probabilistic Fuzzing with Coverage<a class="anchor-link" href="#Exercise-1:-Probabilistic-Fuzzing-with-Coverage">&#182;</a></h3><p>Create a class <code>ProbabilisticGrammarCoverageFuzzer</code> that extends <code>GrammarCoverageFuzzer</code> with probabilistic capabilities.  The idea is to first cover all uncovered expansions (like <code>GrammarCoverageFuzzer</code>) and once all expansions are covered, to proceed by probabilities (like <code>ProbabilisticGrammarFuzzer</code>).  To this end, define new instances of the <code>choose_covered_node_expansion()</code> and <code>choose_uncovered_node_expansion()</code> methods that choose an expansion based on the given weights.  If you are an advanced programmer, realize the class via <em>multiple inheritance</em> from <code>GrammarCoverageFuzzer</code> and <code>ProbabilisticGrammarFuzzer</code> to achieve this.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ProbabilisticGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -15314,7 +16886,7 @@ Found &lt;octet&gt; -&gt; 4
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2">Exercise 2<a class="anchor-link" href="#Exercise-2">&#182;</a></h3><p>Test: [<a href="http://dl.acm.org/citation.cfm?id=2362793.2362831">Holler <em>et al</em>, 2012.</a>]</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-Learning-Probabilities-in-Context">Exercise 2: Learning Probabilities in Context<a class="anchor-link" href="#Exercise-2:-Learning-Probabilities-in-Context">&#182;</a></h3><p>Consider the <code>duplicate_context()</code> method introduced in the <a href="GrammarCoverageFuzzer.html">chapter on coverage fuzzing</a>.  Apply it on <code>EXPR_GRAMMAR</code> to obtain probabilities in context from an input sample, and use them to produce more of the same inputs.  Compare how well your "contextual" grammar matches the properties of the input, compared to a "context-less" grammar.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ProbabilisticGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -15329,7 +16901,7 @@ Found &lt;octet&gt; -&gt; 4
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ProbabilisticGrammarFuzzer.ipynb" target=_blank)>Last change: 2018-11-25 17:28:40+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ProbabilisticGrammarFuzzer.ipynb" target=_blank)>Last change: 2018-12-04 15:59:02+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -15345,7 +16917,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html</a>.  Retrieved 2018-11-25 17:28:40+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html</a>.  Retrieved 2018-12-04 15:59:02+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:ProbabilisticGrammarFuzzer,
@@ -15355,9 +16927,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html}},
-    note = {Retrieved 2018-11-25 17:28:40+01:00},
+    note = {Retrieved 2018-12-04 15:59:02+01:00},
     url = {https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html},
-    urldate = {2018-11-25 17:28:40+01:00}
+    urldate = {2018-12-04 15:59:02+01:00}
 }
 </pre>
 </div>

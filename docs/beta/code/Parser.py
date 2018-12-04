@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-27 15:30:45+01:00
+# Last change: 2018-11-28 18:53:41+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
 
 def process_vehicle(vehicle):
-    year, kind, company, model = vehicle.split(',')
+    year, kind, company, model, *_ = vehicle.split(',')
     if kind == 'van':
         print("We have a %s %s van from %s vintage." % (company, model, year))
         iyear = int(year)
@@ -78,7 +78,7 @@ CSV_GRAMMAR = {
     '<csvline>': ['<items>'],
     '<items>' :  ['<item>,<items>', '<item>'],
     '<item>' : ['<letters>'],
-    '<letters>': ['<letter><letter>', '<letter>'],
+    '<letters>': ['<letter><letters>', '<letter>'],
     '<letter>' : list(string.ascii_letters + string.digits + string.punctuation + ' \t\n')
 }
 
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    gf = GrammarFuzzer(CSV_GRAMMAR)
+    gf = GrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     trials = 1000
     valid = []
     time = 0
@@ -119,17 +119,19 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    gf = GrammarFuzzer(CSV_GRAMMAR)
+    gf = GrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     trials = 10
     valid = []
     time = 0
     for i in range(trials):
         vehicle_info = gf.fuzz()
         try:
-            print(vehicle_info)
+            print(repr(vehicle_info), end="")
             process_vehicle(vehicle_info)
         except Exception as e:
             print("\t", e)
+        else:
+            print()
 
 
 from copy import deepcopy
@@ -154,10 +156,10 @@ class PooledGrammarFuzzer(GrammarFuzzer):
         return super().expand_node_randomly(node)
 
 if __name__ == "__main__":
-    gf = PooledGrammarFuzzer(CSV_GRAMMAR)
+    gf = PooledGrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     gf.update_cache('<item>', [
-        ('<item>', [('<car>', [])]),
-        ('<item>', [('<van>', [])]),
+        ('<item>', [('car', [])]),
+        ('<item>', [('van', [])]),
     ])
     trials = 10
     valid = []
@@ -165,10 +167,12 @@ if __name__ == "__main__":
     for i in range(trials):
         vehicle_info = gf.fuzz()
         try:
-            print(vehicle_info)
+            print(repr(vehicle_info), end="")
             process_vehicle(vehicle_info)
         except Exception as e:
             print("\t", e)
+        else:
+            print()
 
 
 # ## An Ad Hoc Parser
@@ -519,6 +523,8 @@ if __name__ == "__main__":
 
 class PEGParser(PEGParser):
     def unify_key(self, key, text, at=0):
+        if self.log:
+            print("unify_key: %s with %s" % (repr(key), repr(text[at:])))
         if key not in self.cgrammar:
             if text[at:].startswith(key):
                 return at + len(key), (key, [])
@@ -530,6 +536,17 @@ class PEGParser(PEGParser):
                 return (to, (key, res))
         return 0, None
 
+if __name__ == "__main__":
+    mystring = "1"
+    peg = PEGParser(EXPR_GRAMMAR, log=True)
+    peg.unify_key('1', mystring)
+
+
+if __name__ == "__main__":
+    mystring = "2"
+    peg.unify_key('1', mystring)
+
+
 # #### Unify Rule
 
 if __name__ == "__main__":
@@ -540,6 +557,8 @@ if __name__ == "__main__":
 
 class PEGParser(PEGParser):
     def unify_rule(self, rule, text, at):
+        if self.log:
+            print('unify_rule: %s with %s' % (repr(rule), repr(text[at:])))
         results = []
         for token in rule:
             at, res = self.unify_key(token, text, at)
@@ -547,6 +566,23 @@ class PEGParser(PEGParser):
                 return at, None
             results.append(res)
         return at, results
+
+if __name__ == "__main__":
+    mystring = "0"
+    peg = PEGParser(EXPR_GRAMMAR, log=True)
+    peg.unify_rule(peg.cgrammar['<digit>'][0], mystring, 0)
+
+
+if __name__ == "__main__":
+    mystring = "12"
+    peg.unify_rule(peg.cgrammar['<integer>'][0], mystring, 0)
+
+
+if __name__ == "__main__":
+    mystring = "1 + 2"
+    peg = PEGParser(EXPR_GRAMMAR, log=False)
+    peg.parse(mystring)
+
 
 from functools import lru_cache
 
@@ -1220,30 +1256,6 @@ class EarleyParser(EarleyParser):
         start = next(s for s in states if s.finished())
         return self.extract_trees(self.parse_forest(f_table, start))
 
-# ### Parsing Forests
-
-if __name__ == "__main__":
-    print('\n### Parsing Forests')
-
-
-
-
-class EarleyParser(EarleyParser):
-    def parse_forest(self, chart, state):
-        if not state.expr:
-            return (state.name, [])
-        pathexprs = self.parse_paths(state.expr, chart, state.s_col.index,
-                                     state.e_col.index)
-        paths_ = []
-        for pathexpr in pathexprs:
-            pathexpr_ = []
-            for varexpr in pathexpr:
-                completion = (self.parse_forest(chart, varexpr) if isinstance(
-                    varexpr, State) else (varexpr, []))
-                pathexpr_.append(completion)
-            paths_.append(pathexpr_)
-        return (state.name, paths_)
-
 # ### Parsing Paths
 
 if __name__ == "__main__":
@@ -1282,10 +1294,35 @@ if __name__ == "__main__":
         print([str(s) for s in path])
 
 
+# ### Parsing Forests
+
+if __name__ == "__main__":
+    print('\n### Parsing Forests')
+
+
+
+
+class EarleyParser(EarleyParser):
+    def parse_forest(self, chart, state):
+        if not state.expr:
+            return (state.name, [])
+        pathexprs = self.parse_paths(state.expr, chart, state.s_col.index,
+                                     state.e_col.index)
+        paths_ = []
+        for pathexpr in pathexprs:
+            pathexpr_ = []
+            for varexpr in pathexpr:
+                completion = (self.parse_forest(chart, varexpr) if isinstance(
+                    varexpr, State) else (varexpr, []))
+                pathexpr_.append(completion)
+            paths_.append(pathexpr_)
+        return (state.name, paths_)
+
 if __name__ == "__main__":
     ep = EarleyParser(SAMPLE_GRAMMAR)
     reversed_table = ep.reverse(columns)
-    ep.parse_forest(reversed_table, last_states[0])
+    result = ep.parse_forest(reversed_table, last_states[0])
+    result
 
 
 # ### Extracting Trees
@@ -1676,18 +1713,11 @@ if __name__ == "__main__":
 
 
 
-LR_GRAMMAR = {
-    '<start>': ['<A>'],
-    '<A>': ['<A>a', ''],
-}
-
-RR_GRAMMAR = {
-    '<start>': ['<A>'],
-    '<A>': ['a<A>', ''],
-}
-
 if __name__ == "__main__":
     mystring = 'aaaaaa'
+
+
+if __name__ == "__main__":
     result = EarleyParser(LR_GRAMMAR, log=True).parse(mystring)
 
 

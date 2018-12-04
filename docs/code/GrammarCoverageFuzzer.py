@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-11-27 14:14:40+01:00
+# Last change: 2018-11-28 20:41:01+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -103,24 +103,33 @@ if __name__ == "__main__":
 
 
 class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
-    def _max_expansion_coverage(self, symbol, symbols_seen):
-        """Return set of all expansions in a grammar"""
-        if symbol in symbols_seen:
+    def _max_expansion_coverage(self, symbol, max_depth):
+        if max_depth <= 0:
             return set()
         
-        symbols_seen.add(symbol)
+        self._symbols_seen.add(symbol)
         
         expansions = set()
         for expansion in self.grammar[symbol]:
             expansions.add(expansion_key(symbol, expansion))
             for nonterminal in nonterminals(expansion):
-                expansions |= self._max_expansion_coverage(nonterminal, symbols_seen)
-        
+                if nonterminal not in self._symbols_seen:
+                    expansions |= self._max_expansion_coverage(nonterminal, max_depth - 1)
+
         return expansions
     
-    def max_expansion_coverage(self):
-        symbols_seen = set()
-        return self._max_expansion_coverage(self.start_symbol, symbols_seen)
+    def max_expansion_coverage(self, symbol=None, max_depth=float('inf')):
+        """Return set of all expansions in a grammar starting with `symbol`"""
+        if symbol is None:
+            symbol = self.start_symbol
+
+        self._symbols_seen = set()
+        cov = self._max_expansion_coverage(symbol, max_depth)
+        
+        if symbol == START_SYMBOL:
+            assert len(self._symbols_seen) == len(self.grammar)
+
+        return cov
 
 if __name__ == "__main__":
     expr_fuzzer = TrackingGrammarCoverageFuzzer(EXPR_GRAMMAR)
@@ -140,7 +149,8 @@ class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
         index = super().choose_node_expansion(node, possible_children)
         self.add_coverage(symbol, possible_children[index])
         return index
-    
+
+class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
     def missing_expansion_coverage(self):
         return self.max_expansion_coverage() - self.expansion_coverage()
 
@@ -226,7 +236,7 @@ class SimpleGrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
         return TrackingGrammarCoverageFuzzer.choose_node_expansion(self, node, possible_children)
 
 if __name__ == "__main__":
-    f = SimpleGrammarCoverageFuzzer(EXPR_GRAMMAR, start_symbol="<digit>", log=True)
+    f = SimpleGrammarCoverageFuzzer(EXPR_GRAMMAR, start_symbol="<digit>")
     f.fuzz()
 
 
@@ -244,11 +254,11 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     for i in range(7):
-        f.fuzz()
+        print(f.fuzz(), end=" ")
 
 
 if __name__ == "__main__":
-    f.max_expansion_coverage() - f.expansion_coverage()
+    f.missing_expansion_coverage()
 
 
 if __name__ == "__main__":
@@ -258,7 +268,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    f.max_expansion_coverage() - f.expansion_coverage()
+    f.missing_expansion_coverage()
 
 
 if __name__ == "__main__":
@@ -284,7 +294,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    f.max_expansion_coverage() - f.expansion_coverage()
+    f.missing_expansion_coverage()
 
 
 if __name__ == "__main__":
@@ -299,47 +309,13 @@ if __name__ == "__main__":
 
 
 
-class GrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
-    def _max_symbol_expansion_coverage(
-            self, symbol, max_depth, cov, symbols_seen):
-        """Return set of all expansions in a grammar starting with `symbol`"""
-        if max_depth <= 0:
-            return (cov, symbols_seen)
-
-        symbols_seen.add(symbol)
-        for expansion in self.grammar[symbol]:
-            key = expansion_key(symbol, expansion)
-            if key in cov:
-                continue
-
-            cov.add(key)
-            for s in nonterminals(expansion):
-                if s in symbols_seen:
-                    continue
-                new_cov, new_symbols_seen = (
-                    self._max_symbol_expansion_coverage(s, max_depth - 1, cov, symbols_seen))
-                cov |= new_cov
-                symbols_seen |= new_symbols_seen
-
-        return (cov, symbols_seen)
-
-class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
-    def max_symbol_expansion_coverage(self, symbol, max_depth=float('inf')):
-        cov, symbols_seen = self._max_symbol_expansion_coverage(
-            symbol, max_depth, set(), set())
-        return cov
-
 if __name__ == "__main__":
-    f = GrammarCoverageFuzzer(EXPR_GRAMMAR)
-    f.max_symbol_expansion_coverage('<integer>')
+    f = SimpleGrammarCoverageFuzzer(EXPR_GRAMMAR)
+    f.max_expansion_coverage('<integer>')
 
 
 if __name__ == "__main__":
-    f.max_symbol_expansion_coverage('<digit>')
-
-
-if __name__ == "__main__":
-    assert f.max_expansion_coverage() == f.max_symbol_expansion_coverage(START_SYMBOL)
+    f.max_expansion_coverage('<digit>')
 
 
 # ### Determining yet Uncovered Children
@@ -350,12 +326,12 @@ if __name__ == "__main__":
 
 
 
-class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
+class GrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
     def _new_child_coverage(self, children, max_depth):
         new_cov = set()
         for (c_symbol, _) in children:
             if c_symbol in self.grammar:
-                new_cov |= self.max_symbol_expansion_coverage(
+                new_cov |= self.max_expansion_coverage(
                     c_symbol, max_depth)
         return new_cov
 
@@ -533,13 +509,13 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from Grammars import new_symbol
+    from Grammars import new_symbol, unreachable_nonterminals
 else:
-    from .Grammars import new_symbol
+    from .Grammars import new_symbol, unreachable_nonterminals
 
 from GrammarFuzzer import expansion_to_children
 
-def duplicate_context(grammar, symbol, expansion=None, depth=-1):
+def duplicate_context(grammar, symbol, expansion=None, depth=float('inf')):
     """Duplicate an expansion within a grammar.
 
     In the given grammar, take the given expansion of the given symbol
@@ -551,6 +527,10 @@ def duplicate_context(grammar, symbol, expansion=None, depth=-1):
     orig_grammar = copy.deepcopy(grammar)
     _duplicate_context(grammar, orig_grammar, symbol,
                        expansion, depth, seen={})
+    
+    # After duplication, we may have unreachable rules; delete them
+    for nonterminal in unreachable_nonterminals(grammar):
+        del grammar[nonterminal]
 
 def _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen):
     for i in range(len(grammar[symbol])):
@@ -599,6 +579,10 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
     duplicate_context(dup_expr_grammar, "<expr>")
+
+
+if __name__ == "__main__":
+    assert is_valid_grammar(dup_expr_grammar)
     len(dup_expr_grammar)
 
 
@@ -610,7 +594,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
     duplicate_context(dup_expr_grammar, "<expr>")
-    duplicate_context(dup_expr_grammar, "<expr>")
+    duplicate_context(dup_expr_grammar, "<expr-1>")
     len(dup_expr_grammar)
 
 
