@@ -2,6 +2,7 @@
 # This file defines the chapter files to be included
 
 # Chapters to include in the book, in this order
+# Chapters that are out on the website
 PUBLIC_CHAPTERS = \
 	Intro_Testing.ipynb \
 	Fuzzer.ipynb \
@@ -9,16 +10,16 @@ PUBLIC_CHAPTERS = \
 	MutationFuzzer.ipynb \
 	Grammars.ipynb \
 	GrammarFuzzer.ipynb \
-	GrammarCoverageFuzzer.ipynb
+	GrammarCoverageFuzzer.ipynb \
+	ConfigurationFuzzer.ipynb
 
-# Chapters that are ready for release
+# Chapters that are ready for release (and with the students)
 READY_CHAPTERS = \
-	ConfigurationFuzzer.ipynb \
-	Parser.ipynb
+	Parser.ipynb \
+	ProbabilisticGrammarFuzzer.ipynb \
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	ProbabilisticGrammarFuzzer.ipynb \
 	Reducer.ipynb \
 	Carver.ipynb \
 	APIFuzzer.ipynb \
