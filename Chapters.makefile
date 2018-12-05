@@ -11,7 +11,7 @@ PUBLIC_CHAPTERS = \
 	Grammars.ipynb \
 	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
-	ConfigurationFuzzer.ipynb
+	ConfigurationFuzzer.ipynb \
 
 # Chapters that are ready for release (and with the students)
 READY_CHAPTERS = \
@@ -20,15 +20,15 @@ READY_CHAPTERS = \
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	Reducer.ipynb \
-	Carver.ipynb \
+	ConstraintGrammarFuzzer.ipynb \
 	APIFuzzer.ipynb \
+	Carver.ipynb \
+	Reducer.ipynb \
 	WebFuzzer.ipynb \
 	InformationFlow.ipynb \
-	GrammarMiner.ipynb
+	GrammarMiner.ipynb \
+
 	# Oracles.ipynb
-	# ConstraintGrammarFuzzer.ipynb
-	# GUIFuzzer.ipynb
 	# SearchBasedFuzzer.ipynb
 	# SymbolicFuzzer.ipynb
 	# FuzzingInTheLarge.ipynb
