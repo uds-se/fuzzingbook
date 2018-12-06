@@ -797,7 +797,10 @@ delete-betas:
 # Table of contents
 .PHONY: toc
 toc: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb
-$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py $(CHAPTERS_MAKEFILE)
+$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
+	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
+	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
+	$(CHAPTERS_MAKEFILE)
 	$(RM) $@
 	$(PYTHON) utils/nbtoc.py \
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
@@ -806,8 +809,10 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py $(CHAPTERS_MA
 # Index
 .PHONY: index
 index: $(NOTEBOOKS)/00_Index.ipynb
-$(NOTEBOOKS)/00_Index.ipynb $(DOCS_TARGET)notebooks/00_Index.ipynb: \
-	utils/nbindex.py $(SOURCES) $(CHAPTERS_MAKEFILE)
+$(NOTEBOOKS)/00_Index.ipynb $(DOCS_TARGET)notebooks/00_Index.ipynb: utils/nbindex.py \
+	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
+	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
+	$(CHAPTERS_MAKEFILE)
 	(cd $(NOTEBOOKS); $(PYTHON) ../utils/nbindex.py $(TOC_CHAPTERS) $(APPENDICES)) > $@
 
 ## Python packages
