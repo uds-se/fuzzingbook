@@ -20,7 +20,7 @@ READY_CHAPTERS = \
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	ConstraintGrammarFuzzer.ipynb \
+	GeneratorGrammarFuzzer.ipynb \
 	APIFuzzer.ipynb \
 	Carver.ipynb \
 	Reducer.ipynb \
