@@ -690,7 +690,7 @@ $(DOCS_TARGET)code/%: $(CODE_TARGET)%
 	cp -pr $< $@
 
 .PHONY: dist publish-dist
-dist publish-dist: check-import check-code publish-code delete-betas toc \
+dist publish-dist: check-import check-code publish-code toc \
 	$(DOCS_TARGET)dist/fuzzingbook-code.zip \
 	$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip
 
@@ -771,28 +771,6 @@ publish-pics-setup:
 	$(RM) -fr $(DOCS_TARGET)html/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)html
 	$(RM) -fr $(DOCS_TARGET)slides/PICS; ln -s ../$(NOTEBOOKS)/PICS $(DOCS_TARGET)slides
 
-
-# ifndef BETA
-# # Remove all chapters marked as beta
-# .PHONY: delete-betas
-# delete-betas: publish-code publish-html publish-slides
-# 	@cd $(DOCS_TARGET); \
-# 	for chapter in $(BETA_CHAPTERS); do \
-# 	    module=$$(basename $$chapter .ipynb); \
-# 		echo "Removing '$$module' (beta)"; \
-# 		$(RM) code/$$module.py; \
-# 		$(RM) html/$$module.html; \
-# 		$(RM) -r html/$${module}_files; \
-# 		$(RM) notebooks/$$module.ipynb; \
-# 		$(RM) slides/$$module.slides.html; \
-# 	done
-# endif
-#
-# ifdef BETA
-# # On the beta site, we don't delete stuff
-.PHONY: delete-betas
-delete-betas:
-# endif
 
 # Table of contents
 .PHONY: toc
