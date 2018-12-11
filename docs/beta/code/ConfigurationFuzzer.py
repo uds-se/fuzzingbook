@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2018-12-03 14:33:12+01:00
+# Last change: 2018-12-11 13:53:58+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -622,9 +622,18 @@ class OptionRunner(OptionRunner):
     def grammar(self):
         return convert_ebnf_grammar(self._ebnf_grammar)
 
+if __package__ is None or __package__ == "":
+    from Grammars import unreachable_nonterminals
+else:
+    from .Grammars import unreachable_nonterminals
+
+
 class OptionRunner(OptionRunner):
     def set_arguments(self, args):
         self._ebnf_grammar["<arguments>"] = [" " + args]
+        # Delete rules for previous arguments
+        for nonterminal in unreachable_nonterminals(self._ebnf_grammar):
+            del self._ebnf_grammar[nonterminal]
 
     def set_invocation(self, program):
         self.program = program

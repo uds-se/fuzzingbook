@@ -11875,12 +11875,13 @@ MathJax.Hub.Config({
 <li><a href="ConfigurationFuzzer.html"><span class="chnum">8</span> Testing Configurations</a></li>
 <li><a href="Parser.html"><span class="chnum">9</span> Parsing and Recombining Inputs&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 <li><a href="ProbabilisticGrammarFuzzer.html" class="this_page"><span class="chnum">10</span> Probabilistic Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
-<li class="has-sub"><a href="Reducer.html" class="chapters">Chapters 11&ndash;15&nbsp;<i class="fa fa-fw fa-wrench"></i> <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="Reducer.html"><span class="chnum">11</span> Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="Carver.html"><span class="chnum">12</span> Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="APIFuzzer.html"><span class="chnum">13</span> Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="WebFuzzer.html"><span class="chnum">14</span> Web GUI Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="InformationFlow.html"><span class="chnum">15</span> Information Flow&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-</ul><li class="has-sub"><a href="GrammarMiner.html" class="chapters">Chapters 16&ndash;16&nbsp;<i class="fa fa-fw fa-wrench"></i> <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="GrammarMiner.html"><span class="chnum">16</span> Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li class="has-sub"><a href="GeneratorGrammarFuzzer.html" class="chapters">Chapters 11&ndash;15&nbsp;<i class="fa fa-fw fa-wrench"></i> <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="GeneratorGrammarFuzzer.html"><span class="chnum">11</span> Fuzzing with Generators&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="APIFuzzer.html"><span class="chnum">12</span> Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="Carver.html"><span class="chnum">13</span> Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="Reducer.html"><span class="chnum">14</span> Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="WebFuzzer.html"><span class="chnum">15</span> Web GUI Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+</ul><li class="has-sub"><a href="InformationFlow.html" class="chapters">Chapters 16&ndash;17&nbsp;<i class="fa fa-fw fa-wrench"></i> <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="InformationFlow.html"><span class="chnum">16</span> Information Flow&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="GrammarMiner.html"><span class="chnum">17</span> Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 </ul>
            <li><a href="https://www.fuzzingbook.org/beta/#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
@@ -11906,7 +11907,7 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Background">Background</a>
 </li><li class="has-sub"><a href="#Exercises">Exercises</a>
 <ul><li class="has-sub"><a href="#Exercise-1:-Probabilistic-Fuzzing-with-Coverage">Exercise 1: Probabilistic Fuzzing with Coverage</a>
-</li><li class="has-sub"><a href="#Exercise-2:-Learning-from-past-Bugs">Exercise 2: Learning from past Bugs</a>
+</li><li class="has-sub"><a href="#Exercise-2:-Learning-from-Past-Bugs">Exercise 2: Learning from Past Bugs</a>
 </ul></li></ul></li>
      </li>
      
@@ -12318,7 +12319,7 @@ which gives us:</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Our concept for expressing probabilities is to <em>annotate</em> individual expansions with attributes such as probabilities.  To this end, we allow that an expansion cannot only be a string, but also a <em>pair</em> of a string and a set of attributes, as in</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Our concept for expressing probabilities is to <em>annotate</em> individual expansions with attributes such as probabilities, using the annotation mechanism introduced in <a href="Grammars.html">the chapter on grammars</a>.  To this end, we allow that an expansion cannot only be a string, but also a <em>pair</em> of a string and a set of attributes, as in</p>
 <div class="highlight"><pre><span></span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">:</span>
         <span class="p">[(</span><span class="s2">&quot;&lt;term&gt; + &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)),</span>
          <span class="p">(</span><span class="s2">&quot;&lt;term&gt; - &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)),</span>
@@ -12328,53 +12329,6 @@ which gives us:</p>
 </div>
 </div>
 </div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Our <code>opts()</code> helper function returns a mapping of its arguments to values:</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">opts</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">kwargs</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.50</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_text output_subarea output_execute_result">
-<pre>{&#39;prob&#39;: 0.5}
-</pre>
-</div>
-
 </div>
 
 <div class="input_markdown">
@@ -12421,6 +12375,7 @@ which gives us:</p>
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">crange</span><span class="p">,</span> <span class="n">syntax_diagram</span>
+<span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">opts</span><span class="p">,</span> <span class="n">exp_string</span><span class="p">,</span> <span class="n">exp_opt</span><span class="p">,</span> <span class="n">set_opts</span>
 </pre></div>
 
 </div>
@@ -12489,7 +12444,7 @@ which gives us:</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">supported_opts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;prob&#39;</span><span class="p">})</span>
 </pre></div>
 
 </div>
@@ -12540,27 +12495,9 @@ which gives us:</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>However, we typically access the expansion string and the associated probability via designated helper functions, <code>exp_string()</code> and <code>exp_prob()</code>:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>However, we typically access the expansion string and the associated probability via designated helper functions, <code>exp_string()</code> (from the <a href="Grammars.html">chapter on Grammars</a>) and <code>exp_prob()</code>:</p>
 </div>
 </div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_string</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the string to be expanded&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">expansion</span>
-    <span class="k">return</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</pre></div>
-
-</div>
-</div></div>
 </div>
 </div>
 
@@ -12617,52 +12554,9 @@ which gives us:</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_opts</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the options of an expansion&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_opts</span><span class="p">(</span><span class="n">leaddigit_expansion</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_text output_subarea output_execute_result">
-<pre>{&#39;prob&#39;: 0.301}
-</pre>
-</div>
-
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_prob</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the specified probability, or None if unspecified&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">exp_opts</span><span class="p">(</span><span class="n">expansion</span><span class="p">)[</span><span class="s1">&#39;prob&#39;</span><span class="p">]</span>
+    <span class="sd">&quot;&quot;&quot;Return the options of an expansion&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">exp_opt</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="s1">&#39;prob&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12696,7 +12590,7 @@ which gives us:</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Fortunately, our existing fuzzers have been set up to work well with grammars annotated this way.  They simply ignore all annotations:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Our existing fuzzers are all set up to work with grammars annotated this way.  They simply ignore all annotations.</p>
 </div>
 </div>
 </div>
@@ -12715,6 +12609,15 @@ which gives us:</p>
 </div>
 </div></div>
 </div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>warning: option &#39;prob&#39; is not supported
+</pre>
+</div>
+
 </div>
 
 <div class="output_area">
@@ -12757,507 +12660,18 @@ which gives us:</p>
 
 <div class="output_area">
 
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>warning: option &#39;prob&#39; is not supported
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
 <div class="output_text output_subarea output_execute_result">
 <pre>&#39;1.30&#39;
 </pre>
-</div>
-
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">syntax_diagram</span><span class="p">(</span><span class="n">PROBABILISTIC_EXPR_GRAMMAR</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>start
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="62" viewBox="0 0 174.0 62" width="174.0" xmlns="http://www.w3.org/2000/svg">
-<g transform="translate(.5 .5)">
-<style>/* <![CDATA[ */
-    svg.railroad-diagram {
-        background-color:hsl(100,100%,100%);
-    }
-    svg.railroad-diagram path {
-        stroke-width:3;
-        stroke:black;
-        fill:rgba(0,0,0,0);
-    }
-    svg.railroad-diagram text {
-        font:bold 14px monospace;
-        text-anchor:middle;
-    }
-    svg.railroad-diagram text.label{
-        text-anchor:start;
-    }
-    svg.railroad-diagram text.comment{
-        font:italic 12px monospace;
-    }
-    svg.railroad-diagram rect{
-        stroke-width:3;
-        stroke:black;
-        fill:hsl(0,62%,82%);
-    }
-
-/* ]]> */
-</style><g>
-<path d="M20 21v20m10 -20v20m-10 -10h20"/></g><g>
-<path d="M40 31h0.0"/><path d="M134.0 31h0.0"/><path d="M40.0 31h20"/><g>
-<path d="M60.0 31h0.0"/><path d="M114.0 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M114.0 31h0.0"/><rect height="22" width="54.0" x="60.0" y="20"/><text x="87.0" y="35">expr</text></g></g><path d="M114.0 31h20"/></g><path d="M 134.0 31 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
-
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>expr
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 313.5 122" width="313.5" xmlns="http://www.w3.org/2000/svg">
-<g transform="translate(.5 .5)">
-<style>/* <![CDATA[ */
-    svg.railroad-diagram {
-        background-color:hsl(100,100%,100%);
-    }
-    svg.railroad-diagram path {
-        stroke-width:3;
-        stroke:black;
-        fill:rgba(0,0,0,0);
-    }
-    svg.railroad-diagram text {
-        font:bold 14px monospace;
-        text-anchor:middle;
-    }
-    svg.railroad-diagram text.label{
-        text-anchor:start;
-    }
-    svg.railroad-diagram text.comment{
-        font:italic 12px monospace;
-    }
-    svg.railroad-diagram rect{
-        stroke-width:3;
-        stroke:black;
-        fill:hsl(0,62%,82%);
-    }
-
-/* ]]> */
-</style><g>
-<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
-<path d="M40 61h0.0"/><path d="M273.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M253.5 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M114.0 31h0.0"/><rect height="22" width="54.0" x="60.0" y="20"/><text x="87.0" y="35">term</text></g><path d="M114.0 31h10"/><path d="M124.0 31h10"/><g class="terminal">
-<path d="M134.0 31h0.0"/><path d="M179.5 31h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="134.0" y="20"/><text x="156.75" y="35"> + </text></g><path d="M179.5 31h10"/><path d="M189.5 31h10"/><g class="non-terminal">
-<path d="M199.5 31h0.0"/><path d="M253.5 31h0.0"/><rect height="22" width="54.0" x="199.5" y="20"/><text x="226.5" y="35">expr</text></g></g><path d="M253.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M253.5 61h0.0"/><g class="non-terminal">
-<path d="M60.0 61h0.0"/><path d="M114.0 61h0.0"/><rect height="22" width="54.0" x="60.0" y="50"/><text x="87.0" y="65">term</text></g><path d="M114.0 61h10"/><path d="M124.0 61h10"/><g class="terminal">
-<path d="M134.0 61h0.0"/><path d="M179.5 61h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="134.0" y="50"/><text x="156.75" y="65"> - </text></g><path d="M179.5 61h10"/><path d="M189.5 61h10"/><g class="non-terminal">
-<path d="M199.5 61h0.0"/><path d="M253.5 61h0.0"/><rect height="22" width="54.0" x="199.5" y="50"/><text x="226.5" y="65">expr</text></g></g><path d="M253.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 91h69.75"/><path d="M183.75 91h69.75"/><g class="non-terminal">
-<path d="M129.75 91h0.0"/><path d="M183.75 91h0.0"/><rect height="22" width="54.0" x="129.75" y="80"/><text x="156.75" y="95">term</text></g></g><path d="M253.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 273.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
-
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>term
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 330.5 122" width="330.5" xmlns="http://www.w3.org/2000/svg">
-<g transform="translate(.5 .5)">
-<style>/* <![CDATA[ */
-    svg.railroad-diagram {
-        background-color:hsl(100,100%,100%);
-    }
-    svg.railroad-diagram path {
-        stroke-width:3;
-        stroke:black;
-        fill:rgba(0,0,0,0);
-    }
-    svg.railroad-diagram text {
-        font:bold 14px monospace;
-        text-anchor:middle;
-    }
-    svg.railroad-diagram text.label{
-        text-anchor:start;
-    }
-    svg.railroad-diagram text.comment{
-        font:italic 12px monospace;
-    }
-    svg.railroad-diagram rect{
-        stroke-width:3;
-        stroke:black;
-        fill:hsl(0,62%,82%);
-    }
-
-/* ]]> */
-</style><g>
-<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
-<path d="M40 61h0.0"/><path d="M290.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M270.5 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" width="71.0" x="60.0" y="20"/><text x="95.5" y="35">factor</text></g><path d="M131.0 31h10"/><path d="M141.0 31h10"/><g class="terminal">
-<path d="M151.0 31h0.0"/><path d="M196.5 31h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="151.0" y="20"/><text x="173.75" y="35"> * </text></g><path d="M196.5 31h10"/><path d="M206.5 31h10"/><g class="non-terminal">
-<path d="M216.5 31h0.0"/><path d="M270.5 31h0.0"/><rect height="22" width="54.0" x="216.5" y="20"/><text x="243.5" y="35">term</text></g></g><path d="M270.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M270.5 61h0.0"/><g class="non-terminal">
-<path d="M60.0 61h0.0"/><path d="M131.0 61h0.0"/><rect height="22" width="71.0" x="60.0" y="50"/><text x="95.5" y="65">factor</text></g><path d="M131.0 61h10"/><path d="M141.0 61h10"/><g class="terminal">
-<path d="M151.0 61h0.0"/><path d="M196.5 61h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="151.0" y="50"/><text x="173.75" y="65"> / </text></g><path d="M196.5 61h10"/><path d="M206.5 61h10"/><g class="non-terminal">
-<path d="M216.5 61h0.0"/><path d="M270.5 61h0.0"/><rect height="22" width="54.0" x="216.5" y="50"/><text x="243.5" y="65">term</text></g></g><path d="M270.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 91h69.75"/><path d="M200.75 91h69.75"/><g class="non-terminal">
-<path d="M129.75 91h0.0"/><path d="M200.75 91h0.0"/><rect height="22" width="71.0" x="129.75" y="80"/><text x="165.25" y="95">factor</text></g></g><path d="M270.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 290.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
-
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>factor
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="182" viewBox="0 0 381.5 182" width="381.5" xmlns="http://www.w3.org/2000/svg">
-<g transform="translate(.5 .5)">
-<style>/* <![CDATA[ */
-    svg.railroad-diagram {
-        background-color:hsl(100,100%,100%);
-    }
-    svg.railroad-diagram path {
-        stroke-width:3;
-        stroke:black;
-        fill:rgba(0,0,0,0);
-    }
-    svg.railroad-diagram text {
-        font:bold 14px monospace;
-        text-anchor:middle;
-    }
-    svg.railroad-diagram text.label{
-        text-anchor:start;
-    }
-    svg.railroad-diagram text.comment{
-        font:italic 12px monospace;
-    }
-    svg.railroad-diagram rect{
-        stroke-width:3;
-        stroke:black;
-        fill:hsl(0,62%,82%);
-    }
-
-/* ]]> */
-</style><g>
-<path d="M20 81v20m10 -20v20m-10 -10h20"/></g><g>
-<path d="M40 91h0.0"/><path d="M341.5 91h0.0"/><path d="M40.0 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 61h71.0"/><path d="M250.5 61h71.0"/><g class="terminal">
-<path d="M131.0 61h0.0"/><path d="M159.5 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="131.0" y="50"/><text x="145.25" y="65">-</text></g><path d="M159.5 61h10"/><path d="M169.5 61h10"/><g class="non-terminal">
-<path d="M179.5 61h0.0"/><path d="M250.5 61h0.0"/><rect height="22" width="71.0" x="179.5" y="50"/><text x="215.0" y="65">factor</text></g></g><path d="M321.5 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h71.0"/><path d="M250.5 31h71.0"/><g class="terminal">
-<path d="M131.0 31h0.0"/><path d="M159.5 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="131.0" y="20"/><text x="145.25" y="35">+</text></g><path d="M159.5 31h10"/><path d="M169.5 31h10"/><g class="non-terminal">
-<path d="M179.5 31h0.0"/><path d="M250.5 31h0.0"/><rect height="22" width="71.0" x="179.5" y="20"/><text x="215.0" y="35">factor</text></g></g><path d="M321.5 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M40.0 91h20"/><g>
-<path d="M60.0 91h55.25"/><path d="M266.25 91h55.25"/><g class="terminal">
-<path d="M115.25 91h0.0"/><path d="M143.75 91h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="115.25" y="80"/><text x="129.5" y="95">(</text></g><path d="M143.75 91h10"/><path d="M153.75 91h10"/><g class="non-terminal">
-<path d="M163.75 91h0.0"/><path d="M217.75 91h0.0"/><rect height="22" width="54.0" x="163.75" y="80"/><text x="190.75" y="95">expr</text></g><path d="M217.75 91h10"/><path d="M227.75 91h10"/><g class="terminal">
-<path d="M237.75 91h0.0"/><path d="M266.25 91h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="237.75" y="80"/><text x="252.0" y="95">)</text></g></g><path d="M321.5 91h20"/><path d="M40.0 91a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 121h74.0"/><path d="M247.5 121h74.0"/><g class="non-terminal">
-<path d="M134.0 121h0.0"/><path d="M247.5 121h0.0"/><rect height="22" width="113.5" x="134.0" y="110"/><text x="190.75" y="125">leadinteger</text></g></g><path d="M321.5 121a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><path d="M40.0 91a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 151h0.0"/><path d="M321.5 151h0.0"/><g class="non-terminal">
-<path d="M60.0 151h0.0"/><path d="M173.5 151h0.0"/><rect height="22" width="113.5" x="60.0" y="140"/><text x="116.75" y="155">leadinteger</text></g><path d="M173.5 151h10"/><path d="M183.5 151h10"/><g class="terminal">
-<path d="M193.5 151h0.0"/><path d="M222.0 151h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="193.5" y="140"/><text x="207.75" y="155">.</text></g><path d="M222.0 151h10"/><path d="M232.0 151h10"/><g class="non-terminal">
-<path d="M242.0 151h0.0"/><path d="M321.5 151h0.0"/><rect height="22" width="79.5" x="242.0" y="140"/><text x="281.75" y="155">integer</text></g></g><path d="M321.5 151a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/></g><path d="M 341.5 91 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
-
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>leadinteger
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 316.0 92" width="316.0" xmlns="http://www.w3.org/2000/svg">
-<g transform="translate(.5 .5)">
-<style>/* <![CDATA[ */
-    svg.railroad-diagram {
-        background-color:hsl(100,100%,100%);
-    }
-    svg.railroad-diagram path {
-        stroke-width:3;
-        stroke:black;
-        fill:rgba(0,0,0,0);
-    }
-    svg.railroad-diagram text {
-        font:bold 14px monospace;
-        text-anchor:middle;
-    }
-    svg.railroad-diagram text.label{
-        text-anchor:start;
-    }
-    svg.railroad-diagram text.comment{
-        font:italic 12px monospace;
-    }
-    svg.railroad-diagram rect{
-        stroke-width:3;
-        stroke:black;
-        fill:hsl(0,62%,82%);
-    }
-
-/* ]]> */
-</style><g>
-<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
-<path d="M40 61h0.0"/><path d="M276.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M256.0 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M156.5 31h0.0"/><rect height="22" width="96.5" x="60.0" y="20"/><text x="108.25" y="35">leaddigit</text></g><path d="M156.5 31h10"/><path d="M166.5 31h10"/><g class="non-terminal">
-<path d="M176.5 31h0.0"/><path d="M256.0 31h0.0"/><rect height="22" width="79.5" x="176.5" y="20"/><text x="216.25" y="35">integer</text></g></g><path d="M256.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h49.75"/><path d="M206.25 61h49.75"/><g class="non-terminal">
-<path d="M109.75 61h0.0"/><path d="M206.25 61h0.0"/><rect height="22" width="96.5" x="109.75" y="50"/><text x="158.0" y="65">leaddigit</text></g></g><path d="M256.0 61h20"/></g><path d="M 276.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
-
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>leaddigit
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="80" viewBox="0 0 876.5 80" width="876.5" xmlns="http://www.w3.org/2000/svg">
-<g transform="translate(.5 .5)">
-<style>/* <![CDATA[ */
-    svg.railroad-diagram {
-        background-color:hsl(100,100%,100%);
-    }
-    svg.railroad-diagram path {
-        stroke-width:3;
-        stroke:black;
-        fill:rgba(0,0,0,0);
-    }
-    svg.railroad-diagram text {
-        font:bold 14px monospace;
-        text-anchor:middle;
-    }
-    svg.railroad-diagram text.label{
-        text-anchor:start;
-    }
-    svg.railroad-diagram text.comment{
-        font:italic 12px monospace;
-    }
-    svg.railroad-diagram rect{
-        stroke-width:3;
-        stroke:black;
-        fill:hsl(0,62%,82%);
-    }
-
-/* ]]> */
-</style><g>
-<path d="M20 30v20m10 -20v20m-10 -10h20"/></g><g>
-<path d="M40 40h0.0"/><path d="M836.5 40h0.0"/><path d="M40.0 40a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10h678.0"/><path d="M138.5 60h678.0a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10"/><path d="M40.0 40h10"/><g>
-<path d="M50.0 40h0.0"/><path d="M118.5 40h0.0"/><path d="M50.0 40h20"/><g>
-<path d="M70.0 40h0.0"/><path d="M98.5 40h0.0"/><g class="terminal">
-<path d="M70.0 40h0.0"/><path d="M98.5 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="29"/><text x="84.25" y="44">1</text></g></g><path d="M98.5 40h20"/></g><path d="M118.5 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M118.5 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
-<path d="M138.5 40h0.0"/><path d="M207.0 40h0.0"/><path d="M138.5 40h20"/><g>
-<path d="M158.5 40h0.0"/><path d="M187.0 40h0.0"/><g class="terminal">
-<path d="M158.5 40h0.0"/><path d="M187.0 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="29"/><text x="172.75" y="44">2</text></g></g><path d="M187.0 40h20"/></g><path d="M207.0 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M207.0 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
-<path d="M227.0 40h0.0"/><path d="M295.5 40h0.0"/><path d="M227.0 40h20"/><g>
-<path d="M247.0 40h0.0"/><path d="M275.5 40h0.0"/><g class="terminal">
-<path d="M247.0 40h0.0"/><path d="M275.5 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="29"/><text x="261.25" y="44">3</text></g></g><path d="M275.5 40h20"/></g><path d="M295.5 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M295.5 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
-<path d="M315.5 40h0.0"/><path d="M384.0 40h0.0"/><path d="M315.5 40h20"/><g>
-<path d="M335.5 40h0.0"/><path d="M364.0 40h0.0"/><g class="terminal">
-<path d="M335.5 40h0.0"/><path d="M364.0 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="29"/><text x="349.75" y="44">4</text></g></g><path d="M364.0 40h20"/></g><path d="M384.0 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M384.0 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
-<path d="M404.0 40h0.0"/><path d="M472.5 40h0.0"/><path d="M404.0 40h20"/><g>
-<path d="M424.0 40h0.0"/><path d="M452.5 40h0.0"/><g class="terminal">
-<path d="M424.0 40h0.0"/><path d="M452.5 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="29"/><text x="438.25" y="44">5</text></g></g><path d="M452.5 40h20"/></g><path d="M472.5 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M472.5 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
-<path d="M492.5 40h0.0"/><path d="M561.0 40h0.0"/><path d="M492.5 40h20"/><g>
-<path d="M512.5 40h0.0"/><path d="M541.0 40h0.0"/><g class="terminal">
-<path d="M512.5 40h0.0"/><path d="M541.0 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="512.5" y="29"/><text x="526.75" y="44">6</text></g></g><path d="M541.0 40h20"/></g><path d="M561.0 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M561.0 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
-<path d="M581.0 40h0.0"/><path d="M649.5 40h0.0"/><path d="M581.0 40h20"/><g>
-<path d="M601.0 40h0.0"/><path d="M629.5 40h0.0"/><g class="terminal">
-<path d="M601.0 40h0.0"/><path d="M629.5 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="601.0" y="29"/><text x="615.25" y="44">7</text></g></g><path d="M629.5 40h20"/></g><path d="M649.5 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M649.5 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
-<path d="M669.5 40h0.0"/><path d="M738.0 40h0.0"/><path d="M669.5 40h20"/><g>
-<path d="M689.5 40h0.0"/><path d="M718.0 40h0.0"/><g class="terminal">
-<path d="M689.5 40h0.0"/><path d="M718.0 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="689.5" y="29"/><text x="703.75" y="44">8</text></g></g><path d="M718.0 40h20"/></g><path d="M738.0 40a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M738.0 20a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><g>
-<path d="M758.0 40h0.0"/><path d="M826.5 40h0.0"/><path d="M758.0 40h20"/><g>
-<path d="M778.0 40h0.0"/><path d="M806.5 40h0.0"/><g class="terminal">
-<path d="M778.0 40h0.0"/><path d="M806.5 40h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="778.0" y="29"/><text x="792.25" y="44">9</text></g></g><path d="M806.5 40h20"/></g><path d="M826.5 40h10"/></g><path d="M 836.5 40 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
-
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>integer
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 282.0 92" width="282.0" xmlns="http://www.w3.org/2000/svg">
-<g transform="translate(.5 .5)">
-<style>/* <![CDATA[ */
-    svg.railroad-diagram {
-        background-color:hsl(100,100%,100%);
-    }
-    svg.railroad-diagram path {
-        stroke-width:3;
-        stroke:black;
-        fill:rgba(0,0,0,0);
-    }
-    svg.railroad-diagram text {
-        font:bold 14px monospace;
-        text-anchor:middle;
-    }
-    svg.railroad-diagram text.label{
-        text-anchor:start;
-    }
-    svg.railroad-diagram text.comment{
-        font:italic 12px monospace;
-    }
-    svg.railroad-diagram rect{
-        stroke-width:3;
-        stroke:black;
-        fill:hsl(0,62%,82%);
-    }
-
-/* ]]> */
-</style><g>
-<path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
-<path d="M40 61h0.0"/><path d="M242.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M222.0 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><rect height="22" width="62.5" x="60.0" y="20"/><text x="91.25" y="35">digit</text></g><path d="M122.5 31h10"/><path d="M132.5 31h10"/><g class="non-terminal">
-<path d="M142.5 31h0.0"/><path d="M222.0 31h0.0"/><rect height="22" width="79.5" x="142.5" y="20"/><text x="182.25" y="35">integer</text></g></g><path d="M222.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h49.75"/><path d="M172.25 61h49.75"/><g class="non-terminal">
-<path d="M109.75 61h0.0"/><path d="M172.25 61h0.0"/><rect height="22" width="62.5" x="109.75" y="50"/><text x="141.0" y="65">digit</text></g></g><path d="M222.0 61h20"/></g><path d="M 242.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
-
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>digit
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="109" viewBox="0 0 522.5 109" width="522.5" xmlns="http://www.w3.org/2000/svg">
-<g transform="translate(.5 .5)">
-<style>/* <![CDATA[ */
-    svg.railroad-diagram {
-        background-color:hsl(100,100%,100%);
-    }
-    svg.railroad-diagram path {
-        stroke-width:3;
-        stroke:black;
-        fill:rgba(0,0,0,0);
-    }
-    svg.railroad-diagram text {
-        font:bold 14px monospace;
-        text-anchor:middle;
-    }
-    svg.railroad-diagram text.label{
-        text-anchor:start;
-    }
-    svg.railroad-diagram text.comment{
-        font:italic 12px monospace;
-    }
-    svg.railroad-diagram rect{
-        stroke-width:3;
-        stroke:black;
-        fill:hsl(0,62%,82%);
-    }
-
-/* ]]> */
-</style><g>
-<path d="M20 59v20m10 -20v20m-10 -10h20"/></g><g>
-<path d="M40 69h0.0"/><path d="M482.5 69h0.0"/><path d="M40.0 69a10 10 0 0 0 10 -10v-29a10 10 0 0 1 10 -10h324.0"/><path d="M138.5 89h324.0a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10"/><path d="M40.0 69h10"/><g>
-<path d="M50.0 69h0.0"/><path d="M118.5 69h0.0"/><path d="M50.0 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M70.0 39h0.0"/><path d="M98.5 39h0.0"/><g class="terminal">
-<path d="M70.0 39h0.0"/><path d="M98.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="28"/><text x="84.25" y="43">0</text></g></g><path d="M98.5 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M50.0 69h20"/><g>
-<path d="M70.0 69h0.0"/><path d="M98.5 69h0.0"/><g class="terminal">
-<path d="M70.0 69h0.0"/><path d="M98.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="70.0" y="58"/><text x="84.25" y="73">1</text></g></g><path d="M98.5 69h20"/></g><path d="M118.5 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M118.5 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
-<path d="M138.5 69h0.0"/><path d="M207.0 69h0.0"/><path d="M138.5 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M158.5 39h0.0"/><path d="M187.0 39h0.0"/><g class="terminal">
-<path d="M158.5 39h0.0"/><path d="M187.0 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="28"/><text x="172.75" y="43">2</text></g></g><path d="M187.0 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M138.5 69h20"/><g>
-<path d="M158.5 69h0.0"/><path d="M187.0 69h0.0"/><g class="terminal">
-<path d="M158.5 69h0.0"/><path d="M187.0 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="158.5" y="58"/><text x="172.75" y="73">3</text></g></g><path d="M187.0 69h20"/></g><path d="M207.0 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M207.0 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
-<path d="M227.0 69h0.0"/><path d="M295.5 69h0.0"/><path d="M227.0 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M247.0 39h0.0"/><path d="M275.5 39h0.0"/><g class="terminal">
-<path d="M247.0 39h0.0"/><path d="M275.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="28"/><text x="261.25" y="43">4</text></g></g><path d="M275.5 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M227.0 69h20"/><g>
-<path d="M247.0 69h0.0"/><path d="M275.5 69h0.0"/><g class="terminal">
-<path d="M247.0 69h0.0"/><path d="M275.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="247.0" y="58"/><text x="261.25" y="73">5</text></g></g><path d="M275.5 69h20"/></g><path d="M295.5 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M295.5 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
-<path d="M315.5 69h0.0"/><path d="M384.0 69h0.0"/><path d="M315.5 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M335.5 39h0.0"/><path d="M364.0 39h0.0"/><g class="terminal">
-<path d="M335.5 39h0.0"/><path d="M364.0 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="28"/><text x="349.75" y="43">6</text></g></g><path d="M364.0 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M315.5 69h20"/><g>
-<path d="M335.5 69h0.0"/><path d="M364.0 69h0.0"/><g class="terminal">
-<path d="M335.5 69h0.0"/><path d="M364.0 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="335.5" y="58"/><text x="349.75" y="73">7</text></g></g><path d="M364.0 69h20"/></g><path d="M384.0 69a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"/><path d="M384.0 20a10 10 0 0 1 10 10v29a10 10 0 0 0 10 10"/><g>
-<path d="M404.0 69h0.0"/><path d="M472.5 69h0.0"/><path d="M404.0 69a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M424.0 39h0.0"/><path d="M452.5 39h0.0"/><g class="terminal">
-<path d="M424.0 39h0.0"/><path d="M452.5 39h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="28"/><text x="438.25" y="43">8</text></g></g><path d="M452.5 39a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M404.0 69h20"/><g>
-<path d="M424.0 69h0.0"/><path d="M452.5 69h0.0"/><g class="terminal">
-<path d="M424.0 69h0.0"/><path d="M452.5 69h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="424.0" y="58"/><text x="438.25" y="73">9</text></g></g><path d="M452.5 69h20"/></g><path d="M472.5 69h10"/></g><path d="M 482.5 69 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
-
 </div>
 
 </div>
@@ -13565,13 +12979,13 @@ the "remaining" probability is distributed equally over all $u_j$; in other word
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-40-79503424e212&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-34-79503424e212&gt;&#34;, line 2, in &lt;module&gt;
     assert is_valid_probabilistic_grammar({&#34;&lt;start&gt;&#34;: [(&#34;1&#34;, opts(prob=0.5))]})
-  File &#34;&lt;ipython-input-36-c1c25dbf0315&gt;&#34;, line 7, in is_valid_probabilistic_grammar
+  File &#34;&lt;ipython-input-30-c1c25dbf0315&gt;&#34;, line 7, in is_valid_probabilistic_grammar
     prob_dist = exp_probabilities(expansions, nonterminal)
-  File &#34;&lt;ipython-input-31-9042a394542d&gt;&#34;, line 3, in exp_probabilities
+  File &#34;&lt;ipython-input-25-9042a394542d&gt;&#34;, line 3, in exp_probabilities
     prob_dist = prob_distribution(probabilities, nonterminal)
-  File &#34;&lt;ipython-input-32-57a3f95cf4ed&gt;&#34;, line 6, in prob_distribution
+  File &#34;&lt;ipython-input-26-57a3f95cf4ed&gt;&#34;, line 6, in prob_distribution
     assert abs(sum(probabilities) - 1.0) &lt; epsilon,             nonterminal + &#34;: sum of probabilities must be 1.0&#34;
 AssertionError: &lt;start&gt;: sum of probabilities must be 1.0 (expected)
 </pre>
@@ -13599,13 +13013,13 @@ AssertionError: &lt;start&gt;: sum of probabilities must be 1.0 (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-41-79fe851796f9&gt;&#34;, line 3, in &lt;module&gt;
+  File &#34;&lt;ipython-input-35-79fe851796f9&gt;&#34;, line 3, in &lt;module&gt;
     {&#34;&lt;start&gt;&#34;: [(&#34;1&#34;, opts(prob=1.5)), &#34;2&#34;]})
-  File &#34;&lt;ipython-input-36-c1c25dbf0315&gt;&#34;, line 7, in is_valid_probabilistic_grammar
+  File &#34;&lt;ipython-input-30-c1c25dbf0315&gt;&#34;, line 7, in is_valid_probabilistic_grammar
     prob_dist = exp_probabilities(expansions, nonterminal)
-  File &#34;&lt;ipython-input-31-9042a394542d&gt;&#34;, line 3, in exp_probabilities
+  File &#34;&lt;ipython-input-25-9042a394542d&gt;&#34;, line 3, in exp_probabilities
     prob_dist = prob_distribution(probabilities, nonterminal)
-  File &#34;&lt;ipython-input-32-57a3f95cf4ed&gt;&#34;, line 13, in prob_distribution
+  File &#34;&lt;ipython-input-26-57a3f95cf4ed&gt;&#34;, line 13, in prob_distribution
     assert 0 &lt;= sum_of_specified_probabilities &lt;= 1.0,         nonterminal + &#34;: sum of specified probabilities must be between 0.0 and 1.0&#34;
 AssertionError: &lt;start&gt;: sum of specified probabilities must be between 0.0 and 1.0 (expected)
 </pre>
@@ -13643,6 +13057,26 @@ AssertionError: &lt;start&gt;: sum of specified probabilities must be between 0.
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">GrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">check_grammar</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="n">is_valid_probabilistic_grammar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">supported_opts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">supported_opts</span><span class="p">()</span> <span class="o">|</span> <span class="p">{</span><span class="s1">&#39;prob&#39;</span><span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProbabilisticGrammarFuzzer</span><span class="p">(</span><span class="n">ProbabilisticGrammarFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">choose_node_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">possible_children</span><span class="p">):</span>
         <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span> <span class="o">=</span> <span class="n">node</span>
         <span class="n">expansions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span>
@@ -13731,6 +13165,15 @@ AssertionError: &lt;start&gt;: sum of specified probabilities must be between 0.
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>[&#39;3&#39;, &#39;1&#39;, &#39;56&#39;, &#39;5&#39;, &#39;408251024&#39;, &#39;7&#39;, &#39;27&#39;, &#39;2&#39;, &#39;9&#39;, &#39;6456&#39;, &#39;7&#39;, &#39;32&#39;, &#39;1&#39;, &#39;4&#39;, &#39;7&#39;, &#39;19&#39;, &#39;2&#39;, &#39;6&#39;, &#39;2&#39;, &#39;5&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>warning: option &#39;prob&#39; is not supported
 </pre>
 </div>
 
@@ -13847,52 +13290,6 @@ AssertionError: &lt;start&gt;: sum of specified probabilities must be between 0.
 </div>
 </div>
 
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">URL_GRAMMAR</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">set_opts</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">,</span> <span class="n">opts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set the options of the given expansion of grammar[symbol] to opts&quot;&quot;&quot;</span>
-    <span class="n">expansions</span> <span class="o">=</span> <span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">expansions</span><span class="p">)):</span>
-        <span class="n">exp</span> <span class="o">=</span> <span class="n">expansions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">exp_string</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="o">==</span> <span class="n">exp_string</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
-            <span class="n">new_opts</span> <span class="o">=</span> <span class="n">exp_opts</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">opts</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">new_opts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">new_opts</span> <span class="o">=</span> <span class="n">opts</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
-                    <span class="n">new_opts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">new_opts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">exp_string</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp_string</span><span class="p">(</span><span class="n">exp</span><span class="p">),</span> <span class="n">new_opts</span><span class="p">)</span>
-            <span class="k">return</span>
-
-    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;no expansion &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; -&gt; &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">exp_string</span><span class="p">(</span><span class="n">expansion</span><span class="p">)))</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -13934,6 +13331,20 @@ AssertionError: &lt;start&gt;: sum of specified probabilities must be between 0.
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/copy.html" class="import" target="_blank">copy</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">URL_GRAMMAR</span>
 </pre></div>
 
 </div>
@@ -15308,26 +14719,26 @@ http://fuzzingbook.com:80/?abc=def
 <!-- Generated by graphviz version 2.40.1 (20161225.0304)
  -->
 <!-- Title: %3 Pages: 1 -->
-<svg width="509pt" height="380pt"
- viewBox="0.00 0.00 508.50 380.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="470pt" height="380pt"
+ viewBox="0.00 0.00 469.50 380.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 376)">
 <title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-376 504.5,-376 504.5,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-376 465.5,-376 465.5,4 -4,4"/>
 <!-- 0 -->
 <g id="node1" class="node">
 <title>0</title>
-<text text-anchor="middle" x="122" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+<text text-anchor="middle" x="140" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
 </g>
 <!-- 1 -->
 <g id="node2" class="node">
 <title>1</title>
-<text text-anchor="middle" x="122" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;url&gt;</text>
+<text text-anchor="middle" x="140" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;url&gt;</text>
 </g>
 <!-- 0&#45;&gt;1 -->
 <g id="edge1" class="edge">
 <title>0&#45;&gt;1</title>
-<path fill="none" stroke="#000000" d="M122,-356.9748C122,-350.195 122,-339.966 122,-331.1331"/>
-<polygon fill="#000000" stroke="#000000" points="125.5001,-331.0561 122,-321.0561 118.5001,-331.0561 125.5001,-331.0561"/>
+<path fill="none" stroke="#000000" d="M140,-356.9748C140,-350.195 140,-339.966 140,-331.1331"/>
+<polygon fill="#000000" stroke="#000000" points="143.5001,-331.0561 140,-321.0561 136.5001,-331.0561 143.5001,-331.0561"/>
 </g>
 <!-- 2 -->
 <g id="node3" class="node">
@@ -15337,74 +14748,52 @@ http://fuzzingbook.com:80/?abc=def
 <!-- 1&#45;&gt;2 -->
 <g id="edge2" class="edge">
 <title>1&#45;&gt;2</title>
-<path fill="none" stroke="#000000" d="M108.2775,-305.9748C93.4417,-297.839 69.5489,-284.7365 51.8664,-275.0397"/>
-<polygon fill="#000000" stroke="#000000" points="53.2298,-271.7956 42.7788,-270.0561 49.864,-277.9333 53.2298,-271.7956"/>
+<path fill="none" stroke="#000000" d="M123.6216,-305.9748C105.4224,-297.613 75.8044,-284.0047 54.551,-274.2397"/>
+<polygon fill="#000000" stroke="#000000" points="55.9937,-271.0508 45.4456,-270.0561 53.0711,-277.4115 55.9937,-271.0508"/>
 </g>
 <!-- 4 -->
 <g id="node5" class="node">
 <title>4</title>
-<text text-anchor="middle" x="78" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">:</text>
+<text text-anchor="middle" x="82" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">://</text>
 </g>
 <!-- 1&#45;&gt;4 -->
 <g id="edge4" class="edge">
 <title>1&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M115.5076,-305.9748C107.9059,-297.1636 95.2781,-282.5269 86.8,-272.6999"/>
-<polygon fill="#000000" stroke="#000000" points="89.2273,-270.1555 80.0449,-264.8702 83.9272,-274.7282 89.2273,-270.1555"/>
+<path fill="none" stroke="#000000" d="M131.4419,-305.9748C122.093,-297.7542 106.9771,-284.4626 95.917,-274.7374"/>
+<polygon fill="#000000" stroke="#000000" points="97.9251,-271.8425 88.1042,-267.8675 93.3028,-277.0993 97.9251,-271.8425"/>
 </g>
 <!-- 5 -->
 <g id="node6" class="node">
 <title>5</title>
-<text text-anchor="middle" x="100" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">/</text>
+<text text-anchor="middle" x="140" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;authority&gt;</text>
 </g>
 <!-- 1&#45;&gt;5 -->
 <g id="edge5" class="edge">
 <title>1&#45;&gt;5</title>
-<path fill="none" stroke="#000000" d="M118.7538,-305.9748C115.4191,-298.2442 110.1499,-286.0294 106.0448,-276.5129"/>
-<polygon fill="#000000" stroke="#000000" points="109.2444,-275.0937 102.0697,-267.298 102.8169,-277.8664 109.2444,-275.0937"/>
+<path fill="none" stroke="#000000" d="M140,-305.9748C140,-299.195 140,-288.966 140,-280.1331"/>
+<polygon fill="#000000" stroke="#000000" points="143.5001,-280.0561 140,-270.0561 136.5001,-280.0561 143.5001,-280.0561"/>
 </g>
-<!-- 6 -->
-<g id="node7" class="node">
-<title>6</title>
-<text text-anchor="middle" x="122" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">/</text>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="212" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;path&gt;</text>
 </g>
-<!-- 1&#45;&gt;6 -->
-<g id="edge6" class="edge">
-<title>1&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M122,-305.9748C122,-299.195 122,-288.966 122,-280.1331"/>
-<polygon fill="#000000" stroke="#000000" points="125.5001,-280.0561 122,-270.0561 118.5001,-280.0561 125.5001,-280.0561"/>
+<!-- 1&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>1&#45;&gt;11</title>
+<path fill="none" stroke="#000000" d="M150.6238,-305.9748C161.7906,-298.065 179.5851,-285.4606 193.1453,-275.8554"/>
+<polygon fill="#000000" stroke="#000000" points="195.1954,-278.6924 201.3326,-270.0561 191.1492,-272.9802 195.1954,-278.6924"/>
 </g>
-<!-- 7 -->
-<g id="node8" class="node">
-<title>7</title>
-<text text-anchor="middle" x="176" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;authority&gt;</text>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="277" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;query&gt;</text>
 </g>
-<!-- 1&#45;&gt;7 -->
-<g id="edge7" class="edge">
-<title>1&#45;&gt;7</title>
-<path fill="none" stroke="#000000" d="M129.9679,-305.9748C138.0239,-298.3663 150.6792,-286.4141 160.6833,-276.9658"/>
-<polygon fill="#000000" stroke="#000000" points="163.1325,-279.4669 167.9994,-270.0561 158.3261,-274.3778 163.1325,-279.4669"/>
-</g>
-<!-- 13 -->
-<g id="node14" class="node">
-<title>13</title>
-<text text-anchor="middle" x="248" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;path&gt;</text>
-</g>
-<!-- 1&#45;&gt;13 -->
-<g id="edge13" class="edge">
-<title>1&#45;&gt;13</title>
-<path fill="none" stroke="#000000" d="M138.2143,-306.937C158.8687,-298.577 194.8929,-283.9957 220.0217,-273.8246"/>
-<polygon fill="#000000" stroke="#000000" points="221.435,-277.0284 229.3913,-270.0321 218.8087,-270.5398 221.435,-277.0284"/>
-</g>
-<!-- 17 -->
-<g id="node18" class="node">
-<title>17</title>
-<text text-anchor="middle" x="322" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;query&gt;</text>
-</g>
-<!-- 1&#45;&gt;17 -->
-<g id="edge17" class="edge">
-<title>1&#45;&gt;17</title>
-<path fill="none" stroke="#000000" d="M138.0288,-309.4127C170.4665,-301.141 244.5057,-282.261 288.1248,-271.1382"/>
-<polygon fill="#000000" stroke="#000000" points="289.1667,-274.4846 297.9918,-268.6221 287.437,-267.7016 289.1667,-274.4846"/>
+<!-- 1&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>1&#45;&gt;15</title>
+<path fill="none" stroke="#000000" d="M156.2537,-307.4494C178.6004,-299.1305 219.2114,-284.0126 247.1193,-273.6235"/>
+<polygon fill="#000000" stroke="#000000" points="248.6184,-276.8001 256.7691,-270.0312 246.1763,-270.2399 248.6184,-276.8001"/>
 </g>
 <!-- 3 -->
 <g id="node4" class="node">
@@ -15417,280 +14806,280 @@ http://fuzzingbook.com:80/?abc=def
 <path fill="none" stroke="#000000" d="M29,-254.9748C29,-248.195 29,-237.966 29,-229.1331"/>
 <polygon fill="#000000" stroke="#000000" points="32.5001,-229.0561 29,-219.0561 25.5001,-229.0561 32.5001,-229.0561"/>
 </g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="85" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;host&gt;</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M131.8846,-254.9748C123.6794,-247.3663 110.7897,-235.4141 100.6004,-225.9658"/>
+<polygon fill="#000000" stroke="#000000" points="102.8612,-223.2891 93.1487,-219.0561 98.1016,-228.422 102.8612,-223.2891"/>
+</g>
 <!-- 8 -->
 <g id="node9" class="node">
 <title>8</title>
-<text text-anchor="middle" x="126" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;host&gt;</text>
+<text text-anchor="middle" x="125" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">:</text>
 </g>
-<!-- 7&#45;&gt;8 -->
+<!-- 5&#45;&gt;8 -->
 <g id="edge8" class="edge">
-<title>7&#45;&gt;8</title>
-<path fill="none" stroke="#000000" d="M168.6223,-254.9748C161.2369,-247.4417 149.6768,-235.6503 140.458,-226.2472"/>
-<polygon fill="#000000" stroke="#000000" points="142.9079,-223.7466 133.4079,-219.0561 137.9094,-228.6471 142.9079,-223.7466"/>
-</g>
-<!-- 10 -->
-<g id="node11" class="node">
-<title>10</title>
-<text text-anchor="middle" x="166" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">:</text>
-</g>
-<!-- 7&#45;&gt;10 -->
-<g id="edge10" class="edge">
-<title>7&#45;&gt;10</title>
-<path fill="none" stroke="#000000" d="M174.5245,-254.9748C173.1951,-248.195 171.1894,-237.966 169.4575,-229.1331"/>
-<polygon fill="#000000" stroke="#000000" points="172.8404,-228.1958 167.4816,-219.0561 165.9712,-229.5427 172.8404,-228.1958"/>
-</g>
-<!-- 11 -->
-<g id="node12" class="node">
-<title>11</title>
-<text text-anchor="middle" x="206" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;port&gt;</text>
-</g>
-<!-- 7&#45;&gt;11 -->
-<g id="edge11" class="edge">
-<title>7&#45;&gt;11</title>
-<path fill="none" stroke="#000000" d="M180.4266,-254.9748C184.592,-247.8936 190.9706,-237.05 196.3152,-227.9641"/>
-<polygon fill="#000000" stroke="#000000" points="199.5018,-229.45 201.5552,-219.0561 193.4682,-225.9009 199.5018,-229.45"/>
+<title>5&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M137.7867,-254.9748C135.7241,-247.962 132.5762,-237.2591 129.92,-228.2279"/>
+<polygon fill="#000000" stroke="#000000" points="133.2093,-227.0073 127.0298,-218.4013 126.4937,-228.9826 133.2093,-227.0073"/>
 </g>
 <!-- 9 -->
 <g id="node10" class="node">
 <title>9</title>
-<text text-anchor="middle" x="126" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">cispa.saarland</text>
+<text text-anchor="middle" x="165" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;port&gt;</text>
 </g>
-<!-- 8&#45;&gt;9 -->
+<!-- 5&#45;&gt;9 -->
 <g id="edge9" class="edge">
-<title>8&#45;&gt;9</title>
-<path fill="none" stroke="#000000" d="M126,-203.9748C126,-197.195 126,-186.966 126,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="129.5001,-178.0561 126,-168.0561 122.5001,-178.0561 129.5001,-178.0561"/>
+<title>5&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M143.6888,-254.9748C147.1231,-247.969 152.3626,-237.2803 156.7869,-228.2547"/>
+<polygon fill="#000000" stroke="#000000" points="160.0371,-229.5759 161.296,-219.0561 153.7517,-226.4947 160.0371,-229.5759"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="85" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">cispa.saarland</text>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M85,-203.9748C85,-197.195 85,-186.966 85,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="88.5001,-178.0561 85,-168.0561 81.5001,-178.0561 88.5001,-178.0561"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="165" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">80</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M165,-203.9748C165,-197.195 165,-186.966 165,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="168.5001,-178.0561 165,-168.0561 161.5001,-178.0561 168.5001,-178.0561"/>
 </g>
 <!-- 12 -->
 <g id="node13" class="node">
 <title>12</title>
-<text text-anchor="middle" x="206" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">80</text>
+<text text-anchor="middle" x="205" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">/</text>
 </g>
 <!-- 11&#45;&gt;12 -->
 <g id="edge12" class="edge">
 <title>11&#45;&gt;12</title>
-<path fill="none" stroke="#000000" d="M206,-203.9748C206,-197.195 206,-186.966 206,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="209.5001,-178.0561 206,-168.0561 202.5001,-178.0561 209.5001,-178.0561"/>
+<path fill="none" stroke="#000000" d="M210.9671,-254.9748C210.0366,-248.195 208.6326,-237.966 207.4202,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="210.8645,-228.4873 206.0371,-219.0561 203.9295,-229.4392 210.8645,-228.4873"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="239" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
+</g>
+<!-- 11&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>11&#45;&gt;13</title>
+<path fill="none" stroke="#000000" d="M215.9839,-254.9748C219.7328,-247.8936 225.4735,-237.05 230.2837,-227.9641"/>
+<polygon fill="#000000" stroke="#000000" points="233.414,-229.5316 234.9997,-219.0561 227.2275,-226.2564 233.414,-229.5316"/>
 </g>
 <!-- 14 -->
 <g id="node15" class="node">
 <title>14</title>
-<text text-anchor="middle" x="246" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">/</text>
+<text text-anchor="middle" x="235" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">def</text>
 </g>
 <!-- 13&#45;&gt;14 -->
 <g id="edge14" class="edge">
 <title>13&#45;&gt;14</title>
-<path fill="none" stroke="#000000" d="M247.7049,-254.9748C247.439,-248.195 247.0379,-237.966 246.6915,-229.1331"/>
-<polygon fill="#000000" stroke="#000000" points="250.1856,-228.9112 246.2963,-219.0561 243.191,-229.1856 250.1856,-228.9112"/>
-</g>
-<!-- 15 -->
-<g id="node16" class="node">
-<title>15</title>
-<text text-anchor="middle" x="280" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
-</g>
-<!-- 13&#45;&gt;15 -->
-<g id="edge15" class="edge">
-<title>13&#45;&gt;15</title>
-<path fill="none" stroke="#000000" d="M252.7217,-254.9748C257.212,-247.8183 264.1137,-236.8188 269.8512,-227.6747"/>
-<polygon fill="#000000" stroke="#000000" points="272.9087,-229.387 275.2589,-219.0561 266.9792,-225.6665 272.9087,-229.387"/>
+<path fill="none" stroke="#000000" d="M238.4098,-203.9748C237.878,-197.195 237.0758,-186.966 236.383,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="239.8639,-177.7518 235.5926,-168.0561 232.8854,-178.2992 239.8639,-177.7518"/>
 </g>
 <!-- 16 -->
 <g id="node17" class="node">
 <title>16</title>
-<text text-anchor="middle" x="274" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">def</text>
+<text text-anchor="middle" x="277" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">?</text>
 </g>
 <!-- 15&#45;&gt;16 -->
 <g id="edge16" class="edge">
 <title>15&#45;&gt;16</title>
-<path fill="none" stroke="#000000" d="M279.1147,-203.9748C278.3171,-197.195 277.1136,-186.966 276.0745,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="279.5335,-177.5786 274.889,-168.0561 272.5814,-178.3966 279.5335,-177.5786"/>
+<path fill="none" stroke="#000000" d="M277,-254.9748C277,-248.195 277,-237.966 277,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="280.5001,-229.0561 277,-219.0561 273.5001,-229.0561 280.5001,-229.0561"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+<text text-anchor="middle" x="334" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;params&gt;</text>
+</g>
+<!-- 15&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>15&#45;&gt;17</title>
+<path fill="none" stroke="#000000" d="M285.4105,-254.9748C293.9141,-247.3663 307.2725,-235.4141 317.8323,-225.9658"/>
+<polygon fill="#000000" stroke="#000000" points="320.4363,-228.3324 325.5549,-219.0561 315.7687,-223.1157 320.4363,-228.3324"/>
 </g>
 <!-- 18 -->
 <g id="node19" class="node">
 <title>18</title>
-<text text-anchor="middle" x="322" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">?</text>
+<text text-anchor="middle" x="288" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;param&gt;</text>
 </g>
 <!-- 17&#45;&gt;18 -->
 <g id="edge18" class="edge">
 <title>17&#45;&gt;18</title>
-<path fill="none" stroke="#000000" d="M322,-254.9748C322,-248.195 322,-237.966 322,-229.1331"/>
-<polygon fill="#000000" stroke="#000000" points="325.5001,-229.0561 322,-219.0561 318.5001,-229.0561 325.5001,-229.0561"/>
-</g>
-<!-- 19 -->
-<g id="node20" class="node">
-<title>19</title>
-<text text-anchor="middle" x="375" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;params&gt;</text>
-</g>
-<!-- 17&#45;&gt;19 -->
-<g id="edge19" class="edge">
-<title>17&#45;&gt;19</title>
-<path fill="none" stroke="#000000" d="M329.8203,-254.9748C337.6489,-247.4417 349.9026,-235.6503 359.6745,-226.2472"/>
-<polygon fill="#000000" stroke="#000000" points="362.3687,-228.5119 367.1476,-219.0561 357.515,-223.4679 362.3687,-228.5119"/>
-</g>
-<!-- 20 -->
-<g id="node21" class="node">
-<title>20</title>
-<text text-anchor="middle" x="327" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;param&gt;</text>
-</g>
-<!-- 19&#45;&gt;20 -->
-<g id="edge20" class="edge">
-<title>19&#45;&gt;20</title>
-<path fill="none" stroke="#000000" d="M367.9174,-203.9748C360.8983,-196.517 349.9513,-184.8857 341.1459,-175.53"/>
-<polygon fill="#000000" stroke="#000000" points="343.514,-172.9393 334.1116,-168.0561 338.4166,-177.7369 343.514,-172.9393"/>
-</g>
-<!-- 27 -->
-<g id="node28" class="node">
-<title>27</title>
-<text text-anchor="middle" x="376" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&amp;</text>
-</g>
-<!-- 19&#45;&gt;27 -->
-<g id="edge27" class="edge">
-<title>19&#45;&gt;27</title>
-<path fill="none" stroke="#000000" d="M375.1476,-203.9748C375.2805,-197.195 375.4811,-186.966 375.6543,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="379.155,-178.1228 375.8518,-168.0561 372.1564,-177.9855 379.155,-178.1228"/>
-</g>
-<!-- 28 -->
-<g id="node29" class="node">
-<title>28</title>
-<text text-anchor="middle" x="435" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;params&gt;</text>
-</g>
-<!-- 19&#45;&gt;28 -->
-<g id="edge28" class="edge">
-<title>19&#45;&gt;28</title>
-<path fill="none" stroke="#000000" d="M383.8532,-203.9748C392.8929,-196.291 407.1447,-184.177 418.3107,-174.6859"/>
-<polygon fill="#000000" stroke="#000000" points="420.7578,-177.1994 426.1105,-168.0561 416.2243,-171.8658 420.7578,-177.1994"/>
-</g>
-<!-- 21 -->
-<g id="node22" class="node">
-<title>21</title>
-<text text-anchor="middle" x="289" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
-</g>
-<!-- 20&#45;&gt;21 -->
-<g id="edge21" class="edge">
-<title>20&#45;&gt;21</title>
-<path fill="none" stroke="#000000" d="M321.393,-152.9748C315.9484,-145.6677 307.5187,-134.354 300.6233,-125.0997"/>
-<polygon fill="#000000" stroke="#000000" points="303.4115,-122.9837 294.63,-117.0561 297.7983,-127.1661 303.4115,-122.9837"/>
-</g>
-<!-- 23 -->
-<g id="node24" class="node">
-<title>23</title>
-<text text-anchor="middle" x="325" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">=</text>
-</g>
-<!-- 20&#45;&gt;23 -->
-<g id="edge23" class="edge">
-<title>20&#45;&gt;23</title>
-<path fill="none" stroke="#000000" d="M326.7049,-152.9748C326.439,-146.195 326.0379,-135.966 325.6915,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="329.1856,-126.9112 325.2963,-117.0561 322.191,-127.1856 329.1856,-126.9112"/>
-</g>
-<!-- 24 -->
-<g id="node25" class="node">
-<title>24</title>
-<text text-anchor="middle" x="364" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;nat&gt;</text>
-</g>
-<!-- 20&#45;&gt;24 -->
-<g id="edge24" class="edge">
-<title>20&#45;&gt;24</title>
-<path fill="none" stroke="#000000" d="M332.4595,-152.9748C337.7061,-145.743 345.7998,-134.5868 352.4744,-125.3866"/>
-<polygon fill="#000000" stroke="#000000" points="355.4788,-127.2056 358.5181,-117.0561 349.8128,-123.095 355.4788,-127.2056"/>
-</g>
-<!-- 22 -->
-<g id="node23" class="node">
-<title>22</title>
-<text text-anchor="middle" x="289" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">def</text>
-</g>
-<!-- 21&#45;&gt;22 -->
-<g id="edge22" class="edge">
-<title>21&#45;&gt;22</title>
-<path fill="none" stroke="#000000" d="M289,-101.9748C289,-95.195 289,-84.966 289,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="292.5001,-76.0561 289,-66.0561 285.5001,-76.0561 292.5001,-76.0561"/>
+<path fill="none" stroke="#000000" d="M327.2125,-203.9748C320.4859,-196.517 309.995,-184.8857 301.5564,-175.53"/>
+<polygon fill="#000000" stroke="#000000" points="304.112,-173.1376 294.8153,-168.0561 298.914,-177.826 304.112,-173.1376"/>
 </g>
 <!-- 25 -->
 <g id="node26" class="node">
 <title>25</title>
-<text text-anchor="middle" x="362" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+<text text-anchor="middle" x="337" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&amp;</text>
 </g>
-<!-- 24&#45;&gt;25 -->
+<!-- 17&#45;&gt;25 -->
 <g id="edge25" class="edge">
-<title>24&#45;&gt;25</title>
-<path fill="none" stroke="#000000" d="M363.7049,-101.9748C363.439,-95.195 363.0379,-84.966 362.6915,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="366.1856,-75.9112 362.2963,-66.0561 359.191,-76.1856 366.1856,-75.9112"/>
+<title>17&#45;&gt;25</title>
+<path fill="none" stroke="#000000" d="M334.4427,-203.9748C334.8415,-197.195 335.4432,-186.966 335.9628,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="339.4622,-178.2444 336.5555,-168.0561 332.4742,-177.8333 339.4622,-178.2444"/>
 </g>
 <!-- 26 -->
 <g id="node27" class="node">
 <title>26</title>
-<text text-anchor="middle" x="362" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">7</text>
+<text text-anchor="middle" x="396" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;params&gt;</text>
 </g>
-<!-- 25&#45;&gt;26 -->
+<!-- 17&#45;&gt;26 -->
 <g id="edge26" class="edge">
-<title>25&#45;&gt;26</title>
-<path fill="none" stroke="#000000" d="M362,-50.9748C362,-44.195 362,-33.966 362,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="365.5001,-25.0561 362,-15.0561 358.5001,-25.0561 365.5001,-25.0561"/>
+<title>17&#45;&gt;26</title>
+<path fill="none" stroke="#000000" d="M343.1483,-203.9748C352.4894,-196.291 367.2162,-184.177 378.7544,-174.6859"/>
+<polygon fill="#000000" stroke="#000000" points="381.3147,-177.1119 386.8142,-168.0561 376.8678,-171.7058 381.3147,-177.1119"/>
 </g>
-<!-- 29 -->
-<g id="node30" class="node">
-<title>29</title>
-<text text-anchor="middle" x="438" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;param&gt;</text>
+<!-- 19 -->
+<g id="node20" class="node">
+<title>19</title>
+<text text-anchor="middle" x="250" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
 </g>
-<!-- 28&#45;&gt;29 -->
-<g id="edge29" class="edge">
-<title>28&#45;&gt;29</title>
-<path fill="none" stroke="#000000" d="M435.4427,-152.9748C435.8415,-146.195 436.4432,-135.966 436.9628,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="440.4622,-127.2444 437.5555,-117.0561 433.4742,-126.8333 440.4622,-127.2444"/>
+<!-- 18&#45;&gt;19 -->
+<g id="edge19" class="edge">
+<title>18&#45;&gt;19</title>
+<path fill="none" stroke="#000000" d="M282.393,-152.9748C276.9484,-145.6677 268.5187,-134.354 261.6233,-125.0997"/>
+<polygon fill="#000000" stroke="#000000" points="264.4115,-122.9837 255.63,-117.0561 258.7983,-127.1661 264.4115,-122.9837"/>
+</g>
+<!-- 21 -->
+<g id="node22" class="node">
+<title>21</title>
+<text text-anchor="middle" x="286" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">=</text>
+</g>
+<!-- 18&#45;&gt;21 -->
+<g id="edge21" class="edge">
+<title>18&#45;&gt;21</title>
+<path fill="none" stroke="#000000" d="M287.7049,-152.9748C287.439,-146.195 287.0379,-135.966 286.6915,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="290.1856,-126.9112 286.2963,-117.0561 283.191,-127.1856 290.1856,-126.9112"/>
+</g>
+<!-- 22 -->
+<g id="node23" class="node">
+<title>22</title>
+<text text-anchor="middle" x="325" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;nat&gt;</text>
+</g>
+<!-- 18&#45;&gt;22 -->
+<g id="edge22" class="edge">
+<title>18&#45;&gt;22</title>
+<path fill="none" stroke="#000000" d="M293.4595,-152.9748C298.7061,-145.743 306.7998,-134.5868 313.4744,-125.3866"/>
+<polygon fill="#000000" stroke="#000000" points="316.4788,-127.2056 319.5181,-117.0561 310.8128,-123.095 316.4788,-127.2056"/>
+</g>
+<!-- 20 -->
+<g id="node21" class="node">
+<title>20</title>
+<text text-anchor="middle" x="250" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">def</text>
+</g>
+<!-- 19&#45;&gt;20 -->
+<g id="edge20" class="edge">
+<title>19&#45;&gt;20</title>
+<path fill="none" stroke="#000000" d="M250,-101.9748C250,-95.195 250,-84.966 250,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="253.5001,-76.0561 250,-66.0561 246.5001,-76.0561 253.5001,-76.0561"/>
+</g>
+<!-- 23 -->
+<g id="node24" class="node">
+<title>23</title>
+<text text-anchor="middle" x="323" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 22&#45;&gt;23 -->
+<g id="edge23" class="edge">
+<title>22&#45;&gt;23</title>
+<path fill="none" stroke="#000000" d="M324.7049,-101.9748C324.439,-95.195 324.0379,-84.966 323.6915,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="327.1856,-75.9112 323.2963,-66.0561 320.191,-76.1856 327.1856,-75.9112"/>
+</g>
+<!-- 24 -->
+<g id="node25" class="node">
+<title>24</title>
+<text text-anchor="middle" x="323" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">7</text>
+</g>
+<!-- 23&#45;&gt;24 -->
+<g id="edge24" class="edge">
+<title>23&#45;&gt;24</title>
+<path fill="none" stroke="#000000" d="M323,-50.9748C323,-44.195 323,-33.966 323,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="326.5001,-25.0561 323,-15.0561 319.5001,-25.0561 326.5001,-25.0561"/>
+</g>
+<!-- 27 -->
+<g id="node28" class="node">
+<title>27</title>
+<text text-anchor="middle" x="399" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;param&gt;</text>
+</g>
+<!-- 26&#45;&gt;27 -->
+<g id="edge27" class="edge">
+<title>26&#45;&gt;27</title>
+<path fill="none" stroke="#000000" d="M396.4427,-152.9748C396.8415,-146.195 397.4432,-135.966 397.9628,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="401.4622,-127.2444 398.5555,-117.0561 394.4742,-126.8333 401.4622,-127.2444"/>
+</g>
+<!-- 28 -->
+<g id="node29" class="node">
+<title>28</title>
+<text text-anchor="middle" x="376" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
+</g>
+<!-- 27&#45;&gt;28 -->
+<g id="edge28" class="edge">
+<title>27&#45;&gt;28</title>
+<path fill="none" stroke="#000000" d="M395.6063,-101.9748C392.4468,-94.969 387.6264,-84.2803 383.556,-75.2547"/>
+<polygon fill="#000000" stroke="#000000" points="386.7093,-73.7331 379.4077,-66.0561 380.3282,-76.6109 386.7093,-73.7331"/>
 </g>
 <!-- 30 -->
 <g id="node31" class="node">
 <title>30</title>
-<text text-anchor="middle" x="415" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
+<text text-anchor="middle" x="412" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">=</text>
 </g>
-<!-- 29&#45;&gt;30 -->
+<!-- 27&#45;&gt;30 -->
 <g id="edge30" class="edge">
-<title>29&#45;&gt;30</title>
-<path fill="none" stroke="#000000" d="M434.6063,-101.9748C431.4468,-94.969 426.6264,-84.2803 422.556,-75.2547"/>
-<polygon fill="#000000" stroke="#000000" points="425.7093,-73.7331 418.4077,-66.0561 419.3282,-76.6109 425.7093,-73.7331"/>
-</g>
-<!-- 32 -->
-<g id="node33" class="node">
-<title>32</title>
-<text text-anchor="middle" x="451" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">=</text>
-</g>
-<!-- 29&#45;&gt;32 -->
-<g id="edge32" class="edge">
-<title>29&#45;&gt;32</title>
-<path fill="none" stroke="#000000" d="M439.9182,-101.9748C441.6656,-95.1196 444.3118,-84.7383 446.5802,-75.8392"/>
-<polygon fill="#000000" stroke="#000000" points="449.9954,-76.6108 449.0739,-66.0561 443.2123,-74.8817 449.9954,-76.6108"/>
-</g>
-<!-- 33 -->
-<g id="node34" class="node">
-<title>33</title>
-<text text-anchor="middle" x="487" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
-</g>
-<!-- 29&#45;&gt;33 -->
-<g id="edge33" class="edge">
-<title>29&#45;&gt;33</title>
-<path fill="none" stroke="#000000" d="M445.2301,-101.9748C452.3954,-94.517 463.5706,-82.8857 472.5594,-73.53"/>
-<polygon fill="#000000" stroke="#000000" points="475.3358,-75.6921 479.7402,-66.0561 470.2881,-70.8423 475.3358,-75.6921"/>
+<title>27&#45;&gt;30</title>
+<path fill="none" stroke="#000000" d="M400.9182,-101.9748C402.6656,-95.1196 405.3118,-84.7383 407.5802,-75.8392"/>
+<polygon fill="#000000" stroke="#000000" points="410.9954,-76.6108 410.0739,-66.0561 404.2123,-74.8817 410.9954,-76.6108"/>
 </g>
 <!-- 31 -->
 <g id="node32" class="node">
 <title>31</title>
-<text text-anchor="middle" x="415" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">x23</text>
+<text text-anchor="middle" x="448" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;id&gt;</text>
 </g>
-<!-- 30&#45;&gt;31 -->
+<!-- 27&#45;&gt;31 -->
 <g id="edge31" class="edge">
-<title>30&#45;&gt;31</title>
-<path fill="none" stroke="#000000" d="M415,-50.9748C415,-44.195 415,-33.966 415,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="418.5001,-25.0561 415,-15.0561 411.5001,-25.0561 418.5001,-25.0561"/>
+<title>27&#45;&gt;31</title>
+<path fill="none" stroke="#000000" d="M406.2301,-101.9748C413.3954,-94.517 424.5706,-82.8857 433.5594,-73.53"/>
+<polygon fill="#000000" stroke="#000000" points="436.3358,-75.6921 440.7402,-66.0561 431.2881,-70.8423 436.3358,-75.6921"/>
 </g>
-<!-- 34 -->
-<g id="node35" class="node">
-<title>34</title>
-<text text-anchor="middle" x="487" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">abc</text>
+<!-- 29 -->
+<g id="node30" class="node">
+<title>29</title>
+<text text-anchor="middle" x="376" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">x23</text>
 </g>
-<!-- 33&#45;&gt;34 -->
-<g id="edge34" class="edge">
-<title>33&#45;&gt;34</title>
-<path fill="none" stroke="#000000" d="M487,-50.9748C487,-44.195 487,-33.966 487,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="490.5001,-25.0561 487,-15.0561 483.5001,-25.0561 490.5001,-25.0561"/>
+<!-- 28&#45;&gt;29 -->
+<g id="edge29" class="edge">
+<title>28&#45;&gt;29</title>
+<path fill="none" stroke="#000000" d="M376,-50.9748C376,-44.195 376,-33.966 376,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="379.5001,-25.0561 376,-15.0561 372.5001,-25.0561 379.5001,-25.0561"/>
+</g>
+<!-- 32 -->
+<g id="node33" class="node">
+<title>32</title>
+<text text-anchor="middle" x="448" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">abc</text>
+</g>
+<!-- 31&#45;&gt;32 -->
+<g id="edge32" class="edge">
+<title>31&#45;&gt;32</title>
+<path fill="none" stroke="#000000" d="M448,-50.9748C448,-44.195 448,-33.966 448,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="451.5001,-25.0561 448,-15.0561 444.5001,-25.0561 451.5001,-25.0561"/>
 </g>
 </g>
 </svg>
@@ -16630,6 +16019,15 @@ http://fuzzingbook.com:80/?abc=def
 </div>
 </div>
 
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>warning: option &#39;prob&#39; is not supported
+</pre>
+</div>
+
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -16874,7 +16272,8 @@ http://fuzzingbook.com:80/?abc=def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Probabilistic-Fuzzing-with-Coverage">Exercise 1: Probabilistic Fuzzing with Coverage<a class="anchor-link" href="#Exercise-1:-Probabilistic-Fuzzing-with-Coverage">&#182;</a></h3><p>Create a class <code>ProbabilisticGrammarCoverageFuzzer</code> that extends <code>GrammarCoverageFuzzer</code> with probabilistic capabilities.  The idea is to first cover all uncovered expansions (like <code>GrammarCoverageFuzzer</code>) and once all expansions are covered, to proceed by probabilities (like <code>ProbabilisticGrammarFuzzer</code>).  To this end, define new instances of the <code>choose_covered_node_expansion()</code> and <code>choose_uncovered_node_expansion()</code> methods that choose an expansion based on the given weights.  If you are an advanced programmer, realize the class via <em>multiple inheritance</em> from <code>GrammarCoverageFuzzer</code> and <code>ProbabilisticGrammarFuzzer</code> to achieve this.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Probabilistic-Fuzzing-with-Coverage">Exercise 1: Probabilistic Fuzzing with Coverage<a class="anchor-link" href="#Exercise-1:-Probabilistic-Fuzzing-with-Coverage">&#182;</a></h3><p>Create a class <code>ProbabilisticGrammarCoverageFuzzer</code> that extends <code>GrammarCoverageFuzzer</code> with probabilistic capabilities.  The idea is to first cover all uncovered expansions (like <code>GrammarCoverageFuzzer</code>) and once all expansions are covered, to proceed by probabilities (like <code>ProbabilisticGrammarFuzzer</code>).</p>
+<p>To this end, define new instances of the <code>choose_covered_node_expansion()</code> and <code>choose_uncovered_node_expansion()</code> methods that choose an expansion based on the given weights.</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ProbabilisticGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -16886,7 +16285,90 @@ http://fuzzingbook.com:80/?abc=def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-Learning-from-past-Bugs">Exercise 2: Learning from past Bugs<a class="anchor-link" href="#Exercise-2:-Learning-from-past-Bugs">&#182;</a></h3><p>Learning from a set of inputs can be extremely valuable if one learns from <em>inputs that are known to have caused failures before.</em>  In this exercise, you will go and learn distributions from past vulnerabilities.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>If you are an advanced programmer, realize the class via <em>multiple inheritance</em> from <code>GrammarCoverageFuzzer</code> and <code>ProbabilisticGrammarFuzzer</code> to achieve this.</p>
+<p>Multiple inheritance is a tricky thing.  If you have two classes $A'$ and $A''$ which both inherit from $A$, the same method $m()$ of $A$ may be overloaded in both $A'$ and $A''$.  If one now inherits from <em>both</em> $A'$ and $A''$, and calls $m()$, which of the $m()$ implementations should be called?  Python "resolves" this conflict by simply invoking the one $m()$ method in the class one inherits from first.</p>
+<p>To avoid such conflicts, one can check whether the order in which one inherits makes a difference.  So try this method to compare the attributes with each other; if they refer to different code, you have to resolve the conflict.</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ProbabilisticGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/inspect.html" class="import" target="_blank">inspect</a></span> <span class="k">import</span> <span class="n">getattr_static</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">inheritance_conflicts</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">c1c2</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">class</span> <span class="nc">c2c1</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="n">c1</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">attr</span> <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">c1c2</span><span class="p">)</span> <span class="k">if</span> <span class="n">getattr_static</span><span class="p">(</span><span class="n">c1c2</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span> <span class="o">!=</span> <span class="n">getattr_static</span><span class="p">(</span><span class="n">c2c1</span><span class="p">,</span> <span class="n">attr</span><span class="p">)]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inheritance_conflicts</span><span class="p">(</span><span class="n">GrammarCoverageFuzzer</span><span class="p">,</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;choose_node_expansion&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This is a method you <em>have</em> to implement for multiple inheritance besides <code>choose_covered_node_expansion()</code> and <code>choose_uncovered_node_expansion()</code>.</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/ProbabilisticGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-Learning-from-Past-Bugs">Exercise 2: Learning from Past Bugs<a class="anchor-link" href="#Exercise-2:-Learning-from-Past-Bugs">&#182;</a></h3><p>Learning from a set of inputs can be extremely valuable if one learns from <em>inputs that are known to have caused failures before.</em>  In this exercise, you will go and learn distributions from past vulnerabilities.</p>
 <ol>
 <li>Download <a href="https://github.com/tunz/js-vuln-db"><code>js-vuln-db</code></a>, a set of JavaScript engine vulnerabilities.  Each vulnerability comes with code that exercises it.</li>
 <li>Extract all <em>number literals</em> from the code, using <code>re.findall()</code> with appropriate regular expressions.</li>
@@ -16908,7 +16390,7 @@ http://fuzzingbook.com:80/?abc=def
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ProbabilisticGrammarFuzzer.ipynb" target=_blank)>Last change: 2018-12-04 17:52:30+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ProbabilisticGrammarFuzzer.ipynb" target=_blank)>Last change: 2018-12-10 16:45:33+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -16924,7 +16406,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html</a>.  Retrieved 2018-12-04 17:52:30+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html</a>.  Retrieved 2018-12-10 16:45:33+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:ProbabilisticGrammarFuzzer,
@@ -16934,9 +16416,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html}},
-    note = {Retrieved 2018-12-04 17:52:30+01:00},
+    note = {Retrieved 2018-12-10 16:45:33+01:00},
     url = {https://www.fuzzingbook.org/beta/html/ProbabilisticGrammarFuzzer.html},
-    urldate = {2018-12-04 17:52:30+01:00}
+    urldate = {2018-12-10 16:45:33+01:00}
 }
 </pre>
 </div>

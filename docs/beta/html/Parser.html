@@ -11875,12 +11875,13 @@ MathJax.Hub.Config({
 <li><a href="ConfigurationFuzzer.html"><span class="chnum">8</span> Testing Configurations</a></li>
 <li><a href="Parser.html" class="this_page"><span class="chnum">9</span> Parsing and Recombining Inputs&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 <li><a href="ProbabilisticGrammarFuzzer.html"><span class="chnum">10</span> Probabilistic Grammar Fuzzing&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
-<li class="has-sub"><a href="Reducer.html" class="chapters">Chapters 11&ndash;15&nbsp;<i class="fa fa-fw fa-wrench"></i> <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="Reducer.html"><span class="chnum">11</span> Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="Carver.html"><span class="chnum">12</span> Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="APIFuzzer.html"><span class="chnum">13</span> Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="WebFuzzer.html"><span class="chnum">14</span> Web GUI Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="InformationFlow.html"><span class="chnum">15</span> Information Flow&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-</ul><li class="has-sub"><a href="GrammarMiner.html" class="chapters">Chapters 16&ndash;16&nbsp;<i class="fa fa-fw fa-wrench"></i> <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="GrammarMiner.html"><span class="chnum">16</span> Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li class="has-sub"><a href="GeneratorGrammarFuzzer.html" class="chapters">Chapters 11&ndash;15&nbsp;<i class="fa fa-fw fa-wrench"></i> <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="GeneratorGrammarFuzzer.html"><span class="chnum">11</span> Fuzzing with Generators&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="APIFuzzer.html"><span class="chnum">12</span> Fuzzing APIs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="Carver.html"><span class="chnum">13</span> Carving Unit Tests&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="Reducer.html"><span class="chnum">14</span> Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="WebFuzzer.html"><span class="chnum">15</span> Web GUI Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+</ul><li class="has-sub"><a href="InformationFlow.html" class="chapters">Chapters 16&ndash;17&nbsp;<i class="fa fa-fw fa-wrench"></i> <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="InformationFlow.html"><span class="chnum">16</span> Information Flow&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="GrammarMiner.html"><span class="chnum">17</span> Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 </ul>
            <li><a href="https://www.fuzzingbook.org/beta/#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
@@ -12732,7 +12733,7 @@ is also required.</li>
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0 valid strings, that is GrammarFuzzer generated 0.000000% valid entries from 1000 inputs
-Total time of 5.573822 seconds
+Total time of 5.629142 seconds
 </pre>
 </div>
 
@@ -16007,6 +16008,7 @@ in two ways as we see below using the <code>A1_GRAMMAR</code></p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">grammar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_symbol&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coalesce</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coalesce&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tokens&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">set</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -16022,8 +16024,25 @@ in two ways as we see below using the <code>A1_GRAMMAR</code></p>
             <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;at &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">cursor</span><span class="p">:]))</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">forest</span><span class="p">]</span>
 
+    <span class="k">def</span> <span class="nf">coalesce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">new_lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cn</span><span class="p">,</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cn</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span><span class="p">:</span>
+                <span class="n">last</span> <span class="o">+=</span> <span class="n">cn</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">last</span><span class="p">:</span>
+                    <span class="n">new_lst</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">last</span><span class="p">,</span> <span class="p">[]))</span>
+                    <span class="n">last</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">new_lst</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cn</span><span class="p">,</span> <span class="n">cc</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">last</span><span class="p">:</span>
+            <span class="n">new_lst</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">last</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="k">return</span> <span class="n">new_lst</span>
+
     <span class="k">def</span> <span class="nf">prune_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
         <span class="n">name</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coalesce</span><span class="p">:</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[(</span><span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">),</span> <span class="p">[])])</span>
         <span class="k">else</span><span class="p">:</span>
@@ -20694,7 +20713,7 @@ x=10;y=20;z=(x+y)*(x-y)
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>61 valid strings, that is LangFuzzer generated 61.000000% valid entries
-Total time of 0.010947 seconds
+Total time of 0.010777 seconds
 </pre>
 </div>
 
@@ -20731,7 +20750,7 @@ Total time of 0.010947 seconds
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>4 valid strings, that is GrammarFuzzer generated 4.000000% valid entries
-Total time of 1.415999 seconds
+Total time of 1.381509 seconds
 </pre>
 </div>
 
@@ -20796,7 +20815,7 @@ Total time of 1.415999 seconds
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">strings</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">PEG_SURPRISE</span><span class="p">,</span> <span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">PEG_SURPRISE</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">)</span>
     <span class="n">tree</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
         <span class="n">tree</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">expand_tree_once</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
@@ -21325,7 +21344,7 @@ Total time of 1.415999 seconds
 <pre>Traceback (most recent call last):
   File &#34;&lt;ipython-input-82-dec55ebf796e&gt;&#34;, line 4, in &lt;module&gt;
     for tree in peg.parse(s):
-  File &#34;&lt;ipython-input-41-1d89f620487f&gt;&#34;, line 18, in parse
+  File &#34;&lt;ipython-input-41-5d528e2a45db&gt;&#34;, line 19, in parse
     raise SyntaxError(&#34;at &#34; + repr(text[cursor:]))
   File &#34;&lt;string&gt;&#34;, line None
 SyntaxError: at &#39;aa&#39; (expected)
@@ -22155,6 +22174,9 @@ We also store a reference to all the child states (that is, all states that orig
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">dot</span><span class="p">],</span> <span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dot</span><span class="p">:]]</span>
         <span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;(</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s_col</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_col</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s_col</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s_col</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
@@ -22510,7 +22532,6 @@ If the letter matches what we have, then create a new state by advancing the cur
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ep</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">SAMPLE_GRAMMAR</span><span class="p">)</span>
 <span class="n">col_1</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
 <span class="n">ep</span><span class="o">.</span><span class="n">chart</span> <span class="o">=</span> <span class="p">[</span><span class="n">col_0</span><span class="p">,</span> <span class="n">col_1</span><span class="p">]</span>
-<span class="n">ep</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">col_0</span><span class="p">,</span> <span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -22949,8 +22970,8 @@ d chart[4]
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">parse_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chart_parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">table</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chart_parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">):</span>
             <span class="n">states</span> <span class="o">=</span> <span class="p">[</span><span class="n">st</span> <span class="k">for</span> <span class="n">st</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">states</span> <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">states</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">col</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">states</span>
@@ -23103,8 +23124,7 @@ d chart[4]
         <span class="k">if</span> <span class="n">cursor</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;at &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">cursor</span><span class="p">:]))</span>
 
-        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chart_parse</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">)</span>
-        <span class="n">f_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+        <span class="n">f_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">)</span>
         <span class="n">start</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">states</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">finished</span><span class="p">())</span>
         <span class="n">forest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_trees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parse_forest</span><span class="p">(</span><span class="n">f_table</span><span class="p">,</span> <span class="n">start</span><span class="p">))</span>
 
@@ -24937,7 +24957,7 @@ d chart[4]
 <pre>Traceback (most recent call last):
   File &#34;&lt;ipython-input-134-61c19f40fd3a&gt;&#34;, line 4, in &lt;module&gt;
     trees = parser.parse(mystring)
-  File &#34;&lt;ipython-input-119-3c0171ff2661&gt;&#34;, line 5, in parse
+  File &#34;&lt;ipython-input-119-555708227559&gt;&#34;, line 5, in parse
     raise SyntaxError(&#34;at &#34; + repr(text[cursor:]))
   File &#34;&lt;string&gt;&#34;, line None
 SyntaxError: at &#39;a&#39; (expected)
@@ -25169,7 +25189,7 @@ SyntaxError: at &#39;a&#39; (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;E&gt;&#39;}
+<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;A&gt;&#39;}
 E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </pre>
 </div>
@@ -25764,6 +25784,9 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">nonterminals</span><span class="p">:</span>
         <span class="n">g</span><span class="p">[</span><span class="s1">&#39;&lt;nonterminals&gt;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">g</span><span class="p">[</span><span class="s1">&#39;&lt;lt&gt;&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">g</span><span class="p">[</span><span class="s1">&#39;&lt;alpha&gt;&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">g</span><span class="p">[</span><span class="s1">&#39;&lt;gt&gt;&#39;</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">g</span>
 </pre></div>
@@ -26252,18 +26275,18 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_grammar</span><span class="p">(</span><span class="n">num_symbols</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_alts</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span><span class="p">)</span>
+    <span class="n">terminals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span><span class="p">)</span>
     <span class="n">grammar</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_symbols</span><span class="p">):</span>
-        <span class="n">name</span><span class="p">,</span> <span class="n">expansions</span> <span class="o">=</span> <span class="n">make_rule</span><span class="p">([</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                                      <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">keys</span><span class="p">()],</span> <span class="n">a</span><span class="p">,</span> <span class="n">num_alts</span><span class="p">)</span>
+        <span class="n">nonterminals</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">expansions</span> <span class="o">=</span> \
+            <span class="n">make_rule</span><span class="p">(</span><span class="n">nonterminals</span><span class="p">,</span> <span class="n">terminals</span><span class="p">,</span> <span class="n">num_alts</span><span class="p">)</span>
         <span class="n">grammar</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">expansions</span>
 
     <span class="n">grammar</span><span class="p">[</span><span class="n">START_SYMBOL</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="p">]</span>
 
-    <span class="c1"># assert is_valid_grammar(grammar)</span>
-
+    <span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">grammar</span>
 </pre></div>
 
@@ -26349,26 +26372,26 @@ qfo
 <!-- Generated by graphviz version 2.40.1 (20161225.0304)
  -->
 <!-- Title: %3 Pages: 1 -->
-<svg width="96pt" height="176pt"
- viewBox="0.00 0.00 96.00 176.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="76pt" height="176pt"
+ viewBox="0.00 0.00 76.00 176.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 172)">
 <title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-172 92,-172 92,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-172 72,-172 72,4 -4,4"/>
 <!-- 0 -->
 <g id="node1" class="node">
 <title>0</title>
-<text text-anchor="middle" x="59" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+<text text-anchor="middle" x="40" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
 </g>
 <!-- 1 -->
 <g id="node2" class="node">
 <title>1</title>
-<text text-anchor="middle" x="59" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;KWH&gt;</text>
+<text text-anchor="middle" x="40" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;KWH&gt;</text>
 </g>
 <!-- 0&#45;&gt;1 -->
 <g id="edge1" class="edge">
 <title>0&#45;&gt;1</title>
-<path fill="none" stroke="#000000" d="M59,-152.9748C59,-146.195 59,-135.966 59,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="62.5001,-127.0561 59,-117.0561 55.5001,-127.0561 62.5001,-127.0561"/>
+<path fill="none" stroke="#000000" d="M40,-152.9748C40,-146.195 40,-135.966 40,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="43.5001,-127.0561 40,-117.0561 36.5001,-127.0561 43.5001,-127.0561"/>
 </g>
 <!-- 2 -->
 <g id="node3" class="node">
@@ -26378,30 +26401,19 @@ qfo
 <!-- 1&#45;&gt;2 -->
 <g id="edge2" class="edge">
 <title>1&#45;&gt;2</title>
-<path fill="none" stroke="#000000" d="M53.0979,-101.9748C47.3668,-94.6677 38.4933,-83.354 31.2351,-74.0997"/>
-<polygon fill="#000000" stroke="#000000" points="33.8518,-71.7647 24.9264,-66.0561 28.3438,-76.0847 33.8518,-71.7647"/>
+<path fill="none" stroke="#000000" d="M36.9014,-101.9748C34.0477,-95.0443 29.7099,-84.5097 26.0191,-75.5464"/>
+<polygon fill="#000000" stroke="#000000" points="29.1553,-73.9702 22.1113,-66.0561 22.6825,-76.6355 29.1553,-73.9702"/>
 </g>
 <!-- 4 -->
 <g id="node5" class="node">
 <title>4</title>
-<text text-anchor="middle" x="59" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">f</text>
+<text text-anchor="middle" x="62" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">fo</text>
 </g>
 <!-- 1&#45;&gt;4 -->
 <g id="edge4" class="edge">
 <title>1&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M59,-101.9748C59,-95.195 59,-84.966 59,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="62.5001,-76.0561 59,-66.0561 55.5001,-76.0561 62.5001,-76.0561"/>
-</g>
-<!-- 5 -->
-<g id="node6" class="node">
-<title>5</title>
-<text text-anchor="middle" x="84" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">o</text>
-</g>
-<!-- 1&#45;&gt;5 -->
-<g id="edge5" class="edge">
-<title>1&#45;&gt;5</title>
-<path fill="none" stroke="#000000" d="M62.6888,-101.9748C66.1231,-94.969 71.3626,-84.2803 75.7869,-75.2547"/>
-<polygon fill="#000000" stroke="#000000" points="79.0371,-76.5759 80.296,-66.0561 72.7517,-73.4947 79.0371,-76.5759"/>
+<path fill="none" stroke="#000000" d="M43.2462,-101.9748C46.2683,-94.969 50.8791,-84.2803 54.7725,-75.2547"/>
+<polygon fill="#000000" stroke="#000000" points="57.9933,-76.6246 58.7405,-66.0561 51.5658,-73.8519 57.9933,-76.6246"/>
 </g>
 <!-- 3 -->
 <g id="node4" class="node">
@@ -26440,191 +26452,114 @@ ceyhaeyhatqy
 <!-- Generated by graphviz version 2.40.1 (20161225.0304)
  -->
 <!-- Title: %3 Pages: 1 -->
-<svg width="205pt" height="227pt"
- viewBox="0.00 0.00 204.50 227.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="170pt" height="227pt"
+ viewBox="0.00 0.00 169.50 227.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 223)">
 <title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-223 200.5,-223 200.5,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-223 165.5,-223 165.5,4 -4,4"/>
 <!-- 0 -->
 <g id="node1" class="node">
 <title>0</title>
-<text text-anchor="middle" x="93.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+<text text-anchor="middle" x="79.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
 </g>
 <!-- 1 -->
 <g id="node2" class="node">
 <title>1</title>
-<text text-anchor="middle" x="93.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;YIO&gt;</text>
+<text text-anchor="middle" x="79.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;YIO&gt;</text>
 </g>
 <!-- 0&#45;&gt;1 -->
 <g id="edge1" class="edge">
 <title>0&#45;&gt;1</title>
-<path fill="none" stroke="#000000" d="M93.5,-203.9748C93.5,-197.195 93.5,-186.966 93.5,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="97.0001,-178.0561 93.5,-168.0561 90.0001,-178.0561 97.0001,-178.0561"/>
+<path fill="none" stroke="#000000" d="M79.5,-203.9748C79.5,-197.195 79.5,-186.966 79.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="83.0001,-178.0561 79.5,-168.0561 76.0001,-178.0561 83.0001,-178.0561"/>
 </g>
 <!-- 2 -->
 <g id="node3" class="node">
 <title>2</title>
-<text text-anchor="middle" x="14.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">c</text>
+<text text-anchor="middle" x="3.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">c</text>
 </g>
 <!-- 1&#45;&gt;2 -->
 <g id="edge2" class="edge">
 <title>1&#45;&gt;2</title>
-<path fill="none" stroke="#000000" d="M81.8433,-152.9748C67.0572,-143.4294 41.6806,-127.0469 26.6592,-117.3496"/>
-<polygon fill="#000000" stroke="#000000" points="28.4713,-114.3535 18.1715,-111.8702 24.6746,-120.2345 28.4713,-114.3535"/>
+<path fill="none" stroke="#000000" d="M68.2859,-152.9748C54.1982,-143.5211 30.1169,-127.3614 15.617,-117.6312"/>
+<polygon fill="#000000" stroke="#000000" points="17.2861,-114.5362 7.0321,-111.8702 13.3855,-120.3487 17.2861,-114.5362"/>
 </g>
 <!-- 3 -->
 <g id="node4" class="node">
 <title>3</title>
-<text text-anchor="middle" x="58.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;OUZ&gt;</text>
+<text text-anchor="middle" x="47.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;OUZ&gt;</text>
 </g>
 <!-- 1&#45;&gt;3 -->
 <g id="edge3" class="edge">
 <title>1&#45;&gt;3</title>
-<path fill="none" stroke="#000000" d="M88.3356,-152.9748C83.3726,-145.743 75.7165,-134.5868 69.4026,-125.3866"/>
-<polygon fill="#000000" stroke="#000000" points="72.2298,-123.3208 63.6856,-117.0561 66.4582,-127.2817 72.2298,-123.3208"/>
-</g>
-<!-- 8 -->
-<g id="node9" class="node">
-<title>8</title>
-<text text-anchor="middle" x="125.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;BTM&gt;</text>
-</g>
-<!-- 1&#45;&gt;8 -->
-<g id="edge8" class="edge">
-<title>1&#45;&gt;8</title>
-<path fill="none" stroke="#000000" d="M98.2217,-152.9748C102.712,-145.8183 109.6137,-134.8188 115.3512,-125.6747"/>
-<polygon fill="#000000" stroke="#000000" points="118.4087,-127.387 120.7589,-117.0561 112.4792,-123.6665 118.4087,-127.387"/>
-</g>
-<!-- 16 -->
-<g id="node17" class="node">
-<title>16</title>
-<text text-anchor="middle" x="171.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">y</text>
-</g>
-<!-- 1&#45;&gt;16 -->
-<g id="edge16" class="edge">
-<title>1&#45;&gt;16</title>
-<path fill="none" stroke="#000000" d="M105.0092,-152.9748C119.3326,-143.6095 143.7217,-127.6627 158.6445,-117.9055"/>
-<polygon fill="#000000" stroke="#000000" points="160.7688,-120.6983 167.2232,-112.2964 156.9381,-114.8395 160.7688,-120.6983"/>
-</g>
-<!-- 4 -->
-<g id="node5" class="node">
-<title>4</title>
-<text text-anchor="middle" x="3.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">e</text>
-</g>
-<!-- 3&#45;&gt;4 -->
-<g id="edge4" class="edge">
-<title>3&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M50.3846,-101.9748C40.8599,-93.1428 25.0231,-78.4578 14.425,-68.6305"/>
-<polygon fill="#000000" stroke="#000000" points="16.7209,-65.9862 7.0084,-61.7533 11.9613,-71.1191 16.7209,-65.9862"/>
+<path fill="none" stroke="#000000" d="M74.7783,-152.9748C70.288,-145.8183 63.3863,-134.8188 57.6488,-125.6747"/>
+<polygon fill="#000000" stroke="#000000" points="60.5208,-123.6665 52.2411,-117.0561 54.5913,-127.387 60.5208,-123.6665"/>
 </g>
 <!-- 5 -->
 <g id="node6" class="node">
 <title>5</title>
-<text text-anchor="middle" x="29.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">y</text>
+<text text-anchor="middle" x="111.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;BTM&gt;</text>
 </g>
-<!-- 3&#45;&gt;5 -->
+<!-- 1&#45;&gt;5 -->
 <g id="edge5" class="edge">
-<title>3&#45;&gt;5</title>
-<path fill="none" stroke="#000000" d="M54.221,-101.9748C50.1481,-94.8123 43.8864,-83.8002 38.6842,-74.6515"/>
-<polygon fill="#000000" stroke="#000000" points="41.5944,-72.6887 33.6088,-65.7259 35.5094,-76.1489 41.5944,-72.6887"/>
-</g>
-<!-- 6 -->
-<g id="node7" class="node">
-<title>6</title>
-<text text-anchor="middle" x="55.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">h</text>
-</g>
-<!-- 3&#45;&gt;6 -->
-<g id="edge6" class="edge">
-<title>3&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M58.0573,-101.9748C57.6585,-95.195 57.0568,-84.966 56.5372,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="60.0258,-75.8333 55.9445,-66.0561 53.0378,-76.2444 60.0258,-75.8333"/>
-</g>
-<!-- 7 -->
-<g id="node8" class="node">
-<title>7</title>
-<text text-anchor="middle" x="81.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 3&#45;&gt;7 -->
-<g id="edge7" class="edge">
-<title>3&#45;&gt;7</title>
-<path fill="none" stroke="#000000" d="M61.8937,-101.9748C65.0532,-94.969 69.8736,-84.2803 73.944,-75.2547"/>
-<polygon fill="#000000" stroke="#000000" points="77.1718,-76.6109 78.0923,-66.0561 70.7907,-73.7331 77.1718,-76.6109"/>
+<title>1&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M84.2217,-152.9748C88.712,-145.8183 95.6137,-134.8188 101.3512,-125.6747"/>
+<polygon fill="#000000" stroke="#000000" points="104.4087,-127.387 106.7589,-117.0561 98.4792,-123.6665 104.4087,-127.387"/>
 </g>
 <!-- 9 -->
 <g id="node10" class="node">
 <title>9</title>
-<text text-anchor="middle" x="125.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;OUZ&gt;</text>
+<text text-anchor="middle" x="157.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">y</text>
 </g>
-<!-- 8&#45;&gt;9 -->
+<!-- 1&#45;&gt;9 -->
 <g id="edge9" class="edge">
-<title>8&#45;&gt;9</title>
-<path fill="none" stroke="#000000" d="M125.5,-101.9748C125.5,-95.195 125.5,-84.966 125.5,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="129.0001,-76.0561 125.5,-66.0561 122.0001,-76.0561 129.0001,-76.0561"/>
+<title>1&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M91.0092,-152.9748C105.3326,-143.6095 129.7217,-127.6627 144.6445,-117.9055"/>
+<polygon fill="#000000" stroke="#000000" points="146.7688,-120.6983 153.2232,-112.2964 142.9381,-114.8395 146.7688,-120.6983"/>
 </g>
-<!-- 14 -->
-<g id="node15" class="node">
-<title>14</title>
-<text text-anchor="middle" x="168.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">t</text>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="47.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">eyha</text>
 </g>
-<!-- 8&#45;&gt;14 -->
-<g id="edge14" class="edge">
-<title>8&#45;&gt;14</title>
-<path fill="none" stroke="#000000" d="M131.8448,-101.9748C139.2096,-93.2398 151.4015,-78.7796 159.6842,-68.956"/>
-<polygon fill="#000000" stroke="#000000" points="162.3721,-71.1977 166.1423,-61.2964 157.0204,-66.6855 162.3721,-71.1977"/>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M47.5,-101.9748C47.5,-95.195 47.5,-84.966 47.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="51.0001,-76.0561 47.5,-66.0561 44.0001,-76.0561 51.0001,-76.0561"/>
 </g>
-<!-- 15 -->
-<g id="node16" class="node">
-<title>15</title>
-<text text-anchor="middle" x="192.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">q</text>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="106.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;OUZ&gt;</text>
 </g>
-<!-- 8&#45;&gt;15 -->
-<g id="edge15" class="edge">
-<title>8&#45;&gt;15</title>
-<path fill="none" stroke="#000000" d="M135.3861,-101.9748C147.2209,-92.9662 167.0557,-77.868 179.9582,-68.0468"/>
-<polygon fill="#000000" stroke="#000000" points="182.389,-70.5951 188.2261,-61.7533 178.1491,-65.0252 182.389,-70.5951"/>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M110.7622,-101.9748C110.0975,-95.195 109.0947,-84.966 108.2287,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="111.6999,-75.6669 107.2408,-66.0561 104.7333,-76.3499 111.6999,-75.6669"/>
 </g>
-<!-- 10 -->
-<g id="node11" class="node">
-<title>10</title>
-<text text-anchor="middle" x="86.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">e</text>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="152.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">tq</text>
 </g>
-<!-- 9&#45;&gt;10 -->
-<g id="edge10" class="edge">
-<title>9&#45;&gt;10</title>
-<path fill="none" stroke="#000000" d="M119.7454,-50.9748C113.5796,-42.9117 103.6832,-29.9703 96.2886,-20.3005"/>
-<polygon fill="#000000" stroke="#000000" points="99.0238,-18.1155 90.169,-12.298 93.4633,-22.3676 99.0238,-18.1155"/>
+<!-- 5&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>5&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M117.5497,-101.9748C123.5591,-94.4997 132.9392,-82.8317 140.4694,-73.4648"/>
+<polygon fill="#000000" stroke="#000000" points="143.4141,-75.388 146.9519,-65.4013 137.9585,-71.0021 143.4141,-75.388"/>
 </g>
-<!-- 11 -->
-<g id="node12" class="node">
-<title>11</title>
-<text text-anchor="middle" x="112.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">y</text>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="106.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">eyha</text>
 </g>
-<!-- 9&#45;&gt;11 -->
-<g id="edge11" class="edge">
-<title>9&#45;&gt;11</title>
-<path fill="none" stroke="#000000" d="M123.5818,-50.9748C121.8344,-44.1196 119.1882,-33.7383 116.9198,-24.8392"/>
-<polygon fill="#000000" stroke="#000000" points="120.2877,-23.8817 114.4261,-15.0561 113.5046,-25.6108 120.2877,-23.8817"/>
-</g>
-<!-- 12 -->
-<g id="node13" class="node">
-<title>12</title>
-<text text-anchor="middle" x="138.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">h</text>
-</g>
-<!-- 9&#45;&gt;12 -->
-<g id="edge12" class="edge">
-<title>9&#45;&gt;12</title>
-<path fill="none" stroke="#000000" d="M127.4182,-50.9748C129.1656,-44.1196 131.8118,-33.7383 134.0802,-24.8392"/>
-<polygon fill="#000000" stroke="#000000" points="137.4954,-25.6108 136.5739,-15.0561 130.7123,-23.8817 137.4954,-25.6108"/>
-</g>
-<!-- 13 -->
-<g id="node14" class="node">
-<title>13</title>
-<text text-anchor="middle" x="164.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 9&#45;&gt;13 -->
-<g id="edge13" class="edge">
-<title>9&#45;&gt;13</title>
-<path fill="none" stroke="#000000" d="M131.2546,-50.9748C137.4204,-42.9117 147.3168,-29.9703 154.7114,-20.3005"/>
-<polygon fill="#000000" stroke="#000000" points="157.5367,-22.3676 160.831,-12.298 151.9762,-18.1155 157.5367,-22.3676"/>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M106.5,-50.9748C106.5,-44.195 106.5,-33.966 106.5,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="110.0001,-25.0561 106.5,-15.0561 103.0001,-25.0561 110.0001,-25.0561"/>
 </g>
 </g>
 </svg>
@@ -26652,59 +26587,37 @@ lqy
 <!-- Generated by graphviz version 2.40.1 (20161225.0304)
  -->
 <!-- Title: %3 Pages: 1 -->
-<svg width="64pt" height="125pt"
- viewBox="0.00 0.00 64.00 125.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="53pt" height="125pt"
+ viewBox="0.00 0.00 53.00 125.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 121)">
 <title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-121 60,-121 60,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-121 49,-121 49,4 -4,4"/>
 <!-- 0 -->
 <g id="node1" class="node">
 <title>0</title>
-<text text-anchor="middle" x="26" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+<text text-anchor="middle" x="22.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
 </g>
 <!-- 1 -->
 <g id="node2" class="node">
 <title>1</title>
-<text text-anchor="middle" x="26" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;UHE&gt;</text>
+<text text-anchor="middle" x="22.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;UHE&gt;</text>
 </g>
 <!-- 0&#45;&gt;1 -->
 <g id="edge1" class="edge">
 <title>0&#45;&gt;1</title>
-<path fill="none" stroke="#000000" d="M26,-101.9748C26,-95.195 26,-84.966 26,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="29.5001,-76.0561 26,-66.0561 22.5001,-76.0561 29.5001,-76.0561"/>
+<path fill="none" stroke="#000000" d="M22.5,-101.9748C22.5,-95.195 22.5,-84.966 22.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="26.0001,-76.0561 22.5,-66.0561 19.0001,-76.0561 26.0001,-76.0561"/>
 </g>
 <!-- 2 -->
 <g id="node3" class="node">
 <title>2</title>
-<text text-anchor="middle" x="2" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">l</text>
+<text text-anchor="middle" x="22.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">lqy</text>
 </g>
 <!-- 1&#45;&gt;2 -->
 <g id="edge2" class="edge">
 <title>1&#45;&gt;2</title>
-<path fill="none" stroke="#000000" d="M22.4587,-50.9748C18.745,-43.0832 12.8322,-30.5185 8.3161,-20.9217"/>
-<polygon fill="#000000" stroke="#000000" points="11.4273,-19.3129 4.0024,-11.7551 5.0935,-22.2936 11.4273,-19.3129"/>
-</g>
-<!-- 3 -->
-<g id="node4" class="node">
-<title>3</title>
-<text text-anchor="middle" x="26" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">q</text>
-</g>
-<!-- 1&#45;&gt;3 -->
-<g id="edge3" class="edge">
-<title>1&#45;&gt;3</title>
-<path fill="none" stroke="#000000" d="M26,-50.9748C26,-44.195 26,-33.966 26,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="29.5001,-25.0561 26,-15.0561 22.5001,-25.0561 29.5001,-25.0561"/>
-</g>
-<!-- 4 -->
-<g id="node5" class="node">
-<title>4</title>
-<text text-anchor="middle" x="52" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">y</text>
-</g>
-<!-- 1&#45;&gt;4 -->
-<g id="edge4" class="edge">
-<title>1&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M29.8364,-50.9748C33.408,-43.969 38.8571,-33.2803 43.4584,-24.2547"/>
-<polygon fill="#000000" stroke="#000000" points="46.7241,-25.5548 48.1479,-15.0561 40.4878,-22.3755 46.7241,-25.5548"/>
+<path fill="none" stroke="#000000" d="M22.5,-50.9748C22.5,-44.195 22.5,-33.966 22.5,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="26.0001,-25.0561 22.5,-15.0561 19.0001,-25.0561 26.0001,-25.0561"/>
 </g>
 </g>
 </svg>
@@ -26732,59 +26645,48 @@ roauy
 <!-- Generated by graphviz version 2.40.1 (20161225.0304)
  -->
 <!-- Title: %3 Pages: 1 -->
-<svg width="150pt" height="227pt"
- viewBox="0.00 0.00 150.00 227.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="110pt" height="227pt"
+ viewBox="0.00 0.00 109.50 227.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 223)">
 <title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-223 146,-223 146,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-223 105.5,-223 105.5,4 -4,4"/>
 <!-- 0 -->
 <g id="node1" class="node">
 <title>0</title>
-<text text-anchor="middle" x="112" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+<text text-anchor="middle" x="69" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
 </g>
 <!-- 1 -->
 <g id="node2" class="node">
 <title>1</title>
-<text text-anchor="middle" x="112" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;VGG&gt;</text>
+<text text-anchor="middle" x="69" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;VGG&gt;</text>
 </g>
 <!-- 0&#45;&gt;1 -->
 <g id="edge1" class="edge">
 <title>0&#45;&gt;1</title>
-<path fill="none" stroke="#000000" d="M112,-203.9748C112,-197.195 112,-186.966 112,-178.1331"/>
-<polygon fill="#000000" stroke="#000000" points="115.5001,-178.0561 112,-168.0561 108.5001,-178.0561 115.5001,-178.0561"/>
+<path fill="none" stroke="#000000" d="M69,-203.9748C69,-197.195 69,-186.966 69,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="72.5001,-178.0561 69,-168.0561 65.5001,-178.0561 72.5001,-178.0561"/>
 </g>
 <!-- 2 -->
 <g id="node3" class="node">
 <title>2</title>
-<text text-anchor="middle" x="66" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;DOX&gt;</text>
+<text text-anchor="middle" x="45" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;DOX&gt;</text>
 </g>
 <!-- 1&#45;&gt;2 -->
 <g id="edge2" class="edge">
 <title>1&#45;&gt;2</title>
-<path fill="none" stroke="#000000" d="M105.2125,-152.9748C98.4859,-145.517 87.995,-133.8857 79.5564,-124.53"/>
-<polygon fill="#000000" stroke="#000000" points="82.112,-122.1376 72.8153,-117.0561 76.914,-126.826 82.112,-122.1376"/>
+<path fill="none" stroke="#000000" d="M65.4587,-152.9748C62.1619,-145.969 57.1319,-135.2803 52.8845,-126.2547"/>
+<polygon fill="#000000" stroke="#000000" points="55.9807,-124.614 48.5558,-117.0561 49.647,-127.5946 55.9807,-124.614"/>
 </g>
-<!-- 7 -->
-<g id="node8" class="node">
-<title>7</title>
-<text text-anchor="middle" x="112" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">u</text>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="94" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">uy</text>
 </g>
-<!-- 1&#45;&gt;7 -->
-<g id="edge7" class="edge">
-<title>1&#45;&gt;7</title>
-<path fill="none" stroke="#000000" d="M112,-152.9748C112,-146.195 112,-135.966 112,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="115.5001,-127.0561 112,-117.0561 108.5001,-127.0561 115.5001,-127.0561"/>
-</g>
-<!-- 8 -->
-<g id="node9" class="node">
-<title>8</title>
-<text text-anchor="middle" x="138" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">y</text>
-</g>
-<!-- 1&#45;&gt;8 -->
-<g id="edge8" class="edge">
-<title>1&#45;&gt;8</title>
-<path fill="none" stroke="#000000" d="M115.8364,-152.9748C119.408,-145.969 124.8571,-135.2803 129.4584,-126.2547"/>
-<polygon fill="#000000" stroke="#000000" points="132.7241,-127.5548 134.1479,-117.0561 126.4878,-124.3755 132.7241,-127.5548"/>
+<!-- 1&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>1&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M72.6888,-152.9748C76.1231,-145.969 81.3626,-135.2803 85.7869,-126.2547"/>
+<polygon fill="#000000" stroke="#000000" points="89.0371,-127.5759 90.296,-117.0561 82.7517,-124.4947 89.0371,-127.5759"/>
 </g>
 <!-- 3 -->
 <g id="node4" class="node">
@@ -26794,30 +26696,19 @@ roauy
 <!-- 2&#45;&gt;3 -->
 <g id="edge3" class="edge">
 <title>2&#45;&gt;3</title>
-<path fill="none" stroke="#000000" d="M59.5076,-101.9748C53.1385,-94.5923 43.241,-83.1203 35.2122,-73.8142"/>
-<polygon fill="#000000" stroke="#000000" points="37.7014,-71.3414 28.519,-66.0561 32.4013,-75.914 37.7014,-71.3414"/>
+<path fill="none" stroke="#000000" d="M41.6063,-101.9748C38.4468,-94.969 33.6264,-84.2803 29.556,-75.2547"/>
+<polygon fill="#000000" stroke="#000000" points="32.7093,-73.7331 25.4077,-66.0561 26.3282,-76.6109 32.7093,-73.7331"/>
 </g>
 <!-- 5 -->
 <g id="node6" class="node">
 <title>5</title>
-<text text-anchor="middle" x="66" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">o</text>
+<text text-anchor="middle" x="69" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">oa</text>
 </g>
 <!-- 2&#45;&gt;5 -->
 <g id="edge5" class="edge">
 <title>2&#45;&gt;5</title>
-<path fill="none" stroke="#000000" d="M66,-101.9748C66,-95.195 66,-84.966 66,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="69.5001,-76.0561 66,-66.0561 62.5001,-76.0561 69.5001,-76.0561"/>
-</g>
-<!-- 6 -->
-<g id="node7" class="node">
-<title>6</title>
-<text text-anchor="middle" x="92" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">a</text>
-</g>
-<!-- 2&#45;&gt;6 -->
-<g id="edge6" class="edge">
-<title>2&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M69.8364,-101.9748C73.5294,-94.7309 79.2297,-83.5494 83.9245,-74.3403"/>
-<polygon fill="#000000" stroke="#000000" points="87.0579,-75.9 88.4817,-65.4013 80.8216,-72.7207 87.0579,-75.9"/>
+<path fill="none" stroke="#000000" d="M48.5413,-101.9748C51.8381,-94.969 56.8681,-84.2803 61.1155,-75.2547"/>
+<polygon fill="#000000" stroke="#000000" points="64.353,-76.5946 65.4442,-66.0561 58.0193,-73.614 64.353,-76.5946"/>
 </g>
 <!-- 4 -->
 <g id="node5" class="node">
@@ -26856,92 +26747,59 @@ verxj
 <!-- Generated by graphviz version 2.40.1 (20161225.0304)
  -->
 <!-- Title: %3 Pages: 1 -->
-<svg width="106pt" height="176pt"
- viewBox="0.00 0.00 106.00 176.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="76pt" height="176pt"
+ viewBox="0.00 0.00 76.00 176.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 172)">
 <title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-172 102,-172 102,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-172 72,-172 72,4 -4,4"/>
 <!-- 0 -->
 <g id="node1" class="node">
 <title>0</title>
-<text text-anchor="middle" x="72" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+<text text-anchor="middle" x="40.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
 </g>
 <!-- 1 -->
 <g id="node2" class="node">
 <title>1</title>
-<text text-anchor="middle" x="72" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;JKU&gt;</text>
+<text text-anchor="middle" x="40.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;JKU&gt;</text>
 </g>
 <!-- 0&#45;&gt;1 -->
 <g id="edge1" class="edge">
 <title>0&#45;&gt;1</title>
-<path fill="none" stroke="#000000" d="M72,-152.9748C72,-146.195 72,-135.966 72,-127.1331"/>
-<polygon fill="#000000" stroke="#000000" points="75.5001,-127.0561 72,-117.0561 68.5001,-127.0561 75.5001,-127.0561"/>
+<path fill="none" stroke="#000000" d="M40.5,-152.9748C40.5,-146.195 40.5,-135.966 40.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="44.0001,-127.0561 40.5,-117.0561 37.0001,-127.0561 44.0001,-127.0561"/>
 </g>
 <!-- 2 -->
 <g id="node3" class="node">
 <title>2</title>
-<text text-anchor="middle" x="30" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;IFU&gt;</text>
+<text text-anchor="middle" x="19.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;IFU&gt;</text>
 </g>
 <!-- 1&#45;&gt;2 -->
 <g id="edge2" class="edge">
 <title>1&#45;&gt;2</title>
-<path fill="none" stroke="#000000" d="M65.8028,-101.9748C59.7231,-94.5923 50.2755,-83.1203 42.6117,-73.8142"/>
-<polygon fill="#000000" stroke="#000000" points="45.2815,-71.5504 36.2227,-66.0561 39.878,-76.0004 45.2815,-71.5504"/>
-</g>
-<!-- 6 -->
-<g id="node7" class="node">
-<title>6</title>
-<text text-anchor="middle" x="72" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">x</text>
-</g>
-<!-- 1&#45;&gt;6 -->
-<g id="edge6" class="edge">
-<title>1&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M72,-101.9748C72,-95.195 72,-84.966 72,-76.1331"/>
-<polygon fill="#000000" stroke="#000000" points="75.5001,-76.0561 72,-66.0561 68.5001,-76.0561 75.5001,-76.0561"/>
-</g>
-<!-- 7 -->
-<g id="node8" class="node">
-<title>7</title>
-<text text-anchor="middle" x="96" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">j</text>
-</g>
-<!-- 1&#45;&gt;7 -->
-<g id="edge7" class="edge">
-<title>1&#45;&gt;7</title>
-<path fill="none" stroke="#000000" d="M75.5413,-101.9748C79.255,-94.0832 85.1678,-81.5185 89.6839,-71.9217"/>
-<polygon fill="#000000" stroke="#000000" points="92.9065,-73.2936 93.9976,-62.7551 86.5727,-70.3129 92.9065,-73.2936"/>
-</g>
-<!-- 3 -->
-<g id="node4" class="node">
-<title>3</title>
-<text text-anchor="middle" x="4" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">v</text>
-</g>
-<!-- 2&#45;&gt;3 -->
-<g id="edge3" class="edge">
-<title>2&#45;&gt;3</title>
-<path fill="none" stroke="#000000" d="M26.1636,-50.9748C22.592,-43.969 17.1429,-33.2803 12.5416,-24.2547"/>
-<polygon fill="#000000" stroke="#000000" points="15.5122,-22.3755 7.8521,-15.0561 9.2759,-25.5548 15.5122,-22.3755"/>
+<path fill="none" stroke="#000000" d="M37.4014,-101.9748C34.5477,-95.0443 30.2099,-84.5097 26.5191,-75.5464"/>
+<polygon fill="#000000" stroke="#000000" points="29.6553,-73.9702 22.6113,-66.0561 23.1825,-76.6355 29.6553,-73.9702"/>
 </g>
 <!-- 4 -->
 <g id="node5" class="node">
 <title>4</title>
-<text text-anchor="middle" x="30" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">e</text>
+<text text-anchor="middle" x="62.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">xj</text>
 </g>
-<!-- 2&#45;&gt;4 -->
+<!-- 1&#45;&gt;4 -->
 <g id="edge4" class="edge">
-<title>2&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M30,-50.9748C30,-44.195 30,-33.966 30,-25.1331"/>
-<polygon fill="#000000" stroke="#000000" points="33.5001,-25.0561 30,-15.0561 26.5001,-25.0561 33.5001,-25.0561"/>
+<title>1&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M43.7462,-101.9748C46.7683,-94.969 51.3791,-84.2803 55.2725,-75.2547"/>
+<polygon fill="#000000" stroke="#000000" points="58.4933,-76.6246 59.2405,-66.0561 52.0658,-73.8519 58.4933,-76.6246"/>
 </g>
-<!-- 5 -->
-<g id="node6" class="node">
-<title>5</title>
-<text text-anchor="middle" x="54" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">r</text>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="19.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">ver</text>
 </g>
-<!-- 2&#45;&gt;5 -->
-<g id="edge5" class="edge">
-<title>2&#45;&gt;5</title>
-<path fill="none" stroke="#000000" d="M33.5413,-50.9748C37.1034,-43.4053 42.6888,-31.5364 47.1242,-22.1112"/>
-<polygon fill="#000000" stroke="#000000" points="50.383,-23.406 51.4741,-12.8675 44.0492,-20.4254 50.383,-23.406"/>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M19.5,-50.9748C19.5,-44.195 19.5,-33.966 19.5,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="23.0001,-25.0561 19.5,-15.0561 16.0001,-25.0561 23.0001,-25.0561"/>
 </g>
 </g>
 </svg>
@@ -27119,7 +26977,7 @@ Remember the exercise from <a href="Grammars.html">the chapter on grammars</a> t
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We enable logging to see the parse progress</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>To see the problem, we need to enable logging. Here is the logged version of parsing with the <code>LR_GRAMMAR</code></p>
 </div>
 </div>
 </div>
@@ -27163,30 +27021,18 @@ a chart[5]
 a chart[6]
 &lt;A&gt;:= &lt;A&gt; a |(0,6)
 &lt;start&gt;:= &lt;A&gt; |(0,6)
-None chart[0]
-&lt;A&gt;:= |(0,0)
-&lt;start&gt;:= &lt;A&gt; |(0,0)
-a chart[1]
-&lt;A&gt;:= &lt;A&gt; a |(0,1)
-&lt;start&gt;:= &lt;A&gt; |(0,1)
-a chart[2]
-&lt;A&gt;:= &lt;A&gt; a |(0,2)
-&lt;start&gt;:= &lt;A&gt; |(0,2)
-a chart[3]
-&lt;A&gt;:= &lt;A&gt; a |(0,3)
-&lt;start&gt;:= &lt;A&gt; |(0,3)
-a chart[4]
-&lt;A&gt;:= &lt;A&gt; a |(0,4)
-&lt;start&gt;:= &lt;A&gt; |(0,4)
-a chart[5]
-&lt;A&gt;:= &lt;A&gt; a |(0,5)
-&lt;start&gt;:= &lt;A&gt; |(0,5)
-a chart[6]
-&lt;A&gt;:= &lt;A&gt; a |(0,6)
-&lt;start&gt;:= &lt;A&gt; |(0,6)
 </pre>
 </div>
 
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Compare that to the parsing of <code>RR_GRAMMAR</code> as seen below:</p>
+</div>
+</div>
+</div>
 </div>
 
 <div class="input_code">
@@ -27248,48 +27094,6 @@ a chart[6]
 &lt;A&gt;:= a &lt;A&gt; |(1,6)
 &lt;A&gt;:= a &lt;A&gt; |(0,6)
 &lt;start&gt;:= &lt;A&gt; |(0,6)
-None chart[0]
-&lt;A&gt;:= |(0,0)
-&lt;start&gt;:= &lt;A&gt; |(0,0)
-a chart[1]
-&lt;A&gt;:= |(1,1)
-&lt;A&gt;:= a &lt;A&gt; |(0,1)
-&lt;start&gt;:= &lt;A&gt; |(0,1)
-a chart[2]
-&lt;A&gt;:= |(2,2)
-&lt;A&gt;:= a &lt;A&gt; |(1,2)
-&lt;A&gt;:= a &lt;A&gt; |(0,2)
-&lt;start&gt;:= &lt;A&gt; |(0,2)
-a chart[3]
-&lt;A&gt;:= |(3,3)
-&lt;A&gt;:= a &lt;A&gt; |(2,3)
-&lt;A&gt;:= a &lt;A&gt; |(1,3)
-&lt;A&gt;:= a &lt;A&gt; |(0,3)
-&lt;start&gt;:= &lt;A&gt; |(0,3)
-a chart[4]
-&lt;A&gt;:= |(4,4)
-&lt;A&gt;:= a &lt;A&gt; |(3,4)
-&lt;A&gt;:= a &lt;A&gt; |(2,4)
-&lt;A&gt;:= a &lt;A&gt; |(1,4)
-&lt;A&gt;:= a &lt;A&gt; |(0,4)
-&lt;start&gt;:= &lt;A&gt; |(0,4)
-a chart[5]
-&lt;A&gt;:= |(5,5)
-&lt;A&gt;:= a &lt;A&gt; |(4,5)
-&lt;A&gt;:= a &lt;A&gt; |(3,5)
-&lt;A&gt;:= a &lt;A&gt; |(2,5)
-&lt;A&gt;:= a &lt;A&gt; |(1,5)
-&lt;A&gt;:= a &lt;A&gt; |(0,5)
-&lt;start&gt;:= &lt;A&gt; |(0,5)
-a chart[6]
-&lt;A&gt;:= |(6,6)
-&lt;A&gt;:= a &lt;A&gt; |(5,6)
-&lt;A&gt;:= a &lt;A&gt; |(4,6)
-&lt;A&gt;:= a &lt;A&gt; |(3,6)
-&lt;A&gt;:= a &lt;A&gt; |(2,6)
-&lt;A&gt;:= a &lt;A&gt; |(1,6)
-&lt;A&gt;:= a &lt;A&gt; |(0,6)
-&lt;start&gt;:= &lt;A&gt; |(0,6)
 </pre>
 </div>
 
@@ -27301,42 +27105,25 @@ a chart[6]
 <div class="text_cell_render border-box-sizing rendered_html"><p>As can be seen from the parsing log for each letter, the number of states with representation <code>&lt;A&gt;:= a &lt;A&gt; | (i, j)</code> increases at each stage, and these are simply a left over from the previous letter. They do not contribute anything more to the parse other than to simply complete these entries. However, they take up space, and require resources for inspection, contributing a factor of <code>n</code> in analysis.</p>
 <p>Joop Leo [<a href="https://doi.org/https://doi.org/10.1016/0304-3975(91)90180-A">Joop M.I.M. Leo, 1991.</a>] found that this inefficiency can be avoided by detecting right recursion. The idea is that before starting the <code>completion</code> step, check whether the current item has a <em>deterministic reduction path</em>. If such a path exists, add a copy of the topmost element of the <em>deteministic reduction path</em> to the current column, and return. If not, perform the original <code>completion</code> step.</p>
 <p>Finding a <em>deterministic reduction path</em> is as follows:</p>
-<p>Given a complete state, represented by <code>&lt;A&gt; := ... | (i)</code> where <code>(i)</code> is the starting column, there is a <em>deterministic reduction path</em> above it if two criteria are satisfied.</p>
+<p>Given a complete state, represented by <code>&lt;A&gt; := seq_1 | (i)</code> where <code>(i)</code> is the starting column, there is a <em>deterministic reduction path</em> <strong>above</strong> it if two criteria are satisfied.</p>
 <ul>
-<li>There exist an item <code>&lt;B&gt; := ... &lt;A&gt; | (k)</code> in the current column.</li>
-<li>It should have a <em>single</em> predecessor of the form <code>&lt;B&gt; := ... | &lt;A&gt; (k)</code> in the current column.
-Following this chain (looking for the link above <code>&lt;B&gt; := ... &lt;A&gt; | (k)</code>), the topmost item is the item that does not have a parent.</li>
+<li>There exist an item <code>&lt;B&gt; := seq_2 &lt;A&gt; | (k)</code> in the current column.</li>
+<li>It should have a <em>single</em> predecessor of the form <code>&lt;B&gt; := seq_2 | &lt;A&gt; (k)</code> in the current column.</li>
 </ul>
+<p>Whre <code>seq_1</code> and <code>seq_2</code> are arbitrary symbol sequences.
+Following this chain (looking for the link above <code>&lt;B&gt; := seq_2 &lt;A&gt; | (k)</code>), the topmost item is the item that does not have a parent.</p>
 <p>See <a href="http://loup-vaillant.fr/tutorials/earley-parsing/right-recursion">Loup Vaillant</a> for further information.</p>
 </div>
 </div>
 </div>
 </div>
 
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">State</span><span class="p">(</span><span class="n">State</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">dot</span><span class="p">,</span> <span class="n">s_col</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">dot</span><span class="p">,</span> <span class="n">s_col</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="n">tag</span>
-
-    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">State</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s_col</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">init</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag</span> <span class="ow">or</span> <span class="s2">&quot;   &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">init</span> <span class="o">+</span> <span class="s1">&#39;:= &#39;</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
-            <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">dot</span><span class="p">],</span> <span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dot</span><span class="p">:]]</span>
-        <span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;(</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s_col</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_col</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-</pre></div>
-
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here is the skeleton for the parser <code>LeoParser</code>.</p>
 </div>
-</div></div>
+</div>
 </div>
 </div>
 
@@ -27358,7 +27145,7 @@ Following this chain (looking for the link above <code>&lt;B&gt; := ... &lt;A&gt
             <span class="bp">self</span><span class="o">.</span><span class="n">earley_complete</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">deterministic_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-        <span class="o">...</span>
+        <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -27369,7 +27156,7 @@ Following this chain (looking for the link above <code>&lt;B&gt; := ... &lt;A&gt
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Can you implement the <code>deterministic_reduction</code> method to obtain the top most element?</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Can you implement the <code>deterministic_reduction()</code> method to obtain the top most element?</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/Parser.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -27386,50 +27173,6 @@ Following this chain (looking for the link above <code>&lt;B&gt; := ... &lt;A&gt
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/Parser.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 </div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">RR_GRAMMAR3</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">],</span>
-    <span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ab&lt;B&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span>
-    <span class="s1">&#39;&lt;B&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">],</span>
-<span class="p">}</span>
-<span class="n">mystring3</span> <span class="o">=</span> <span class="s1">&#39;abababab&#39;</span>
-</pre></div>
-
-</div>
-</div>
-    
-<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/Parser.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">RR_GRAMMAR3</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">],</span>
-    <span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;a&lt;B&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span>
-    <span class="s1">&#39;&lt;B&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;b&lt;A&gt;&#39;</span><span class="p">],</span>
-<span class="p">}</span>
-<span class="n">mystring3</span> <span class="o">=</span> <span class="s1">&#39;abababab&#39;</span>
-</pre></div>
-
-</div>
-</div>
-    
-<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/beta/notebooks/Parser.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 </div>
 </div>
 </div>
@@ -27737,7 +27480,7 @@ It should result in the following table:</p>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2018-12-04 11:22:21+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2018-12-11 08:21:50+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -27753,7 +27496,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2018-12-04 11:22:21+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2018-12-11 08:21:50+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Parser,
@@ -27763,9 +27506,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Parser.html}},
-    note = {Retrieved 2018-12-04 11:22:21+01:00},
+    note = {Retrieved 2018-12-11 08:21:50+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Parser.html},
-    urldate = {2018-12-04 11:22:21+01:00}
+    urldate = {2018-12-11 08:21:50+01:00}
 }
 </pre>
 </div>

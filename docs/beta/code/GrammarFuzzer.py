@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-12-04 17:08:54+01:00
+# Last change: 2018-12-10 15:56:40+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -47,9 +47,9 @@ if __name__ == "__main__":
 import fuzzingbook_utils
 
 if __package__ is None or __package__ == "":
-    from Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer
+    from Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer, is_valid_grammar, exp_string, exp_opts
 else:
-    from .Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer
+    from .Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer, is_valid_grammar, exp_string, exp_opts
 
 
 if __name__ == "__main__":
@@ -249,7 +249,6 @@ def display_tree(derivation_tree,
         print(dot)
     display(dot)
 
-
 if __name__ == "__main__":
     display_tree(derivation_tree)
 
@@ -332,7 +331,14 @@ class GrammarFuzzer(Fuzzer):
         self.max_nonterminals = max_nonterminals
         self.disp = disp
         self.log = log
+        self.check_grammar()
 
+class GrammarFuzzer(GrammarFuzzer):
+    def check_grammar(self):
+        assert self.start_symbol in self.grammar
+        assert is_valid_grammar(self.grammar, start_symbol=self.start_symbol, supported_opts=self.supported_opts())
+    def supported_opts(self):
+        return set()
 
 class GrammarFuzzer(GrammarFuzzer):
     def init_tree(self):
@@ -348,9 +354,8 @@ def expansion_to_children(expansion):
     # strings contains all substrings -- both terminals and nonterminals such
     # that ''.join(strings) == expansion
 
-    # See nonterminals() in Grammars.py
-    if isinstance(expansion, tuple):
-        expansion = expansion[0]
+    expansion = exp_string(expansion)
+    assert isinstance(expansion, str)
 
     if expansion == "":  # Special case: epsilon expansion
         return [("", [])]
@@ -358,7 +363,6 @@ def expansion_to_children(expansion):
     strings = re.split(RE_NONTERMINAL, expansion)
     return [(s, None) if is_nonterminal(s) else (s, [])
             for s in strings if len(s) > 0]
-
 
 if __name__ == "__main__":
     expansion_to_children("<term> + <expr>")
@@ -396,15 +400,23 @@ class GrammarFuzzer(GrammarFuzzer):
 
         # ... and select a random expansion
         index = self.choose_node_expansion(node, possible_children)
-        children = possible_children[index]
+        chosen_children = possible_children[index]
+        
+        # Process children (for subclasses)
+        chosen_children = self.process_chosen_children(chosen_children, 
+                                                       expansions[index])
 
         # Return with new children
-        return (symbol, children)
-
+        return (symbol, chosen_children)
 
 class GrammarFuzzer(GrammarFuzzer):
     def expand_node(self, node):
         return self.expand_node_randomly(node)
+
+class GrammarFuzzer(GrammarFuzzer):
+    def process_chosen_children(self, chosen_children, expansion):
+        """Process children after selection.  By default, does nothing."""
+        return chosen_children
 
 if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
@@ -458,6 +470,7 @@ class GrammarFuzzer(GrammarFuzzer):
         return random.randrange(0, len(children))
 
     def expand_tree_once(self, tree):
+        """Choose an unexpanded symbol in tree; expand it.  Can be overloaded in subclasses."""
         (symbol, children) = tree
         if children is None:
             # Expand this node
@@ -546,19 +559,25 @@ class GrammarFuzzer(GrammarFuzzer):
         expansions = self.grammar[symbol]
 
         possible_children_with_cost = [(self.expansion_to_children(expansion),
-                                        self.expansion_cost(expansion, {symbol}))
+                                        self.expansion_cost(expansion, {symbol}),
+                                        expansion)
                                        for expansion in expansions]
 
-        costs = [cost for (child, cost) in possible_children_with_cost]
+        costs = [cost for (child, cost, expansion) in possible_children_with_cost]
         chosen_cost = choose(costs)
-        children_with_chosen_cost = [child for (child, child_cost) in possible_children_with_cost
+        children_with_chosen_cost = [child for (child, child_cost, _) in possible_children_with_cost
+                                     if child_cost == chosen_cost]
+        expansion_with_chosen_cost = [expansion for (_, child_cost, expansion) in possible_children_with_cost
                                      if child_cost == chosen_cost]
 
         index = self.choose_node_expansion(node, children_with_chosen_cost)
+        
+        chosen_children = children_with_chosen_cost[index]
+        chosen_expansion = expansion_with_chosen_cost[index]
+        chosen_children = self.process_chosen_children(chosen_children, chosen_expansion)
 
         # Return with a new list
-        return (symbol, children_with_chosen_cost[index])
-
+        return (symbol, chosen_children)
 
 class GrammarFuzzer(GrammarFuzzer):
     def expand_node_min_cost(self, node):
@@ -675,8 +694,9 @@ class GrammarFuzzer(GrammarFuzzer):
         """Expand tree using `expand_node_method` as node expansion function
         until the number of possible expansions reaches `limit`."""
         self.expand_node = expand_node_method
-        while (limit is None or self.possible_expansions(tree)
-               < limit) and self.any_possible_expansions(tree):
+        while ((limit is None 
+                or self.possible_expansions(tree) < limit)
+               and self.any_possible_expansions(tree)):
             tree = self.expand_tree_once(tree)
             self.log_tree(tree)
         return tree
@@ -688,12 +708,12 @@ class GrammarFuzzer(GrammarFuzzer):
             tree, self.expand_node_max_cost, self.min_nonterminals)
         tree = self.expand_tree_with_strategy(
             tree, self.expand_node_randomly, self.max_nonterminals)
-        tree = self.expand_tree_with_strategy(tree, self.expand_node_min_cost)
+        tree = self.expand_tree_with_strategy(
+            tree, self.expand_node_min_cost)
 
         assert self.possible_expansions(tree) == 0
 
         return tree
-
 
 if __name__ == "__main__":
     derivation_tree = ("<start>",
