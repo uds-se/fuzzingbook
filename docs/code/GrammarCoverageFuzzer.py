@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-12-04 18:01:04+01:00
+# Last change: 2018-12-10 17:49:40+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -223,7 +223,7 @@ class SimpleGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
             # All expansions covered - use superclass method
             return self.choose_covered_node_expansion(node, possible_children)
 
-        # select a random expansion
+        # Select from uncovered nodes
         index = self.choose_uncovered_node_expansion(node, uncovered_children)
 
         return index_map[index]
