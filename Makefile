@@ -909,6 +909,7 @@ $(DEPEND_TARGET)%.ipynb_depend: $(NOTEBOOKS)/%.ipynb
 	@for import in `$(NBDEPEND) $<`; do \
 		if [ -f $(NOTEBOOKS)/$$import.ipynb ]; then \
 			echo '$$''(FULL_NOTEBOOKS)/$(notdir $<): $$''(NOTEBOOKS)/'"$$import.ipynb"; \
+			echo '$$''(CODE_TARGET)$(notdir $(<:%.ipynb=%.py.out)): $$''(CODE_TARGET)'"$$import.py"; \
 		fi; \
 	done > $@
 
