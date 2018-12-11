@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-11-28 18:53:41+01:00
+# Last change: 2018-12-11 08:21:50+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -36,10 +36,10 @@ if __name__ == "__main__":
 
 
 
-# ## Fuzzing a Simple Proram
+# ## Fuzzing a Simple Program
 
 if __name__ == "__main__":
-    print('\n## Fuzzing a Simple Proram')
+    print('\n## Fuzzing a Simple Program')
 
 
 
@@ -49,14 +49,14 @@ def process_vehicle(vehicle):
     if kind == 'van':
         print("We have a %s %s van from %s vintage." % (company, model, year))
         iyear = int(year)
-        if year > 2010:
+        if iyear > 2010:
             print("It is a recent model!")
         else:
             print("It is an old but reliable model!")
     elif kind == 'car':
         print("We have a %s %s car from %s vintage." % (company, model, year))
         iyear = int(year)
-        if year > 2016:
+        if iyear > 2016:
             print("It is a recent model!")
         else:
             print("It is an old but reliable model!")
@@ -136,7 +136,6 @@ if __name__ == "__main__":
 
 from copy import deepcopy
 import random
-
 
 class PooledGrammarFuzzer(GrammarFuzzer):
     def __init__(self, *args, **kwargs):
@@ -420,9 +419,10 @@ if __name__ == "__main__":
 class Parser(object):
     def __init__(self, grammar, **kwargs):
         self._grammar = grammar
-        self.start_symbol = kwargs.get('start_symbol') or START_SYMBOL
-        self.log = kwargs.get('log') or False
-        self.tokens = kwargs.get('tokens') or set()
+        self.start_symbol = kwargs.get('start_symbol', default=START_SYMBOL)
+        self.log = kwargs.get('log', default=False)
+        self.coalesce = kwargs.get('coalesce', default=True)
+        self.tokens = kwargs.get('tokens', default=set())
 
     def grammar(self):
         return self._grammar
@@ -436,9 +436,26 @@ class Parser(object):
         if cursor < len(text):
             raise SyntaxError("at " + repr(text[cursor:]))
         return [self.prune_tree(tree) for tree in forest]
-
+    
+    def coalesce(self, children):
+        last = ''
+        new_lst = []
+        for cn, cc in children:
+            if cn not in self._grammar:
+                last += cn
+            else:
+                if last:
+                    new_lst.append((last, []))
+                    last = ''
+                new_lst.append((cn, cc))
+        if last:
+            new_lst.append((last, []))
+        return new_lst
+                
     def prune_tree(self, tree):
         name, children = tree
+        if self.coalesce:
+            children = self.coalesce(children)
         if name in self.tokens:
             return (name, [(tree_to_string(tree), [])])
         else:
@@ -471,8 +488,11 @@ if __name__ == "__main__":
 import re
 
 def canonical(grammar, letters=False):
-    def split(rule):
-        return [token for token in re.split(RE_NONTERMINAL, rule) if token]
+    def split(expansion):
+        if isinstance(expansion, tuple):
+            expansion = expansion[0]
+
+        return [token for token in re.split(RE_NONTERMINAL, expansion) if token]
 
     def tokenize(word):
         return list(word) if letters else [word]
@@ -871,7 +891,7 @@ PEG_SURPRISE = {
 if __name__ == "__main__":
     strings = []
     for e in range(4):
-        f = GrammarFuzzer(PEG_SURPRISE, '<A>')
+        f = GrammarFuzzer(PEG_SURPRISE, start_symbol='<A>')
         tree = ('<A>', None)
         for _ in range(e):
             tree = f.expand_tree_once(tree)
@@ -995,6 +1015,9 @@ class State(Item):
             str(p)
             for p in [*self.expr[:self.dot], '|', *self.expr[self.dot:]]
         ]) + "(%d,%d)" % (self.s_col.index, self.e_col.index)
+    
+    def copy(self):
+        return State(self.name, self.expr, self.dot, self.s_col)
 
     def _t(self):
         return (self.name, self.expr, self.dot, self.s_col.index)
@@ -1092,7 +1115,6 @@ if __name__ == "__main__":
     ep = EarleyParser(SAMPLE_GRAMMAR)
     col_1 = Column(1, 'a')
     ep.chart = [col_0, col_1]
-    ep.predict(col_0, '<A>', s)
 
 
 if __name__ == "__main__":
@@ -1217,8 +1239,8 @@ if __name__ == "__main__":
 
 class EarleyParser(EarleyParser):
     def parse_prefix(self, text):
-        table = self.chart_parse(text, self.start_symbol)
-        for col in reversed(table):
+        self.table = self.chart_parse(text, self.start_symbol)
+        for col in reversed(self.table):
             states = [st for st in col.states if st.name == self.start_symbol]
             if states:
                 return col.index, states
@@ -1249,12 +1271,14 @@ if __name__ == "__main__":
 class EarleyParser(EarleyParser):
     def parse(self, text):
         cursor, states = self.parse_prefix(text)
-        if cursor != len(text):
-            return []
-        table = self.chart_parse(text, self.start_symbol)
-        f_table = self.reverse(table)
+        if cursor < len(text):
+            raise SyntaxError("at " + repr(text[cursor:]))
+
+        f_table = self.reverse(self.table)
         start = next(s for s in states if s.finished())
-        return self.extract_trees(self.parse_forest(f_table, start))
+        forest = self.extract_trees(self.parse_forest(f_table, start))
+
+        return [self.prune_tree(tree) for tree in forest]
 
 # ### Parsing Paths
 
@@ -1427,8 +1451,8 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     mystring = 'a'
     parser = EarleyParser(E_GRAMMAR)
-    trees = parser.parse(mystring)
-    print(trees)
+    with ExpectError():
+        trees = parser.parse(mystring)
 
 
 # #### Fixpoint
@@ -1551,6 +1575,9 @@ def prod_line_grammar(nonterminals, terminals):
 
     if not nonterminals:
         g['<nonterminals>'] = ['']
+        del g['<lt>']
+        del g['<alpha>']
+        del g['<gt>']
 
     return g
 
@@ -1571,18 +1598,18 @@ if __name__ == "__main__":
 
 
 def make_grammar(num_symbols=3, num_alts=3):
-    a = list(string.ascii_lowercase)
+    terminals = list(string.ascii_lowercase)
     grammar = {}
     name = None
     for _ in range(num_symbols):
-        name, expansions = make_rule([k[1:-1]
-                                      for k in grammar.keys()], a, num_alts)
+        nonterminals = [k[1:-1] for k in grammar.keys()]
+        name, expansions = \
+            make_rule(nonterminals, terminals, num_alts)
         grammar[name] = expansions
 
     grammar[START_SYMBOL] = [name]
 
-    # assert is_valid_grammar(grammar)
-
+    assert is_valid_grammar(grammar)
     return grammar
 
 if __name__ == "__main__":
@@ -1725,21 +1752,6 @@ if __name__ == "__main__":
     result = EarleyParser(RR_GRAMMAR, log=True).parse(mystring)
 
 
-class State(State):
-    def __init__(self, name, expr, dot, s_col, tag=None):
-        super().__init__(name, expr, dot, s_col)
-        self.tag = tag
-
-    def copy(self, tag=None):
-        return State(self.name, self.expr, self.dot, self.s_col, tag)
-
-    def __str__(self):
-        init = "%s %s" % (self.tag or "   ", self.name)
-        return init + ':= ' + ' '.join([
-            str(p)
-            for p in [*self.expr[:self.dot], '|', *self.expr[self.dot:]]
-        ]) + "(%d,%d)" % (self.s_col.index, self.e_col.index)
-
 class LeoParser(EarleyParser):
     def complete(self, col, state):
         return self.leo_complete(col, state)
@@ -1752,7 +1764,7 @@ class LeoParser(EarleyParser):
             self.earley_complete(col, state)
 
     def deterministic_reduction(self, state):
-        ...
+        raise NotImplemented()
 
 from functools import reduce
 
@@ -1760,27 +1772,36 @@ def splitlst(predicate, iterable):
     return reduce(lambda res, e: res[predicate(e)].append(e)
                   or res, iterable, ([], []))
 
+if __name__ == "__main__":
+    splitlst(lambda x: x % 2 == 0, [1,2,3,4,5,6,7,8,9])
+
+
 class LeoParser(LeoParser):
-    def check_single_item(self, st, remain):
+    def check_constraint(self, st_B, remain):
+        matching_states = [
+            s for s in remain if s.name == st_B.name and s.expr == st_B.expr
+        ]
         res = [
-            s for s in remain if s.name == st.name and s.expr == st.expr
-            and s.s_col.index == st.s_col.index and s.dot == (st.dot - 1)
+            s for s in matching_states
+            if s.s_col.index == st_B.s_col.index and s.dot == (st_B.dot - 1)
         ]
         return len(res) == 1
 
+class LeoParser(LeoParser):
     @lru_cache(maxsize=None)
-    def get_above(self, state):
-        remain, finished = splitlst(lambda s: s.finished(), state.s_col.states)
+    def get_above(self, state_A):
+        remain, finished = splitlst(lambda s: s.finished(), state_A.s_col.states)
         res = [
             st for st in finished
-            if len(st.expr) > 1 and state.name == st.expr[-1]
+            if len(st.expr) > 1 and st.expr[-1] == state_A.name
         ]
-        vals = [st for st in res if self.check_single_item(st, remain)]
-        if vals:
-            assert len(vals) == 1
-            return vals[0]
+        st_Bs = [st_B for st_B in res if self.check_constraint(st_B, remain)]
+        if st_Bs:
+            assert len(st_Bs) == 1
+            return st_Bs[0]
         return None
 
+class LeoParser(LeoParser):
     def deterministic_reduction(self, state):
         st = state
         while True:
@@ -1790,15 +1811,15 @@ class LeoParser(LeoParser):
             st = _st
         return st if st != state else None
 
-    def complete(self, col, state):
-        return self.leo_complete(col, state)
+if __name__ == "__main__":
+    result = LeoParser(RR_GRAMMAR, log=True).parse(mystring)
 
-    def leo_complete(self, col, state):
-        detred = self.deterministic_reduction(state)
-        if detred:
-            col.add(detred.copy(state.name))
-        else:
-            self.earley_complete(col, state)
+
+if __name__ == "__main__":
+    result = LeoParser(LR_GRAMMAR, log=True).parse(mystring)
+    for tree in result:
+        print(tree_to_string(tree))
+
 
 if __name__ == "__main__":
     result = LeoParser(RR_GRAMMAR, log=True).parse(mystring)
@@ -1823,91 +1844,12 @@ RR_GRAMMAR3 = {
 }
 mystring3 = 'abababab'
 
-RR_GRAMMAR3 = {
+RR_GRAMMAR4 = {
     '<start>': ['<A>'],
     '<A>': ['a<B>', ''],
     '<B>': ['b<A>'],
 }
 mystring3 = 'abababab'
-
-class Tagged:
-    def __init__(self, tbl):
-        self.col, self.tbl = [{} for _ in tbl], tbl
-
-    @lru_cache(maxsize=None)
-    def get(self, frm, var):
-        if frm == -1:
-            return []
-
-        def filter_states(ends):
-            lst = []
-            for (state, e) in ends:
-                if e > frm and state.name == var:
-                    sc = state.copy()
-                    sc.s_col, sc.e_col = self.tbl[frm], self.tbl[e]
-                    lst.append((sc, e))
-            return lst
-
-        lst = filter_states(self.get(frm - 1, var))
-        st_dict = self.col[frm]
-        ends = [(state, s) for state in st_dict for s in st_dict[state]
-                if s > frm]
-        return lst + filter_states(ends)
-
-class LeoParser(LeoParser):
-    def parse(self, text):
-        cursor, states = self.parse_prefix(text)
-        if cursor != len(text):
-            return []
-        table = self.chart_parse(text, self.start_symbol)
-        f_table = self.reverse(table)
-
-        self.tagged_array = Tagged(f_table)
-        for i, col in enumerate(f_table):
-            tcol = self.tagged_array.col[i]
-            for state in col.states:
-                if state.tag:
-                    if state not in tcol:
-                        tcol[state] = set()
-                    tcol[state].add(state.e_col.index)
-
-        start = next(s for s in states if s.finished())
-        return self.extract_trees(self.parse_forest(f_table, start))
-
-    def parse_paths(self, expr_, chart, frm, til):
-        var, *expr = expr_
-        ends = None
-        if var not in self.cgrammar:
-            ends = ([(var, frm + len(var))]
-                    if frm < til and chart[frm + 1].letter == var else [])
-        else:
-            tagged_ends = self.tagged_array.get(frm, var)
-
-            ends = [(s, s.e_col.index) for s in chart[frm].states
-                    if s.name == var and not s.tag] + tagged_ends
-
-        paths = []
-        for state, end in ends:
-            if not expr:
-                paths.extend([[state]] if end == til else [])
-            else:
-                res = self.parse_paths(expr, chart, end, til)
-                paths.extend([[state] + r for r in res])
-        return paths
-
-if __name__ == "__main__":
-    p = LeoParser(RR_GRAMMAR)
-    for tree in p.parse(mystring):
-        assert tree_to_string(tree) == mystring
-        display_tree(tree)
-
-
-if __name__ == "__main__":
-    p = LeoParser(RR_GRAMMAR2)
-    for tree in p.parse(mystring2):
-        assert tree_to_string(tree) == mystring2
-        display_tree(tree)
-
 
 # ### Exercise 6: First Set of a Nonterminal
 
