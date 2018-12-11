@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-12-10 15:56:40+01:00
+# Last change: 2018-12-11 17:26:09+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -579,7 +579,7 @@ if __name__ == "__main__":
 
 
 
-RE_PARENTHESIZED_EXPR = re.compile(r'\([^())]*\)[?+*]')
+RE_PARENTHESIZED_EXPR = re.compile(r'\([^()]*\)[?+*]')
 
 def parenthesized_expressions(expansion):
     # In later chapters, we allow expansions to be tuples,
