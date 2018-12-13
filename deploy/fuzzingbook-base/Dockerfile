@@ -10,6 +10,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # FB_USER holds the username (and thus group and home name) of our notebook user. 
 ARG FB_USER=fuzzingbook
+ENV FB_USER=${FB_USER}
 
 # Specify whether we install publish extensions.
 ARG PUBLISH
@@ -154,6 +155,10 @@ RUN git clone --branch ${BRANCH} --depth 1 https://github.com/uds-se/fuzzingbook
 # with external tools like VSCode, Atom or IntelliJ can use a constant config. 
 ADD --chown=fuzzingbook:fuzzingbook jupyter_notebook_config.py /home/${FB_USER}/.jupyter/
 
+USER root
+ADD startup.sh /startup.sh
+ADD startup-user.sh /startup-user.sh
+
 # I am running notebook here. Feel free to change this to hub, lab, or whatever you guys prefer.
 EXPOSE 8000 8888
-CMD /usr/local/bin/jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser ${HOME}/${BASEDIR}
+CMD bash /startup.sh
