@@ -149,7 +149,10 @@ RUN git clone --branch ${BRANCH} --depth 1 https://github.com/uds-se/fuzzingbook
   && mv FuzzManager-${FUZZMANAGER_VERSION} FuzzManager \
   && python3 FuzzManager/server/manage.py migrate \
   && python3 FuzzManager/server/manage.py createsuperuser --username demo --email demo@example.com --no-input \
-  && python3 FuzzManager/server/manage.py shell -c 'from django.contrib.auth.models import User; user = User.objects.get(username="demo"); user.set_password("demo"); user.save();'
+  && python3 FuzzManager/server/manage.py shell -c 'from django.contrib.auth.models import User; user = User.objects.get(username="demo"); user.set_password("demo"); user.save();' \
+  && echo -ne "[Main]\nsigdir = /home/${FB_USER}/signatures/\ntool = fuzzingbook\nserverport = 8000\nserverproto = http\nserverhost = 127.0.0.1\nserverauthtoken = " > .fuzzmanagerconf \
+  && python3 FuzzManager/server/manage.py get_auth_token demo >> .fuzzmanagerconf \
+  && mkdir /home/${FB_USER}/signatures/
 
 # Adding configuration for jupyter. This sets a constant token, such that connecting
 # with external tools like VSCode, Atom or IntelliJ can use a constant config. 
