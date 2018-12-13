@@ -85,6 +85,10 @@ RUN set -x \
     git \
     npm \
   && apt-get install --no-install-recommends -y $(<install-packages.txt) $(grep -v -e '^\s*#' fuzzingbook-packages.txt) \
+  && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+  && echo 'LANG="en_US.UTF-8"' > /etc/default/locale \
+  && dpkg-reconfigure --frontend=noninteractive locales \
+  && update-locale LANG=en_US.UTF-8 \
   && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
   && python3 get-pip.py \
   && pip3 install \
