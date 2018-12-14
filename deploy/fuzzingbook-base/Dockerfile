@@ -112,11 +112,15 @@ ADD notebookapp.py /usr/local/lib/python3.6/dist-packages/notebook/notebookapp.p
 # We run tini as an entry point. 
 ADD https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
+
 ENTRYPOINT ["/tini", "--"]
 
 # Switch to the notebook user and prepare the work environment.
 USER ${FB_USER}
 WORKDIR /home/${FB_USER}
+
+# Patch to change certain FuzzManager settings
+ADD settings.py.patch /home/${FB_USER}/settings.py.patch
 
 # Clone the fuzzingbook repository and use it as working directory for 
 # the jupyter instance. We shallow clone and omit history at this point
@@ -156,7 +160,8 @@ RUN git clone --branch ${BRANCH} --depth 1 https://github.com/uds-se/fuzzingbook
   && python3 FuzzManager/server/manage.py shell -c 'from django.contrib.auth.models import User; user = User.objects.get(username="demo"); user.set_password("demo"); user.save();' \
   && echo -ne "[Main]\nsigdir = /home/${FB_USER}/signatures/\ntool = fuzzingbook\nserverport = 8000\nserverproto = http\nserverhost = 127.0.0.1\nserverauthtoken = " > .fuzzmanagerconf \
   && python3 FuzzManager/server/manage.py get_auth_token demo >> .fuzzmanagerconf \
-  && mkdir /home/${FB_USER}/signatures/
+  && mkdir /home/${FB_USER}/signatures/ \
+  && (cd FuzzManager && patch -p1 < /home/${FB_USER}/settings.py.patch)
 
 # Adding configuration for jupyter. This sets a constant token, such that connecting
 # with external tools like VSCode, Atom or IntelliJ can use a constant config. 
