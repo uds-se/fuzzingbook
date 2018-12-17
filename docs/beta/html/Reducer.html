@@ -11891,8 +11891,15 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Manual-Input-Reduction">Manual Input Reduction</a>
 </li><li class="has-sub"><a href="#Delta-Debugging">Delta Debugging</a>
 </li><li class="has-sub"><a href="#Grammar-Based-Input-Reduction">Grammar-Based Input Reduction</a>
-</li><li class="has-sub"><a href="#_Section-4_">_Section 4_</a>
-</li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
+<ul><li class="has-sub"><a href="#Simplifying-by-Replacing-Subtrees">Simplifying by Replacing Subtrees</a>
+</li><li class="has-sub"><a href="#Simplifying-by-Alternative-Expansions">Simplifying by Alternative Expansions</a>
+</li><li class="has-sub"><a href="#A-Class-for-Reducing-with-Grammars">A Class for Reducing with Grammars</a>
+</li><li class="has-sub"><a href="#A-Few-Helpers">A Few Helpers</a>
+</li><li class="has-sub"><a href="#Simplification-Strategies">Simplification Strategies</a>
+</li><li class="has-sub"><a href="#A-Reduction-Strategy">A Reduction Strategy</a>
+</li><li class="has-sub"><a href="#Putting-Things-Together">Putting Things Together</a>
+</li><li class="has-sub"><a href="#Complex-Inputs">Complex Inputs</a>
+</ul></li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps">Next Steps</a>
 </li><li class="has-sub"><a href="#Background">Background</a>
 </li><li class="has-sub"><a href="#Exercises">Exercises</a>
@@ -11967,7 +11974,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Why-Reducing?">Why Reducing?<a class="anchor-link" href="#Why-Reducing?">&#182;</a></h2><p>At this point, we have seen a number of test generation techniques that all in some form produce input in order to trigger failures.  If they are successful – that is, the program actually fails – we must find out why the failure occurred and how to fix it.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Why-Reducing?">Why Reducing?<a class="anchor-link" href="#Why-Reducing?">&#182;</a></h2><p>At this point, we have seen a number of test generation techniques that all in some form produce inputs in order to trigger failures.  If they are successful – that is, the program actually fails – we must find out why the failure occurred and how to fix it.</p>
 </div>
 </div>
 </div>
@@ -11976,7 +11983,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Here's an example of such a situation.  We have a class <code>MysteryRunner</code> class with a <code>run()</code> method that – given its code – can occasionally fail.  But under which circumstances does this actually happen?  We have deliberately obscured the exact condition in order to make this non-obvious.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's an example of such a situation.  We have a class <code>MysteryRunner</code> class with a <code>run()</code> method that – given its code – can occasionally fail.  But under which circumstances does this actually happen?  We have deliberately obscured the exact condition in order to make this non-obvious.</p>
 </div>
 </div>
 </div>
@@ -12003,6 +12010,20 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Fuzzer.html" class="import" target="_blank">Fuzzer</a></span> <span class="k">import</span> <span class="n">RandomFuzzer</span><span class="p">,</span> <span class="n">Runner</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/re.html" class="import" target="_blank">re</a></span>
 </pre></div>
 
 </div>
@@ -12425,10 +12446,10 @@ the first quarter, the second quarter, and so on.</p>
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Reducer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">,</span> <span class="n">log_test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Attach reducer to the given `runner`&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">runner</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_test</span> <span class="o">=</span> <span class="n">log_test</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -12437,7 +12458,7 @@ the first quarter, the second quarter, and so on.</p>
     <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tests</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_test</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test #</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tests</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">inp</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)),</span> <span class="n">outcome</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">outcome</span>
 
@@ -12505,7 +12526,7 @@ the first quarter, the second quarter, and so on.</p>
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">CachingReducer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">==</span> <span class="n">Runner</span><span class="o">.</span><span class="n">FAIL</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Runner</span><span class="o">.</span><span class="n">PASS</span>
 
         <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>     <span class="c1"># Initial granularity</span>
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
@@ -12541,7 +12562,7 @@ the first quarter, the second quarter, and so on.</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>To see how the <code>DeltaDebuggingReducer</code> works, let us run it on our failing input.  With each step, we see how the remaining input gets smaller and smaller, until only two characters remain:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>To see how the <code>DeltaDebuggingReducer</code> works, let us run it on our failing input.  With each step, we see how the remaining input gets smaller and smaller, until only three characters remain:</p>
 </div>
 </div>
 </div>
@@ -12553,7 +12574,7 @@ the first quarter, the second quarter, and so on.</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dd_reducer</span> <span class="o">=</span> <span class="n">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dd_reducer</span> <span class="o">=</span> <span class="n">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">log_test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">dd_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">failing_input</span><span class="p">)</span>
 </pre></div>
 
@@ -12611,7 +12632,7 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Now we know why <code>MysteryRunner</code> fails – it suffices that the input contains two matching parentheses.  Delta Debugging determines this is 29 steps.  Its result is <em>1-minimal</em>, meaning that every character contained is required to produce the error; removing any (as seen in tests <code>#27</code> and <code>#28</code>, above) no longer makes the test fail.  This property is guaranteed by the delta debugging algorithm, which in its last stage always tries to delete characters one by one.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Now we know why <code>MysteryRunner</code> fails – it suffices that the input contains two matching parentheses with a number between them.  Delta Debugging determines this is 29 steps.  Its result is <em>1-minimal</em>, meaning that every character contained is required to produce the error; removing any (as seen in tests <code>#27</code> and <code>#28</code>, above) no longer makes the test fail.  This property is guaranteed by the delta debugging algorithm, which in its last stage always tries to delete characters one by one.</p>
 </div>
 </div>
 </div>
@@ -12637,7 +12658,7 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>How effective is delta debugging?  In the best case (wither the left half or the right half fails), the number of tests is logarithmic proportional to the length $n$ of an input (i.e., $O(\log_2 n)$); this is the same complexity as binary search.  In the worst case, though, delta debugging can require a number of tests proportional to $n^2$  (i.e., $O(n^2)$) – this happens in the case when we are down to character granularity, and we have to repeatedly tried to delete all characters, only to find that deleting the last character results in a failure [<a href="https://doi.org/10.1109/32.988498">Zeller <em>et al</em>, 2002.</a>].  (This is a pretty pathological situation, though.)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>How effective is delta debugging?  In the best case (when the left half or the right half fails), the number of tests is logarithmic proportional to the length $n$ of an input (i.e., $O(\log_2 n)$); this is the same complexity as binary search.  In the worst case, though, delta debugging can require a number of tests proportional to $n^2$  (i.e., $O(n^2)$) – this happens in the case when we are down to character granularity, and we have to repeatedly tried to delete all characters, only to find that deleting the last character results in a failure [<a href="https://doi.org/10.1109/32.988498">Zeller <em>et al</em>, 2002.</a>].  (This is a pretty pathological situation, though.)</p>
 </div>
 </div>
 </div>
@@ -12655,7 +12676,12 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammar-Based-Input-Reduction">Grammar-Based Input Reduction<a class="anchor-link" href="#Grammar-Based-Input-Reduction">&#182;</a></h2><p>\todo{Add}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammar-Based-Input-Reduction">Grammar-Based Input Reduction<a class="anchor-link" href="#Grammar-Based-Input-Reduction">&#182;</a></h2><p>In the second half of this chapter, we will introduce an algorithm that makes use of <em>grammars</em> to reduce inputs even faster.  The general idea is to start with a <em>derivation tree</em>, and then substitute subtrees by smaller subtrees of the same type.  These alternate subtrees can either come</p>
+<ol>
+<li>From the tree itself, or</li>
+<li>By applying an alternate grammar expansion using elements from the tree.</li>
+</ol>
+<p>Let us show these two strategies using an example.  We start with a derivation tree from an arithmetic expression:</p>
 </div>
 </div>
 </div>
@@ -12667,7 +12693,7 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Parser.html" class="import" target="_blank">Parser</a></span> <span class="k">import</span> <span class="n">PEGParser</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Parser.html" class="import" target="_blank">Parser</a></span> <span class="k">import</span> <span class="n">EarleyParser</span>
 </pre></div>
 
 </div>
@@ -12681,7 +12707,7 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">all_terminals</span><span class="p">,</span> <span class="n">expansion_to_children</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">all_terminals</span><span class="p">,</span> <span class="n">expansion_to_children</span><span class="p">,</span> <span class="n">display_tree</span>
 </pre></div>
 
 </div>
@@ -12695,8 +12721,1337 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># For logging the queue</span>
-<span class="k">def</span> <span class="nf">queue_to_string</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">nonterminals</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inp</span> <span class="o">=</span> <span class="s2">&quot;1 + (2 * 3)&quot;</span>
+<span class="n">derivation_tree</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">inp</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">display_tree</span><span class="p">(</span><span class="n">derivation_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="203pt" height="584pt"
+ viewBox="0.00 0.00 203.00 584.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 580)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-580 199,-580 199,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="74.5" y="-564.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="74.5" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="#000000" d="M74.5,-560.9748C74.5,-554.195 74.5,-543.966 74.5,-535.1331"/>
+<polygon fill="#000000" stroke="#000000" points="78.0001,-535.0561 74.5,-525.0561 71.0001,-535.0561 78.0001,-535.0561"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="27.5" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M67.565,-509.9748C60.6921,-502.517 49.9731,-490.8857 41.3512,-481.53"/>
+<polygon fill="#000000" stroke="#000000" points="43.8141,-479.0378 34.4635,-474.0561 38.6666,-483.7816 43.8141,-479.0378"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="74.5" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000"> + </text>
+</g>
+<!-- 1&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>1&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M74.5,-509.9748C74.5,-503.195 74.5,-492.966 74.5,-484.1331"/>
+<polygon fill="#000000" stroke="#000000" points="78.0001,-484.0561 74.5,-474.0561 71.0001,-484.0561 78.0001,-484.0561"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="120.5" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 1&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>1&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M81.2875,-509.9748C88.0141,-502.517 98.505,-490.8857 106.9436,-481.53"/>
+<polygon fill="#000000" stroke="#000000" points="109.586,-483.826 113.6847,-474.0561 104.388,-479.1376 109.586,-483.826"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="27.5" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M27.5,-458.9748C27.5,-452.195 27.5,-441.966 27.5,-433.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-433.0561 27.5,-423.0561 24.0001,-433.0561 31.0001,-433.0561"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="27.5" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M27.5,-407.9748C27.5,-401.195 27.5,-390.966 27.5,-382.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-382.0561 27.5,-372.0561 24.0001,-382.0561 31.0001,-382.0561"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="27.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M27.5,-356.9748C27.5,-350.195 27.5,-339.966 27.5,-331.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-331.0561 27.5,-321.0561 24.0001,-331.0561 31.0001,-331.0561"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="27.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">1</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M27.5,-305.9748C27.5,-299.195 27.5,-288.966 27.5,-280.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-280.0561 27.5,-270.0561 24.0001,-280.0561 31.0001,-280.0561"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="120.5" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M120.5,-458.9748C120.5,-452.195 120.5,-441.966 120.5,-433.1331"/>
+<polygon fill="#000000" stroke="#000000" points="124.0001,-433.0561 120.5,-423.0561 117.0001,-433.0561 124.0001,-433.0561"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="120.5" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M120.5,-407.9748C120.5,-401.195 120.5,-390.966 120.5,-382.1331"/>
+<polygon fill="#000000" stroke="#000000" points="124.0001,-382.0561 120.5,-372.0561 117.0001,-382.0561 124.0001,-382.0561"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="79.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">(</text>
+</g>
+<!-- 10&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>10&#45;&gt;11</title>
+<path fill="none" stroke="#000000" d="M114.4503,-356.9748C107.6341,-348.4961 96.4814,-334.6232 88.6104,-324.8324"/>
+<polygon fill="#000000" stroke="#000000" points="91.1088,-322.3541 82.1154,-316.7533 85.6531,-326.74 91.1088,-322.3541"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="120.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 10&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>10&#45;&gt;12</title>
+<path fill="none" stroke="#000000" d="M120.5,-356.9748C120.5,-350.195 120.5,-339.966 120.5,-331.1331"/>
+<polygon fill="#000000" stroke="#000000" points="124.0001,-331.0561 120.5,-321.0561 117.0001,-331.0561 124.0001,-331.0561"/>
+</g>
+<!-- 24 -->
+<g id="node25" class="node">
+<title>24</title>
+<text text-anchor="middle" x="161.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">)</text>
+</g>
+<!-- 10&#45;&gt;24 -->
+<g id="edge24" class="edge">
+<title>10&#45;&gt;24</title>
+<path fill="none" stroke="#000000" d="M126.5497,-356.9748C133.3659,-348.4961 144.5186,-334.6232 152.3896,-324.8324"/>
+<polygon fill="#000000" stroke="#000000" points="155.3469,-326.74 158.8846,-316.7533 149.8912,-322.3541 155.3469,-326.74"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="120.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="#000000" d="M120.5,-305.9748C120.5,-299.195 120.5,-288.966 120.5,-280.1331"/>
+<polygon fill="#000000" stroke="#000000" points="124.0001,-280.0561 120.5,-270.0561 117.0001,-280.0561 124.0001,-280.0561"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="70.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 13&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>13&#45;&gt;14</title>
+<path fill="none" stroke="#000000" d="M113.1223,-254.9748C105.7369,-247.4417 94.1768,-235.6503 84.958,-226.2472"/>
+<polygon fill="#000000" stroke="#000000" points="87.4079,-223.7466 77.9079,-219.0561 82.4094,-228.6471 87.4079,-223.7466"/>
+</g>
+<!-- 18 -->
+<g id="node19" class="node">
+<title>18</title>
+<text text-anchor="middle" x="120.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000"> * </text>
+</g>
+<!-- 13&#45;&gt;18 -->
+<g id="edge18" class="edge">
+<title>13&#45;&gt;18</title>
+<path fill="none" stroke="#000000" d="M120.5,-254.9748C120.5,-248.195 120.5,-237.966 120.5,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="124.0001,-229.0561 120.5,-219.0561 117.0001,-229.0561 124.0001,-229.0561"/>
+</g>
+<!-- 19 -->
+<g id="node20" class="node">
+<title>19</title>
+<text text-anchor="middle" x="167.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 13&#45;&gt;19 -->
+<g id="edge19" class="edge">
+<title>13&#45;&gt;19</title>
+<path fill="none" stroke="#000000" d="M127.435,-254.9748C134.3079,-247.517 145.0269,-235.8857 153.6488,-226.53"/>
+<polygon fill="#000000" stroke="#000000" points="156.3334,-228.7816 160.5365,-219.0561 151.1859,-224.0378 156.3334,-228.7816"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="70.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="#000000" d="M70.5,-203.9748C70.5,-197.195 70.5,-186.966 70.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="74.0001,-178.0561 70.5,-168.0561 67.0001,-178.0561 74.0001,-178.0561"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="70.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 15&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>15&#45;&gt;16</title>
+<path fill="none" stroke="#000000" d="M70.5,-152.9748C70.5,-146.195 70.5,-135.966 70.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="74.0001,-127.0561 70.5,-117.0561 67.0001,-127.0561 74.0001,-127.0561"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+<text text-anchor="middle" x="70.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+</g>
+<!-- 16&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>16&#45;&gt;17</title>
+<path fill="none" stroke="#000000" d="M70.5,-101.9748C70.5,-95.195 70.5,-84.966 70.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="74.0001,-76.0561 70.5,-66.0561 67.0001,-76.0561 74.0001,-76.0561"/>
+</g>
+<!-- 20 -->
+<g id="node21" class="node">
+<title>20</title>
+<text text-anchor="middle" x="167.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 19&#45;&gt;20 -->
+<g id="edge20" class="edge">
+<title>19&#45;&gt;20</title>
+<path fill="none" stroke="#000000" d="M167.5,-203.9748C167.5,-197.195 167.5,-186.966 167.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="171.0001,-178.0561 167.5,-168.0561 164.0001,-178.0561 171.0001,-178.0561"/>
+</g>
+<!-- 21 -->
+<g id="node22" class="node">
+<title>21</title>
+<text text-anchor="middle" x="167.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 20&#45;&gt;21 -->
+<g id="edge21" class="edge">
+<title>20&#45;&gt;21</title>
+<path fill="none" stroke="#000000" d="M167.5,-152.9748C167.5,-146.195 167.5,-135.966 167.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="171.0001,-127.0561 167.5,-117.0561 164.0001,-127.0561 171.0001,-127.0561"/>
+</g>
+<!-- 22 -->
+<g id="node23" class="node">
+<title>22</title>
+<text text-anchor="middle" x="167.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 21&#45;&gt;22 -->
+<g id="edge22" class="edge">
+<title>21&#45;&gt;22</title>
+<path fill="none" stroke="#000000" d="M167.5,-101.9748C167.5,-95.195 167.5,-84.966 167.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="171.0001,-76.0561 167.5,-66.0561 164.0001,-76.0561 171.0001,-76.0561"/>
+</g>
+<!-- 23 -->
+<g id="node24" class="node">
+<title>23</title>
+<text text-anchor="middle" x="167.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+</g>
+<!-- 22&#45;&gt;23 -->
+<g id="edge23" class="edge">
+<title>22&#45;&gt;23</title>
+<path fill="none" stroke="#000000" d="M167.5,-50.9748C167.5,-44.195 167.5,-33.966 167.5,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="171.0001,-25.0561 167.5,-15.0561 164.0001,-25.0561 171.0001,-25.0561"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Simplifying-by-Replacing-Subtrees">Simplifying by Replacing Subtrees<a class="anchor-link" href="#Simplifying-by-Replacing-Subtrees">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To simplify this tree, we could replace any <code>&lt;expr&gt;</code> symbol up in the tree with some <code>&lt;expr&gt;</code> subtree down in the tree.  For instance, we could replace the uppermost <code>&lt;expr&gt;</code> with its right <code>&lt;expr&gt;</code> subtree, yielding the string <code>(2 + 3)</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/copy.html" class="import" target="_blank">copy</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">new_derivation_tree</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">derivation_tree</span><span class="p">)</span>
+<span class="n">sub_expr_tree</span> <span class="o">=</span> <span class="n">new_derivation_tree</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># We really should have some query language</span>
+<span class="n">display_tree</span><span class="p">(</span><span class="n">sub_expr_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="160pt" height="482pt"
+ viewBox="0.00 0.00 160.00 482.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 478)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-478 156,-478 156,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="77.5" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="77.5" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="#000000" d="M77.5,-458.9748C77.5,-452.195 77.5,-441.966 77.5,-433.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-433.0561 77.5,-423.0561 74.0001,-433.0561 81.0001,-433.0561"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="77.5" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M77.5,-407.9748C77.5,-401.195 77.5,-390.966 77.5,-382.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-382.0561 77.5,-372.0561 74.0001,-382.0561 81.0001,-382.0561"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="36.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">(</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M71.4503,-356.9748C64.6341,-348.4961 53.4814,-334.6232 45.6104,-324.8324"/>
+<polygon fill="#000000" stroke="#000000" points="48.1088,-322.3541 39.1154,-316.7533 42.6531,-326.74 48.1088,-322.3541"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="77.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 2&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>2&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M77.5,-356.9748C77.5,-350.195 77.5,-339.966 77.5,-331.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-331.0561 77.5,-321.0561 74.0001,-331.0561 81.0001,-331.0561"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="118.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">)</text>
+</g>
+<!-- 2&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>2&#45;&gt;16</title>
+<path fill="none" stroke="#000000" d="M83.5497,-356.9748C90.3659,-348.4961 101.5186,-334.6232 109.3896,-324.8324"/>
+<polygon fill="#000000" stroke="#000000" points="112.3469,-326.74 115.8846,-316.7533 106.8912,-322.3541 112.3469,-326.74"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="77.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M77.5,-305.9748C77.5,-299.195 77.5,-288.966 77.5,-280.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-280.0561 77.5,-270.0561 74.0001,-280.0561 81.0001,-280.0561"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="27.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M70.1223,-254.9748C62.7369,-247.4417 51.1768,-235.6503 41.958,-226.2472"/>
+<polygon fill="#000000" stroke="#000000" points="44.4079,-223.7466 34.9079,-219.0561 39.4094,-228.6471 44.4079,-223.7466"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="77.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000"> * </text>
+</g>
+<!-- 5&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>5&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M77.5,-254.9748C77.5,-248.195 77.5,-237.966 77.5,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-229.0561 77.5,-219.0561 74.0001,-229.0561 81.0001,-229.0561"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="124.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 5&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>5&#45;&gt;11</title>
+<path fill="none" stroke="#000000" d="M84.435,-254.9748C91.3079,-247.517 102.0269,-235.8857 110.6488,-226.53"/>
+<polygon fill="#000000" stroke="#000000" points="113.3334,-228.7816 117.5365,-219.0561 108.1859,-224.0378 113.3334,-228.7816"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="27.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M27.5,-203.9748C27.5,-197.195 27.5,-186.966 27.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-178.0561 27.5,-168.0561 24.0001,-178.0561 31.0001,-178.0561"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="27.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 7&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>7&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M27.5,-152.9748C27.5,-146.195 27.5,-135.966 27.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-127.0561 27.5,-117.0561 24.0001,-127.0561 31.0001,-127.0561"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="27.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M27.5,-101.9748C27.5,-95.195 27.5,-84.966 27.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-76.0561 27.5,-66.0561 24.0001,-76.0561 31.0001,-76.0561"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="124.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 11&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>11&#45;&gt;12</title>
+<path fill="none" stroke="#000000" d="M124.5,-203.9748C124.5,-197.195 124.5,-186.966 124.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-178.0561 124.5,-168.0561 121.0001,-178.0561 128.0001,-178.0561"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="124.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="#000000" d="M124.5,-152.9748C124.5,-146.195 124.5,-135.966 124.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-127.0561 124.5,-117.0561 121.0001,-127.0561 128.0001,-127.0561"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="124.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 13&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>13&#45;&gt;14</title>
+<path fill="none" stroke="#000000" d="M124.5,-101.9748C124.5,-95.195 124.5,-84.966 124.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-76.0561 124.5,-66.0561 121.0001,-76.0561 128.0001,-76.0561"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="124.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="#000000" d="M124.5,-50.9748C124.5,-44.195 124.5,-33.966 124.5,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-25.0561 124.5,-15.0561 121.0001,-25.0561 128.0001,-25.0561"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">new_derivation_tree</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sub_expr_tree</span>
+<span class="n">display_tree</span><span class="p">(</span><span class="n">new_derivation_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="160pt" height="533pt"
+ viewBox="0.00 0.00 160.00 533.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 529)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-529 156,-529 156,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="77.5" y="-513.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="77.5" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="#000000" d="M77.5,-509.9748C77.5,-503.195 77.5,-492.966 77.5,-484.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-484.0561 77.5,-474.0561 74.0001,-484.0561 81.0001,-484.0561"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="77.5" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M77.5,-458.9748C77.5,-452.195 77.5,-441.966 77.5,-433.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-433.0561 77.5,-423.0561 74.0001,-433.0561 81.0001,-433.0561"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="77.5" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M77.5,-407.9748C77.5,-401.195 77.5,-390.966 77.5,-382.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-382.0561 77.5,-372.0561 74.0001,-382.0561 81.0001,-382.0561"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="36.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">(</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M71.4503,-356.9748C64.6341,-348.4961 53.4814,-334.6232 45.6104,-324.8324"/>
+<polygon fill="#000000" stroke="#000000" points="48.1088,-322.3541 39.1154,-316.7533 42.6531,-326.74 48.1088,-322.3541"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="77.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 3&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>3&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M77.5,-356.9748C77.5,-350.195 77.5,-339.966 77.5,-331.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-331.0561 77.5,-321.0561 74.0001,-331.0561 81.0001,-331.0561"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+<text text-anchor="middle" x="118.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">)</text>
+</g>
+<!-- 3&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>3&#45;&gt;17</title>
+<path fill="none" stroke="#000000" d="M83.5497,-356.9748C90.3659,-348.4961 101.5186,-334.6232 109.3896,-324.8324"/>
+<polygon fill="#000000" stroke="#000000" points="112.3469,-326.74 115.8846,-316.7533 106.8912,-322.3541 112.3469,-326.74"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="77.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M77.5,-305.9748C77.5,-299.195 77.5,-288.966 77.5,-280.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-280.0561 77.5,-270.0561 74.0001,-280.0561 81.0001,-280.0561"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="27.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M70.1223,-254.9748C62.7369,-247.4417 51.1768,-235.6503 41.958,-226.2472"/>
+<polygon fill="#000000" stroke="#000000" points="44.4079,-223.7466 34.9079,-219.0561 39.4094,-228.6471 44.4079,-223.7466"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="77.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000"> * </text>
+</g>
+<!-- 6&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>6&#45;&gt;11</title>
+<path fill="none" stroke="#000000" d="M77.5,-254.9748C77.5,-248.195 77.5,-237.966 77.5,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-229.0561 77.5,-219.0561 74.0001,-229.0561 81.0001,-229.0561"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="124.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 6&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>6&#45;&gt;12</title>
+<path fill="none" stroke="#000000" d="M84.435,-254.9748C91.3079,-247.517 102.0269,-235.8857 110.6488,-226.53"/>
+<polygon fill="#000000" stroke="#000000" points="113.3334,-228.7816 117.5365,-219.0561 108.1859,-224.0378 113.3334,-228.7816"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="27.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 7&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>7&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M27.5,-203.9748C27.5,-197.195 27.5,-186.966 27.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-178.0561 27.5,-168.0561 24.0001,-178.0561 31.0001,-178.0561"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="27.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M27.5,-152.9748C27.5,-146.195 27.5,-135.966 27.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-127.0561 27.5,-117.0561 24.0001,-127.0561 31.0001,-127.0561"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="27.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M27.5,-101.9748C27.5,-95.195 27.5,-84.966 27.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-76.0561 27.5,-66.0561 24.0001,-76.0561 31.0001,-76.0561"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="124.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="#000000" d="M124.5,-203.9748C124.5,-197.195 124.5,-186.966 124.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-178.0561 124.5,-168.0561 121.0001,-178.0561 128.0001,-178.0561"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="124.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 13&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>13&#45;&gt;14</title>
+<path fill="none" stroke="#000000" d="M124.5,-152.9748C124.5,-146.195 124.5,-135.966 124.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-127.0561 124.5,-117.0561 121.0001,-127.0561 128.0001,-127.0561"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="124.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="#000000" d="M124.5,-101.9748C124.5,-95.195 124.5,-84.966 124.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-76.0561 124.5,-66.0561 121.0001,-76.0561 128.0001,-76.0561"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="124.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+</g>
+<!-- 15&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>15&#45;&gt;16</title>
+<path fill="none" stroke="#000000" d="M124.5,-50.9748C124.5,-44.195 124.5,-33.966 124.5,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-25.0561 124.5,-15.0561 121.0001,-25.0561 128.0001,-25.0561"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_terminals</span><span class="p">(</span><span class="n">new_derivation_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;(2 * 3)&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Replacing one subtree by another only works as long as individual elements such as <code>&lt;expr&gt;</code> occur multiple times in our tree.  In the reduced <code>new_derivation_tree</code>, above, we could replace further <code>&lt;expr&gt;</code> trees only once more.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Simplifying-by-Alternative-Expansions">Simplifying by Alternative Expansions<a class="anchor-link" href="#Simplifying-by-Alternative-Expansions">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>A second means to simplify this tree is to apply <em>alternative expansions</em>.  That is, for a symbol, we check whether there is an alternative expansion with a smaller number of children.  Then, we replace the symbol with the alternative expansion, filling in needed symbols from the tree.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As an example, consider the <code>new_derivation_tree</code> above.  The applied expansion for <code>&lt;term&gt;</code> has been</p>
+
+<pre><code>&lt;term&gt; ::= &lt;term&gt; * &lt;factor&gt;
+
+</code></pre>
+<p>Lat us replace this with the alternative expansion:</p>
+
+<pre><code>&lt;term&gt; ::= &lt;factor&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">term_tree</span> <span class="o">=</span> <span class="n">new_derivation_tree</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">display_tree</span><span class="p">(</span><span class="n">term_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="160pt" height="278pt"
+ viewBox="0.00 0.00 160.00 278.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 274)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-274 156,-274 156,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="77.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="27.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="#000000" d="M70.1223,-254.9748C62.7369,-247.4417 51.1768,-235.6503 41.958,-226.2472"/>
+<polygon fill="#000000" stroke="#000000" points="44.4079,-223.7466 34.9079,-219.0561 39.4094,-228.6471 44.4079,-223.7466"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="77.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000"> * </text>
+</g>
+<!-- 0&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>0&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M77.5,-254.9748C77.5,-248.195 77.5,-237.966 77.5,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="81.0001,-229.0561 77.5,-219.0561 74.0001,-229.0561 81.0001,-229.0561"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="124.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 0&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>0&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M84.435,-254.9748C91.3079,-247.517 102.0269,-235.8857 110.6488,-226.53"/>
+<polygon fill="#000000" stroke="#000000" points="113.3334,-228.7816 117.5365,-219.0561 108.1859,-224.0378 113.3334,-228.7816"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="27.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M27.5,-203.9748C27.5,-197.195 27.5,-186.966 27.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-178.0561 27.5,-168.0561 24.0001,-178.0561 31.0001,-178.0561"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="27.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M27.5,-152.9748C27.5,-146.195 27.5,-135.966 27.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-127.0561 27.5,-117.0561 24.0001,-127.0561 31.0001,-127.0561"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="27.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M27.5,-101.9748C27.5,-95.195 27.5,-84.966 27.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-76.0561 27.5,-66.0561 24.0001,-76.0561 31.0001,-76.0561"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="124.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M124.5,-203.9748C124.5,-197.195 124.5,-186.966 124.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-178.0561 124.5,-168.0561 121.0001,-178.0561 128.0001,-178.0561"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="124.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 7&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>7&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M124.5,-152.9748C124.5,-146.195 124.5,-135.966 124.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-127.0561 124.5,-117.0561 121.0001,-127.0561 128.0001,-127.0561"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="124.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M124.5,-101.9748C124.5,-95.195 124.5,-84.966 124.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-76.0561 124.5,-66.0561 121.0001,-76.0561 128.0001,-76.0561"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="124.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M124.5,-50.9748C124.5,-44.195 124.5,-33.966 124.5,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="128.0001,-25.0561 124.5,-15.0561 121.0001,-25.0561 128.0001,-25.0561"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">shorter_term_tree</span> <span class="o">=</span> <span class="n">term_tree</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">display_tree</span><span class="p">(</span><span class="n">shorter_term_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="63pt" height="227pt"
+ viewBox="0.00 0.00 63.00 227.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 223)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-223 59,-223 59,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="27.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="27.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="#000000" d="M27.5,-203.9748C27.5,-197.195 27.5,-186.966 27.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-178.0561 27.5,-168.0561 24.0001,-178.0561 31.0001,-178.0561"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="27.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M27.5,-152.9748C27.5,-146.195 27.5,-135.966 27.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-127.0561 27.5,-117.0561 24.0001,-127.0561 31.0001,-127.0561"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="27.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M27.5,-101.9748C27.5,-95.195 27.5,-84.966 27.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-76.0561 27.5,-66.0561 24.0001,-76.0561 31.0001,-76.0561"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="27.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M27.5,-50.9748C27.5,-44.195 27.5,-33.966 27.5,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="31.0001,-25.0561 27.5,-15.0561 24.0001,-25.0561 31.0001,-25.0561"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">new_derivation_tree</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">shorter_term_tree</span>
+<span class="n">display_tree</span><span class="p">(</span><span class="n">new_derivation_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="95pt" height="482pt"
+ viewBox="0.00 0.00 95.00 482.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 478)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-478 91,-478 91,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="43.5" y="-462.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="43.5" y="-411.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="#000000" d="M43.5,-458.9748C43.5,-452.195 43.5,-441.966 43.5,-433.1331"/>
+<polygon fill="#000000" stroke="#000000" points="47.0001,-433.0561 43.5,-423.0561 40.0001,-433.0561 47.0001,-433.0561"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="43.5" y="-360.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M43.5,-407.9748C43.5,-401.195 43.5,-390.966 43.5,-382.1331"/>
+<polygon fill="#000000" stroke="#000000" points="47.0001,-382.0561 43.5,-372.0561 40.0001,-382.0561 47.0001,-382.0561"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="43.5" y="-309.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M43.5,-356.9748C43.5,-350.195 43.5,-339.966 43.5,-331.1331"/>
+<polygon fill="#000000" stroke="#000000" points="47.0001,-331.0561 43.5,-321.0561 40.0001,-331.0561 47.0001,-331.0561"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="2.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">(</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M37.4503,-305.9748C30.6341,-297.4961 19.4814,-283.6232 11.6104,-273.8324"/>
+<polygon fill="#000000" stroke="#000000" points="14.1088,-271.3541 5.1154,-265.7533 8.6531,-275.74 14.1088,-271.3541"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="43.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;expr&gt;</text>
+</g>
+<!-- 3&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>3&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M43.5,-305.9748C43.5,-299.195 43.5,-288.966 43.5,-280.1331"/>
+<polygon fill="#000000" stroke="#000000" points="47.0001,-280.0561 43.5,-270.0561 40.0001,-280.0561 47.0001,-280.0561"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="84.5" y="-258.8" font-family="Times,serif" font-size="14.00" fill="#000000">)</text>
+</g>
+<!-- 3&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>3&#45;&gt;11</title>
+<path fill="none" stroke="#000000" d="M49.5497,-305.9748C56.3659,-297.4961 67.5186,-283.6232 75.3896,-273.8324"/>
+<polygon fill="#000000" stroke="#000000" points="78.3469,-275.74 81.8846,-265.7533 72.8912,-271.3541 78.3469,-275.74"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="43.5" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;term&gt;</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M43.5,-254.9748C43.5,-248.195 43.5,-237.966 43.5,-229.1331"/>
+<polygon fill="#000000" stroke="#000000" points="47.0001,-229.0561 43.5,-219.0561 40.0001,-229.0561 47.0001,-229.0561"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="43.5" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;factor&gt;</text>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M43.5,-203.9748C43.5,-197.195 43.5,-186.966 43.5,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="47.0001,-178.0561 43.5,-168.0561 40.0001,-178.0561 47.0001,-178.0561"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="43.5" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;integer&gt;</text>
+</g>
+<!-- 7&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>7&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M43.5,-152.9748C43.5,-146.195 43.5,-135.966 43.5,-127.1331"/>
+<polygon fill="#000000" stroke="#000000" points="47.0001,-127.0561 43.5,-117.0561 40.0001,-127.0561 47.0001,-127.0561"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="43.5" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M43.5,-101.9748C43.5,-95.195 43.5,-84.966 43.5,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="47.0001,-76.0561 43.5,-66.0561 40.0001,-76.0561 47.0001,-76.0561"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="43.5" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M43.5,-50.9748C43.5,-44.195 43.5,-33.966 43.5,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="47.0001,-25.0561 43.5,-15.0561 40.0001,-25.0561 47.0001,-25.0561"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_terminals</span><span class="p">(</span><span class="n">new_derivation_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;(3)&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we replace derivation subtrees by (smaller) subtrees, and if we search for alternate expansions that again yield smaller subtrees, we can systematically simplify the input.  This could be much faster than delta debugging, as our inputs would always be syntactically valid.  However, we need a strategy for when to apply which simplification rule. This is what we develop in the remainder of this section.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="A-Class-for-Reducing-with-Grammars">A Class for Reducing with Grammars<a class="anchor-link" href="#A-Class-for-Reducing-with-Grammars">&#182;</a></h3><p>We introduce the <code>GrammarReducer</code> class, which is again a <code>Reducer</code>.  Note that we derive from <code>CachingReducer</code>, as the strategy will produce several duplicates.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">CachingReducer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">log_test</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_reduce</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">runner</span><span class="p">,</span> <span class="n">log_test</span><span class="o">=</span><span class="n">log_test</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">grammar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">start_symbol</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_reduce</span> <span class="o">=</span> <span class="n">log_reduce</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">try_all_combinations</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="A-Few-Helpers">A Few Helpers<a class="anchor-link" href="#A-Few-Helpers">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">tree_list_to_string</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
     <span class="k">return</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">q</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
 </pre></div>
 
@@ -12711,26 +14066,7 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">derivation_tree</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">,</span>
-                   <span class="p">[(</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span>
-                     <span class="p">[(</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-                      <span class="p">(</span><span class="s2">&quot; + &quot;</span><span class="p">,</span> <span class="p">[]),</span>
-                         <span class="p">(</span><span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span>
-                     <span class="p">)])</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">queue_to_string</span><span class="p">([</span><span class="n">derivation_tree</span><span class="p">,</span> <span class="n">derivation_tree</span><span class="p">])</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">tree_list_to_string</span><span class="p">([</span><span class="n">derivation_tree</span><span class="p">,</span> <span class="n">derivation_tree</span><span class="p">])</span>
 </pre></div>
 
 </div>
@@ -12741,7 +14077,7 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;[&lt;expr&gt; + &lt;term&gt;, &lt;expr&gt; + &lt;term&gt;]&#39;
+<pre>&#39;[1 + (2 * 3), 1 + (2 * 3)]&#39;
 </pre>
 </div>
 
@@ -12753,7 +14089,23 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">START_SYMBOL</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+    <span class="c1"># convert a list [[X1, X2], [Y1, Y2], ...]</span>
+    <span class="c1"># into [X1, Y1], [X1, Y2], [X2, Y1], [X2, Y2], ...</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="c1"># print(list_of_lists)</span>
+
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">list_of_lists</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">e</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+                <span class="n">new_combo</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span>
+                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_combo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
 </div>
@@ -12767,16 +14119,118 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">Reducer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">runner</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">grammar</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">start_symbol</span> <span class="o">=</span> <span class="n">start_symbol</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">start_symbol</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">possible_combinations</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">]])</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[[1, &#39;a&#39;], [1, &#39;b&#39;], [2, &#39;a&#39;], [2, &#39;b&#39;]]
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Return the number of nodes</span>
+<span class="k">def</span> <span class="nf">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">([</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">number_of_nodes</span><span class="p">(</span><span class="n">derivation_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>25
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Return height of a tree</span>
+<span class="k">def</span> <span class="nf">max_height</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">max</span><span class="p">([</span><span class="n">max_height</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">max_height</span><span class="p">(</span><span class="n">derivation_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>12
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Simplification-Strategies">Simplification Strategies<a class="anchor-link" href="#Simplification-Strategies">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Finding-Symbols">Finding Symbols<a class="anchor-link" href="#Finding-Symbols">&#182;</a></h4></div>
+</div>
 </div>
 </div>
 
@@ -12787,74 +14241,112 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">derivation_reductions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
-        <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[]</span>  <span class="c1"># Terminal symbol</span>
+    <span class="k">def</span> <span class="nf">subtrees_with_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ignore_root</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="c1"># Find all subtrees in TREE whose root is SYMBOL.</span>
+        <span class="c1"># If IGNORE_ROOT is true, ignore the root note of TREE.</span>
 
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying alternative expansions for &quot;</span> <span class="o">+</span> <span class="n">symbol</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="p">(</span><span class="n">child_symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ignore_root</span> <span class="ow">and</span> <span class="n">child_symbol</span> <span class="o">==</span> <span class="n">symbol</span><span class="p">:</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 
-        <span class="c1"># Possible expansions for this symbol</span>
-        <span class="n">expansions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expansions: &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">expansions</span><span class="p">))</span>
+        <span class="c1"># Search across all children</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">children</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtrees_with_symbol</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ignore_root</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="n">alternatives</span> <span class="o">=</span> \
-            <span class="p">[</span><span class="n">expansion_to_children</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span> <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="n">expansions</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">ret</span>
+</pre></div>
 
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar_reducer</span> <span class="o">=</span> <span class="n">GrammarReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">),</span> <span class="n">log_reduce</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="p">[</span><span class="n">all_terminals</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">grammar_reducer</span><span class="o">.</span><span class="n">subtrees_with_symbol</span><span class="p">(</span><span class="n">derivation_tree</span><span class="p">,</span> <span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">)]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;1&#39;, &#39;(2 * 3)&#39;, &#39;2 * 3&#39;, &#39;3&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Alternate-Expansions">Alternate Expansions<a class="anchor-link" href="#Alternate-Expansions">&#182;</a></h4></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">alternate_reductions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">reductions</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">alternative</span> <span class="ow">in</span> <span class="n">alternatives</span><span class="p">:</span>
 
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">alternative</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">):</span>
-                <span class="k">continue</span>  <span class="c1"># New alternative has more children</span>
+        <span class="n">expansions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">expansions</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">expansion</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">expansion_to_children</span><span class="p">(</span><span class="n">expansion</span><span class="p">)))</span>
+
+        <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="n">expansions</span><span class="p">:</span>
+            <span class="n">expansion_children</span> <span class="o">=</span> <span class="n">expansion_to_children</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span>
 
             <span class="n">match</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">new_children_reductions</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="c1"># print(&quot;Trying alternative expansion &quot; + queue_to_string(alternative))</span>
-            <span class="k">for</span> <span class="n">alt_child</span> <span class="ow">in</span> <span class="n">alternative</span><span class="p">:</span>
-                <span class="p">(</span><span class="n">alt_symbol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">alt_child</span>
-                <span class="n">child_reductions</span> <span class="o">=</span> <span class="n">subtrees_with_symbol</span><span class="p">(</span><span class="n">alt_symbol</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">alt_symbol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">expansion_children</span><span class="p">:</span>
+                <span class="n">child_reductions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtrees_with_symbol</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">alt_symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">child_reductions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="c1"># Child not found; cannot apply rule</span>
-                    <span class="n">match</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">match</span> <span class="o">=</span> <span class="kc">False</span>   <span class="c1"># Child not found; cannot apply rule</span>
                     <span class="k">break</span>
 
-                <span class="c1"># print(&quot;Found alternatives &quot; + queue_to_string(child_reductions))</span>
                 <span class="n">new_children_reductions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child_reductions</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
                 <span class="k">continue</span>  <span class="c1"># Try next alternative</span>
 
-            <span class="c1"># Go through the possible combinations</span>
+            <span class="c1"># Use the first suitable combination</span>
             <span class="k">for</span> <span class="n">new_children</span> <span class="ow">in</span> <span class="n">possible_combinations</span><span class="p">(</span><span class="n">new_children_reductions</span><span class="p">):</span>
                 <span class="n">new_tree</span> <span class="o">=</span> <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">number_of_nodes</span><span class="p">(</span><span class="n">new_tree</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+                    <span class="n">reductions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_tree</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">try_all_combinations</span><span class="p">:</span>
+                        <span class="k">break</span>
 
-                <span class="k">if</span> <span class="n">number_of_nodes</span><span class="p">(</span><span class="n">new_tree</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
-                    <span class="k">continue</span>  <span class="c1"># No reduction</span>
-
-                <span class="n">reductions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_tree</span><span class="p">)</span>
-
-        <span class="c1"># Apply this recursively</span>
-        <span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)):</span>
-                <span class="n">child</span> <span class="o">=</span> <span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-                <span class="n">child_reductions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">derivation_reductions</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">reduced_child</span> <span class="ow">in</span> <span class="n">child_reductions</span><span class="p">:</span>
-                    <span class="n">new_children</span> <span class="o">=</span> <span class="p">(</span><span class="n">children</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span>
-                                    <span class="o">+</span> <span class="p">[</span><span class="n">reduced_child</span><span class="p">]</span>
-                                    <span class="o">+</span> <span class="n">children</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
-                    <span class="n">reductions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">))</span>
-
-        <span class="c1"># Filter duplicates</span>
-        <span class="n">unique_reductions</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reductions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_reductions</span><span class="p">:</span>
-                <span class="n">unique_reductions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-        <span class="n">reductions</span> <span class="o">=</span> <span class="n">unique_reductions</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reductions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># We have a new expansion</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Can reduce &quot;</span> <span class="o">+</span> <span class="n">symbol</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-                  <span class="o">+</span> <span class="s2">&quot; to reduced subtrees &quot;</span> <span class="o">+</span> <span class="n">queue_to_string</span><span class="p">(</span><span class="n">reductions</span><span class="p">))</span>
+        <span class="c1"># Sort by number of nodes</span>
+        <span class="n">reductions</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">number_of_nodes</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">reductions</span>
 </pre></div>
@@ -12864,6 +14356,14 @@ Test #29 &#39;)&#39; 1 PASS
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Both-Strategies-Together">Both Strategies Together<a class="anchor-link" href="#Both-Strategies-Together">&#182;</a></h4></div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -12871,8 +14371,163 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">reductions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">derivation_reductions</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">symbol_reductions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find all expansion alternatives for the given symbol&quot;&quot;&quot;</span>
+        <span class="n">reductions</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subtrees_with_symbol</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">)</span>
+                      <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">alternate_reductions</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">))</span>
+
+        <span class="c1"># Filter duplicates</span>
+        <span class="n">unique_reductions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reductions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_reductions</span><span class="p">:</span>
+                <span class="n">unique_reductions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">unique_reductions</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar_reducer</span> <span class="o">=</span> <span class="n">GrammarReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">),</span> <span class="n">log_reduce</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_terminals</span><span class="p">(</span><span class="n">derivation_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;1 + (2 * 3)&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">reductions</span> <span class="o">=</span> <span class="n">grammar_reducer</span><span class="o">.</span><span class="n">symbol_reductions</span><span class="p">(</span><span class="n">derivation_tree</span><span class="p">,</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">)</span>
+<span class="n">tree_list_to_string</span><span class="p">([</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reductions</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;[1 + (2 * 3), (2 * 3), 2 * 3, 1]&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">reductions</span> <span class="o">=</span> <span class="n">grammar_reducer</span><span class="o">.</span><span class="n">symbol_reductions</span><span class="p">(</span><span class="n">derivation_tree</span><span class="p">,</span> <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">)</span>
+<span class="n">tree_list_to_string</span><span class="p">([</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reductions</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;[1, (2 * 3), 2, 3, ((2 * 3))]&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="A-Reduction-Strategy">A Reduction Strategy<a class="anchor-link" href="#A-Reduction-Strategy">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">reduce_subtree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">subtree</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+        <span class="n">symbol</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="n">subtree</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_reduce</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reducing&quot;</span><span class="p">,</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">subtree</span><span class="p">),</span> <span class="s2">&quot;with depth&quot;</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">reduced</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">children</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">child_symbol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">child</span>
+                <span class="k">for</span> <span class="n">reduction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbol_reductions</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">child_symbol</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">number_of_nodes</span><span class="p">(</span><span class="n">reduction</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">number_of_nodes</span><span class="p">(</span><span class="n">child</span><span class="p">):</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># Try this reduction</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_reduce</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Replacing&quot;</span><span class="p">,</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="s2">&quot;by&quot;</span><span class="p">,</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">reduction</span><span class="p">))</span>
+                    <span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">reduction</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span> <span class="o">==</span> <span class="n">Runner</span><span class="o">.</span><span class="n">FAIL</span><span class="p">:</span>
+                        <span class="c1"># Success</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_reduce</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New tree:&quot;</span><span class="p">,</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+                        <span class="n">reduced</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Didn&#39;t work out - restore</span>
+                        <span class="n">children</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">child</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">reduced</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_reduce</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tried all alternatives for&quot;</span><span class="p">,</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">subtree</span><span class="p">))</span>
+                <span class="k">break</span>
+
+        <span class="c1"># Run recursively</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reduce_subtree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12887,29 +14542,22 @@ Test #29 &#39;)&#39; 1 PASS
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
-    <span class="c1"># Reduce with respect to a given test</span>
     <span class="k">def</span> <span class="nf">reduce_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
-        <span class="c1"># Find possible reductions</span>
-        <span class="n">smallest_tree</span> <span class="o">=</span> <span class="n">tree</span>
-        <span class="n">tree_reductions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reductions</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Alternatives: &quot;</span> <span class="o">+</span> <span class="n">queue_to_string</span><span class="p">(</span><span class="n">tree_reductions</span><span class="p">))</span>
-
-        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">tree_reductions</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">t</span> <span class="o">=</span> <span class="n">tree_reductions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">tree_reductions</span> <span class="o">=</span> <span class="n">tree_reductions</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="n">Runner</span><span class="o">.</span><span class="n">FAIL</span><span class="p">:</span>
-                <span class="c1"># Found new smallest tree; try to reduce that one further</span>
-                <span class="n">smallest_tree</span> <span class="o">=</span> <span class="n">t</span>
-                <span class="n">tree_reductions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reductions</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-                <span class="n">tree_reductions</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tree</span><span class="p">:</span> <span class="o">-</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;New smallest tree: &quot;</span> <span class="o">+</span> <span class="n">all_terminals</span><span class="p">(</span><span class="n">smallest_tree</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">smallest_tree</span>
+        <span class="k">for</span> <span class="n">depth</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_height</span><span class="p">(</span><span class="n">tree</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reduce_subtree</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tree</span>        
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Putting-Things-Together">Putting Things Together<a class="anchor-link" href="#Putting-Things-Together">&#182;</a></h3></div>
+</div>
 </div>
 </div>
 
@@ -12942,125 +14590,7 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Find all subtrees in TREE whose root is SEARCH_SYMBOL.</span>
-<span class="c1"># If IGNORE_ROOT is true, ignore the root note of TREE.</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">subtrees_with_symbol</span><span class="p">(</span><span class="n">search_symbol</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">ignore_root</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_root</span> <span class="ow">and</span> <span class="n">symbol</span> <span class="o">==</span> <span class="n">search_symbol</span><span class="p">:</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-
-    <span class="c1"># Search across all children</span>
-    <span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
-            <span class="n">ret</span> <span class="o">+=</span> <span class="n">subtrees_with_symbol</span><span class="p">(</span><span class="n">search_symbol</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">ret</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># convert a list [[X1, X2], [Y1, Y2], ...]</span>
-<span class="c1"># into [X1, Y1], [X1, Y2], [X2, Y1], [X2, Y2], ...</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[]</span>
-
-    <span class="c1"># print(list_of_lists)</span>
-
-    <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">list_of_lists</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">e</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
-                <span class="n">new_combo</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span>
-                <span class="c1"># print(&quot;New combo: &quot;, repr(new_combo))</span>
-                <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_combo</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">ret</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Return the number of nodes</span>
-<span class="k">def</span> <span class="nf">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
-    <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
-        <span class="n">n</span> <span class="o">+=</span> <span class="n">number_of_nodes</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">n</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">EXPR_GRAMMAR</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inp</span> <span class="o">=</span> <span class="s2">&quot;1 + (2 * 3)&quot;</span>
-<span class="n">grammar_reducer</span> <span class="o">=</span> <span class="n">GrammarReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar_reducer</span> <span class="o">=</span> <span class="n">GrammarReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">),</span> <span class="n">log_test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">grammar_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
 </pre></div>
 
@@ -13073,106 +14603,9 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>1 + (2 * 3)
-Trying alternative expansions for &lt;start&gt;
-Expansions: [&#39;&lt;expr&gt;&#39;]
-Trying alternative expansions for &lt;expr&gt;
-Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
-Trying alternative expansions for &lt;term&gt;
-Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
-Trying alternative expansions for &lt;factor&gt;
-Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
-Trying alternative expansions for &lt;integer&gt;
-Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
-Trying alternative expansions for &lt;digit&gt;
-Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
-Trying alternative expansions for &lt;expr&gt;
-Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
-Trying alternative expansions for &lt;term&gt;
-Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
-Trying alternative expansions for &lt;factor&gt;
-Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
-Trying alternative expansions for &lt;expr&gt;
-Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
-Trying alternative expansions for &lt;term&gt;
-Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
-Trying alternative expansions for &lt;factor&gt;
-Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
-Trying alternative expansions for &lt;integer&gt;
-Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
-Trying alternative expansions for &lt;digit&gt;
-Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
-Trying alternative expansions for &lt;term&gt;
-Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
-Trying alternative expansions for &lt;factor&gt;
-Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
-Trying alternative expansions for &lt;integer&gt;
-Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
-Trying alternative expansions for &lt;digit&gt;
-Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
-Can reduce &lt;term&gt; 2 * 3 to reduced subtrees [2, 3]
-Can reduce &lt;expr&gt; 2 * 3 to reduced subtrees [3, 2]
-Can reduce &lt;factor&gt; (2 * 3) to reduced subtrees [2, 3, (3), (2)]
-Can reduce &lt;term&gt; (2 * 3) to reduced subtrees [2, 3, (3), (2)]
-Can reduce &lt;expr&gt; (2 * 3) to reduced subtrees [2 * 3, 3, 2, (3), (2)]
-Can reduce &lt;expr&gt; 1 + (2 * 3) to reduced subtrees [1 + 2 * 3, 3 + 2 * 3, 1, (2 * 3), 2 * 3, 3, 1 + 3, 1 + 2, 1 + (3), 1 + (2)]
-Can reduce &lt;start&gt; 1 + (2 * 3) to reduced subtrees [(2 * 3), 2 * 3, 1 + 2 * 3, 3 + 2 * 3, 1, 3, 1 + 3, 1 + 2, 1 + (3), 1 + (2)]
-Alternatives: [(2 * 3), 2 * 3, 1 + 2 * 3, 3 + 2 * 3, 1, 3, 1 + 3, 1 + 2, 1 + (3), 1 + (2)]
-Trying alternative expansions for &lt;start&gt;
-Expansions: [&#39;&lt;expr&gt;&#39;]
-Trying alternative expansions for &lt;expr&gt;
-Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
-Trying alternative expansions for &lt;term&gt;
-Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
-Trying alternative expansions for &lt;factor&gt;
-Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
-Trying alternative expansions for &lt;expr&gt;
-Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
-Trying alternative expansions for &lt;term&gt;
-Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
-Trying alternative expansions for &lt;factor&gt;
-Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
-Trying alternative expansions for &lt;integer&gt;
-Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
-Trying alternative expansions for &lt;digit&gt;
-Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
-Trying alternative expansions for &lt;term&gt;
-Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
-Trying alternative expansions for &lt;factor&gt;
-Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
-Trying alternative expansions for &lt;integer&gt;
-Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
-Trying alternative expansions for &lt;digit&gt;
-Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
-Can reduce &lt;term&gt; 2 * 3 to reduced subtrees [2, 3]
-Can reduce &lt;expr&gt; 2 * 3 to reduced subtrees [3, 2]
-Can reduce &lt;factor&gt; (2 * 3) to reduced subtrees [2, 3, (3), (2)]
-Can reduce &lt;term&gt; (2 * 3) to reduced subtrees [2, 3, (3), (2)]
-Can reduce &lt;expr&gt; (2 * 3) to reduced subtrees [2 * 3, 3, 2, (3), (2)]
-Can reduce &lt;start&gt; (2 * 3) to reduced subtrees [2 * 3, 3, 2, (3), (2)]
-New smallest tree: (2 * 3)
-Trying alternative expansions for &lt;start&gt;
-Expansions: [&#39;&lt;expr&gt;&#39;]
-Trying alternative expansions for &lt;expr&gt;
-Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
-Trying alternative expansions for &lt;term&gt;
-Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
-Trying alternative expansions for &lt;factor&gt;
-Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
-Trying alternative expansions for &lt;expr&gt;
-Expansions: [&#39;&lt;term&gt; + &lt;expr&gt;&#39;, &#39;&lt;term&gt; - &lt;expr&gt;&#39;, &#39;&lt;term&gt;&#39;]
-Trying alternative expansions for &lt;term&gt;
-Expansions: [&#39;&lt;factor&gt; * &lt;term&gt;&#39;, &#39;&lt;factor&gt; / &lt;term&gt;&#39;, &#39;&lt;factor&gt;&#39;]
-Trying alternative expansions for &lt;factor&gt;
-Expansions: [&#39;+&lt;factor&gt;&#39;, &#39;-&lt;factor&gt;&#39;, &#39;(&lt;expr&gt;)&#39;, &#39;&lt;integer&gt;.&lt;integer&gt;&#39;, &#39;&lt;integer&gt;&#39;]
-Trying alternative expansions for &lt;integer&gt;
-Expansions: [&#39;&lt;digit&gt;&lt;integer&gt;&#39;, &#39;&lt;digit&gt;&#39;]
-Trying alternative expansions for &lt;digit&gt;
-Expansions: [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;]
-Can reduce &lt;factor&gt; (3) to reduced subtrees [3]
-Can reduce &lt;term&gt; (3) to reduced subtrees [3]
-Can reduce &lt;expr&gt; (3) to reduced subtrees [3]
-Can reduce &lt;start&gt; (3) to reduced subtrees [3]
-New smallest tree: (3)
+Test #1 &#39;(2 * 3)&#39; 7 FAIL
+Test #2 &#39;(3)&#39; 3 FAIL
+Test #3 &#39;3&#39; 1 PASS
 </pre>
 </div>
 
@@ -13187,10 +14620,462 @@ New smallest tree: (3)
 
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dd_reducer</span> <span class="o">=</span> <span class="n">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">log_test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">dd_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Test #1 &#39;1 + (2 * 3)&#39; 11 FAIL
+Test #2 &#39;2 * 3)&#39; 6 PASS
+Test #3 &#39;1 + (&#39; 5 PASS
+Test #4 &#39;+ (2 * 3)&#39; 9 FAIL
+Test #5 &#39;+ ( 3)&#39; 6 FAIL
+Test #6 &#39; 3)&#39; 3 PASS
+Test #7 &#39;+ (&#39; 3 PASS
+Test #8 &#39; ( 3)&#39; 5 FAIL
+Test #9 &#39;( 3)&#39; 4 FAIL
+Test #10 &#39;3)&#39; 2 PASS
+Test #11 &#39;( &#39; 2 PASS
+Test #12 &#39;(3)&#39; 3 FAIL
+Test #13 &#39;()&#39; 2 FAIL
+Test #14 &#39;)&#39; 1 PASS
+Test #15 &#39;(&#39; 1 PASS
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;()&#39;
+</pre>
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Section-4"><em>Section 4</em><a class="anchor-link" href="#Section-4">&#182;</a></h2><p>\todo{Add}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that the grammar-based reducer needs far fewer steps.  (On the other hand, the delta debugging reducer can reduce a bit further, as it is not bound by the grammar.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarFuzzer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inp</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">min_nonterminals</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+<span class="n">inp</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;++---((-2 / 3 / 3 - -+1 / 5 - 2) * ++6 / +8 * 4 / 9 / 2 * 8 + ++(5) * 3 / 8 * 0 + 3 * 3 + 4 / 0 / 6 + 9) * ++++(+--9 * -3 * 7 / 4 + --(4) / 3 - 0 / 3 + 5 + 0) * (1 * 6 - 1 / 9 * 5 - 9 / 0 + 7) * ++(8 - 1) * +1 * 7 * 0 + ((1 + 4) / 4 * 8 * 9 * 4 + 4 / (4) * 1 - (4) * 8 * 5 + 1 + 4) / (+(2 - 1 - 9) * 5 + 3 + 6 - 2) * +3 * (3 - 7 + 8) / 4 - -(9 * 4 - 1 * 0 + 5) / (5 / 9 * 5 + 2) * 7 + ((7 - 5 + 3) / 1 * 8 - 8 - 9) * --+1 * 4 / 4 - 4 / 7 * 4 - 3 / 6 * 1 - 2 - 7 - 8&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar_reducer</span> <span class="o">=</span> <span class="n">GrammarReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">),</span> <span class="n">log_test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">grammar_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>++---((-2 / 3 / 3 - -+1 / 5 - 2) * ++6 / +8 * 4 / 9 / 2 * 8 + ++(5) * 3 / 8 * 0 + 3 * 3 + 4 / 0 / 6 + 9) * ++++(+--9 * -3 * 7 / 4 + --(4) / 3 - 0 / 3 + 5 + 0) * (1 * 6 - 1 / 9 * 5 - 9 / 0 + 7) * ++(8 - 1) * +1 * 7 * 0 + ((1 + 4) / 4 * 8 * 9 * 4 + 4 / (4) * 1 - (4) * 8 * 5 + 1 + 4) / (+(2 - 1 - 9) * 5 + 3 + 6 - 2) * +3 * (3 - 7 + 8) / 4 - -(9 * 4 - 1 * 0 + 5) / (5 / 9 * 5 + 2) * 7 + ((7 - 5 + 3) / 1 * 8 - 8 - 9) * --+1 * 4 / 4 - 4 / 7 * 4 - 3 / 6 * 1 - 2 - 7 - 8
+Test #1 &#39;((1 + 4) / 4 * 8 * 9 * 4 + 4 / (4) * 1 - (4) * 8 * 5 + 1 + 4) / (+(2 - 1 - 9) * 5 + 3 + 6 - 2) * +3 * (3 - 7 + 8) / 4 - -(9 * 4 - 1 * 0 + 5) / (5 / 9 * 5 + 2) * 7 + ((7 - 5 + 3) / 1 * 8 - 8 - 9) * --+1 * 4 / 4 - 4 / 7 * 4 - 3 / 6 * 1 - 2 - 7 - 8&#39; 245 FAIL
+Test #2 &#39;-(9 * 4 - 1 * 0 + 5) / (5 / 9 * 5 + 2) * 7 + ((7 - 5 + 3) / 1 * 8 - 8 - 9) * --+1 * 4 / 4 - 4 / 7 * 4 - 3 / 6 * 1 - 2 - 7 - 8&#39; 125 FAIL
+Test #3 &#39;((7 - 5 + 3) / 1 * 8 - 8 - 9) * --+1 * 4 / 4 - 4 / 7 * 4 - 3 / 6 * 1 - 2 - 7 - 8&#39; 80 FAIL
+Test #4 &#39;4 / 7 * 4 - 3 / 6 * 1 - 2 - 7 - 8&#39; 33 PASS
+Test #5 &#39;((7 - 5 + 3) / 1 * 8 - 8 - 9) * --+1 * 4 / 4&#39; 44 FAIL
+Test #6 &#39;--+1 * 4 / 4&#39; 12 PASS
+Test #7 &#39;((7 - 5 + 3) / 1 * 8 - 8 - 9)&#39; 29 FAIL
+Test #8 &#39;(8 - 9)&#39; 7 FAIL
+Test #9 &#39;(9)&#39; 3 FAIL
+Test #10 &#39;9&#39; 1 PASS
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;(9)&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dd_reducer</span> <span class="o">=</span> <span class="n">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">mystery</span><span class="p">,</span> <span class="n">log_test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">dd_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Test #1 &#39;++---((-2 / 3 / 3 - -+1 / 5 - 2) * ++6 / +8 * 4 / 9 / 2 * 8 + ++(5) * 3 / 8 * 0 + 3 * 3 + 4 / 0 / 6 + 9) * ++++(+--9 * -3 * 7 / 4 + --(4) / 3 - 0 / 3 + 5 + 0) * (1 * 6 - 1 / 9 * 5 - 9 / 0 + 7) * ++(8 - 1) * +1 * 7 * 0 + ((1 + 4) / 4 * 8 * 9 * 4 + 4 / (4) * 1 - (4) * 8 * 5 + 1 + 4) / (+(2 - 1 - 9) * 5 + 3 + 6 - 2) * +3 * (3 - 7 + 8) / 4 - -(9 * 4 - 1 * 0 + 5) / (5 / 9 * 5 + 2) * 7 + ((7 - 5 + 3) / 1 * 8 - 8 - 9) * --+1 * 4 / 4 - 4 / 7 * 4 - 3 / 6 * 1 - 2 - 7 - 8&#39; 465 FAIL
+Test #2 &#39; * 8 * 9 * 4 + 4 / (4) * 1 - (4) * 8 * 5 + 1 + 4) / (+(2 - 1 - 9) * 5 + 3 + 6 - 2) * +3 * (3 - 7 + 8) / 4 - -(9 * 4 - 1 * 0 + 5) / (5 / 9 * 5 + 2) * 7 + ((7 - 5 + 3) / 1 * 8 - 8 - 9) * --+1 * 4 / 4 - 4 / 7 * 4 - 3 / 6 * 1 - 2 - 7 - 8&#39; 233 FAIL
+Test #3 &#39;- 1 * 0 + 5) / (5 / 9 * 5 + 2) * 7 + ((7 - 5 + 3) / 1 * 8 - 8 - 9) * --+1 * 4 / 4 - 4 / 7 * 4 - 3 / 6 * 1 - 2 - 7 - 8&#39; 117 PASS
+Test #4 &#39; * 8 * 9 * 4 + 4 / (4) * 1 - (4) * 8 * 5 + 1 + 4) / (+(2 - 1 - 9) * 5 + 3 + 6 - 2) * +3 * (3 - 7 + 8) / 4 - -(9 * 4 &#39; 116 FAIL
+Test #5 &#39; 1 - 9) * 5 + 3 + 6 - 2) * +3 * (3 - 7 + 8) / 4 - -(9 * 4 &#39; 58 PASS
+Test #6 &#39; * 8 * 9 * 4 + 4 / (4) * 1 - (4) * 8 * 5 + 1 + 4) / (+(2 -&#39; 58 FAIL
+Test #7 &#39;(4) * 8 * 5 + 1 + 4) / (+(2 -&#39; 29 FAIL
+Test #8 &#39;1 + 4) / (+(2 -&#39; 15 PASS
+Test #9 &#39;(4) * 8 * 5 + &#39; 14 FAIL
+Test #10 &#39; * 5 + &#39; 7 PASS
+Test #11 &#39;(4) * 8&#39; 7 FAIL
+Test #12 &#39; * 8&#39; 4 PASS
+Test #13 &#39;(4)&#39; 3 FAIL
+Test #14 &#39;4)&#39; 2 PASS
+Test #15 &#39;(&#39; 1 PASS
+Test #16 &#39;()&#39; 2 FAIL
+Test #17 &#39;)&#39; 1 PASS
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;()&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As above: It pays off to use grammars.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Complex-Inputs">Complex Inputs<a class="anchor-link" href="#Complex-Inputs">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The more complex the input, the better off we are with grammar-based reduction.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GeneratorGrammarFuzzer.html" class="import" target="_blank">GeneratorGrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">,</span> <span class="n">CONSTRAINED_VAR_GRAMMAR</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EvalMysteryRunner</span><span class="p">(</span><span class="n">MysteryRunner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">inp</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">Runner</span><span class="o">.</span><span class="n">UNRESOLVED</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">eval_mystery</span> <span class="o">=</span> <span class="n">EvalMysteryRunner</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">var_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">)</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">inp</span> <span class="o">=</span> <span class="n">var_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">eval_mystery</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">Runner</span><span class="o">.</span><span class="n">FAIL</span><span class="p">:</span>
+        <span class="k">break</span>
+<span class="n">inp</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>W=-9.869
+j=(+1.8*++(2+6))*-++++-+3/(9+1*+7/3/3)
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;j=(+1.8*++(2+6))*-++++-+3/(9+1*+7/3/3)&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar_reducer</span> <span class="o">=</span> <span class="n">GrammarReducer</span><span class="p">(</span><span class="n">eval_mystery</span><span class="p">,</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">),</span> <span class="n">log_test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">grammar_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>j=(+1.8*++(2+6))*-++++-+3/(9+1*+7/3/3)
+Test #1 &#39;j=-++++-+3/(9+1*+7/3/3)&#39; 23 FAIL
+Test #2 &#39;j=(9+1*+7/3/3)&#39; 14 FAIL
+Test #3 &#39;j=(1*+7/3/3)&#39; 12 FAIL
+Test #4 &#39;j=(+7/3/3)&#39; 10 FAIL
+Test #5 &#39;j=(3/3)&#39; 7 FAIL
+Test #6 &#39;j=(3)&#39; 5 FAIL
+Test #7 &#39;j=3&#39; 3 PASS
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;j=(3)&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">dd_reducer</span> <span class="o">=</span> <span class="n">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">eval_mystery</span><span class="p">,</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">))</span>
+<span class="n">dd_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Test #1 &#39;j=(+1.8*++(2+6))*-++++-+3/(9+1*+7/3/3)&#39; 38 FAIL
+Test #2 &#39;+++-+3/(9+1*+7/3/3)&#39; 19 UNRESOLVED
+Test #3 &#39;j=(+1.8*++(2+6))*-+&#39; 19 UNRESOLVED
+Test #4 &#39;+(2+6))*-++++-+3/(9+1*+7/3/3)&#39; 29 UNRESOLVED
+Test #5 &#39;j=(+1.8*++++-+3/(9+1*+7/3/3)&#39; 28 UNRESOLVED
+Test #6 &#39;j=(+1.8*++(2+6))*-++1*+7/3/3)&#39; 29 UNRESOLVED
+Test #7 &#39;j=(+1.8*++(2+6))*-++++-+3/(9&#39; 28 UNRESOLVED
+Test #8 &#39;1.8*++(2+6))*-++++-+3/(9+1*+7/3/3)&#39; 34 UNRESOLVED
+Test #9 &#39;j=(++(2+6))*-++++-+3/(9+1*+7/3/3)&#39; 33 FAIL
+Test #10 &#39;j=(+))*-++++-+3/(9+1*+7/3/3)&#39; 28 UNRESOLVED
+Test #11 &#39;j=(++(2+6+++-+3/(9+1*+7/3/3)&#39; 28 UNRESOLVED
+Test #12 &#39;j=(++(2+6))*-++3/(9+1*+7/3/3)&#39; 29 FAIL
+Test #13 &#39;+(2+6))*-++3/(9+1*+7/3/3)&#39; 25 UNRESOLVED
+Test #14 &#39;j=(+))*-++3/(9+1*+7/3/3)&#39; 24 UNRESOLVED
+Test #15 &#39;j=(++(2+6+3/(9+1*+7/3/3)&#39; 24 UNRESOLVED
+Test #16 &#39;j=(++(2+6))*-++1*+7/3/3)&#39; 24 UNRESOLVED
+Test #17 &#39;j=(++(2+6))*-++3/(9/3/3)&#39; 24 FAIL
+Test #18 &#39;+(2+6))*-++3/(9/3/3)&#39; 20 UNRESOLVED
+Test #19 &#39;j=(+))*-++3/(9/3/3)&#39; 19 UNRESOLVED
+Test #20 &#39;j=(++(2+6+3/(9/3/3)&#39; 19 UNRESOLVED
+Test #21 &#39;j=(++(2+6))*-+/3/3)&#39; 19 UNRESOLVED
+Test #22 &#39;j=(++(2+6))*-++3/(9&#39; 19 UNRESOLVED
+Test #23 &#39;(++(2+6))*-++3/(9/3/3)&#39; 22 UNRESOLVED
+Test #24 &#39;j=+(2+6))*-++3/(9/3/3)&#39; 22 UNRESOLVED
+Test #25 &#39;j=(++6))*-++3/(9/3/3)&#39; 21 UNRESOLVED
+Test #26 &#39;j=(++(2))*-++3/(9/3/3)&#39; 22 FAIL
+Test #27 &#39;(++(2))*-++3/(9/3/3)&#39; 20 UNRESOLVED
+Test #28 &#39;j=+(2))*-++3/(9/3/3)&#39; 20 UNRESOLVED
+Test #29 &#39;j=(++(2*-++3/(9/3/3)&#39; 20 UNRESOLVED
+Test #30 &#39;j=(++(2))+3/(9/3/3)&#39; 19 FAIL
+Test #31 &#39;(++(2))+3/(9/3/3)&#39; 17 UNRESOLVED
+Test #32 &#39;j=+(2))+3/(9/3/3)&#39; 17 UNRESOLVED
+Test #33 &#39;j=(+))+3/(9/3/3)&#39; 16 UNRESOLVED
+Test #34 &#39;j=(++(2+3/(9/3/3)&#39; 17 UNRESOLVED
+Test #35 &#39;j=(++(2))/(9/3/3)&#39; 17 FAIL
+Test #36 &#39;(++(2))/(9/3/3)&#39; 15 UNRESOLVED
+Test #37 &#39;j=+(2))/(9/3/3)&#39; 15 UNRESOLVED
+Test #38 &#39;j=(+))/(9/3/3)&#39; 14 UNRESOLVED
+Test #39 &#39;j=(++(2/(9/3/3)&#39; 15 UNRESOLVED
+Test #40 &#39;j=(++(2))/3/3)&#39; 14 UNRESOLVED
+Test #41 &#39;j=(++(2))/(9/3)&#39; 15 FAIL
+Test #42 &#39;(++(2))/(9/3)&#39; 13 UNRESOLVED
+Test #43 &#39;j=(2))/(9/3)&#39; 12 UNRESOLVED
+Test #44 &#39;j=(++))/(9/3)&#39; 13 UNRESOLVED
+Test #45 &#39;j=(++(2(9/3)&#39; 12 UNRESOLVED
+Test #46 &#39;j=(++(2))//3)&#39; 13 UNRESOLVED
+Test #47 &#39;j=(++(2))/(9&#39; 12 UNRESOLVED
+Test #48 &#39;=(++(2))/(9/3)&#39; 14 UNRESOLVED
+Test #49 &#39;j(++(2))/(9/3)&#39; 14 UNRESOLVED
+Test #50 &#39;j=++(2))/(9/3)&#39; 14 UNRESOLVED
+Test #51 &#39;j=((2))/(9/3)&#39; 13 FAIL
+Test #52 &#39;=((2))/(9/3)&#39; 12 UNRESOLVED
+Test #53 &#39;j((2))/(9/3)&#39; 12 UNRESOLVED
+Test #54 &#39;j=(())/(9/3)&#39; 12 UNRESOLVED
+Test #55 &#39;j=((2/(9/3)&#39; 11 UNRESOLVED
+Test #56 &#39;j=((2))(9/3)&#39; 12 UNRESOLVED
+Test #57 &#39;j=((2))/9/3)&#39; 12 UNRESOLVED
+Test #58 &#39;j=((2))/(/3)&#39; 12 UNRESOLVED
+Test #59 &#39;j=((2))/(93)&#39; 12 FAIL
+Test #60 &#39;=((2))/(93)&#39; 11 UNRESOLVED
+Test #61 &#39;j((2))/(93)&#39; 11 UNRESOLVED
+Test #62 &#39;j=(2))/(93)&#39; 11 UNRESOLVED
+Test #63 &#39;j=(()/(93)&#39; 10 UNRESOLVED
+Test #64 &#39;j=((2)/(93)&#39; 11 UNRESOLVED
+Test #65 &#39;j=((2))(93)&#39; 11 UNRESOLVED
+Test #66 &#39;j=((2))/93)&#39; 11 UNRESOLVED
+Test #67 &#39;j=((2))/(3)&#39; 11 FAIL
+Test #68 &#39;=((2))/(3)&#39; 10 UNRESOLVED
+Test #69 &#39;j((2))/(3)&#39; 10 UNRESOLVED
+Test #70 &#39;j=(2))/(3)&#39; 10 UNRESOLVED
+Test #71 &#39;j=(()/(3)&#39; 9 UNRESOLVED
+Test #72 &#39;j=((2)/(3)&#39; 10 UNRESOLVED
+Test #73 &#39;j=((2))(3)&#39; 10 UNRESOLVED
+Test #74 &#39;j=((2))/3)&#39; 10 UNRESOLVED
+Test #75 &#39;j=((2))/(&#39; 9 UNRESOLVED
+Test #76 &#39;j=(())/(3)&#39; 10 UNRESOLVED
+Test #77 &#39;j=((2))/()&#39; 10 UNRESOLVED
+Test #78 &#39;j=((2))/(3&#39; 10 UNRESOLVED
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;j=((2))/(3)&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Not only does grammar-based reduction need far fewer tests, the reduced result is also smaller.</p>
 </div>
 </div>
 </div>
@@ -13200,9 +15085,9 @@ New smallest tree: (3)
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
-<li><em>Lesson one</em></li>
-<li><em>Lesson two</em></li>
-<li><em>Lesson three</em></li>
+<li>Reducing failure-inducing inputs to a minimum is helpful for testing and debugging.</li>
+<li><em>Delta Debugging</em> is a simple and robust algorithm to easily reduce test cases.</li>
+<li>For complex inputs, consider <em>grammar-based</em> reduction instead.</li>
 </ul>
 </div>
 </div>
@@ -13228,7 +15113,7 @@ New smallest tree: (3)
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>The delta debugging algorithm discussed here stems from [<a href="https://doi.org/10.1109/32.988498">Zeller <em>et al</em>, 2002.</a>]; actually, this is the exact Python implementation as used by Zeller in 2002.  The idea of systematically reducing inputs has been discovered a number of times, although not as  automatic and generic as delta debugging. [<a href="https://www.microsoft.com/en-us/research/publication/massive-stochastic-testing-of-sql/">Slutz <em>et al</em>, 1998.</a>], for instance, discusses systematic reduction of SQL statements for SQL databases; the general process as manual work is well described by [Kernighan <em>et al</em>, 1999.].</p>
 <p>[<a href="http://dl.acm.org/citation.cfm?id=3155562.3155669">Herfert <em>et al</em>, 2017.</a>]</p>
-<p>\todo{Add more: hierarchical DD, Csmith / C-reduce}</p>
+<p>\todo{Discuss hierarchical DD, Csmith / C-reduce}</p>
 </div>
 </div>
 </div>
@@ -13302,7 +15187,7 @@ New smallest tree: (3)
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Reducer.ipynb" target=_blank)>Last change: 2018-11-13 11:58:42+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Reducer.ipynb" target=_blank)>Last change: 2018-12-17 12:45:20+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13318,7 +15203,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Reducer.html">Reducing Failure-Inducing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Reducer.html">https://www.fuzzingbook.org/beta/html/Reducer.html</a>.  Retrieved 2018-11-13 11:58:42+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Reducer.html">Reducing Failure-Inducing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Reducer.html">https://www.fuzzingbook.org/beta/html/Reducer.html</a>.  Retrieved 2018-12-17 12:45:20+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Reducer,
@@ -13328,9 +15213,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Reducer.html}},
-    note = {Retrieved 2018-11-13 11:58:42+01:00},
+    note = {Retrieved 2018-12-17 12:45:20+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Reducer.html},
-    urldate = {2018-11-13 11:58:42+01:00}
+    urldate = {2018-12-17 12:45:20+01:00}
 }
 </pre>
 </div>

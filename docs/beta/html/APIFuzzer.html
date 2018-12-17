@@ -11793,7 +11793,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/APIFuzzer.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Fuzzing APIs - Generating Software Tests" />
-<meta property="og:description" content="So far, we have always generated system input, i.e. data that the program as a whole obtains via its input channels.  However, we can also generate input that goes directly into individual functions, gaining flexibility and speed in the process.  In this chapter, we explore the use of grammars to synthesize code for function calls, which allows you to generate program code that very efficiently invokes functions directly.  Prerequisites You have to know how grammar fuzzing work, e.g. from the chapter on grammars. We make use of generator functions, as discussed in the chapter on fuzzing with generators. We make use of probabilities, as as discussed in the chapter on fuzzing with probabilities." />
+<meta property="og:description" content="So far, we have always generated system input, i.e. data that the program as a whole obtains via its input channels.  However, we can also generate inputs that go directly into individual functions, gaining flexibility and speed in the process.  In this chapter, we explore the use of grammars to synthesize code for function calls, which allows you to generate program code that very efficiently invokes functions directly.  Prerequisites You have to know how grammar fuzzing work, e.g. from the chapter on grammars. We make use of generator functions, as discussed in the chapter on fuzzing with generators. We make use of probabilities, as discussed in the chapter on fuzzing with probabilities." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11892,7 +11892,8 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Synthesizing-Code">Synthesizing Code</a>
 </ul></li><li class="has-sub"><a href="#Synthesizing-Oracles">Synthesizing Oracles</a>
 <ul><li class="has-sub"><a href="#Synthesizing-Data">Synthesizing Data</a>
-</ul></li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
+</ul></li><li class="has-sub"><a href="#Example:-Populating-a-SQL-Database">Example: Populating a SQL Database</a>
+</li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps">Next Steps</a>
 </li><li class="has-sub"><a href="#Background">Background</a>
 </li><li class="has-sub"><a href="#Exercises">Exercises</a>
@@ -11945,7 +11946,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-APIs">Fuzzing APIs<a class="anchor-link" href="#Fuzzing-APIs">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-warning"></i>&nbsp;This chapter is still under review ("beta").  It may change at any time.</em></p><p>So far, we have always generated <em>system input</em>, i.e. data that the program as a whole obtains via its input channels.  However, we can also generate input that goes directly into individual functions, gaining flexibility and speed in the process.  In this chapter, we explore the use of grammars to synthesize code for function calls, which allows you to generate <em>program code that very efficiently invokes functions directly.</em></p>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-APIs">Fuzzing APIs<a class="anchor-link" href="#Fuzzing-APIs">&#182;</a></h1><p><em class="beta"><i class="fa fa-fw fa-warning"></i>&nbsp;This chapter is still under review ("beta").  It may change at any time.</em></p><p>So far, we have always generated <em>system input</em>, i.e. data that the program as a whole obtains via its input channels.  However, we can also generate inputs that go directly into individual functions, gaining flexibility and speed in the process.  In this chapter, we explore the use of grammars to synthesize code for function calls, which allows you to generate <em>program code that very efficiently invokes functions directly.</em></p>
 </div>
 </div>
 </div>
@@ -11958,7 +11959,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <ul>
 <li>You have to know how grammar fuzzing work, e.g. from the <a href="Grammars.html">chapter on grammars</a>.</li>
 <li>We make use of <em>generator functions</em>, as discussed in the <a href="GeneratorGrammarFuzzer.html">chapter on fuzzing with generators</a>.</li>
-<li>We make use of probabilities, as as discussed in the <a href="ProbabilisticGrammarFuzzer.html">chapter on fuzzing with probabilities</a>.</li>
+<li>We make use of probabilities, as discussed in the <a href="ProbabilisticGrammarFuzzer.html">chapter on fuzzing with probabilities</a>.</li>
 </ul>
 </div>
 </div>
@@ -11968,7 +11969,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Fuzzing-a-Function">Fuzzing a Function<a class="anchor-link" href="#Fuzzing-a-Function">&#182;</a></h2><p>Let us start with our first problem: How do we fuzz a given function?  For an interpreted language like Python, this pretty straight-forward.  All we need to do is to generate <em>calls</em> to the function(s) we want to test.  This is something we can easily do with a grammar.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Fuzzing-a-Function">Fuzzing a Function<a class="anchor-link" href="#Fuzzing-a-Function">&#182;</a></h2><p>Let us start with our first problem: How do we fuzz a given function?  For an interpreted language like Python, this is pretty straight-forward.  All we need to do is to generate <em>calls</em> to the function(s) we want to test.  This is something we can easily do with a grammar.</p>
 </div>
 </div>
 </div>
@@ -12058,7 +12059,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">URL_GRAMMAR</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">new_symbol</span><span class="p">,</span> <span class="n">opts</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">URL_GRAMMAR</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">new_symbol</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">extend_grammar</span>
 <span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">display_tree</span><span class="p">,</span> <span class="n">all_terminals</span>
 </pre></div>
 
@@ -12496,20 +12497,6 @@ void test() {
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/copy.html" class="import" target="_blank">copy</a></span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GeneratorGrammarFuzzer.html" class="import" target="_blank">GeneratorGrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">,</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span>
 </pre></div>
 
@@ -12524,8 +12511,8 @@ void test() {
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">URLPARSE_ORACLE_GRAMMAR</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">URLPARSE_GRAMMAR</span><span class="p">)</span>
-<span class="n">URLPARSE_ORACLE_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">URLPARSE_ORACLE_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">URLPARSE_GRAMMAR</span><span class="p">,</span>
+<span class="p">{</span>
     <span class="s2">&quot;&lt;call&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;assert urlparse(&#39;&lt;url&gt;&#39;).geturl() == &#39;&lt;url&gt;&#39;&quot;</span><span class="p">,</span> 
                 <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">url_1</span><span class="p">,</span> <span class="n">url_2</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">url_1</span><span class="p">]))]</span>
 <span class="p">})</span>
@@ -12590,8 +12577,8 @@ void test() {
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">URLPARSE_ORACLE_GRAMMAR</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">URLPARSE_GRAMMAR</span><span class="p">)</span>
-<span class="n">URLPARSE_ORACLE_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">URLPARSE_ORACLE_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">URLPARSE_GRAMMAR</span><span class="p">,</span>
+<span class="p">{</span>
     <span class="s2">&quot;&lt;call&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;result = urlparse(&#39;&lt;scheme&gt;://&lt;host&gt;&lt;path&gt;?&lt;params&gt;&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="c1"># + &quot;print(result)\n&quot;</span>
                 <span class="o">+</span> <span class="s2">&quot;assert result.scheme == &#39;&lt;scheme&gt;&#39;</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -12870,7 +12857,7 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">int_grammar_with_range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
-    <span class="n">int_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">INT_GRAMMAR</span><span class="p">)</span>
+    <span class="n">int_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">INT_GRAMMAR</span><span class="p">)</span>
     <span class="n">set_opts</span><span class="p">(</span><span class="n">int_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;int&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;_int&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">int_grammar</span>
 </pre></div>
@@ -13004,7 +12991,7 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">float_grammar_with_range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
-    <span class="n">float_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">FLOAT_GRAMMAR</span><span class="p">)</span>
+    <span class="n">float_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">FLOAT_GRAMMAR</span><span class="p">)</span>
     <span class="n">set_opts</span><span class="p">(</span><span class="n">float_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;float&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;_float&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">float_grammar</span>
 </pre></div>
@@ -13173,7 +13160,7 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">list_grammar</span><span class="p">(</span><span class="n">list_object_symbol</span><span class="p">,</span> <span class="n">object_grammar</span><span class="p">):</span>
-    <span class="n">obj_list_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">LIST_GRAMMAR</span><span class="p">)</span>
+    <span class="n">obj_list_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">LIST_GRAMMAR</span><span class="p">)</span>
 
     <span class="n">obj_list_grammar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">object_grammar</span><span class="p">)</span>
     <span class="n">obj_list_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;list&gt;&quot;</span><span class="p">]</span>
@@ -13309,9 +13296,62 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>\todo{Apply these.}</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Example:-Populating-a-SQL-Database">Example: Populating a SQL Database<a class="anchor-link" href="#Example:-Populating-a-SQL-Database">&#182;</a></h2></div>
 </div>
 </div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>\todo{Finish}</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/sqlite3.html" class="import" target="_blank">sqlite3</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">connection</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;company.db&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">SQL_VALUES_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;values&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;values&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;VALUES()&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
 </div>
 </div>
 
@@ -13330,7 +13370,12 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>In the <a href="Carver.html">next chapter</a>, we will introduce <em>carving</em>, a technique to automatically extract API calls (and thus unit tests) from program executions.  In particular, we will show how to turn such recorded calls into grammars that allow to test these APIs with various combinations of recorded values.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>This chapter was all about manually writing test and controlling which data gets generated.  <a href="Carver.html">In the next chapter</a>, we will introduce a much higher level of automation:</p>
+<ul>
+<li><em>Carving</em> automatically records function calls and arguments from program executions.</li>
+<li>We can turn these into <em>grammars</em>, allowing to test these functions with various combinations of recorded values.</li>
+</ul>
+<p>With these techniques, we automatically obtain grammars that already invoke functions in application contexts, making our work of specifying them much easier.</p>
 </div>
 </div>
 </div>
@@ -13396,7 +13441,7 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/APIFuzzer.ipynb" target=_blank)>Last change: 2018-12-11 17:21:49+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/APIFuzzer.ipynb" target=_blank)>Last change: 2018-12-17 12:34:30+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13412,7 +13457,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">Fuzzing APIs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">https://www.fuzzingbook.org/beta/html/APIFuzzer.html</a>.  Retrieved 2018-12-11 17:21:49+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">Fuzzing APIs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">https://www.fuzzingbook.org/beta/html/APIFuzzer.html</a>.  Retrieved 2018-12-17 12:34:30+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:APIFuzzer,
@@ -13422,9 +13467,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/APIFuzzer.html}},
-    note = {Retrieved 2018-12-11 17:21:49+01:00},
+    note = {Retrieved 2018-12-17 12:34:30+01:00},
     url = {https://www.fuzzingbook.org/beta/html/APIFuzzer.html},
-    urldate = {2018-12-11 17:21:49+01:00}
+    urldate = {2018-12-17 12:34:30+01:00}
 }
 </pre>
 </div>

@@ -11902,6 +11902,7 @@ MathJax.Hub.Config({
 </ul></li><li class="has-sub"><a href="#Grammars-as-Mutation-Seeds">Grammars as Mutation Seeds</a>
 </li><li class="has-sub"><a href="#A-Grammar-Toolbox">A Grammar Toolbox</a>
 <ul><li class="has-sub"><a href="#Escapes">Escapes</a>
+</li><li class="has-sub"><a href="#Extending-Grammars">Extending Grammars</a>
 </li><li class="has-sub"><a href="#Character-Classes">Character Classes</a>
 </li><li class="has-sub"><a href="#Grammar-Shortcuts">Grammar Shortcuts</a>
 </li><li class="has-sub"><a href="#Grammar-Extensions">Grammar Extensions</a>
@@ -15589,11 +15590,12 @@ http://fuzzingbook.com:8080/def
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span> <span class="o">=</span> <span class="p">{</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">simple_nonterminal_grammar</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;nonterminal&gt;&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;nonterminal&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;left-angle&gt;&lt;identifier&gt;&lt;right-angle&gt;&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;left-angle&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;right-angle&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;&quot;</span><span class="p">]</span>
+    <span class="s2">&quot;&lt;right-angle&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="c1"># for now</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -15605,9 +15607,139 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>In <code>nonterminal_grammar</code>, neither the expansion for <code>&lt;left-angle&gt;</code> nor the expansion for <code>&lt;right-angle&gt;</code> can be mistaken as a nonterminal.  Hence, we can produce as many as we want.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>In <code>simple_nonterminal_grammar</code>, neither the expansion for <code>&lt;left-angle&gt;</code> nor the expansion for <code>&lt;right-angle&gt;</code> can be mistaken as a nonterminal.  Hence, we can produce as many as we want.</p>
 </div>
 </div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Extending-Grammars">Extending Grammars<a class="anchor-link" href="#Extending-Grammars">&#182;</a></h3><p>In the course of this book, we frequently run into the issue of creating a grammar by <em>extending</em> an existing grammar with new features.  Such an extension is very much like subclassing in object-oriented programming.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To create a new grammar $g'$ from an existing grammar $g$, we first copy $g$ into $g'$, and then go and extend existing rules with new alternatives and/or add new symbols.  Here's an example, extending the above <code>nonterminal</code> grammar with a better rule for identifiers:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/copy.html" class="import" target="_blank">copy</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">simple_nonterminal_grammar</span><span class="p">)</span>
+<span class="n">nonterminal_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;identifier&gt;&lt;idchar&gt;&quot;</span><span class="p">]</span>
+<span class="n">nonterminal_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]</span>  <span class="c1"># for now</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;nonterminal&gt;&#39;],
+ &#39;&lt;nonterminal&gt;&#39;: [&#39;&lt;left-angle&gt;&lt;identifier&gt;&lt;right-angle&gt;&#39;],
+ &#39;&lt;left-angle&gt;&#39;: [&#39;&lt;&#39;],
+ &#39;&lt;right-angle&gt;&#39;: [&#39;&gt;&#39;],
+ &#39;&lt;identifier&gt;&#39;: [&#39;&lt;idchar&gt;&#39;, &#39;&lt;identifier&gt;&lt;idchar&gt;&#39;],
+ &#39;&lt;idchar&gt;&#39;: [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;]}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Since such an extension of grammars is a common operation, we introduce a custom function <code>extend_grammar()</code> which first copies the given grammar and then updates it from a dictionary, using the Python dictionary <code>update()</code> method:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">extend_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="n">new_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+    <span class="n">new_grammar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_grammar</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This call to <code>extend_grammar()</code> extends <code>simple_nonterminal_grammar</code> to <code>nonterminal_grammar</code> just like the "manual" example above:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">simple_nonterminal_grammar</span><span class="p">,</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;identifier&gt;&lt;idchar&gt;&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]</span>  <span class="c1"># for now</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
 </div>
 </div>
 
@@ -15622,7 +15754,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>In the above <code>nonterminal_grammar</code>, we have left out the definition for <code>&lt;identifier&gt;</code>.  That is because enumerating all letters or digits in a grammar manually, as in <code>&lt;letter&gt; ::= 'a' | 'b' | 'c' ...</code> is a bit painful.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>In the above <code>nonterminal_grammar</code>, we have enumerated only the first few letters; indeed, enumerating all letters or digits in a grammar manually, as in <code>&lt;idchar&gt; ::= 'a' | 'b' | 'c' ...</code> is a bit painful.</p>
 </div>
 </div>
 </div>
@@ -15631,7 +15763,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>However, remember that grammars are part of a program, and can thus also be constructed programmatically.  In Python, the constant <code>string.ascii_letters</code> contains all letters in the ASCII character set:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>However, remember that grammars are part of a program, and can thus also be constructed programmatically.  We introduce a function <code>srange()</code> which constructs a list of characters in a string:</p>
 </div>
 </div>
 </div>
@@ -15657,6 +15789,31 @@ http://fuzzingbook.com:8080/def
 
 <div class="inner_cell">
 <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">srange</span><span class="p">(</span><span class="n">characters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct a list with all characters in the string }`characters`&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">characters</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we pass it the constant <code>string.ascii_letters</code>, which holds all ASCII letters, <code>srange()</code> returns a list of all ASCII letters:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span>
 </pre></div>
 
@@ -15672,31 +15829,6 @@ http://fuzzingbook.com:8080/def
 </pre>
 </div>
 
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>From this, we can construct a list of all letters:</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">srange</span><span class="p">(</span><span class="n">characters</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Construct a list with all characters in the string }`characters`&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">characters</span><span class="p">]</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
 </div>
 
 <div class="input_code">
@@ -15725,7 +15857,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We can now use this in our grammar to define identifiers:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can use such constants in our grammar to quickly define identifiers:</p>
 </div>
 </div>
 </div>
@@ -15737,9 +15869,11 @@ http://fuzzingbook.com:8080/def
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;idchar&gt;&lt;identifier&gt;&quot;</span><span class="p">]</span>
-<span class="n">nonterminal_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srange</span><span class="p">(</span>
-    <span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span><span class="p">)</span> <span class="o">+</span> <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span> <span class="o">+</span> <span class="n">srange</span><span class="p">(</span><span class="s2">&quot;-_&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">nonterminal_grammar</span><span class="p">,</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">:</span> <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span><span class="p">)</span> <span class="o">+</span> <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span> <span class="o">+</span> <span class="n">srange</span><span class="p">(</span><span class="s2">&quot;-_&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">)</span>
 </pre></div>
 
 </div>
@@ -15764,7 +15898,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;b&#39;, &#39;d&#39;, &#39;X3b&#39;, &#39;n0&#39;, &#39;7&#39;, &#39;v&#39;, &#39;z&#39;, &#39;X&#39;, &#39;g&#39;, &#39;Pfed&#39;]
+<pre>[&#39;b&#39;, &#39;d&#39;, &#39;V9&#39;, &#39;x4c&#39;, &#39;YdiEWj&#39;, &#39;c&#39;, &#39;xd&#39;, &#39;7&#39;, &#39;vIU&#39;, &#39;QhKD&#39;]
 </pre>
 </div>
 
@@ -15875,7 +16009,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;&lt;idchar&gt;&#39;, &#39;&lt;idchar&gt;&lt;identifier&gt;&#39;]
+<pre>[&#39;&lt;idchar&gt;&#39;, &#39;&lt;identifier&gt;&lt;idchar&gt;&#39;]
 </pre>
 </div>
 
@@ -15923,22 +16057,11 @@ http://fuzzingbook.com:8080/def
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/copy.html" class="import" target="_blank">copy</a></span> <span class="k">import</span> <span class="n">deepcopy</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_ebnf_grammar</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">nonterminal_grammar</span><span class="p">)</span>
-<span class="n">nonterminal_ebnf_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&lt;idchar&gt;+&quot;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_ebnf_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">nonterminal_grammar</span><span class="p">,</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;+&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">)</span>
 </pre></div>
 
 </div>
@@ -16167,7 +16290,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">convert_ebnf_parentheses</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert a grammar in extended BNF to BNF&quot;&quot;&quot;</span>
-    <span class="n">grammar</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">)</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="n">ebnf_grammar</span><span class="p">:</span>
         <span class="n">expansions</span> <span class="o">=</span> <span class="n">ebnf_grammar</span><span class="p">[</span><span class="n">nonterminal</span><span class="p">]</span>
 
@@ -16336,7 +16459,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">convert_ebnf_operators</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert a grammar in extended BNF to BNF&quot;&quot;&quot;</span>
-    <span class="n">grammar</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">)</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="n">ebnf_grammar</span><span class="p">:</span>
         <span class="n">expansions</span> <span class="o">=</span> <span class="n">ebnf_grammar</span><span class="p">[</span><span class="n">nonterminal</span><span class="p">]</span>
 
@@ -17348,9 +17471,9 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-99-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-103-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
     expression_grammar_fn()
-  File &#34;&lt;ipython-input-98-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
+  File &#34;&lt;ipython-input-102-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
     expr = &#34;&lt;term&gt; + &lt;expr&gt;&#34; | &#34;&lt;term&gt; - &lt;expr&gt;&#34;
 TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (expected)
 </pre>
@@ -17693,7 +17816,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-12-11 17:26:09+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2018-12-16 15:20:59+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -17709,7 +17832,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2018-12-11 17:26:09+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2018-12-16 15:20:59+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:Grammars,
@@ -17719,9 +17842,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Grammars.html}},
-    note = {Retrieved 2018-12-11 17:26:09+01:00},
+    note = {Retrieved 2018-12-16 15:20:59+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Grammars.html},
-    urldate = {2018-12-11 17:26:09+01:00}
+    urldate = {2018-12-16 15:20:59+01:00}
 }
 </pre>
 </div>

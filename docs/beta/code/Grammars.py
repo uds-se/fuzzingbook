@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-12-11 17:26:09+01:00
+# Last change: 2018-12-16 15:20:59+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -453,12 +453,47 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    nonterminal_grammar = {
+    simple_nonterminal_grammar = {
         "<start>": ["<nonterminal>"],
         "<nonterminal>": ["<left-angle><identifier><right-angle>"],
         "<left-angle>": ["<"],
-        "<right-angle>": [">"]
+        "<right-angle>": [">"],
+        "<identifier>": ["id"] # for now
     }
+
+
+# ### Extending Grammars
+
+if __name__ == "__main__":
+    print('\n### Extending Grammars')
+
+
+
+
+import copy
+
+if __name__ == "__main__":
+    nonterminal_grammar = copy.deepcopy(simple_nonterminal_grammar)
+    nonterminal_grammar["<identifier>"] = ["<idchar>", "<identifier><idchar>"]
+    nonterminal_grammar["<idchar>"] = ['a', 'b', 'c', 'd']  # for now
+
+
+if __name__ == "__main__":
+    nonterminal_grammar
+
+
+def extend_grammar(grammar, extension={}):
+    new_grammar = copy.deepcopy(grammar)
+    new_grammar.update(extension)
+    return new_grammar
+
+if __name__ == "__main__":
+    nonterminal_grammar = extend_grammar(simple_nonterminal_grammar,
+        {
+            "<identifier>": ["<idchar>", "<identifier><idchar>"],
+            "<idchar>": ['a', 'b', 'c', 'd']  # for now
+        }
+    )
 
 
 # ### Character Classes
@@ -471,22 +506,24 @@ if __name__ == "__main__":
 
 import string
 
-if __name__ == "__main__":
-    string.ascii_letters
-
-
 def srange(characters):
     """Construct a list with all characters in the string }`characters`"""
     return [c for c in characters]
+
+if __name__ == "__main__":
+    string.ascii_letters
+
 
 if __name__ == "__main__":
     srange(string.ascii_letters)[:10]
 
 
 if __name__ == "__main__":
-    nonterminal_grammar["<identifier>"] = ["<idchar>", "<idchar><identifier>"]
-    nonterminal_grammar["<idchar>"] = srange(
-        string.ascii_letters) + srange(string.digits) + srange("-_")
+    nonterminal_grammar = extend_grammar(nonterminal_grammar,
+        {
+            "<idchar>": srange(string.ascii_letters) + srange(string.digits) + srange("-_")
+        }
+    )
 
 
 if __name__ == "__main__":
@@ -517,11 +554,12 @@ if __name__ == "__main__":
     nonterminal_grammar["<identifier>"]
 
 
-from copy import deepcopy
-
 if __name__ == "__main__":
-    nonterminal_ebnf_grammar = deepcopy(nonterminal_grammar)
-    nonterminal_ebnf_grammar["<identifier>"] = "<idchar>+"
+    nonterminal_ebnf_grammar = extend_grammar(nonterminal_grammar,
+        {
+            "<identifier>": ["<idchar>+"]
+        }
+    )
 
 
 EXPR_EBNF_GRAMMAR = {
@@ -596,7 +634,7 @@ if __name__ == "__main__":
 
 def convert_ebnf_parentheses(ebnf_grammar):
     """Convert a grammar in extended BNF to BNF"""
-    grammar = deepcopy(ebnf_grammar)
+    grammar = extend_grammar(ebnf_grammar)
     for nonterminal in ebnf_grammar:
         expansions = ebnf_grammar[nonterminal]
 
@@ -653,7 +691,7 @@ if __name__ == "__main__":
 
 def convert_ebnf_operators(ebnf_grammar):
     """Convert a grammar in extended BNF to BNF"""
-    grammar = deepcopy(ebnf_grammar)
+    grammar = extend_grammar(ebnf_grammar)
     for nonterminal in ebnf_grammar:
         expansions = ebnf_grammar[nonterminal]
 

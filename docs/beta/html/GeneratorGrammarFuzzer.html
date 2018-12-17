@@ -11793,7 +11793,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/GeneratorGrammarFuzzer.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Fuzzing with Generators - Generating Software Tests" />
-<meta property="og:description" content="In this chapter, we show how to extend grammars with functions – pieces of code that get executed during grammar expansion, and that can generate, check, or change elements produced.  Adding functions to a grammar allows for very versatile test generation, bringing together the best of grammar generation and programming.Prerequisites As thus chapter deeply interacts with the techniques discussed in the chapter on efficient grammar fuzzing, a good understanding of the techniques is recommended." />
+<meta property="og:description" content="In this chapter, we show how to extend grammars with functions – pieces of code that get executed during grammar expansion, and that can generate, check, or change elements produced.  Adding functions to a grammar allows for very versatile test generation, bringing together the best of grammar generation and programming.Prerequisites As this chapter deeply interacts with the techniques discussed in the chapter on efficient grammar fuzzing, a good understanding of the techniques is recommended." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11968,7 +11968,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
 <ul>
-<li>As thus chapter deeply interacts with the techniques discussed in the <a href="GrammarFuzzer.html">chapter on efficient grammar fuzzing</a>, a good understanding of the techniques is recommended.</li>
+<li>As this chapter deeply interacts with the techniques discussed in the <a href="GrammarFuzzer.html">chapter on efficient grammar fuzzing</a>, a good understanding of the techniques is recommended.</li>
 </ul>
 </div>
 </div>
@@ -11987,7 +11987,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>To make things simple, we will simply assume that we need to pieces of data – a 16-digit credit card number and an amount to be charged.  Both pieces can be easily generated with grammars, as in the following:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>To make things simple, we will assume that we need only two pieces of data – a 16-digit credit card number and an amount to be charged.  Both pieces can be easily generated with grammars, as in the following:</p>
 </div>
 </div>
 </div>
@@ -12013,7 +12013,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">is_nonterminal</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">exp_opt</span><span class="p">,</span> <span class="n">exp_string</span><span class="p">,</span> <span class="n">crange</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">is_nonterminal</span><span class="p">,</span> <span class="n">extend_grammar</span>
+<span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">opts</span><span class="p">,</span> <span class="n">exp_opt</span><span class="p">,</span> <span class="n">exp_string</span><span class="p">,</span> <span class="n">crange</span>
 </pre></div>
 
 </div>
@@ -12115,7 +12116,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>We could go and ignore these issues; after all, eventually, it is only a matter of time until large amounts and valid numbers are generated.  As it comes to the first concern, we could also address it by changing the grammar appropriately – say, to only produce charges that have at least six leading digits.  However, generalizing this to arbitrary ranges of values will be cumbersome.</p>
-<p>The second concern, the checksums of credit card numbers, however, runs deeper – at least as far as grammars are concerned, is that a complex arithmetic operation like a checksum cannot be expressed in a grammar alone – at least not in the <em>context-free grammars</em> we use here.  (In principle, one <em>could</em> do this in a  <em>context–sensitive</em> grammar, but specifying this would be is no fun at all.)  What we want is a mechanism that allows us to <em>attach programmatic computations</em> to our grammars, bringing together the best of both worlds.</p>
+<p>The second concern, the checksums of credit card numbers, however, runs deeper – at least as far as grammars are concerned, is that a complex arithmetic operation like a checksum cannot be expressed in a grammar alone – at least not in the <em>context-free grammars</em> we use here.  (In principle, one <em>could</em> do this in a  <em>context–sensitive</em> grammar, but specifying this would be no fun at all.)  What we want is a mechanism that allows us to <em>attach programmatic computations</em> to our grammars, bringing together the best of both worlds.</p>
 </div>
 </div>
 </div>
@@ -12209,7 +12210,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>with the intention that whenever <code>&lt;float&gt;</code> is expanded, the function <code>high_charge</code> would be invoked to generate a value for <code>&lt;float&gt;</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>with the intention that whenever <code>&lt;float&gt;</code> is expanded, the function <code>high_charge</code> would be invoked to generate a value for <code>&lt;float&gt;</code>.  (The actual expansion in the grammar would still be present for fuzzers that ignore functions, such as <code>GrammarFuzzer</code>).</p>
 </div>
 </div>
 </div>
@@ -12293,7 +12294,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <li>It can serve as a <em>constraint</em> or <em>filter</em> on the expanded values, returning <code>True</code> if the expansion is valid, and <code>False</code> if not; if it returns <code>False</code>, another expansion is attempted.</li>
 <li>It can also serve as a <em>repair</em>, returning a string value; like pre-expansion functions, the returned value replaces the expansion.</li>
 </ol>
-<p>For our credit card example, we can chose both ways.  If we have a function <code>check_credit_card(s)</code> which returns <code>True</code> for a valid number <code>s</code> and <code>False</code> for invalid ones, we would go for the first option:</p>
+<p>For our credit card example, we can choose both ways.  If we have a function <code>check_credit_card(s)</code> which returns <code>True</code> for a valid number <code>s</code> and <code>False</code> for invalid ones, we would go for the first option:</p>
 </div>
 </div>
 </div>
@@ -12523,8 +12524,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>warning: option &#39;pre&#39; is not supported
-warning: option &#39;post&#39; is not supported
+<pre>warning: option &#39;post&#39; is not supported
+warning: option &#39;pre&#39; is not supported
 </pre>
 </div>
 
@@ -12796,7 +12797,7 @@ warning: option &#39;post&#39; is not supported
 Expanding &lt;amount&gt; randomly
 Tree: $&lt;float&gt;
 Expanding &lt;float&gt; randomly
-&lt;function &lt;lambda&gt; at 0x10a8ba7b8&gt;() = 382087.72
+&lt;function &lt;lambda&gt; at 0x108eeb9d8&gt;() = 382087.72
 Replacing &lt;integer&gt;.&lt;digit&gt;&lt;digit&gt; by 382087.72
 Tree: $382087.72
 &#39;$382087.72&#39;
@@ -12829,22 +12830,7 @@ Tree: $382087.72
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/copy.html" class="import" target="_blank">copy</a></span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expr_100_200_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">expr_100_200_grammar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expr_100_200_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
     <span class="p">{</span>
      <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span> <span class="p">[</span>
          <span class="s2">&quot;+&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span>
@@ -12984,8 +12970,8 @@ Tree: $382087.72
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iterate_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">iterate_grammar</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iterate_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
+<span class="p">{</span>
      <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span> <span class="p">[</span>
          <span class="s2">&quot;+&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span>
          <span class="c1"># &quot;&lt;integer&gt;.&lt;integer&gt;&quot;,</span>
@@ -13094,8 +13080,8 @@ Tree: $382087.72
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iterate_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">iterate_grammar</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iterate_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
+<span class="p">{</span>
      <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span> <span class="p">[</span>
          <span class="s2">&quot;+&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span>
          <span class="p">(</span><span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))),</span>
@@ -13123,8 +13109,8 @@ Tree: $382087.72
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iterate_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">iterate_grammar</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iterate_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
+<span class="p">{</span>
      <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span> <span class="p">[</span>
          <span class="s2">&quot;+&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span>
          <span class="p">(</span><span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)))),</span>
@@ -13369,8 +13355,7 @@ Tree: $382087.72
         <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">False</span>
 
-<span class="n">negative_expr_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">negative_expr_grammar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+<span class="n">negative_expr_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
     <span class="p">{</span>
         <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">eval_with_exception</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">))]</span>
     <span class="p">}</span>
@@ -13509,7 +13494,7 @@ Tree: $382087.72
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>This fragment consists of two HTML (XML) tags that surround the text; the tag name (<code>strong</code>) is present both in the opening (<code>&lt;strong&gt;</code>) as well as in the closing (<code>&lt;\strong&gt;</code>) tag.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>This fragment consists of two HTML (XML) tags that surround the text; the tag name (<code>strong</code>) is present both in the opening (<code>&lt;strong&gt;</code>) as well as in the closing (<code>&lt;/strong&gt;</code>) tag.</p>
 </div>
 </div>
 </div>
@@ -13536,7 +13521,7 @@ Tree: $382087.72
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We can address this problem by introducing appropriate post-expansion functions that automatically make the closing tag match the optining tag.  Let us start with a simple grammar for producing XML trees:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can address this problem by introducing appropriate post-expansion functions that automatically make the closing tag match the opening tag.  Let us start with a simple grammar for producing XML trees:</p>
 </div>
 </div>
 </div>
@@ -13755,8 +13740,7 @@ Tree: $382087.72
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">binary_expr_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-<span class="n">binary_expr_grammar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">binary_expr_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
     <span class="p">{</span>
         <span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;digit&gt;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">digit</span><span class="p">,</span> <span class="n">_</span><span class="p">:</span> <span class="n">digit</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])),</span>
                       <span class="p">(</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">digit</span><span class="p">:</span> <span class="n">digit</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]))]</span>
@@ -14111,7 +14095,7 @@ q=da*T/e--v;x=3+g;bk=u
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14134,7 +14118,7 @@ q=da*T/e--v;x=3+g;bk=u
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">,</span> <span class="p">{</span>
     <span class="s2">&quot;&lt;assignment&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;identifier&gt;=&lt;expr&gt;&quot;</span><span class="p">,</span> 
                       <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="nb">id</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">define_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)))]</span>
 <span class="p">})</span>
@@ -14160,7 +14144,7 @@ q=da*T/e--v;x=3+g;bk=u
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">,</span> <span class="p">{</span>
     <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;+&lt;factor&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;-&lt;factor&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;(&lt;expr&gt;)&#39;</span><span class="p">,</span>
                  <span class="p">(</span><span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">use_id</span><span class="p">())),</span>
                  <span class="s1">&#39;&lt;number&gt;&#39;</span><span class="p">]</span>
@@ -14187,7 +14171,7 @@ q=da*T/e--v;x=3+g;bk=u
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">,</span> <span class="p">{</span>
     <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;statements&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="n">clear_symbol_table</span><span class="p">))]</span>
 <span class="p">})</span>
 </pre></div>
@@ -14248,7 +14232,7 @@ q=3-2;MPy=q;p=2*5
 zj=+5*-+35.2-+1.5727978+(-(-0/6-7+3))*--+44*1
 Tl=((0*9+4-3)-6)/(-3-7*8*8/7)+9
 aXZ=-5/-+3*9/3/1-8-+0*0/3+7+4
-NA=-(8+g-1)*1.6;g=++7;a=++g*g*g
+NA=-(8+a-1)*1.6;g=++7;a=++g*g*g
 </pre>
 </div>
 
@@ -14300,7 +14284,7 @@ NA=-(8+g-1)*1.6;g=++7;a=++g*g*g
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-73-7d8198a01aa0&gt;&#34;, line 6, in &lt;module&gt;
+  File &#34;&lt;ipython-input-72-7d8198a01aa0&gt;&#34;, line 6, in &lt;module&gt;
     exec(s, {}, {})
   File &#34;&lt;string&gt;&#34;, line 1, in &lt;module&gt;
 NameError: name &#39;kOj&#39; is not defined (expected)
@@ -14333,7 +14317,7 @@ NameError: name &#39;kOj&#39; is not defined (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">,</span> <span class="p">{</span>
     <span class="s2">&quot;&lt;statements&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;statement&gt;;&lt;statements&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])),</span>
                       <span class="s2">&quot;&lt;statement&gt;&quot;</span><span class="p">]</span>
 <span class="p">})</span>
@@ -14359,7 +14343,7 @@ NameError: name &#39;kOj&#39; is not defined (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">,</span> <span class="p">{</span>
     <span class="s2">&quot;&lt;assignment&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;identifier&gt;=&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="nb">id</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">define_id</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span>
                                                   <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))],</span>
 <span class="p">})</span>
@@ -14597,7 +14581,7 @@ u=-++33*+-6/(2*3*2+1/9-4*1-8)*((8.5))
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We have to implement <code>supported_opts()</code> as the merger of both superclasses.  At the same time, we also set up the cosntructor such that it invokes both.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We have to implement <code>supported_opts()</code> as the merger of both superclasses.  At the same time, we also set up the constructor such that it invokes both.</p>
 </div>
 </div>
 </div>
@@ -14782,6 +14766,20 @@ u=-++33*+-6/(2*3*2+1/9-4*1-8)*((8.5))
 <div class="text_cell_render border-box-sizing rendered_html"><p>We resolve the problem by <em>rebuilding the coverage</em> from the final tree after it is produced.  To this end, we hook into the <code>fuzz_tree()</code> method.  We have it save the original coverage before creating the tree, restoring it afterwards.  Then we traverse the resulting tree, adding its coverage back again (<code>add_tree_coverage()</code>).</p>
 </div>
 </div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/copy.html" class="import" target="_blank">copy</a></span>
+</pre></div>
+
+</div>
+</div></div>
 </div>
 </div>
 
@@ -15091,7 +15089,7 @@ u=-++33*+-6/(2*3*2+1/9-4*1-8)*((8.5))
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GeneratorGrammarFuzzer.ipynb" target=_blank)>Last change: 2018-12-11 16:58:46+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GeneratorGrammarFuzzer.ipynb" target=_blank)>Last change: 2018-12-17 12:40:20+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -15107,7 +15105,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GeneratorGrammarFuzzer.html">Fuzzing with Generators</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/GeneratorGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/GeneratorGrammarFuzzer.html</a>.  Retrieved 2018-12-11 16:58:46+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GeneratorGrammarFuzzer.html">Fuzzing with Generators</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/GeneratorGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/GeneratorGrammarFuzzer.html</a>.  Retrieved 2018-12-17 12:40:20+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2018:GeneratorGrammarFuzzer,
@@ -15117,9 +15115,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2018},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/GeneratorGrammarFuzzer.html}},
-    note = {Retrieved 2018-12-11 16:58:46+01:00},
+    note = {Retrieved 2018-12-17 12:40:20+01:00},
     url = {https://www.fuzzingbook.org/beta/html/GeneratorGrammarFuzzer.html},
-    urldate = {2018-12-11 16:58:46+01:00}
+    urldate = {2018-12-17 12:40:20+01:00}
 }
 </pre>
 </div>

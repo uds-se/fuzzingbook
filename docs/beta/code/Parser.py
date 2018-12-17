@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2018-12-11 08:21:50+01:00
+# Last change: 2018-12-16 18:27:30+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -134,7 +134,8 @@ if __name__ == "__main__":
             print()
 
 
-from copy import deepcopy
+import copy
+
 import random
 
 class PooledGrammarFuzzer(GrammarFuzzer):
@@ -151,7 +152,7 @@ class PooledGrammarFuzzer(GrammarFuzzer):
         if symbol in self._node_cache:
             if random.randint(0, 1) == 1:
                 return super().expand_node_randomly(node)
-            return deepcopy(random.choice(self._node_cache[symbol]))
+            return copy.deepcopy(random.choice(self._node_cache[symbol]))
         return super().expand_node_randomly(node)
 
 if __name__ == "__main__":
@@ -419,13 +420,16 @@ if __name__ == "__main__":
 class Parser(object):
     def __init__(self, grammar, **kwargs):
         self._grammar = grammar
-        self.start_symbol = kwargs.get('start_symbol', default=START_SYMBOL)
+        self._start_symbol = kwargs.get('start_symbol', default=START_SYMBOL)
         self.log = kwargs.get('log', default=False)
         self.coalesce = kwargs.get('coalesce', default=True)
         self.tokens = kwargs.get('tokens', default=set())
 
     def grammar(self):
         return self._grammar
+
+    def start_symbol(self):
+        return self._start_symbol
 
     def parse_prefix(self, text):
         """Return pair (cursor, forest) for longest prefix of text"""
@@ -515,7 +519,7 @@ if __name__ == "__main__":
 class Parser(Parser):
     def __init__(self, grammar, **kwargs):
         self._grammar = grammar
-        self.start_symbol = kwargs.get('start_symbol') or START_SYMBOL
+        self._start_symbol = kwargs.get('start_symbol', START_SYMBOL)
         self.log = kwargs.get('log') or False
         self.tokens = kwargs.get('tokens') or set()
         self.cgrammar = canonical(grammar)
@@ -530,7 +534,7 @@ if __name__ == "__main__":
 
 class PEGParser(Parser):
     def parse_prefix(self, text):
-        cursor, tree = self.unify_key(self.start_symbol, text, 0)
+        cursor, tree = self.unify_key(self.start_symbol(), text, 0)
         return cursor, [tree]
 
 # #### Unify Key
@@ -1239,9 +1243,9 @@ if __name__ == "__main__":
 
 class EarleyParser(EarleyParser):
     def parse_prefix(self, text):
-        self.table = self.chart_parse(text, self.start_symbol)
+        self.table = self.chart_parse(text, self.start_symbol())
         for col in reversed(self.table):
-            states = [st for st in col.states if st.name == self.start_symbol]
+            states = [st for st in col.states if st.name == self.start_symbol()]
             if states:
                 return col.index, states
         return -1, []
@@ -1671,7 +1675,7 @@ if __name__ == "__main__":
 
 class PackratParser(Parser):
     def parse_prefix(self, text):
-        txt, res = self.unify_key(self.start_symbol, text)
+        txt, res = self.unify_key(self.start_symbol(), text)
         return len(txt), [res]
 
     def parse(self, text):
@@ -1969,7 +1973,7 @@ class LL1Parser(LL1Parser):
         epsilon = nullable(self.cgrammar)
         first = firstset(self.cgrammar, epsilon)
         # inefficient, can combine the three.
-        follow = followset(self.cgrammar, self.start_symbol)
+        follow = followset(self.cgrammar, self.start_symbol())
 
         ptable = [(i, self.predict(rule, first, follow, epsilon))
                   for i, rule in enumerate(self.my_rules)]
@@ -2062,7 +2066,7 @@ class LangFuzzer2(LangFuzzer):
         tree, nodes = random.choice(self.trees)
         interesting_nodes = [
             n for n in nodes if nodes[n][0] in self.fragments
-            and nodes[n][0] is not self.parser.start_symbol
+            and nodes[n][0] is not self.parser.start_symbol()
             and len(self.fragments[nodes[n][0]]) > 0
         ]
         node = random.choice(interesting_nodes)
