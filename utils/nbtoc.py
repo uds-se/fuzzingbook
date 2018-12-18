@@ -81,7 +81,7 @@ def notebook_toc(public_chapters, appendices):
      "name": "python3"
     }
     
-    toc_notebook["language_info"] = {
+    toc_notebook.metadata["language_info"] = {
      "codemirror_mode": {
       "name": "ipython",
       "version": 3
