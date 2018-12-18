@@ -74,6 +74,13 @@ def notebook_toc(public_chapters, appendices):
      "toc_window_display": False
     }
     
+    # Add general metadata
+    toc_notebook.metadata["kernelspec"] = {
+     "display_name": "Python 3",
+     "language": "python",
+     "name": "python3"
+    }
+
     return toc_notebook    
 
 
