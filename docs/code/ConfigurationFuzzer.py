@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2018-12-11 13:53:58+01:00
+# Last change: 2018-12-12 09:36:27+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -107,10 +107,11 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from Grammars import crange, srange, convert_ebnf_grammar, is_valid_grammar, START_SYMBOL, new_symbol
+    from Grammars import crange, srange, convert_ebnf_grammar, extend_grammar, is_valid_grammar
 else:
-    from .Grammars import crange, srange, convert_ebnf_grammar, is_valid_grammar, START_SYMBOL, new_symbol
+    from .Grammars import crange, srange, convert_ebnf_grammar, extend_grammar, is_valid_grammar
 
+from Grammars import START_SYMBOL, new_symbol
 
 PROCESS_NUMBERS_EBNF_GRAMMAR = {
     "<start>": ["<operator> <integers>"],
@@ -763,11 +764,9 @@ if __name__ == "__main__":
     print(pairwise(option_list)[:20])
 
 
-from copy import deepcopy
-
 if __name__ == "__main__":
     notedown_grammar = notedown_runner.grammar()
-    pairwise_notedown_grammar = deepcopy(notedown_grammar)
+    pairwise_notedown_grammar = extend_grammar(notedown_grammar)
     pairwise_notedown_grammar["<option>"] = pairwise(notedown_grammar["<option>"])
     assert is_valid_grammar(pairwise_notedown_grammar)
 
@@ -971,7 +970,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    pairwise_cpp_grammar = deepcopy(cpp_grammar)
+    pairwise_cpp_grammar = extend_grammar(cpp_grammar)
     pairwise_cpp_grammar["<option>"] = pairwise(cpp_grammar["<option>"])
     pairwise_cpp_grammar["<option>"][:10]
 

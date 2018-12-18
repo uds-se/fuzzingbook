@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2018-11-29 16:07:04+01:00
+# Last change: 2018-12-16 15:19:19+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -65,7 +65,6 @@ def fuzzer(max_length=100, char_start=32, char_range=32):
         out += chr(random.randrange(char_start, char_start + char_range))
     return out
 
-
 if __name__ == "__main__":
     fuzzer()
 
@@ -92,7 +91,6 @@ if __name__ == "__main__":
 
 import os
 import tempfile
-
 
 if __name__ == "__main__":
     basename = "input.txt"

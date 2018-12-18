@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-12-10 17:49:40+01:00
+# Last change: 2018-12-12 09:01:56+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -47,10 +47,11 @@ if __name__ == "__main__":
 import fuzzingbook_utils
 
 if __package__ is None or __package__ == "":
-    from Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL, is_valid_grammar
+    from Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
 else:
-    from .Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL, is_valid_grammar
+    from .Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
 
+from Grammars import is_valid_grammar, extend_grammar
 
 if __name__ == "__main__":
     EXPR_GRAMMAR["<factor>"]
@@ -471,23 +472,18 @@ if __name__ == "__main__":
 
 
 
-import copy
-
 if __name__ == "__main__":
-    dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
-    dup_expr_grammar["<factor>"][3] = "<integer-1>.<integer-2>"
-    dup_expr_grammar["<factor>"]
-
-
-if __name__ == "__main__":
-    dup_expr_grammar.update({
-        "<integer-1>": ["<digit-1><integer-1>", "<digit-1>"],
-        "<integer-2>": ["<digit-2><integer-2>", "<digit-2>"],
-        "<digit-1>":
-            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
-        "<digit-2>":
-            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-    })
+    dup_expr_grammar = extend_grammar(EXPR_GRAMMAR,
+        {
+            "<factor>": ["+<factor>", "-<factor>", "(<expr>)", "<integer-1>.<integer-2>", "<integer>"],
+            "<integer-1>": ["<digit-1><integer-1>", "<digit-1>"],
+            "<integer-2>": ["<digit-2><integer-2>", "<digit-2>"],
+            "<digit-1>":
+                ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+            "<digit-2>":
+                ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        }
+    )
 
 
 if __name__ == "__main__":
@@ -524,13 +520,15 @@ def duplicate_context(grammar, symbol, expansion=None, depth=float('inf')):
 
     If depth is given, limit duplication to `depth` references (default: unlimited)
     """
-    orig_grammar = copy.deepcopy(grammar)
+    orig_grammar = extend_grammar(grammar)
     _duplicate_context(grammar, orig_grammar, symbol,
                        expansion, depth, seen={})
     
     # After duplication, we may have unreachable rules; delete them
     for nonterminal in unreachable_nonterminals(grammar):
         del grammar[nonterminal]
+
+import copy
 
 def _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen):
     for i in range(len(grammar[symbol])):
@@ -555,7 +553,7 @@ def _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen):
             grammar[symbol][i] = new_expansion
 
 if __name__ == "__main__":
-    dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
+    dup_expr_grammar = extend_grammar(EXPR_GRAMMAR)
     duplicate_context(dup_expr_grammar, "<factor>", "<integer>.<integer>")
     dup_expr_grammar
 
@@ -567,7 +565,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
+    dup_expr_grammar = extend_grammar(EXPR_GRAMMAR)
     duplicate_context(dup_expr_grammar, "<factor>", "<integer>.<integer>", depth=1)
     dup_expr_grammar
 
@@ -577,7 +575,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
+    dup_expr_grammar = extend_grammar(EXPR_GRAMMAR)
     duplicate_context(dup_expr_grammar, "<expr>")
 
 
@@ -592,7 +590,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    dup_expr_grammar = copy.deepcopy(EXPR_GRAMMAR)
+    dup_expr_grammar = extend_grammar(EXPR_GRAMMAR)
     duplicate_context(dup_expr_grammar, "<expr>")
     duplicate_context(dup_expr_grammar, "<expr-1>")
     len(dup_expr_grammar)

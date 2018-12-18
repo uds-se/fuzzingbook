@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-12-10 15:56:40+01:00
+# Last change: 2018-12-18 17:49:27+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -878,7 +878,7 @@ if __name__ == "__main__":
 
 
 
-from copy import deepcopy
+import copy
 
 class FasterGrammarFuzzer(GrammarFuzzer):
     def __init__(self, *args, **kwargs):
@@ -891,7 +891,7 @@ class FasterGrammarFuzzer(GrammarFuzzer):
         self._expansion_invocations += 1
         if expansion in self._expansion_cache:
             self._expansion_invocations_cached += 1
-            cached_result = deepcopy(self._expansion_cache[expansion])
+            cached_result = copy.deepcopy(self._expansion_cache[expansion])
             return cached_result
 
         result = super().expansion_to_children(expansion)

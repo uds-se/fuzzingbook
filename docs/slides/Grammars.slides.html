@@ -14169,7 +14169,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="A-Simple-Grammar-Fuzzer">A Simple Grammar Fuzzer<a class="anchor-link" href="#A-Simple-Grammar-Fuzzer">&#182;</a></h2><p>Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (<code>&lt;start&gt;</code>) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (<code>max_symbols</code>) on the number of symbols.  Furthermore, to avoid being stuck in a situation where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.</p>
+<h2 id="A-Simple-Grammar-Fuzzer">A Simple Grammar Fuzzer<a class="anchor-link" href="#A-Simple-Grammar-Fuzzer">&#182;</a></h2><p>Let us now put the above grammars to use.   We will build a very simple grammar fuzzer that starts with a start symbol (<code>&lt;start&gt;</code>) and then keeps on expanding it.  To avoid expansion to infinite inputs, we place a limit (<code>max_nonterminals</code>) on the number of nonterminals.  Furthermore, to avoid being stuck in a situation where we cannot reduce the number of symbols any further, we also limit the total number of expansion steps.</p>
 
 </div>
 </div>
@@ -14404,7 +14404,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We first define the method <code>syntax_diagram_symbol()</code> to visualize a given symbol.  Nonterminal symbols are denoted as ovals, whereas terminal symbols (such as <code>&lt;term&gt;</code>) are denoted as rectangles.</p>
+<p>We first define the method <code>syntax_diagram_symbol()</code> to visualize a given symbol.  Terminal symbols are denoted as ovals, whereas nonterminal symbols (such as <code>&lt;term&gt;</code>) are denoted as rectangles.</p>
 
 </div>
 </div>
@@ -17572,11 +17572,12 @@ http://fuzzingbook.com:8080/def
 <div class="prompt input_prompt">In&nbsp;[41]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span> <span class="o">=</span> <span class="p">{</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">simple_nonterminal_grammar</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;nonterminal&gt;&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;nonterminal&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;left-angle&gt;&lt;identifier&gt;&lt;right-angle&gt;&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;left-angle&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;right-angle&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;&quot;</span><span class="p">]</span>
+    <span class="s2">&quot;&lt;right-angle&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="c1"># for now</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -17588,10 +17589,129 @@ http://fuzzingbook.com:8080/def
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In <code>nonterminal_grammar</code>, neither the expansion for <code>&lt;left-angle&gt;</code> nor the expansion for <code>&lt;right-angle&gt;</code> can be mistaken as a nonterminal.  Hence, we can produce as many as we want.</p>
+<p>In <code>simple_nonterminal_grammar</code>, neither the expansion for <code>&lt;left-angle&gt;</code> nor the expansion for <code>&lt;right-angle&gt;</code> can be mistaken as a nonterminal.  Hence, we can produce as many as we want.</p>
 
 </div>
 </div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Extending-Grammars">Extending Grammars<a class="anchor-link" href="#Extending-Grammars">&#182;</a></h3><p>In the course of this book, we frequently run into the issue of creating a grammar by <em>extending</em> an existing grammar with new features.  Such an extension is very much like subclassing in object-oriented programming.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To create a new grammar $g'$ from an existing grammar $g$, we first copy $g$ into $g'$, and then go and extend existing rules with new alternatives and/or add new symbols.  Here's an example, extending the above <code>nonterminal</code> grammar with a better rule for identifiers:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">simple_nonterminal_grammar</span><span class="p">)</span>
+<span class="n">nonterminal_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;identifier&gt;&lt;idchar&gt;&quot;</span><span class="p">]</span>
+<span class="n">nonterminal_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]</span>  <span class="c1"># for now</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[44]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;nonterminal&gt;&#39;],
+ &#39;&lt;nonterminal&gt;&#39;: [&#39;&lt;left-angle&gt;&lt;identifier&gt;&lt;right-angle&gt;&#39;],
+ &#39;&lt;left-angle&gt;&#39;: [&#39;&lt;&#39;],
+ &#39;&lt;right-angle&gt;&#39;: [&#39;&gt;&#39;],
+ &#39;&lt;identifier&gt;&#39;: [&#39;&lt;idchar&gt;&#39;, &#39;&lt;identifier&gt;&lt;idchar&gt;&#39;],
+ &#39;&lt;idchar&gt;&#39;: [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;]}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Since such an extension of grammars is a common operation, we introduce a custom function <code>extend_grammar()</code> which first copies the given grammar and then updates it from a dictionary, using the Python dictionary <code>update()</code> method:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">extend_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="n">new_grammar</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+    <span class="n">new_grammar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new_grammar</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This call to <code>extend_grammar()</code> extends <code>simple_nonterminal_grammar</code> to <code>nonterminal_grammar</code> just like the "manual" example above:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">simple_nonterminal_grammar</span><span class="p">,</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;identifier&gt;&lt;idchar&gt;&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">]</span>  <span class="c1"># for now</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
 </div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
@@ -17603,7 +17723,7 @@ http://fuzzingbook.com:8080/def
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In the above <code>nonterminal_grammar</code>, we have left out the definition for <code>&lt;identifier&gt;</code>.  That is because enumerating all letters or digits in a grammar manually, as in <code>&lt;letter&gt; ::= 'a' | 'b' | 'c' ...</code> is a bit painful.</p>
+<p>In the above <code>nonterminal_grammar</code>, we have enumerated only the first few letters; indeed, enumerating all letters or digits in a grammar manually, as in <code>&lt;idchar&gt; ::= 'a' | 'b' | 'c' ...</code> is a bit painful.</p>
 
 </div>
 </div>
@@ -17611,14 +17731,14 @@ http://fuzzingbook.com:8080/def
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>However, remember that grammars are part of a program, and can thus also be constructed programmatically.  In Python, the constant <code>string.ascii_letters</code> contains all letters in the ASCII character set:</p>
+<p>However, remember that grammars are part of a program, and can thus also be constructed programmatically.  We introduce a function <code>srange()</code> which constructs a list of characters in a string:</p>
 
 </div>
 </div>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">string</span>
@@ -17631,7 +17751,30 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">srange</span><span class="p">(</span><span class="n">characters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct a list with all characters in the string&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">characters</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If we pass it the constant <code>string.ascii_letters</code>, which holds all ASCII letters, <code>srange()</code> returns a list of all ASCII letters:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span>
@@ -17647,7 +17790,7 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[43]:</div>
+    <div class="prompt output_prompt">Out[49]:</div>
 
 
 
@@ -17661,33 +17804,10 @@ http://fuzzingbook.com:8080/def
 </div>
 </div>
 
-</div></div></section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>From this, we can construct a list of all letters:</p>
-
-</div>
-</div>
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[44]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">srange</span><span class="p">(</span><span class="n">characters</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Construct a list with all characters in the string }`characters`&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">characters</span><span class="p">]</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span><span class="p">)[:</span><span class="mi">10</span><span class="p">]</span>
@@ -17703,7 +17823,7 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[45]:</div>
+    <div class="prompt output_prompt">Out[50]:</div>
 
 
 
@@ -17721,19 +17841,21 @@ http://fuzzingbook.com:8080/def
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We can now use this in our grammar to define identifiers:</p>
+<p>We can use such constants in our grammar to quickly define identifiers:</p>
 
 </div>
 </div>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;idchar&gt;&lt;identifier&gt;&quot;</span><span class="p">]</span>
-<span class="n">nonterminal_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">srange</span><span class="p">(</span>
-    <span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span><span class="p">)</span> <span class="o">+</span> <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span> <span class="o">+</span> <span class="n">srange</span><span class="p">(</span><span class="s2">&quot;-_&quot;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">nonterminal_grammar</span><span class="p">,</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">:</span> <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span><span class="p">)</span> <span class="o">+</span> <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span> <span class="o">+</span> <span class="n">srange</span><span class="p">(</span><span class="s2">&quot;-_&quot;</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">)</span>
 </pre></div>
 
     </div>
@@ -17743,7 +17865,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="p">[</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">nonterminal_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
@@ -17759,13 +17881,13 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[47]:</div>
+    <div class="prompt output_prompt">Out[52]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;b&#39;, &#39;d&#39;, &#39;X3b&#39;, &#39;n0&#39;, &#39;7&#39;, &#39;v&#39;, &#39;z&#39;, &#39;X&#39;, &#39;g&#39;, &#39;Pfed&#39;]</pre>
+<pre>[&#39;b&#39;, &#39;d&#39;, &#39;V9&#39;, &#39;x4c&#39;, &#39;YdiEWj&#39;, &#39;c&#39;, &#39;xd&#39;, &#39;7&#39;, &#39;vIU&#39;, &#39;QhKD&#39;]</pre>
 </div>
 
 </div>
@@ -17784,7 +17906,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">crange</span><span class="p">(</span><span class="n">character_start</span><span class="p">,</span> <span class="n">character_end</span><span class="p">):</span>
@@ -17807,7 +17929,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">crange</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">)</span>
@@ -17823,7 +17945,7 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[49]:</div>
+    <div class="prompt output_prompt">Out[54]:</div>
 
 
 
@@ -17840,7 +17962,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">crange</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span><span class="p">)</span>
@@ -17868,7 +17990,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">]</span>
@@ -17884,13 +18006,13 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[51]:</div>
+    <div class="prompt output_prompt">Out[56]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;&lt;idchar&gt;&#39;, &#39;&lt;idchar&gt;&lt;identifier&gt;&#39;]</pre>
+<pre>[&#39;&lt;idchar&gt;&#39;, &#39;&lt;identifier&gt;&lt;idchar&gt;&#39;]</pre>
 </div>
 
 </div>
@@ -17934,11 +18056,14 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="prompt input_prompt">In&nbsp;[57]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_ebnf_grammar</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">nonterminal_grammar</span><span class="p">)</span>
-<span class="n">nonterminal_ebnf_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&lt;idchar&gt;+&quot;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_ebnf_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">nonterminal_grammar</span><span class="p">,</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;idchar&gt;+&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">)</span>
 </pre></div>
 
     </div>
@@ -17956,7 +18081,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">EXPR_EBNF_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
@@ -18033,7 +18158,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="prompt input_prompt">In&nbsp;[59]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">new_symbol</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">symbol_name</span><span class="o">=</span><span class="s2">&quot;&lt;symbol&gt;&quot;</span><span class="p">):</span>
@@ -18056,7 +18181,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="prompt input_prompt">In&nbsp;[60]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">new_symbol</span><span class="p">(</span><span class="n">EXPR_EBNF_GRAMMAR</span><span class="p">,</span> <span class="s1">&#39;&lt;expr&gt;&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;&lt;expr-1&gt;&#39;</span>
@@ -18084,7 +18209,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="prompt input_prompt">In&nbsp;[61]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">RE_PARENTHESIZED_EXPR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\([^()]*\)[?+*]&#39;</span><span class="p">)</span>
@@ -18097,7 +18222,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[58]:</div>
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">parenthesized_expressions</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
@@ -18116,7 +18241,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[59]:</div>
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">parenthesized_expressions</span><span class="p">(</span><span class="s2">&quot;(&lt;foo&gt;)* (&lt;foo&gt;&lt;bar&gt;)+ (+&lt;foo&gt;)? &lt;integer&gt;(.&lt;integer&gt;)?&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span>
@@ -18138,12 +18263,12 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">convert_ebnf_parentheses</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert a grammar in extended BNF to BNF&quot;&quot;&quot;</span>
-    <span class="n">grammar</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">)</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="n">ebnf_grammar</span><span class="p">:</span>
         <span class="n">expansions</span> <span class="o">=</span> <span class="n">ebnf_grammar</span><span class="p">[</span><span class="n">nonterminal</span><span class="p">]</span>
 
@@ -18183,7 +18308,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[61]:</div>
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">convert_ebnf_parentheses</span><span class="p">({</span><span class="s2">&quot;&lt;number&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;integer&gt;(.&lt;integer&gt;)?&quot;</span><span class="p">]})</span>
@@ -18199,7 +18324,7 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[61]:</div>
+    <div class="prompt output_prompt">Out[65]:</div>
 
 
 
@@ -18224,7 +18349,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">convert_ebnf_parentheses</span><span class="p">({</span><span class="s2">&quot;&lt;foo&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;((&lt;foo&gt;)?)+&quot;</span><span class="p">]})</span>
@@ -18240,7 +18365,7 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[62]:</div>
+    <div class="prompt output_prompt">Out[66]:</div>
 
 
 
@@ -18265,7 +18390,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="prompt input_prompt">In&nbsp;[67]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">RE_EXTENDED_NONTERMINAL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(&lt;[^&lt;&gt; ]*&gt;[?+*])&#39;</span><span class="p">)</span>
@@ -18278,7 +18403,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="prompt input_prompt">In&nbsp;[68]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">extended_nonterminals</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
@@ -18297,7 +18422,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="prompt input_prompt">In&nbsp;[69]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">extended_nonterminals</span><span class="p">(</span>
@@ -18319,12 +18444,12 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[66]:</div>
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">convert_ebnf_operators</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert a grammar in extended BNF to BNF&quot;&quot;&quot;</span>
-    <span class="n">grammar</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">)</span>
+    <span class="n">grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">nonterminal</span> <span class="ow">in</span> <span class="n">ebnf_grammar</span><span class="p">:</span>
         <span class="n">expansions</span> <span class="o">=</span> <span class="n">ebnf_grammar</span><span class="p">[</span><span class="n">nonterminal</span><span class="p">]</span>
 
@@ -18358,7 +18483,7 @@ http://fuzzingbook.com:8080/def
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[67]:</div>
+<div class="prompt input_prompt">In&nbsp;[71]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">convert_ebnf_operators</span><span class="p">({</span><span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;+&quot;</span><span class="p">]})</span>
@@ -18374,7 +18499,7 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[67]:</div>
+    <div class="prompt output_prompt">Out[71]:</div>
 
 
 
@@ -18399,7 +18524,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[68]:</div>
+<div class="prompt input_prompt">In&nbsp;[72]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">convert_ebnf_grammar</span><span class="p">(</span><span class="n">ebnf_grammar</span><span class="p">):</span>
@@ -18413,7 +18538,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[69]:</div>
+<div class="prompt input_prompt">In&nbsp;[73]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">convert_ebnf_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;authority&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;(&lt;userinfo&gt;@)?&lt;host&gt;(:&lt;port&gt;)?&quot;</span><span class="p">]})</span>
@@ -18429,7 +18554,7 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[69]:</div>
+    <div class="prompt output_prompt">Out[73]:</div>
 
 
 
@@ -18450,7 +18575,7 @@ http://fuzzingbook.com:8080/def
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[70]:</div>
+<div class="prompt input_prompt">In&nbsp;[74]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">expr_grammar</span> <span class="o">=</span> <span class="n">convert_ebnf_grammar</span><span class="p">(</span><span class="n">EXPR_EBNF_GRAMMAR</span><span class="p">)</span>
@@ -18467,7 +18592,7 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[70]:</div>
+    <div class="prompt output_prompt">Out[74]:</div>
 
 
 
@@ -18540,7 +18665,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[71]:</div>
+<div class="prompt input_prompt">In&nbsp;[75]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">opts</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -18554,123 +18679,10 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[72]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">opts</span><span class="p">(</span><span class="n">min_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[72]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>{&#39;min_depth&#39;: 10}</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>To deal with both expansion strings and pairs of expansions and annotations, we access the expansion string and the associated annotations via designated helper functions, <code>exp_string()</code> and <code>exp_opts()</code>:</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[73]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_string</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the string to be expanded&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">expansion</span>
-    <span class="k">return</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div></div></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[74]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_string</span><span class="p">((</span><span class="s2">&quot;&lt;term&gt; + &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">min_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)))</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[74]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;&lt;term&gt; + &lt;expr&gt;&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[75]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_opts</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the options of an expansion.  If options are not defined, return {}&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{}</span>
-    <span class="k">return</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
-<span class="k">def</span> <span class="nf">exp_opt</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the given attribution of an expansion.  </span>
-<span class="sd">    If attribute is not defined, return None&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">exp_opts</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
 <div class="prompt input_prompt">In&nbsp;[76]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_opts</span><span class="p">((</span><span class="s2">&quot;&lt;term&gt; + &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">min_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">opts</span><span class="p">(</span><span class="n">min_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -18697,10 +18709,123 @@ http://fuzzingbook.com:8080/def
 </div>
 </div>
 
-</div></div></section><section>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To deal with both expansion strings and pairs of expansions and annotations, we access the expansion string and the associated annotations via designated helper functions, <code>exp_string()</code> and <code>exp_opts()</code>:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[77]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_string</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the string to be expanded&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">expansion</span>
+    <span class="k">return</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[78]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_string</span><span class="p">((</span><span class="s2">&quot;&lt;term&gt; + &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">min_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[78]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;&lt;term&gt; + &lt;expr&gt;&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[79]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_opts</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the options of an expansion.  If options are not defined, return {}&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">return</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">exp_opt</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the given attribution of an expansion.  </span>
+<span class="sd">    If attribute is not defined, return None&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">exp_opts</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attribute</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[80]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_opts</span><span class="p">((</span><span class="s2">&quot;&lt;term&gt; + &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">min_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[80]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;min_depth&#39;: 10}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[81]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">exp_opt</span><span class="p">((</span><span class="s2">&quot;&lt;term&gt; - &lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span> <span class="s1">&#39;max_depth&#39;</span><span class="p">)</span>
@@ -18716,7 +18841,7 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[77]:</div>
+    <div class="prompt output_prompt">Out[81]:</div>
 
 
 
@@ -18741,7 +18866,7 @@ http://fuzzingbook.com:8080/def
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[78]:</div>
+<div class="prompt input_prompt">In&nbsp;[82]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">set_opts</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expansion</span><span class="p">,</span> <span class="n">opts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -18789,7 +18914,7 @@ http://fuzzingbook.com:8080/def
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[80]:</div>
+<div class="prompt input_prompt">In&nbsp;[84]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">def_used_nonterminals</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">):</span>
@@ -18831,7 +18956,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[81]:</div>
+<div class="prompt input_prompt">In&nbsp;[85]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">reachable_nonterminals</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">):</span>
@@ -18859,7 +18984,7 @@ http://fuzzingbook.com:8080/def
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[82]:</div>
+<div class="prompt input_prompt">In&nbsp;[86]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">opts_used</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
@@ -18877,7 +19002,7 @@ http://fuzzingbook.com:8080/def
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[83]:</div>
+<div class="prompt input_prompt">In&nbsp;[87]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">is_valid_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">supported_opts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -18933,7 +19058,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[84]:</div>
+<div class="prompt input_prompt">In&nbsp;[88]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
@@ -18956,7 +19081,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[85]:</div>
+<div class="prompt input_prompt">In&nbsp;[89]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">EXPR_EBNF_GRAMMAR</span><span class="p">)</span>
@@ -18977,7 +19102,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[86]:</div>
+<div class="prompt input_prompt">In&nbsp;[90]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;x&gt;&quot;</span><span class="p">],</span> <span class="s2">&quot;&lt;y&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">]})</span>
@@ -19010,7 +19135,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[87]:</div>
+<div class="prompt input_prompt">In&nbsp;[91]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;123&quot;</span><span class="p">})</span>
@@ -19041,7 +19166,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[88]:</div>
+<div class="prompt input_prompt">In&nbsp;[92]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[]})</span>
@@ -19072,7 +19197,7 @@ http://fuzzingbook.com:8080/def
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[89]:</div>
+<div class="prompt input_prompt">In&nbsp;[93]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="ow">not</span> <span class="n">is_valid_grammar</span><span class="p">({</span><span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]})</span>
@@ -19321,7 +19446,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[98]:</div>
+<div class="prompt input_prompt">In&nbsp;[102]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">expression_grammar_fn</span><span class="p">():</span>
@@ -19348,7 +19473,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[99]:</div>
+<div class="prompt input_prompt">In&nbsp;[103]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -19370,9 +19495,9 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-99-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-103-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
     expression_grammar_fn()
-  File &#34;&lt;ipython-input-98-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
+  File &#34;&lt;ipython-input-102-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
     expr = &#34;&lt;term&gt; + &lt;expr&gt;&#34; | &#34;&lt;term&gt; - &lt;expr&gt;&#34;
 TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (expected)
 </pre>
@@ -19401,7 +19526,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[101]:</div>
+<div class="prompt input_prompt">In&nbsp;[105]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">source</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">expression_grammar_fn</span><span class="p">)</span>
@@ -19418,7 +19543,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[101]:</div>
+    <div class="prompt output_prompt">Out[105]:</div>
 
 
 
@@ -19443,7 +19568,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[102]:</div>
+<div class="prompt input_prompt">In&nbsp;[106]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
@@ -19464,7 +19589,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[103]:</div>
+<div class="prompt input_prompt">In&nbsp;[107]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_alternatives</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">to_expr</span><span class="o">=</span><span class="k">lambda</span> <span class="n">o</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">s</span><span class="p">):</span>
@@ -19488,7 +19613,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[104]:</div>
+<div class="prompt input_prompt">In&nbsp;[108]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">funct_parser</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">to_expr</span><span class="o">=</span><span class="k">lambda</span> <span class="n">o</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">s</span><span class="p">):</span>
@@ -19511,7 +19636,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[105]:</div>
+<div class="prompt input_prompt">In&nbsp;[109]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar</span> <span class="o">=</span> <span class="n">funct_parser</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
@@ -19580,7 +19705,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[108]:</div>
+<div class="prompt input_prompt">In&nbsp;[112]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_name</span><span class="p">(</span><span class="n">o</span><span class="p">):</span>
@@ -19594,7 +19719,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[109]:</div>
+<div class="prompt input_prompt">In&nbsp;[113]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_expr</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
@@ -19610,7 +19735,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[110]:</div>
+<div class="prompt input_prompt">In&nbsp;[114]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_ex_grammar</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
@@ -19676,7 +19801,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[111]:</div>
+<div class="prompt input_prompt">In&nbsp;[115]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">identifier_grammar_fn</span><span class="p">():</span>
