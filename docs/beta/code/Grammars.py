@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-12-16 15:20:59+01:00
+# Last change: 2018-12-18 17:38:07+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -507,7 +507,7 @@ if __name__ == "__main__":
 import string
 
 def srange(characters):
-    """Construct a list with all characters in the string }`characters`"""
+    """Construct a list with all characters in the string"""
     return [c for c in characters]
 
 if __name__ == "__main__":
