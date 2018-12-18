@@ -90,26 +90,30 @@ Technically, yes; but this would cost money and effort, which we'd rather spend 
 
 #### Which content will be coming up?
 
-The contents of this book will include topics such as:
+Here's our current release plan.  New chapters are coming out every Tuesday.
 
-1. Introduction to Testing
-1. Basic Fuzzing
-1. Coverage
-1. Mutation-Based Fuzzing
-1. Fuzzing with Grammars
-1. Efficient Grammar Fuzzing
-1. Grammar Coverage
-1. Configuration Fuzzing
-1. Parsing and Mutating Inputs
-1. Probabilistic Testing
-1. Reducing Failure-Inducing Inputs
-1. Fuzzing Function Calls
-1. Fuzzing User Interfaces
-1. Search-Based Testing
-1. Symbolic Testing
-1. Mining Grammars
-1. Fuzzing and Invariants
-1. Protection and Repair
+1. [Introduction to Software Testing](Intro_Testing.ipynb) – 2018-10-30
+1. [Fuzzing: Breaking Things with Random Inputs](Fuzzer.ipynb) – 2018-10-30
+1. [Getting Coverage](Coverage.ipynb) – 2018-11-06
+1. [Mutation-Based Fuzzing](MutationFuzzer.ipynb) – 2018-11-06
+1. [Fuzzing with Grammars](Grammars.ipynb) – 2018-11-13
+1. [Efficient Grammar Fuzzing](GrammarFuzzer.ipynb) – 2018-11-20
+1. [Grammar Coverage](GrammarCoverageFuzzer.ipynb) – 2018-11-27
+1. [Testing Configurations](ConfigurationFuzzer.ipynb) – 2018-12-04
+1. [Parsing and Recombining Inputs](Parser.ipynb) – 2018-12-11
+1. [Probabilistic Grammar Fuzzing](ProbabilisticGrammarFuzzer.ipynb) – 2018-12-18
+1. [Fuzzing with Generators](GeneratorGrammarFuzzer.ipynb) – 2018-01-08
+1. [Fuzzing APIs](APIFuzzer.ipynb) – 2018-01-15
+1. [Carving Unit Tests](Carver.ipynb) – 2018-01-22
+1. [Reducing Failure-Inducing Inputs](Reducer.ipynb) – 2018-01-29
+1. [Web and GUI Testing](WebFuzzer.ipynb) – 2018-02-05
+1. [Information Flow](InformationFlow.ipynb) – 2018-02-12
+1. [Mining Input Grammars](GrammarMiner.ipynb) – 2018-02-19
+1. Oracles – 2018-02-26
+1. Search-Based Fuzzing – 2018-03-05
+1. Symbolic Fuzzing – 2018-03-12
+1. Fuzzing in the Large – 2018-03-19
+1. Mutation Analysis – 2018-03-26
 
 See the table of contents in the menu above for those chapters that are already done.
 
