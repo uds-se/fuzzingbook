@@ -154,7 +154,7 @@ def index_markdown():
         first_letter = sublist[0][len("### ")]
         last_letter = sublist[-1][len("### ")]
         # Having &ndash; here breaks fragment links
-        new_index_sections += ["## " + first_letter + "-" + last_letter] + sublist
+        new_index_sections += ["## " + first_letter + " - " + last_letter] + sublist
     
     return new_index_sections
 
