@@ -40,6 +40,13 @@ menu_start = r"""
      <li class="has-sub"><a href="#"><span title="__BOOKTITLE__"><i class="fa fa-fw fa-bars"></i> </span><span class="menu_1">__BOOKTITLE_BETA__</span></a>
         <ol>
            <__ALL_CHAPTERS_MENU__>
+           <li class="has-sub"><a>Appendices <i class="fa fa-fw fa-caret-right"></i></a>
+               <ul>
+                   <li><a href="__SITE_HTML__html/ExpectError.html">Error Handling</a></li>
+                   <li><a href="__SITE_HTML__html/Timer.html">Timer</a></li>
+                   <li><a href="__SITE_HTML__html/00_Index.html"><i class="fa fa-fw fa-location-arrow"></i>&nbsp;Index (beta)</a></i></li>
+               </ul>
+           </li>
            <li><a href="__SITE_HTML__#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
      </li>
