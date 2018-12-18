@@ -13,17 +13,17 @@ PUBLIC_CHAPTERS = \
 	GrammarCoverageFuzzer.ipynb \
 	ConfigurationFuzzer.ipynb \
 	Parser.ipynb \
+	ProbabilisticGrammarFuzzer.ipynb \
 
 # Chapters that are ready for release (= the current chapters for the students)
 READY_CHAPTERS = \
-	ProbabilisticGrammarFuzzer.ipynb \
 	GeneratorGrammarFuzzer.ipynb \
 	APIFuzzer.ipynb \
+	Carver.ipynb \
+	Reducer.ipynb \
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	Carver.ipynb \
-	Reducer.ipynb \
 	WebFuzzer.ipynb \
 	InformationFlow.ipynb \
 	GrammarMiner.ipynb \
