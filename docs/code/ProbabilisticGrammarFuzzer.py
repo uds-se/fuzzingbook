@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2018-12-18 18:31:59+01:00
+# Last change: 2018-12-18 19:12:42+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -535,7 +535,7 @@ else:
 IP_ADDRESS_TOKENS = {"<octet>"}  # EarleyParser needs explicit tokens
 
 if __name__ == "__main__":
-    parser = EarleyParser(IP_ADDRESS_GRAMMAR, tokens=IP_ADDRESS_TOKENS)
+    parser = EarleyParser(IP_ADDRESS_GRAMMAR)
 
 
 if __name__ == "__main__":
@@ -598,7 +598,7 @@ class ExpansionCountMiner(ExpansionCountMiner):
         return self.expansion_counts
 
 if __name__ == "__main__":
-    expansion_count_miner = ExpansionCountMiner(EarleyParser(IP_ADDRESS_GRAMMAR, tokens=IP_ADDRESS_TOKENS))
+    expansion_count_miner = ExpansionCountMiner(EarleyParser(IP_ADDRESS_GRAMMAR))
 
 
 if __name__ == "__main__":
@@ -640,7 +640,7 @@ class ProbabilisticGrammarMiner(ProbabilisticGrammarMiner):
         return self.grammar
 
 if __name__ == "__main__":
-    probabilistic_grammar_miner = ProbabilisticGrammarMiner(EarleyParser(IP_ADDRESS_GRAMMAR, tokens=IP_ADDRESS_TOKENS))
+    probabilistic_grammar_miner = ProbabilisticGrammarMiner(EarleyParser(IP_ADDRESS_GRAMMAR))
 
 
 if __name__ == "__main__":
@@ -680,7 +680,7 @@ URL_SAMPLE = [
     "http://fuzzingbook.com:8080/def",
 ]
 
-URL_TOKENS = { "<scheme>", "<userinfo>", "<host>", "<port>", "<id>"}
+URL_TOKENS = { "<scheme>", "<userinfo>", "<host>", "<port>", "<id>" }
 
 if __name__ == "__main__":
     url_parser = EarleyParser(URL_GRAMMAR, tokens=URL_TOKENS)
