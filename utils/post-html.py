@@ -39,7 +39,7 @@ menu_start = r"""
   <ul>
      <li class="has-sub"><a href="#"><span title="__BOOKTITLE__"><i class="fa fa-fw fa-bars"></i> </span><span class="menu_1">__BOOKTITLE_BETA__</span></a>
         <ol>
-           <__ALL_CHAPTERS_MENU__>
+           <__STRUCTURED_ALL_CHAPTERS_MENU__>
            <li class="has-sub"><a>Appendices <i class="fa fa-fw fa-caret-right"></i></a>
                <ul>
                    <li><a href="__SITE_HTML__html/ExpectError.html">Error Handling</a></li>
@@ -470,6 +470,7 @@ if args.home:
 else:
     link_class = ''
 all_chapters_menu = '<li><a href="%s"%s><i class="fa fa-fw fa-home"></i> About this book</a></li>\n' % (site_html, link_class)
+structured_all_chapters_menu = all_chapters_menu
 
 this_chapter_counter = 1
 for counter, menu_ipynb_file in enumerate(all_chapters):
@@ -481,14 +482,17 @@ CHAPTERS_PER_MENU = 5
 in_sublist = False
 for counter, menu_ipynb_file in enumerate(all_chapters):
     basename = os.path.splitext(os.path.basename(menu_ipynb_file))[0]
-    title = '<span class="chnum">' + repr(counter + 1) + "</span> "
+    structured_title = '<span class="chnum">' + repr(counter + 1) + "</span> "
+    title = ""
 
     if menu_ipynb_file == chapter_ipynb_file:
         link_class = ' class="this_page"'
         # title += ' &bull;'
     else:
         link_class = ''
-    title += get_title(menu_ipynb_file)
+    file_title = get_title(menu_ipynb_file)
+    title += file_title
+    structured_title += file_title
 
     beta_indicator = ''
     if menu_ipynb_file in ready_chapters:
@@ -499,24 +503,29 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
     
     if counter // CHAPTERS_PER_MENU == this_chapter_counter // CHAPTERS_PER_MENU:
         if in_sublist:
-            all_chapters_menu += "</ul>"
+            structured_all_chapters_menu += "</ul>"
             in_sublist = False
     elif counter % CHAPTERS_PER_MENU == 0:
         if in_sublist:
-            all_chapters_menu += "</ul>"
+            structured_all_chapters_menu += "</ul>"
         subtitle = "Chapters " + repr(counter + 1) + "&ndash;" + \
             repr(min(len(all_chapters), counter + CHAPTERS_PER_MENU))
-        all_chapters_menu += '<li class="has-sub"><a href="%s" class="chapters">%s%s' \
+        structured_all_chapters_menu += \
+            '<li class="has-sub"><a href="%s" class="chapters">%s%s' \
             % (menu_html_file, subtitle, beta_indicator)
-        all_chapters_menu += ' <i class="fa fa-fw fa-caret-right"></i></a><ul>'
+        structured_all_chapters_menu += ' <i class="fa fa-fw fa-caret-right"></i></a><ul>'
         in_sublist = True
+    
+    structured_item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
+        (menu_html_file, link_class, structured_title, beta_indicator)
+    structured_all_chapters_menu += structured_item
     
     item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
         (menu_html_file, link_class, title, beta_indicator)
     all_chapters_menu += item
     
 if in_sublist:
-    all_chapters_menu += "</ul>"
+    structured_all_chapters_menu += "</ul>"
     in_sublist = False
 
 # Description
@@ -562,6 +571,7 @@ chapter_contents = chapter_contents \
     .replace("<__HEADER__>", header_template) \
     .replace("<__FOOTER__>", footer_template) \
     .replace("<__ALL_CHAPTERS_MENU__>", all_chapters_menu) \
+    .replace("<__STRUCTURED_ALL_CHAPTERS_MENU__>", structured_all_chapters_menu) \
     .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
     .replace("<__END_OF_EXERCISE__>", end_of_exercise) \
     .replace("__PAGE_TITLE__", page_title) \
