@@ -1,7 +1,7 @@
 repository = fuzzingbook
 image = base
 instance = fuzzing-book-instance
-BRANCH = master
+BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
 tag = $(repository)/$(image)
 deps = $(wildcard fuzzingbook*.txt)
@@ -14,7 +14,7 @@ all: $(tag)
 # Build the docker image
 $(tag): Dockerfile $(deps) check-env
 	$(info Building image with tag $(tag))
-	@docker build -t $(tag) --squash .
+	@docker build --build-arg branch=$(BRANCH) -t $(tag) --squash .
 
 # Deploy the image to docker.io
 push: $(tag)
