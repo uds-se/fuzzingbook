@@ -660,6 +660,7 @@ publish: docs
 .PHONY: publish-html publish-html-setup
 publish-html: html publish-html-setup \
 	$(DOCS_TARGET)html/00_Index.html \
+	$(DOCS_TARGET)html/00_Table_of_Contents.html \
 	$(DOCS_TARGET)html/custom.css \
 	$(DOCS_TARGET)html/favicon \
 	$(DOCS:%=$(DOCS_TARGET)html/%.html) \
