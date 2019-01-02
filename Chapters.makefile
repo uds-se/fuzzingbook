@@ -32,6 +32,7 @@ TODO_CHAPTERS = \
 	# SearchBasedFuzzer.ipynb
 	# SymbolicFuzzer.ipynb
 	# FuzzingInTheLarge.ipynb
+	# GUIFuzzer.ipynb
 
 # Appendices for the book
 APPENDICES = \
