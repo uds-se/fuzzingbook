@@ -299,12 +299,15 @@ def add_links_to_imports(contents):
         link = None
         if module == "fuzzingbook_utils":
             pass
-        elif module[0].isupper():
-            # Point to notebook
-            link = module + '.html'
-        else:
+        if module[0].islower():
             # Point to Python doc
             link = "https://docs.python.org/3/library/" + module + ".html"
+        elif module.startswith("IPython"):
+            # Point to IPython doc
+            link = "https://ipython.readthedocs.io/en/stable/api/generated/" + module + ".html"
+        else:
+            # Point to notebook
+            link = module + '.html'
 
         if link is not None:
             contents = contents.replace(r'<span class="nn">' + module + r'</span>',
