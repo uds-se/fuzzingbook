@@ -94,7 +94,8 @@ PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py) \
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
 MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 EPUBS     = $(SOURCE_FILES:%.ipynb=$(EPUB_TARGET)%.epub)
-FULLS     = $(UTILITY_FILES:%=$(FULL_NOTEBOOKS)/fuzzingbook_utils/%) \
+FULLS     = $(FULL_NOTEBOOKS)/fuzzingbook_utils \
+				$(UTILITY_FILES:%=$(FULL_NOTEBOOKS)/fuzzingbook_utils/%) \
 				$(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb) \
 				$(FULL_NOTEBOOKS)/00_Index.ipynb
 
@@ -351,8 +352,12 @@ $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.ipynb_depend $
 	$(EXECUTE_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
-	
+
+$(FULL_NOTEBOOKS)/fuzzingbook_utils:
+	$(MKDIR) $(FULL_NOTEBOOKS)/fuzzingbook_utils
+
 $(FULL_NOTEBOOKS)/fuzzingbook_utils/%: $(NOTEBOOKS)/fuzzingbook_utils/%
+	@test -d $(FULL_NOTEBOOKS)/fuzzingbook_utils || $(MKDIR) $(FULL_NOTEBOOKS)/fuzzingbook_utils
 	cp -pr $< $@
 
 
