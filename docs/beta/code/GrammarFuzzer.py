@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2018-12-18 17:49:27+01:00
+# Last change: 2019-01-03 15:04:52+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -260,13 +260,14 @@ def display_annotated_tree(tree, a_nodes, a_edges, log=False):
 
     def annotate_node(dot, nid, symbol, ann):
         if nid in a_nodes:
-            dot.node(repr(nid), "%s (%s)" %(dot_escape(symbol), a_nodes[nid]))
+            dot.node(repr(nid), "%s (%s)" % (dot_escape(symbol), a_nodes[nid]))
         else:
             dot.node(repr(nid), dot_escape(symbol))
 
     def annotate_edge(dot, start_node, stop_node):
-        if (start_node,stop_node) in a_edges:
-            dot.edge(repr(start_node), repr(stop_node), a_edges[(start_node,stop_node)])
+        if (start_node, stop_node) in a_edges:
+            dot.edge(repr(start_node), repr(stop_node),
+                     a_edges[(start_node, stop_node)])
         else:
             dot.edge(repr(start_node), repr(stop_node))
 
@@ -276,7 +277,7 @@ def display_annotated_tree(tree, a_nodes, a_edges, log=False):
                  graph_attr=graph_attr)
 
 if __name__ == "__main__":
-    display_annotated_tree(derivation_tree, {3:'plus'},{(1,3):'op'},log=False)
+    display_annotated_tree(derivation_tree, {3: 'plus'}, {(1, 3): 'op'}, log=False)
 
 
 def all_terminals(tree):
@@ -336,7 +337,11 @@ class GrammarFuzzer(Fuzzer):
 class GrammarFuzzer(GrammarFuzzer):
     def check_grammar(self):
         assert self.start_symbol in self.grammar
-        assert is_valid_grammar(self.grammar, start_symbol=self.start_symbol, supported_opts=self.supported_opts())
+        assert is_valid_grammar(
+            self.grammar,
+            start_symbol=self.start_symbol,
+            supported_opts=self.supported_opts())
+
     def supported_opts(self):
         return set()
 
@@ -396,14 +401,15 @@ class GrammarFuzzer(GrammarFuzzer):
 
         # Fetch the possible expansions from grammar...
         expansions = self.grammar[symbol]
-        possible_children = [self.expansion_to_children(expansion) for expansion in expansions]
+        possible_children = [self.expansion_to_children(
+            expansion) for expansion in expansions]
 
         # ... and select a random expansion
         index = self.choose_node_expansion(node, possible_children)
         chosen_children = possible_children[index]
-        
+
         # Process children (for subclasses)
-        chosen_children = self.process_chosen_children(chosen_children, 
+        chosen_children = self.process_chosen_children(chosen_children,
                                                        expansions[index])
 
         # Return with new children
@@ -559,22 +565,25 @@ class GrammarFuzzer(GrammarFuzzer):
         expansions = self.grammar[symbol]
 
         possible_children_with_cost = [(self.expansion_to_children(expansion),
-                                        self.expansion_cost(expansion, {symbol}),
+                                        self.expansion_cost(
+                                            expansion, {symbol}),
                                         expansion)
                                        for expansion in expansions]
 
-        costs = [cost for (child, cost, expansion) in possible_children_with_cost]
+        costs = [cost for (child, cost, expansion)
+                 in possible_children_with_cost]
         chosen_cost = choose(costs)
         children_with_chosen_cost = [child for (child, child_cost, _) in possible_children_with_cost
                                      if child_cost == chosen_cost]
         expansion_with_chosen_cost = [expansion for (_, child_cost, expansion) in possible_children_with_cost
-                                     if child_cost == chosen_cost]
+                                      if child_cost == chosen_cost]
 
         index = self.choose_node_expansion(node, children_with_chosen_cost)
-        
+
         chosen_children = children_with_chosen_cost[index]
         chosen_expansion = expansion_with_chosen_cost[index]
-        chosen_children = self.process_chosen_children(chosen_children, chosen_expansion)
+        chosen_children = self.process_chosen_children(
+            chosen_children, chosen_expansion)
 
         # Return with a new list
         return (symbol, chosen_children)
@@ -694,7 +703,7 @@ class GrammarFuzzer(GrammarFuzzer):
         """Expand tree using `expand_node_method` as node expansion function
         until the number of possible expansions reaches `limit`."""
         self.expand_node = expand_node_method
-        while ((limit is None 
+        while ((limit is None
                 or self.possible_expansions(tree) < limit)
                and self.any_possible_expansions(tree)):
             tree = self.expand_tree_once(tree)

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2018-12-12 09:01:56+01:00
+# Last change: 2019-01-03 15:04:59+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -107,18 +107,19 @@ class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
     def _max_expansion_coverage(self, symbol, max_depth):
         if max_depth <= 0:
             return set()
-        
+
         self._symbols_seen.add(symbol)
-        
+
         expansions = set()
         for expansion in self.grammar[symbol]:
             expansions.add(expansion_key(symbol, expansion))
             for nonterminal in nonterminals(expansion):
                 if nonterminal not in self._symbols_seen:
-                    expansions |= self._max_expansion_coverage(nonterminal, max_depth - 1)
+                    expansions |= self._max_expansion_coverage(
+                        nonterminal, max_depth - 1)
 
         return expansions
-    
+
     def max_expansion_coverage(self, symbol=None, max_depth=float('inf')):
         """Return set of all expansions in a grammar starting with `symbol`"""
         if symbol is None:
@@ -126,7 +127,7 @@ class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
 
         self._symbols_seen = set()
         cov = self._max_expansion_coverage(symbol, max_depth)
-        
+
         if symbol == START_SYMBOL:
             assert len(self._symbols_seen) == len(self.grammar)
 
@@ -156,7 +157,8 @@ class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
         return self.max_expansion_coverage() - self.expansion_coverage()
 
 if __name__ == "__main__":
-    digit_fuzzer = TrackingGrammarCoverageFuzzer(EXPR_GRAMMAR, start_symbol="<digit>", log=True)
+    digit_fuzzer = TrackingGrammarCoverageFuzzer(
+        EXPR_GRAMMAR, start_symbol="<digit>", log=True)
     digit_fuzzer.fuzz()
 
 
@@ -231,10 +233,12 @@ class SimpleGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
 
 class SimpleGrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
     def choose_uncovered_node_expansion(self, node, possible_children):
-        return TrackingGrammarCoverageFuzzer.choose_node_expansion(self, node, possible_children)
+        return TrackingGrammarCoverageFuzzer.choose_node_expansion(
+            self, node, possible_children)
 
     def choose_covered_node_expansion(self, node, possible_children):
-        return TrackingGrammarCoverageFuzzer.choose_node_expansion(self, node, possible_children)
+        return TrackingGrammarCoverageFuzzer.choose_node_expansion(
+            self, node, possible_children)
 
 if __name__ == "__main__":
     f = SimpleGrammarCoverageFuzzer(EXPR_GRAMMAR, start_symbol="<digit>")
@@ -474,16 +478,18 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     dup_expr_grammar = extend_grammar(EXPR_GRAMMAR,
-        {
-            "<factor>": ["+<factor>", "-<factor>", "(<expr>)", "<integer-1>.<integer-2>", "<integer>"],
-            "<integer-1>": ["<digit-1><integer-1>", "<digit-1>"],
-            "<integer-2>": ["<digit-2><integer-2>", "<digit-2>"],
-            "<digit-1>":
-                ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
-            "<digit-2>":
-                ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-        }
-    )
+                                      {
+                                          "<factor>": ["+<factor>", "-<factor>", "(<expr>)", "<integer-1>.<integer-2>", "<integer>"],
+                                          "<integer-1>": ["<digit-1><integer-1>", "<digit-1>"],
+                                          "<integer-2>": ["<digit-2><integer-2>", "<digit-2>"],
+                                          "<digit-1>":
+                                          ["0", "1", "2", "3", "4",
+                                              "5", "6", "7", "8", "9"],
+                                          "<digit-2>":
+                                          ["0", "1", "2", "3", "4",
+                                              "5", "6", "7", "8", "9"]
+                                      }
+                                      )
 
 
 if __name__ == "__main__":
@@ -515,7 +521,7 @@ def duplicate_context(grammar, symbol, expansion=None, depth=float('inf')):
     """Duplicate an expansion within a grammar.
 
     In the given grammar, take the given expansion of the given symbol
-    (if expansion is omitted: all symbols), and replace it with a 
+    (if expansion is omitted: all symbols), and replace it with a
     new expansion referring to a duplicate of all originally referenced rules.
 
     If depth is given, limit duplication to `depth` references (default: unlimited)
@@ -523,7 +529,7 @@ def duplicate_context(grammar, symbol, expansion=None, depth=float('inf')):
     orig_grammar = extend_grammar(grammar)
     _duplicate_context(grammar, orig_grammar, symbol,
                        expansion, depth, seen={})
-    
+
     # After duplication, we may have unreachable rules; delete them
     for nonterminal in unreachable_nonterminals(grammar):
         del grammar[nonterminal]
