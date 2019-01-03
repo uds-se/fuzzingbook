@@ -99,7 +99,7 @@ FULLS     = $(FULL_NOTEBOOKS)/fuzzingbook_utils \
 				$(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb) \
 				$(FULL_NOTEBOOKS)/00_Index.ipynb
 
-DEPENDS   = $(SOURCE_FILES:%.ipynb=$(DEPEND_TARGET)%.ipynb_depend)
+DEPENDS   = $(SOURCE_FILES:%.ipynb=$(DEPEND_TARGET)%.makefile)
 
 CHAPTER_PYS = $(CHAPTERS:%.ipynb=$(CODE_TARGET)%.py)
 
@@ -348,7 +348,7 @@ help:
 # Run a notebook, (re)creating all output cells
 ADD_METADATA = utils/add-metadata.py
 NBAUTOSLIDE = utils/nbautoslide.py
-$(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.ipynb_depend $(ADD_METADATA)
+$(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA)
 	$(EXECUTE_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
@@ -939,15 +939,23 @@ realclean: clean
 ## Dependencies - should come at the very end
 # See http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/ for inspiration
 NBDEPEND = $(PYTHON) utils/nbdepend.py
-$(DEPEND_TARGET)%.ipynb_depend: $(NOTEBOOKS)/%.ipynb
+$(DEPEND_TARGET)%.makefile: $(NOTEBOOKS)/%.ipynb
 	@echo "Rebuilding $@"
 	@test -d $(DEPEND_TARGET) || $(MKDIR) $(DEPEND_TARGET)
-	@for import in `$(NBDEPEND) $<`; do \
+	@for import in $$($(NBDEPEND) $<); do \
 		if [ -f $(NOTEBOOKS)/$$import.ipynb ]; then \
-			echo '$$''(FULL_NOTEBOOKS)/$(notdir $<): $$''(NOTEBOOKS)/'"$$import.ipynb"; \
-			echo '$$''(CODE_TARGET)$(notdir $(<:%.ipynb=%.py.out)): $$''(CODE_TARGET)'"$$import.py"; \
+			notebooks="$$notebooks $$""(NOTEBOOKS)/$$import.ipynb"; \
+			imports="$$imports $$""(CODE_TARGET)$$import.py"; \
 		fi; \
-	done > $@
+	done; \
+	( \
+		echo '# $(basename $(notdir $<)) dependencies'; \
+		echo ''; \
+		echo '$$''(FULL_NOTEBOOKS)/$(notdir $<):' $$notebooks; \
+		echo ''; \
+		echo '$$''(CODE_TARGET)$(notdir $(<:%.ipynb=%.py.out)):' $$imports; \
+	) >> $@
+
 
 .PHONY: depend
 depend: $(DEPENDS)
