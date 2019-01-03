@@ -935,6 +935,18 @@ realclean: clean
 	@echo "All old files deleted"
 
 
+## A bit of Makefile debugging
+# See http://www.drdobbs.com/tools/debugging-makefiles/197003338#
+
+# Use "make print-VAR" to see the value of VAR, e.g. "make print-NBDEPEND"
+print-%: ; @$(error $* = $($*) (defined as $* = $(value $*) from $(origin $*)))
+
+# Use "make DEBUG=1" to get better diagnostics why a command gets executed
+ifdef DEBUG
+OLD_SHELL := $(SHELL)
+SHELL = $(warning creating $@ from $^: $? is newer)$(OLD_SHELL)
+endif
+
 
 ## Dependencies - should come at the very end
 # See http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/ for inspiration
