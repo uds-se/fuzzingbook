@@ -20,6 +20,15 @@ SOURCE_FILES = \
 # The bibliography file
 BIB = fuzzingbook.bib
 
+# The utilities in fuzzingbook_utils
+UTILITY_FILES = \
+	__init__.py \
+	PrettyTable.py \
+	README.md \
+	export_notebook_code.py \
+	import_notebooks.py \
+	set_fixed_seed.py
+
 # Where the notebooks are
 NOTEBOOKS = notebooks
 
@@ -79,11 +88,16 @@ TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
 HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(HTML_TARGET)00_Index.html
 SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
-PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py) $(CODE_TARGET)setup.py $(CODE_TARGET)__init__.py
+PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py) \
+				$(CODE_TARGET)setup.py \
+				$(CODE_TARGET)__init__.py
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
 MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 EPUBS     = $(SOURCE_FILES:%.ipynb=$(EPUB_TARGET)%.epub)
-FULLS     = $(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb) $(FULL_NOTEBOOKS)/00_Index.ipynb
+FULLS     = $(UTILITY_FILES:%=$(FULL_NOTEBOOKS)/fuzzingbook_utils/%) \
+				$(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb) \
+				$(FULL_NOTEBOOKS)/00_Index.ipynb
+
 DEPENDS   = $(SOURCE_FILES:%.ipynb=$(DEPEND_TARGET)%.ipynb_depend)
 
 CHAPTER_PYS = $(CHAPTERS:%.ipynb=$(CODE_TARGET)%.py)
@@ -337,6 +351,10 @@ $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.ipynb_depend $
 	$(EXECUTE_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
+	
+$(FULL_NOTEBOOKS)/fuzzingbook_utils/%: $(NOTEBOOKS)/fuzzingbook_utils/%
+	cp -pr $< $@
+
 
 # Conversion rules - chapters
 ifeq ($(LATEX),pdflatex)
@@ -678,14 +696,18 @@ $(DOCS_TARGET)html/%: $(HTML_TARGET)%
 publish-code: code publish-code-setup \
 	$(DOCS_TARGET)code/LICENSE.md \
 	$(DOCS_TARGET)code/README.md \
-	$(DOCS_TARGET)code/fuzzingbook_utils \
 	$(DOCS_TARGET)code/setup.py \
+	$(UTILITY_FILES:%=$(DOCS_TARGET)code/fuzzingbook_utils/%) \
 	$(PUBLIC_CHAPTERS:%.ipynb=$(DOCS_TARGET)code/%.py) \
 	$(APPENDICES:%.ipynb=$(DOCS_TARGET)code/%.py)
 
 publish-code-setup:
-	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
-	@test -d $(DOCS_TARGET)code || $(MKDIR) $(DOCS_TARGET)code
+	@test -d $(DOCS_TARGET) \
+		|| $(MKDIR) $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)code \
+		|| $(MKDIR) $(DOCS_TARGET)code
+	@test -d $(DOCS_TARGET)code/fuzzingbook_utils \
+		|| $(MKDIR) $(DOCS_TARGET)code/fuzzingbook_utils
 	
 $(DOCS_TARGET)code/%: $(CODE_TARGET)%
 	cp -pr $< $@
@@ -748,19 +770,21 @@ publish-notebooks: full-notebooks publish-notebooks-setup \
 	$(DOCS_TARGET)notebooks/fuzzingbook.bib \
 	$(DOCS_TARGET)notebooks/LICENSE.md \
 	$(DOCS_TARGET)notebooks/README.md \
-	$(DOCS_TARGET)notebooks/fuzzingbook_utils/PrettyTable.py \
-	$(DOCS_TARGET)notebooks/fuzzingbook_utils/README.md \
-	$(DOCS_TARGET)notebooks/fuzzingbook_utils/export_notebook_code.py \
-	$(DOCS_TARGET)notebooks/fuzzingbook_utils/import_notebooks.py \
-	$(DOCS_TARGET)notebooks/fuzzingbook_utils/set_fixed_seed.py \
-	$(DOCS:%=$(DOCS_TARGET)notebooks/%.ipynb)
+	$(DOCS:%=$(DOCS_TARGET)notebooks/%.ipynb) \
+	$(UTILITY_FILES:%=$(DOCS_TARGET)notebooks/fuzzingbook_utils/%)
 	
 publish-notebooks-setup:
-	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
-	@test -d $(DOCS_TARGET)notebooks || $(MKDIR) $(DOCS_TARGET)notebooks
+	@test -d $(DOCS_TARGET) \
+		|| $(MKDIR) $(DOCS_TARGET)
+	@test -d $(DOCS_TARGET)notebooks \
+		|| $(MKDIR) $(DOCS_TARGET)notebooks
+	@test -d $(DOCS_TARGET)notebooks/fuzzingbook_utils \
+		|| $(MKDIR) $(DOCS_TARGET)notebooks/fuzzingbook_utils
 
 $(DOCS_TARGET)notebooks/%: $(FULL_NOTEBOOKS)/%
 	cp -pr $< $@
+	
+
 
 .PHONY: publish-index
 publish-index: $(DOCS_TARGET)notebooks/00_Index.ipynb
