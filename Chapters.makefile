@@ -22,6 +22,7 @@ READY_CHAPTERS = \
 	Carver.ipynb \
 	Reducer.ipynb \
 	WebFuzzer.ipynb \
+	GUIFuzzer.ipynb
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
