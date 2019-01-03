@@ -609,7 +609,8 @@ stats: $(SOURCES)
 # Run all code.  This should produce no failures.
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
 $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
-	$(PYTHON) $< > $@ 2>&1 || (echo "Error while running $<" >> $@; tail $@; exit 1)
+	@echo Running $<...
+	@$(PYTHON) $< > $@ 2>&1 || (echo "Error while running $<" >> $@; tail $@; exit 1)
 
 .PHONY: check-code
 check-code: code $(PYS_OUT)
