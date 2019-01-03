@@ -748,6 +748,11 @@ publish-notebooks: full-notebooks publish-notebooks-setup \
 	$(DOCS_TARGET)notebooks/fuzzingbook.bib \
 	$(DOCS_TARGET)notebooks/LICENSE.md \
 	$(DOCS_TARGET)notebooks/README.md \
+	$(DOCS_TARGET)notebooks/fuzzingbook_utils/PrettyTable.py \
+	$(DOCS_TARGET)notebooks/fuzzingbook_utils/README.md \
+	$(DOCS_TARGET)notebooks/fuzzingbook_utils/export_notebook_code.py \
+	$(DOCS_TARGET)notebooks/fuzzingbook_utils/import_notebooks.py \
+	$(DOCS_TARGET)notebooks/fuzzingbook_utils/set_fixed_seed.py \
 	$(DOCS:%=$(DOCS_TARGET)notebooks/%.ipynb)
 	
 publish-notebooks-setup:
