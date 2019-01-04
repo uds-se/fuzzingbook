@@ -364,7 +364,7 @@ $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 
-$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA)
+$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NOTEBOOKS)/fuzzingbook_utils/__init__.py
 	$(RENDER_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
