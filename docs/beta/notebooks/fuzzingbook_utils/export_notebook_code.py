@@ -11,7 +11,8 @@ from import_notebooks import RE_CODE
 
 # Things to ignore in exported Python code
 RE_IGNORE = re.compile(r'^get_ipython().*|^%.*')
-RE_IMPORT_FUZZINGBOOK_UTILS = re.compile(r'^(import|from) fuzzingbook_utils .*$', re.MULTILINE)
+RE_IMPORT_FUZZINGBOOK_UTILS = re.compile(r'^import fuzzingbook_utils .*$', re.MULTILINE)
+RE_FROM_FUZZINGBOOK_UTILS = re.compile(r'^from fuzzingbook_utils import .*$', re.MULTILINE)
 
 # Strip blank lines
 RE_BLANK_LINES = re.compile(r'^[ \t]*$', re.MULTILINE)
@@ -135,6 +136,9 @@ def export_notebook_code(notebook_name, path=None):
             if RE_IMPORT_FUZZINGBOOK_UTILS.match(code):
                 # Don't import all of fuzzingbook_utils (requires nbformat & Ipython)
                 print_if_main(SET_FIXED_SEED)
+            elif RE_FROM_FUZZINGBOOK_UTILS.match(code):
+                # This would be "from fuzzingbook_utils import HTML"
+                print_if_main(code)
             elif RE_IGNORE.match(code):
                 # Code to ignore - comment out
                 print_utf8("\n" + prefix_code(code, "# ") + "\n")

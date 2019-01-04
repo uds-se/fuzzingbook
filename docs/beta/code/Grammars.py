@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2019-01-03 15:26:05+01:00
+# Last change: 2019-01-04 22:09:18+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -214,7 +214,7 @@ if __package__ is None or __package__ == "":
 else:
     from .RailroadDiagrams import NonTerminal, Terminal, Choice, HorizontalChoice, Sequence, Diagram, show_diagram
 
-from IPython.display import SVG, HTML, display
+from IPython.display import SVG, display
 
 def syntax_diagram_symbol(symbol):
     if is_nonterminal(symbol):
