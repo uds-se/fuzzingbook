@@ -258,10 +258,12 @@ CONVERT_TO_WORD = $(PANDOC)
 CONVERT_TO_MARKDOWN = $(NBCONVERT) --to markdown --output-dir=$(MARKDOWN_TARGET)
 
 # Run
-EXECUTE_NOTEBOOK = $(NBCONVERT) --to notebook --execute --output-dir=$(FULL_NOTEBOOKS)
+EXECUTE_TIMEOUT = 60
+EXECUTE_OPTIONS = --ExecutePreprocessor.timeout=$(EXECUTE_TIMEOUT)
+EXECUTE_NOTEBOOK = $(NBCONVERT) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(FULL_NOTEBOOKS)
 
 # Render
-RENDER_NOTEBOOK = RENDER_HTML=1 $(NBCONVERT) --to notebook --execute --output-dir=$(RENDERED_NOTEBOOKS)
+RENDER_NOTEBOOK = RENDER_HTML=1 $(NBCONVERT) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(RENDERED_NOTEBOOKS)
 
 
 # Zip
