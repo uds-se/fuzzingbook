@@ -1,5 +1,5 @@
 # Define the contents of this file as a package
-__all__ = ["PrettyTable", "YouTubeVideo", "print_file"]
+__all__ = ["PrettyTable", "YouTubeVideo", "print_file", "HTML"]
 
 
 # Setup loader such that workbooks can be imported directly
@@ -44,3 +44,57 @@ def print_file(filename, lexer=None):
         print(contents, end="")
 
 
+
+# HTML() behaves like IPython.core.display.HTML(); but if png is True or the environment
+# variable RENDER_HTML is set, it converts the HTML into a PNG image.
+# This is useful for producing derived formats without HTML support (LaTeX/PDF, Word, ...)
+
+import os
+firefox_webdriver = None
+
+def HTML(data=None, url=None, filename=None, png=False, headless=True):
+    if not png and not 'RENDER_HTML' in os.environ:
+        # Standard behavior
+        import IPython.core.display
+        return IPython.core.display.HTML(data=data, url=url, filename=filename)
+
+    # Import only as needed; avoids unnecessary dependencies
+    from selenium import webdriver
+    from selenium.webdriver.firefox.options import Options
+    from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.common.action_chains import ActionChains
+    from IPython.core.display import Image
+    import tempfile
+
+    # Get a webdriver
+    global firefox_webdriver
+    if firefox_webdriver is None:
+        options = Options()
+        options.headless = headless
+        firefox_webdriver = webdriver.Firefox(options=options)
+    
+    # Create a URL argument
+    if data is not None:
+        has_html = data.find('<html')
+        with tempfile.NamedTemporaryFile(mode='wb', suffix='.html') as fp:
+            if has_html:
+                fp.write(data.encode('utf8'))
+            else:
+                fp.write(('<html>' + data + '</html>').encode('utf8'))
+            fp.flush()
+            return HTML(filename=fp.name, png=True)
+
+    if filename is not None:
+        return HTML(url='file://' + filename, png=True)
+
+    assert url is not None
+
+    # Render URL as PNG
+    firefox_webdriver.get(url)
+    return Image(firefox_webdriver.get_screenshot_as_png())
+
+import atexit
+@atexit.register
+def quit_webdriver():
+    if firefox_webdriver is not None:
+        firefox_webdriver.quit()
