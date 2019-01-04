@@ -68,6 +68,10 @@ SLIDES_TARGET  := beta/$(SLIDES_TARGET)
 CODE_TARGET    := beta/$(CODE_TARGET)
 BETA_FLAG = --include-ready --include-todo
 endif
+ifndef BETA
+# Avoid warning: undefined variable `BETA_FLAG'
+BETA_FLAG = 
+endif
 
 # Files to appear in the table of contents
 ifndef BETA
