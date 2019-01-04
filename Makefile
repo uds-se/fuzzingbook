@@ -36,7 +36,7 @@ NOTEBOOKS = notebooks
 FULL_NOTEBOOKS = full_notebooks
 
 # Derived versions including PNG and text output cells
-RENDERED_NOTEBOOKS = rendered_notebooks
+RENDERED_NOTEBOOKS = rendered
 
 
 # Git repo
