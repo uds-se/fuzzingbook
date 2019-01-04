@@ -1,6 +1,6 @@
 # Makefile to simplify some local Docker steps
 
-BRANCH:=$(git rev-parse --abbrev-ref HEAD)
+BRANCH:=$(shell git rev-parse --abbrev-ref HEAD)
 
 build:
 	docker build --build-arg branch=$(BRANCH) -t 'fuzzing-book' fuzzingbook-dockerenv
