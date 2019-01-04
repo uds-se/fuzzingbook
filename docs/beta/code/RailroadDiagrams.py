@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/RailroadDiagrams.html
-# Last change: 2019-01-03 15:24:22+01:00
+# Last change: 2019-01-04 16:03:17+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -483,8 +483,8 @@ class OptionalSequence(DiagramItem):
             self.up = max(self.up, max(C.AR * 2, item.up + C.VS) - heightSoFar)
             heightSoFar += item.height
             if i > 0:
-                self.down = max(self.height + self.down, heightSoFar +
-                                max(C.AR * 2, item.down + C.VS)) - self.height
+                self.down = max(self.height + self.down, heightSoFar
+                                + max(C.AR * 2, item.down + C.VS)) - self.height
             itemWidth = item.width + (20 if item.needsSpace else 0)
             if i == 0:
                 self.width += C.AR + max(itemWidth, C.AR)
@@ -499,8 +499,8 @@ class OptionalSequence(DiagramItem):
     def format(self, x, y, width):
         leftGap, rightGap = determineGaps(width, self.width)
         Path(x, y).right(leftGap).addTo(self)
-        Path(x + leftGap + self.width, y +
-             self.height).right(rightGap).addTo(self)
+        Path(x + leftGap + self.width, y
+             + self.height).right(rightGap).addTo(self)
         x += leftGap
         upperLineY = y - self.up
         last = len(self.items) - 1
@@ -632,32 +632,32 @@ class AlternatingSequence(DiagramItem):
         firstOut = self.up - first.up - first.height
         Path(x, y).arc('se').up(firstIn - 2 * arc).arc('wn').addTo(self)
         first.format(
-            x +
-            2 *
-            arc,
-            y -
-            firstIn,
-            self.width -
-            4 *
-            arc).addTo(self)
-        Path(x + self.width - 2 * arc, y -
-             firstOut).arc('ne').down(firstOut - 2 * arc).arc('ws').addTo(self)
+            x
+            + 2
+            * arc,
+            y
+            - firstIn,
+            self.width
+            - 4
+            * arc).addTo(self)
+        Path(x + self.width - 2 * arc, y
+             - firstOut).arc('ne').down(firstOut - 2 * arc).arc('ws').addTo(self)
 
         # bottom
         secondIn = self.down - second.down - second.height
         secondOut = self.down - second.down
         Path(x, y).arc('ne').down(secondIn - 2 * arc).arc('ws').addTo(self)
         second.format(
-            x +
-            2 *
-            arc,
-            y +
-            secondIn,
-            self.width -
-            4 *
-            arc).addTo(self)
-        Path(x + self.width - 2 * arc, y +
-             secondOut).arc('se').up(secondOut - 2 * arc).arc('wn').addTo(self)
+            x
+            + 2
+            * arc,
+            y
+            + secondIn,
+            self.width
+            - 4
+            * arc).addTo(self)
+        Path(x + self.width - 2 * arc, y
+             + secondOut).arc('se').up(secondOut - 2 * arc).arc('wn').addTo(self)
 
         # crossover
         arcX = 1 / Math.sqrt(2) * arc * 2
@@ -690,13 +690,13 @@ class Choice(DiagramItem):
             else:
                 arcs = C.AR
             if i < default:
-                self.up += max(arcs, item.height + item.down +
-                               C.VS + self.items[i + 1].up)
+                self.up += max(arcs, item.height + item.down
+                               + C.VS + self.items[i + 1].up)
             elif i == default:
                 continue
             else:
-                self.down += max(arcs, item.up + C.VS +
-                                 self.items[i - 1].down + self.items[i - 1].height)
+                self.down += max(arcs, item.up + C.VS
+                                 + self.items[i - 1].down + self.items[i - 1].height)
         # already counted in self.height
         self.down -= self.items[default].height
         addDebug(self)
@@ -726,8 +726,8 @@ class Choice(DiagramItem):
                 + above[0].down
                 + above[0].height)
         for i, ni, item in doubleenumerate(above):
-            Path(x, y).arc('se').up(distanceFromY -
-                                    C.AR * 2).arc('wn').addTo(self)
+            Path(x, y).arc('se').up(distanceFromY
+                                    - C.AR * 2).arc('wn').addTo(self)
             item.format(x + C.AR * 2, y - distanceFromY,
                         innerWidth).addTo(self)
             Path(x + C.AR * 2 + innerWidth, y - distanceFromY + item.height).arc('ne') \
@@ -744,8 +744,8 @@ class Choice(DiagramItem):
         Path(x, y).right(C.AR * 2).addTo(self)
         self.items[self.default].format(
             x + C.AR * 2, y, innerWidth).addTo(self)
-        Path(x + C.AR * 2 + innerWidth, y +
-             self.height).right(C.AR * 2).addTo(self)
+        Path(x + C.AR * 2 + innerWidth, y
+             + self.height).right(C.AR * 2).addTo(self)
 
         # Do the elements that curve below
         below = self.items[self.default + 1:]
@@ -791,13 +791,13 @@ class MultipleChoice(DiagramItem):
             else:
                 minimum = C.AR
             if i < default:
-                self.up += max(minimum, item.height +
-                               item.down + C.VS + self.items[i + 1].up)
+                self.up += max(minimum, item.height
+                               + item.down + C.VS + self.items[i + 1].up)
             elif i == default:
                 continue
             else:
-                self.down += max(minimum, item.up + C.VS +
-                                 self.items[i - 1].down + self.items[i - 1].height)
+                self.down += max(minimum, item.up + C.VS
+                                 + self.items[i - 1].down + self.items[i - 1].height)
         # already counted in self.height
         self.down -= self.items[default].height
         addDebug(self)
@@ -848,8 +848,8 @@ class MultipleChoice(DiagramItem):
         Path(x + 30, y).right(C.AR).addTo(self)
         self.items[self.default].format(
             x + 30 + C.AR, y, self.innerWidth).addTo(self)
-        Path(x + 30 + C.AR + self.innerWidth, y +
-             self.height).right(C.AR).addTo(self)
+        Path(x + 30 + C.AR + self.innerWidth, y
+             + self.height).right(C.AR).addTo(self)
 
         # Do the elements that curve below
         below = self.items[self.default + 1:]
@@ -878,8 +878,8 @@ class MultipleChoice(DiagramItem):
                 + C.VS
                 + (below[i + 1].up if i + 1 < len(below) else 0))
         text = DiagramItem('g', attrs={"class": "diagram-text"}).addTo(self)
-        DiagramItem('title', text="take one or more branches, once each, in any order" if self.type ==
-                    "any" else "take all branches, once each, in any order").addTo(text)
+        DiagramItem('title', text="take one or more branches, once each, in any order" if self.type
+                    == "any" else "take all branches, once each, in any order").addTo(text)
         DiagramItem('path', attrs={
             "d": "M {x} {y} h -26 a 4 4 0 0 0 -4 4 v 12 a 4 4 0 0 0 4 4 h 26 z".format(x=x + 30, y=y - 10),
             "class": "diagram-text"
@@ -1071,8 +1071,8 @@ class OneOrMore(DiagramItem):
         Path(x + self.width - C.AR, y + self.height).right(C.AR).addTo(self)
 
         # Draw repeat arc
-        distanceFromY = max(C.AR * 2, self.item.height +
-                            self.item.down + C.VS + self.rep.up)
+        distanceFromY = max(C.AR * 2, self.item.height
+                            + self.item.down + C.VS + self.rep.up)
         Path(x + C.AR, y).arc('nw').down(distanceFromY - C.AR * 2) \
             .arc('ws').addTo(self)
         self.rep.format(x + C.AR, y + distanceFromY,
@@ -1107,8 +1107,8 @@ class Start(DiagramItem):
         if self.type == "complex":
             path.down(20).m(0, -10).right(self.width).addTo(self)
         else:
-            path.down(20).m(10, -20).down(20).m(-10, -
-                                                10).right(self.width).addTo(self)
+            path.down(20).m(10, -20).down(20).m(-10,
+                                                - 10).right(self.width).addTo(self)
         if self.label:
             DiagramItem('text', attrs={
                         "x": x, "y": y - 15, "style": "text-anchor:start"}, text=self.label).addTo(self)
