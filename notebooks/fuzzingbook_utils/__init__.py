@@ -50,9 +50,9 @@ def print_file(filename, lexer=None):
 # This is useful for producing derived formats without HTML support (LaTeX/PDF, Word, ...)
 
 import os
-firefox_webdriver = None
+firefox = None
 
-def HTML(data=None, url=None, filename=None, png=False, headless=True):
+def HTML(data=None, url=None, filename=None, png=False, headless=True, zoom=2.0):
     if not png and not 'RENDER_HTML' in os.environ:
         # Standard behavior
         import IPython.core.display
@@ -61,17 +61,18 @@ def HTML(data=None, url=None, filename=None, png=False, headless=True):
     # Import only as needed; avoids unnecessary dependencies
     from selenium import webdriver
     from selenium.webdriver.firefox.options import Options
-    from selenium.webdriver.common.keys import Keys
-    from selenium.webdriver.common.action_chains import ActionChains
+    from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
     from IPython.core.display import Image
     import tempfile
 
     # Get a webdriver
-    global firefox_webdriver
-    if firefox_webdriver is None:
+    global firefox
+    if firefox is None:
         options = Options()
         options.headless = headless
-        firefox_webdriver = webdriver.Firefox(options=options)
+        profile = FirefoxProfile()
+        profile.set_preference("layout.css.devPixelsPerPx", repr(zoom))
+        firefox = webdriver.Firefox(firefox_profile=profile, options=options)
     
     # Create a URL argument
     if data is not None:
@@ -90,11 +91,11 @@ def HTML(data=None, url=None, filename=None, png=False, headless=True):
     assert url is not None
 
     # Render URL as PNG
-    firefox_webdriver.get(url)
-    return Image(firefox_webdriver.get_screenshot_as_png())
+    firefox.get(url)
+    return Image(firefox.get_screenshot_as_png())
 
 import atexit
 @atexit.register
 def quit_webdriver():
-    if firefox_webdriver is not None:
-        firefox_webdriver.quit()
+    if firefox is not None:
+        firefox.quit()
