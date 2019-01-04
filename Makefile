@@ -32,8 +32,12 @@ UTILITY_FILES = \
 # Where the notebooks are
 NOTEBOOKS = notebooks
 
-# Derived versions with output cells
+# Derived versions including HTML and text output cells
 FULL_NOTEBOOKS = full_notebooks
+
+# Derived versions including PNG and text output cells
+RENDERED_NOTEBOOKS = rendered_notebooks
+
 
 # Git repo
 GITHUB_REPO = https://github.com/uds-se/fuzzingbook/
@@ -98,6 +102,8 @@ FULLS     = $(FULL_NOTEBOOKS)/fuzzingbook_utils \
 				$(UTILITY_FILES:%=$(FULL_NOTEBOOKS)/fuzzingbook_utils/%) \
 				$(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb) \
 				$(FULL_NOTEBOOKS)/00_Index.ipynb
+RENDERS = $(SOURCE_FILES:%.ipynb=$(RENDERED_NOTEBOOKS)/%.ipynb) \
+				$(RENDERED_NOTEBOOKS)/00_Index.ipynb
 
 DEPENDS   = $(SOURCE_FILES:%.ipynb=$(DEPEND_TARGET)%.makefile)
 
@@ -254,6 +260,10 @@ CONVERT_TO_MARKDOWN = $(NBCONVERT) --to markdown --output-dir=$(MARKDOWN_TARGET)
 # Run
 EXECUTE_NOTEBOOK = $(NBCONVERT) --to notebook --execute --output-dir=$(FULL_NOTEBOOKS)
 
+# Render
+RENDER_NOTEBOOK = RENDER_HTML=1 $(NBCONVERT) --to notebook --execute --output-dir=$(RENDERED_NOTEBOOKS)
+
+
 # Zip
 ZIP ?= zip
 ZIP_OPTIONS = -r
@@ -272,7 +282,7 @@ and more:	word markdown epub
 
 # Individual targets
 .PHONY: html pdf python code slides word doc docx md markdown epub
-.PHONY: full-notebooks full fulls book-pdf book-html
+.PHONY: full-notebooks full fulls rendered-notebooks rendered renders book-pdf book-html
 html:	ipypublish-chapters $(HTMLS)
 pdf:	ipypublish-chapters $(PDFS)
 python code:	$(PYS)
@@ -281,6 +291,7 @@ word doc docx: $(WORDS)
 md markdown: $(MARKDOWNS)
 epub: $(EPUBS)
 full-notebooks full fulls: $(FULLS)
+rendered-notebooks rendered renders: $(RENDERS)
 
 book-pdf:  ipypublish-book $(BOOK_PDF)
 book-html: ipypublish-book $(BOOK_HTML)
@@ -353,12 +364,18 @@ $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 
+$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA)
+	$(RENDER_NOTEBOOK) $<
+	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
+
 $(FULL_NOTEBOOKS)/fuzzingbook_utils:
 	$(MKDIR) $(FULL_NOTEBOOKS)/fuzzingbook_utils
 
 $(FULL_NOTEBOOKS)/fuzzingbook_utils/%: $(NOTEBOOKS)/fuzzingbook_utils/%
 	@test -d $(FULL_NOTEBOOKS)/fuzzingbook_utils || $(MKDIR) $(FULL_NOTEBOOKS)/fuzzingbook_utils
 	cp -pr $< $@
+
 
 
 # Conversion rules - chapters
@@ -387,7 +404,7 @@ $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@$(OPEN) $@
 endif
 
-$(PDF_TARGET)%.tex:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_METADATA)
+$(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_METADATA)
 	$(eval TMPDIR := $(shell mktemp -d))
 	$(PYTHON) $(ADD_METADATA) --titlepage $< > $(TMPDIR)/$(notdir $<)
 	cp -pr $(NOTEBOOKS)/PICS fuzzingbook.* $(TMPDIR)
@@ -494,7 +511,7 @@ $(CODE_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 
 
 # Markdown
-$(MARKDOWN_TARGET)%.md:	$(FULL_NOTEBOOKS)/%.ipynb $(BIB)
+$(MARKDOWN_TARGET)%.md:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB)
 	$(RM) -r $(MARKDOWN_TARGET)$(basename $(notdir $<)).md $(MARKDOWN_TARGET)$(basename $(notdir $<))_files
 	$(CONVERT_TO_MARKDOWN) $<
 
@@ -511,13 +528,13 @@ $(EPUB_TARGET)%.epub: $(MARKDOWN_TARGET)%.md
 # and let the book converters run on this
 ifeq ($(PUBLISH),nbpublish)
 # With nbpublish
-$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
+$(PDF_TARGET)book.tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
 	-$(RM) -r book
 	$(MKDIR) book
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
-	    ln -s ../$(FULL_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
+	    ln -s ../$(RENDERED_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
 		chapter=$$(expr $$chapter + 1); \
 	done
 	ln -s ../$(BIB) book
@@ -544,13 +561,13 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post-html.py
 	@echo Created $@
 else
 # With bookbook
-$(PDF_TARGET)book.tex: $(FULLS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
+$(PDF_TARGET)book.tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
 	-$(RM) -r book
 	$(MKDIR) book
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
-		ln -s ../$(FULL_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/'$${chnum}'-&/g'); \
+		ln -s ../$(RENDERED_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/'$${chnum}'-&/g'); \
 		chapter=$$(expr $$chapter + 1); \
 	done
 	cd book; $(BOOKBOOK_LATEX)
@@ -914,15 +931,20 @@ clean-book:
 clean-aux clean-pdf:
 	$(RM) $(AUX)
 
-.PHONY: clean-full_notebooks clean-full clean-fulls clean-docs clean realclean
+.PHONY: clean-full-notebooks clean-full clean-fulls 
+.PHONY: clean-rendered-notebooks clean-rendered clean-renders
+.PHONY: clean-docs clean realclean
 clean-full-notebooks clean-full clean-fulls:
 	$(RM) $(FULLS)
+
+clean-rendered-notebooks clean-rendered clean-renders:
+	$(RM) $(RENDERS)
 
 clean-docs:
 	$(RM) -r $(DOCS_TARGET)html $(DOCS_TARGET)code \
 	 	$(DOCS_TARGET)slides $(DOCS_TARGET)index.html $(DOCS_TARGET)404.html \ 		$(DOCS_TARGET)PICS $(DOCS_TARGET)notebooks
 
-clean: clean-code clean-chapters clean-book clean-aux clean-docs clean-fulls
+clean: clean-code clean-chapters clean-book clean-aux clean-docs clean-fulls clean-renders
 	@echo "All derived files deleted"
 
 realclean: clean
@@ -965,8 +987,10 @@ $(DEPEND_TARGET)%.makefile: $(NOTEBOOKS)/%.ipynb
 		echo ''; \
 		echo '$$''(FULL_NOTEBOOKS)/$(notdir $<):' $$notebooks; \
 		echo ''; \
+		echo '$$''(RENDERED_NOTEBOOKS)/$(notdir $<):' $$notebooks; \
+		echo ''; \
 		echo '$$''(CODE_TARGET)$(notdir $(<:%.ipynb=%.py.out)):' $$imports; \
-	) >> $@
+	) > $@
 
 
 .PHONY: depend
