@@ -10,6 +10,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # FB_USER holds the username (and thus group and home name) of our notebook user. 
 ARG FB_USER=fuzzingbook
+ENV FB_USER=${FB_USER}
 
 # Specify whether we install publish extensions.
 ARG PUBLISH
@@ -84,6 +85,10 @@ RUN set -x \
     git \
     npm \
   && apt-get install --no-install-recommends -y $(<install-packages.txt) $(grep -v -e '^\s*#' fuzzingbook-packages.txt) \
+  && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+  && echo 'LANG="en_US.UTF-8"' > /etc/default/locale \
+  && dpkg-reconfigure --frontend=noninteractive locales \
+  && update-locale LANG=en_US.UTF-8 \
   && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py \
   && python3 get-pip.py \
   && pip3 install \
@@ -107,11 +112,15 @@ ADD notebookapp.py /usr/local/lib/python3.6/dist-packages/notebook/notebookapp.p
 # We run tini as an entry point. 
 ADD https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini /tini
 RUN chmod +x /tini
+
 ENTRYPOINT ["/tini", "--"]
 
 # Switch to the notebook user and prepare the work environment.
 USER ${FB_USER}
 WORKDIR /home/${FB_USER}
+
+# Patch to change certain FuzzManager settings
+ADD settings.py.patch /home/${FB_USER}/settings.py.patch
 
 # Clone the fuzzingbook repository and use it as working directory for 
 # the jupyter instance. We shallow clone and omit history at this point
@@ -149,12 +158,19 @@ RUN git clone --branch ${BRANCH} --depth 1 https://github.com/uds-se/fuzzingbook
   && python3 FuzzManager/server/manage.py migrate \
   && python3 FuzzManager/server/manage.py createsuperuser --username demo --email demo@example.com --no-input \
   && python3 FuzzManager/server/manage.py shell -c 'from django.contrib.auth.models import User; user = User.objects.get(username="demo"); user.set_password("demo"); user.save();' \
-  && sed -ie 's/ALLOWED_HOSTS = \[\]/ALLOWED_HOSTS = \[ "0.0.0.0" \]/g' FuzzManager/server/server/settings.py
+  && echo -ne "[Main]\nsigdir = /home/${FB_USER}/signatures/\ntool = fuzzingbook\nserverport = 8000\nserverproto = http\nserverhost = 127.0.0.1\nserverauthtoken = " > .fuzzmanagerconf \
+  && python3 FuzzManager/server/manage.py get_auth_token demo >> .fuzzmanagerconf \
+  && mkdir /home/${FB_USER}/signatures/ \
+  && (cd FuzzManager && patch -p1 < /home/${FB_USER}/settings.py.patch)
 
 # Adding configuration for jupyter. This sets a constant token, such that connecting
 # with external tools like VSCode, Atom or IntelliJ can use a constant config. 
 ADD --chown=fuzzingbook:fuzzingbook jupyter_notebook_config.py /home/${FB_USER}/.jupyter/
 
+USER root
+ADD startup.sh /startup.sh
+ADD startup-user.sh /startup-user.sh
+
 # I am running notebook here. Feel free to change this to hub, lab, or whatever you guys prefer.
-EXPOSE 8080 8000
-CMD /usr/local/bin/jupyter notebook --ip=0.0.0.0 --port=8080 --no-browser ${HOME}/${BASEDIR}
+EXPOSE 8000 8888
+CMD bash /startup.sh
