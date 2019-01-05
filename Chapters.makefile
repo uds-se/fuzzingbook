@@ -21,11 +21,11 @@ READY_CHAPTERS = \
 	APIFuzzer.ipynb \
 	Carver.ipynb \
 	Reducer.ipynb \
-	WebFuzzer.ipynb \
-	GUIFuzzer.ipynb
+	WebFuzzer.ipynb
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
+	GUIFuzzer.ipynb \
 	InformationFlow.ipynb \
 	GrammarMiner.ipynb \
 
