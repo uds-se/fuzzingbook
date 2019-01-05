@@ -27,13 +27,12 @@ READY_CHAPTERS = \
 TODO_CHAPTERS = \
 	GUIFuzzer.ipynb \
 	InformationFlow.ipynb \
-	GrammarMiner.ipynb \
+	GrammarMiner.ipynb
 
 	# Oracles.ipynb
 	# SearchBasedFuzzer.ipynb
 	# SymbolicFuzzer.ipynb
 	# FuzzingInTheLarge.ipynb
-	# GUIFuzzer.ipynb
 
 # Appendices for the book
 APPENDICES = \
