@@ -810,7 +810,6 @@ publish-notebooks-setup:
 		|| $(MKDIR) $(DOCS_TARGET)notebooks/fuzzingbook_utils
 
 $(DOCS_TARGET)notebooks/%: $(FULL_NOTEBOOKS)/%
-	$(error Making $@ because of $<?)
 	cp -pr $< $@
 
 
