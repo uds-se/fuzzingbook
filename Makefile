@@ -794,7 +794,7 @@ $(DOCS_TARGET)slides/%: $(SLIDES_TARGET)%
 # Add/update notebooks on Web pages
 .PHONY: publish-notebooks publish-notebooks-setup
 publish-notebooks: full-notebooks publish-notebooks-setup \
-	git statuss/custom.css \
+	$(DOCS_TARGET)notebooks/custom.css \
 	$(DOCS_TARGET)notebooks/fuzzingbook.bib \
 	$(DOCS_TARGET)notebooks/LICENSE.md \
 	$(DOCS_TARGET)notebooks/README.md \
