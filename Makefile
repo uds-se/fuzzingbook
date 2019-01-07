@@ -94,7 +94,7 @@ DOCS = \
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
-HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html) $(HTML_TARGET)00_Index.html
+HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html)
 SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
 PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py) \
 				$(CODE_TARGET)setup.py \
@@ -104,10 +104,8 @@ MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 EPUBS     = $(SOURCE_FILES:%.ipynb=$(EPUB_TARGET)%.epub)
 FULLS     = $(FULL_NOTEBOOKS)/fuzzingbook_utils \
 				$(UTILITY_FILES:%=$(FULL_NOTEBOOKS)/fuzzingbook_utils/%) \
-				$(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb) \
-				$(FULL_NOTEBOOKS)/00_Index.ipynb
-RENDERS = $(SOURCE_FILES:%.ipynb=$(RENDERED_NOTEBOOKS)/%.ipynb) \
-				$(RENDERED_NOTEBOOKS)/00_Index.ipynb
+				$(SOURCE_FILES:%.ipynb=$(FULL_NOTEBOOKS)/%.ipynb) 
+RENDERS = $(SOURCE_FILES:%.ipynb=$(RENDERED_NOTEBOOKS)/%.ipynb)
 
 DEPENDS   = $(SOURCE_FILES:%.ipynb=$(DEPEND_TARGET)%.makefile)
 
@@ -379,7 +377,8 @@ $(FULL_NOTEBOOKS)/fuzzingbook_utils:
 	$(MKDIR) $(FULL_NOTEBOOKS)/fuzzingbook_utils
 
 $(FULL_NOTEBOOKS)/fuzzingbook_utils/%: $(NOTEBOOKS)/fuzzingbook_utils/%
-	@test -d $(FULL_NOTEBOOKS)/fuzzingbook_utils || $(MKDIR) $(FULL_NOTEBOOKS)/fuzzingbook_utils
+	@test -d $(FULL_NOTEBOOKS)/fuzzingbook_utils || \
+		$(MKDIR) $(FULL_NOTEBOOKS)/fuzzingbook_utils
 	cp -pr $< $@
 
 
@@ -448,7 +447,7 @@ $(DOCS_TARGET)404.html: $(FULL_NOTEBOOKS)/404.ipynb $(HTML_DEPS)
 	$(PYTHON) utils/post-html.py --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
 	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
 	@$(OPEN) $@
-	
+
 $(DOCS_TARGET)html/00_Index.html: $(DOCS_TARGET)notebooks/00_Index.ipynb $(HTML_DEPS)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) -r 00_Index.nbpub.log 00_Index_files
@@ -795,7 +794,7 @@ $(DOCS_TARGET)slides/%: $(SLIDES_TARGET)%
 # Add/update notebooks on Web pages
 .PHONY: publish-notebooks publish-notebooks-setup
 publish-notebooks: full-notebooks publish-notebooks-setup \
-	$(DOCS_TARGET)notebooks/custom.css \
+	git statuss/custom.css \
 	$(DOCS_TARGET)notebooks/fuzzingbook.bib \
 	$(DOCS_TARGET)notebooks/LICENSE.md \
 	$(DOCS_TARGET)notebooks/README.md \
@@ -811,8 +810,9 @@ publish-notebooks-setup:
 		|| $(MKDIR) $(DOCS_TARGET)notebooks/fuzzingbook_utils
 
 $(DOCS_TARGET)notebooks/%: $(FULL_NOTEBOOKS)/%
+	$(error Making $@ because of $<?)
 	cp -pr $< $@
-	
+
 
 
 .PHONY: publish-index
@@ -845,8 +845,8 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
 		
 # Index
 .PHONY: index
-index: $(NOTEBOOKS)/00_Index.ipynb
-$(NOTEBOOKS)/00_Index.ipynb $(DOCS_TARGET)notebooks/00_Index.ipynb: utils/nbindex.py \
+index: $(DOCS_TARGET)/notebooks/00_Index.ipynb
+$(DOCS_TARGET)notebooks/00_Index.ipynb: utils/nbindex.py \
 	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
 	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
 	$(CHAPTERS_MAKEFILE)
