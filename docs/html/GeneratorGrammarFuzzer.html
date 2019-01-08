@@ -11,7 +11,7 @@ with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" /><title>Generating Software Tests - Generating Software Tests</title>
+<meta charset="utf-8" /><title>Fuzzing with Generators - Generating Software Tests</title>
 
 <style type="text/css">
     /*!
@@ -11790,10 +11790,10 @@ MathJax.Hub.Config({
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
-<meta property="og:url" content="https://www.fuzzingbook.org/html/00_Table_of_Contents.html" />
+<meta property="og:url" content="https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html" />
 <meta property="og:type" content="article" />
-<meta property="og:title" content="Generating Software Tests - Generating Software Tests" />
-<meta property="og:description" content="" />
+<meta property="og:title" content="Fuzzing with Generators - Generating Software Tests" />
+<meta property="og:description" content="In this chapter, we show how to extend grammars with functions – pieces of code that get executed during grammar expansion, and that can generate, check, or change elements produced.  Adding functions to a grammar allows for very versatile test generation, bringing together the best of grammar generation and programming.Prerequisites As this chapter deeply interacts with the techniques discussed in the chapter on efficient grammar fuzzing, a good understanding of the techniques is recommended." />
 <meta property="og:image" content="https://www.fuzzingbook.org/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11865,18 +11865,18 @@ MathJax.Hub.Config({
      <li class="has-sub"><a href="#"><span title="Generating Software Tests"><i class="fa fa-fw fa-bars"></i> </span><span class="menu_1">Generating Software Tests</span></a>
         <ol>
            <li><a href="https://www.fuzzingbook.org/"><i class="fa fa-fw fa-home"></i> About this book</a></li>
-<li><a href="Intro_Testing.html"><span class="chnum">1</span> Introduction to Software Testing</a></li>
+<li class="has-sub"><a href="Intro_Testing.html" class="chapters">Chapters 1&ndash;5 <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="Intro_Testing.html"><span class="chnum">1</span> Introduction to Software Testing</a></li>
 <li><a href="Fuzzer.html"><span class="chnum">2</span> Fuzzing: Breaking Things with Random Inputs</a></li>
 <li><a href="Coverage.html"><span class="chnum">3</span> Getting Coverage</a></li>
 <li><a href="MutationFuzzer.html"><span class="chnum">4</span> Mutation-Based Fuzzing</a></li>
 <li><a href="Grammars.html"><span class="chnum">5</span> Fuzzing with Grammars</a></li>
-<li class="has-sub"><a href="GrammarFuzzer.html" class="chapters">Chapters 6&ndash;10 <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="GrammarFuzzer.html"><span class="chnum">6</span> Efficient Grammar Fuzzing</a></li>
+</ul><li class="has-sub"><a href="GrammarFuzzer.html" class="chapters">Chapters 6&ndash;10 <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="GrammarFuzzer.html"><span class="chnum">6</span> Efficient Grammar Fuzzing</a></li>
 <li><a href="GrammarCoverageFuzzer.html"><span class="chnum">7</span> Grammar Coverage</a></li>
 <li><a href="ConfigurationFuzzer.html"><span class="chnum">8</span> Testing Configurations</a></li>
 <li><a href="Parser.html"><span class="chnum">9</span> Parsing and Recombining Inputs</a></li>
 <li><a href="ProbabilisticGrammarFuzzer.html"><span class="chnum">10</span> Probabilistic Grammar Fuzzing</a></li>
-</ul><li class="has-sub"><a href="GeneratorGrammarFuzzer.html" class="chapters">Chapters 11&ndash;11 <i class="fa fa-fw fa-caret-right"></i></a><ul><li><a href="GeneratorGrammarFuzzer.html"><span class="chnum">11</span> Fuzzing with Generators</a></li>
-</ul>
+</ul><li><a href="GeneratorGrammarFuzzer.html" class="this_page"><span class="chnum">11</span> Fuzzing with Generators</a></li>
+
            <li class="has-sub"><a>Appendices <i class="fa fa-fw fa-caret-right"></i></a>
                <ul>
                    <li><a href="https://www.fuzzingbook.org/html/ExpectError.html">Error Handling</a></li>
@@ -11887,18 +11887,40 @@ MathJax.Hub.Config({
            <li><a href="https://www.fuzzingbook.org/#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
      </li>
-     <li class="has-sub"><a href="#"><span title="Generating Software Tests"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Generating Software Tests</span></a>
-           <ul><li class="has-sub"><a href="#Table-of-Contents">Table of Contents</a>
-</li><li class="has-sub"><a href="#Appendices">Appendices</a>
-</ul></li>
+     <li class="has-sub"><a href="#"><span title="Fuzzing with Generators"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Fuzzing with Generators</span></a>
+           <ul><li class="has-sub"><a href="#Example:-Test-a-Credit-Card-System">Example: Test a Credit Card System</a>
+</li><li class="has-sub"><a href="#Attaching-Functions-to-Expansions">Attaching Functions to Expansions</a>
+<ul><li class="has-sub"><a href="#Functions-Called-Before-Expansion">Functions Called Before Expansion</a>
+</li><li class="has-sub"><a href="#Functions-Called-After-Expansion">Functions Called After Expansion</a>
+</ul></li><li class="has-sub"><a href="#A-Class-for-Integrating-Constraints">A Class for Integrating Constraints</a>
+</li><li class="has-sub"><a href="#Generating-Elements-before-Expansion">Generating Elements before Expansion</a>
+<ul><li class="has-sub"><a href="#Example:-Numeric-Ranges">Example: Numeric Ranges</a>
+</li><li class="has-sub"><a href="#Example:-More-Numeric-Ranges">Example: More Numeric Ranges</a>
+</li><li class="has-sub"><a href="#Support-for-Python-Generators">Support for Python Generators</a>
+</ul></li><li class="has-sub"><a href="#Checking-and-Repairing-Elements-after-Expansion">Checking and Repairing Elements after Expansion</a>
+<ul><li class="has-sub"><a href="#Example:-Negative-Expressions">Example: Negative Expressions</a>
+</li><li class="has-sub"><a href="#Example:-Matching-XML-Tags">Example: Matching XML Tags</a>
+</li><li class="has-sub"><a href="#Example:-Checksums">Example: Checksums</a>
+</ul></li><li class="has-sub"><a href="#Local-Checking-and-Repairing">Local Checking and Repairing</a>
+</li><li class="has-sub"><a href="#Definitions-and-Uses">Definitions and Uses</a>
+</li><li class="has-sub"><a href="#Ordering-Expansions">Ordering Expansions</a>
+</li><li class="has-sub"><a href="#All-Together">All Together</a>
+<ul><li class="has-sub"><a href="#Generators-and-Probabilistic-Fuzzing">Generators and Probabilistic Fuzzing</a>
+</ul></li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
+</li><li class="has-sub"><a href="#Next-Steps">Next Steps</a>
+</li><li class="has-sub"><a href="#Background">Background</a>
+</li><li class="has-sub"><a href="#Exercises">Exercises</a>
+<ul><li class="has-sub"><a href="#Exercise-1:-Tree-Processing">Exercise 1: Tree Processing</a>
+</li><li class="has-sub"><a href="#Exercise-2:-Attribute-Grammars">Exercise 2: Attribute Grammars</a>
+</ul></li></ul></li>
      </li>
      
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/00_Table_of_Contents.ipynb" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook (beta)</a></li>
-     <li><a href="https://www.fuzzingbook.org/slides/00_Table_of_Contents.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
-     <li><a href="https://www.fuzzingbook.org/code/00_Table_of_Contents.py"><i class="fa fa-fw fa-download"></i> Download Code (.py)</a></li>
-     <li><a href="https://www.fuzzingbook.org/notebooks/00_Table_of_Contents.ipynb"><i class="fa fa-fw fa-download"></i> Download Notebook (.ipynb)</a></li>
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/GeneratorGrammarFuzzer.ipynb" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook (beta)</a></li>
+     <li><a href="https://www.fuzzingbook.org/slides/GeneratorGrammarFuzzer.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
+     <li><a href="https://www.fuzzingbook.org/code/GeneratorGrammarFuzzer.py"><i class="fa fa-fw fa-download"></i> Download Code (.py)</a></li>
+     <li><a href="https://www.fuzzingbook.org/notebooks/GeneratorGrammarFuzzer.ipynb"><i class="fa fa-fw fa-download"></i> Download Notebook (.ipynb)</a></li>
      <li><a href="https://www.fuzzingbook.org/dist/fuzzingbook-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
      <li><a href="https://www.fuzzingbook.org/dist/fuzzingbook-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
      <li><a href="https://github.com/uds-se/fuzzingbook/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
@@ -11907,13 +11929,13 @@ MathJax.Hub.Config({
      
      <li class="has-sub"><a href="#"><span title="Share"><i class="fa fa-fw fa-comments"></i> </span> <span class="menu_4">Share</span></a>
         <ul>
-            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Generating%20Software%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2f00_Table_of_Contents.html" target="popup" 
-onclick="window.open('https://twitter.com/intent/tweet?text=I%20just%20read%20%22Generating%20Software%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2f00_Table_of_Contents.html','popup','width=600,height=600'); return false;"
+            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Fuzzing%20with%20Generators%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fGeneratorGrammarFuzzer.html" target="popup" 
+onclick="window.open('https://twitter.com/intent/tweet?text=I%20just%20read%20%22Fuzzing%20with%20Generators%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fGeneratorGrammarFuzzer.html','popup','width=600,height=600'); return false;"
 ><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
-            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2f00_Table_of_Contents.html" target="popup" 
-onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2f00_Table_of_Contents.html','popup','width=600,height=600'); return false;"
+            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fGeneratorGrammarFuzzer.html" target="popup" 
+onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fGeneratorGrammarFuzzer.html','popup','width=600,height=600'); return false;"
 ><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
-            <li><a href="mailto:?subject=Generating%20Software%20Tests&body=I%20just%20read%20%22Generating%20Software%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2f00_Table_of_Contents.html"><i class="fa fa-fw fa-envelope"></i> Share by Email</a>
+            <li><a href="mailto:?subject=Fuzzing%20with%20Generators&body=I%20just%20read%20%22Fuzzing%20with%20Generators%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fGeneratorGrammarFuzzer.html"><i class="fa fa-fw fa-envelope"></i> Share by Email</a>
             <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
      </li>
@@ -11936,7 +11958,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Generating-Software-Tests">Generating Software Tests<a class="anchor-link" href="#Generating-Software-Tests">&#182;</a></h1></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Fuzzing-with-Generators">Fuzzing with Generators<a class="anchor-link" href="#Fuzzing-with-Generators">&#182;</a></h1><p>In this chapter, we show how to extend grammars with <em>functions</em> – pieces of code that get executed during grammar expansion, and that can generate, check, or change elements produced.  Adding functions to a grammar allows for very versatile test generation, bringing together the best of grammar generation and programming.</p>
+</div>
 </div>
 </div>
 </div>
@@ -11944,25 +11967,146 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Table-of-Contents">Table of Contents<a class="anchor-link" href="#Table-of-Contents">&#182;</a></h2><ol>
-<li><a href="Intro_Testing.html">Introduction to Software Testing</a></li>
-<li><a href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
-<li><a href="Coverage.html">Getting Coverage</a></li>
-<li><a href="MutationFuzzer.html">Mutation-Based Fuzzing</a></li>
-<li><a href="Grammars.html">Fuzzing with Grammars</a></li>
-<li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing</a></li>
-<li><a href="GrammarCoverageFuzzer.html">Grammar Coverage</a></li>
-<li><a href="ConfigurationFuzzer.html">Testing Configurations</a></li>
-<li><a href="Parser.html">Parsing and Recombining Inputs</a></li>
-<li><a href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a></li>
-<li><a href="GeneratorGrammarFuzzer.html">Fuzzing with Generators</a></li>
-<li><a href="APIFuzzer.html">Fuzzing APIs</a></li>
-<li><a href="Carver.html">Carving Unit Tests</a></li>
-<li><a href="Reducer.html">Reducing Failure-Inducing Inputs</a></li>
-<li><a href="WebFuzzer.html">Testing Web Applications</a></li>
-<li><a href="GUIFuzzer.html">Testing Graphical User Interfaces</a></li>
-<li><a href="InformationFlow.html">Information Flow</a></li>
-<li><a href="GrammarMiner.html">Mining Input Grammars</a></li>
+<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
+<ul>
+<li>As this chapter deeply interacts with the techniques discussed in the <a href="GrammarFuzzer.html">chapter on efficient grammar fuzzing</a>, a good understanding of the techniques is recommended.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Example:-Test-a-Credit-Card-System">Example: Test a Credit Card System<a class="anchor-link" href="#Example:-Test-a-Credit-Card-System">&#182;</a></h2><p>Suppose you work with a shopping system that – among several other features – allows customers to pay with a credit card.  Your task is to test the payment functionality.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To make things simple, we will assume that we need only two pieces of data – a 16-digit credit card number and an amount to be charged.  Both pieces can be easily generated with grammars, as in the following:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/fuzzingbook_utils.html" class="import" target="_blank">fuzzingbook_utils</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">is_nonterminal</span><span class="p">,</span> <span class="n">extend_grammar</span>
+<span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">opts</span><span class="p">,</span> <span class="n">exp_opt</span><span class="p">,</span> <span class="n">exp_string</span><span class="p">,</span> <span class="n">crange</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CHARGE_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Charge &lt;amount&gt; to my credit card &lt;credit-card-number&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;amount&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;$&lt;float&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;float&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;integer&gt;.&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;integer&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span> <span class="n">crange</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">),</span>
+
+    <span class="s2">&quot;&lt;credit-card-number&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digits&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;digits&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit-block&gt;&lt;digit-block&gt;&lt;digit-block&gt;&lt;digit-block&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;digit-block&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">CHARGE_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>All of this works neatly – we can generate arbitrary amounts and credit card numbers:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">all_terminals</span><span class="p">,</span> <span class="n">display_tree</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">CHARGE_GRAMMAR</span><span class="p">)</span>
+<span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;Charge $9.40 to my credit card 7166898575638313&#39;,
+ &#39;Charge $8.79 to my credit card 6845418694643271&#39;,
+ &#39;Charge $5.64 to my credit card 6655894657077388&#39;,
+ &#39;Charge $0.60 to my credit card 2596728464872261&#39;,
+ &#39;Charge $8.90 to my credit card 2363769342732142&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>However, when actually testing our system with this data, we find two problems:</p>
+<ol>
+<li>We'd like to test <em>specific</em> amounts being charged – for instance, amounts that would excess the credit card limit.</li>
+<li>We find that 9 out of 10 credit card numbers are rejected because of having an incorrect checksum.  This is fine if we want to test rejection of credit card numbers – but if we want to test the actual functionality of processing a charge, we need <em>valid</em> numbers.</li>
 </ol>
 </div>
 </div>
@@ -11972,12 +12116,3052 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Appendices">Appendices<a class="anchor-link" href="#Appendices">&#182;</a></h2><ul>
-<li><a href="ExpectError.html">Error Handling</a></li>
-<li><a href="Timer.html">Timer</a></li>
-<li><a href="RailroadDiagrams.html">Railroad Diagrams</a></li>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We could go and ignore these issues; after all, eventually, it is only a matter of time until large amounts and valid numbers are generated.  As it comes to the first concern, we could also address it by changing the grammar appropriately – say, to only produce charges that have at least six leading digits.  However, generalizing this to arbitrary ranges of values will be cumbersome.</p>
+<p>The second concern, the checksums of credit card numbers, however, runs deeper – at least as far as grammars are concerned, is that a complex arithmetic operation like a checksum cannot be expressed in a grammar alone – at least not in the <em>context-free grammars</em> we use here.  (In principle, one <em>could</em> do this in a  <em>context–sensitive</em> grammar, but specifying this would be no fun at all.)  What we want is a mechanism that allows us to <em>attach programmatic computations</em> to our grammars, bringing together the best of both worlds.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Attaching-Functions-to-Expansions">Attaching Functions to Expansions<a class="anchor-link" href="#Attaching-Functions-to-Expansions">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The key idea of this chapter is to <em>extend</em> grammars such that one can <em>attach Python functions</em> to individual expansions.  These functions can be executed</p>
+<ol>
+<li><em>before</em> expansion, <em>replacing</em> the element to be expanded by a computed value; or</li>
+<li><em>after</em> expansion, <em>checking</em> generated elements, and possibly also replacing them.</li>
+</ol>
+<p>In both cases, functions are specified using the <code>opts()</code> expansion mechanism introduced in the <a href="Grammars.html">chapter on grammars</a>.  They are thus tied to a specific expansion $e$ of a symbol $s$.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Functions-Called-Before-Expansion">Functions Called Before Expansion<a class="anchor-link" href="#Functions-Called-Before-Expansion">&#182;</a></h3><p>A function defined using the <code>pre</code> option is invoked <em>before</em> expansion of $s$ into $e$. Its value <em>replaces</em> the expansion $e$ to be produced.  To generate a value for the credit card example, above, we could define a <em>pre-expansion</em> generator function</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/random.html" class="import" target="_blank">random</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">high_charge</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">10000000</span><span class="p">,</span> <span class="mi">90000000</span><span class="p">)</span> <span class="o">/</span> <span class="mf">100.0</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>With <code>opts()</code>, we could attach this function to the grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CHARGE_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s2">&quot;&lt;float&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;integer&gt;.&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="n">high_charge</span><span class="p">))],</span>
+<span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>with the intention that whenever <code>&lt;float&gt;</code> is expanded, the function <code>high_charge</code> would be invoked to generate a value for <code>&lt;float&gt;</code>.  (The actual expansion in the grammar would still be present for fuzzers that ignore functions, such as <code>GrammarFuzzer</code>).</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Since functions tied to a grammar are frequently very simple, we can also <em>inline</em> them using a <em>lambda</em> expression.  A <em>lambda expression</em> is used for <em>anonymous</em> functions that are limited in scope and functionality.  Here's an example:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">apply_twice</span><span class="p">(</span><span class="n">function</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">function</span><span class="p">(</span><span class="n">function</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">apply_twice</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>16
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here, we don't have to give the <code>function</code> to be applied twice a name (say, <code>square()</code>); instead, we apply it inline within the invocation.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Using <code>lambda</code>, this is what our grammar looks like:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CHARGE_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s2">&quot;&lt;float&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;integer&gt;.&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">,</span>
+                 <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">10000000</span><span class="p">,</span> <span class="mi">90000000</span><span class="p">)</span> <span class="o">/</span> <span class="mf">100.0</span><span class="p">))]</span>
+<span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Functions-Called-After-Expansion">Functions Called After Expansion<a class="anchor-link" href="#Functions-Called-After-Expansion">&#182;</a></h3><p>A function defined using the <code>post</code> option is invoked <em>after</em> expansion of $s$ into $e$, passing the expanded values of the symbols in $e$ as arguments.  A post-expansion function can serve in two ways:</p>
+<ol>
+<li>It can serve as a <em>constraint</em> or <em>filter</em> on the expanded values, returning <code>True</code> if the expansion is valid, and <code>False</code> if not; if it returns <code>False</code>, another expansion is attempted.</li>
+<li>It can also serve as a <em>repair</em>, returning a string value; like pre-expansion functions, the returned value replaces the expansion.</li>
+</ol>
+<p>For our credit card example, we can choose both ways.  If we have a function <code>check_credit_card(s)</code> which returns <code>True</code> for a valid number <code>s</code> and <code>False</code> for invalid ones, we would go for the first option:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CHARGE_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s2">&quot;&lt;credit-card-number&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;digits&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">digits</span><span class="p">:</span> <span class="n">check_credit_card</span><span class="p">(</span><span class="n">digits</span><span class="p">)))]</span>
+<span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>With such a filter, only valid credit cards will be produced.  On average, it will still take 10 attempts for each time <code>check_credit_card()</code> is satisfied, but then, we do not have to recourse to the system under test.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we have a function <code>fix_credit_card(s)</code> which changes the number such that the checksum is valid and returns the "fixed" number, we can make use of this one instead:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CHARGE_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s2">&quot;&lt;credit-card-number&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;digits&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">digits</span><span class="p">:</span> <span class="n">fix_credit_card</span><span class="p">(</span><span class="n">digits</span><span class="p">)))]</span>
+<span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here, each number is generated only once and then repaired.  This is very efficient.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The checksum function used for credit cards is the <a href="https://en.wikipedia.org/wiki/Luhn_algorithm">Luhn algorithm</a>, a simple yet effective formula.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">luhn_checksum</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute Luhn&#39;s check digit over a string of digits&quot;&quot;&quot;</span>
+    <span class="n">LUHN_ODD_LOOKUP</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span>
+                       <span class="mi">9</span><span class="p">)</span>  <span class="c1"># sum_of_digits (index * 2)</span>
+
+    <span class="n">evens</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">::</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">odds</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">LUHN_ODD_LOOKUP</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">::</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">evens</span> <span class="o">+</span> <span class="n">odds</span><span class="p">)</span> <span class="o">%</span> <span class="mi">10</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">valid_luhn_checksum</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check whether the last digit is Luhn&#39;s checksum over the earlier digits&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">luhn_checksum</span><span class="p">(</span><span class="n">s</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fix_luhn_checksum</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the given string of digits, with a fixed check digit&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">s</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">luhn_checksum</span><span class="p">(</span><span class="n">s</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">luhn_checksum</span><span class="p">(</span><span class="s2">&quot;123&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>8
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fix_luhn_checksum</span><span class="p">(</span><span class="s2">&quot;123x&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;1238&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can make use of these functions in our credit card grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">check_credit_card</span> <span class="o">=</span> <span class="n">valid_luhn_checksum</span>
+<span class="n">fix_credit_card</span> <span class="o">=</span> <span class="n">fix_luhn_checksum</span>
+
+<span class="n">fix_credit_card</span><span class="p">(</span><span class="s2">&quot;1234567890123456&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;1234567890123458&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Class-for-Integrating-Constraints">A Class for Integrating Constraints<a class="anchor-link" href="#A-Class-for-Integrating-Constraints">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>While it is easy to specify functions, our grammar fuzzer will simply ignore them just as it ignores all extensions.  It will issue a warning, though:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">CHARGE_GRAMMAR</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>warning: option &#39;post&#39; is not supported
+warning: option &#39;pre&#39; is not supported
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;Charge $4.05 to my credit card 0637034038177393&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We need to define a special fuzzer that actually invokes the given <code>pre</code> and <code>post</code> functions and acts accordingly.  We name this a <code>GeneratorGrammarFuzzer</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">supported_opts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">supported_opts</span><span class="p">()</span> <span class="o">|</span> <span class="p">{</span><span class="s2">&quot;pre&quot;</span><span class="p">,</span> <span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="s2">&quot;order&quot;</span><span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We define custom functions to access the <code>pre</code> and <code>post</code> options:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_pre_expansion_function</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the specified pre-expansion function, or None if unspecified&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">exp_opt</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="s1">&#39;pre&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_post_expansion_function</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the specified post-expansion function, or None if unspecified&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">exp_opt</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="s1">&#39;post&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>order</code> attribute will be used <a href="#Ordering-Expansions">later in this chapter</a>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Generating-Elements-before-Expansion">Generating Elements before Expansion<a class="anchor-link" href="#Generating-Elements-before-Expansion">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Our first task will be implementing the pre-expansion functions – that is, the function that would be invoked <em>before</em> expansion to replace the value to be expanded.  To this end, we hook into the <code>process_chosen_children()</code> method, which gets the selected children before expansion.  We set it up such that it invokes the given <code>pre</code> function and applies its result on the children, possibly replacing them.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/inspect.html" class="import" target="_blank">inspect</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">process_chosen_children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">expansion</span><span class="p">):</span>
+        <span class="n">function</span> <span class="o">=</span> <span class="n">exp_pre_expansion_function</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">children</span>
+
+        <span class="k">assert</span> <span class="n">callable</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isgeneratorfunction</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
+            <span class="c1"># See &quot;generators&quot;, below</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_generator</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="n">function</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">function</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">function</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;()&quot;</span><span class="p">,</span> <span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The method <code>apply_result()</code> takes the result from the pre-expansion function and applies it on the children.  The exact effect depends on the type of the result:</p>
+<ul>
+<li>A <em>string</em> $s$ replaces the entire expansion with $s$.</li>
+<li>A <em>list</em> $[x_1, x_2, \dots, x_n]$ replaces the $i$-th symbol with $x_i$ for every $x_i$ that is not <code>None</code>.  Specifying <code>None</code> as a list element $x_i$ is useful to leave that element unchanged.  If $x_i$ is not a string, it is converted to a string.</li>
+<li>A value of <code>None</code> is ignored.  This is useful if one wants to simply call a function upon expansion, with no effect on the expanded strings.</li>
+<li><em>Boolean</em> values are ignored.  This is useful for post-expansion functions, discussed below.</li>
+<li>All <em>other types</em> are converted to strings, replacing the entire expansion.</li>
 </ul>
 </div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">apply_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="p">[(</span><span class="n">result</span><span class="p">,</span> <span class="p">[])]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">symbol_indexes</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                <span class="n">children</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_nonterminal</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">child_index</span> <span class="o">=</span> <span class="n">symbol_indexes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="s2">&quot;Replacing&quot;</span><span class="p">,</span> <span class="n">all_terminals</span><span class="p">(</span>
+                                <span class="n">children</span><span class="p">[</span><span class="n">child_index</span><span class="p">]),</span> <span class="s2">&quot;by&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+                    <span class="c1"># children[child_index] = (value, [])</span>
+                    <span class="n">child_symbol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">children</span><span class="p">[</span><span class="n">child_index</span><span class="p">]</span>
+                    <span class="n">children</span><span class="p">[</span><span class="n">child_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">child_symbol</span><span class="p">,</span> <span class="p">[(</span><span class="n">value</span><span class="p">,</span> <span class="p">[])])</span>
+        <span class="k">elif</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Replacing&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">all_terminals</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">]),</span> <span class="s2">&quot;by&quot;</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+            <span class="n">children</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">repr</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="p">[])]</span>
+
+        <span class="k">return</span> <span class="n">children</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Numeric-Ranges">Example: Numeric Ranges<a class="anchor-link" href="#Example:-Numeric-Ranges">&#182;</a></h3><p>With the above extensions, we have full support for pre-expansion functions.  Using the augmented <code>CHARGE_GRAMMAR</code>, we find that the pre-expansion <code>lambda</code> function is actually used:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">charge_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">CHARGE_GRAMMAR</span><span class="p">)</span>
+<span class="n">charge_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;Charge $439383.87 to my credit card 2433506594138520&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The log reveals a bit more details what happens when the pre-expansion function is called.  We see that the expansion <code>&lt;integer&gt;.&lt;digit&gt;&lt;digit&gt;</code> is directly replaced by the computed value:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">amount_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span>
+    <span class="n">CHARGE_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;amount&gt;&quot;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">amount_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Tree: &lt;amount&gt;
+Expanding &lt;amount&gt; randomly
+Tree: $&lt;float&gt;
+Expanding &lt;float&gt; randomly
+&lt;function &lt;lambda&gt; at 0x112dc0c80&gt;() = 382087.72
+Replacing &lt;integer&gt;.&lt;digit&gt;&lt;digit&gt; by 382087.72
+Tree: $382087.72
+&#39;$382087.72&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;$382087.72&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-More-Numeric-Ranges">Example: More Numeric Ranges<a class="anchor-link" href="#Example:-More-Numeric-Ranges">&#182;</a></h3><p>We can use such pre-expansion functions in other contexts, too.  Suppose we want to generate arithmetic expressions in which each number is between 100 and 200.  We can extend <code>EXPR_GRAMMAR</code> accordingly:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expr_100_200_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
+                                      <span class="p">{</span>
+                                          <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span> <span class="p">[</span>
+                                              <span class="s2">&quot;+&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span>
+
+                                              <span class="c1"># Generate only the integer part with a function;</span>
+                                              <span class="c1"># the fractional part comes from</span>
+                                              <span class="c1"># the grammar</span>
+                                              <span class="p">(</span><span class="s2">&quot;&lt;integer&gt;.&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span>
+                                                  <span class="n">pre</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="kc">None</span><span class="p">])),</span>
+
+                                              <span class="c1"># Generate the entire integer</span>
+                                              <span class="c1"># from the function</span>
+                                              <span class="p">(</span><span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span>
+                                                  <span class="n">pre</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">))),</span>
+                                          <span class="p">],</span>
+                                      <span class="p">}</span>
+                                      <span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">expr_100_200_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">expr_100_200_grammar</span><span class="p">)</span>
+<span class="n">expr_100_200_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;(108.6 / 155 + 177) / 118 * 120 * 107 + 151 + 195 / -200 - 150 * 188 / 147 + 112&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Support-for-Python-Generators">Support for Python Generators<a class="anchor-link" href="#Support-for-Python-Generators">&#182;</a></h3><p>The Python language has its own concept of generator functions, which we of course want to support as well.  A <em>generator function in Python</em> is a function that returns a so-called <em>iterator object</em> which we can iterate over, one value at a time.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To create a generator function in Python, one defines a normal function, using the <code>yield</code> statement instead of a <code>return</code> statement.  While a <code>return</code> statement terminates the function, a <code>yield</code> statement pauses its execution, saving all of its state, to be resumed later for the next successive calls.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here is an example of a generator function.  When first invoked, <code>iterate()</code> yields the value 1, followed by 2, 3, and so on:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">iterate</span><span class="p">():</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">yield</span> <span class="n">t</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can use <code>iterate</code> in a loop, just like the <code>range()</code> function (which also is a generator function):</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">iterate</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="k">break</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>1 2 3 4 5 6 7 8 9 10 
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can also use <code>iterate()</code> as a pre-expansion generator function, ensuring it will create one successive integer after another:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iterate_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
+                                 <span class="p">{</span>
+                                     <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span> <span class="p">[</span>
+                                         <span class="s2">&quot;+&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span>
+                                         <span class="c1"># &quot;&lt;integer&gt;.&lt;integer&gt;&quot;,</span>
+
+                                         <span class="c1"># Generate one integer after another</span>
+                                         <span class="c1"># from the function</span>
+                                         <span class="p">(</span><span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="n">iterate</span><span class="p">)),</span>
+                                     <span class="p">],</span>
+                                 <span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To support generators, our <code>process_chosen_children()</code> method, above, checks whether a function is a generator; if so, it invokes the <code>run_generator()</code> method.  When <code>run_generator()</code> sees the function for the first time during a <code>fuzz_tree()</code> (or <code>fuzz()</code>) call, it invokes the function to create a generator object; this is saved in the <code>generators</code> attribute, and then called.  Subsequent calls directly go to the generator, preserving state.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fuzz_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_generators</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fuzz_tree</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">reset_generators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generators</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">run_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expansion</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">((</span><span class="n">expansion</span><span class="p">,</span> <span class="n">function</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">generators</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">generators</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span><span class="p">()</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generators</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Does this work?  Let us run our fuzzer on the above grammar, using <code>iterator()</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iterate_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">iterate_grammar</span><span class="p">)</span>
+<span class="n">iterate_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;1 * ++++3 / ---+4 - 2 * +--6 / 7 * 10 - (9 - 11) - 5 + (13) * 14 + 8 + 12&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We see that the expression contains all integers starting with 1.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Instead of specifying our own Python generator function such as <code>iterate()</code>, we can also use one of the built-in Python generators such as <code>range()</code>.  This will also generate integers starting with 1:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iterate_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
+                                 <span class="p">{</span>
+                                     <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span> <span class="p">[</span>
+                                         <span class="s2">&quot;+&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span>
+                                         <span class="p">(</span><span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))),</span>
+                                     <span class="p">],</span>
+                                 <span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>It is also possible to use Python list comprehensions, by adding their generator functions in parentheses:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">iterate_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
+                                 <span class="p">{</span>
+                                     <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span> <span class="p">[</span>
+                                         <span class="s2">&quot;+&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;factor&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span>
+                                         <span class="p">(</span><span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span>
+                                             <span class="n">pre</span><span class="o">=</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)))),</span>
+                                     <span class="p">],</span>
+                                 <span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Note that both above grammars will actually cause the fuzzer to raise an exception when more than 1,000 integers are created, but you will find it very easy to fix this.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Finally, <code>yield</code> is actually an expression, not a statement, so it is also possible to have a <code>lambda</code> expression <code>yield</code> a value.  If you find some reasonable use for this, let us know.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Checking-and-Repairing-Elements-after-Expansion">Checking and Repairing Elements after Expansion<a class="anchor-link" href="#Checking-and-Repairing-Elements-after-Expansion">&#182;</a></h2><p>Let us now turn to our second set of functions to be supported – namely, post-expansion functions.  The simplest way of using them is to run them once the entire tree is generated, taking care of replacements as with <code>pre</code> functions.  If one of them returns <code>False</code>, however, we start anew.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fuzz_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fuzz_tree</span><span class="p">()</span>
+            <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
+            <span class="n">result</span><span class="p">,</span> <span class="n">new_children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_post_functions</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_children</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restart_expansion</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">restart_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># To be overloaded in subclasses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_generators</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The method <code>run_post_functions()</code> is applied recursively on all nodes of the derivation tree.  For each node, it determines the expansion applied, and then runs the function associated with that expansion.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="c1"># Return True iff all constraints of grammar are satisfied in TREE</span>
+    <span class="k">def</span> <span class="nf">run_post_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)):</span>
+        <span class="n">symbol</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="k">if</span> <span class="n">children</span> <span class="o">==</span> <span class="p">[]:</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">children</span>  <span class="c1"># Terminal symbol</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">expansion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_expansion</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c1"># Expansion (no longer) found - ignore</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">children</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">function</span> <span class="o">=</span> <span class="n">exp_post_expansion_function</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_function</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">function</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">),</span>
+                        <span class="s2">&quot;did not satisfy&quot;</span><span class="p">,</span>
+                        <span class="n">symbol</span><span class="p">,</span>
+                        <span class="s2">&quot;constraint&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">children</span>
+
+            <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_result</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_post_functions</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">children</span>
+
+        <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">children</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The helper method <code>find_expansion()</code> takes a subtree <code>tree</code> and determines the expansion from the grammar that was applied to create the children in <code>tree</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">find_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="n">symbol</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="n">tree</span>
+
+        <span class="n">applied_expansion</span> <span class="o">=</span> \
+            <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">child_symbol</span> <span class="k">for</span> <span class="n">child_symbol</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">children</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">exp_string</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span> <span class="o">==</span> <span class="n">applied_expansion</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">expansion</span>
+
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+            <span class="n">symbol</span> <span class="o">+</span>
+            <span class="s2">&quot;: did not find expansion &quot;</span> <span class="o">+</span>
+            <span class="nb">repr</span><span class="p">(</span><span class="n">applied_expansion</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The method <code>eval_function()</code> is the one that takes care of actually invoking the post-expansion function.  It creates an argument list containing the expansions of all nonterminal children – that is, one argument for each symbol in the grammar expansion.  It then calls the given function.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">eval_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+        <span class="n">symbol</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="n">tree</span>
+
+        <span class="k">assert</span> <span class="n">callable</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">exp</span><span class="p">)</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">exp</span> <span class="o">!=</span> <span class="p">[]</span> <span class="ow">and</span> <span class="n">exp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">symbol_value</span> <span class="o">=</span> <span class="n">all_terminals</span><span class="p">((</span><span class="n">symbol</span><span class="p">,</span> <span class="n">exp</span><span class="p">))</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">symbol_value</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">function</span><span class="p">)</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">)),</span> <span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Note that unlike pre-expansion functions, post-expansion functions typically process the values already produced, so we do not support Python generators here.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Negative-Expressions">Example: Negative Expressions<a class="anchor-link" href="#Example:-Negative-Expressions">&#182;</a></h3><p>Let us try out these post-expression functions on an example.  Suppose we want to produce only arithmetic expressions that evaluate to a negative number – for instance, to feed such generated expressions into a compiler or some other external system.  Doing so constructively with <code>pre</code> functions would be very difficult. Instead, we can define a constraint that checks for precisely this property, using the Python <code>eval()</code> function.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The Python <code>eval()</code> function takes a string and evaluates it according to Python rules.  Since the syntax of our generated expressions is slightly different from Python, and since Python can raise arithmetic exceptions during evaluation, we need a means to handle such errors gracefully.  The function <code>eval_with_exception()</code> wraps around <code>eval()</code>; if an exception occurs during evaluation, it returns False – which causes the production algorithm to produce another value.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="k">import</span> <span class="n">ExpectError</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">eval_with_exception</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="c1"># Use &quot;mute=True&quot; to suppress all messages</span>
+    <span class="k">with</span> <span class="n">ExpectError</span><span class="p">(</span><span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">negative_expr_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
+                                       <span class="p">{</span>
+                                           <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">eval_with_exception</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">))]</span>
+                                       <span class="p">}</span>
+                                       <span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">negative_expr_grammar</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">negative_expr_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">negative_expr_grammar</span><span class="p">)</span>
+<span class="n">expr</span> <span class="o">=</span> <span class="n">negative_expr_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+<span class="n">expr</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>ZeroDivisionError: division by zero (expected)
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;(8.9 / 6 * 4 - 0.2 + -7 - 7 - 8 * 6) * 7 * 15.55 - -945.9&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The result is indeed negative:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">eval</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>-5178.726666666667
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Matching-XML-Tags">Example: Matching XML Tags<a class="anchor-link" href="#Example:-Matching-XML-Tags">&#182;</a></h3><p>Post-expansion functions can not only be used to <em>check</em> expansions, but also to repair them.  To this end, we can have them return a string or a list of strings; just like pre-expansion functions, these strings would then replace the entire expansion or individual symbols.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As an example, consider <em>XML documents</em>, which are composed of text within matching <em>XML tags</em>.  For instance, consider the following fragment in HTML, a subset of XML:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/fuzzingbook_utils.html" class="import" target="_blank">fuzzingbook_utils</a></span> <span class="k">import</span> <span class="n">HTML</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;strong&gt;A bold text&lt;/strong&gt;&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+<strong>A bold text</strong>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This fragment consists of two HTML (XML) tags that surround the text; the tag name (<code>strong</code>) is present both in the opening (<code>&lt;strong&gt;</code>) as well as in the closing (<code>&lt;/strong&gt;</code>) tag.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>For a <em>finite</em> set of tags (for instance, the HTML tags <code>&lt;strong&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;body&gt;</code>, <code>&lt;form&gt;</code>, and so on), we could define a context-free grammar that parses it; each pair of tags would make up an individual rule in the grammar.  If the set of tags is <em>infinite</em>, though, as with general XML, we cannot define an appropriate grammar; that is because the constraint that the closing tag must match the opening tag is context-sensitive and thus does not fit context-free grammars.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>(Incidentally, if the closing tag had the identifier <em>reversed</em> (<code>&lt;/gnorts&gt;</code>), then a context-free grammar could describe it.  Make this a programming exercise.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can address this problem by introducing appropriate post-expansion functions that automatically make the closing tag match the opening tag.  Let us start with a simple grammar for producing XML trees:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">XML_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;xml-tree&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;xml-tree&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;&lt;id&gt;&gt;&lt;xml-content&gt;&lt;/&lt;id&gt;&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;xml-content&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Text&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;xml-tree&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;id&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;letter&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;id&gt;&lt;letter&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;letter&gt;&quot;</span><span class="p">:</span> <span class="n">crange</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>If we fuzz using this grammar, we get non-matching XML tags, as expected:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">xml_fuzzer</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">)</span>
+<span class="n">xml_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;&lt;t&gt;&lt;qju&gt;Text&lt;/m&gt;&lt;/q&gt;&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Setting up a post-expansion function that sets the second identifier to the string found in the first solves the problem:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">XML_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s2">&quot;&lt;xml-tree&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;&lt;id&gt;&gt;&lt;xml-content&gt;&lt;/&lt;id&gt;&gt;&quot;</span><span class="p">,</span>
+                    <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">id1</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">id2</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">id1</span><span class="p">])</span>
+                    <span class="p">)]</span>
+<span class="p">})</span>
+
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">xml_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">XML_GRAMMAR</span><span class="p">)</span>
+<span class="n">xml_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;&lt;u&gt;Text&lt;/u&gt;&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Checksums">Example: Checksums<a class="anchor-link" href="#Example:-Checksums">&#182;</a></h3><p>As our last example, let us consider the checksum problem from the introduction.  With our newly defined repair mechanisms, we can now generate credit card numbers that are valid:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">credit_card_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span>
+    <span class="n">CHARGE_GRAMMAR</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;credit-card-number&gt;&quot;</span><span class="p">)</span>
+<span class="n">credit_card_number</span> <span class="o">=</span> <span class="n">credit_card_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+<span class="n">credit_card_number</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;2967308746680770&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">valid_luhn_checksum</span><span class="p">(</span><span class="n">credit_card_number</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The validity extends to the entire grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">charge_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">CHARGE_GRAMMAR</span><span class="p">)</span>
+<span class="n">charge_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;Charge $818819.97 to my credit card 2817984968014288&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Local-Checking-and-Repairing">Local Checking and Repairing<a class="anchor-link" href="#Local-Checking-and-Repairing">&#182;</a></h2><p>So far, we have always first generated an entire expression tree, only to check it later for validity.  This can become expensive: If several elements are first generated only to find later that one of them is invalid, we spend a lot of time trying (randomly) to regenerate a matching input.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To demonstrate the issue, let us create an expression grammar in which all digits consist of zeros and ones.  Rather than doing this constructively, though, we filter out all non-conforming expressions after the fact, using a <code>post</code> constraint:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">binary_expr_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
+                                     <span class="p">{</span>
+                                         <span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;digit&gt;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">digit</span><span class="p">,</span> <span class="n">_</span><span class="p">:</span> <span class="n">digit</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">])),</span>
+                                                       <span class="p">(</span><span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">digit</span><span class="p">:</span> <span class="n">digit</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]))]</span>
+                                     <span class="p">}</span>
+                                     <span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">binary_expr_grammar</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This works, but is very slow; it can take several seconds before a matching expression is found.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">binary_expr_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">binary_expr_grammar</span><span class="p">)</span>
+<span class="n">binary_expr_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;(-+0)&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can address the problem by checking constraints not only for the final subtree, but also for partial subtrees as soon as they are complete.  To this end, we extend the method <code>expand_tree_once()</code> such that it invokes the post-expansion function as soon as all symbols in a subtree are expanded.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">expand_tree_once</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="c1"># Apply inherited method.  This also calls `expand_tree_once()` on all</span>
+        <span class="c1"># subtrees.</span>
+        <span class="n">new_tree</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">expand_tree_once</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+        <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">new_tree</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">exp_post_expansion_function</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span>
+                <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">expansion</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="n">symbol</span><span class="p">]]):</span>
+            <span class="c1"># No constraints for this symbol</span>
+            <span class="k">return</span> <span class="n">new_tree</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">any_possible_expansions</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+            <span class="c1"># Still expanding</span>
+            <span class="k">return</span> <span class="n">new_tree</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_post_functions_locally</span><span class="p">(</span><span class="n">new_tree</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The main work takes place in this helper method <code>run_post_functions_locally()</code>.  It runs the post-expansion function $f$ with <code>run_post_functions()</code> only on the current node by setting <code>depth</code> to zero, as any completed subtrees would have their post-expansion functions ran already.  If $f$ returns <code>False</code>, <code>run_post_functions_locally()</code> returns an unexpanded symbol, such that the main driver can try another expansion.  It does so for up to 10 times (configurable via a <code>replacement_attempts</code> parameter during construction); after that, it raises a <code>RestartExpansionException</code> to restart creating the tree from scratch.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run_post_functions_locally</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_tree</span><span class="p">):</span>
+        <span class="n">symbol</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">new_tree</span>
+
+        <span class="n">result</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_post_functions</span><span class="p">(</span><span class="n">new_tree</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="n">result</span><span class="p">:</span>
+            <span class="c1"># No constraints, or constraint satisfied</span>
+            <span class="c1"># children = self.apply_result(result, children)</span>
+            <span class="n">new_tree</span> <span class="o">=</span> <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new_tree</span>
+
+        <span class="c1"># Replace tree by unexpanded symbol and try again</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="n">all_terminals</span><span class="p">(</span><span class="n">new_tree</span><span class="p">),</span>
+                <span class="s2">&quot;did not satisfy&quot;</span><span class="p">,</span>
+                <span class="n">symbol</span><span class="p">,</span>
+                <span class="s2">&quot;constraint&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">replacement_attempts_counter</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trying another expansion&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">replacement_attempts_counter</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting from scratch&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">RestartExpansionException</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">RestartExpansionException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The class constructor method and <code>fuzz_tree()</code> are set up to handle the additional functionality:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">replacement_attempts</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replacement_attempts</span> <span class="o">=</span> <span class="n">replacement_attempts</span>
+
+    <span class="k">def</span> <span class="nf">restart_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">restart_expansion</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replacement_attempts_counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replacement_attempts</span>
+
+    <span class="k">def</span> <span class="nf">fuzz_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replacement_attempts_counter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replacement_attempts</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># This is fuzz_tree() as defined above</span>
+                <span class="n">tree</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fuzz_tree</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">tree</span>
+            <span class="k">except</span> <span class="n">RestartExpansionException</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">restart_expansion</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">binary_expr_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span>
+    <span class="n">binary_expr_grammar</span><span class="p">,</span> <span class="n">replacement_attempts</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">binary_expr_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;+0 / +-1 - 1 / +0 * -+0 * 0 * 1 / 1&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Definitions-and-Uses">Definitions and Uses<a class="anchor-link" href="#Definitions-and-Uses">&#182;</a></h2><p>With the above generators and constraints, we can also address complex examples.  The <code>VAR_GRAMMAR</code> grammar from <a href="Parser.html">the chapter on parsers</a> defines a number of variables as arithmetic expressions (which in turn can contain variables, too).  Applying a simple <code>GrammarFuzzer</code> on the grammar produces plenty of identifiers, but each identifier has a unique name.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Parser.html" class="import" target="_blank">Parser</a></span> <span class="k">import</span> <span class="n">VAR_GRAMMAR</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">g</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Gc=F/1*Y+M-D-9;N=n/(m)/m*7
+a=79.0;W=o-9;v=2;K=u;D=9
+o=y-z+y+4;q=5+W;X=T
+M=-98.032*5/o
+H=IA-5-1;n=3-t;QQ=5-5
+Y=-80;d=D-M+M;Z=4.3+1*r-5+b
+ZDGSS=(1*Y-4)*54/0*pcO/4;RI=r*5.0
+Q=6+z-6;J=6/t/9/i-3-5+k
+x=-GT*+-x*6++-93*5
+q=da*T/e--v;x=3+g;bk=u
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>What we'd like is that within expressions, only identifiers <em>previously defined</em> should be used.  To this end, we introduce a set of functions around a <em>symbol table</em>, which keeps track of all variables already defined.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">SYMBOL_TABLE</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_id</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">SYMBOL_TABLE</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">use_id</span><span class="p">():</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">SYMBOL_TABLE</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">SYMBOL_TABLE</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">id</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">clear_symbol_table</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">SYMBOL_TABLE</span>
+    <span class="n">SYMBOL_TABLE</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To make use of the symbol table, we attach pre- and post-expansion functions to <code>VAR_GRAMMAR</code> that define and lookup identifiers from the symbol table.  We name our extended grammar <code>CONSTRAINED_VAR_GRAMMAR</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">VAR_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>First, we set up the grammar such that after each time an identifier is defined, we store its name in the symbol table:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;assignment&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;identifier&gt;=&lt;expr&gt;&quot;</span><span class="p">,</span>
+                      <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="nb">id</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">define_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)))]</span>
+<span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Second, we make sure that when an identifier is generated, we pick it from the symbol table, too.  (We use <code>post</code> here such that we can return <code>False</code> if no identifier is yet available, leading to another expansion being made.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;factor&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;+&lt;factor&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;-&lt;factor&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;(&lt;expr&gt;)&#39;</span><span class="p">,</span>
+                 <span class="p">(</span><span class="s2">&quot;&lt;identifier&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">use_id</span><span class="p">())),</span>
+                 <span class="s1">&#39;&lt;number&gt;&#39;</span><span class="p">]</span>
+<span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Finally, we clear the symbol table each time we (re)start an expansion.  This is helpful as we may occasionally have to restart expansions.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;statements&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="n">clear_symbol_table</span><span class="p">))]</span>
+<span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Fuzzing with this grammar ensures that each identifier used is actually defined:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">var_grammar_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">var_grammar_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>DB=+(8/4/7-9+3+3)/2178/+-9
+lNIqc=+(1+9-8)/2.9*8/5*0
+Sg=(+9/8/6)*++1/(1+7)*8*4
+r=+---552
+iz=5/7/7;K=1+6*iz*1
+q=3-2;MPy=q;p=2*5
+zj=+5*-+35.2-+1.5727978+(-(-0/6-7+3))*--+44*1
+Tl=((0*9+4-3)-6)/(-3-7*8*8/7)+9
+aXZ=-5/-+3*9/3/1-8-+0*0/3+7+4
+NA=-(8+a-1)*1.6;g=++7;a=++g*g*g
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Ordering-Expansions">Ordering Expansions<a class="anchor-link" href="#Ordering-Expansions">&#182;</a></h2><p>While our previous def/use example ensures that each <em>used</em> variable also is a <em>defined</em> variable, it does not take care of the <em>order</em> in which these definitions are made.  In fact, it is possible that first, the term on the right hand side of a <code>;</code> expands, creating an entry in the symbol table, which is then later used in the expression on the left hand side.  We can demonstrate this by actually evaluating the produced variable assignments in Python, using <code>exec()</code> to execute the sequence of assignments.  (Little known fact: Python <em>does</em> support <code>;</code> as statement separator.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">var_grammar_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">var_grammar_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">{},</span> <span class="p">{})</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+            <span class="k">continue</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>f=(9)*kOj*kOj-6/7;kOj=(9-8)*7*1
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-75-7d8198a01aa0&gt;&#34;, line 6, in &lt;module&gt;
+    exec(s, {}, {})
+  File &#34;&lt;string&gt;&#34;, line 1, in &lt;module&gt;
+NameError: name &#39;kOj&#39; is not defined (expected)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To address this issue, we allow to explicitly specify an <em>ordering of expansions</em>.  For our previous fuzzers, such an ordering was inconsequential, as eventually, all symbols would be expanded; if we have expansion functions with side effects, though, having control over the ordering in which expansions are made (and thus over the ordering in which the associated functions are called) can be important.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To specify orderings, we assign a special attribute <code>order</code> to individual expansions.  This is a list with a number for each symbol in the expansion stating in which order the expansions are to be made, starting with the smallest one.  As an example, the following rule specifies that the left hand side of a <code>;</code> separator should be expanded first:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;statements&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;statement&gt;;&lt;statements&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])),</span>
+                     <span class="s2">&quot;&lt;statement&gt;&quot;</span><span class="p">]</span>
+<span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Likewise, we want the definition of a variable to be produced only <em>after</em> the expression is expanded, since otherwise, the expression might already refer to the defined variable:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">,</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;assignment&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;identifier&gt;=&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="nb">id</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">define_id</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span>
+                                                  <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))],</span>
+<span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The helper <code>exp_order()</code> allows us to retrieve the order:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">exp_order</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the specified expansion ordering, or None if unspecified&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">exp_opt</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>To control the ordering in which symbols are expanded, we hook into the method <code>choose_tree_expansion()</code>, which is specifically set for being extended in subclasses.  It proceeds through the list <code>expandable_children</code> of expandable children to choose from and matches them with the nonterminal children from the expansion to determine their order number.  The index <code>min_given_order</code> of the expandable child with the lowest order number is then returned, choosing this child for expansion.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">choose_tree_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">expandable_children</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return index of subtree in `children` to be selected for expansion.  Defaults to random.&quot;&quot;&quot;</span>
+        <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">tree_children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">expandable_children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># No choice</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">choose_tree_expansion</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">expandable_children</span><span class="p">)</span>
+
+        <span class="n">expansion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_expansion</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="n">given_order</span> <span class="o">=</span> <span class="n">exp_order</span><span class="p">(</span><span class="n">expansion</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">given_order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># No order specified</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">choose_tree_expansion</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">expandable_children</span><span class="p">)</span>
+
+        <span class="n">nonterminal_children</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tree_children</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="p">[]]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">nonterminal_children</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">given_order</span><span class="p">),</span> \
+            <span class="s2">&quot;Order must have one element for each nonterminal&quot;</span>
+
+        <span class="c1"># Find expandable child with lowest ordering</span>
+        <span class="n">min_given_order</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">expandable_child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">expandable_children</span><span class="p">):</span>
+            <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span>
+                    <span class="n">nonterminal_children</span><span class="p">)</span> <span class="ow">and</span> <span class="n">expandable_child</span> <span class="o">!=</span> <span class="n">nonterminal_children</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">assert</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">nonterminal_children</span><span class="p">),</span> <span class="s2">&quot;Expandable child not found&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expandable child #</span><span class="si">%d</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> has order </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span>
+                      <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">expandable_child</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">given_order</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="n">min_given_order</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">given_order</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">min_given_order</span><span class="p">:</span>
+                <span class="n">min_given_order</span> <span class="o">=</span> <span class="n">k</span>
+
+        <span class="k">assert</span> <span class="n">min_given_order</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Returning expandable child #</span><span class="si">%d</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                  <span class="p">(</span><span class="n">min_given_order</span><span class="p">,</span> <span class="n">expandable_children</span><span class="p">[</span><span class="n">min_given_order</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">min_given_order</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>With this, our fuzzer can now respect orderings, and all variables are properly defined:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">var_grammar_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">var_grammar_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">exec</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">{},</span> <span class="p">{})</span>
+    <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+        <span class="k">continue</span>
+    <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+        <span class="k">continue</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>SAl=4/-(2.92+5.27)/-4*0/6/3
+Z=+-7/+5.519*68/4*-+-(5/7+4)*(8*-1/0-1+6-0);o=2
+j=-(8+1+5)-+8/7*5-2/9+4;t=j
+S=-(9+9-1)--5+-8*4-1+8-2
+VImBX=06/7*6*7++-(+5*7*2+9-0)
+f=-7;j=(f*f*0)/-5*(f-f)-f*-1/f
+W=85.3*-++(9-5)/76.82/-2/++8*7;j=W
+xb=1*5*1*1-+0*3*7+2+9+0
+Edd=(4+8)/+4-+8*2*7+++9*+-+08.9
+u=-++33*+-6/(2*3*2+1/9-4*1-8)*((8.5))
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Real programming languages not only have one global scope, but multiple local scopes, frequently nested.  By carefully organizing global and local symbol tables, we can set up a grammar to handle all of these.  However, when fuzzing compilers and interpreters, we typically focus on single functions, for which one single scope is enough to make most inputs valid.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="All-Together">All Together<a class="anchor-link" href="#All-Together">&#182;</a></h2><p>Let us close this chapter by integrating our generator features with the other grammar features introduced earlier, in particular <a href="GrammarCoverageFuzzer.html">coverage-driven fuzzing</a> and <a href="ProbabilisticGrammarFuzzer.html">probabilistic grammar fuzzing</a>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The general idea to integrate the individual features is through <em>multiple inheritance</em>, which we already used for <code>ProbabilisticGrammarCoverageFuzzer</code>, introduced in the <a href="ProbabilisticGrammarFuzzer.html">exercises on probabilistic fuzzing</a>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Generators-and-Probabilistic-Fuzzing">Generators and Probabilistic Fuzzing<a class="anchor-link" href="#Generators-and-Probabilistic-Fuzzing">&#182;</a></h3><p>Probabilistic fuzzing integrates very easily with generators, as both extend <code>GrammarFuzzer</code> in different ways.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ProbabilisticGrammarFuzzer.html" class="import" target="_blank">ProbabilisticGrammarFuzzer</a></span> <span class="k">import</span> <span class="n">ProbabilisticGrammarFuzzer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ProbabilisticGrammarFuzzer.html" class="import" target="_blank">ProbabilisticGrammarFuzzer</a></span> <span class="k">import</span> <span class="n">inheritance_conflicts</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inheritance_conflicts</span><span class="p">(</span><span class="n">ProbabilisticGrammarFuzzer</span><span class="p">,</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;supported_opts&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We have to implement <code>supported_opts()</code> as the merger of both superclasses.  At the same time, we also set up the constructor such that it invokes both.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">,</span>
+                                          <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">supported_opts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">supported_opts</span><span class="p">()</span> <span class="o">|</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">ProbabilisticGrammarFuzzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">supported_opts</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">replacement_attempts</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span>
+            <span class="n">GeneratorGrammarFuzzer</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">grammar</span><span class="p">,</span>
+            <span class="n">replacement_attempts</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProbabilisticGrammarFuzzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us give our joint class a simple test, using probabilities to favor long identifiers:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="s1">&#39;&lt;word&gt;&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;&lt;alpha&gt;&lt;word&gt;&#39;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">prob</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)),</span>
+               <span class="s1">&#39;&lt;alpha&gt;&#39;</span><span class="p">],</span>
+<span class="p">})</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pgg_fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">)</span>
+<span class="n">pgg_fuzzer</span><span class="o">.</span><span class="n">supported_opts</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;order&#39;, &#39;post&#39;, &#39;pre&#39;, &#39;prob&#39;}
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pgg_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;hfaHpaxvv=+-(8*-(7)*5-(4))/+-(-5*-43);h=7&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Generators-and-Grammar-Coverage">Generators and Grammar Coverage<a class="anchor-link" href="#Generators-and-Grammar-Coverage">&#182;</a></h1><p>Fuzzing based on grammar coverage is a bigger challenge.  Not so much for the methods overloaded in both; we can resolve these just as above.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ProbabilisticGrammarFuzzer.html" class="import" target="_blank">ProbabilisticGrammarFuzzer</a></span> <span class="k">import</span> <span class="n">ProbabilisticGrammarFuzzer</span><span class="p">,</span> <span class="n">ProbabilisticGrammarCoverageFuzzer</span>
+<span class="kn">from</span> <span class="nn"><a href="GrammarCoverageFuzzer.html" class="import" target="_blank">GrammarCoverageFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarCoverageFuzzer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">inheritance_conflicts</span><span class="p">(</span>
+    <span class="n">ProbabilisticGrammarCoverageFuzzer</span><span class="p">,</span>
+    <span class="n">GeneratorGrammarFuzzer</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;__init__&#39;, &#39;supported_opts&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProbabilisticGeneratorGrammarCoverageFuzzer</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">,</span>
+                                                  <span class="n">ProbabilisticGrammarCoverageFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">supported_opts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">GeneratorGrammarFuzzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">supported_opts</span><span class="p">()</span> <span class="o">|</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">ProbabilisticGrammarCoverageFuzzer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">supported_opts</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="n">replacement_attempts</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span>
+            <span class="n">GeneratorGrammarFuzzer</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">grammar</span><span class="p">,</span>
+            <span class="n">replacement_attempts</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span>
+            <span class="n">ProbabilisticGrammarCoverageFuzzer</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">grammar</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The problem is that during expansion, we <em>may</em> generate (and cover) expansions that we later drop (for instance, because a <code>post</code> function returns <code>False</code>).  Hence, we have to <em>remove</em> this coverage which is no longer present in the final production.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We resolve the problem by <em>rebuilding the coverage</em> from the final tree after it is produced.  To this end, we hook into the <code>fuzz_tree()</code> method.  We have it save the original coverage before creating the tree, restoring it afterwards.  Then we traverse the resulting tree, adding its coverage back again (<code>add_tree_coverage()</code>).</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/copy.html" class="import" target="_blank">copy</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProbabilisticGeneratorGrammarCoverageFuzzer</span><span class="p">(</span>
+        <span class="n">ProbabilisticGeneratorGrammarCoverageFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fuzz_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orig_covered_expansions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covered_expansions</span><span class="p">)</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fuzz_tree</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">covered_expansions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_covered_expansions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_tree_coverage</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tree</span>
+
+    <span class="k">def</span> <span class="nf">add_tree_coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">flat_children</span> <span class="o">=</span> <span class="p">[(</span><span class="n">child_symbol</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                             <span class="k">for</span> <span class="p">(</span><span class="n">child_symbol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="n">children</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_coverage</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">flat_children</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_tree_coverage</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As a final step, we ensure that if we do have to restart an expansion from scratch, we also restore the previous coverage such that we can start fully anew:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ProbabilisticGeneratorGrammarCoverageFuzzer</span><span class="p">(</span>
+        <span class="n">ProbabilisticGeneratorGrammarCoverageFuzzer</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">restart_expansion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">restart_expansion</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">covered_expansions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">orig_covered_expansions</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us try this out.  After we have produced a string, we should see its coverage in <code>expansion_coverage()</code>:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pggc_fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarCoverageFuzzer</span><span class="p">(</span>
+    <span class="n">CONSTRAINED_VAR_GRAMMAR</span><span class="p">)</span>
+<span class="n">pggc_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;sM=7/5*9++(-6/2/8)-4+1;g=3&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pggc_fuzzer</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;alpha&gt; -&gt; M&#39;,
+ &#39;&lt;alpha&gt; -&gt; g&#39;,
+ &#39;&lt;alpha&gt; -&gt; s&#39;,
+ &#39;&lt;assignment&gt; -&gt; &lt;identifier&gt;=&lt;expr&gt;&#39;,
+ &#39;&lt;digit&gt; -&gt; 1&#39;,
+ &#39;&lt;digit&gt; -&gt; 2&#39;,
+ &#39;&lt;digit&gt; -&gt; 3&#39;,
+ &#39;&lt;digit&gt; -&gt; 4&#39;,
+ &#39;&lt;digit&gt; -&gt; 5&#39;,
+ &#39;&lt;digit&gt; -&gt; 6&#39;,
+ &#39;&lt;digit&gt; -&gt; 7&#39;,
+ &#39;&lt;digit&gt; -&gt; 8&#39;,
+ &#39;&lt;digit&gt; -&gt; 9&#39;,
+ &#39;&lt;expr&gt; -&gt; &lt;term&gt;&#39;,
+ &#39;&lt;expr&gt; -&gt; &lt;term&gt;+&lt;expr&gt;&#39;,
+ &#39;&lt;expr&gt; -&gt; &lt;term&gt;-&lt;expr&gt;&#39;,
+ &#39;&lt;factor&gt; -&gt; (&lt;expr&gt;)&#39;,
+ &#39;&lt;factor&gt; -&gt; +&lt;factor&gt;&#39;,
+ &#39;&lt;factor&gt; -&gt; -&lt;factor&gt;&#39;,
+ &#39;&lt;factor&gt; -&gt; &lt;number&gt;&#39;,
+ &#39;&lt;identifier&gt; -&gt; &lt;word&gt;&#39;,
+ &#39;&lt;integer&gt; -&gt; &lt;digit&gt;&#39;,
+ &#39;&lt;number&gt; -&gt; &lt;integer&gt;&#39;,
+ &#39;&lt;start&gt; -&gt; &lt;statements&gt;&#39;,
+ &#39;&lt;statement&gt; -&gt; &lt;assignment&gt;&#39;,
+ &#39;&lt;statements&gt; -&gt; &lt;statement&gt;&#39;,
+ &#39;&lt;statements&gt; -&gt; &lt;statement&gt;;&lt;statements&gt;&#39;,
+ &#39;&lt;term&gt; -&gt; &lt;factor&gt;&#39;,
+ &#39;&lt;term&gt; -&gt; &lt;factor&gt;*&lt;term&gt;&#39;,
+ &#39;&lt;term&gt; -&gt; &lt;factor&gt;/&lt;term&gt;&#39;,
+ &#39;&lt;word&gt; -&gt; &lt;alpha&gt;&#39;,
+ &#39;&lt;word&gt; -&gt; &lt;alpha&gt;&lt;word&gt;&#39;}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Fuzzing again would eventually cover all letters in identifiers:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="p">[</span><span class="n">pggc_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;tIbFSBC=0/7/8+9*2/1*9;m=7&#39;,
+ &#39;LHkGcwXqTUzODjWhRruVo=6/4/5/6+1+7+5*1-2&#39;,
+ &#39;QYePndypZKxNafAElvILv=551.3;ZRhYGwEfIDYSfiunr=02.45*(2+0)+3*QYePndypZKxNafAElvILv+QYePndypZKxNafAElvILv/7&#39;,
+ &#39;uIQHzf=(4/8)/5/-8-+(9-3+9+8+0)/++-2&#39;,
+ &#39;DWNVzzWELL=((3+4)-++4/9*0+67)/(50169.1*3)&#39;,
+ &#39;NVKZ=-011/++82.4*-(5*6*6)/97.3/-3/1&#39;,
+ &#39;O=+(2*(8)*2+(7/0))/+-6*+0.3*8&#39;,
+ &#39;RMfynoao=-+02/(7)*8--9+8*5/3-5+9&#39;,
+ &#39;k=2/3/4.7*6---+-3;q=1&#39;,
+ &#39;MR=49*1++21-5/6/2*5;x=MR&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>With <code>ProbabilisticGeneratorGrammarCoverageFuzzer</code>, we now have a grammar fuzzer that combines efficient grammar fuzzing with coverage, probabilities, and generator functions.  The only thing that is missing is a shorter name.  <code>PGGCFuzzer</code>, maybe?</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PGGCFuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarCoverageFuzzer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><p>Functions attached to grammar expansions can serve</p>
+<ul>
+<li>as <em>generators</em> to efficiently produce a symbol expansion from a function;</li>
+<li>as <em>constraints</em> to check produced strings against (complex) validity conditions; and</li>
+<li>as <em>repairs</em> to apply changes to produced strings, such as checksums and identifiers.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>With this chapter, we have powerful grammars which we can use in a number of domains:</p>
+<ul>
+<li>In the <a href="APIFuzzer.html">chapter on fuzzing APIs</a>, we show how to produce complex data structures for testing, making use of <code>GeneratorGrammarFuzzer</code> features to combine grammars and generator functions.</li>
+<li>In the <a href="WebFuzzer.html">chapter on fuzzing User Interfaces</a>, we make use of <code>GeneratorGrammarFuzzer</code> to produce complex user interface inputs.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>For fuzzing APIs, generator functions are very common.  In the <a href="APIFuzzer.html">chapter on API fuzzing</a>, we show how to combine them with grammars for even richer test generation.</p>
+<p>The combination of generator functions and grammars is mostly possible because we define and make use of grammars in an all-Python environment.  We are not aware of another grammar-based fuzzing system that exhibits similar features.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Exercises">Exercises<a class="anchor-link" href="#Exercises">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Tree-Processing">Exercise 1: Tree Processing<a class="anchor-link" href="#Exercise-1:-Tree-Processing">&#182;</a></h3><p>So far, our <code>pre</code> and <code>post</code> processing functions all accept and produce strings.  In some circumstances, however, it can be useful to access the <em>derivation trees</em> directly – for instance, to access and check some child element.</p>
+<p>Your task is to extend <code>GeneratorGrammarFuzzer</code> with pre- and post-processing functions that can accept and return derivation trees.  To this end, proceed as follows:</p>
+<ol>
+<li>Extend <code>GeneratorGrammarFuzzer</code> such that a function can return a derivation tree (a tuple) or a list of derivation trees, which would then replace subtrees in the same way as strings.</li>
+<li>Extend <code>GeneratorGrammarFuzzer</code> with a <code>post_tree</code> attribute which takes a function just like <code>post</code>, except that its arguments would be derivation trees.</li>
+</ol>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/GeneratorGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-2:-Attribute-Grammars">Exercise 2: Attribute Grammars<a class="anchor-link" href="#Exercise-2:-Attribute-Grammars">&#182;</a></h3><p>Set up a mechanism through which it is possible to attach arbitrary <em>attributes</em> to individual elements in the derivation tree.  Expansion functions could attach such attributes to individual symbols (say, by returning <code>opts()</code>), and also access attributes of symbols in later calls.  Here is an example:</p>
+
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/GeneratorGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ATTR_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;clause&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;xml-open&gt;Text&lt;xml-close&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">x1</span><span class="o">.</span><span class="n">name</span><span class="p">]))],</span>
+    <span class="s2">&quot;&lt;xml-open&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;&lt;tag&gt;&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">tag</span><span class="p">:</span> <span class="n">opts</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">random_name</span><span class="p">())))],</span>
+    <span class="s2">&quot;&lt;xml-close&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;/&lt;tag&gt;&gt;&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div>
+    
+<p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/GeneratorGrammarFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
 </div>
 </div>
 </div>
@@ -11988,7 +15172,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/00_Table_of_Contents.ipynb" target=_blank)>Last change: 2019-01-08 11:32:12+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GeneratorGrammarFuzzer.ipynb" target=_blank)>Last change: 2019-01-04 22:16:58+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -12004,19 +15188,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/00_Table_of_Contents.html">Generating Software Tests</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/00_Table_of_Contents.html">https://www.fuzzingbook.org/html/00_Table_of_Contents.html</a>.  Retrieved 2019-01-08 11:32:12+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html">Fuzzing with Generators</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html">https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html</a>.  Retrieved 2019-01-04 22:16:58+01:00.
 </p>
 <pre>
-@incollection{fuzzingbook2019:00_Table_of_Contents,
+@incollection{fuzzingbook2019:GeneratorGrammarFuzzer,
     author = {Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler},
     booktitle = {Generating Software Tests},
-    title = {Generating Software Tests},
+    title = {Fuzzing with Generators},
     year = {2019},
     publisher = {Saarland University},
-    howpublished = {\url{https://www.fuzzingbook.org/html/00_Table_of_Contents.html}},
-    note = {Retrieved 2019-01-08 11:32:12+01:00},
-    url = {https://www.fuzzingbook.org/html/00_Table_of_Contents.html},
-    urldate = {2019-01-08 11:32:12+01:00}
+    howpublished = {\url{https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html}},
+    note = {Retrieved 2019-01-04 22:16:58+01:00},
+    url = {https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html},
+    urldate = {2019-01-04 22:16:58+01:00}
 }
 </pre>
 </div>
