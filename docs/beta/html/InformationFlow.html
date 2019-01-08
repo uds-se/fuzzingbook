@@ -12831,10 +12831,10 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="n">key</span> <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">key</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">slice</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="kc">False</span>
@@ -12927,7 +12927,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
             <span class="k">raise</span> <span class="ne">StopIteration</span>
         <span class="c1"># calls tstr getitem should be tstr</span>
         <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tstr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_str_idx</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">tstr</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_str_idx</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">c</span>
 </pre></div>
@@ -12986,7 +12986,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">tstr</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">),</span>
                                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">taint</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
@@ -13067,7 +13067,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="n">taint</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">taint</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span> <span class="k">else</span> <span class="p">[</span>
+        <span class="n">taint</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">taint</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">tstr</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span>
             <span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">other</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="p">),</span> <span class="p">(</span><span class="n">taint</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">))</span>
 </pre></div>
@@ -13224,7 +13224,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">old_taint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span>
-        <span class="n">b_taint</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">taint</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span> <span class="k">else</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="n">b_taint</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">taint</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">tstr</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
         <span class="n">mystr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -13536,7 +13536,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
         <span class="n">sep_taint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span>
         <span class="n">lst</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lst</span><span class="p">):</span>
-            <span class="n">staint</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">taint</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span> <span class="k">else</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">staint</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">taint</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">tstr</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
             <span class="n">mytaint</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">staint</span><span class="p">)</span>
             <span class="n">mystr</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
@@ -13639,7 +13639,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
     <span class="k">def</span> <span class="nf">ljust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">fillchar</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">):</span>
         <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">fillchar</span><span class="p">)</span>
         <span class="n">initial</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">fillchar</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fillchar</span><span class="p">,</span> <span class="n">tstr</span><span class="p">):</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">fillchar</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">t</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -13648,7 +13648,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
     <span class="k">def</span> <span class="nf">rjust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">fillchar</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">):</span>
         <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">fillchar</span><span class="p">)</span>
         <span class="n">final</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">fillchar</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fillchar</span><span class="p">,</span> <span class="n">tstr</span><span class="p">):</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">fillchar</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">t</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -13892,10 +13892,10 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
                     <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">stop</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">key</span><span class="o">.</span><span class="n">stop</span><span class="p">))</span>
 
         <span class="n">res</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="n">key</span> <span class="k">if</span> <span class="n">key</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">key</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">key</span><span class="p">]])</span>
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">slice</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="c1"># Result is an empty string</span>
@@ -14080,7 +14080,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
             <span class="k">return</span> <span class="s1">&#39;?&#39;</span>
 
     <span class="k">def</span> <span class="nf">opS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">opA</span><span class="o">.</span><span class="n">has_taint</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opB</span><span class="p">)</span> <span class="ow">is</span> <span class="n">tstr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">opA</span><span class="o">.</span><span class="n">has_taint</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opB</span><span class="p">,</span> <span class="n">tstr</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opB</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opA</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opB</span><span class="p">)</span>
@@ -14146,6 +14146,9 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
         <span class="n">o</span><span class="o">.</span><span class="n">comparisons</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comparisons</span>
         <span class="k">return</span> <span class="n">o</span>
 
+    <span class="k">def</span> <span class="nf">add_instr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">c_a</span><span class="p">,</span> <span class="n">c_b</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comparisons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Instr</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">c_a</span><span class="p">,</span> <span class="n">c_b</span><span class="p">))</span>
+
     <span class="k">def</span> <span class="nf">with_comparisons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comparisons</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comparisons</span> <span class="o">=</span> <span class="n">comparisons</span>
         <span class="k">return</span> <span class="bp">self</span>
@@ -14165,16 +14168,16 @@ AttributeError: &#39;str&#39; object has no attribute &#39;has_taint&#39; (expec
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ctstr</span><span class="p">(</span><span class="n">ctstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">comparisons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">EQ</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">EQ</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">comparisons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">EQ</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">EQ</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">comparisons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">EQ</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">other</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">EQ</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">other</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">comparisons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">EQ</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">EQ</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">other</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -14270,7 +14273,7 @@ eq, ,&#39;&#39;
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ctstr</span><span class="p">(</span><span class="n">ctstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comparisons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">IN</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">IN</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 </pre></div>
 
@@ -14291,13 +14294,64 @@ eq, ,&#39;&#39;
             <span class="n">start_val</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">end_val</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">comparisons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">IN</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="n">start_val</span><span class="p">:</span><span class="n">end_val</span><span class="p">],</span> <span class="n">sub</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_instr</span><span class="p">(</span><span class="n">Op</span><span class="o">.</span><span class="n">IN</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="n">start_val</span><span class="p">:</span><span class="n">end_val</span><span class="p">],</span> <span class="n">sub</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
 </pre></div>
 
 </div>
 </div></div>
 </div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ctstr</span><span class="p">(</span><span class="n">ctstr</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">startswith</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">beg</span> <span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">end</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span> <span class="o">==</span> <span class="n">s</span><span class="p">[</span><span class="n">beg</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">beg</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">ctstr</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">with_comparisons</span><span class="p">([])</span>
+<span class="k">assert</span> <span class="n">t</span><span class="o">.</span><span class="n">comparisons</span> <span class="o">==</span> <span class="p">[]</span>
+<span class="n">t</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">comparisons</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>eq,h,&#39;h&#39;
+eq,e,&#39;e&#39;
+eq,l,&#39;l&#39;
+eq,l,&#39;l&#39;
+eq,o,&#39;o&#39;
+eq, ,&#39;&#39;
+</pre>
+</div>
+
 </div>
 
 <div class="input_markdown">
@@ -14643,7 +14697,7 @@ eq,C,&#39;D&#39;
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2019-01-04 16:03:17+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2019-01-08 11:23:59+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14659,7 +14713,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">https://www.fuzzingbook.org/beta/html/InformationFlow.html</a>.  Retrieved 2019-01-04 16:03:17+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">https://www.fuzzingbook.org/beta/html/InformationFlow.html</a>.  Retrieved 2019-01-08 11:23:59+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:InformationFlow,
@@ -14669,9 +14723,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/InformationFlow.html}},
-    note = {Retrieved 2019-01-04 16:03:17+01:00},
+    note = {Retrieved 2019-01-08 11:23:59+01:00},
     url = {https://www.fuzzingbook.org/beta/html/InformationFlow.html},
-    urldate = {2019-01-04 16:03:17+01:00}
+    urldate = {2019-01-08 11:23:59+01:00}
 }
 </pre>
 </div>
