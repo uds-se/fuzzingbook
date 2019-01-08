@@ -102,18 +102,18 @@ Here's our current release plan.  New chapters are coming out every Tuesday.
 1. [Testing Configurations](ConfigurationFuzzer.ipynb) – 2018-12-04
 1. [Parsing and Recombining Inputs](Parser.ipynb) – 2018-12-11
 1. [Probabilistic Grammar Fuzzing](ProbabilisticGrammarFuzzer.ipynb) – 2018-12-18
-1. [Fuzzing with Generators](GeneratorGrammarFuzzer.ipynb) – 2018-01-08
-1. [Fuzzing APIs](APIFuzzer.ipynb) – 2018-01-15
-1. [Carving Unit Tests](Carver.ipynb) – 2018-01-22
-1. [Reducing Failure-Inducing Inputs](Reducer.ipynb) – 2018-01-29
-1. [Web and GUI Testing](WebFuzzer.ipynb) – 2018-02-05
-1. [Information Flow](InformationFlow.ipynb) – 2018-02-12
-1. [Mining Input Grammars](GrammarMiner.ipynb) – 2018-02-19
-1. Oracles – 2018-02-26
-1. Search-Based Fuzzing – 2018-03-05
-1. Symbolic Fuzzing – 2018-03-12
-1. Fuzzing in the Large – 2018-03-19
-1. Mutation Analysis – 2018-03-26
+1. [Fuzzing with Generators](GeneratorGrammarFuzzer.ipynb) – 2019-01-08
+1. [Fuzzing APIs](APIFuzzer.ipynb) – 2019-01-15
+1. [Carving Unit Tests](Carver.ipynb) – 2019-01-22
+1. [Reducing Failure-Inducing Inputs](Reducer.ipynb) – 2019-01-29
+1. [Web and GUI Testing](WebFuzzer.ipynb) – 2019-02-05
+1. [Information Flow](InformationFlow.ipynb) – 2019-02-12
+1. [Mining Input Grammars](GrammarMiner.ipynb) – 2019-02-19
+1. Oracles – 2019-02-26
+1. Search-Based Fuzzing – 2019-03-05
+1. Symbolic Fuzzing – 2019-03-12
+1. Fuzzing in the Large – 2019-03-19
+1. Mutation Analysis – 2019-03-26
 
 See the table of contents in the menu above for those chapters that are already done.
 

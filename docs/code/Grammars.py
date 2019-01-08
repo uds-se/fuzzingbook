@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2018-12-18 17:38:07+01:00
+# Last change: 2019-01-05 20:04:12+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -214,7 +214,7 @@ if __package__ is None or __package__ == "":
 else:
     from .RailroadDiagrams import NonTerminal, Terminal, Choice, HorizontalChoice, Sequence, Diagram, show_diagram
 
-from IPython.display import SVG, HTML, display
+from IPython.display import SVG, display
 
 def syntax_diagram_symbol(symbol):
     if is_nonterminal(symbol):
@@ -235,7 +235,7 @@ def syntax_diagram_expr(expansion):
     symbols = [sym for sym in re.split(RE_NONTERMINAL, expansion) if sym != ""]
     if len(symbols) == 0:
         symbols = [""]  # special case: empty expansion
-    
+
     return Sequence(*[syntax_diagram_symbol(sym) for sym in symbols])
 
 if __name__ == "__main__":
@@ -246,16 +246,16 @@ from itertools import zip_longest
 
 def syntax_diagram_alt(alt):
     max_len = 5
-    l = len(alt)
-    if l > max_len:
-        iter_len = l // max_len
+    alt_len = len(alt)
+    if alt_len > max_len:
+        iter_len = alt_len // max_len
         alts = list(zip_longest(*[alt[i::iter_len] for i in range(iter_len)]))
         exprs = [[syntax_diagram_expr(expr) for expr in alt
                   if expr is not None] for alt in alts]
-        choices = [Choice(len(expr)//2,*expr) for expr in exprs]
+        choices = [Choice(len(expr) // 2, *expr) for expr in exprs]
         return HorizontalChoice(*choices)
     else:
-        return Choice(l//2,*[syntax_diagram_expr(expr) for expr in alt])
+        return Choice(alt_len // 2, *[syntax_diagram_expr(expr) for expr in alt])
 
 if __name__ == "__main__":
     SVG(show_diagram(syntax_diagram_alt(EXPR_GRAMMAR['<digit>'])))
@@ -458,7 +458,7 @@ if __name__ == "__main__":
         "<nonterminal>": ["<left-angle><identifier><right-angle>"],
         "<left-angle>": ["<"],
         "<right-angle>": [">"],
-        "<identifier>": ["id"] # for now
+        "<identifier>": ["id"]  # for now
     }
 
 
@@ -489,11 +489,12 @@ def extend_grammar(grammar, extension={}):
 
 if __name__ == "__main__":
     nonterminal_grammar = extend_grammar(simple_nonterminal_grammar,
-        {
-            "<identifier>": ["<idchar>", "<identifier><idchar>"],
-            "<idchar>": ['a', 'b', 'c', 'd']  # for now
-        }
-    )
+                                         {
+                                             "<identifier>": ["<idchar>", "<identifier><idchar>"],
+                                             # for now
+                                             "<idchar>": ['a', 'b', 'c', 'd']
+                                         }
+                                         )
 
 
 # ### Character Classes
@@ -520,10 +521,10 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     nonterminal_grammar = extend_grammar(nonterminal_grammar,
-        {
-            "<idchar>": srange(string.ascii_letters) + srange(string.digits) + srange("-_")
-        }
-    )
+                                         {
+                                             "<idchar>": srange(string.ascii_letters) + srange(string.digits) + srange("-_")
+                                         }
+                                         )
 
 
 if __name__ == "__main__":
@@ -556,10 +557,10 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     nonterminal_ebnf_grammar = extend_grammar(nonterminal_grammar,
-        {
-            "<identifier>": ["<idchar>+"]
-        }
-    )
+                                              {
+                                                  "<identifier>": ["<idchar>+"]
+                                              }
+                                              )
 
 
 EXPR_EBNF_GRAMMAR = {
@@ -773,7 +774,7 @@ def exp_opts(expansion):
     return expansion[1]
 
 def exp_opt(expansion, attribute):
-    """Return the given attribution of an expansion.  
+    """Return the given attribution of an expansion.
     If attribute is not defined, return None"""
     return exp_opts(expansion).get(attribute, None)
 
@@ -791,7 +792,7 @@ def set_opts(grammar, symbol, expansion, opts=None):
     for i, exp in enumerate(expansions):
         if exp_string(exp) != exp_string(expansion):
             continue
-            
+
         new_opts = exp_opts(exp)
         if opts is None or new_opts == {}:
             new_opts = opts
@@ -804,7 +805,12 @@ def set_opts(grammar, symbol, expansion, opts=None):
             grammar[symbol][i] = (exp_string(exp), new_opts)
         return
 
-    raise KeyError("no expansion " + repr(symbol) + " -> " + repr(exp_string(expansion)))
+    raise KeyError(
+        "no expansion " +
+        repr(symbol) +
+        " -> " +
+        repr(
+            exp_string(expansion)))
 
 # ## Checking Grammars
 
@@ -849,7 +855,7 @@ def def_used_nonterminals(grammar, start_symbol=START_SYMBOL):
 
 def reachable_nonterminals(grammar, start_symbol=START_SYMBOL):
     reachable = set()
-    
+
     def _find_reachable_nonterminals(grammar, symbol):
         nonlocal reachable
         reachable.add(symbol)
@@ -857,7 +863,7 @@ def reachable_nonterminals(grammar, start_symbol=START_SYMBOL):
             for nonterminal in nonterminals(expansion):
                 if nonterminal not in reachable:
                     _find_reachable_nonterminals(grammar, nonterminal)
-    
+
     _find_reachable_nonterminals(grammar, start_symbol)
     return reachable
 
@@ -876,7 +882,7 @@ def is_valid_grammar(grammar, start_symbol=START_SYMBOL, supported_opts=None):
         def_used_nonterminals(grammar, start_symbol)
     if defined_nonterminals is None or used_nonterminals is None:
         return False
-    
+
     # Do not complain about '<start>' being not used,
     # even if start_symbol is different
     if START_SYMBOL in grammar:
@@ -893,7 +899,8 @@ def is_valid_grammar(grammar, start_symbol=START_SYMBOL, supported_opts=None):
     unreachable = unreachable_nonterminals(grammar, start_symbol)
     msg_start_symbol = start_symbol
     if START_SYMBOL in grammar:
-        unreachable = unreachable - reachable_nonterminals(grammar, START_SYMBOL)
+        unreachable = unreachable - \
+            reachable_nonterminals(grammar, START_SYMBOL)
         if start_symbol != START_SYMBOL:
             msg_start_symbol += " or " + START_SYMBOL
     for unreachable_nonterminal in unreachable:
@@ -902,9 +909,14 @@ def is_valid_grammar(grammar, start_symbol=START_SYMBOL, supported_opts=None):
 
     used_but_not_supported_opts = set()
     if supported_opts is not None:
-        used_but_not_supported_opts = opts_used(grammar).difference(supported_opts)
+        used_but_not_supported_opts = opts_used(
+            grammar).difference(supported_opts)
         for opt in used_but_not_supported_opts:
-            print("warning: option " + repr(opt) + " is not supported", file=sys.stderr)
+            print(
+                "warning: option " +
+                repr(opt) +
+                " is not supported",
+                file=sys.stderr)
 
     return used_nonterminals == defined_nonterminals and len(unreachable) == 0
 

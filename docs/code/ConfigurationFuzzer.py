@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2018-12-12 09:36:27+01:00
+# Last change: 2019-01-03 15:03:33+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -857,7 +857,7 @@ if __name__ == "__main__":
     filename = "xmlparse.c"
 
     open(filename, "w").write(
-    """
+        """
     #if defined(_WIN32) && !defined(LOAD_LIBRARY_SEARCH_SYSTEM32)
     # define LOAD_LIBRARY_SEARCH_SYSTEM32  0x00000800
     #endif
@@ -867,7 +867,7 @@ if __name__ == "__main__":
         && !defined(XML_DEV_URANDOM) \
         && !defined(_WIN32) \
         && !defined(XML_POOR_ENTROPY)
-    # error 
+    # error
     #endif
 
     #if !defined(TIOCSWINSZ) || defined(__SCO__) || defined(__UNIXWARE__)
@@ -892,16 +892,16 @@ if __name__ == "__main__":
     re_cpp_if_directive = re.compile(r"\s*#\s*(el)?if")
     re_cpp_identifier = re.compile(r"[a-zA-Z_$]+")
 
-    def cpp_identifiers(lines):
-        identifiers = set()
-        for line in lines:
-            if re_cpp_if_directive.match(line):
-                identifiers |= set(re_cpp_identifier.findall(line))
 
-        # These are preprocessor keywords
-        identifiers -= { "if", "ifdef", "ifndef", "defined" }
-        return identifiers
+def cpp_identifiers(lines):
+    identifiers = set()
+    for line in lines:
+        if re_cpp_if_directive.match(line):
+            identifiers |= set(re_cpp_identifier.findall(line))
 
+    # These are preprocessor keywords
+    identifiers -= {"if", "ifdef", "ifndef", "defined"}
+    return identifiers
 
 if __name__ == "__main__":
     cpp_ids = cpp_identifiers(open("xmlparse.c").readlines())
