@@ -14,10 +14,10 @@ PUBLIC_CHAPTERS = \
 	ConfigurationFuzzer.ipynb \
 	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
+	GeneratorGrammarFuzzer.ipynb \
 
 # Chapters that are ready for release (= the current chapters for the students)
 READY_CHAPTERS = \
-	GeneratorGrammarFuzzer.ipynb \
 	APIFuzzer.ipynb \
 	Carver.ipynb \
 	Reducer.ipynb \
