@@ -1,6 +1,7 @@
 # Define the contents of this file as a package
 __all__ = ["PrettyTable", "YouTubeVideo", 
-           "print_file", "HTML", "unicode_escape"]
+           "print_file", "HTML", 
+           "unicode_escape", "terminal_escape"]
 
 
 # Setup loader such that workbooks can be imported directly
@@ -56,6 +57,11 @@ def unicode_escape(s, error="backslashreplace"):
     bytes = s.encode('utf-8', error)
     return "".join(map(ascii_chr, bytes))
 
+# Same, but escaping unicode only if output is not a terminal
+def terminal_escape(s):
+    if rich_output():
+        return s
+    return unicode_escape(s)
 
 
 # HTML() behaves like IPython.core.display.HTML(); but if png is True or the environment

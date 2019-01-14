@@ -27,8 +27,8 @@ READY_CHAPTERS = \
 TODO_CHAPTERS = \
 	GUIFuzzer.ipynb \
 	SBST.ipynb \
-	InformationFlow.ipynb \
 	GrammarMiner.ipynb \
+	InformationFlow.ipynb \
 
 	# Oracles.ipynb
 	# SearchBasedFuzzer.ipynb
