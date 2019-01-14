@@ -44,6 +44,17 @@ def print_file(filename, lexer=None):
         print(contents, end="")
 
 
+# Escaping unicode characters into ASCII for user-facing strings
+def unicode_escape(s, error="backslashreplace"):
+    def ascii_chr(byte):
+        if 0 <= byte <= 127:
+            return chr(byte)
+        return r"\x%02x" % byte
+
+    bytes = s.encode('utf-8', error)
+    return "".join(map(ascii_chr, bytes))
+
+
 
 # HTML() behaves like IPython.core.display.HTML(); but if png is True or the environment
 # variable RENDER_HTML is set, it converts the HTML into a PNG image.
