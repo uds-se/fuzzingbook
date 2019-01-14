@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2019-01-13 13:00:49+01:00
+# Last change: 2019-01-14 13:55:13+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -99,7 +99,11 @@ CSV_GRAMMAR = {
     '<letter>': list(string.ascii_letters + string.digits + string.punctuation + ' \t\n')
 }
 
-import fuzzingbook_utils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     from Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL, is_valid_grammar, syntax_diagram
@@ -109,7 +113,11 @@ else:
 from Fuzzer import Fuzzer
 from GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
 
-from ExpectError import ExpectError
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectError
+else:
+    from .ExpectError import ExpectError
+
 from Coverage import Coverage
 from Timer import Timer
 
