@@ -12070,8 +12070,9 @@ Solution. Solution for the exercise
 <li><a href="Reducer.html"><span class="chnum">14</span> Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 <li><a href="WebFuzzer.html"><span class="chnum">15</span> Testing Web Applications&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 </ul><li><a href="GUIFuzzer.html"><span class="chnum">16</span> Testing Graphical User Interfaces&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="InformationFlow.html" class="this_page"><span class="chnum">17</span> Information Flow&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="GrammarMiner.html"><span class="chnum">18</span> Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="SBST.html"><span class="chnum">17</span> Search-based Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="InformationFlow.html" class="this_page"><span class="chnum">18</span> Information Flow&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="GrammarMiner.html"><span class="chnum">19</span> Mining Input Grammars&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 
            <li class="has-sub"><a>Appendices <i class="fa fa-fw fa-caret-right"></i></a>
                <ul>
@@ -14484,8 +14485,7 @@ eq, ,&#39;&#39;
             <span class="k">return</span> <span class="n">tree_node</span>
         <span class="n">mod_val</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">(</span>
             <span class="n">func</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Attribute</span><span class="p">(</span>
-                <span class="n">value</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">(</span>
-                    <span class="n">func</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;__fn&#39;</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">Load</span><span class="p">()),</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">left</span><span class="p">],</span> <span class="n">keywords</span><span class="o">=</span><span class="p">[]),</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">left</span><span class="p">,</span>
                 <span class="n">attr</span><span class="o">=</span><span class="s1">&#39;in_&#39;</span><span class="p">,</span>
                 <span class="n">ctx</span><span class="o">=</span><span class="n">left</span><span class="o">.</span><span class="n">ctx</span><span class="p">),</span>
             <span class="n">args</span><span class="o">=</span><span class="n">tree_node</span><span class="o">.</span><span class="n">comparators</span><span class="p">,</span>
@@ -14505,9 +14505,8 @@ eq, ,&#39;&#39;
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">rewrite_in</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
-    <span class="n">fn_ast</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">fn</span><span class="p">))</span>
-    <span class="k">return</span> <span class="nb">compile</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">fix_missing_locations</span><span class="p">(</span>
-        <span class="n">InRewrite</span><span class="p">()</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">fn_ast</span><span class="p">)),</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;exec&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">fix_missing_locations</span><span class="p">(</span><span class="n">InRewrite</span><span class="p">()</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">fn</span><span class="p">))))</span>
 </pre></div>
 
 </div>
@@ -14521,8 +14520,22 @@ eq, ,&#39;&#39;
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_new_fn</span> <span class="o">=</span> <span class="n">rewrite_in</span><span class="p">(</span><span class="n">my_fn</span><span class="p">)</span>
-<span class="n">exec</span><span class="p">(</span><span class="n">my_new_fn</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">redefine_with_in</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+    <span class="n">exec</span><span class="p">(</span><span class="nb">compile</span><span class="p">(</span><span class="n">rewrite_in</span><span class="p">(</span><span class="n">fn</span><span class="p">),</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;exec&#39;</span><span class="p">),</span> <span class="nb">globals</span><span class="p">())</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">redefine_with_in</span><span class="p">(</span><span class="n">my_fn</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14697,7 +14710,7 @@ eq,C,&#39;D&#39;
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2019-01-08 11:23:59+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2019-01-14 12:01:19+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14713,7 +14726,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">https://www.fuzzingbook.org/beta/html/InformationFlow.html</a>.  Retrieved 2019-01-08 11:23:59+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">https://www.fuzzingbook.org/beta/html/InformationFlow.html</a>.  Retrieved 2019-01-14 12:01:19+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:InformationFlow,
@@ -14723,9 +14736,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/InformationFlow.html}},
-    note = {Retrieved 2019-01-08 11:23:59+01:00},
+    note = {Retrieved 2019-01-14 12:01:19+01:00},
     url = {https://www.fuzzingbook.org/beta/html/InformationFlow.html},
-    urldate = {2019-01-08 11:23:59+01:00}
+    urldate = {2019-01-14 12:01:19+01:00}
 }
 </pre>
 </div>
