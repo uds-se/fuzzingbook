@@ -26,8 +26,9 @@ READY_CHAPTERS = \
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
 	GUIFuzzer.ipynb \
+	SBST.ipynb \
 	InformationFlow.ipynb \
-	GrammarMiner.ipynb
+	GrammarMiner.ipynb \
 
 	# Oracles.ipynb
 	# SearchBasedFuzzer.ipynb
