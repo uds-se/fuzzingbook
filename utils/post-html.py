@@ -198,6 +198,10 @@ def get_title(notebook):
     """Return the title from a notebook file"""
     contents = get_text_contents(notebook)
     match = re.search(r'^# (.*)', contents, re.MULTILINE)
+    if match is None:
+        print(notebook + ": no title", file=sys.stderr)
+        return notebook
+
     title = match.group(1).replace(r'\n', '')
     # print("Title", title.encode('utf-8'))
     return title

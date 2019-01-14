@@ -98,6 +98,10 @@ def collect_index(notebook_name):
                 entry = formatter(match)
                 if entry not in index:
                     index[entry] = []
+                    
+                if title is None:
+                    print(notebook_name + ": cell without title", file=sys.stderr)
+                    continue
 
                 link = notebook_name + fragment
                 listed_title = title
