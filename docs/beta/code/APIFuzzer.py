@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2019-01-15 17:58:55+01:00
+# Last change: 2019-01-15 18:40:00+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -44,14 +44,6 @@ if __name__ == "__main__":
 
 
 
-# ### Testing a URL Parser
-
-if __name__ == "__main__":
-    print('\n### Testing a URL Parser')
-
-
-
-
 if __name__ == "__main__":
     # We use the same fixed seed as the notebook to ensure consistency
     import random
@@ -81,10 +73,10 @@ if __name__ == "__main__":
         print(urlparse(url))
 
 
-# ### Synthesizing Code
+# ## Synthesizing Code
 
 if __name__ == "__main__":
-    print('\n### Synthesizing Code')
+    print('\n## Synthesizing Code')
 
 
 
@@ -171,10 +163,10 @@ else:
 
 
 URLPARSE_ORACLE_GRAMMAR = extend_grammar(URLPARSE_GRAMMAR,
-                                         {
-                                             "<call>": [("assert urlparse('<url>').geturl() == '<url>'",
-                                                         opts(post=lambda url_1, url_2: [None, url_1]))]
-                                         })
+{
+     "<call>": [("assert urlparse('<url>').geturl() == '<url>'",
+                 opts(post=lambda url_1, url_2: [None, url_1]))]
+})
 
 if __name__ == "__main__":
     urlparse_oracle_fuzzer = GeneratorGrammarFuzzer(URLPARSE_ORACLE_GRAMMAR)
@@ -234,18 +226,18 @@ if __name__ == "__main__":
     assert result.query == query
 
 
-# ### Synthesizing Data
+# ## Synthesizing Data
 
 if __name__ == "__main__":
-    print('\n### Synthesizing Data')
+    print('\n## Synthesizing Data')
 
 
 
 
-# #### Integers
+# ### Integers
 
 if __name__ == "__main__":
-    print('\n#### Integers')
+    print('\n### Integers')
 
 
 
@@ -290,14 +282,8 @@ import random
 
 def int_grammar_with_range(start, end):
     int_grammar = extend_grammar(INT_GRAMMAR)
-    set_opts(
-        int_grammar,
-        "<int>",
-        "<_int>",
-        opts(
-            pre=lambda: random.randint(
-                start,
-                end)))
+    set_opts(int_grammar, "<int>", "<_int>",
+        opts(pre=lambda: random.randint(start, end)))
     return int_grammar
 
 if __name__ == "__main__":
@@ -305,10 +291,10 @@ if __name__ == "__main__":
     [int_fuzzer.fuzz() for i in range(10)]
 
 
-# #### Floats
+# ### Floats
 
 if __name__ == "__main__":
-    print('\n#### Floats')
+    print('\n### Floats')
 
 
 
@@ -344,10 +330,10 @@ if __name__ == "__main__":
     [float_fuzzer.fuzz() for i in range(10)]
 
 
-# #### Strings
+# ### Strings
 
 if __name__ == "__main__":
-    print('\n#### Strings')
+    print('\n### Strings')
 
 
 
@@ -371,10 +357,18 @@ if __name__ == "__main__":
     print([string_fuzzer.fuzz() for i in range(10)])
 
 
-# #### Lists
+# ## Synthesizing Composite Data
 
 if __name__ == "__main__":
-    print('\n#### Lists')
+    print('\n## Synthesizing Composite Data')
+
+
+
+
+# ### Lists
+
+if __name__ == "__main__":
+    print('\n### Lists')
 
 
 

@@ -11897,10 +11897,14 @@ MathJax.Hub.Config({
      </li>
      <li class="has-sub"><a href="#"><span title="Fuzzing APIs"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Fuzzing APIs</span></a>
            <ul><li class="has-sub"><a href="#Fuzzing-a-Function">Fuzzing a Function</a>
-<ul><li class="has-sub"><a href="#Testing-a-URL-Parser">Testing a URL Parser</a>
 </li><li class="has-sub"><a href="#Synthesizing-Code">Synthesizing Code</a>
-</ul></li><li class="has-sub"><a href="#Synthesizing-Oracles">Synthesizing Oracles</a>
-<ul><li class="has-sub"><a href="#Synthesizing-Data">Synthesizing Data</a>
+</li><li class="has-sub"><a href="#Synthesizing-Oracles">Synthesizing Oracles</a>
+</li><li class="has-sub"><a href="#Synthesizing-Data">Synthesizing Data</a>
+<ul><li class="has-sub"><a href="#Integers">Integers</a>
+</li><li class="has-sub"><a href="#Floats">Floats</a>
+</li><li class="has-sub"><a href="#Strings">Strings</a>
+</ul></li><li class="has-sub"><a href="#Synthesizing-Composite-Data">Synthesizing Composite Data</a>
+<ul><li class="has-sub"><a href="#Lists">Lists</a>
 </ul></li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps">Next Steps</a>
 </li><li class="has-sub"><a href="#Background">Background</a>
@@ -11986,7 +11990,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Testing-a-URL-Parser">Testing a URL Parser<a class="anchor-link" href="#Testing-a-URL-Parser">&#182;</a></h3><p>As an example, consider the <code>urlparse()</code> function from the Python library.  <code>urlparse()</code> takes a URL and decomposes it into its individual components.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>As an example, consider the <code>urlparse()</code> function from the Python library.  <code>urlparse()</code> takes a URL and decomposes it into its individual components.</p>
 </div>
 </div>
 </div>
@@ -12136,7 +12140,7 @@ ParseResult(scheme=&#39;ftps&#39;, netloc=&#39;user:password@cispa.saarland&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Synthesizing-Code">Synthesizing Code<a class="anchor-link" href="#Synthesizing-Code">&#182;</a></h3><p>The "scaffolding" method, as sketched above, has an important downside: It couples test generation and test execution into a single unit, disallowing running both at different times, or for different languages.  To decouple the two, we take another approach: Rather than generating inputs and immediately feeding this input into a function, we <em>synthesize code</em> instead that invokes functions with a given input.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Synthesizing-Code">Synthesizing Code<a class="anchor-link" href="#Synthesizing-Code">&#182;</a></h2><p>The "scaffolding" method, as sketched above, has an important downside: It couples test generation and test execution into a single unit, disallowing running both at different times, or for different languages.  To decouple the two, we take another approach: Rather than generating inputs and immediately feeding this input into a function, we <em>synthesize code</em> instead that invokes functions with a given input.</p>
 </div>
 </div>
 </div>
@@ -12520,10 +12524,10 @@ void test() {
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">URLPARSE_ORACLE_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">URLPARSE_GRAMMAR</span><span class="p">,</span>
-                                         <span class="p">{</span>
-                                             <span class="s2">&quot;&lt;call&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;assert urlparse(&#39;&lt;url&gt;&#39;).geturl() == &#39;&lt;url&gt;&#39;&quot;</span><span class="p">,</span>
-                                                         <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">url_1</span><span class="p">,</span> <span class="n">url_2</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">url_1</span><span class="p">]))]</span>
-                                         <span class="p">})</span>
+<span class="p">{</span>
+     <span class="s2">&quot;&lt;call&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;assert urlparse(&#39;&lt;url&gt;&#39;).geturl() == &#39;&lt;url&gt;&#39;&quot;</span><span class="p">,</span>
+                 <span class="n">opts</span><span class="p">(</span><span class="n">post</span><span class="o">=</span><span class="k">lambda</span> <span class="n">url_1</span><span class="p">,</span> <span class="n">url_2</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">url_1</span><span class="p">]))]</span>
+<span class="p">})</span>
 </pre></div>
 
 </div>
@@ -12715,7 +12719,7 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Synthesizing-Data">Synthesizing Data<a class="anchor-link" href="#Synthesizing-Data">&#182;</a></h3><p>For <code>urlparse()</code>, we have used a very specific grammar for creating a very specific argument.  Many functions take basic data types as (some) arguments, though; we therefore define grammars that generate precisely those arguments.  Even better, we can define functions that <em>generate</em> grammars tailored towards our specific needs, returning values in a particular range, for instance.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Synthesizing-Data">Synthesizing Data<a class="anchor-link" href="#Synthesizing-Data">&#182;</a></h2><p>For <code>urlparse()</code>, we have used a very specific grammar for creating a very specific argument.  Many functions take basic data types as (some) arguments, though; we therefore define grammars that generate precisely those arguments.  Even better, we can define functions that <em>generate</em> grammars tailored towards our specific needs, returning values in a particular range, for instance.</p>
 </div>
 </div>
 </div>
@@ -12724,7 +12728,7 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Integers">Integers<a class="anchor-link" href="#Integers">&#182;</a></h4><p>We introduce a simple grammar to produce integers.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Integers">Integers<a class="anchor-link" href="#Integers">&#182;</a></h3><p>We introduce a simple grammar to produce integers.</p>
 </div>
 </div>
 </div>
@@ -12880,14 +12884,8 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">int_grammar_with_range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
     <span class="n">int_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">INT_GRAMMAR</span><span class="p">)</span>
-    <span class="n">set_opts</span><span class="p">(</span>
-        <span class="n">int_grammar</span><span class="p">,</span>
-        <span class="s2">&quot;&lt;int&gt;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;&lt;_int&gt;&quot;</span><span class="p">,</span>
-        <span class="n">opts</span><span class="p">(</span>
-            <span class="n">pre</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span>
-                <span class="n">start</span><span class="p">,</span>
-                <span class="n">end</span><span class="p">)))</span>
+    <span class="n">set_opts</span><span class="p">(</span><span class="n">int_grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;int&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;_int&gt;&quot;</span><span class="p">,</span>
+        <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)))</span>
     <span class="k">return</span> <span class="n">int_grammar</span>
 </pre></div>
 
@@ -12923,7 +12921,8 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Floats">Floats<a class="anchor-link" href="#Floats">&#182;</a></h4></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Floats">Floats<a class="anchor-link" href="#Floats">&#182;</a></h3><p>The grammar for floating-point values closely resembles the integer grammar.</p>
+</div>
 </div>
 </div>
 </div>
@@ -13068,7 +13067,16 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Strings">Strings<a class="anchor-link" href="#Strings">&#182;</a></h4></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Strings">Strings<a class="anchor-link" href="#Strings">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Finally, we introduce a grammar for producing strings.</p>
+</div>
 </div>
 </div>
 </div>
@@ -13138,7 +13146,16 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Lists">Lists<a class="anchor-link" href="#Lists">&#182;</a></h4></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Synthesizing-Composite-Data">Synthesizing Composite Data<a class="anchor-link" href="#Synthesizing-Composite-Data">&#182;</a></h2><p>From basic data, as discussed above, we can also produce <em>composite data</em> in data structures such as sets or lists.  We illustrate such generation on lists.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Lists">Lists<a class="anchor-link" href="#Lists">&#182;</a></h3></div>
 </div>
 </div>
 </div>
@@ -13323,7 +13340,7 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>This way, we can produce arbitrary data structures by putting together grammar generators.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Generators for dictionaries, sets, etc. can be defined in a similar fashion.  By plugging together grammar generators. we can produce data structures with arbitrary elements.</p>
 </div>
 </div>
 </div>
@@ -13415,7 +13432,7 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/APIFuzzer.ipynb" target=_blank)>Last change: 2019-01-15 17:58:55+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/APIFuzzer.ipynb" target=_blank)>Last change: 2019-01-15 18:40:00+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13431,7 +13448,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">Fuzzing APIs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">https://www.fuzzingbook.org/beta/html/APIFuzzer.html</a>.  Retrieved 2019-01-15 17:58:55+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">Fuzzing APIs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">https://www.fuzzingbook.org/beta/html/APIFuzzer.html</a>.  Retrieved 2019-01-15 18:40:00+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:APIFuzzer,
@@ -13441,9 +13458,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/APIFuzzer.html}},
-    note = {Retrieved 2019-01-15 17:58:55+01:00},
+    note = {Retrieved 2019-01-15 18:40:00+01:00},
     url = {https://www.fuzzingbook.org/beta/html/APIFuzzer.html},
-    urldate = {2019-01-15 17:58:55+01:00}
+    urldate = {2019-01-15 18:40:00+01:00}
 }
 </pre>
 </div>
