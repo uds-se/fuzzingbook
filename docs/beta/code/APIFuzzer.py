@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2018-11-28 20:53:12+01:00
+# Last change: 2019-01-15 17:58:55+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -52,7 +52,11 @@ if __name__ == "__main__":
 
 
 
-import fuzzingbook_utils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 from urllib.parse import urlparse
 
@@ -61,9 +65,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from Grammars import URL_GRAMMAR, is_valid_grammar, START_SYMBOL, new_symbol
+    from Grammars import URL_GRAMMAR, is_valid_grammar, START_SYMBOL, new_symbol, opts, extend_grammar
 else:
-    from .Grammars import URL_GRAMMAR, is_valid_grammar, START_SYMBOL, new_symbol
+    from .Grammars import URL_GRAMMAR, is_valid_grammar, START_SYMBOL, new_symbol, opts, extend_grammar
 
 from GrammarFuzzer import GrammarFuzzer, display_tree, all_terminals
 
@@ -98,17 +102,11 @@ URLPARSE_GRAMMAR = {
         ['urlparse("<url>")']
 }
 
-if __name__ == "__main__":
-    URLPARSE_GRAMMAR.update(URL_GRAMMAR)
+# Import definitions from URL_GRAMMAR
+URLPARSE_GRAMMAR.update(URL_GRAMMAR)
+URLPARSE_GRAMMAR["<start>"] = ["<call>"]
 
-
-if __name__ == "__main__":
-    URLPARSE_GRAMMAR["<start>"] = ["<call>"]
-
-
-if __name__ == "__main__":
-    assert is_valid_grammar(URLPARSE_GRAMMAR)
-
+assert is_valid_grammar(URLPARSE_GRAMMAR)
 
 if __name__ == "__main__":
     URLPARSE_GRAMMAR
@@ -158,326 +156,275 @@ if __name__ == "__main__":
     print(urlparse_fuzzer.fuzz())
 
 
-# ## Mining API Grammars
+# ## Synthesizing Oracles
 
 if __name__ == "__main__":
-    print('\n## Mining API Grammars')
+    print('\n## Synthesizing Oracles')
 
 
 
-
-# ### From Calls to Grammars
-
-if __name__ == "__main__":
-    print('\n### From Calls to Grammars')
-
-
-
-
-import math
-
-def power(x, y):
-    return math.pow(x, y)
 
 if __package__ is None or __package__ == "":
-    from Carver import CallCarver, call_value, call_string
+    from GeneratorGrammarFuzzer import GeneratorGrammarFuzzer, ProbabilisticGeneratorGrammarFuzzer
 else:
-    from .Carver import CallCarver, call_value, call_string
+    from .GeneratorGrammarFuzzer import GeneratorGrammarFuzzer, ProbabilisticGeneratorGrammarFuzzer
+
+
+URLPARSE_ORACLE_GRAMMAR = extend_grammar(URLPARSE_GRAMMAR,
+                                         {
+                                             "<call>": [("assert urlparse('<url>').geturl() == '<url>'",
+                                                         opts(post=lambda url_1, url_2: [None, url_1]))]
+                                         })
+
+if __name__ == "__main__":
+    urlparse_oracle_fuzzer = GeneratorGrammarFuzzer(URLPARSE_ORACLE_GRAMMAR)
+    test = urlparse_oracle_fuzzer.fuzz()
+    print(test)
 
 
 if __name__ == "__main__":
-    with CallCarver() as power_carver:
-        z = power(1, 2)
-        z = power(3, 4)
+    exec(test)
+
+
+URLPARSE_ORACLE_GRAMMAR = extend_grammar(URLPARSE_GRAMMAR,
+{
+     "<call>": [("result = urlparse('<scheme>://<host><path>?<params>')\n"
+                 # + "print(result)\n"
+                 + "assert result.scheme == '<scheme>'\n"
+                 + "assert result.netloc == '<host>'\n"
+                 + "assert result.path == '<path>'\n"
+                 + "assert result.query == '<params>'",
+                 opts(post=lambda scheme_1, authority_1, path_1, params_1,
+                      scheme_2, authority_2, path_2, params_2:
+                      [None, None, None, None,
+                       scheme_1, authority_1, path_1, params_1]))]
+})
+
+# Get rid of unused symbols
+del URLPARSE_ORACLE_GRAMMAR["<url>"]
+del URLPARSE_ORACLE_GRAMMAR["<query>"]
+del URLPARSE_ORACLE_GRAMMAR["<authority>"]
+del URLPARSE_ORACLE_GRAMMAR["<userinfo>"]
+del URLPARSE_ORACLE_GRAMMAR["<port>"]
+
+if __name__ == "__main__":
+    urlparse_oracle_fuzzer = GeneratorGrammarFuzzer(URLPARSE_ORACLE_GRAMMAR)
+    test = urlparse_oracle_fuzzer.fuzz()
+    print(test)
 
 
 if __name__ == "__main__":
-    power_carver.arguments("power")
+    exec(test)
 
 
-POWER_GRAMMAR = {
-    "<start>": ["power(<x>, <y>)"],
-    "<x>": ["1", "3"],
-    "<y>": ["2", "4"]
+def fuzzed_url_element(symbol):
+    return GrammarFuzzer(URLPARSE_GRAMMAR, start_symbol=symbol).fuzz()
+
+if __name__ == "__main__":
+    scheme = fuzzed_url_element("<scheme>")
+    authority = fuzzed_url_element("<authority>")
+    path = fuzzed_url_element("<path>")
+    query = fuzzed_url_element("<params>")
+    url = "%s://%s%s?%s" % (scheme, authority, path, query)
+    result = urlparse(url)
+    # print(result)
+    assert result.geturl() == url
+    assert result.scheme == scheme
+    assert result.path == path
+    assert result.query == query
+
+
+# ### Synthesizing Data
+
+if __name__ == "__main__":
+    print('\n### Synthesizing Data')
+
+
+
+
+# #### Integers
+
+if __name__ == "__main__":
+    print('\n#### Integers')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from Grammars import convert_ebnf_grammar, crange
+else:
+    from .Grammars import convert_ebnf_grammar, crange
+
+
+if __package__ is None or __package__ == "":
+    from ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer
+else:
+    from .ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer
+
+
+INT_EBNF_GRAMMAR = {
+    "<start>": ["<int>"],
+    "<int>": ["<_int>"],
+    "<_int>": ["(-)?<leaddigit><digit>*"],
+    "<leaddigit>": crange('1', '9'),
+    "<digit>": crange('0', '9')
 }
 
+assert is_valid_grammar(INT_EBNF_GRAMMAR)
+
+INT_GRAMMAR = convert_ebnf_grammar(INT_EBNF_GRAMMAR)
+INT_GRAMMAR
+
 if __name__ == "__main__":
-    assert is_valid_grammar(POWER_GRAMMAR)
+    int_fuzzer = GrammarFuzzer(INT_GRAMMAR)
+    print([int_fuzzer.fuzz() for i in range(10)])
 
 
 if __package__ is None or __package__ == "":
-    from GrammarCoverageFuzzer import GrammarCoverageFuzzer
+    from Grammars import set_opts
 else:
-    from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
+    from .Grammars import set_opts
+
+
+import random
+
+def int_grammar_with_range(start, end):
+    int_grammar = extend_grammar(INT_GRAMMAR)
+    set_opts(
+        int_grammar,
+        "<int>",
+        "<_int>",
+        opts(
+            pre=lambda: random.randint(
+                start,
+                end)))
+    return int_grammar
+
+if __name__ == "__main__":
+    int_fuzzer = GeneratorGrammarFuzzer(int_grammar_with_range(900, 1000))
+    [int_fuzzer.fuzz() for i in range(10)]
+
+
+# #### Floats
+
+if __name__ == "__main__":
+    print('\n#### Floats')
+
+
+
+
+FLOAT_EBNF_GRAMMAR = {
+    "<start>": ["<float>"],
+    "<float>": [("<_float>", opts(prob=0.9)), "inf", "NaN"],
+    "<_float>": ["<int>(.<digit>+)?<exp>?"],
+    "<exp>": ["e<int>"]
+}
+FLOAT_EBNF_GRAMMAR.update(INT_EBNF_GRAMMAR)
+FLOAT_EBNF_GRAMMAR["<start>"] = ["<float>"]
+
+assert is_valid_grammar(FLOAT_EBNF_GRAMMAR)
+
+FLOAT_GRAMMAR = convert_ebnf_grammar(FLOAT_EBNF_GRAMMAR)
+FLOAT_GRAMMAR
+
+if __name__ == "__main__":
+    float_fuzzer = ProbabilisticGrammarFuzzer(FLOAT_GRAMMAR)
+    print([float_fuzzer.fuzz() for i in range(10)])
+
+
+def float_grammar_with_range(start, end):
+    float_grammar = extend_grammar(FLOAT_GRAMMAR)
+    set_opts(float_grammar, "<float>", "<_float>", opts(
+        pre=lambda: start + random.random() * (end - start)))
+    return float_grammar
+
+if __name__ == "__main__":
+    float_fuzzer = ProbabilisticGeneratorGrammarFuzzer(
+        float_grammar_with_range(900.0, 900.9))
+    [float_fuzzer.fuzz() for i in range(10)]
+
+
+# #### Strings
+
+if __name__ == "__main__":
+    print('\n#### Strings')
+
+
+
+
+ASCII_STRING_EBNF_GRAMMAR = {
+    "<start>": ["<ascii-string>"],
+    "<ascii-string>": ['"<ascii-chars>"'],
+    "<ascii-chars>": [
+        ("", opts(prob=0.05)),
+        "<ascii-chars><ascii-char>"
+    ],
+    "<ascii-char>": crange(" ", "!") + [r'\"'] + crange("#", "~")
+}
+
+assert is_valid_grammar(ASCII_STRING_EBNF_GRAMMAR)
+
+ASCII_STRING_GRAMMAR = convert_ebnf_grammar(ASCII_STRING_EBNF_GRAMMAR)
+
+if __name__ == "__main__":
+    string_fuzzer = ProbabilisticGrammarFuzzer(ASCII_STRING_GRAMMAR)
+    print([string_fuzzer.fuzz() for i in range(10)])
+
+
+# #### Lists
+
+if __name__ == "__main__":
+    print('\n#### Lists')
+
+
+
+
+LIST_EBNF_GRAMMAR = {
+    "<start>": ["<list>"],
+    "<list>": [
+        ("[]", opts(prob=0.05)),
+        "[<list-objects>]"
+    ],
+    "<list-objects>": [
+        ("<list-object>", opts(prob=0.2)),
+        "<list-object>, <list-objects>"
+    ],
+    "<list-object>": ["0"],
+}
+
+assert is_valid_grammar(LIST_EBNF_GRAMMAR)
+
+LIST_GRAMMAR = convert_ebnf_grammar(LIST_EBNF_GRAMMAR)
+
+def list_grammar(object_grammar, list_object_symbol=None):
+    obj_list_grammar = extend_grammar(LIST_GRAMMAR)
+    if list_object_symbol is None:
+        # Default: Use the first expansion of <start> as list symbol
+        list_object_symbol = object_grammar[START_SYMBOL][0]
+
+    obj_list_grammar.update(object_grammar)
+    obj_list_grammar[START_SYMBOL] = ["<list>"]
+    obj_list_grammar["<list-object>"] = [list_object_symbol]
+
+    assert is_valid_grammar(obj_list_grammar)
+
+    return obj_list_grammar
+
+if __name__ == "__main__":
+    int_list_fuzzer = ProbabilisticGrammarFuzzer(list_grammar(INT_GRAMMAR))
+    [int_list_fuzzer.fuzz() for i in range(10)]
 
 
 if __name__ == "__main__":
-    power_fuzzer = GrammarCoverageFuzzer(POWER_GRAMMAR)
-    [power_fuzzer.fuzz() for i in range(5)]
-
-
-# ### A Grammar Miner for Calls
-
-if __name__ == "__main__":
-    print('\n### A Grammar Miner for Calls')
-
-
-
-
-class CallGrammarMiner(object):
-    def __init__(self, carver, log=False):
-        self.carver = carver
-        self.log = log
-
-# #### Initial Grammar
-
-if __name__ == "__main__":
-    print('\n#### Initial Grammar')
-
-
-
-
-import copy 
-
-class CallGrammarMiner(CallGrammarMiner):
-    CALL_SYMBOL = "<call>"
-
-    def initial_grammar(self):
-        return copy.deepcopy(
-            {START_SYMBOL: [self.CALL_SYMBOL],
-                self.CALL_SYMBOL: []
-             })
-
-if __name__ == "__main__":
-    m = CallGrammarMiner(power_carver)
-    initial_grammar = m.initial_grammar()
-    initial_grammar
-
-
-# #### A Grammar from Arguments
-
-if __name__ == "__main__":
-    print('\n#### A Grammar from Arguments')
-
-
+    string_list_fuzzer = ProbabilisticGrammarFuzzer(
+        list_grammar(ASCII_STRING_GRAMMAR))
+    [string_list_fuzzer.fuzz() for i in range(10)]
 
 
 if __name__ == "__main__":
-    arguments = power_carver.arguments("power")
-    arguments
-
-
-class CallGrammarMiner(CallGrammarMiner):
-    def var_symbol(self, function_name, var, grammar):
-        return new_symbol(grammar, "<" + function_name + "-" + var + ">")
-
-    def mine_arguments_grammar(self, function_name, arguments, grammar):
-        var_grammar = {}
-
-        variables = {}
-        for argument_list in arguments:
-            for (var, value) in argument_list:
-                value_string = call_value(value)
-                if self.log:
-                    print(var, "=", value_string)
-
-                if value_string.find("<") >= 0:
-                    var_grammar["<langle>"] = ["<"]
-                    value_string = value_string.replace("<", "<langle>")
-
-                if var not in variables:
-                    variables[var] = set()
-                variables[var].add(value_string)
-
-        var_symbols = []
-        for var in variables:
-            var_symbol = self.var_symbol(function_name, var, grammar)
-            var_symbols.append(var_symbol)
-            var_grammar[var_symbol] = list(variables[var])
-
-        return var_grammar, var_symbols
-
-if __name__ == "__main__":
-    m = CallGrammarMiner(power_carver)
-    var_grammar, var_symbols = m.mine_arguments_grammar(
-        "power", arguments, initial_grammar)
-
-
-if __name__ == "__main__":
-    var_grammar
-
-
-if __name__ == "__main__":
-    var_symbols
-
-
-# #### A Grammar from Calls
-
-if __name__ == "__main__":
-    print('\n#### A Grammar from Calls')
-
-
-
-
-class CallGrammarMiner(CallGrammarMiner):
-    def function_symbol(self, function_name, grammar):
-        return new_symbol(grammar, "<" + function_name + ">")
-
-    def mine_function_grammar(self, function_name, grammar):
-        arguments = self.carver.arguments(function_name)
-
-        if self.log:
-            print(function_name, arguments)
-
-        var_grammar, var_symbols = self.mine_arguments_grammar(
-            function_name, arguments, grammar)
-
-        function_grammar = var_grammar
-        function_symbol = self.function_symbol(function_name, grammar)
-
-        if len(var_symbols) > 0 and var_symbols[0].find("-self") >= 0:
-            # Method call
-            function_grammar[function_symbol] = [
-                var_symbols[0] + "." + function_name + "(" + ", ".join(var_symbols[1:]) + ")"]
-        else:
-            function_grammar[function_symbol] = [
-                function_name + "(" + ", ".join(var_symbols) + ")"]
-
-        if self.log:
-            print(function_symbol, "::=", function_grammar[function_symbol])
-
-        return function_grammar, function_symbol
-
-if __name__ == "__main__":
-    m = CallGrammarMiner(power_carver)
-    function_grammar, function_symbol = m.mine_function_grammar(
-        "power", initial_grammar)
-    function_grammar
-
-
-if __name__ == "__main__":
-    function_symbol
-
-
-# #### A Grammar from all Calls
-
-if __name__ == "__main__":
-    print('\n#### A Grammar from all Calls')
-
-
-
-
-if __name__ == "__main__":
-    power_carver.called_functions()
-
-
-class CallGrammarMiner(CallGrammarMiner):
-    def mine_call_grammar(self, function_list=None, qualified=False):
-        grammar = self.initial_grammar()
-        fn_list = function_list
-        if function_list is None:
-            fn_list = self.carver.called_functions(qualified=qualified)
-
-        for function_name in fn_list:
-            if function_list is None and (function_name.startswith("_") or function_name.startswith("<")):
-                continue  # Internal function
-
-            # Ignore errors with mined functions
-            try:
-                function_grammar, function_symbol = self.mine_function_grammar(
-                    function_name, grammar)
-            except:
-                if function_list is not None:
-                    raise
-
-            if function_symbol not in grammar[self.CALL_SYMBOL]:
-                grammar[self.CALL_SYMBOL].append(function_symbol)
-            grammar.update(function_grammar)
-
-        assert is_valid_grammar(grammar)
-        return grammar
-
-if __name__ == "__main__":
-    m = CallGrammarMiner(power_carver)
-    power_grammar = m.mine_call_grammar()
-    power_grammar
-
-
-if __name__ == "__main__":
-    power_fuzzer = GrammarCoverageFuzzer(power_grammar)
-    [power_fuzzer.fuzz() for i in range(5)]
-
-
-# ## Fuzzing Web Functions
-
-if __name__ == "__main__":
-    print('\n## Fuzzing Web Functions')
-
-
-
-
-if __package__ is None or __package__ == "":
-    from Carver import webbrowser
-else:
-    from .Carver import webbrowser
-
-
-if __name__ == "__main__":
-    with CallCarver() as webbrowser_carver:
-        webbrowser("https://www.fuzzingbook.org")
-        webbrowser("http://www.example.com")
-
-
-if __name__ == "__main__":
-    m = CallGrammarMiner(webbrowser_carver)
-    webbrowser_grammar = m.mine_call_grammar()
-
-
-if __name__ == "__main__":
-    print(webbrowser_grammar['<call>'])
-
-
-if __name__ == "__main__":
-    webbrowser_grammar["<urlsplit>"]
-
-
-if __name__ == "__main__":
-    webbrowser_grammar["<urlsplit-url>"]
-
-
-if __name__ == "__main__":
-    webbrowser_grammar["<urlsplit-scheme>"]
-
-
-if __name__ == "__main__":
-    urlsplit_fuzzer = GrammarCoverageFuzzer(
-        webbrowser_grammar, start_symbol="<urlsplit>")
-    for i in range(5):
-        print(urlsplit_fuzzer.fuzz())
-
-
-from urllib.parse import urlsplit
-
-if __package__ is None or __package__ == "":
-    from Timer import Timer
-else:
-    from .Timer import Timer
-
-
-if __name__ == "__main__":
-    with Timer() as urlsplit_timer:
-        urlsplit('http://www.fuzzingbook.org/', 'http', True)
-    urlsplit_timer.elapsed_time()
-
-
-if __name__ == "__main__":
-    with Timer() as webbrowser_timer:
-        webbrowser("http://www.fuzzingbook.org")
-    webbrowser_timer.elapsed_time()
-
-
-if __name__ == "__main__":
-    webbrowser_timer.elapsed_time() / urlsplit_timer.elapsed_time()
+    float_list_fuzzer = ProbabilisticGeneratorGrammarFuzzer(list_grammar(
+        float_grammar_with_range(900.0, 900.9)))
+    [float_list_fuzzer.fuzz() for i in range(10)]
 
 
 # ## Lessons Learned
@@ -512,26 +459,26 @@ if __name__ == "__main__":
 
 
 
-# ### Exercise 1: Covering Argument Combinations
+# ### Exercise 1: Deep Arguments
 
 if __name__ == "__main__":
-    print('\n### Exercise 1: Covering Argument Combinations')
+    print('\n### Exercise 1: Deep Arguments')
 
 
 
 
-# ### Exercise 2: Mutating Arguments
-
-if __name__ == "__main__":
-    print('\n### Exercise 2: Mutating Arguments')
-
-
-
-
-# ### Exercise 3: Abstracting Arguments
+# ### Exercise 2: Covering Argument Combinations
 
 if __name__ == "__main__":
-    print('\n### Exercise 3: Abstracting Arguments')
+    print('\n### Exercise 2: Covering Argument Combinations')
+
+
+
+
+# ### Exercise 3: Mutating Arguments
+
+if __name__ == "__main__":
+    print('\n### Exercise 3: Mutating Arguments')
 
 
 
