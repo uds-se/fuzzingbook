@@ -15,23 +15,21 @@ PUBLIC_CHAPTERS = \
 	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
 	GeneratorGrammarFuzzer.ipynb \
+	APIFuzzer.ipynb \
 
 # Chapters that are ready for release (= the current chapters for the students)
 READY_CHAPTERS = \
-	APIFuzzer.ipynb \
 	Carver.ipynb \
 	Reducer.ipynb \
-	WebFuzzer.ipynb
+	WebFuzzer.ipynb \
+	GUIFuzzer.ipynb \
+	SBST.ipynb \
 
 # Chapters that still are work in progress
 TODO_CHAPTERS = \
-	GUIFuzzer.ipynb \
-	SBST.ipynb \
 	GrammarMiner.ipynb \
 	InformationFlow.ipynb \
-
 	# Oracles.ipynb
-	# SearchBasedFuzzer.ipynb
 	# SymbolicFuzzer.ipynb
 	# FuzzingInTheLarge.ipynb
 
