@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2019-01-04 22:16:58+01:00
+# Last change: 2019-01-15 13:31:14+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -44,7 +44,11 @@ if __name__ == "__main__":
 
 
 
-import fuzzingbook_utils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     from Grammars import EXPR_GRAMMAR, is_valid_grammar, is_nonterminal, extend_grammar
@@ -526,9 +530,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    from fuzzingbook_utils import HTML
-
+from fuzzingbook_utils import HTML
 
 if __name__ == "__main__":
     HTML("<strong>A bold text</strong>")

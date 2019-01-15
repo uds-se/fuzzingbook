@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2019-01-07 15:22:03+01:00
+# Last change: 2019-01-14 13:55:30+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -44,7 +44,13 @@ if __name__ == "__main__":
 
 
 
-import fuzzingbook_utils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+
+from fuzzingbook_utils import unicode_escape
 
 if __package__ is None or __package__ == "":
     from Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer, is_valid_grammar, exp_string, exp_opts
@@ -199,7 +205,6 @@ import re
 
 def dot_escape(s):
     """Return s in a form suitable for dot"""
-    # s = s.replace("\\", "\\\\")
     s = re.sub(r'([^a-zA-Z0-9" ])', r"\\\1", s)
     return s
 
@@ -214,7 +219,7 @@ def extract_node(node, id):
     return symbol, children, ''.join(str(a) for a in annotation)
 
 def default_node_attr(dot, nid, symbol, ann):
-    dot.node(repr(nid), dot_escape(symbol))
+    dot.node(repr(nid), dot_escape(unicode_escape(symbol)))
 
 def default_edge_attr(dot, start_node, stop_node):
     dot.edge(repr(start_node), repr(stop_node))
@@ -260,9 +265,9 @@ def display_annotated_tree(tree, a_nodes, a_edges, log=False):
 
     def annotate_node(dot, nid, symbol, ann):
         if nid in a_nodes:
-            dot.node(repr(nid), "%s (%s)" % (dot_escape(symbol), a_nodes[nid]))
+            dot.node(repr(nid), "%s (%s)" % (dot_escape(unicode_escape(symbol)), a_nodes[nid]))
         else:
-            dot.node(repr(nid), dot_escape(symbol))
+            dot.node(repr(nid), dot_escape(unicode_escape(symbol)))
 
     def annotate_edge(dot, start_node, stop_node):
         if (start_node, stop_node) in a_edges:
