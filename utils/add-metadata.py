@@ -70,6 +70,7 @@ def add_document_metadata(notebook, titlepage):
      "toc_section_display": True,
      "toc_window_display": True
     }
+    notebook.metadata["toc-autonumbering"] = False
 
 def add_solution_metadata(notebook):
     """Add solution metadata"""
