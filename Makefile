@@ -629,14 +629,24 @@ stats: $(SOURCES)
 	@cd $(NOTEBOOKS); ../utils/nbstats.py $(SOURCE_FILES)
 
 # Run all code.  This should produce no failures.
+PY_SUCCESS_MAGIC = "--- Code check passed ---"
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
 $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 	@echo Running $<...
-	@$(PYTHON) $< > $@ 2>&1 || (echo "Error while running $<" >> $@; tail $@; exit 1)
+	@if $(PYTHON) $< > $@ 2>&1; then \
+		echo $(PY_SUCCESS_MAGIC) >> $@; \
+		exit 0; \
+	else \
+		echo "Error while running $<" >> $@; \
+		tail $@; \
+		touch -r $< $@; \
+		touch -A -010000 $@; \
+		exit 1; \
+	fi
 
 .PHONY: check-code
 check-code: code $(PYS_OUT)
-	@grep "^Error while running" $(PYS_OUT) || echo "All code checks passed."
+	@grep --files-without-match -- $(PY_SUCCESS_MAGIC) $(PYS_OUT) && echo "All code checks passed."
 
 # Import all code.  This should produce no output (or error messages).
 IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
