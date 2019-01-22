@@ -13367,6 +13367,17 @@ a:active {
     font-style: italic!important;
 }
 
+/* Chapters in menu */
+.chapters {
+    /* font-style: italic!important; */
+}
+
+/* Chapter numbers in menu */
+.chnum {
+    /* font-weight: bold; */
+}
+
+
 /* Imports */
 a.import {
     text-decoration: underline;
@@ -13572,7 +13583,7 @@ article {
 }
 #cssmenu ul li > ul,
 #cssmenu ul li > ol {
-  width: 225px;
+  width: 240px;
 }
 #cssmenu ul ul ul,
 #cssmenu ul ul ol,
@@ -13626,12 +13637,12 @@ article {
   */
 }
 #cssmenu > ul > li > a:hover {
-  background: #660000;
+  background: #bb0000;
   color: #ffffff;
 }
 #cssmenu ul ul a:hover,
 #cssmenu ul ol a:hover {
-  background: #990000;
+  background: #bb0000;
   color: #ffffff;
 }
 #cssmenu > ul > li.has-sub > a:hover:before {
@@ -13774,7 +13785,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Carving-Unit-Tests">Carving Unit Tests<a class="anchor-link" href="#Carving-Unit-Tests">&#182;</a></h1><p>So far, we have always generated <em>system input</em>, i.e. data that the program as a whole obtains via its input channels.  If we are interested in testing only a small set of functions, having to go through the system can be very inefficient.  This chapter introduces a technique known as <em>carving</em>, which, given a system test, automatically extracts a set of <em>unit tests</em> that replicate the calls seen during the unit test.  The key idea is to <em>record</em> such calls such that we can <em>replay</em> them later – as a whole or selectively.</p>
+<h1 id="Carving-Unit-Tests">Carving Unit Tests<a class="anchor-link" href="#Carving-Unit-Tests">&#182;</a></h1><p>So far, we have always generated <em>system input</em>, i.e. data that the program as a whole obtains via its input channels.  If we are interested in testing only a small set of functions, having to go through the system can be very inefficient.  This chapter introduces a technique known as <em>carving</em>, which, given a system test, automatically extracts a set of <em>unit tests</em> that replicate the calls seen during the unit test.  The key idea is to <em>record</em> such calls such that we can <em>replay</em> them later – as a whole or selectively.  On top, we also explore how to synthesize API grammars from carved unit tests; this means that we can <em>synthesize API tests without having to write a grammar at all.</em></p>
 
 </div>
 </div>
@@ -13785,6 +13796,7 @@ a.anchor-link {
 <p><strong>Prerequisites</strong></p>
 <ul>
 <li>Carving makes use of dynamic traces of function calls and variables, as introduced in the <a href="ConfigurationFuzzer.slides.html">chapter on configuration fuzzing</a>.</li>
+<li>Using grammars to test units was introduced in the <a href="APIFuzzer.slides.html">chapter on API fuzzing</a>.</li>
 </ul>
 
 </div>
@@ -13801,33 +13813,31 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">webbrowser</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Download the http/https resource given by the URL&quot;&quot;&quot;</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">getcode</span><span class="p">()</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
-        <span class="n">contents</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">contents</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span>
 </pre></div>
 
     </div>
 </div>
 </div>
 
-</div></div></section><section>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Let us apply this on <a href="https://www.fuzzingbook.org/">fuzzingboook.org</a> and measure the time, using the <a href="Timer.slides.html">Timer class</a>:</p>
+<p>Let us apply this on <a href="https://www.fuzzingbook.org/">fuzzingbook.org</a> and measure the time, using the <a href="Timer.slides.html">Timer class</a>:</p>
 
 </div>
 </div>
-</div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">webbrowser_timer</span><span class="p">:</span>
@@ -13852,7 +13862,7 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Downloaded 394791 bytes in 0.98 seconds
+<pre>Downloaded 412400 bytes in 0.20 seconds
 </pre>
 </div>
 </div>
@@ -13860,10 +13870,10 @@ a.anchor-link {
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzingbook_contents</span><span class="p">[:</span><span class="mi">100</span><span class="p">]</span>
@@ -13879,7 +13889,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[6]:</div>
+    <div class="prompt output_prompt">Out[7]:</div>
 
 
 
@@ -13904,7 +13914,7 @@ a.anchor-link {
 
 </div>
 </div>
-</div><div class="fragment">
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -13912,7 +13922,7 @@ a.anchor-link {
 
 </div>
 </div>
-</div></div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -13920,10 +13930,10 @@ a.anchor-link {
 
 </div>
 </div>
-</div><div class="fragment">
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlparse</span><span class="p">(</span><span class="s1">&#39;https://www.fuzzingbook.com/html/Carver.html&#39;</span><span class="p">)</span>
@@ -13939,7 +13949,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[8]:</div>
+    <div class="prompt output_prompt">Out[9]:</div>
 
 
 
@@ -13953,7 +13963,7 @@ a.anchor-link {
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -13961,7 +13971,7 @@ a.anchor-link {
 
 </div>
 </div>
-</div></div><div class="fragment">
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -13972,7 +13982,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="mi">1000</span>
@@ -13994,13 +14004,13 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[9]:</div>
+    <div class="prompt output_prompt">Out[10]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>2.012384997215122e-06</pre>
+<pre>2.321939013199881e-06</pre>
 </div>
 
 </div>
@@ -14019,51 +14029,10 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[10]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>0.9807676509954035</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The difference in time is huge:</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
 <div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span> <span class="o">/</span> <span class="n">avg_urlparse_time</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -14082,7 +14051,48 @@ a.anchor-link {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>487365.81337699195</pre>
+<pre>0.19838373598759063</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The difference in time is huge:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span> <span class="o">/</span> <span class="n">avg_urlparse_time</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[12]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>85438.82283720991</pre>
 </div>
 
 </div>
@@ -14128,7 +14138,7 @@ a.anchor-link {
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Carver</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -14165,7 +14175,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_qualified_name</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
@@ -14184,7 +14194,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_arguments</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
@@ -14202,7 +14212,7 @@ a.anchor-link {
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallCarver</span><span class="p">(</span><span class="n">Carver</span><span class="p">):</span>
@@ -14247,7 +14257,7 @@ a.anchor-link {
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallCarver</span><span class="p">(</span><span class="n">CallCarver</span><span class="p">):</span>
@@ -14293,7 +14303,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CallCarver</span><span class="p">()</span> <span class="k">as</span> <span class="n">sqrt_carver</span><span class="p">:</span>
@@ -14316,7 +14326,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sqrt_carver</span><span class="o">.</span><span class="n">calls</span><span class="p">()</span>
@@ -14332,14 +14342,14 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[21]:</div>
+    <div class="prompt output_prompt">Out[22]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
 <pre>{&#39;my_sqrt&#39;: [[(&#39;x&#39;, 2)], [(&#39;x&#39;, 4)]],
- &#39;__exit__&#39;: [[(&#39;self&#39;, &lt;__main__.CallCarver at 0x10feb92e8&gt;),
+ &#39;__exit__&#39;: [[(&#39;self&#39;, &lt;__main__.CallCarver at 0x104599cf8&gt;),
    (&#39;exc_type&#39;, None),
    (&#39;exc_value&#39;, None),
    (&#39;tb&#39;, None)]]}</pre>
@@ -14353,7 +14363,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sqrt_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">()</span>
@@ -14369,7 +14379,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[22]:</div>
+    <div class="prompt output_prompt">Out[23]:</div>
 
 
 
@@ -14394,7 +14404,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sqrt_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;my_sqrt&quot;</span><span class="p">)</span>
@@ -14410,7 +14420,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[23]:</div>
+    <div class="prompt output_prompt">Out[24]:</div>
 
 
 
@@ -14435,7 +14445,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">simple_call_string</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">argument_list</span><span class="p">):</span>
@@ -14452,7 +14462,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="n">sqrt_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">():</span>
@@ -14476,7 +14486,7 @@ a.anchor-link {
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>my_sqrt(x=2)
 my_sqrt(x=4)
-__exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, exc_value=None, tb=None)
+__exit__(self=&lt;__main__.CallCarver object at 0x104599cf8&gt;, exc_type=None, exc_value=None, tb=None)
 </pre>
 </div>
 </div>
@@ -14495,7 +14505,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;my_sqrt(x=2)&quot;</span><span class="p">)</span>
@@ -14511,7 +14521,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[26]:</div>
+    <div class="prompt output_prompt">Out[27]:</div>
 
 
 
@@ -14543,7 +14553,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CallCarver</span><span class="p">()</span> <span class="k">as</span> <span class="n">webbrowser_carver</span><span class="p">:</span>
@@ -14565,50 +14575,11 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">(</span><span class="n">qualified</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt"></div>
-
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>[&#39;urllib.request.urlopen&#39;, &#39;urllib.request.open&#39;, &#39;urllib.request.__init__&#39;, &#39;urllib.request.full_url&#39;, &#39;urllib.parse.unwrap&#39;, &#39;urllib.parse.splittag&#39;, &#39;urllib.request._parse&#39;, &#39;urllib.parse.splittype&#39;, &#39;urllib.parse.splithost&#39;, &#39;urllib.parse.unquote&#39;, &#39;urllib.request.data&#39;, &#39;urllib.request.request_host&#39;, &#39;urllib.parse.urlparse&#39;, &#39;urllib.parse._coerce_args&#39;, &#39;urllib.parse.urlsplit&#39;, &#39;urllib.parse.clear_cache&#39;, &#39;urllib.parse._splitnetloc&#39;, &#39;urllib.parse._noop&#39;, &#39;urllib.request.do_request_&#39;, &#39;urllib.request.has_proxy&#39;, &#39;urllib.request.has_header&#39;, &#39;urllib.request.add_unredirected_header&#39;, &#39;urllib.request._open&#39;, &#39;urllib.request._call_chain&#39;, &#39;urllib.request.http_open&#39;, &#39;urllib.request.do_open&#39;, &#39;http.client.__init__&#39;, &#39;http.client._get_hostport&#39;, &#39;http.client.set_debuglevel&#39;, &#39;urllib.request.&lt;genexpr&gt;&#39;, &#39;urllib.request.get_method&#39;, &#39;http.client.request&#39;, &#39;http.client._send_request&#39;, &#39;http.client.&lt;genexpr&gt;&#39;, &#39;http.client.putrequest&#39;, &#39;http.client._output&#39;, &#39;http.client.putheader&#39;, &#39;http.client._get_content_length&#39;, &#39;http.client.endheaders&#39;, &#39;http.client._send_output&#39;, &#39;http.client.send&#39;, &#39;http.client.connect&#39;, &#39;socket.create_connection&#39;, &#39;socket.getaddrinfo&#39;, &#39;encodings.idna.encode&#39;, &#39;socket._intenum_converter&#39;, &#39;enum.__call__&#39;, &#39;enum.__new__&#39;, &#39;socket.__init__&#39;, &#39;http.client.getresponse&#39;, &#39;socket.makefile&#39;, &#39;socket.readable&#39;, &#39;http.client.begin&#39;, &#39;http.client._read_status&#39;, &#39;socket.readinto&#39;, &#39;http.client.parse_headers&#39;, &#39;email.parser.__init__&#39;, &#39;email.parser.parsestr&#39;, &#39;email.parser.parse&#39;, &#39;email.feedparser.__init__&#39;, &#39;email.message.__init__&#39;, &#39;email.feedparser.feed&#39;, &#39;email.feedparser.push&#39;, &#39;email.feedparser.pushlines&#39;, &#39;email.feedparser._call_parse&#39;, &#39;email.feedparser._parsegen&#39;, &#39;email.feedparser._new_message&#39;, &#39;email.feedparser.__iter__&#39;, &#39;email.feedparser.__next__&#39;, &#39;email.feedparser.readline&#39;, &#39;email.feedparser._parse_headers&#39;, &#39;email._policybase.header_source_parse&#39;, &#39;email.message.set_raw&#39;, &#39;email.message.get_content_type&#39;, &#39;email.message.get&#39;, &#39;email._policybase.header_fetch_parse&#39;, &#39;email._policybase._sanitize_header&#39;, &#39;email.utils._has_surrogates&#39;, &#39;email.message._splitparam&#39;, &#39;email.message.get_content_maintype&#39;, &#39;email.feedparser.close&#39;, &#39;email.message.set_payload&#39;, &#39;email.feedparser._pop_message&#39;, &#39;http.client._check_close&#39;, &#39;http.client.close&#39;, &#39;socket.close&#39;, &#39;urllib.request.get_full_url&#39;, &#39;urllib.request.http_response&#39;, &#39;http.client.info&#39;, &#39;http.client.getcode&#39;, &#39;http.client.read&#39;, &#39;http.client._safe_read&#39;, &#39;http.client._close_conn&#39;, &#39;socket._decref_socketios&#39;, &#39;socket._real_close&#39;]
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Among several other functions, we also have a call to <code>urlparse()</code>:</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
 <div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlparse_argument_list</span> <span class="o">=</span> <span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;urllib.parse.urlparse&quot;</span><span class="p">)</span>
-<span class="n">urlparse_argument_list</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">function_list</span> <span class="o">=</span> <span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">(</span><span class="n">qualified</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">function_list</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -14627,7 +14598,110 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 
 <div class="output_text output_subarea output_execute_result">
+<pre>305</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">function_list</span><span class="p">[:</span><span class="mi">50</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[&#39;requests.api.get&#39;, &#39;requests.api.request&#39;, &#39;requests.sessions.__init__&#39;, &#39;requests.utils.default_headers&#39;, &#39;requests.utils.default_user_agent&#39;, &#39;requests.structures.__init__&#39;, &#39;collections.abc.update&#39;, &#39;abc.__instancecheck__&#39;, &#39;_weakrefset.__contains__&#39;, &#39;requests.structures.__setitem__&#39;, &#39;requests.hooks.default_hooks&#39;, &#39;requests.hooks.&lt;genexpr&gt;&#39;, &#39;requests.cookies.cookiejar_from_dict&#39;, &#39;http.cookiejar.__init__&#39;, &#39;threading.RLock&#39;, &#39;http.cookiejar.__iter__&#39;, &#39;requests.cookies.&lt;listcomp&gt;&#39;, &#39;http.cookiejar.deepvalues&#39;, &#39;http.cookiejar.vals_sorted_by_key&#39;, &#39;requests.adapters.__init__&#39;, &#39;urllib3.util.retry.__init__&#39;, &#39;requests.adapters.init_poolmanager&#39;, &#39;urllib3.poolmanager.__init__&#39;, &#39;urllib3.request.__init__&#39;, &#39;urllib3._collections.__init__&#39;, &#39;requests.sessions.mount&#39;, &#39;requests.sessions.&lt;listcomp&gt;&#39;, &#39;requests.sessions.__enter__&#39;, &#39;requests.sessions.request&#39;, &#39;requests.models.__init__&#39;, &#39;requests.sessions.prepare_request&#39;, &#39;requests.cookies.merge_cookies&#39;, &#39;requests.cookies.update&#39;, &#39;requests.utils.get_netrc_auth&#39;, &#39;posixpath.expanduser&#39;, &#39;posixpath._get_sep&#39;, &#39;collections.abc.__contains__&#39;, &#39;os.__getitem__&#39;, &#39;os.encode&#39;, &#39;os.decode&#39;, &#39;genericpath.exists&#39;, &#39;urllib.parse.urlparse&#39;, &#39;urllib.parse._coerce_args&#39;, &#39;urllib.parse.urlsplit&#39;, &#39;urllib.parse._splitnetloc&#39;, &#39;urllib.parse._noop&#39;, &#39;netrc.__init__&#39;, &#39;_bootlocale.getpreferredencoding&#39;, &#39;codecs.__init__&#39;, &#39;netrc._parse&#39;]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Among several other functions, we also have a call to <code>urlparse()</code>:</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlparse_argument_list</span> <span class="o">=</span> <span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;urllib.parse.urlparse&quot;</span><span class="p">)</span>
+<span class="n">urlparse_argument_list</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[31]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
 <pre>[[(&#39;url&#39;, &#39;http://www.example.com&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)],
+ [(&#39;url&#39;, &#39;http://www.example.com/&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)],
+ [(&#39;url&#39;, &#39;http://www.example.com/&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)],
+ [(&#39;url&#39;, &#39;http://www.example.com/&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)],
+ [(&#39;url&#39;, &#39;http://www.example.com/&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)],
+ [(&#39;url&#39;, &#39;http://www.example.com/&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)],
+ [(&#39;url&#39;, &#39;http://www.example.com/&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)],
+ [(&#39;url&#39;, &#39;http://www.example.com/&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)],
+ [(&#39;url&#39;, &#39;http://www.example.com/&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)],
+ [(&#39;url&#39;, &#39;http://www.example.com/&#39;),
+  (&#39;scheme&#39;, &#39;&#39;),
+  (&#39;allow_fragments&#39;, True)],
+ [(&#39;url&#39;, &#39;http://www.example.com/&#39;),
   (&#39;scheme&#39;, &#39;&#39;),
   (&#39;allow_fragments&#39;, True)]]</pre>
 </div>
@@ -14637,7 +14711,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div>
 </div>
 
-</div></div></section><section>
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -14648,7 +14722,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlparse_call</span> <span class="o">=</span> <span class="n">simple_call_string</span><span class="p">(</span><span class="s2">&quot;urlparse&quot;</span><span class="p">,</span> <span class="n">urlparse_argument_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -14665,7 +14739,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[30]:</div>
+    <div class="prompt output_prompt">Out[32]:</div>
 
 
 
@@ -14690,7 +14764,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">eval</span><span class="p">(</span><span class="n">urlparse_call</span><span class="p">)</span>
@@ -14706,7 +14780,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[31]:</div>
+    <div class="prompt output_prompt">Out[33]:</div>
 
 
 
@@ -14755,7 +14829,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">email_parse_argument_list</span> <span class="o">=</span> <span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;email.parser.parse&quot;</span><span class="p">)</span>
@@ -14776,7 +14850,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">email_parse_call</span> <span class="o">=</span> <span class="n">simple_call_string</span><span class="p">(</span>
@@ -14795,13 +14869,13 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[33]:</div>
+    <div class="prompt output_prompt">Out[35]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;email.parser.parse(self=&lt;email.parser.Parser object at 0x10feb9a20&gt;, fp=&lt;_io.StringIO object at 0x10ff4b708&gt;, headersonly=False)&#39;</pre>
+<pre>&#39;email.parser.parse(self=&lt;email.parser.Parser object at 0x105642c18&gt;, fp=&lt;_io.StringIO object at 0x1056fe4c8&gt;, headersonly=False)&#39;</pre>
 </div>
 
 </div>
@@ -14828,7 +14902,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">parser_object</span> <span class="o">=</span> <span class="n">email_parse_argument_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
@@ -14845,13 +14919,13 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[35]:</div>
+    <div class="prompt output_prompt">Out[37]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;email.parser.Parser at 0x10feb9a20&gt;</pre>
+<pre>&lt;email.parser.Parser at 0x105642c18&gt;</pre>
 </div>
 
 </div>
@@ -14862,7 +14936,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">pickled</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">parser_object</span><span class="p">)</span>
@@ -14879,7 +14953,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[36]:</div>
+    <div class="prompt output_prompt">Out[38]:</div>
 
 
 
@@ -14904,7 +14978,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">unpickled_parser_object</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">pickled</span><span class="p">)</span>
@@ -14921,13 +14995,13 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[37]:</div>
+    <div class="prompt output_prompt">Out[39]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;email.parser.Parser at 0x10ff61278&gt;</pre>
+<pre>&lt;email.parser.Parser at 0x10585e128&gt;</pre>
 </div>
 
 </div>
@@ -14946,7 +15020,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">call_value</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
@@ -14964,7 +15038,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">call_string</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">argument_list</span><span class="p">):</span>
@@ -14997,7 +15071,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">call</span> <span class="o">=</span> <span class="n">call_string</span><span class="p">(</span><span class="s2">&quot;email.parser.parse&quot;</span><span class="p">,</span> <span class="n">email_parse_argument_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -15018,7 +15092,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pickle.loads(b&#39;\x80\x03cemail.parser\nParser\nq\x00)\x81q\x01}q\x02(X\x06\x00\x00\x00_classq\x03chttp.client\nHTTPMessage\nq\x04X\x06\x00\x00\x00policyq\x05cemail._policybase\nCompat32\nq\x06)\x81q\x07ub.&#39;).parse(fp=pickle.loads(b&#39;\x80\x03c_io\nStringIO\nq\x00)\x81q\x01(XD\x01\x00\x00Cache-Control: max-age=604800\r\nContent-Type: text/html; charset=UTF-8\r\nDate: Mon, 26 Nov 2018 11:22:07 GMT\r\nEtag: &#34;1541025663+ident&#34;\r\nExpires: Mon, 03 Dec 2018 11:22:07 GMT\r\nLast-Modified: Fri, 09 Aug 2013 23:54:35 GMT\r\nServer: ECS (dca/24C1)\r\nVary: Accept-Encoding\r\nX-Cache: HIT\r\nContent-Length: 1270\r\nConnection: close\r\n\r\nq\x02X\x01\x00\x00\x00\nq\x03MD\x01Ntq\x04b.&#39;), headersonly=False)
+<pre>pickle.loads(b&#39;\x80\x03cemail.parser\nParser\nq\x00)\x81q\x01}q\x02(X\x06\x00\x00\x00_classq\x03chttp.client\nHTTPMessage\nq\x04X\x06\x00\x00\x00policyq\x05cemail._policybase\nCompat32\nq\x06)\x81q\x07ub.&#39;).parse(fp=pickle.loads(b&#39;\x80\x03c_io\nStringIO\nq\x00)\x81q\x01(XX\x01\x00\x00Content-Encoding: gzip\r\nAccept-Ranges: bytes\r\nCache-Control: max-age=604800\r\nContent-Type: text/html; charset=UTF-8\r\nDate: Tue, 22 Jan 2019 11:35:03 GMT\r\nEtag: &#34;1541025663&#34;\r\nExpires: Tue, 29 Jan 2019 11:35:03 GMT\r\nLast-Modified: Fri, 09 Aug 2013 23:54:35 GMT\r\nServer: ECS (dca/24C1)\r\nVary: Accept-Encoding\r\nX-Cache: HIT\r\nContent-Length: 606\r\n\r\nq\x02X\x01\x00\x00\x00\nq\x03MX\x01Ntq\x04b.&#39;), headersonly=False)
 </pre>
 </div>
 </div>
@@ -15037,7 +15111,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">eval</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
@@ -15053,13 +15127,13 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[41]:</div>
+    <div class="prompt output_prompt">Out[43]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;http.client.HTTPMessage at 0x10ff61ac8&gt;</pre>
+<pre>&lt;http.client.HTTPMessage at 0x10585e908&gt;</pre>
 </div>
 
 </div>
@@ -15078,7 +15152,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_functions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">webbrowser_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">(</span><span class="n">qualified</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
@@ -15093,7 +15167,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">exceptions_seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -15122,7 +15196,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2"> calls (</span><span class="si">%.2f%%</span><span class="s2">) successfully created and </span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2"> calls (</span><span class="si">%.2f%%</span><span class="s2">) successfully ran&quot;</span> <span class="o">%</span> <span class="p">(</span>
@@ -15145,7 +15219,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>83/95 calls (87.37%) successfully created and 47/95 calls (49.47%) successfully ran
+<pre>242/305 calls (79.34%) successfully created and 123/305 calls (40.33%) successfully ran
 </pre>
 </div>
 </div>
@@ -15164,7 +15238,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
@@ -15185,16 +15259,16 @@ __exit__(self=&lt;__main__.CallCarver object at 0x10feb92e8&gt;, exc_type=None, 
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>NameError(&#34;name &#39;SplitResult&#39; is not defined&#34;,)
-SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 16, &#34;urllib.request.&lt;genexpr&gt;(headers={&#39;Host&#39;: &#39;www.example.com&#39;, &#39;User-agent&#39;: &#39;Python-urllib/3.6&#39;, &#39;Connection&#39;: &#39;close&#39;}, .0=pickle.loads(b&#39;\\x80\\x03cbuiltins\\niter\\nq\\x00]q\\x01\\x85q\\x02Rq\\x03.&#39;))&#34;))
-TypeError(&#39;an integer is required (got type object)&#39;,)
-StopIteration()
-TypeError(&#34;_call_chain() got an unexpected keyword argument &#39;args&#39;&#34;,)
-ResponseNotReady(&#39;Idle&#39;,)
+<pre>NameError(&#34;name &#39;collections&#39; is not defined&#34;,)
+SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 21, &#34;requests.structures.&lt;genexpr&gt;(.0=pickle.loads(b&#39;\\x80\\x03cbuiltins\\niter\\nq\\x00]q\\x01\\x85q\\x02Rq\\x03.&#39;))&#34;))
+SyntaxError(&#39;keyword argument repeated&#39;, (&#39;&lt;string&gt;&#39;, 1, 43, None))
+SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 18, &#34;urllib3.response.&lt;genexpr&gt;(enc=&#39;&#39;, .0=pickle.loads(b&#39;\\x80\\x03cbuiltins\\niter\\nq\\x00]q\\x01\\x85q\\x02Rq\\x03.&#39;))&#34;))
+SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 21, &#39;urllib3.poolmanager.&lt;lambda&gt;(p=pickle.loads(b\&#39;\\x80\\x03curllib3.connectionpool\\nHTTPConnectionPool\\nq\\x00)\\x81q\\x01}q\\x02(X\\x04\\x00\\x00\\x00hostq\\x03X\\x0f\\x00\\x00\\x00www.example.comq\\x04X\\x0b\\x00\\x00\\x00_proxy_hostq\\x05X\\x0f\\x00\\x00\\x00www.example.comq\\x06X\\x04\\x00\\x00\\x00portq\\x07KPX\\x07\\x00\\x00\\x00headersq\\x08}q\\tX\\x06\\x00\\x00\\x00strictq\\n\\x88X\\x07\\x00\\x00\\x00timeoutq\\x0bcurllib3.util.timeout\\nTimeout\\nq\\x0c)\\x81q\\r}q\\x0e(X\\x08\\x00\\x00\\x00_connectq\\x0fcbuiltins\\nobject\\nq\\x10)\\x81q\\x11X\\x05\\x00\\x00\\x00_readq\\x12h\\x11X\\x05\\x00\\x00\\x00totalq\\x13NX\\x0e\\x00\\x00\\x00_start_connectq\\x14NubX\\x07\\x00\\x00\\x00retriesq\\x15curllib3.util.retry\\nRetry\\nq\\x16)\\x81q\\x17}q\\x18(h\\x13K\\x03X\\x07\\x00\\x00\\x00connectq\\x19NX\\x04\\x00\\x00\\x00readq\\x1aNX\\x06\\x00\\x00\\x00statusq\\x1bNX\\x08\\x00\\x00\\x00redirectq\\x1cNX\\x10\\x00\\x00\\x00status_forcelistq\\x1dcbuiltins\\nset\\nq\\x1e]q\\x1f\\x85q Rq!X\\x10\\x00\\x00\\x00method_whitelistq&#34;cbuiltins\\nfrozenset\\nq#]q$(X\\x06\\x00\\x00\\x00DELETEq%X\\x05\\x00\\x00\\x00TRACEq&amp;X\\x04\\x00\\x00\\x00HEADq\\\&#39;X\\x03\\x00\\x00\\x00GETq(X\\x07\\x00\\x00\\x00OPTIONSq)X\\x03\\x00\\x00\\x00PUTq*e\\x85q+Rq,X\\x0e\\x00\\x00\\x00backoff_factorq-K\\x00X\\x11\\x00\\x00\\x00raise_on_redirectq.\\x88X\\x0f\\x00\\x00\\x00raise_on_statusq/\\x88X\\x07\\x00\\x00\\x00historyq0)X\\x1a\\x00\\x00\\x00respect_retry_after_headerq1\\x88X\\x1a\\x00\\x00\\x00remove_headers_on_redirectq2h#]q3X\\r\\x00\\x00\\x00Authorizationq4a\\x85q5Rq6ubX\\x04\\x00\\x00\\x00poolq7NX\\x05\\x00\\x00\\x00blockq8\\x89X\\x05\\x00\\x00\\x00proxyq9NX\\r\\x00\\x00\\x00proxy_headersq:}q;X\\x0f\\x00\\x00\\x00num_connectionsq&lt;K\\x01X\\x0c\\x00\\x00\\x00num_requestsq=K\\x01X\\x07\\x00\\x00\\x00conn_kwq&gt;}q?X\\t\\x00\\x00\\x00cert_reqsq@X\\t\\x00\\x00\\x00CERT_NONEqAX\\x08\\x00\\x00\\x00ca_certsqBNX\\x0b\\x00\\x00\\x00ca_cert_dirqCNub.\&#39;))&#39;))
+SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 17, &#34;requests.models.&lt;genexpr&gt;(.0=pickle.loads(b&#39;\\x80\\x03cbuiltins\\niter\\nq\\x00]q\\x01\\x85q\\x02Rq\\x03.&#39;))&#34;))
 TypeError(&#34;putheader() got an unexpected keyword argument &#39;values&#39;&#34;,)
-AttributeError(&#34;&#39;NoneType&#39; object has no attribute &#39;readline&#39;&#34;,)
-TypeError(&#34;can&#39;t pickle memoryview objects&#34;,)
-SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 16, &#34;urllib.request.&lt;genexpr&gt;(name=&#39;User-agent&#39;, val=&#39;Python-urllib/3.6&#39;, .0=pickle.loads(b&#39;\\x80\\x03cbuiltins\\niter\\nq\\x00]q\\x01\\x85q\\x02Rq\\x03.&#39;))&#34;))
+TypeError(&#39;__contains__() takes no keyword arguments&#39;,)
+NameError(&#34;name &#39;OrderedDict&#39; is not defined&#34;,)
+SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 19, &#34;requests.sessions.&lt;listcomp&gt;(prefix=&#39;http://&#39;, .0=pickle.loads(b&#39;\\x80\\x03cbuiltins\\niter\\nq\\x00]q\\x01\\x85q\\x02Rq\\x03.&#39;))&#34;))
 </pre>
 </div>
 </div>
@@ -15226,11 +15300,1159 @@ SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 16, &#34;url
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Mining-API-Grammars-from-Carved-Calls">Mining API Grammars from Carved Calls<a class="anchor-link" href="#Mining-API-Grammars-from-Carved-Calls">&#182;</a></h2><p>So far, we have used carved calls to replay exactly the same invocations as originally encountered.  However, we can also <em>mutate</em> carved calls to effectively fuzz APIs with previously recorded arguments.</p>
+<p>The general idea is as follows:</p>
+<ol>
+<li>First, we record all calls of a specific function from a given execution of the program.</li>
+<li>Second, we create a grammar that incorporates all these calls, with separate rules for each argument and alternatives for each value found; this allows us to produce calls that arbitrarily <em>recombine</em> these arguments.</li>
+</ol>
+<p>Let us explore these steps in the following sections.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="From-Calls-to-Grammars">From Calls to Grammars<a class="anchor-link" href="#From-Calls-to-Grammars">&#182;</a></h3><p>Let us start with an example.  The <code>power(x, y)</code> function returns $x^y$; it is but a wrapper around the equivalent <code>math.pow()</code> function.  (Since <code>power()</code> is defined in Python, we can trace it – in contrast to <code>math.pow()</code>, which is implemented in C.)</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Let us invoke <code>power()</code> while recording its arguments:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CallCarver</span><span class="p">()</span> <span class="k">as</span> <span class="n">power_carver</span><span class="p">:</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">power</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">power</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">power_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;power&quot;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[53]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[[(&#39;x&#39;, 1), (&#39;y&#39;, 2)], [(&#39;x&#39;, 3), (&#39;y&#39;, 4)]]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>From this list of recorded arguments, we could now create a grammar for the <code>power()</code> call, with <code>x</code> and <code>y</code> expanding into the values seen:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">POWER_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;power(&lt;x&gt;, &lt;y&gt;)&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;x&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;y&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">POWER_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>When fuzzing with this grammar, we then get arbitrary combinations of <code>x</code> and <code>y</code>; aiming for coverage will ensure that all values are actually tested at least once:</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">power_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">POWER_GRAMMAR</span><span class="p">)</span>
+<span class="p">[</span><span class="n">power_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[57]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;power(1, 2)&#39;, &#39;power(3, 4)&#39;, &#39;power(1, 2)&#39;, &#39;power(3, 4)&#39;, &#39;power(3, 4)&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>What we need is a method to automatically convert the arguments as seen in <code>power_carver</code> to the grammar as seen in <code>POWER_GRAMMAR</code>.  This is what we define in the next section.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="A-Grammar-Miner-for-Calls">A Grammar Miner for Calls<a class="anchor-link" href="#A-Grammar-Miner-for-Calls">&#182;</a></h3><p>We introduce a class <code>CallGrammarMiner</code>, which, given a <code>Carver</code>, automatically produces a grammar from the calls seen.  To initialize, we pass the carver object:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallGrammarMiner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">carver</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">carver</span> <span class="o">=</span> <span class="n">carver</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Initial-Grammar">Initial Grammar<a class="anchor-link" href="#Initial-Grammar">&#182;</a></h4><p>The initial grammar produces a single call.  The possible <code>&lt;call&gt;</code> expansions are to be constructed later:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallGrammarMiner</span><span class="p">(</span><span class="n">CallGrammarMiner</span><span class="p">):</span>
+    <span class="n">CALL_SYMBOL</span> <span class="o">=</span> <span class="s2">&quot;&lt;call&gt;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">initial_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">extend_grammar</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">START_SYMBOL</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">:</span> <span class="p">[]</span>
+             <span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[61]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">power_carver</span><span class="p">)</span>
+<span class="n">initial_grammar</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">initial_grammar</span><span class="p">()</span>
+<span class="n">initial_grammar</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[61]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;call&gt;&#39;], &#39;&lt;call&gt;&#39;: []}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="A-Grammar-from-Arguments">A Grammar from Arguments<a class="anchor-link" href="#A-Grammar-from-Arguments">&#182;</a></h4><p>Let us start by creating a grammar from a list of arguments.  The method <code>mine_arguments_grammar()</code> creates a grammar for the arguments seen during carving, such as these:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">arguments</span> <span class="o">=</span> <span class="n">power_carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s2">&quot;power&quot;</span><span class="p">)</span>
+<span class="n">arguments</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[62]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[[(&#39;x&#39;, 1), (&#39;y&#39;, 2)], [(&#39;x&#39;, 3), (&#39;y&#39;, 4)]]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>mine_arguments_grammar()</code> method iterates through the variables seen and creates a mapping <code>variables</code> of variable names to a set of values seen (as strings, going through <code>call_value()</code>).  In a second step, it then creates a grammar with a rule for each variable name, expanding into the values seen.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallGrammarMiner</span><span class="p">(</span><span class="n">CallGrammarMiner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">var_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">new_symbol</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">var</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">mine_arguments_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="n">var_grammar</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">variables</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">argument_list</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">:</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">argument_list</span><span class="p">:</span>
+                <span class="n">value_string</span> <span class="o">=</span> <span class="n">call_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="n">value_string</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">value_string</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">var_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;langle&gt;&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;&quot;</span><span class="p">]</span>
+                    <span class="n">value_string</span> <span class="o">=</span> <span class="n">value_string</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;langle&gt;&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+                    <span class="n">variables</span><span class="p">[</span><span class="n">var</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="n">variables</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">value_string</span><span class="p">)</span>
+
+        <span class="n">var_symbols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+            <span class="n">var_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_symbol</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+            <span class="n">var_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">var_symbol</span><span class="p">)</span>
+            <span class="n">var_grammar</span><span class="p">[</span><span class="n">var_symbol</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">var_grammar</span><span class="p">,</span> <span class="n">var_symbols</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">power_carver</span><span class="p">)</span>
+<span class="n">var_grammar</span><span class="p">,</span> <span class="n">var_symbols</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_arguments_grammar</span><span class="p">(</span>
+    <span class="s2">&quot;power&quot;</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">initial_grammar</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">var_grammar</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[65]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;], &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;]}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The additional return value <code>var_symbols</code> is a list of argument symbols in the call:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">var_symbols</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[66]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;&lt;power-x&gt;&#39;, &#39;&lt;power-y&gt;&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="A-Grammar-from-Calls">A Grammar from Calls<a class="anchor-link" href="#A-Grammar-from-Calls">&#182;</a></h4><p>To get the grammar for a single function (<code>mine_function_grammar()</code>), we add a call to the function:</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[67]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallGrammarMiner</span><span class="p">(</span><span class="n">CallGrammarMiner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">function_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">new_symbol</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">mine_function_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">):</span>
+        <span class="n">arguments</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="n">function_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">)</span>
+
+        <span class="n">var_grammar</span><span class="p">,</span> <span class="n">var_symbols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mine_arguments_grammar</span><span class="p">(</span>
+            <span class="n">function_name</span><span class="p">,</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+
+        <span class="n">function_grammar</span> <span class="o">=</span> <span class="n">var_grammar</span>
+        <span class="n">function_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">function_symbol</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">var_symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;-self&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Method call</span>
+            <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">var_symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">function_name</span> <span class="o">+</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">var_symbols</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">function_symbol</span><span class="p">,</span> <span class="s2">&quot;::=&quot;</span><span class="p">,</span> <span class="n">function_grammar</span><span class="p">[</span><span class="n">function_symbol</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">function_grammar</span><span class="p">,</span> <span class="n">function_symbol</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[68]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">power_carver</span><span class="p">)</span>
+<span class="n">function_grammar</span><span class="p">,</span> <span class="n">function_symbol</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_function_grammar</span><span class="p">(</span>
+    <span class="s2">&quot;power&quot;</span><span class="p">,</span> <span class="n">initial_grammar</span><span class="p">)</span>
+<span class="n">function_grammar</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[68]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;],
+ &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;],
+ &#39;&lt;power&gt;&#39;: [&#39;power(&lt;power-x&gt;, &lt;power-y&gt;)&#39;]}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The additionally returned <code>function_symbol</code> holds the name of the function call just added:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[69]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">function_symbol</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[69]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;&lt;power&gt;&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="A-Grammar-from-all-Calls">A Grammar from all Calls<a class="anchor-link" href="#A-Grammar-from-all-Calls">&#182;</a></h4><p>Let us now repeat the above for all function calls seen during carving.  To this end, we simply iterate over all function calls seen:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">power_carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[70]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;power&#39;, &#39;__exit__&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[71]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CallGrammarMiner</span><span class="p">(</span><span class="n">CallGrammarMiner</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">mine_call_grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">qualified</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">grammar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_grammar</span><span class="p">()</span>
+        <span class="n">fn_list</span> <span class="o">=</span> <span class="n">function_list</span>
+        <span class="k">if</span> <span class="n">function_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fn_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">(</span><span class="n">qualified</span><span class="o">=</span><span class="n">qualified</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">function_name</span> <span class="ow">in</span> <span class="n">fn_list</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">function_list</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">function_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">)):</span>
+                <span class="k">continue</span>  <span class="c1"># Internal function</span>
+
+            <span class="c1"># Ignore errors with mined functions</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">function_grammar</span><span class="p">,</span> <span class="n">function_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mine_function_grammar</span><span class="p">(</span>
+                    <span class="n">function_name</span><span class="p">,</span> <span class="n">grammar</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">function_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span>
+
+            <span class="k">if</span> <span class="n">function_symbol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">]:</span>
+                <span class="n">grammar</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">CALL_SYMBOL</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">function_symbol</span><span class="p">)</span>
+            <span class="n">grammar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">function_grammar</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grammar</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The method <code>mine_call_grammar()</code> is the one that clients can and should use – first for mining...</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[72]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">power_carver</span><span class="p">)</span>
+<span class="n">power_grammar</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_call_grammar</span><span class="p">()</span>
+<span class="n">power_grammar</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[72]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;call&gt;&#39;],
+ &#39;&lt;call&gt;&#39;: [&#39;&lt;power&gt;&#39;],
+ &#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;],
+ &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;],
+ &#39;&lt;power&gt;&#39;: [&#39;power(&lt;power-x&gt;, &lt;power-y&gt;)&#39;]}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>...and then for fuzzing:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[73]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">power_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">power_grammar</span><span class="p">)</span>
+<span class="p">[</span><span class="n">power_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[73]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;power(1, 2)&#39;, &#39;power(3, 4)&#39;, &#39;power(1, 2)&#39;, &#39;power(1, 2)&#39;, &#39;power(3, 2)&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>With this, we have successfully extracted a grammar from a recorded execution; in contrast to "simple" carving, our grammar allows us to <em>recombine</em> arguments and thus to fuzz at the API level.</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Fuzzing-Web-Functions">Fuzzing Web Functions<a class="anchor-link" href="#Fuzzing-Web-Functions">&#182;</a></h2><p>Let us now apply our grammar miner on a larger API – the <code>urlparse()</code> function we already encountered during carving.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[75]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CallCarver</span><span class="p">()</span> <span class="k">as</span> <span class="n">webbrowser_carver</span><span class="p">:</span>
+    <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;https://www.fuzzingbook.org&quot;</span><span class="p">)</span>
+    <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;http://www.example.com&quot;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can mine a grammar from the calls encountered:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[76]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">webbrowser_carver</span><span class="p">)</span>
+<span class="n">webbrowser_grammar</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">mine_call_grammar</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This is a rather large grammar:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[77]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">call_list</span> <span class="o">=</span> <span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s1">&#39;&lt;call&gt;&#39;</span><span class="p">]</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">call_list</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[77]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>152</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[78]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">call_list</span><span class="p">[:</span><span class="mi">20</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[&#39;&lt;webbrowser&gt;&#39;, &#39;&lt;default_headers&gt;&#39;, &#39;&lt;default_user_agent&gt;&#39;, &#39;&lt;update&gt;&#39;, &#39;&lt;default_hooks&gt;&#39;, &#39;&lt;cookiejar_from_dict&gt;&#39;, &#39;&lt;RLock&gt;&#39;, &#39;&lt;deepvalues&gt;&#39;, &#39;&lt;vals_sorted_by_key&gt;&#39;, &#39;&lt;init_poolmanager&gt;&#39;, &#39;&lt;mount&gt;&#39;, &#39;&lt;prepare_request&gt;&#39;, &#39;&lt;merge_cookies&gt;&#39;, &#39;&lt;get_netrc_auth&gt;&#39;, &#39;&lt;expanduser&gt;&#39;, &#39;&lt;encode&gt;&#39;, &#39;&lt;decode&gt;&#39;, &#39;&lt;exists&gt;&#39;, &#39;&lt;urlparse&gt;&#39;, &#39;&lt;urlsplit&gt;&#39;]
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here's the rule for the <code>urlsplit()</code> function:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[79]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlsplit&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[79]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;urlsplit(&lt;urlsplit-url&gt;, &lt;urlsplit-scheme&gt;, &lt;urlsplit-allow_fragments&gt;)&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here are the arguments.  Note that although we only passed <code>http://www.fuzzingbook.org</code> as a parameter, we also see the <code>https:</code> variant.  That is because opening the <code>http:</code> URL automatically redirects to the <code>https:</code> URL, which is then also processed by <code>urlsplit()</code>.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[80]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlsplit-url&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[80]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#34;&#39;https://www.fuzzingbook.org/&#39;&#34;,
+ &#34;&#39;https://www.fuzzingbook.org&#39;&#34;,
+ &#34;&#39;http://www.example.com&#39;&#34;,
+ &#34;&#39;http://www.example.com/&#39;&#34;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>There also is some variation in the <code>scheme</code> argument:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[81]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_grammar</span><span class="p">[</span><span class="s2">&quot;&lt;urlsplit-scheme&gt;&quot;</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[81]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#34;&#39;&#39;&#34;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>If we now apply a fuzzer on these rules, we systematically cover all variations of arguments seen, including, of course, combinations not seen during carving.  Again, we are fuzzing at the API level here.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[82]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">urlsplit_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span>
+    <span class="n">webbrowser_grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="s2">&quot;&lt;urlsplit&gt;&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">urlsplit_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>urlsplit(&#39;https://www.fuzzingbook.org&#39;, &#39;&#39;, True)
+urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
+urlsplit(&#39;http://www.example.com/&#39;, &#39;&#39;, True)
+urlsplit(&#39;http://www.example.com&#39;, &#39;&#39;, True)
+urlsplit(&#39;http://www.example.com/&#39;, &#39;&#39;, True)
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Just as seen with carving, running tests at the API level is orders of magnitude faster than executing system tests.  Hence, this calls for means to fuzz at the method level:</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[85]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">urlsplit_timer</span><span class="p">:</span>
+    <span class="n">urlsplit</span><span class="p">(</span><span class="s1">&#39;http://www.fuzzingbook.org/&#39;</span><span class="p">,</span> <span class="s1">&#39;http&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">urlsplit_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[85]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>1.6507983673363924e-05</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[86]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">webbrowser_timer</span><span class="p">:</span>
+    <span class="n">webbrowser</span><span class="p">(</span><span class="s2">&quot;http://www.fuzzingbook.org&quot;</span><span class="p">)</span>
+<span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[86]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>0.08294510998530313</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[87]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">webbrowser_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span> <span class="o">/</span> <span class="n">urlsplit_timer</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[87]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>5024.545191375329</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>But then again, the caveats encountered during carving apply, notably the requirement to recreate the original function environment.  If we also alter or recombine arguments, we get the additional risk of <em>violating an implicit precondition</em> – that is, invoking a function with arguments the function was never designed for.  Such <em>false alarms</em>, resulting from incorrect invocations rather than incorrect implementations, must then be identified (typically manually) and wed out (for instance, by altering or constraining the grammar).  The huge speed gains at the API level, however, may well justify this additional investment.</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
-<li><em>Carving</em> allows for effective replay of function calls recorded during a system test</li>
+<li><em>Carving</em> allows for effective replay of function calls recorded during a system test.</li>
 <li>A function call can be <em>orders of magnitude faster</em> than a system invocation.</li>
 <li><em>Serialization</em> allows to create persistent representations of complex objects.</li>
 <li>Functions that heavily interact with their environment and/or access external resources are difficult to carve.</li>
+<li>From carved calls, one can produce API grammars that arbitrarily combine carved arguments.</li>
 </ul>
 
 </div>
@@ -15239,10 +16461,7 @@ SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 16, &#34;url
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>The following chapters make use of the concepts defined here:</p>
-<ul>
-<li>In the chapter on <a href="APIFuzzer.slides.html">fuzzing APIs</a>, we discuss how to use carving to <em>fuzz functions with combinations of carved and newly generated values</em>.  This effectively joins the strengths of carving and fuzzing.</li>
-</ul>
+<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>In the next chapter, we will discuss <a href="Reducer.slides.html">how to reduce failure-inducing inputs</a>.</p>
 
 </div>
 </div>
@@ -15251,6 +16470,7 @@ SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 16, &#34;url
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>Carving was invented by Elbaum et al. \cite{Elbaum2006} and originally implemented for Java.  In this chapter, we follow several of their design choices (including recording and serializing method arguments only).</p>
+<p>The combination of carving and fuzzing at the API level is described in \cite{Kampmann2018}.</p>
 
 </div>
 </div>
@@ -15274,7 +16494,7 @@ SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 16, &#34;url
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="prompt input_prompt">In&nbsp;[88]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ResultCarver</span><span class="p">(</span><span class="n">CallCarver</span><span class="p">):</span>
@@ -15296,7 +16516,7 @@ SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 16, &#34;url
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="prompt input_prompt">In&nbsp;[89]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ResultCarver</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">result_carver</span><span class="p">:</span>
@@ -15319,7 +16539,7 @@ SyntaxError(&#39;invalid syntax&#39;, (&#39;&lt;string&gt;&#39;, 1, 16, &#34;url
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>my_sqrt(x=2)
 Result: 1.414213562373095
-__exit__(self=&lt;__main__.ResultCarver object at 0x10feb9d30&gt;, exc_type=None, exc_value=None, tb=None)
+__exit__(self=&lt;__main__.ResultCarver object at 0x1a163cdda0&gt;, exc_type=None, exc_value=None, tb=None)
 </pre>
 </div>
 </div>
@@ -15352,6 +16572,15 @@ __exit__(self=&lt;__main__.ResultCarver object at 0x10feb9d30&gt;, exc_type=None
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h4 id="Part-3:-Produce-assertions">Part 3: Produce assertions<a class="anchor-link" href="#Part-3:-Produce-assertions">&#182;</a></h4><p>For the functions called during <code>webbrowser()</code> execution, create a set of <em>assertions</em> that check whether the result returned is still the same.  Test this for <code>urllib.parse.urlparse()</code> and <code>urllib.parse.urlsplit()</code>.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Exercise-2:-Abstracting-Arguments">Exercise 2: Abstracting Arguments<a class="anchor-link" href="#Exercise-2:-Abstracting-Arguments">&#182;</a></h3><p>When mining an API grammar from executions, set up an abstraction scheme to widen the range of arguments to be used during testing.  If the values for an argument, all conform to some type <code>T</code>. abstract it into <code>&lt;T&gt;</code>.  For instance, if calls to <code>foo(1)</code>, <code>foo(2)</code>, <code>foo(3)</code> have been seen, the grammar should abstract its calls into <code>foo(&lt;int&gt;)</code>, with <code>&lt;int&gt;</code> being appropriately defined.</p>
+<p>Do this for a number of common types: integers, positive numbers, floating-point numbers, host names, URLs, mail addresses, and more.</p>
 
 </div>
 </div>
