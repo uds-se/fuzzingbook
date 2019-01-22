@@ -301,20 +301,16 @@ def add_links_to_imports(contents):
     imports = re.findall(RE_IMPORT, contents)
     for module in imports:
         link = None
-        if module == "fuzzingbook_utils":
-            pass
-        if module[0].islower():
-            # Point to Python doc
-            link = "https://docs.python.org/3/library/" + module + ".html"
+        if module.startswith("fuzzingbook_utils"):
+            link = "https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils"
+        elif module == "requests":
+            link = "http://docs.python-requests.org/en/master/"
         elif module.startswith("IPython"):
             # Point to IPython doc
             link = "https://ipython.readthedocs.io/en/stable/api/generated/" + module + ".html"
-        elif module == "requests":
-            # Requests
-            link = "http://docs.python-requests.org/en/master/"
-        elif module.startswith("fuzzingbook_utils"):
-            # Fuzzingbook Utils
-            link = "https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils"
+        elif module[0].islower():
+            # Point to Python doc
+            link = "https://docs.python.org/3/library/" + module + ".html"
         else:
             # Point to notebook
             link = module + '.html'
