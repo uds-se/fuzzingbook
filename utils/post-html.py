@@ -309,6 +309,9 @@ def add_links_to_imports(contents):
         elif module.startswith("IPython"):
             # Point to IPython doc
             link = "https://ipython.readthedocs.io/en/stable/api/generated/" + module + ".html"
+        elif module == "requests":
+            # Requests
+            link = "http://docs.python-requests.org/en/master/"
         else:
             # Point to notebook
             link = module + '.html'
