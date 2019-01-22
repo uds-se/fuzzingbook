@@ -312,6 +312,9 @@ def add_links_to_imports(contents):
         elif module == "requests":
             # Requests
             link = "http://docs.python-requests.org/en/master/"
+        elif module.startswith("fuzzingbook_utils"):
+            # Fuzzingbook Utils
+            link = "https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils"
         else:
             # Point to notebook
             link = module + '.html'
