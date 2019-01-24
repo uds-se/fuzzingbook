@@ -1,5 +1,7 @@
 # Define the contents of this file as a package
-__all__ = ["PrettyTable", "YouTubeVideo", "print_file", "HTML"]
+__all__ = ["PrettyTable", "YouTubeVideo", 
+           "print_file", "HTML", 
+           "unicode_escape", "terminal_escape"]
 
 
 # Setup loader such that workbooks can be imported directly
@@ -11,14 +13,6 @@ from . import set_fixed_seed
 set_fixed_seed.set_fixed_seed()
 
 
-# Wrapper for YouTubeVideo
-import IPython.display
-
-class YouTubeVideo(IPython.display.YouTubeVideo):
-    def __init__(self, video_id, **kwargs):
-        super().__init__(video_id, width=640, height=360, **kwargs)
-
-
 # Check for rich output
 try:
     _rich_output = get_ipython().__class__.__name__
@@ -28,12 +22,21 @@ except NameError:
 def rich_output():
     return _rich_output
 
+
+# Wrapper for YouTubeVideo
+import IPython.display
+
+class YouTubeVideo(IPython.display.YouTubeVideo):
+    def __init__(self, video_id, **kwargs):
+        super().__init__(video_id, width=640, height=360, **kwargs)
+
+
   
 # Printing files with syntax highlighting
-from pygments import highlight, lexers, formatters
-from pygments.lexers import get_lexer_for_filename
-
 def print_file(filename, lexer=None):
+    from pygments import highlight, lexers, formatters
+    from pygments.lexers import get_lexer_for_filename
+
     contents = open(filename, "rb").read().decode('utf-8')
     if rich_output():
         if lexer is None:
@@ -43,6 +46,22 @@ def print_file(filename, lexer=None):
     else:
         print(contents, end="")
 
+
+# Escaping unicode characters into ASCII for user-facing strings
+def unicode_escape(s, error="backslashreplace"):
+    def ascii_chr(byte):
+        if 0 <= byte <= 127:
+            return chr(byte)
+        return r"\x%02x" % byte
+
+    bytes = s.encode('utf-8', error)
+    return "".join(map(ascii_chr, bytes))
+
+# Same, but escaping unicode only if output is not a terminal
+def terminal_escape(s):
+    if rich_output():
+        return s
+    return unicode_escape(s)
 
 
 # HTML() behaves like IPython.core.display.HTML(); but if png is True or the environment

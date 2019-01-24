@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2019-01-15 17:55:56+01:00
+# Last change: 2019-01-23 02:05:34-08:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -451,10 +451,10 @@ if __name__ == "__main__":
 class Parser(object):
     def __init__(self, grammar, **kwargs):
         self._grammar = grammar
-        self._start_symbol = kwargs.get('start_symbol') or START_SYMBOL
-        self.log = kwargs.get('log') or False
-        self.coalesce = kwargs.get('coalesce') or True
-        self.tokens = kwargs.get('tokens') or set()
+        self._start_symbol = kwargs.get('start_symbol', START_SYMBOL)
+        self.log = kwargs.get('log', False)
+        self.coalesce = kwargs.get('coalesce', True)
+        self.tokens = kwargs.get('tokens', set())
 
     def grammar(self):
         return self._grammar
@@ -551,9 +551,9 @@ if __name__ == "__main__":
 class Parser(Parser):
     def __init__(self, grammar, **kwargs):
         self._grammar = grammar
-        self._start_symbol = kwargs.get('start_symbol') or START_SYMBOL
-        self.log = kwargs.get('log') or False
-        self.tokens = kwargs.get('tokens') or set()
+        self._start_symbol = kwargs.get('start_symbol', START_SYMBOL)
+        self.log = kwargs.get('log', False)
+        self.tokens = kwargs.get('tokens', set())
         self.cgrammar = canonical(grammar)
 
 # ### The Parser
