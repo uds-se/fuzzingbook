@@ -19,7 +19,7 @@ LEXICAL_PART = \
 	Coverage.ipynb \
 	MutationFuzzer.ipynb
 LEXICAL_PART_READY = \
-	SBST.ipynb
+	SearchBasedFuzzer.ipynb
 LEXICAL_PART_TODO = \
 	# AFLFast.ipynb
 
@@ -31,9 +31,9 @@ SYNTACTICAL_PART = \
 	ProbabilisticGrammarFuzzer.ipynb \
 	GeneratorGrammarFuzzer.ipynb \
 	Parser.ipynb
-LEXICAL_PART_READY = \
+SYNTACTICAL_PART_READY = \
 	Reducer.ipynb
-LEXICAL_PART_TODO =
+SYNTACTICAL_PART_TODO =
 	
 SEMANTICAL_PART = 
 SEMANTICAL_PART_READY = \
@@ -56,10 +56,10 @@ DOMAINS_PART_TODO =
 MANAGEMENT_PART = 
 MANAGEMENT_PART_READY =
 MANAGEMENT_PART_TODO = \
-	06_Managing_Fuzzing.ipynb
-	# FuzzingInTheLarge.ipynb
+	06_Managing_Fuzzing.ipynb \
+ 	FuzzingInTheLarge.ipynb
 	# WhenToStopFuzzing.ipynb
-	
+
 
 # Appendices for the book
 APPENDICES = \

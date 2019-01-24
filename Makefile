@@ -675,6 +675,7 @@ stats: $(SOURCES)
 # Run all code.  This should produce no failures.
 PY_SUCCESS_MAGIC = "--- Code check passed ---"
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
+# PYS_OUT = $(PUBLIC_SOURCES:%.ipynb=$(CODE_TARGET)%.py.out)
 $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 	@echo Running $<...
 	@if $(PYTHON) $< > $@ 2>&1; then \
