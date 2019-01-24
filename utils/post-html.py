@@ -486,12 +486,10 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
     if menu_ipynb_file == chapter_ipynb_file:
         this_chapter_counter = counter
 
-CHAPTERS_PER_MENU = 5
-
 in_sublist = False
 for counter, menu_ipynb_file in enumerate(all_chapters):
     basename = os.path.splitext(os.path.basename(menu_ipynb_file))[0]
-    structured_title = '<span class="chnum">' + repr(counter + 1) + "</span> "
+    structured_title = '' # '<span class="chnum">' + repr(counter + 1) + '</span> '
     title = ""
 
     if menu_ipynb_file == chapter_ipynb_file:
@@ -510,28 +508,24 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
         beta_indicator = "&nbsp;" + todo_suffix
     menu_html_file = menu_prefix + basename + ".html"
     
-    if counter // CHAPTERS_PER_MENU == this_chapter_counter // CHAPTERS_PER_MENU:
+    if basename.startswith('0'):
+        # New part
         if in_sublist:
             structured_all_chapters_menu += "</ul>"
             in_sublist = False
-    elif counter % CHAPTERS_PER_MENU == 0:
-        if in_sublist:
-            structured_all_chapters_menu += "</ul>"
-        subtitle = "Chapters " + repr(counter + 1) + "&ndash;" + \
-            repr(min(len(all_chapters), counter + CHAPTERS_PER_MENU))
         structured_all_chapters_menu += \
             '<li class="has-sub"><a href="%s" class="chapters">%s%s' \
-            % (menu_html_file, subtitle, beta_indicator)
-        structured_all_chapters_menu += ' <i class="fa fa-fw fa-caret-right"></i></a><ul>'
+            % (menu_html_file, file_title, beta_indicator)
+        structured_all_chapters_menu += ' <i class="fa fa-fw fa-caret-right"></i></a>\n<ul>\n'
         in_sublist = True
+    else:
+        structured_item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
+            (menu_html_file, link_class, structured_title, beta_indicator)
+        structured_all_chapters_menu += structured_item
     
-    structured_item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
-        (menu_html_file, link_class, structured_title, beta_indicator)
-    structured_all_chapters_menu += structured_item
-    
-    item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
-        (menu_html_file, link_class, title, beta_indicator)
-    all_chapters_menu += item
+        item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
+            (menu_html_file, link_class, title, beta_indicator)
+        all_chapters_menu += item
     
 if in_sublist:
     structured_all_chapters_menu += "</ul>"
