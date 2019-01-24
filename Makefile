@@ -4,11 +4,45 @@
 CHAPTERS_MAKEFILE = Chapters.makefile
 include $(CHAPTERS_MAKEFILE)
 
-# Only these will appear on the beta site
-BETA_CHAPTERS = $(READY_CHAPTERS) $(TODO_CHAPTERS)
+# These chapters will show up in the "public" version
+PUBLIC_CHAPTERS = \
+	$(INTRO_PART) \
+	$(LEXICAL_PART) \
+	$(SYNTACTICAL_PART) \
+	$(SEMANTICAL_PART) \
+	$(DOMAINS_PART)
 
-# All chapters
-CHAPTERS = $(PUBLIC_CHAPTERS) $(BETA_CHAPTERS)
+# These chapters will show up in the "beta" version
+CHAPTERS = \
+	$(INTRO_PART) \
+	$(INTRO_PART_READY) \
+	$(INTRO_PART_TODO) \
+	$(LEXICAL_PART) \
+	$(LEXICAL_PART_READY) \
+	$(LEXICAL_PART_TODO) \
+	$(SYNTACTICAL_PART) \
+	$(SYNTACTICAL_PART_READY) \
+	$(SYNTACTICAL_PART_TODO) \
+	$(SEMANTICAL_PART) \
+	$(SEMANTICAL_PART_READY) \
+	$(SEMANTICAL_PART_TODO) \
+	$(DOMAINS_PART) \
+	$(DOMAINS_PART_READY) \
+	$(DOMAINS_PART_TODO)
+	
+READY_CHAPTERS = \
+	$(INTRO_PART_READY) \
+	$(LEXICAL_PART_READY) \
+	$(SYNTACTICAL_PART_READY) \
+	$(SEMANTICAL_PART_READY) \
+	$(DOMAINS_PART_READY)
+
+TODO_CHAPTERS = \
+	$(INTRO_PART_TODO) \
+	$(LEXICAL_PART_TODO) \
+	$(SYNTACTICAL_PART_TODO) \
+	$(SEMANTICAL_PART_TODO) \
+	$(DOMAINS_PART_TODO)
 
 # All source notebooks
 SOURCE_FILES = \
@@ -45,6 +79,7 @@ BINDER_URL = https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/
 
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
+CHAPTER_SOURCES = $(CHAPTERS:%=$(NOTEBOOKS)/%)
 PUBLIC_SOURCES = $(PUBLIC_CHAPTERS:%=$(NOTEBOOKS)/%)
 READY_SOURCES = $(READY_CHAPTERS:%=$(NOTEBOOKS)/%)
 TODO_SOURCES = $(TODO_CHAPTERS:%=$(NOTEBOOKS)/%)
@@ -419,7 +454,7 @@ $(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(AD
 
 
 POST_HTML_OPTIONS = $(BETA_FLAG) \
-	--public-chapters="$(PUBLIC_SOURCES)" \
+	--public-chapters="$(CHAPTER_SOURCES)" \
 	--ready-chapters="$(READY_SOURCES)" \
 	--todo-chapters="$(TODO_SOURCES)"
 	
@@ -653,7 +688,7 @@ IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
 .PHONY: check-import check-imports
 check-import check-imports: code
 	@echo "#!/usr/bin/env $(PYTHON)" > $(CODE_TARGET)import_all.py
-	@(for file in $(IMPORTS); do echo import $$file; done) >> $(CODE_TARGET)import_all.py
+	@(for file in $(IMPORTS); do echo import $$file; done) | grep -v '^import [0-9][0-9]' >> $(CODE_TARGET)import_all.py
 	cd $(CODE_TARGET); $(PYTHON) import_all.py 2>&1 | tee import_all.py.out
 	@test ! -s $(CODE_TARGET)import_all.py.out && echo "All import checks passed."
 	@$(RM) $(CODE_TARGET)import_all.py*

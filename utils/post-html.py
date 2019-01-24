@@ -381,7 +381,7 @@ else:
     todo_chapters = []
     
 beta_chapters = ready_chapters + todo_chapters
-all_chapters = public_chapters + beta_chapters
+all_chapters = public_chapters # + beta_chapters
 include_beta = args.include_ready or args.include_todo
 
 todo_suffix = '<i class="fa fa-fw fa-wrench"></i>'

@@ -3,24 +3,27 @@
 
 # Chapters to include in the book, in this order
 # Chapters that are out on the website
-PUBLIC_CHAPTERS = \
-	$(INTRO_PART) \
-	$(LEXICAL_PART) \
-	$(SYNTACTICAL_PART) \
-	$(SEMANTICAL_PART) \
-	$(DOMAINS_PART)
 
 INTRO_PART = \
 	01_Intro.ipynb \
-	Intro_Testing.ipynb
+	Intro_Testing.ipynb \
+	
+INTRO_PART_READY = 
+INTRO_PART_TODO = \
 	# Tour.ipynb
+
 
 LEXICAL_PART = \
 	02_Lexical_Fuzzing.ipynb \
 	Fuzzer.ipynb \
 	Coverage.ipynb \
 	MutationFuzzer.ipynb \
-	# SBST.ipynb
+
+LEXICAL_PART_READY = \
+	SBST.ipynb
+LEXICAL_PART_TODO = \
+	# AFLFast.ipynb
+
 
 SYNTACTICAL_PART = \
 	03_Syntactical_Fuzzing.ipynb \
@@ -30,39 +33,34 @@ SYNTACTICAL_PART = \
 	ProbabilisticGrammarFuzzer.ipynb \
 	GeneratorGrammarFuzzer.ipynb \
 	Parser.ipynb \
-	# Reducer.ipynb
+	
+LEXICAL_PART_READY = \
+	Reducer.ipynb
+LEXICAL_PART_TODO =
+
 	
 SEMANTICAL_PART = \
-	04_Semantical_Fuzzing.ipynb \
-	# SymbolicFuzzer.ipynb \
-	# InformationFlow.ipynb \
-	# GrammarMiner.ipynb \
+	04_Semantical_Fuzzing.ipynb
+
+SEMANTICAL_PART_READY = \
+	GrammarMiner.ipynb
+SEMANTICAL_PART_TODO = \
+	InformationFlow.ipynb \
+	# SymbolicFuzzer.ipynb
 
 DOMAINS_PART = \
 	05_Domain-Specific_Fuzzing.ipynb \
 	ConfigurationFuzzer.ipynb \
 	APIFuzzer.ipynb \
 	Carver.ipynb \
-	# WebFuzzer.ipynb \
-	# GUIFuzzer.ipynb \
-	# FuzzingInTheLarge.ipynb
-	# WhenToStopFuzzing.ipynb
-
-# Chapters that are ready for release (= the current chapters for the students)
-READY_CHAPTERS = \
-	06_Unreleased.ipynb \
-	Reducer.ipynb \
+	
+DOMAINS_PART_READY = \
 	WebFuzzer.ipynb \
-	GUIFuzzer.ipynb \
-	SBST.ipynb \
-	GrammarMiner.ipynb \
-
-# Chapters that still are work in progress
-TODO_CHAPTERS = \
-	InformationFlow.ipynb \
-	# SymbolicFuzzer.ipynb
+	GUIFuzzer.ipynb
+DOMAINS_PART_TODO = \
 	# FuzzingInTheLarge.ipynb
 	# WhenToStopFuzzing.ipynb
+
 
 # Appendices for the book
 APPENDICES = \
