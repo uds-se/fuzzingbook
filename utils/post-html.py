@@ -352,6 +352,7 @@ parser.add_argument("--menu-prefix", help="prefix to html files in menu")
 parser.add_argument("--public-chapters", help="List of public chapters")
 parser.add_argument("--ready-chapters", help="List of ready chapters")
 parser.add_argument("--todo-chapters", help="List of work-in-progress chapters")
+parser.add_argument("--new-chapters", help="List of new chapters")
 parser.add_argument("chapter", nargs=1)
 args = parser.parse_args()
 
@@ -380,10 +381,12 @@ if args.include_todo and args.todo_chapters is not None:
 else:
     todo_chapters = []
     
+new_chapters = args.new_chapters.split()
 beta_chapters = ready_chapters + todo_chapters
 all_chapters = public_chapters # + beta_chapters
 include_beta = args.include_ready or args.include_todo
 
+new_suffix = ' <strong>(new)</strong>'
 todo_suffix = '<i class="fa fa-fw fa-wrench"></i>'
 ready_suffix = '<i class="fa fa-fw fa-warning"></i>'
 
@@ -466,6 +469,9 @@ else:
     chapter_notebook_ipynb = notebook_html + basename + ".ipynb"
 
 chapter_title = get_title(chapter_ipynb_file)
+# if chapter_ipynb_file in new_chapters:
+#     chapter_title += " " + new_suffix
+
 chapter_title_beta = chapter_title
 is_todo_chapter = include_beta and chapter_ipynb_file in todo_chapters
 is_ready_chapter = include_beta and chapter_ipynb_file in ready_chapters
@@ -498,6 +504,10 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
     else:
         link_class = ''
     file_title = get_title(menu_ipynb_file)
+    
+    if menu_ipynb_file in new_chapters:
+        file_title += new_suffix
+    
     title += file_title
     structured_title += file_title
 

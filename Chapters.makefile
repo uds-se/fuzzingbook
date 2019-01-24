@@ -1,29 +1,27 @@
 # Fuzzingbook Makefile
 # This file defines the chapter files to be included
 
+# Most recent chapter
+NEW_CHAPTERS = Carver.ipynb
+
 # Chapters to include in the book, in this order
-# Chapters that are out on the website
 
 INTRO_PART = \
 	01_Intro.ipynb \
-	Intro_Testing.ipynb \
-	
+	Intro_Testing.ipynb
 INTRO_PART_READY = 
 INTRO_PART_TODO = \
 	# Tour.ipynb
-
 
 LEXICAL_PART = \
 	02_Lexical_Fuzzing.ipynb \
 	Fuzzer.ipynb \
 	Coverage.ipynb \
-	MutationFuzzer.ipynb \
-
+	MutationFuzzer.ipynb
 LEXICAL_PART_READY = \
 	SBST.ipynb
 LEXICAL_PART_TODO = \
 	# AFLFast.ipynb
-
 
 SYNTACTICAL_PART = \
 	03_Syntactical_Fuzzing.ipynb \
@@ -32,17 +30,14 @@ SYNTACTICAL_PART = \
 	GrammarCoverageFuzzer.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
 	GeneratorGrammarFuzzer.ipynb \
-	Parser.ipynb \
-	
+	Parser.ipynb
 LEXICAL_PART_READY = \
 	Reducer.ipynb
 LEXICAL_PART_TODO =
-
 	
-SEMANTICAL_PART = \
-	04_Semantical_Fuzzing.ipynb
-
+SEMANTICAL_PART = 
 SEMANTICAL_PART_READY = \
+	04_Semantical_Fuzzing.ipynb \
 	GrammarMiner.ipynb
 SEMANTICAL_PART_TODO = \
 	InformationFlow.ipynb \
@@ -52,15 +47,19 @@ DOMAINS_PART = \
 	05_Domain-Specific_Fuzzing.ipynb \
 	ConfigurationFuzzer.ipynb \
 	APIFuzzer.ipynb \
-	Carver.ipynb \
-	
+	Carver.ipynb
 DOMAINS_PART_READY = \
 	WebFuzzer.ipynb \
 	GUIFuzzer.ipynb
-DOMAINS_PART_TODO = \
+DOMAINS_PART_TODO =
+
+MANAGEMENT_PART = 
+MANAGEMENT_PART_READY =
+MANAGEMENT_PART_TODO = \
+	06_Managing_Fuzzing.ipynb
 	# FuzzingInTheLarge.ipynb
 	# WhenToStopFuzzing.ipynb
-
+	
 
 # Appendices for the book
 APPENDICES = \
