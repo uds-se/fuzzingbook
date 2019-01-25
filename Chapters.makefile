@@ -28,9 +28,9 @@ SYNTACTICAL_PART = \
 	Grammars.ipynb \
 	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
+	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
-	GeneratorGrammarFuzzer.ipynb \
-	Parser.ipynb
+	GeneratorGrammarFuzzer.ipynb
 SYNTACTICAL_PART_READY = \
 	Reducer.ipynb
 SYNTACTICAL_PART_TODO =

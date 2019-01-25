@@ -104,6 +104,7 @@ fuzzingbook_tplx_dict = {
         \setmainfont{Source Serif Pro}
         \setromanfont{Source Serif Pro}
         \setmonofont{Source Code Pro}
+        % \setmonofont{Fira Mono}
         \setsansfont[Color={B03A2E}]{Patua One}
         
         % Use Heading font
