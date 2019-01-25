@@ -691,7 +691,13 @@ $(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
 
 .PHONY: check-code
 check-code: code $(PYS_OUT)
-	@grep --files-without-match -- $(PY_SUCCESS_MAGIC) $(PYS_OUT) && echo "All code checks passed."
+	@files_with_errors=$$(grep --files-without-match -- $(PY_SUCCESS_MAGIC) $(PYS_OUT)); \
+	if [ -z "$$files_with_errors" ]; then \
+		echo "All code checks passed."; \
+	else \
+		echo "Check these files for errors: $$files_with_errors"; \
+		exit 1; \
+	fi
 
 # Import all code.  This should produce no output (or error messages).
 IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
