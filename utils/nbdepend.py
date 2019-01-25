@@ -79,6 +79,7 @@ def get_text_contents(notebook):
 def draw_notebook_dependencies(notebooks, 
     format='svg', transitive_reduction=True):
     dot = Digraph(comment="Notebook dependencies")
+    
     # dot.format = format
     for notebook_name in notebooks:
         dirname = os.path.dirname(notebook_name)

@@ -904,14 +904,15 @@ toc: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb
 $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
 	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
 	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
-	$(CHAPTERS_MAKEFILE)
+	$(CHAPTERS_MAKEFILE) \
+	$(DOCS_TARGET)notebooks/00_Sitemap.svg
 	$(RM) $@
 	$(PYTHON) utils/nbtoc.py \
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
 		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
 	$(EXECUTE_NOTEBOOK) $@ && mv $(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb $@
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
-	
+	@$(OPEN) $@
 
 		
 # Index
@@ -922,6 +923,8 @@ $(DOCS_TARGET)notebooks/00_Index.ipynb: utils/nbindex.py \
 	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
 	$(CHAPTERS_MAKEFILE)
 	(cd $(NOTEBOOKS); $(PYTHON) ../utils/nbindex.py $(TOC_CHAPTERS) $(APPENDICES)) > $@
+	@$(OPEN) $@
+
 
 ## Python packages
 # After this, you can do 'pip install fuzzingbook' 
@@ -1054,6 +1057,7 @@ SITEMAP_SVG = $(DOCS_TARGET)notebooks/00_Sitemap.svg
 sitemap: $(SITEMAP_SVG)
 $(SITEMAP_SVG): $(CHAPTER_SOURCES) utils/nbdepend.py
 	$(NBDEPEND) --graph --transitive-reduction $(CHAPTER_SOURCES) > $@
+	@$(OPEN) $@
 
 
 ## Dependencies - should come at the very end
