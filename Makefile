@@ -1036,9 +1036,15 @@ SHELL = $(warning creating $@ from $^: $? is newer)$(OLD_SHELL)
 endif
 
 
+## Dependencies as graph
+NBDEPEND = $(PYTHON) utils/nbdepend.py
+depend-graph:
+	$(NBDEPEND) --graph --tred $(CHAPTER_SOURCES)
+	
+
+
 ## Dependencies - should come at the very end
 # See http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/ for inspiration
-NBDEPEND = $(PYTHON) utils/nbdepend.py
 $(DEPEND_TARGET)%.makefile: $(NOTEBOOKS)/%.ipynb
 	@echo "Rebuilding $@"
 	@test -d $(DEPEND_TARGET) || $(MKDIR) $(DEPEND_TARGET)
