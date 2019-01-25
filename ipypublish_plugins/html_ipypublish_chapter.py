@@ -32,10 +32,10 @@ fuzzingbook_tpl_dict = {
 # Fonts for page and menu
 # See https://designshack.net/articles/css/10-great-google-font-combinations-you-can-copy/
     'html_header': """
-{# Load Google fonts #}
-<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
+{# Fonts #}
+<link href='https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
 
-{# Icon library #}
+{# Icons #}
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
 {# Open Graph Tags #}
