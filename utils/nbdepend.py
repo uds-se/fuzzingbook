@@ -48,7 +48,34 @@ def print_notebook_dependencies(notebooks):
     for notebook_name in notebooks:
         for module in notebook_dependencies(notebook_name):
             print(module)
+
+
+def get_title(notebook):
+    """Return the title from a notebook file"""
+    contents = get_text_contents(notebook)
+    match = re.search(r'^# (.*)', contents, re.MULTILINE)
+    if match is None:
+        print(notebook + ": no title", file=sys.stderr)
+        return notebook
+
+    title = match.group(1).replace(r'\n', '')
+    # print("Title", title.encode('utf-8'))
+    return title
+
+def get_text_contents(notebook):
+    with io.open(notebook, 'r', encoding='utf-8') as f:
+        nb = nbformat.read(f, as_version=4)
+
+    contents = ""
+    for cell in nb.cells:
+        if cell.cell_type == 'markdown':
+            contents += "".join(cell.source) + "\n\n"
             
+    # print("Contents of", notebook, ": ", repr(contents[:100]))
+
+    return contents
+
+   
 def draw_notebook_dependencies(notebooks, 
     format='svg', transitive_reduction=True):
     dot = Digraph(comment="Notebook dependencies")
@@ -56,11 +83,15 @@ def draw_notebook_dependencies(notebooks,
     for notebook_name in notebooks:
         dirname = os.path.dirname(notebook_name)
         basename = os.path.splitext(os.path.basename(notebook_name))[0]
+        title = get_title(notebook_name)
         for module in notebook_dependencies(notebook_name,
                  include_minor_dependencies=False):
             module_file = os.path.join(dirname, module + ".ipynb")
             if module_file in notebooks:
-            # if os.path.exists(module_file):
+                module_title = get_title(module_file)
+                dot.node(module, URL='%s.ipynb' % module, label=module_title, tooltip=module)
+                dot.node(basename, URL='%s.ipynb' % basename, 
+                label=title, tooltip=basename)
                 dot.edge(module, basename)
     
     if transitive_reduction:
@@ -72,9 +103,7 @@ def draw_notebook_dependencies(notebooks,
     
     dot.format = format
     dot.render('depend')
-    with open('depend.' + format) as fp:
-        print(fp.read(), end="")
-    
+    os.system('cat depend.' + format)
     os.remove('depend')
     os.remove('depend.' + format)
 

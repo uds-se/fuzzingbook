@@ -404,7 +404,7 @@ help:
 	@echo "  (default: automatic)"
 	
 # Run a notebook, (re)creating all output cells
-ADD_METADATA = utils/add-metadata.py
+ADD_METADATA = utils/add_metadata.py
 NBAUTOSLIDE = utils/nbautoslide.py
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA)
 	$(EXECUTE_NOTEBOOK) $<
@@ -467,7 +467,7 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--todo-chapters="$(TODO_SOURCES)" \
 	--new-chapters="$(NEW_SOURCES)" \
 	
-HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) utils/post-html.py $(CHAPTERS_MAKEFILE)
+HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) utils/post_html.py $(CHAPTERS_MAKEFILE)
 
 # index.html comes with relative links (html/) such that the beta version gets the beta menu
 $(DOCS_TARGET)index.html: \
@@ -477,7 +477,7 @@ $(DOCS_TARGET)index.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
-	$(PYTHON) utils/post-html.py --menu-prefix=html/ --home $(POST_HTML_OPTIONS)$(HOME_POST_HTML_OPTIONS) $@
+	$(PYTHON) utils/post_html.py --menu-prefix=html/ --home $(POST_HTML_OPTIONS)$(HOME_POST_HTML_OPTIONS) $@
 	@$(OPEN) $@
 
 # 404.html comes with absolute links (/html/) such that it works anywhare
@@ -488,7 +488,7 @@ $(DOCS_TARGET)404.html: $(FULL_NOTEBOOKS)/404.ipynb $(HTML_DEPS)
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)404.html $@
 	@cd $(HTML_TARGET) && $(RM) -r 404.nbpub.log 404_files
-	$(PYTHON) utils/post-html.py --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
+	$(PYTHON) utils/post_html.py --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
 	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
 	@$(OPEN) $@
 
@@ -497,13 +497,20 @@ $(DOCS_TARGET)html/00_Index.html: $(DOCS_TARGET)notebooks/00_Index.ipynb $(HTML_
 	@cd $(HTML_TARGET) && $(RM) -r 00_Index.nbpub.log 00_Index_files
 	@cd $(DOCS_TARGET)html && $(RM) -r 00_Index.nbpub.log 00_Index_files
 	mv $(HTML_TARGET)00_Index.html $@
-	$(PYTHON) utils/post-html.py $(POST_HTML_OPTIONS) $@
+	$(PYTHON) utils/post_html.py $(POST_HTML_OPTIONS) $@
+
+$(DOCS_TARGET)html/00_Table_of_Contents.html: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb $(SITEMAP_SVG)
+	$(CONVERT_TO_HTML) $<
+	@cd $(HTML_TARGET) && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
+	@cd $(DOCS_TARGET)html && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
+	mv $(HTML_TARGET)00_Table_of_Contents.html $@
+	$(PYTHON) utils/post_html.py $(POST_HTML_OPTIONS) $@
 
 $(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	$(PYTHON) utils/post-html.py $(POST_HTML_OPTIONS) $@
+	$(PYTHON) utils/post_html.py $(POST_HTML_OPTIONS) $@
 	@-test -L $(HTML_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(HTML_TARGET)
 	@$(OPEN) $@
 
@@ -592,7 +599,7 @@ $(PDF_TARGET)book.tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
 	cd $(PDF_TARGET) && $(RM) book.nbpub.log
 	@echo Created $@
 
-$(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post-html.py
+$(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post_html.py
 	-$(RM) -r book
 	$(MKDIR) book
 	chapter=0; \
@@ -604,7 +611,7 @@ $(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post-html.py
 	ln -s ../$(BIB) book
 	$(CONVERT_TO_HTML) book
 	$(PYTHON) utils/nbmerge.py book/Ch*.ipynb > notebooks/book.ipynb
-	$(PYTHON) utils/post-html.py $(BETA_FLAG) $(POST_HTML_OPTIONS) $@
+	$(PYTHON) utils/post_html.py $(BETA_FLAG) $(POST_HTML_OPTIONS) $@
 	$(RM) -r book notebooks/book.ipynb
 	cd $(HTML_TARGET) && $(RM) book.nbpub.log book_files/$(BIB)
 	@echo Created $@
@@ -902,6 +909,9 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
 	$(PYTHON) utils/nbtoc.py \
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
 		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
+	$(EXECUTE_NOTEBOOK) $@ && mv $(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb $@
+	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+
 		
 # Index
 .PHONY: index
@@ -1041,8 +1051,10 @@ NBDEPEND = $(PYTHON) utils/nbdepend.py
 SITEMAP_SVG = $(DOCS_TARGET)notebooks/00_Sitemap.svg
 
 sitemap: $(SITEMAP_SVG)
-$(SITEMAP_SVG): $(CHAPTER_SOURCES)
+$(SITEMAP_SVG): $(CHAPTER_SOURCES) utils/nbdepend.py
 	$(NBDEPEND) --graph --transitive-reduction $(CHAPTER_SOURCES) > $@
+
+$(DOCS_TARGET)notebooks/00_Sitemap.html: $(SITEMAP_SVG)
 
 
 ## Dependencies - should come at the very end

@@ -58,12 +58,22 @@ def notebook_toc(public_chapters, appendices):
     appendix_toc = "### Appendices\n\n"
     for notebook in appendices:
         appendix_toc += notebook_toc_entry(notebook, "*")
+        
+    sitemap = r"""## Sitemap
+
+Use the following graph to determine possible paths through the book.  An arrow $A \rightarrow B$ means that chapter $A$ is a prerequisite for chapter $B$."""
+
+    sitemap_code_1 = "import IPython"
+    sitemap_code_2 = "IPython.display.SVG(filename='00_Sitemap.svg')"
 
     toc_notebook = nbformat.v4.new_notebook(
         cells=[
             nbformat.v4.new_markdown_cell(source=title),
+            nbformat.v4.new_markdown_cell(source=sitemap),
+            nbformat.v4.new_code_cell(source=sitemap_code_1),
+            nbformat.v4.new_code_cell(source=sitemap_code_2),
             nbformat.v4.new_markdown_cell(source=chapter_toc),
-            nbformat.v4.new_markdown_cell(source=appendix_toc)
+            nbformat.v4.new_markdown_cell(source=appendix_toc),
         ])
 
     # Get along with TOC extension
