@@ -44,7 +44,7 @@ menu_start = r"""
                <ul>
                    <li><a href="__SITE_HTML__html/ExpectError.html">Error Handling</a></li>
                    <li><a href="__SITE_HTML__html/Timer.html">Timer</a></li>
-                   <li><a href="__SITE_HTML__html/00_Index.html"><i class="fa fa-fw fa-location-arrow"></i>&nbsp;Index (beta)</a></i></li>
+                   <li><a href="__SITE_HTML__html/00_Index.html">Index (beta)</a></i></li>
                </ul>
            </li>
            <li><a href="__SITE_HTML__#News" class="more_coming">More Chapters Coming!</a></li>
@@ -386,7 +386,7 @@ beta_chapters = ready_chapters + todo_chapters
 all_chapters = public_chapters # + beta_chapters
 include_beta = args.include_ready or args.include_todo
 
-new_suffix = ' <strong>(new)</strong>'
+new_suffix = ' <strong class="new_chapter">&bull;</strong>'
 todo_suffix = '<i class="fa fa-fw fa-wrench"></i>'
 ready_suffix = '<i class="fa fa-fw fa-warning"></i>'
 
