@@ -55,7 +55,7 @@ def notebook_toc(public_chapters, appendices):
             chapter_toc += notebook_toc_entry(notebook, "*") # repr(counter) + ".")
             counter += 1
 
-    appendix_toc = "## Appendices\n\n"
+    appendix_toc = "### Appendices\n\n"
     for notebook in appendices:
         appendix_toc += notebook_toc_entry(notebook, "*")
 
