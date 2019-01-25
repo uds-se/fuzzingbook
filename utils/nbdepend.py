@@ -49,7 +49,8 @@ def print_notebook_dependencies(notebooks):
         for module in notebook_dependencies(notebook_name):
             print(module)
             
-def draw_notebook_dependencies(notebooks, format='svg', tred=True):
+def draw_notebook_dependencies(notebooks, 
+    format='svg', transitive_reduction=True):
     dot = Digraph(comment="Notebook dependencies")
     # dot.format = format
     for notebook_name in notebooks:
@@ -62,27 +63,31 @@ def draw_notebook_dependencies(notebooks, format='svg', tred=True):
             # if os.path.exists(module_file):
                 dot.edge(module, basename)
     
-    if tred:
+    if transitive_reduction:
         dot.format = 'gv'
-        dot.save('output.gv')
-        os.system('tred output.gv > output.gv~ && mv output.gv~ output.gv')
-        dot = Source.from_file('output.gv')
+        dot.save('depend.gv')
+        os.system('tred depend.gv > depend.gv~ && mv depend.gv~ depend.gv')
+        dot = Source.from_file('depend.gv')
+        os.remove('depend.gv')
     
     dot.format = format
-    dot.render('output', view=True)
-
-    # print(dot.pipe())
+    dot.render('depend')
+    with open('depend.' + format) as fp:
+        print(fp.read(), end="")
+    
+    os.remove('depend')
+    os.remove('depend.' + format)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--graph", action='store_true', help="Produce graph")
     parser.add_argument("--graph-format", action='store', default='svg', help="Graph format (gv, pdf, svg, ...)")
-    parser.add_argument("--tred", action='store_true', help="Use transitive reduction")
+    parser.add_argument("--transitive-reduction", action='store_true', help="Use transitive reduction")
     parser.add_argument("notebooks", nargs='*', help="notebooks to determine dependencies from")
     args = parser.parse_args()
 
     if args.graph:
-        draw_notebook_dependencies(args.notebooks, args.graph_format, args.tred)
+        draw_notebook_dependencies(args.notebooks, args.graph_format, args.transitive_reduction)
     else:
         print_notebook_dependencies(args.notebooks)

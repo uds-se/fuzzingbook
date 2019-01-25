@@ -1038,9 +1038,11 @@ endif
 
 ## Dependencies as graph
 NBDEPEND = $(PYTHON) utils/nbdepend.py
-depend-graph:
-	$(NBDEPEND) --graph --tred $(CHAPTER_SOURCES)
-	
+SITEMAP_SVG = $(DOCS_TARGET)notebooks/00_Sitemap.svg
+
+sitemap: $(SITEMAP_SVG)
+$(SITEMAP_SVG): $(CHAPTER_SOURCES)
+	$(NBDEPEND) --graph --transitive-reduction $(CHAPTER_SOURCES) > $@
 
 
 ## Dependencies - should come at the very end
