@@ -74,12 +74,20 @@ def fix_imports(code):
     if code.startswith("from IPython"):
         return code
 
-    code = re.sub(r"^(from|import) *([A-Z].*)",
+    code = re.sub(r"^from *([A-Z].*)",
 r'''if __package__ is None or __package__ == "":
-    \1 \2
+    from \1
 else:
-    \1 .\2
+    from .\1
 ''', code)
+
+    code = re.sub(r"^import *([A-Z].*)",
+r'''if __package__ is None or __package__ == "":
+    import \1
+else:
+    from . import \1
+''', code)
+
     return code
 
 def first_line(text):

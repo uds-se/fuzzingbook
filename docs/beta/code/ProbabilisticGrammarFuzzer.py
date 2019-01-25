@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2019-01-24 15:52:58+01:00
+# Last change: 2019-01-25 19:57:37+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -188,9 +188,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from GrammarCoverageFuzzer import GrammarCoverageFuzzer
+    from GrammarCoverageFuzzer import GrammarCoverageFuzzer  # minor dependency
 else:
-    from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
+    from .GrammarCoverageFuzzer import GrammarCoverageFuzzer  # minor dependency
 
 
 if __name__ == "__main__":
@@ -487,9 +487,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from GrammarCoverageFuzzer import duplicate_context
+    from GrammarCoverageFuzzer import duplicate_context  # minor dependency
 else:
-    from .GrammarCoverageFuzzer import duplicate_context
+    from .GrammarCoverageFuzzer import duplicate_context  # minor dependency
 
 
 if __name__ == "__main__":
@@ -558,9 +558,9 @@ class ExpansionCountMiner(object):
         self.reset()
 
 if __package__ is None or __package__ == "":
-    from GrammarCoverageFuzzer import expansion_key
+    from GrammarCoverageFuzzer import expansion_key  # minor dependency
 else:
-    from .GrammarCoverageFuzzer import expansion_key
+    from .GrammarCoverageFuzzer import expansion_key  # minor dependency
 
 
 if __package__ is None or __package__ == "":
@@ -982,17 +982,7 @@ if __name__ == "__main__":
 
 
 
-from inspect import getattr_static
-
-def inheritance_conflicts(c1, c2):
-    class c1c2(c1, c2):
-        pass
-
-    class c2c1(c2, c1):
-        pass
-
-    return [attr for attr in dir(c1c2) if getattr_static(
-        c1c2, attr) != getattr_static(c2c1, attr)]
+from fuzzingbook_utils import inheritance_conflicts
 
 if __name__ == "__main__":
     inheritance_conflicts(GrammarCoverageFuzzer, ProbabilisticGrammarFuzzer)

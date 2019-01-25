@@ -11786,14 +11786,14 @@ MathJax.Hub.Config({
 
 </style>
 
-<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/Fuzzer.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Fuzzing: Breaking Things with Random Inputs - Generating Software Tests" />
-<meta property="og:description" content="In this chapter, we&#x27;ll start with one of the simplest test generation techniques.  The key idea of random text generation, also known as fuzzing, is to feed a string of random characters into a program in the hope to uncover failures.Prerequisites You should know fundamentals of software testing; for instance, from the chapter &quot;Introduction to Software Testing&quot;. You should have a decent understanding of Python; for instance, from the Python tutorial." />
+<meta property="og:description" content="In this chapter, we&#x27;ll start with one of the simplest test generation techniques.  The key idea of random text generation, also known as fuzzing, is to feed a string of random characters into a program in the hope to uncover failures.Prerequisites You should know fundamentals of software testing; for instance, from the chapter &quot;Introduction to Software Testing&quot;. You should have a decent understanding of Python; for instance, from the Python tutorial.We can make these prerequisites explicit.  First, we&#x27;ll import a standard package required for working in notebooks.Now, we explicitly import (and thus require) the earlier chapter." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11879,9 +11879,9 @@ MathJax.Hub.Config({
 <li><a href="Grammars.html">Fuzzing with Grammars</a></li>
 <li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing</a></li>
 <li><a href="GrammarCoverageFuzzer.html">Grammar Coverage</a></li>
+<li><a href="Parser.html">Parsing and Recombining Inputs</a></li>
 <li><a href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a></li>
 <li><a href="GeneratorGrammarFuzzer.html">Fuzzing with Generators</a></li>
-<li><a href="Parser.html">Parsing and Recombining Inputs</a></li>
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 </ul><li class="has-sub"><a href="04_Semantical_Fuzzing.html" class="chapters"><span class="part_number">IV</span> Semantical Fuzzing&nbsp;<i class="fa fa-fw fa-warning"></i> <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
@@ -12001,6 +12001,52 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We can make these prerequisites explicit.  First, we'll import a standard package required for working in notebooks.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils" class="import" target="_blank">fuzzingbook_utils</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Now, we explicitly import (and thus require) the earlier chapter.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="Intro_Testing.html" class="import" target="_blank">Intro_Testing</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Testing-Assignment">A Testing Assignment<a class="anchor-link" href="#A-Testing-Assignment">&#182;</a></h2><p>Fuzzing was born in a "dark and stormy night in the Fall of 1988" [<a href="http://us.artechhouse.com/Fuzzing-for-Software-Security-Testing-and-Quality-Assurance-Second-Edition-P1930.aspx">Takanen <em>et al</em>, 2008.</a>].  Sitting in his apartment in Wisconsin, Madison, professor Barton Miller was connected to his university computer via a 1200 baud telephone line.  The thunderstorm caused noise on the line, and this noise in turn caused the UNIX commands on either end to get bad inputs – and crash.  The frequent crashes surprised him – surely, programs should be more robust than that?  As a scientist, he wanted to investigate the extent of the problem and its causes.  So he crafted a <em>programming exercise</em> for his students at the University of Wisconsin-Madison – an exercise that would have his students create the first fuzzers.</p>
 </div>
 </div>
@@ -12047,30 +12093,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>First, we'll import a standard package required for working in notebooks.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils" class="import" target="_blank">fuzzingbook_utils</a></span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Next, we'll need random numbers.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>To use random numbers, we have to import the respective module.</p>
 </div>
 </div>
 </div>
@@ -12255,7 +12278,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp5kfps6bi/input.txt
+<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmphq7anhsz/input.txt
 </pre>
 </div>
 
@@ -12581,15 +12604,15 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>&#39;5*,55&amp;8&gt;&#34;86,?&#34;/7!1%5-**&amp;-$&amp;)$91;&#34;21(\&#39;8&#34;(%$&#39;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp5kfps6bi/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp5kfps6bi/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp5kfps6bi/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp5kfps6bi/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp5kfps6bi/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp5kfps6bi/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp5kfps6bi/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp5kfps6bi/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp5kfps6bi/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmphq7anhsz/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmphq7anhsz/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmphq7anhsz/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmphq7anhsz/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmphq7anhsz/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmphq7anhsz/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmphq7anhsz/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmphq7anhsz/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmphq7anhsz/input.txt 1: illegal character: $
 </pre>
 </div>
 
@@ -12775,9 +12798,9 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-22-f83db3d59a06&gt;&#34;, line 5, in &lt;module&gt;
+  File &#34;&lt;ipython-input-23-f83db3d59a06&gt;&#34;, line 5, in &lt;module&gt;
     crash_if_too_long(s)
-  File &#34;&lt;ipython-input-20-928c2d2de976&gt;&#34;, line 4, in crash_if_too_long
+  File &#34;&lt;ipython-input-21-928c2d2de976&gt;&#34;, line 4, in crash_if_too_long
     raise ValueError
 ValueError (expected)
 </pre>
@@ -12881,11 +12904,11 @@ ValueError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-25-8e40f7d62a1b&gt;&#34;, line 5, in &lt;module&gt;
+  File &#34;&lt;ipython-input-26-8e40f7d62a1b&gt;&#34;, line 5, in &lt;module&gt;
     hang_if_no_space(s)
-  File &#34;&lt;ipython-input-23-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
+  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
     if i &lt; len(s):
-  File &#34;&lt;ipython-input-23-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
+  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
     if i &lt; len(s):
   File &#34;&lt;string&gt;&#34;, line 16, in check_time
 TimeoutError (expected)
@@ -13006,9 +13029,9 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-28-7a1817f3dbfc&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-29-7a1817f3dbfc&gt;&#34;, line 2, in &lt;module&gt;
     collapse_if_too_large(long_number)
-  File &#34;&lt;ipython-input-26-2c22a83a4dca&gt;&#34;, line 3, in collapse_if_too_large
+  File &#34;&lt;ipython-input-27-2c22a83a4dca&gt;&#34;, line 3, in collapse_if_too_large
     raise ValueError
 ValueError (expected)
 </pre>
@@ -13099,7 +13122,21 @@ ValueError (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">&quot;program.c&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils" class="import" target="_blank">fuzzingbook_utils</a></span> <span class="k">import</span> <span class="n">print_file</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_file</span><span class="p">(</span><span class="s2">&quot;program.c&quot;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13110,22 +13147,21 @@ ValueError (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>
-#include &lt;stdlib.h&gt;
-#include &lt;string.h&gt;
+<pre><span class="ansi-cyan-fg">#</span><span class="ansi-cyan-fg">include</span> <span class="ansi-white-fg">&lt;stdlib.h&gt;</span>
+<span class="ansi-cyan-fg">#</span><span class="ansi-cyan-fg">include</span> <span class="ansi-white-fg">&lt;string.h&gt;</span>
 
-int main(int argc, char** argv) {
-    /* Create an array with 100 bytes, initialized with 42 */
-    char *buf = malloc(100);
-    memset(buf, 42, 100);
+<span class="ansi-cyan-fg">int</span> <span class="ansi-green-fg">main</span>(<span class="ansi-cyan-fg">int</span> argc, <span class="ansi-cyan-fg">char</span>** argv) {
+    <span class="ansi-white-fg">/* Create an array with 100 bytes, initialized with 42 */</span>
+    <span class="ansi-cyan-fg">char</span> *buf = malloc(<span class="ansi-blue-fg">100</span>);
+    memset(buf, <span class="ansi-blue-fg">42</span>, <span class="ansi-blue-fg">100</span>);
 
-    /* Read the N-th element, with N being the first command-line argument */
-    int index = atoi(argv[1]);
-    char val = buf[index];
+    <span class="ansi-white-fg">/* Read the N-th element, with N being the first command-line argument */</span>
+    <span class="ansi-cyan-fg">int</span> index = atoi(argv[<span class="ansi-blue-fg">1</span>]);
+    <span class="ansi-cyan-fg">char</span> val = buf[index];
 
-    /* Clean up memory so we don&#39;t leak */
+    <span class="ansi-white-fg">/* Clean up memory so we don&#39;t leak */</span>
     free(buf);
-    return val;
+    <span class="ansi-blue-fg">return</span> val;
 }
 </pre>
 </div>
@@ -13214,16 +13250,16 @@ int main(int argc, char** argv) {
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>=================================================================
-<span class="ansi-red-intense-fg ansi-bold">==75840==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60b0000000ae at pc 0x00010cde7ea5 bp 0x7ffee2e18500 sp 0x7ffee2e184f8
+<span class="ansi-red-intense-fg ansi-bold">==65841==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60b0000000ae at pc 0x000101937ea5 bp 0x7ffeee2c8510 sp 0x7ffeee2c8508
 </span><span class="ansi-blue-intense-fg ansi-bold">READ of size 1 at 0x60b0000000ae thread T0</span>
-    #0 0x10cde7ea4 in main program.c:12
-    #1 0x7fff6b588ed8 in start (libdyld.dylib:x86_64+0x16ed8)
+    #0 0x101937ea4 in main program.c:12
+    #1 0x7fff738b6ed8 in start (libdyld.dylib:x86_64+0x16ed8)
 
 <span class="ansi-green-intense-fg ansi-bold">0x60b0000000ae is located 10 bytes to the right of 100-byte region [0x60b000000040,0x60b0000000a4)
 </span><span class="ansi-magenta-intense-fg ansi-bold">allocated by thread T0 here:</span>
-    #0 0x10ce40f53 in wrap_malloc (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x56f53)
-    #1 0x10cde7df4 in main program.c:7
-    #2 0x7fff6b588ed8 in start (libdyld.dylib:x86_64+0x16ed8)
+    #0 0x101995f53 in wrap_malloc (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x56f53)
+    #1 0x101937df4 in main program.c:7
+    #2 0x7fff738b6ed8 in start (libdyld.dylib:x86_64+0x16ed8)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow program.c:12 in main
 Shadow bytes around the buggy address:
@@ -13257,7 +13293,7 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           <span class="ansi-yellow-intense-fg ansi-bold">fe</span>
   Left alloca redzone:     <span class="ansi-blue-intense-fg ansi-bold">ca</span>
   Right alloca redzone:    <span class="ansi-blue-intense-fg ansi-bold">cb</span>
-==75840==ABORTING
+==65841==ABORTING
 </pre>
 </div>
 
@@ -13621,7 +13657,7 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-43-8e163fe1f7be&gt;&#34;, line 4, in &lt;module&gt;
+  File &#34;&lt;ipython-input-45-8e163fe1f7be&gt;&#34;, line 4, in &lt;module&gt;
     assert not s.find(uninitialized_memory_marker)
 AssertionError (expected)
 </pre>
@@ -13877,11 +13913,11 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-52-21eb3b08ef3e&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-54-21eb3b08ef3e&gt;&#34;, line 2, in &lt;module&gt;
     assert airport_codes_repOK()
-  File &#34;&lt;ipython-input-49-f8128f7dc918&gt;&#34;, line 3, in airport_codes_repOK
+  File &#34;&lt;ipython-input-51-f8128f7dc918&gt;&#34;, line 3, in airport_codes_repOK
     assert code_repOK(code)
-  File &#34;&lt;ipython-input-47-345123a45730&gt;&#34;, line 2, in code_repOK
+  File &#34;&lt;ipython-input-49-345123a45730&gt;&#34;, line 2, in code_repOK
     assert len(code) == 3, &#34;Airport code must have three characters: &#34; + repr(code)
 AssertionError: Airport code must have three characters: &#39;YMML&#39; (expected)
 </pre>
@@ -13957,11 +13993,11 @@ AssertionError: Airport code must have three characters: &#39;YMML&#39; (expecte
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-55-6aeb45bf2b91&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-57-6aeb45bf2b91&gt;&#34;, line 2, in &lt;module&gt;
     add_new_airport(&#34;London-Heathrow&#34;, &#34;LHR&#34;)
-  File &#34;&lt;ipython-input-53-f4d30ab4bf9e&gt;&#34;, line 2, in add_new_airport
+  File &#34;&lt;ipython-input-55-f4d30ab4bf9e&gt;&#34;, line 2, in add_new_airport
     assert code_repOK(code)
-  File &#34;&lt;ipython-input-47-345123a45730&gt;&#34;, line 2, in code_repOK
+  File &#34;&lt;ipython-input-49-345123a45730&gt;&#34;, line 2, in code_repOK
     assert len(code) == 3, &#34;Airport code must have three characters: &#34; + repr(code)
 AssertionError: Airport code must have three characters: &#39;London-Heathrow&#39; (expected)
 </pre>
@@ -14024,13 +14060,13 @@ AssertionError: Airport code must have three characters: &#39;London-Heathrow&#3
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-57-a80a619d120e&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-59-a80a619d120e&gt;&#34;, line 2, in &lt;module&gt;
     add_new_airport(&#34;IST&#34;, &#34;Istanbul Yeni Havalimanı&#34;)
-  File &#34;&lt;ipython-input-56-93da9120109e&gt;&#34;, line 3, in add_new_airport
+  File &#34;&lt;ipython-input-58-93da9120109e&gt;&#34;, line 3, in add_new_airport
     assert airport_codes_repOK()
-  File &#34;&lt;ipython-input-49-f8128f7dc918&gt;&#34;, line 3, in airport_codes_repOK
+  File &#34;&lt;ipython-input-51-f8128f7dc918&gt;&#34;, line 3, in airport_codes_repOK
     assert code_repOK(code)
-  File &#34;&lt;ipython-input-47-345123a45730&gt;&#34;, line 2, in code_repOK
+  File &#34;&lt;ipython-input-49-345123a45730&gt;&#34;, line 2, in code_repOK
     assert len(code) == 3, &#34;Airport code must have three characters: &#34; + repr(code)
 AssertionError: Airport code must have three characters: &#39;YMML&#39; (expected)
 </pre>
@@ -14850,7 +14886,7 @@ Some paragraph</code></pre>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2019-01-24 16:20:05+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2019-01-25 21:45:25+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14866,7 +14902,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">https://www.fuzzingbook.org/beta/html/Fuzzer.html</a>.  Retrieved 2019-01-24 16:20:05+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">https://www.fuzzingbook.org/beta/html/Fuzzer.html</a>.  Retrieved 2019-01-25 21:45:25+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:Fuzzer,
@@ -14876,9 +14912,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Fuzzer.html}},
-    note = {Retrieved 2019-01-24 16:20:05+01:00},
+    note = {Retrieved 2019-01-25 21:45:25+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Fuzzer.html},
-    urldate = {2019-01-24 16:20:05+01:00}
+    urldate = {2019-01-25 21:45:25+01:00}
 }
 </pre>
 </div>

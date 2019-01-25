@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2019-01-24 16:26:12+01:00
+# Last change: 2019-01-25 19:35:36+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -114,7 +114,6 @@ from Fuzzer import Fuzzer
 from GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
 
 from ExpectError import ExpectError
-from Coverage import Coverage
 from Timer import Timer
 
 if __name__ == "__main__":

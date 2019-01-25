@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2019-01-17 02:24:13-08:00
+# Last change: 2019-01-25 18:33:59+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -36,18 +36,24 @@ if __name__ == "__main__":
 
 
 
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+
+if __package__ is None or __package__ == "":
+    import APIFuzzer
+else:
+    from . import APIFuzzer
+
+
 # ## System Tests vs Unit Tests
 
 if __name__ == "__main__":
     print('\n## System Tests vs Unit Tests')
 
 
-
-
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
 
 
 import urllib.parse
@@ -664,12 +670,6 @@ if __name__ == "__main__":
     print('\n## Fuzzing Web Functions')
 
 
-
-
-if __package__ is None or __package__ == "":
-    from Carver import webbrowser
-else:
-    from .Carver import webbrowser
 
 
 if __name__ == "__main__":

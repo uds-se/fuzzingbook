@@ -11786,7 +11786,7 @@ MathJax.Hub.Config({
 
 </style>
 
-<link href='https://fonts.googleapis.com/css?family=Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Source+Code+Pro|Open+Sans' rel='stylesheet' type='text/css'>
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
@@ -11879,9 +11879,9 @@ MathJax.Hub.Config({
 <li><a href="Grammars.html">Fuzzing with Grammars</a></li>
 <li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing</a></li>
 <li><a href="GrammarCoverageFuzzer.html">Grammar Coverage</a></li>
+<li><a href="Parser.html" class="this_page">Parsing and Recombining Inputs</a></li>
 <li><a href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a></li>
 <li><a href="GeneratorGrammarFuzzer.html">Fuzzing with Generators</a></li>
-<li><a href="Parser.html" class="this_page">Parsing and Recombining Inputs</a></li>
 <li><a href="Reducer.html">Reducing Failure-Inducing Inputs&nbsp;<i class="fa fa-fw fa-warning"></i></a></li>
 </ul><li class="has-sub"><a href="04_Semantical_Fuzzing.html" class="chapters"><span class="part_number">IV</span> Semantical Fuzzing&nbsp;<i class="fa fa-fw fa-warning"></i> <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
@@ -12258,7 +12258,6 @@ It is an old but reliable model!
 <span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">FasterGrammarFuzzer</span><span class="p">,</span> <span class="n">display_tree</span><span class="p">,</span> <span class="n">tree_to_string</span><span class="p">,</span> <span class="n">dot_escape</span>
 
 <span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="k">import</span> <span class="n">ExpectError</span>
-<span class="kn">from</span> <span class="nn"><a href="Coverage.html" class="import" target="_blank">Coverage</a></span> <span class="k">import</span> <span class="n">Coverage</span>
 <span class="kn">from</span> <span class="nn"><a href="Timer.html" class="import" target="_blank">Timer</a></span> <span class="k">import</span> <span class="n">Timer</span>
 </pre></div>
 
@@ -12829,7 +12828,7 @@ It is an old but reliable model!
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0 valid strings, that is GrammarFuzzer generated 0.000000% valid entries from 1000 inputs
-Total time of 5.942005 seconds
+Total time of 9.346591 seconds
 </pre>
 </div>
 
@@ -20959,7 +20958,7 @@ x=10;y=20;z=(x+y)*(x-y)
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>61 valid strings, that is LangFuzzer generated 61.000000% valid entries
-Total time of 0.012395 seconds
+Total time of 0.019463 seconds
 </pre>
 </div>
 
@@ -20997,7 +20996,7 @@ Total time of 0.012395 seconds
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>4 valid strings, that is GrammarFuzzer generated 4.000000% valid entries
-Total time of 1.505123 seconds
+Total time of 2.337843 seconds
 </pre>
 </div>
 
@@ -25356,8 +25355,8 @@ SyntaxError: at &#39;a&#39; (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
-E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
+<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;E&gt;&#39;}
+E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </pre>
 </div>
 
@@ -27283,7 +27282,7 @@ a chart[6]
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>As can be seen from the parsing log for each letter, the number of states with representation <code>&lt;A&gt;: a &lt;A&gt; ● (i, j)</code> increases at each stage, and these are simply a left over from the previous letter. They do not contribute anything more to the parse other than to simply complete these entries. However, they take up space, and require resources for inspection, contributing a factor of <code>n</code> in analysis.</p>
 <p>Joop Leo [<a href="https://doi.org/https://doi.org/10.1016/0304-3975(91)90180-A">Joop M.I.M. Leo, 1991.</a>] found that this inefficiency can be avoided by detecting right recursion. The idea is that before starting the <code>completion</code> step, check whether the current item has a <em>deterministic reduction path</em>. If such a path exists, add a copy of the topmost element of the <em>deteministic reduction path</em> to the current column, and return. If not, perform the original <code>completion</code> step.</p>
-<p><strong>Definition 2.1</strong>: An item is said to be on the deterministic reduction path above $ [A \rightarrow  \gamma., i] $ if it is $ [B \rightarrow \alpha A ., k] $ with $ [B \rightarrow \alpha . A, k] $ being the only item in $ I_i $ with the dot in front of A, or if it is on the deterministic reduction path above $ [B \rightarrow \alpha A ., k] $. An item on such a path is called <em>topmost</em> one if there is no item on the deterministic reduction path above it[<a href="https://doi.org/https://doi.org/10.1016/0304-3975(91)90180-A">Joop M.I.M. Leo, 1991.</a>].</p>
+<p><strong>Definition 2.1</strong>: An item is said to be on the deterministic reduction path above $[A \rightarrow  \gamma., i]$ if it is $[B \rightarrow \alpha A ., k]$ with $[B \rightarrow \alpha . A, k]$ being the only item in $ I_i $ with the dot in front of A, or if it is on the deterministic reduction path above $[B \rightarrow \alpha A ., k]$. An item on such a path is called <em>topmost</em> one if there is no item on the deterministic reduction path above it[<a href="https://doi.org/https://doi.org/10.1016/0304-3975(91)90180-A">Joop M.I.M. Leo, 1991.</a>].</p>
 </div>
 </div>
 </div>
@@ -27757,7 +27756,7 @@ It should result in the following table:</p>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2019-01-24 16:26:12+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2019-01-25 19:35:36+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -27773,7 +27772,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2019-01-24 16:26:12+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2019-01-25 19:35:36+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:Parser,
@@ -27783,9 +27782,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Parser.html}},
-    note = {Retrieved 2019-01-24 16:26:12+01:00},
+    note = {Retrieved 2019-01-25 19:35:36+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Parser.html},
-    urldate = {2019-01-24 16:26:12+01:00}
+    urldate = {2019-01-25 19:35:36+01:00}
 }
 </pre>
 </div>

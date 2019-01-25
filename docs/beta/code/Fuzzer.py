@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2019-01-24 16:20:05+01:00
+# Last change: 2019-01-25 21:45:25+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -36,6 +36,18 @@ if __name__ == "__main__":
 
 
 
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+
+if __package__ is None or __package__ == "":
+    import Intro_Testing
+else:
+    from . import Intro_Testing
+
+
 # ## A Testing Assignment
 
 if __name__ == "__main__":
@@ -50,12 +62,6 @@ if __name__ == "__main__":
     print('\n## A Simple Fuzzer')
 
 
-
-
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
 
 
 import random
@@ -324,8 +330,10 @@ if __name__ == "__main__":
         """)
 
 
+from fuzzingbook_utils import print_file
+
 if __name__ == "__main__":
-    print(open("program.c").read())
+    print_file("program.c")
 
 
 if __name__ == "__main__":

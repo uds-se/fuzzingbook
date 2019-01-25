@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2019-01-14 00:29:35-08:00
+# Last change: 2019-01-25 19:54:31+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -698,9 +698,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from Parser import VAR_GRAMMAR
+    from Parser import VAR_GRAMMAR  # minor dependency
 else:
-    from .Parser import VAR_GRAMMAR
+    from .Parser import VAR_GRAMMAR  # minor dependency
 
 
 if __name__ == "__main__":
@@ -860,16 +860,12 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer
+    from ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer  # minor dependency
 else:
-    from .ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer
+    from .ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer  # minor dependency
 
 
-if __package__ is None or __package__ == "":
-    from ProbabilisticGrammarFuzzer import inheritance_conflicts
-else:
-    from .ProbabilisticGrammarFuzzer import inheritance_conflicts
-
+from fuzzingbook_utils import inheritance_conflicts
 
 if __name__ == "__main__":
     inheritance_conflicts(ProbabilisticGrammarFuzzer, GeneratorGrammarFuzzer)
@@ -914,11 +910,16 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer, ProbabilisticGrammarCoverageFuzzer
+    from ProbabilisticGrammarFuzzer import ProbabilisticGrammarCoverageFuzzer  # minor dependency
 else:
-    from .ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer, ProbabilisticGrammarCoverageFuzzer
+    from .ProbabilisticGrammarFuzzer import ProbabilisticGrammarCoverageFuzzer  # minor dependency
 
-from GrammarCoverageFuzzer import GrammarCoverageFuzzer
+
+if __package__ is None or __package__ == "":
+    from GrammarCoverageFuzzer import GrammarCoverageFuzzer  # minor dependency
+else:
+    from .GrammarCoverageFuzzer import GrammarCoverageFuzzer  # minor dependency
+
 
 if __name__ == "__main__":
     inheritance_conflicts(
