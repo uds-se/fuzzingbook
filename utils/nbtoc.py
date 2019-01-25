@@ -45,8 +45,15 @@ def notebook_toc(public_chapters, appendices):
     title = "# Generating Software Tests"
 
     chapter_toc = "## Table of Contents\n\n"
+    counter = 1
     for notebook in public_chapters:
-        chapter_toc += notebook_toc_entry(notebook, "1.")
+        notebook_title = get_title(notebook)
+        if notebook_title.startswith("Part "):
+            # chapter_toc += "\n### " + notebook_title + "\n\n"
+            chapter_toc += "\n" + notebook_toc_entry(notebook, "###") + "\n"
+        else:
+            chapter_toc += notebook_toc_entry(notebook, "*") # repr(counter) + ".")
+            counter += 1
 
     appendix_toc = "## Appendices\n\n"
     for notebook in appendices:
