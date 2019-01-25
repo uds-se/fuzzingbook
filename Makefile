@@ -911,6 +911,7 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
 		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
 	$(EXECUTE_NOTEBOOK) $@ && mv $(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb $@
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+	
 
 		
 # Index
@@ -1053,8 +1054,6 @@ SITEMAP_SVG = $(DOCS_TARGET)notebooks/00_Sitemap.svg
 sitemap: $(SITEMAP_SVG)
 $(SITEMAP_SVG): $(CHAPTER_SOURCES) utils/nbdepend.py
 	$(NBDEPEND) --graph --transitive-reduction $(CHAPTER_SOURCES) > $@
-
-$(DOCS_TARGET)notebooks/00_Sitemap.html: $(SITEMAP_SVG)
 
 
 ## Dependencies - should come at the very end
