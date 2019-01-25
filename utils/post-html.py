@@ -484,7 +484,7 @@ if args.home:
     link_class = ' class="this_page"'
 else:
     link_class = ''
-all_chapters_menu = '<li><a href="%s"%s><i class="fa fa-fw fa-home"></i> About this book</a></li>\n' % (site_html, link_class)
+all_chapters_menu = '<li><a href="%s"%s><span class="part_number"><i class="fa fa-fw fa-home"></i></span> About this book</a></li>\n' % (site_html, link_class)
 structured_all_chapters_menu = all_chapters_menu
 
 this_chapter_counter = 1
@@ -500,14 +500,32 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
 
     if menu_ipynb_file == chapter_ipynb_file:
         link_class = ' class="this_page"'
-        # title += ' &bull;'
     else:
         link_class = ''
     file_title = get_title(menu_ipynb_file)
     
     if menu_ipynb_file in new_chapters:
         file_title += new_suffix
-    
+        
+    is_part = file_title.startswith("Part ")
+    if is_part:
+        file_title = '<span class="part_number">' + \
+            file_title.replace("Part ", "") \
+            .replace(":", '</span>')
+            # .replace("I:",    '&#x2160;') \
+            # .replace("II:",   '&#x2161;') \
+            # .replace("III:",  '&#x2162;') \
+            # .replace("IV:",   '&#x2163;') \
+            # .replace("V:",    '&#x2164;') \
+            # .replace("VI:",   '&#x2165;') \
+            # .replace("VII:",  '&#x2166;') \
+            # .replace("VIII:", '&#x2167;') \
+            # .replace("IX:",   '&#x2168;') \
+            # .replace("X:",    '&#x2169;') \
+            # .replace("XI:",   '&#x216a;') \
+            # .replace("XII:",  '&#x216b;') \
+            # .replace(';', ';</span>') \
+
     title += file_title
     structured_title += file_title
 
@@ -518,7 +536,7 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
         beta_indicator = "&nbsp;" + todo_suffix
     menu_html_file = menu_prefix + basename + ".html"
     
-    if basename.startswith('0'):
+    if is_part:
         # New part
         if in_sublist:
             structured_all_chapters_menu += "</ul>"
