@@ -77,8 +77,10 @@ def get_text_contents(notebook):
 
    
 def draw_notebook_dependencies(notebooks, 
-    format='svg', transitive_reduction=True):
+    format='svg', transitive_reduction=True, clusters=True):
     dot = Digraph(comment="Notebook dependencies")
+    # dot.attr(size='20,30', rank='max')
+    
     node_attrs = {
         'shape': 'note',  # note, plain, none
         'style': 'filled',
@@ -86,22 +88,47 @@ def draw_notebook_dependencies(notebooks,
         'fontcolor': '#B03A2E',
         'fillcolor': 'white'
     }
-    
-    # dot.format = format
+    cluster = None
+
+    cluster_attrs = {
+        'shape': 'plain',  # note, plain, none
+        'style': 'filled',
+        'fontname': 'Patua One',
+        'fontcolor': 'black',
+        'color': '#F0F0F0',
+    }
+
     for notebook_name in notebooks:
         dirname = os.path.dirname(notebook_name)
         basename = os.path.splitext(os.path.basename(notebook_name))[0]
         title = get_title(notebook_name)
+        if clusters:
+            if title.startswith("Part"):
+                if cluster is not None:
+                    cluster.attr(**cluster_attrs)
+                    dot.subgraph(cluster)
+
+                cluster = Digraph(name='cluster_' + basename)
+                cluster.node(basename, label=title, URL='%s.ipynb' % basename,
+                tooltip=basename, shape='plain', fontname='Patua One')
+            
+            elif cluster is not None:
+                cluster.node(basename)
+
         for module in notebook_dependencies(notebook_name,
                  include_minor_dependencies=False):
             module_file = os.path.join(dirname, module + ".ipynb")
             if module_file in notebooks:
                 module_title = get_title(module_file)
-                dot.node(module, URL='%s.ipynb' % module, 
-                    label=module_title, tooltip=module, **node_attrs)
                 dot.node(basename, URL='%s.ipynb' % basename, 
                     label=title, tooltip=basename, **node_attrs)
+                dot.node(module, URL='%s.ipynb' % module, 
+                    label=module_title, tooltip=module, **node_attrs)
                 dot.edge(module, basename)
+                
+    if cluster is not None:
+        cluster.attr(**cluster_attrs)
+        dot.subgraph(cluster)
     
     if transitive_reduction:
         dot.format = 'gv'
@@ -109,7 +136,7 @@ def draw_notebook_dependencies(notebooks,
         os.system('tred depend.gv > depend.gv~ && mv depend.gv~ depend.gv')
         dot = Source.from_file('depend.gv')
         os.remove('depend.gv')
-    
+
     dot.format = format
     dot.render('depend')
     os.system('cat depend.' + format)
@@ -122,10 +149,11 @@ if __name__ == "__main__":
     parser.add_argument("--graph", action='store_true', help="Produce graph")
     parser.add_argument("--graph-format", action='store', default='svg', help="Graph format (gv, pdf, svg, ...)")
     parser.add_argument("--transitive-reduction", action='store_true', help="Use transitive reduction")
+    parser.add_argument("--cluster-by-parts", action='store_true', help="Cluster by parts")
     parser.add_argument("notebooks", nargs='*', help="notebooks to determine dependencies from")
     args = parser.parse_args()
 
     if args.graph:
-        draw_notebook_dependencies(args.notebooks, args.graph_format, args.transitive_reduction)
+        draw_notebook_dependencies(args.notebooks, args.graph_format, args.transitive_reduction, args.cluster_by_parts)
     else:
         print_notebook_dependencies(args.notebooks)
