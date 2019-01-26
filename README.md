@@ -115,7 +115,7 @@ Here's our current release plan.  New chapters are coming out every Tuesday.
 1. Fuzzing in the Large – 2019-03-19
 1. Mutation Analysis – 2019-03-26
 
-See the table of contents in the menu above for those chapters that are already done.
+See the [table of contents](00_Table_of_Contents.ipynb) for those chapters that are already done.
 
 #### How do I cite your work?
 
@@ -144,6 +144,10 @@ We have successfully used the material in various courses.
 * Now, the goal of the book is to be completely self-contained; that is, it should work without additional support.  Hence, we now give out completed chapters to students in a _flipped classroom_ setting, with the students working on the notebooks at their leisure.  We would meet in the classroom to discuss experiences with past notebooks and discuss future notebooks.
 
 When running a course, [do not rely on mybinder.org](#Troubleshooting) – it will not provide sufficient resources for a larger group of students.  Instead, [install and run your own hub.](#Do-I-have-alternatives-to-the-interactive-notebook?)
+
+#### Are there specific subsets I can focus on?
+
+Our [Sitemap](00_Table_of_Contents.ipynb) lists the dependencies between the individual chapters.  After you have gone through the [basics of fuzzing](Fuzzer.ipynb), you can, for instance, limit yourself to [lexical (character-based) fuzzing](02_Lexical_Fuzzing.ipynb), and take a path towards [mutation-based "AFL-style" fuzzing](MutationFuzzer.ipynb).  Or you can go for Web and GUI testing and take the path through [syntactical (grammar-based) fuzzing](03_Syntactical_Fuzzing.ipynb) instead.
 
 #### How can I extend or adapt your slides?
 
