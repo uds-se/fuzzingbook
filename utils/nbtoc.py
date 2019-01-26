@@ -60,8 +60,7 @@ def notebook_toc(public_chapters, appendices):
         appendix_toc += notebook_toc_entry(notebook, "*")
         
     sitemap = r"""## Sitemap
-
-The following shows possible paths through the book.  An arrow $A \rightarrow B$ means that chapter $A$ is a prerequisite for chapter $B$."""
+This sitemap shows possible paths through the book chapters.  An arrow $A \rightarrow B$ means that chapter $A$ is a prerequisite for chapter $B$."""
 
     sitemap_code_1 = "import IPython"
     sitemap_code_2 = "IPython.display.SVG(filename='00_Sitemap.svg')"

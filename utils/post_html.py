@@ -453,7 +453,10 @@ if args.home:
     link_class = ' class="this_page"'
 else:
     link_class = ''
-all_chapters_menu = '<li><a href="%s"%s><span class="part_number"><i class="fa fa-fw fa-home"></i></span> About this book</a></li>\n' % (site_html, link_class)
+all_chapters_menu = '''
+<li><a href="%s"%s><span class="part_number"><i class="fa fa-fw fa-home"></i></span> About this book</a></li>
+<li><a href="__SITE_HTML__html/00_Table_of_Contents.html"><i class="fa fa-fw fa-sitemap"></i></span> Sitemap</a></li>
+''' % (site_html, link_class)
 structured_all_chapters_menu = all_chapters_menu
 
 this_chapter_counter = 1

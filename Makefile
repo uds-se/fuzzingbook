@@ -508,6 +508,7 @@ $(DOCS_TARGET)html/00_Table_of_Contents.html: $(DOCS_TARGET)notebooks/00_Table_o
 	@cd $(DOCS_TARGET)html && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
 	mv $(HTML_TARGET)00_Table_of_Contents.html $@
 	$(PYTHON) utils/post_html.py $(POST_HTML_OPTIONS) $@
+	@$(OPEN) $@
 
 $(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
