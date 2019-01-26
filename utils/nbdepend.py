@@ -79,6 +79,13 @@ def get_text_contents(notebook):
 def draw_notebook_dependencies(notebooks, 
     format='svg', transitive_reduction=True):
     dot = Digraph(comment="Notebook dependencies")
+    node_attrs = {
+        'shape': 'note',  # note, plain, none
+        'style': 'filled',
+        'fontname': 'Patua One',
+        'fontcolor': '#B03A2E',
+        'fillcolor': 'white'
+    }
     
     # dot.format = format
     for notebook_name in notebooks:
@@ -90,9 +97,10 @@ def draw_notebook_dependencies(notebooks,
             module_file = os.path.join(dirname, module + ".ipynb")
             if module_file in notebooks:
                 module_title = get_title(module_file)
-                dot.node(module, URL='%s.ipynb' % module, label=module_title, tooltip=module)
+                dot.node(module, URL='%s.ipynb' % module, 
+                    label=module_title, tooltip=module, **node_attrs)
                 dot.node(basename, URL='%s.ipynb' % basename, 
-                label=title, tooltip=basename)
+                    label=title, tooltip=basename, **node_attrs)
                 dot.edge(module, basename)
     
     if transitive_reduction:
