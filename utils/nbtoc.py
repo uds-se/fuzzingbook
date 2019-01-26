@@ -90,14 +90,14 @@ Use the following graph to determine possible paths through the book.  An arrow 
      "toc_section_display": False,
      "toc_window_display": False
     }
-    
+
     # Add general metadata
     toc_notebook.metadata["kernelspec"] = {
      "display_name": "Python 3",
      "language": "python",
      "name": "python3"
     }
-    
+
     toc_notebook.metadata["language_info"] = {
      "codemirror_mode": {
       "name": "ipython",

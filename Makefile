@@ -169,6 +169,9 @@ LATEX ?= latexmk
 # Python
 PYTHON ?= python3
 
+# Jupyter
+JUPYTER ?= jupyter
+
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
 NBPUBLISH ?= nbpublish
@@ -179,7 +182,7 @@ BOOKBOOK_LATEX ?= $(PYTHON) -m bookbook.latex
 BOOKBOOK_HTML  ?= $(PYTHON) -m bookbook.html
 
 # The nbconvert alternative (okay for chapters; doesn't work for book; no citations)
-NBCONVERT ?= jupyter nbconvert
+NBCONVERT ?= $(JUPYTER) nbconvert
 
 # Notebook merger
 NBMERGE = $(PYTHON) utils/nbmerge.py
@@ -367,10 +370,10 @@ endif
 .PHONY: edit jupyter lab notebook
 # Invoke notebook and editor: `make jupyter lab`
 edit notebook:
-	jupyter notebook
+	$(JUPYTER) notebook
 
 lab:
-	jupyter lab
+	$(JUPYTER) lab
 	
 jupyter:
 
@@ -912,6 +915,7 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
 		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
 	$(EXECUTE_NOTEBOOK) $@ && mv $(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb $@
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+	$(JUPYTER) trust $@
 	@$(OPEN) $@
 
 		
@@ -1051,12 +1055,12 @@ endif
 
 
 ## Dependencies as graph
-NBDEPEND = $(PYTHON) utils/nbdepend.py
+NBDEPEND = utils/nbdepend.py
 SITEMAP_SVG = $(DOCS_TARGET)notebooks/00_Sitemap.svg
 
 sitemap: $(SITEMAP_SVG)
-$(SITEMAP_SVG): $(CHAPTER_SOURCES) utils/nbdepend.py
-	$(NBDEPEND) --graph --transitive-reduction $(CHAPTER_SOURCES) > $@
+$(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND)
+	$(PYTHON) $(NBDEPEND) --graph --transitive-reduction $(CHAPTER_SOURCES) > $@
 	@$(OPEN) $@
 
 
@@ -1065,7 +1069,7 @@ $(SITEMAP_SVG): $(CHAPTER_SOURCES) utils/nbdepend.py
 $(DEPEND_TARGET)%.makefile: $(NOTEBOOKS)/%.ipynb
 	@echo "Rebuilding $@"
 	@test -d $(DEPEND_TARGET) || $(MKDIR) $(DEPEND_TARGET)
-	@for import in $$($(NBDEPEND) $<); do \
+	@for import in $$($(PYTHON) $(NBDEPEND) $<); do \
 		if [ -f $(NOTEBOOKS)/$$import.ipynb ]; then \
 			notebooks="$$notebooks $$""(NOTEBOOKS)/$$import.ipynb"; \
 			imports="$$imports $$""(CODE_TARGET)$$import.py"; \
