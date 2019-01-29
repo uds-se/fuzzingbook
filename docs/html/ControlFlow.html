@@ -11,7 +11,7 @@ with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" /><title>Generating Software Tests - Generating Software Tests</title>
+<meta charset="utf-8" /><title>Control Flow Graph - Generating Software Tests</title>
 
 <style type="text/css">
     /*!
@@ -11790,10 +11790,10 @@ MathJax.Hub.Config({
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
-<meta property="og:url" content="https://www.fuzzingbook.org/html/00_Table_of_Contents.html" />
+<meta property="og:url" content="https://www.fuzzingbook.org/html/ControlFlow.html" />
 <meta property="og:type" content="article" />
-<meta property="og:title" content="Generating Software Tests - Generating Software Tests" />
-<meta property="og:description" content="" />
+<meta property="og:title" content="Control Flow Graph - Generating Software Tests" />
+<meta property="og:description" content="The code in this notebook helps with obtaining the control flow graph of python functions.Prerequisites This notebook needs some understanding on advanced concepts in Python, notably      classes" />
 <meta property="og:image" content="https://www.fuzzingbook.org/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11900,25 +11900,22 @@ MathJax.Hub.Config({
            <li><a href="https://www.fuzzingbook.org/#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
      </li>
-     <li class="has-sub"><a href="#"><span title="Generating Software Tests"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Generating Software Tests</span></a>
-           <ul><li class="has-sub"><a href="#Sitemap">Sitemap</a>
-</li><li class="has-sub"><a href="#Table-of-Contents">Table of Contents</a>
-<ul><li class="has-sub"><a href="#[Part-I:-Whetting-Your-Appetite](01_Intro.ipynb)">[Part I: Whetting Your Appetite](01_Intro.ipynb)</a>
-</li><li class="has-sub"><a href="#[Part-II:-Lexical-Fuzzing](02_Lexical_Fuzzing.ipynb)">[Part II: Lexical Fuzzing](02_Lexical_Fuzzing.ipynb)</a>
-</li><li class="has-sub"><a href="#[Part-III:-Syntactical-Fuzzing](03_Syntactical_Fuzzing.ipynb)">[Part III: Syntactical Fuzzing](03_Syntactical_Fuzzing.ipynb)</a>
-</li><li class="has-sub"><a href="#[Part-IV:-Semantical-Fuzzing](04_Semantical_Fuzzing.ipynb)">[Part IV: Semantical Fuzzing](04_Semantical_Fuzzing.ipynb)</a>
-</li><li class="has-sub"><a href="#[Part-V:-Domain-Specific-Fuzzing](05_Domain-Specific_Fuzzing.ipynb)">[Part V: Domain-Specific Fuzzing](05_Domain-Specific_Fuzzing.ipynb)</a>
-</li><li class="has-sub"><a href="#[Part-VI:-Managing-Fuzzing](06_Managing_Fuzzing.ipynb)">[Part VI: Managing Fuzzing](06_Managing_Fuzzing.ipynb)</a>
-</li><li class="has-sub"><a href="#Appendices">Appendices</a>
+     <li class="has-sub"><a href="#"><span title="Control Flow Graph"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Control Flow Graph</span></a>
+           <ul><li class="has-sub"><a href="#Control-Flow-Graph">Control Flow Graph</a>
+<ul><li class="has-sub"><a href="#Registry">Registry</a>
+</li><li class="has-sub"><a href="#CFGNode">CFGNode</a>
+</li><li class="has-sub"><a href="#PyCFG">PyCFG</a>
+</li><li class="has-sub"><a href="#Supporting-Functions">Supporting Functions</a>
+</li><li class="has-sub"><a href="#Examples">Examples</a>
 </ul></li></ul></li>
      </li>
      
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
-     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/00_Table_of_Contents.ipynb" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook (beta)</a></li>
-     <li><a href="https://www.fuzzingbook.org/slides/00_Table_of_Contents.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
-     <li><a href="https://www.fuzzingbook.org/code/00_Table_of_Contents.py"><i class="fa fa-fw fa-download"></i> Download Code (.py)</a></li>
-     <li><a href="https://www.fuzzingbook.org/notebooks/00_Table_of_Contents.ipynb"><i class="fa fa-fw fa-download"></i> Download Notebook (.ipynb)</a></li>
+     <li><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/ControlFlow.ipynb" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook (beta)</a></li>
+     <li><a href="https://www.fuzzingbook.org/slides/ControlFlow.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
+     <li><a href="https://www.fuzzingbook.org/code/ControlFlow.py"><i class="fa fa-fw fa-download"></i> Download Code (.py)</a></li>
+     <li><a href="https://www.fuzzingbook.org/notebooks/ControlFlow.ipynb"><i class="fa fa-fw fa-download"></i> Download Notebook (.ipynb)</a></li>
      <li><a href="https://www.fuzzingbook.org/dist/fuzzingbook-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
      <li><a href="https://www.fuzzingbook.org/dist/fuzzingbook-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
      <li><a href="https://github.com/uds-se/fuzzingbook/" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
@@ -11927,13 +11924,13 @@ MathJax.Hub.Config({
      
      <li class="has-sub"><a href="#"><span title="Share"><i class="fa fa-fw fa-comments"></i> </span> <span class="menu_4">Share</span></a>
         <ul>
-            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Generating%20Software%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2f00_Table_of_Contents.html" target="popup" 
-onclick="window.open('https://twitter.com/intent/tweet?text=I%20just%20read%20%22Generating%20Software%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2f00_Table_of_Contents.html','popup','width=600,height=600'); return false;"
+            <li><a href="https://twitter.com/intent/tweet?text=I%20just%20read%20%22Control%20Flow%20Graph%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fControlFlow.html" target="popup" 
+onclick="window.open('https://twitter.com/intent/tweet?text=I%20just%20read%20%22Control%20Flow%20Graph%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fControlFlow.html','popup','width=600,height=600'); return false;"
 ><i class="fa fa-fw fa-twitter"></i> Share on Twitter</a>
-            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2f00_Table_of_Contents.html" target="popup" 
-onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2f00_Table_of_Contents.html','popup','width=600,height=600'); return false;"
+            <li><a href="https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fControlFlow.html" target="popup" 
+onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fControlFlow.html','popup','width=600,height=600'); return false;"
 ><i class="fa fa-fw fa-facebook"></i> Share on Facebook</a>
-            <li><a href="mailto:?subject=Generating%20Software%20Tests&body=I%20just%20read%20%22Generating%20Software%20Tests%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2f00_Table_of_Contents.html"><i class="fa fa-fw fa-envelope"></i> Share by Email</a>
+            <li><a href="mailto:?subject=Control%20Flow%20Graph&body=I%20just%20read%20%22Control%20Flow%20Graph%22%20(part%20of%20@FuzzingBook)%20at%20https%3a%2f%2fwww.fuzzingbook.org%2fhtml%2fControlFlow.html"><i class="fa fa-fw fa-envelope"></i> Share by Email</a>
             <li><a href="#citation" id="cite" onclick="revealCitation()"><i class="fa fa-fw fa-mortar-board"></i> Cite</a>
         </ul>
      </li>
@@ -11956,7 +11953,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Generating-Software-Tests">Generating Software Tests<a class="anchor-link" href="#Generating-Software-Tests">&#182;</a></h1></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h1 id="Control-Flow-Graph">Control Flow Graph<a class="anchor-link" href="#Control-Flow-Graph">&#182;</a></h1><p>The code in this notebook helps with obtaining the control flow graph of python functions.</p>
+</div>
 </div>
 </div>
 </div>
@@ -11964,7 +11962,27 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Sitemap">Sitemap<a class="anchor-link" href="#Sitemap">&#182;</a></h2><p>This sitemap shows possible paths through the book chapters.  An arrow $A \rightarrow B$ means that chapter $A$ is a prerequisite for chapter $B$.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p><strong>Prerequisites</strong></p>
+<ul>
+<li>This notebook needs some understanding on advanced concepts in Python, notably <ul>
+<li>classes</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Control-Flow-Graph">Control Flow Graph<a class="anchor-link" href="#Control-Flow-Graph">&#182;</a></h2><p>The class <code>PyCFG</code> allows one to obtain the control flow graph.</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ControlFlow.html" class="import" target="_blank">ControlFlow</a></span> <span class="kn">import</span> <span class="n">PyCFG</span>
+
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">PyCFG</span><span class="o">.</span><span class="n">gen_cfg</span><span class="p">(</span><span class="n">function_source</span><span class="p">)</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">PyCFG</span><span class="o">.</span><span class="n">to_graph</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+</pre></div>
 </div>
 </div>
 </div>
@@ -11976,7 +11994,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://ipython.readthedocs.io/en/stable/api/generated/IPython.html" class="import" target="_blank">IPython</a></span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils" class="import" target="_blank">fuzzingbook_utils</a></span>
 </pre></div>
 
 </div>
@@ -11990,7 +12008,863 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">IPython</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">SVG</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;00_Sitemap.svg&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/ast.html" class="import" target="_blank">ast</a></span>
+<span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/re.html" class="import" target="_blank">re</a></span>
+<span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/astunparse.html" class="import" target="_blank">astunparse</a></span>
+<span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/graphviz.html" class="import" target="_blank">graphviz</a></span> <span class="k">import</span> <span class="n">Source</span><span class="p">,</span> <span class="n">Graph</span><span class="p">,</span> <span class="n">Digraph</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Registry">Registry<a class="anchor-link" href="#Registry">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">REGISTRY_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">REGISTRY</span> <span class="o">=</span> <span class="p">{}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_registry_idx</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">REGISTRY_IDX</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">REGISTRY_IDX</span>
+    <span class="n">REGISTRY_IDX</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">v</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">reset_registry</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">REGISTRY_IDX</span>
+    <span class="k">global</span> <span class="n">REGISTRY</span>
+    <span class="n">REGISTRY_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">REGISTRY</span> <span class="o">=</span> <span class="p">{}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">register_node</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">rid</span> <span class="o">=</span> <span class="n">get_registry_idx</span><span class="p">()</span>
+    <span class="n">REGISTRY</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">rid</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="CFGNode">CFGNode<a class="anchor-link" href="#CFGNode">&#182;</a></h3><p>We start with the <code>CFGNode</code> representing each node in the control flow graph.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CFGNode</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">[],</span> <span class="n">ast</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span>
+        <span class="n">register_node</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parents</span> <span class="o">=</span> <span class="n">parents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ast_node</span> <span class="o">=</span> <span class="n">ast</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_children</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>  <span class="c1"># requires self.rid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calls</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_child_annotation</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># one shot annotation for branches (if)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">child_node_annotations</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">set_oneshot_annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_child_annotation</span> <span class="o">=</span> <span class="n">a</span>
+
+    <span class="k">def</span> <span class="nf">i</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_children</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parents</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parents</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="c1"># the current annotation is in self._child_annotation</span>
+        <span class="c1"># it is a oneshot annotation: essentially True/False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_child_annotation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># there can be only one annotation to an edge to c.rid</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">child_node_annotations</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">rid</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_child_annotation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_child_annotation</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">lineno</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ast_node</span><span class="o">.</span><span class="n">lineno</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="s1">&#39;lineno&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;id:</span><span class="si">%d</span><span class="s2"> line[</span><span class="si">%d</span><span class="s2">] parents: </span><span class="si">%s</span><span class="s2"> : </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineno</span><span class="p">(),</span> <span class="nb">str</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">rid</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">]),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rid</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">rid</span>
+
+    <span class="k">def</span> <span class="nf">__neq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rid</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">rid</span>
+
+    <span class="k">def</span> <span class="nf">set_parents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parents</span> <span class="o">=</span> <span class="n">p</span>
+
+    <span class="k">def</span> <span class="nf">add_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_parents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ps</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ps</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_parent</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">add_calls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ast_node</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rid</span><span class="p">,</span>
+            <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">rid</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">],</span>
+            <span class="s1">&#39;children&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">rid</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">],</span>
+            <span class="s1">&#39;calls&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calls</span><span class="p">,</span>
+            <span class="s1">&#39;at&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineno</span><span class="p">(),</span>
+            <span class="s1">&#39;ast&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">()</span>
+        <span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">REGISTRY_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">REGISTRY</span> <span class="o">=</span> <span class="p">{}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_registry_idx</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">REGISTRY_IDX</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">REGISTRY_IDX</span>
+    <span class="n">REGISTRY_IDX</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">v</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">reset_registry</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">REGISTRY_IDX</span>
+    <span class="k">global</span> <span class="n">REGISTRY</span>
+    <span class="n">REGISTRY_IDX</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">REGISTRY</span> <span class="o">=</span> <span class="p">{}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">register_node</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">rid</span> <span class="o">=</span> <span class="n">get_registry_idx</span><span class="p">()</span>
+    <span class="n">REGISTRY</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">rid</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="PyCFG">PyCFG<a class="anchor-link" href="#PyCFG">&#182;</a></h3><p>Next, the <code>PyCFG</code> class which is responsible for parsing, and holding the graph.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PyCFG</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">founder</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="p">[],</span> <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># sentinel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">founder</span><span class="o">.</span><span class="n">ast_node</span><span class="o">.</span><span class="n">lineno</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">functions</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">functions_node</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">walk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;on_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">node</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+            <span class="n">fn</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">v</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">myparents</span>
+
+    <span class="k">def</span> <span class="nf">on_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Module(stmt* body)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># each time a statement is executed unconditionally, make a link from</span>
+        <span class="c1"># the result to next statement</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">myparents</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">p</span>
+
+    <span class="k">def</span> <span class="nf">on_assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign(expr* targets, expr value)</span>
+<span class="sd">        TODO: AugAssign(expr target, operator op, expr value)</span>
+<span class="sd">        -- &#39;simple&#39; indicates that we annotate simple name without parens</span>
+<span class="sd">        TODO: AnnAssign(expr target, expr annotation, expr? value, int simple)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">targets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">(</span><span class="s1">&#39;Parallel assignments&#39;</span><span class="p">)</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span> <span class="n">ast</span><span class="o">=</span><span class="n">node</span><span class="p">)]</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">p</span>
+
+    <span class="k">def</span> <span class="nf">on_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span> <span class="n">ast</span><span class="o">=</span><span class="n">node</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="nf">on_break</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="n">myparents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;exit_nodes&#39;</span><span class="p">):</span>
+            <span class="c1"># we have ordered parents</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;exit_nodes&#39;</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span> <span class="n">ast</span><span class="o">=</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="c1"># make the break one of the parents of label node.</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">exit_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="c1"># break doesnt have immediate children</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">on_continue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="n">myparents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;exit_nodes&#39;</span><span class="p">):</span>
+            <span class="c1"># we have ordered parents</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;exit_nodes&#39;</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span> <span class="n">ast</span><span class="o">=</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="c1"># make continue one of the parents of the original test node.</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">add_parent</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="c1"># return the parent because a continue is not the parent</span>
+        <span class="c1"># for the just next node</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">on_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="c1"># node.target in node.iter: node.body</span>
+        <span class="c1"># TODO: The For loop in python (no else) can be translated</span>
+        <span class="c1"># as follows:</span>
+        <span class="c1"># </span>
+        <span class="c1"># for a in iterator:</span>
+        <span class="c1">#      mystatements</span>
+        <span class="c1">#</span>
+        <span class="c1"># __iv = iter(iterator)</span>
+        <span class="c1"># while __iv.__length_hint() &gt; 0:</span>
+        <span class="c1">#     a = next(__iv)</span>
+        <span class="c1">#     mystatements</span>
+
+        <span class="n">_test_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span>
+            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;_for: True if </span><span class="si">%s</span><span class="s1"> else False&#39;</span> <span class="o">%</span> <span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">iter</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">_test_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+
+        <span class="c1"># we attach the label node here so that break can find it.</span>
+        <span class="n">_test_node</span><span class="o">.</span><span class="n">exit_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">test_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">iter</span><span class="p">,</span> <span class="p">[</span><span class="n">_test_node</span><span class="p">])</span>
+
+        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+        <span class="n">extract_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="n">_test_node</span><span class="p">],</span>
+            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">.shift()&#39;</span> <span class="o">%</span>
+                          <span class="p">(</span><span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+                           <span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">iter</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">extract_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">_test_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">)</span>
+
+        <span class="c1"># now we evaluate the body, one at a time.</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="p">[</span><span class="n">extract_node</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+
+        <span class="c1"># the test node is looped back at the end of processing.</span>
+        <span class="n">_test_node</span><span class="o">.</span><span class="n">add_parents</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
+
+        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_test_node</span><span class="o">.</span><span class="n">exit_nodes</span> <span class="o">+</span> <span class="n">test_node</span>
+
+    <span class="k">def</span> <span class="nf">on_while</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="c1"># For a while, the earliest parent is the node.test</span>
+        <span class="n">_test_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span>
+            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+                <span class="s1">&#39;_while: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">_test_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">test</span><span class="p">)</span>
+        <span class="n">_test_node</span><span class="o">.</span><span class="n">exit_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">test_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="p">[</span><span class="n">_test_node</span><span class="p">])</span>
+
+        <span class="c1"># we attach the label node here so that break can find it.</span>
+
+        <span class="c1"># now we evaluate the body, one at a time.</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">test_node</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
+
+        <span class="c1"># the test node is looped back at the end of processing.</span>
+        <span class="n">_test_node</span><span class="o">.</span><span class="n">add_parents</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
+
+        <span class="c1"># link label node back to the condition.</span>
+        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_test_node</span><span class="o">.</span><span class="n">exit_nodes</span> <span class="o">+</span> <span class="n">test_node</span>
+
+    <span class="k">def</span> <span class="nf">on_if</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="n">_test_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span>
+            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
+                <span class="s1">&#39;_if: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">test</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">_test_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">test</span><span class="p">)</span>
+        <span class="n">test_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="p">[</span><span class="n">_test_node</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">g1</span> <span class="o">=</span> <span class="n">test_node</span>
+        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
+            <span class="n">g1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">g1</span><span class="p">)</span>
+        <span class="n">g2</span> <span class="o">=</span> <span class="n">test_node</span>
+        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">orelse</span><span class="p">:</span>
+            <span class="n">g2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">g2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">g1</span> <span class="o">+</span> <span class="n">g2</span>
+
+    <span class="k">def</span> <span class="nf">on_binop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">myparents</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">left</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">right</span>
+
+    <span class="k">def</span> <span class="nf">on_compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">myparents</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">comparators</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">left</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">right</span>
+
+    <span class="k">def</span> <span class="nf">on_unaryop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">operand</span><span class="p">,</span> <span class="n">myparents</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">get_func</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">:</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">id</span>
+            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ast</span><span class="o">.</span><span class="n">Attribute</span><span class="p">:</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">attr</span>
+            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ast</span><span class="o">.</span><span class="n">Call</span><span class="p">:</span>
+                <span class="n">mid</span> <span class="o">=</span> <span class="n">get_func</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="n">mid</span>
+            <span class="c1">#mid = node.func.value.id</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">myparents</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="n">mid</span> <span class="o">=</span> <span class="n">get_func</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">myparents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">add_calls</span><span class="p">(</span><span class="n">mid</span><span class="p">)</span>
+
+        <span class="c1"># these need to be unlinked later if our module actually defines these</span>
+        <span class="c1"># functions. Otherwsise we may leave them around.</span>
+        <span class="c1"># during a call, the direct child is not the next</span>
+        <span class="c1"># statement in text.</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">calllink</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">p</span>
+
+    <span class="k">def</span> <span class="nf">on_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span> <span class="n">ast</span><span class="o">=</span><span class="n">node</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">on_return</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">myparents</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">myparents</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">myparents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">val_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">myparents</span><span class="p">)</span>
+        <span class="c1"># on return look back to the function definition.</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;return_nodes&#39;</span><span class="p">):</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;return_nodes&#39;</span><span class="p">)</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">val_node</span><span class="p">,</span> <span class="n">ast</span><span class="o">=</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="c1"># make the break one of the parents of label node.</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">return_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="c1"># return doesnt have immediate children</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">on_functiondef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+        <span class="c1"># a function definition does not actually continue the thread of</span>
+        <span class="c1"># control flow</span>
+        <span class="c1"># name, args, body, decorator_list, returns</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span>
+        <span class="n">returns</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">returns</span>
+
+        <span class="n">enter_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;enter: </span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">arg</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">args</span><span class="p">])))</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># sentinel</span>
+        <span class="n">enter_node</span><span class="o">.</span><span class="n">calleelink</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">enter_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+        <span class="n">exit_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;exit: </span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">arg</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">args</span><span class="p">])))</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># sentinel</span>
+        <span class="n">exit_node</span><span class="o">.</span><span class="n">fn_exit_node</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">exit_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+        <span class="n">enter_node</span><span class="o">.</span><span class="n">return_nodes</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># sentinel</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="n">enter_node</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">enter_node</span><span class="o">.</span><span class="n">return_nodes</span><span class="p">:</span>
+                <span class="n">enter_node</span><span class="o">.</span><span class="n">return_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">enter_node</span><span class="o">.</span><span class="n">return_nodes</span><span class="p">:</span>
+            <span class="n">exit_node</span><span class="o">.</span><span class="n">add_parent</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">fname</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">enter_node</span><span class="p">,</span> <span class="n">exit_node</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">functions_node</span><span class="p">[</span><span class="n">enter_node</span><span class="o">.</span><span class="n">lineno</span><span class="p">()]</span> <span class="o">=</span> <span class="n">fname</span>
+
+        <span class="k">return</span> <span class="n">myparents</span>
+
+    <span class="k">def</span> <span class="nf">get_defining_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">lineno</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions_node</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">lineno</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">functions_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">lineno</span><span class="p">()]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_defining_function</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">functions_node</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">lineno</span><span class="p">()]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">return</span> <span class="n">val</span>
+
+    <span class="k">def</span> <span class="nf">link_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">REGISTRY</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">calls</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">calls</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">calls</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">calls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">:</span>
+                        <span class="n">enter</span><span class="p">,</span> <span class="n">exit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">functions</span><span class="p">[</span><span class="n">calls</span><span class="p">]</span>
+                        <span class="n">enter</span><span class="o">.</span><span class="n">add_parent</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                            <span class="c1"># # until we link the functions up, the node</span>
+                            <span class="c1"># # should only have succeeding node in text as</span>
+                            <span class="c1"># # children.</span>
+                            <span class="c1"># assert(len(node.children) == 1)</span>
+                            <span class="c1"># passn = node.children[0]</span>
+                            <span class="c1"># # We require a single pass statement after every</span>
+                            <span class="c1"># # call (which means no complex expressions)</span>
+                            <span class="c1"># assert(type(passn.ast_node) == ast.Pass)</span>
+
+                            <span class="c1"># # unlink the call statement</span>
+                            <span class="k">assert</span> <span class="n">node</span><span class="o">.</span><span class="n">calllink</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span>
+                            <span class="n">node</span><span class="o">.</span><span class="n">calllink</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                                <span class="n">i</span><span class="o">.</span><span class="n">add_parent</span><span class="p">(</span><span class="n">exit</span><span class="p">)</span>
+                            <span class="c1"># passn.set_parents([exit])</span>
+                            <span class="c1"># ast.copy_location(exit.ast_node, passn.ast_node)</span>
+
+                            <span class="c1"># #for c in passn.children: c.add_parent(exit)</span>
+                            <span class="c1"># #passn.ast_node = exit.ast_node</span>
+
+    <span class="k">def</span> <span class="nf">update_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">REGISTRY</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_defining_function</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_children</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">REGISTRY</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">gen_cfg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &gt;&gt;&gt; i = PyCFG()</span>
+<span class="sd">        &gt;&gt;&gt; i.walk(&quot;100&quot;)</span>
+<span class="sd">        5</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">founder</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;stop&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">founder</span><span class="o">.</span><span class="n">ast_node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_children</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_functions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">link_functions</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Supporting-Functions">Supporting Functions<a class="anchor-link" href="#Supporting-Functions">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">compute_dominator</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;parents&#39;</span><span class="p">):</span>
+    <span class="n">dominator</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">dominator</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">start</span><span class="p">}</span>
+    <span class="n">all_nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">rem_nodes</span> <span class="o">=</span> <span class="n">all_nodes</span> <span class="o">-</span> <span class="p">{</span><span class="n">start</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">rem_nodes</span><span class="p">:</span>
+        <span class="n">dominator</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">all_nodes</span>
+
+    <span class="n">c</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">while</span> <span class="n">c</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">rem_nodes</span><span class="p">:</span>
+            <span class="n">pred_n</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">doms</span> <span class="o">=</span> <span class="p">[</span><span class="n">dominator</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pred_n</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="nb">set</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="o">*</span><span class="n">doms</span><span class="p">)</span> <span class="k">if</span> <span class="n">doms</span> <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">}</span> <span class="o">|</span> <span class="n">i</span>
+            <span class="k">if</span> <span class="n">dominator</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">!=</span> <span class="n">v</span><span class="p">:</span>
+                <span class="n">c</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">dominator</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">dominator</span>
+
+<span class="k">def</span> <span class="nf">compute_flow</span><span class="p">(</span><span class="n">pythonfile</span><span class="p">):</span>
+    <span class="n">cfg</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">last</span> <span class="o">=</span> <span class="n">get_cfg</span><span class="p">(</span><span class="n">pythonfile</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">compute_dominator</span><span class="p">(</span>
+        <span class="n">cfg</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">first</span><span class="p">),</span> <span class="n">compute_dominator</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">last</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;children&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">gen_cfg</span><span class="p">(</span><span class="n">fnsrc</span><span class="p">,</span> <span class="n">remove_start_stop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">reset_registry</span><span class="p">()</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">PyCFG</span><span class="p">()</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">gen_cfg</span><span class="p">(</span><span class="n">fnsrc</span><span class="p">)</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">REGISTRY</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">remove_start_stop</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">cache</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cache</span> <span class="k">if</span> <span class="n">cache</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;stop&#39;</span><span class="p">}</span>
+        <span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cache</span>
+
+<span class="k">def</span> <span class="nf">get_cfg</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
+    <span class="n">reset_registry</span><span class="p">()</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">PyCFG</span><span class="p">()</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">gen_cfg</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+    <span class="n">cache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">REGISTRY</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cache</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+        <span class="n">at</span> <span class="o">=</span> <span class="n">j</span><span class="p">[</span><span class="s1">&#39;at&#39;</span><span class="p">]</span>
+        <span class="n">parents_at</span> <span class="o">=</span> <span class="p">[</span><span class="n">cache</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">to_json</span><span class="p">()[</span><span class="s1">&#39;at&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">j</span><span class="p">[</span><span class="s1">&#39;parents&#39;</span><span class="p">]]</span>
+        <span class="n">children_at</span> <span class="o">=</span> <span class="p">[</span><span class="n">cache</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">to_json</span><span class="p">()[</span><span class="s1">&#39;at&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">j</span><span class="p">[</span><span class="s1">&#39;children&#39;</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">at</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
+            <span class="n">g</span><span class="p">[</span><span class="n">at</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span> <span class="s1">&#39;children&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">()}</span>
+        <span class="c1"># remove dummy nodes</span>
+        <span class="n">ps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parents_at</span> <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="n">at</span><span class="p">])</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children_at</span> <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">at</span><span class="p">])</span>
+        <span class="n">g</span><span class="p">[</span><span class="n">at</span><span class="p">][</span><span class="s1">&#39;parents&#39;</span><span class="p">]</span> <span class="o">|=</span> <span class="n">ps</span>
+        <span class="n">g</span><span class="p">[</span><span class="n">at</span><span class="p">][</span><span class="s1">&#39;children&#39;</span><span class="p">]</span> <span class="o">|=</span> <span class="n">cs</span>
+        <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">calls</span><span class="p">:</span>
+            <span class="n">g</span><span class="p">[</span><span class="n">at</span><span class="p">][</span><span class="s1">&#39;calls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">calls</span>
+        <span class="n">g</span><span class="p">[</span><span class="n">at</span><span class="p">][</span><span class="s1">&#39;function&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">functions_node</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">lineno</span><span class="p">()]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">founder</span><span class="o">.</span><span class="n">ast_node</span><span class="o">.</span><span class="n">lineno</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">last_node</span><span class="o">.</span><span class="n">ast_node</span><span class="o">.</span><span class="n">lineno</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">to_graph</span><span class="p">(</span><span class="n">cache</span><span class="p">,</span> <span class="n">arcs</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">Digraph</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s1">&#39;The Round Table&#39;</span><span class="p">)</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">}</span>
+    <span class="n">cov_lines</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">arcs</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">cnode</span> <span class="ow">in</span> <span class="n">cache</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">lineno</span> <span class="o">=</span> <span class="n">cnode</span><span class="o">.</span><span class="n">lineno</span><span class="p">()</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lineno</span><span class="p">,</span> <span class="n">unhack</span><span class="p">(</span><span class="n">cnode</span><span class="o">.</span><span class="n">source</span><span class="p">())))</span>
+        <span class="k">for</span> <span class="n">pn</span> <span class="ow">in</span> <span class="n">cnode</span><span class="o">.</span><span class="n">parents</span><span class="p">:</span>
+            <span class="n">plineno</span> <span class="o">=</span> <span class="n">pn</span><span class="o">.</span><span class="n">lineno</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pn</span><span class="p">,</span> <span class="s1">&#39;calllink&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pn</span><span class="o">.</span><span class="n">calllink</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span>
+                    <span class="n">cnode</span><span class="p">,</span> <span class="s1">&#39;calleelink&#39;</span><span class="p">):</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;dotted&#39;</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">arcs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">plineno</span><span class="p">,</span> <span class="n">lineno</span><span class="p">)</span> <span class="ow">in</span> <span class="n">arcs</span><span class="p">:</span>
+                    <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">plineno</span> <span class="o">==</span> <span class="n">lineno</span> <span class="ow">and</span> <span class="n">lineno</span> <span class="ow">in</span> <span class="n">cov_lines</span><span class="p">:</span>
+                    <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">)</span>
+                <span class="c1"># child is exit and parent is covered</span>
+                <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cnode</span><span class="p">,</span> <span class="s1">&#39;fn_exit_node&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">plineno</span> <span class="ow">in</span> <span class="n">cov_lines</span><span class="p">:</span>
+                    <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">)</span>
+                <span class="c1"># parent is exit and one of its parents is covered.</span>
+                <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">pn</span><span class="p">,</span> <span class="s1">&#39;fn_exit_node&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span>
+                        <span class="nb">set</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">lineno</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">pn</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span> <span class="o">|</span> <span class="n">cov_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">)</span>
+                <span class="c1"># child is a callee (has calleelink) and one of the parents is covered.</span>
+                <span class="k">elif</span> <span class="n">plineno</span> <span class="ow">in</span> <span class="n">cov_lines</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cnode</span><span class="p">,</span> <span class="s1">&#39;calleelink&#39;</span><span class="p">):</span>
+                    <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">pn</span><span class="o">.</span><span class="n">child_node_annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cnode</span><span class="o">.</span><span class="n">rid</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">graph</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">unhack</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;if&#39;</span><span class="p">,</span> <span class="s1">&#39;while&#39;</span><span class="p">,</span> <span class="s1">&#39;for&#39;</span><span class="p">,</span> <span class="s1">&#39;elif&#39;</span><span class="p">]:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^_</span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">v</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Examples">Examples<a class="anchor-link" href="#Examples">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="check_triangle">check_triangle<a class="anchor-link" href="#check_triangle">&#182;</a></h4></div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">check_triangle</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">b</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">c</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="n">c</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;Equilateral&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;Isosceles&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Isosceles&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">b</span> <span class="o">!=</span> <span class="n">c</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="n">c</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;Isosceles&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s2">&quot;Scalene&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+              <span class="k">return</span> <span class="s2">&quot;Isosceles&quot;</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/inspect.html" class="import" target="_blank">inspect</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">to_graph</span><span class="p">(</span><span class="n">gen_cfg</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">check_triangle</span><span class="p">)))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Source</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12001,265 +12875,206 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea output_execute_result">
-<svg height="548pt" viewBox="0.00 0.00 886.00 548.00" width="886pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g class="graph" id="graph0" transform="scale(1 1) rotate(0) translate(4 544)">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="831pt" height="472pt"
+ viewBox="0.00 0.00 830.89 472.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 468)">
 <title>%3</title>
-<polygon fill="#ffffff" points="-4,4 -4,-544 882,-544 882,4 -4,4" stroke="transparent"/>
-<!-- Fuzzer -->
-<g class="node" id="node1">
-<title>Fuzzer</title>
-<g id="a_node1"><a xlink:href="Fuzzer.html" xlink:title="Fuzzer">
-<polygon fill="#ffffff" points="516.5,-468 218.5,-468 218.5,-432 522.5,-432 522.5,-462 516.5,-468" stroke="#000000"/>
-<polyline fill="none" points="516.5,-468 516.5,-462 " stroke="#000000"/>
-<polyline fill="none" points="522.5,-462 516.5,-462 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="370.5" y="-446.3">Fuzzing: Breaking Things with Random Inputs</text>
-</a>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-468 826.8858,-468 826.8858,4 -4,4"/>
+<!-- 1 -->
+<g id="node1" class="node">
+<title>1</title>
+<ellipse fill="none" stroke="#000000" cx="350.9429" cy="-446" rx="124.2781" ry="18"/>
+<text text-anchor="middle" x="350.9429" y="-442.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: enter: check_triangle(a, b, c)</text>
 </g>
+<!-- 3 -->
+<g id="node9" class="node">
+<title>3</title>
+<ellipse fill="none" stroke="#000000" cx="350.9429" cy="-373" rx="59.5901" ry="18"/>
+<text text-anchor="middle" x="350.9429" y="-369.3" font-family="Times,serif" font-size="14.00" fill="#000000">2: if: (a == b)</text>
 </g>
-<!-- Coverage -->
-<g class="node" id="node2">
-<title>Coverage</title>
-<g id="a_node2"><a xlink:href="Coverage.html" xlink:title="Coverage">
-<polygon fill="#ffffff" points="341,-324 224,-324 224,-288 347,-288 347,-318 341,-324" stroke="#000000"/>
-<polyline fill="none" points="341,-324 341,-318 " stroke="#000000"/>
-<polyline fill="none" points="347,-318 341,-318 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="285.5" y="-302.3">Getting Coverage</text>
-</a>
+<!-- 1&#45;&gt;3 -->
+<g id="edge7" class="edge">
+<title>1&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M350.9429,-427.9551C350.9429,-419.8828 350.9429,-410.1764 350.9429,-401.1817"/>
+<polygon fill="#000000" stroke="#000000" points="354.443,-401.0903 350.9429,-391.0904 347.443,-401.0904 354.443,-401.0903"/>
 </g>
+<!-- 2 -->
+<g id="node2" class="node">
+<title>2</title>
+<ellipse fill="none" stroke="#000000" cx="421.9429" cy="-18" rx="119.6788" ry="18"/>
+<text text-anchor="middle" x="421.9429" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: exit: check_triangle(a, b, c)</text>
 </g>
-<!-- Fuzzer&#45;&gt;Coverage -->
-<g class="edge" id="edge1">
-<title>Fuzzer-&gt;Coverage</title>
-<path d="M359.7347,-431.7623C344.9813,-406.7682 318.374,-361.6924 301.3436,-332.8409" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="304.2753,-330.9221 296.1779,-324.0896 298.2471,-334.4804 304.2753,-330.9221" stroke="#000000"/>
+<!-- 6 -->
+<g id="node3" class="node">
+<title>6</title>
+<ellipse fill="none" stroke="#000000" cx="155.9429" cy="-91" rx="87.1846" ry="18"/>
+<text text-anchor="middle" x="155.9429" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">5: return &#39;Equilateral&#39;</text>
 </g>
-<!-- Grammars -->
-<g class="node" id="node3">
-<title>Grammars</title>
-<g id="a_node3"><a xlink:href="Grammars.html" xlink:title="Grammars">
-<polygon fill="#ffffff" points="533,-396 374,-396 374,-360 539,-360 539,-390 533,-396" stroke="#000000"/>
-<polyline fill="none" points="533,-396 533,-390 " stroke="#000000"/>
-<polyline fill="none" points="539,-390 533,-390 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="456.5" y="-374.3">Fuzzing with Grammars</text>
-</a>
+<!-- 6&#45;&gt;2 -->
+<g id="edge1" class="edge">
+<title>6&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M208.4959,-76.5775C250.3899,-65.0803 309.3419,-48.9018 354.6792,-36.4596"/>
+<polygon fill="#000000" stroke="#000000" points="355.7099,-39.8062 364.4271,-33.7844 353.8573,-33.0558 355.7099,-39.8062"/>
 </g>
+<!-- 7 -->
+<g id="node4" class="node">
+<title>7</title>
+<ellipse fill="none" stroke="#000000" cx="340.9429" cy="-91" rx="79.8859" ry="18"/>
+<text text-anchor="middle" x="340.9429" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">7: return &#39;Isosceles&#39;</text>
 </g>
-<!-- Fuzzer&#45;&gt;Grammars -->
-<g class="edge" id="edge2">
-<title>Fuzzer-&gt;Grammars</title>
-<path d="M392.2014,-431.8314C402.6921,-423.0485 415.4455,-412.3712 426.8194,-402.8489" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="429.3847,-405.2659 434.8055,-396.1628 424.8911,-399.8986 429.3847,-405.2659" stroke="#000000"/>
+<!-- 7&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>7&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M360.5507,-73.3287C370.822,-64.0719 383.5621,-52.5901 394.7698,-42.4894"/>
+<polygon fill="#000000" stroke="#000000" points="397.1496,-45.0562 402.2349,-35.7615 392.4633,-39.8564 397.1496,-45.0562"/>
 </g>
-<!-- MutationFuzzer -->
-<g class="node" id="node5">
-<title>MutationFuzzer</title>
-<g id="a_node5"><a xlink:href="MutationFuzzer.html" xlink:title="MutationFuzzer">
-<polygon fill="#ffffff" points="163,-252 0,-252 0,-216 169,-216 169,-246 163,-252" stroke="#000000"/>
-<polyline fill="none" points="163,-252 163,-246 " stroke="#000000"/>
-<polyline fill="none" points="169,-246 163,-246 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="84.5" y="-230.3">Mutation-Based Fuzzing</text>
-</a>
+<!-- 8 -->
+<g id="node5" class="node">
+<title>8</title>
+<ellipse fill="none" stroke="#000000" cx="79.9429" cy="-145" rx="79.8859" ry="18"/>
+<text text-anchor="middle" x="79.9429" y="-141.3" font-family="Times,serif" font-size="14.00" fill="#000000">9: return &#39;Isosceles&#39;</text>
 </g>
+<!-- 8&#45;&gt;2 -->
+<g id="edge3" class="edge">
+<title>8&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M66.7456,-127.0337C56.8027,-111.1287 46.9199,-88.1511 59.9429,-73 76.1424,-54.1533 207.6297,-37.8088 307.5113,-27.9422"/>
+<polygon fill="#000000" stroke="#000000" points="308.0719,-31.4042 317.6844,-26.9487 307.3915,-24.4373 308.0719,-31.4042"/>
 </g>
-<!-- Coverage&#45;&gt;MutationFuzzer -->
-<g class="edge" id="edge4">
-<title>Coverage-&gt;MutationFuzzer</title>
-<path d="M235.0387,-287.9243C207.5608,-278.0815 173.3828,-265.8386 144.5412,-255.5073" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="145.5767,-252.1605 134.9821,-252.0831 143.216,-258.7505 145.5767,-252.1605" stroke="#000000"/>
+<!-- 11 -->
+<g id="node6" class="node">
+<title>11</title>
+<ellipse fill="none" stroke="#000000" cx="560.9429" cy="-91" rx="84.485" ry="18"/>
+<text text-anchor="middle" x="560.9429" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">13: return &#39;Isosceles&#39;</text>
 </g>
-<!-- GrammarCoverageFuzzer -->
-<g class="node" id="node6">
-<title>GrammarCoverageFuzzer</title>
-<g id="a_node6"><a xlink:href="GrammarCoverageFuzzer.html" xlink:title="GrammarCoverageFuzzer">
-<polygon fill="#ffffff" points="316,-252 187,-252 187,-216 322,-216 322,-246 316,-252" stroke="#000000"/>
-<polyline fill="none" points="316,-252 316,-246 " stroke="#000000"/>
-<polyline fill="none" points="322,-246 316,-246 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="254.5" y="-230.3">Grammar Coverage</text>
-</a>
+<!-- 11&#45;&gt;2 -->
+<g id="edge4" class="edge">
+<title>11&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M529.0535,-74.2523C509.7833,-64.132 484.9928,-51.1126 464.1155,-40.1482"/>
+<polygon fill="#000000" stroke="#000000" points="465.6154,-36.9827 455.1347,-35.4317 462.3607,-43.18 465.6154,-36.9827"/>
 </g>
+<!-- 12 -->
+<g id="node7" class="node">
+<title>12</title>
+<ellipse fill="none" stroke="#000000" cx="742.9429" cy="-91" rx="79.8859" ry="18"/>
+<text text-anchor="middle" x="742.9429" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">15: return &#39;Scalene&#39;</text>
 </g>
-<!-- Coverage&#45;&gt;GrammarCoverageFuzzer -->
-<g class="edge" id="edge5">
-<title>Coverage-&gt;GrammarCoverageFuzzer</title>
-<path d="M277.6774,-287.8314C274.2891,-279.9617 270.2459,-270.5712 266.4924,-261.8533" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="269.5973,-260.214 262.4279,-252.4133 263.1679,-262.9822 269.5973,-260.214" stroke="#000000"/>
+<!-- 12&#45;&gt;2 -->
+<g id="edge5" class="edge">
+<title>12&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M686.6616,-78.2008C634.3096,-66.2952 555.8945,-48.4625 497.9881,-35.2938"/>
+<polygon fill="#000000" stroke="#000000" points="498.6804,-31.8619 488.1532,-33.0572 497.1281,-38.6876 498.6804,-31.8619"/>
 </g>
-<!-- ProbabilisticGrammarFuzzer -->
-<g class="node" id="node7">
-<title>ProbabilisticGrammarFuzzer</title>
-<g id="a_node7"><a xlink:href="ProbabilisticGrammarFuzzer.html" xlink:title="ProbabilisticGrammarFuzzer">
-<polygon fill="#ffffff" points="516.5,-180 314.5,-180 314.5,-144 522.5,-144 522.5,-174 516.5,-180" stroke="#000000"/>
-<polyline fill="none" points="516.5,-180 516.5,-174 " stroke="#000000"/>
-<polyline fill="none" points="522.5,-174 516.5,-174 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="418.5" y="-158.3">Probabilistic Grammar Fuzzing</text>
-</a>
+<!-- 13 -->
+<g id="node8" class="node">
+<title>13</title>
+<ellipse fill="none" stroke="#000000" cx="448.9429" cy="-145" rx="84.485" ry="18"/>
+<text text-anchor="middle" x="448.9429" y="-141.3" font-family="Times,serif" font-size="14.00" fill="#000000">17: return &#39;Isosceles&#39;</text>
 </g>
+<!-- 13&#45;&gt;2 -->
+<g id="edge6" class="edge">
+<title>13&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M445.0745,-126.804C440.5834,-105.6791 433.1248,-70.5964 427.8943,-45.9935"/>
+<polygon fill="#000000" stroke="#000000" points="431.3072,-45.2158 425.8042,-36.1622 424.4603,-46.6715 431.3072,-45.2158"/>
 </g>
-<!-- Coverage&#45;&gt;ProbabilisticGrammarFuzzer -->
-<g class="edge" id="edge6">
-<title>Coverage-&gt;ProbabilisticGrammarFuzzer</title>
-<path d="M302.3445,-287.7623C325.7291,-262.4436 368.1464,-216.5182 394.74,-187.7251" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="397.5784,-189.8105 401.7922,-180.0896 392.4361,-185.061 397.5784,-189.8105" stroke="#000000"/>
+<!-- 4 -->
+<g id="node10" class="node">
+<title>4</title>
+<ellipse fill="none" stroke="#000000" cx="204.9429" cy="-286" rx="59.2899" ry="18"/>
+<text text-anchor="middle" x="204.9429" y="-282.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: if: (a == c)</text>
 </g>
-<!-- GrammarFuzzer -->
-<g class="node" id="node8">
-<title>GrammarFuzzer</title>
-<g id="a_node8"><a xlink:href="GrammarFuzzer.html" xlink:title="GrammarFuzzer">
-<polygon fill="#ffffff" points="573,-324 396,-324 396,-288 579,-288 579,-318 573,-324" stroke="#000000"/>
-<polyline fill="none" points="573,-324 573,-318 " stroke="#000000"/>
-<polyline fill="none" points="579,-318 573,-318 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="487.5" y="-302.3">Efficient Grammar Fuzzing</text>
-</a>
+<!-- 3&#45;&gt;4 -->
+<g id="edge8" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#0000ff" d="M323.8236,-356.8399C300.3655,-342.8614 266.2776,-322.5488 240.6125,-307.2552"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="242.2991,-304.186 231.917,-302.0736 238.7158,-310.1993 242.2991,-304.186"/>
+<text text-anchor="middle" x="291.4429" y="-325.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
 </g>
+<!-- 9 -->
+<g id="node12" class="node">
+<title>9</title>
+<ellipse fill="none" stroke="#000000" cx="448.9429" cy="-286" rx="62.2891" ry="18"/>
+<text text-anchor="middle" x="448.9429" y="-282.3" font-family="Times,serif" font-size="14.00" fill="#000000">11: if: (b != c)</text>
 </g>
-<!-- Grammars&#45;&gt;GrammarFuzzer -->
-<g class="edge" id="edge7">
-<title>Grammars-&gt;GrammarFuzzer</title>
-<path d="M464.3226,-359.8314C467.7109,-351.9617 471.7541,-342.5712 475.5076,-333.8533" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="478.8321,-334.9822 479.5721,-324.4133 472.4027,-332.214 478.8321,-334.9822" stroke="#000000"/>
+<!-- 3&#45;&gt;9 -->
+<g id="edge13" class="edge">
+<title>3&#45;&gt;9</title>
+<path fill="none" stroke="#ff0000" d="M370.3046,-355.8116C385.0693,-342.7042 405.5848,-324.4914 421.9591,-309.955"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="424.4668,-312.409 429.6215,-303.1527 419.8195,-307.1742 424.4668,-312.409"/>
+<text text-anchor="middle" x="408.9429" y="-325.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
 </g>
-<!-- Intro_Testing -->
-<g class="node" id="node4">
-<title>Intro_Testing</title>
-<g id="a_node4"><a xlink:href="Intro_Testing.html" xlink:title="Intro_Testing">
-<polygon fill="#ffffff" points="474,-540 261,-540 261,-504 480,-504 480,-534 474,-540" stroke="#000000"/>
-<polyline fill="none" points="474,-540 474,-534 " stroke="#000000"/>
-<polyline fill="none" points="480,-534 474,-534 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="370.5" y="-518.3">Introduction to Software Testing</text>
-</a>
+<!-- 4&#45;&gt;8 -->
+<g id="edge12" class="edge">
+<title>4&#45;&gt;8</title>
+<path fill="none" stroke="#ff0000" d="M186.4446,-268.7192C172.177,-255.106 152.1998,-235.4155 135.9429,-217 123.0114,-202.3514 109.5359,-185.0969 99.045,-171.1518"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="101.7131,-168.8749 92.9302,-162.9495 96.101,-173.0587 101.7131,-168.8749"/>
+<text text-anchor="middle" x="170.9429" y="-238.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
 </g>
+<!-- 5 -->
+<g id="node11" class="node">
+<title>5</title>
+<ellipse fill="none" stroke="#000000" cx="204.9429" cy="-199" rx="59.5901" ry="18"/>
+<text text-anchor="middle" x="204.9429" y="-195.3" font-family="Times,serif" font-size="14.00" fill="#000000">4: if: (b == c)</text>
 </g>
-<!-- Intro_Testing&#45;&gt;Fuzzer -->
-<g class="edge" id="edge3">
-<title>Intro_Testing-&gt;Fuzzer</title>
-<path d="M370.5,-503.8314C370.5,-496.131 370.5,-486.9743 370.5,-478.4166" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="374.0001,-478.4132 370.5,-468.4133 367.0001,-478.4133 374.0001,-478.4132" stroke="#000000"/>
+<!-- 4&#45;&gt;5 -->
+<g id="edge9" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="#0000ff" d="M204.9429,-267.9735C204.9429,-256.1918 204.9429,-240.5607 204.9429,-227.1581"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="208.443,-227.0033 204.9429,-217.0034 201.443,-227.0034 208.443,-227.0033"/>
+<text text-anchor="middle" x="209.4429" y="-238.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
 </g>
-<!-- ConfigurationFuzzer -->
-<g class="node" id="node12">
-<title>ConfigurationFuzzer</title>
-<g id="a_node12"><a xlink:href="ConfigurationFuzzer.html" xlink:title="ConfigurationFuzzer">
-<polygon fill="#ffffff" points="252,-180 99,-180 99,-144 258,-144 258,-174 252,-180" stroke="#000000"/>
-<polyline fill="none" points="252,-180 252,-174 " stroke="#000000"/>
-<polyline fill="none" points="258,-174 252,-174 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="178.5" y="-158.3">Testing Configurations</text>
-</a>
+<!-- 5&#45;&gt;6 -->
+<g id="edge10" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#0000ff" d="M196.6307,-180.6793C188.8758,-163.5868 177.2043,-137.8619 168.3478,-118.3413"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="171.4514,-116.7106 164.1323,-109.0502 165.0768,-119.6028 171.4514,-116.7106"/>
+<text text-anchor="middle" x="192.4429" y="-141.3" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
 </g>
+<!-- 5&#45;&gt;7 -->
+<g id="edge11" class="edge">
+<title>5&#45;&gt;7</title>
+<path fill="none" stroke="#ff0000" d="M226.1929,-182.125C248.978,-164.031 285.3358,-135.1586 311.011,-114.7694"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="313.2865,-117.4319 318.941,-108.4721 308.9333,-111.9501 313.2865,-117.4319"/>
+<text text-anchor="middle" x="297.9429" y="-141.3" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
 </g>
-<!-- GrammarCoverageFuzzer&#45;&gt;ConfigurationFuzzer -->
-<g class="edge" id="edge12">
-<title>GrammarCoverageFuzzer-&gt;ConfigurationFuzzer</title>
-<path d="M235.322,-215.8314C226.1412,-207.1337 214.9994,-196.5783 205.0224,-187.1265" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="207.3385,-184.4995 197.6719,-180.1628 202.5243,-189.5811 207.3385,-184.4995" stroke="#000000"/>
+<!-- 9&#45;&gt;13 -->
+<g id="edge17" class="edge">
+<title>9&#45;&gt;13</title>
+<path fill="none" stroke="#ff0000" d="M448.9429,-267.8554C448.9429,-243.8485 448.9429,-201.2861 448.9429,-173.1035"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="452.443,-173.075 448.9429,-163.075 445.443,-173.075 452.443,-173.075"/>
+<text text-anchor="middle" x="452.9429" y="-238.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
 </g>
-<!-- Carver -->
-<g class="node" id="node13">
-<title>Carver</title>
-<g id="a_node13"><a xlink:href="Carver.html" xlink:title="Carver">
-<polygon fill="#ffffff" points="412,-36 287,-36 287,0 418,0 418,-30 412,-36" stroke="#000000"/>
-<polyline fill="none" points="412,-36 412,-30 " stroke="#000000"/>
-<polyline fill="none" points="418,-30 412,-30 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="352.5" y="-14.3">Carving Unit Tests</text>
-</a>
+<!-- 10 -->
+<g id="node13" class="node">
+<title>10</title>
+<ellipse fill="none" stroke="#000000" cx="560.9429" cy="-199" rx="63.8893" ry="18"/>
+<text text-anchor="middle" x="560.9429" y="-195.3" font-family="Times,serif" font-size="14.00" fill="#000000">12: if: (a == c)</text>
 </g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge14" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="#0000ff" d="M470.8035,-269.019C487.9943,-255.6655 512.1258,-236.9205 531.0947,-222.1857"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="533.3872,-224.8368 539.1374,-215.9382 529.093,-219.3087 533.3872,-224.8368"/>
+<text text-anchor="middle" x="515.4429" y="-238.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
 </g>
-<!-- GrammarCoverageFuzzer&#45;&gt;Carver -->
-<g class="edge" id="edge13">
-<title>GrammarCoverageFuzzer-&gt;Carver</title>
-<path d="M262.6869,-215.9555C279.8729,-178.0762 319.7962,-90.0818 340.1257,-45.274" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="343.3231,-46.6977 344.2675,-36.1451 336.9485,-43.8055 343.3231,-46.6977" stroke="#000000"/>
+<!-- 10&#45;&gt;11 -->
+<g id="edge15" class="edge">
+<title>10&#45;&gt;11</title>
+<path fill="none" stroke="#0000ff" d="M560.9429,-180.6793C560.9429,-163.821 560.9429,-138.5651 560.9429,-119.147"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="564.443,-119.0501 560.9429,-109.0502 557.443,-119.0502 564.443,-119.0501"/>
+<text text-anchor="middle" x="565.4429" y="-141.3" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
 </g>
-<!-- APIFuzzer -->
-<g class="node" id="node14">
-<title>APIFuzzer</title>
-<g id="a_node14"><a xlink:href="APIFuzzer.html" xlink:title="APIFuzzer">
-<polygon fill="#ffffff" points="461,-108 370,-108 370,-72 467,-72 467,-102 461,-108" stroke="#000000"/>
-<polyline fill="none" points="461,-108 461,-102 " stroke="#000000"/>
-<polyline fill="none" points="467,-102 461,-102 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="418.5" y="-86.3">Fuzzing APIs</text>
-</a>
-</g>
-</g>
-<!-- ProbabilisticGrammarFuzzer&#45;&gt;APIFuzzer -->
-<g class="edge" id="edge15">
-<title>ProbabilisticGrammarFuzzer-&gt;APIFuzzer</title>
-<path d="M418.5,-143.8314C418.5,-136.131 418.5,-126.9743 418.5,-118.4166" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="422.0001,-118.4132 418.5,-108.4133 415.0001,-118.4133 422.0001,-118.4132" stroke="#000000"/>
-</g>
-<!-- GrammarFuzzer&#45;&gt;GrammarCoverageFuzzer -->
-<g class="edge" id="edge8">
-<title>GrammarFuzzer-&gt;GrammarCoverageFuzzer</title>
-<path d="M429.005,-287.9243C396.7371,-277.9531 356.4984,-265.5188 322.7949,-255.104" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="323.6067,-251.6916 313.0191,-252.0831 321.5399,-258.3796 323.6067,-251.6916" stroke="#000000"/>
-</g>
-<!-- Parser -->
-<g class="node" id="node9">
-<title>Parser</title>
-<g id="a_node9"><a xlink:href="Parser.html" xlink:title="Parser">
-<polygon fill="#ffffff" points="590.5,-252 378.5,-252 378.5,-216 596.5,-216 596.5,-246 590.5,-252" stroke="#000000"/>
-<polyline fill="none" points="590.5,-252 590.5,-246 " stroke="#000000"/>
-<polyline fill="none" points="596.5,-246 590.5,-246 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="487.5" y="-230.3">Parsing and Recombining Inputs</text>
-</a>
-</g>
-</g>
-<!-- GrammarFuzzer&#45;&gt;Parser -->
-<g class="edge" id="edge9">
-<title>GrammarFuzzer-&gt;Parser</title>
-<path d="M487.5,-287.8314C487.5,-280.131 487.5,-270.9743 487.5,-262.4166" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="491.0001,-262.4132 487.5,-252.4133 484.0001,-262.4133 491.0001,-262.4132" stroke="#000000"/>
-</g>
-<!-- GeneratorGrammarFuzzer -->
-<g class="node" id="node10">
-<title>GeneratorGrammarFuzzer</title>
-<g id="a_node10"><a xlink:href="GeneratorGrammarFuzzer.html" xlink:title="GeneratorGrammarFuzzer">
-<polygon fill="#ffffff" points="702.5,-180 540.5,-180 540.5,-144 708.5,-144 708.5,-174 702.5,-180" stroke="#000000"/>
-<polyline fill="none" points="702.5,-180 702.5,-174 " stroke="#000000"/>
-<polyline fill="none" points="708.5,-174 702.5,-174 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="624.5" y="-158.3">Fuzzing with Generators</text>
-</a>
-</g>
-</g>
-<!-- GrammarFuzzer&#45;&gt;GeneratorGrammarFuzzer -->
-<g class="edge" id="edge10">
-<title>GrammarFuzzer-&gt;GeneratorGrammarFuzzer</title>
-<path d="M554.483,-287.9674C573.4632,-279.8348 592.48,-268.2718 605.5,-252 619.3901,-234.6408 623.7918,-209.5453 624.9173,-190.2618" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="628.4164,-190.3417 625.2449,-180.2327 621.4202,-190.1131 628.4164,-190.3417" stroke="#000000"/>
-</g>
-<!-- Reducer -->
-<g class="node" id="node11">
-<title>Reducer</title>
-<g id="a_node11"><a xlink:href="Reducer.html" xlink:title="Reducer">
-<polygon fill="#ffffff" points="872,-252 653,-252 653,-216 878,-216 878,-246 872,-252" stroke="#000000"/>
-<polyline fill="none" points="872,-252 872,-246 " stroke="#000000"/>
-<polyline fill="none" points="878,-246 872,-246 " stroke="#000000"/>
-<text fill="#b03a2e" font-family="Patua One" font-size="14.00" text-anchor="middle" x="765.5" y="-230.3">Reducing Failure-Inducing Inputs</text>
-</a>
-</g>
-</g>
-<!-- GrammarFuzzer&#45;&gt;Reducer -->
-<g class="edge" id="edge11">
-<title>GrammarFuzzer-&gt;Reducer</title>
-<path d="M557.2923,-287.9243C596.3706,-277.8033 645.2469,-265.1447 685.8219,-254.6361" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="686.8759,-257.9786 695.679,-252.0831 685.1208,-251.2022 686.8759,-257.9786" stroke="#000000"/>
-</g>
-<!-- Parser&#45;&gt;ProbabilisticGrammarFuzzer -->
-<g class="edge" id="edge14">
-<title>Parser-&gt;ProbabilisticGrammarFuzzer</title>
-<path d="M470.0884,-215.8314C461.979,-207.3694 452.1844,-197.1489 443.318,-187.8971" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="445.5921,-185.2115 436.146,-180.4133 440.5382,-190.0549 445.5921,-185.2115" stroke="#000000"/>
-</g>
-<!-- GeneratorGrammarFuzzer&#45;&gt;APIFuzzer -->
-<g class="edge" id="edge16">
-<title>GeneratorGrammarFuzzer-&gt;APIFuzzer</title>
-<path d="M572.7834,-143.9243C543.5317,-133.7004 506.8711,-120.887 476.6267,-110.3161" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="477.645,-106.9645 467.0501,-106.969 475.3353,-113.5725 477.645,-106.9645" stroke="#000000"/>
-</g>
-<!-- APIFuzzer&#45;&gt;Carver -->
-<g class="edge" id="edge17">
-<title>APIFuzzer-&gt;Carver</title>
-<path d="M401.8454,-71.8314C394.0886,-63.3694 384.7198,-53.1489 376.239,-43.8971" fill="none" stroke="#000000"/>
-<polygon fill="#000000" points="378.7162,-41.4198 369.3788,-36.4133 373.5561,-46.1499 378.7162,-41.4198" stroke="#000000"/>
+<!-- 10&#45;&gt;12 -->
+<g id="edge16" class="edge">
+<title>10&#45;&gt;12</title>
+<path fill="none" stroke="#ff0000" d="M588.5848,-182.5971C619.8039,-164.0715 670.7735,-133.8258 705.5348,-113.1982"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="707.6261,-116.0272 714.4398,-107.9139 704.0538,-110.0073 707.6261,-116.0272"/>
+<text text-anchor="middle" x="681.9429" y="-141.3" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
 </g>
 </g>
 </svg>
@@ -12271,45 +13086,959 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Table-of-Contents">Table of Contents<a class="anchor-link" href="#Table-of-Contents">&#182;</a></h2><h3 id="Part-I:-Whetting-Your-Appetite"><a href="01_Intro.html">Part I: Whetting Your Appetite</a><a class="anchor-link" href="#Part-I:-Whetting-Your-Appetite">&#182;</a></h3><ul>
-<li><a href="Intro_Testing.html">Introduction to Software Testing</a></li>
-</ul>
-<h3 id="Part-II:-Lexical-Fuzzing"><a href="02_Lexical_Fuzzing.html">Part II: Lexical Fuzzing</a><a class="anchor-link" href="#Part-II:-Lexical-Fuzzing">&#182;</a></h3><ul>
-<li><a href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
-<li><a href="Coverage.html">Getting Coverage</a></li>
-<li><a href="MutationFuzzer.html">Mutation-Based Fuzzing</a></li>
-</ul>
-<h3 id="Part-III:-Syntactical-Fuzzing"><a href="03_Syntactical_Fuzzing.html">Part III: Syntactical Fuzzing</a><a class="anchor-link" href="#Part-III:-Syntactical-Fuzzing">&#182;</a></h3><ul>
-<li><a href="Grammars.html">Fuzzing with Grammars</a></li>
-<li><a href="GrammarFuzzer.html">Efficient Grammar Fuzzing</a></li>
-<li><a href="GrammarCoverageFuzzer.html">Grammar Coverage</a></li>
-<li><a href="Parser.html">Parsing and Recombining Inputs</a></li>
-<li><a href="ProbabilisticGrammarFuzzer.html">Probabilistic Grammar Fuzzing</a></li>
-<li><a href="GeneratorGrammarFuzzer.html">Fuzzing with Generators</a></li>
-<li><a href="Reducer.html">Reducing Failure-Inducing Inputs</a></li>
-</ul>
-<h3 id="Part-V:-Domain-Specific-Fuzzing"><a href="05_Domain-Specific_Fuzzing.ipynb">Part V: Domain-Specific Fuzzing</a><a class="anchor-link" href="#Part-V:-Domain-Specific-Fuzzing">&#182;</a></h3><ul>
-<li><a href="ConfigurationFuzzer.html">Testing Configurations</a></li>
-<li><a href="APIFuzzer.html">Fuzzing APIs</a></li>
-<li><a href="Carver.html">Carving Unit Tests</a></li>
-</ul>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="cgi_decode">cgi_decode<a class="anchor-link" href="#cgi_decode">&#182;</a></h4><p>Note that we do not yet support <em>augmented assignments</em>: i.e assignments such as <code>+=</code></p>
 </div>
 </div>
 </div>
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">cgi_decode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">hex_values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;0&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s1">&#39;5&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;6&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;7&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;8&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+        <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span>
+        <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span><span class="p">:</span>
+            <span class="n">digit_high</span><span class="p">,</span> <span class="n">digit_low</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="k">if</span> <span class="n">digit_high</span> <span class="ow">in</span> <span class="n">hex_values</span> <span class="ow">and</span> <span class="n">digit_low</span> <span class="ow">in</span> <span class="n">hex_values</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">hex_values</span><span class="p">[</span><span class="n">digit_high</span><span class="p">]</span> <span class="o">*</span> <span class="mi">16</span> <span class="o">+</span> <span class="n">hex_values</span><span class="p">[</span><span class="n">digit_low</span><span class="p">]</span>
+                <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">t</span> <span class="o">+</span> <span class="n">c</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">t</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">to_graph</span><span class="p">(</span><span class="n">gen_cfg</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">cgi_decode</span><span class="p">)))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Source</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea output_execute_result">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="630pt" height="1603pt"
+ viewBox="0.00 0.00 630.00 1603.43" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 1599.4306)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-1599.4306 626,-1599.4306 626,4 -4,4"/>
+<!-- 1 -->
+<g id="node1" class="node">
+<title>1</title>
+<ellipse fill="none" stroke="#000000" cx="478" cy="-1577.4306" rx="94.4839" ry="18"/>
+<text text-anchor="middle" x="478" y="-1573.7306" font-family="Times,serif" font-size="14.00" fill="#000000">1: enter: cgi_decode(s)</text>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<ellipse fill="none" stroke="#000000" cx="478" cy="-1262.2153" rx="81.135" ry="260.4308"/>
+<text text-anchor="middle" x="478" y="-1431.0153" font-family="Times,serif" font-size="14.00" fill="#000000">2: hex_values = {</text>
+<text text-anchor="middle" x="478" y="-1416.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;0&#39;: 0,</text>
+<text text-anchor="middle" x="478" y="-1401.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;1&#39;: 1,</text>
+<text text-anchor="middle" x="478" y="-1386.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;2&#39;: 2,</text>
+<text text-anchor="middle" x="478" y="-1371.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;3&#39;: 3,</text>
+<text text-anchor="middle" x="478" y="-1356.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;4&#39;: 4,</text>
+<text text-anchor="middle" x="478" y="-1341.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;5&#39;: 5,</text>
+<text text-anchor="middle" x="478" y="-1326.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;6&#39;: 6,</text>
+<text text-anchor="middle" x="478" y="-1311.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;7&#39;: 7,</text>
+<text text-anchor="middle" x="478" y="-1296.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;8&#39;: 8,</text>
+<text text-anchor="middle" x="478" y="-1281.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;9&#39;: 9,</text>
+<text text-anchor="middle" x="478" y="-1266.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;a&#39;: 10,</text>
+<text text-anchor="middle" x="478" y="-1251.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;b&#39;: 11,</text>
+<text text-anchor="middle" x="478" y="-1236.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;c&#39;: 12,</text>
+<text text-anchor="middle" x="478" y="-1221.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;d&#39;: 13,</text>
+<text text-anchor="middle" x="478" y="-1206.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;e&#39;: 14,</text>
+<text text-anchor="middle" x="478" y="-1191.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;f&#39;: 15,</text>
+<text text-anchor="middle" x="478" y="-1176.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;A&#39;: 10,</text>
+<text text-anchor="middle" x="478" y="-1161.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;B&#39;: 11,</text>
+<text text-anchor="middle" x="478" y="-1146.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;C&#39;: 12,</text>
+<text text-anchor="middle" x="478" y="-1131.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;D&#39;: 13,</text>
+<text text-anchor="middle" x="478" y="-1116.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;E&#39;: 14,</text>
+<text text-anchor="middle" x="478" y="-1101.0153" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&#39;F&#39;: 15,</text>
+<text text-anchor="middle" x="478" y="-1086.0153" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
+</g>
+<!-- 1&#45;&gt;3 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M478,-1559.1208C478,-1552.0013 478,-1543.0635 478,-1532.772"/>
+<polygon fill="#000000" stroke="#000000" points="481.5001,-1532.5052 478,-1522.5053 474.5001,-1532.5053 481.5001,-1532.5052"/>
+</g>
+<!-- 2 -->
+<g id="node2" class="node">
+<title>2</title>
+<ellipse fill="none" stroke="#000000" cx="302" cy="-641" rx="89.8845" ry="18"/>
+<text text-anchor="middle" x="302" y="-637.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: exit: cgi_decode(s)</text>
+</g>
+<!-- 18 -->
+<g id="node3" class="node">
+<title>18</title>
+<ellipse fill="none" stroke="#000000" cx="330" cy="-714" rx="51.1914" ry="18"/>
+<text text-anchor="middle" x="330" y="-710.3" font-family="Times,serif" font-size="14.00" fill="#000000">26: return t</text>
+</g>
+<!-- 18&#45;&gt;2 -->
+<g id="edge1" class="edge">
+<title>18&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M323.0786,-695.9551C319.9151,-687.7074 316.0973,-677.7536 312.5848,-668.5962"/>
+<polygon fill="#000000" stroke="#000000" points="315.7879,-667.1737 308.9388,-659.0904 309.2522,-669.6806 315.7879,-667.1737"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<ellipse fill="none" stroke="#000000" cx="478" cy="-947" rx="35.9954" ry="18"/>
+<text text-anchor="middle" x="478" y="-943.3" font-family="Times,serif" font-size="14.00" fill="#000000">9: t = &#39;&#39;</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge3" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M478,-1001.9063C478,-991.8458 478,-982.7742 478,-975.0365"/>
+<polygon fill="#000000" stroke="#000000" points="481.5001,-975.0221 478,-965.0221 474.5001,-975.0222 481.5001,-975.0221"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<ellipse fill="none" stroke="#000000" cx="478" cy="-874" rx="41.6928" ry="18"/>
+<text text-anchor="middle" x="478" y="-870.3" font-family="Times,serif" font-size="14.00" fill="#000000">10: i = 0</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge4" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M478,-928.9551C478,-920.8828 478,-911.1764 478,-902.1817"/>
+<polygon fill="#000000" stroke="#000000" points="481.5001,-902.0903 478,-892.0904 474.5001,-902.0904 481.5001,-902.0903"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<ellipse fill="none" stroke="#000000" cx="478" cy="-801" rx="88.2844" ry="18"/>
+<text text-anchor="middle" x="478" y="-797.3" font-family="Times,serif" font-size="14.00" fill="#000000">11: while: (i &lt; len(s))</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge5" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M478,-855.9551C478,-847.8828 478,-838.1764 478,-829.1817"/>
+<polygon fill="#000000" stroke="#000000" points="481.5001,-829.0903 478,-819.0904 474.5001,-829.0904 481.5001,-829.0903"/>
+</g>
+<!-- 6&#45;&gt;18 -->
+<g id="edge21" class="edge">
+<title>6&#45;&gt;18</title>
+<path fill="none" stroke="#ff0000" d="M448.76,-783.8116C424.7965,-769.725 390.8021,-749.7418 365.3199,-734.7624"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="367.0864,-731.7409 356.6919,-729.6905 363.539,-737.7755 367.0864,-731.7409"/>
+<text text-anchor="middle" x="417" y="-753.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 7 -->
+<g id="node9" class="node">
+<title>7</title>
+<ellipse fill="none" stroke="#000000" cx="478" cy="-714" rx="50.8918" ry="18"/>
+<text text-anchor="middle" x="478" y="-710.3" font-family="Times,serif" font-size="14.00" fill="#000000">12: c = s[i]</text>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#0000ff" d="M478,-782.9735C478,-771.1918 478,-755.5607 478,-742.1581"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="481.5001,-742.0033 478,-732.0034 474.5001,-742.0034 481.5001,-742.0033"/>
+<text text-anchor="middle" x="482.5" y="-753.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 17 -->
+<g id="node8" class="node">
+<title>17</title>
+<ellipse fill="none" stroke="#000000" cx="311" cy="-18" rx="59.5901" ry="18"/>
+<text text-anchor="middle" x="311" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">25: i = (i + 1)</text>
+</g>
+<!-- 17&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>17&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M370.5959,-19.9482C460.9,-24.5455 622,-39.907 622,-91 622,-714 622,-714 622,-714 622,-751.1353 586.4829,-772.8434 550.7267,-785.2885"/>
+<polygon fill="#000000" stroke="#000000" points="549.5831,-781.98 541.1605,-788.4073 551.7529,-788.6352 549.5831,-781.98"/>
+</g>
+<!-- 8 -->
+<g id="node10" class="node">
+<title>8</title>
+<ellipse fill="none" stroke="#000000" cx="478" cy="-641" rx="68.4888" ry="18"/>
+<text text-anchor="middle" x="478" y="-637.3" font-family="Times,serif" font-size="14.00" fill="#000000">13: if: (c == &#39;+&#39;)</text>
+</g>
+<!-- 7&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>7&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M478,-695.9551C478,-687.8828 478,-678.1764 478,-669.1817"/>
+<polygon fill="#000000" stroke="#000000" points="481.5001,-669.0903 478,-659.0904 474.5001,-669.0904 481.5001,-669.0903"/>
+</g>
+<!-- 9 -->
+<g id="node11" class="node">
+<title>9</title>
+<ellipse fill="none" stroke="#000000" cx="190" cy="-500" rx="60.3893" ry="18"/>
+<text text-anchor="middle" x="190" y="-496.3" font-family="Times,serif" font-size="14.00" fill="#000000">14: t = (t + &#39; &#39;)</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#0000ff" d="M445.5226,-625.0996C392.7088,-599.2428 288.3257,-548.1386 230.6614,-519.9071"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="232.0026,-516.6669 221.4822,-515.4132 228.9246,-522.9538 232.0026,-516.6669"/>
+<text text-anchor="middle" x="404.5" y="-593.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 10 -->
+<g id="node12" class="node">
+<title>10</title>
+<ellipse fill="none" stroke="#000000" cx="478" cy="-554" rx="70.6878" ry="18"/>
+<text text-anchor="middle" x="478" y="-550.3" font-family="Times,serif" font-size="14.00" fill="#000000">15: if: (c == &#39;%&#39;)</text>
+</g>
+<!-- 8&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>8&#45;&gt;10</title>
+<path fill="none" stroke="#ff0000" d="M478,-622.9735C478,-611.1918 478,-595.5607 478,-582.1581"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="481.5001,-582.0033 478,-572.0034 474.5001,-582.0034 481.5001,-582.0033"/>
+<text text-anchor="middle" x="482" y="-593.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 9&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>9&#45;&gt;17</title>
+<path fill="none" stroke="#000000" d="M135.0441,-492.494C78.9299,-481.3739 0,-454.6054 0,-392 0,-392 0,-392 0,-91 0,-41.7531 149.6683,-25.7023 241.3489,-20.4899"/>
+<polygon fill="#000000" stroke="#000000" points="241.6068,-23.9812 251.4041,-19.9482 241.2302,-16.9913 241.6068,-23.9812"/>
+</g>
+<!-- 11 -->
+<g id="node13" class="node">
+<title>11</title>
+<ellipse fill="none" stroke="#000000" cx="313" cy="-446" rx="192.2659" ry="18"/>
+<text text-anchor="middle" x="313" y="-442.3" font-family="Times,serif" font-size="14.00" fill="#000000">16: (digit_high, digit_low) = (s[(i + 1)], s[(i + 2)])</text>
+</g>
+<!-- 10&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>10&#45;&gt;11</title>
+<path fill="none" stroke="#0000ff" d="M452.2188,-537.125C424.3818,-518.9044 379.8468,-489.7542 348.6628,-469.343"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="350.5302,-466.3822 340.2464,-463.834 346.6966,-472.2391 350.5302,-466.3822"/>
+<text text-anchor="middle" x="424.5" y="-496.3" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 16 -->
+<g id="node18" class="node">
+<title>16</title>
+<ellipse fill="none" stroke="#000000" cx="543" cy="-392" rx="59.2899" ry="18"/>
+<text text-anchor="middle" x="543" y="-388.3" font-family="Times,serif" font-size="14.00" fill="#000000">24: t = (t + c)</text>
+</g>
+<!-- 10&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>10&#45;&gt;16</title>
+<path fill="none" stroke="#ff0000" d="M485.2045,-536.0442C496.5275,-507.8238 518.571,-452.8846 531.9208,-419.6128"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="535.2877,-420.6204 535.7632,-410.0362 528.7911,-418.0137 535.2877,-420.6204"/>
+<text text-anchor="middle" x="510" y="-496.3" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 12 -->
+<g id="node14" class="node">
+<title>12</title>
+<ellipse fill="none" stroke="#000000" cx="310" cy="-338" rx="59.5901" ry="18"/>
+<text text-anchor="middle" x="310" y="-334.3" font-family="Times,serif" font-size="14.00" fill="#000000">17: i = (i + 2)</text>
+</g>
+<!-- 11&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>11&#45;&gt;12</title>
+<path fill="none" stroke="#000000" d="M312.4911,-427.6793C312.0228,-410.821 311.3213,-385.5651 310.7819,-366.147"/>
+<polygon fill="#000000" stroke="#000000" points="314.2778,-365.9491 310.5014,-356.0502 307.2805,-366.1435 314.2778,-365.9491"/>
+</g>
+<!-- 13 -->
+<g id="node15" class="node">
+<title>13</title>
+<ellipse fill="none" stroke="#000000" cx="308" cy="-265" rx="248.0561" ry="18"/>
+<text text-anchor="middle" x="308" y="-261.3" font-family="Times,serif" font-size="14.00" fill="#000000">18: if: ((digit_high in hex_values) and (digit_low in hex_values))</text>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="#000000" d="M309.5056,-319.9551C309.2845,-311.8828 309.0185,-302.1764 308.7721,-293.1817"/>
+<polygon fill="#000000" stroke="#000000" points="312.2683,-292.9907 308.4956,-283.0904 305.2709,-293.1825 312.2683,-292.9907"/>
+</g>
+<!-- 13&#45;&gt;17 -->
+<g id="edge19" class="edge">
+<title>13&#45;&gt;17</title>
+<path fill="none" stroke="#ff0000" d="M227.2461,-247.9075C157.9712,-232.4291 67.65,-209.9728 57,-196 -4.4925,-115.322 162.064,-56.992 254.3349,-31.808"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="255.3578,-35.1574 264.1106,-29.1876 253.5454,-28.3961 255.3578,-35.1574"/>
+<text text-anchor="middle" x="62" y="-130.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 14 -->
+<g id="node16" class="node">
+<title>14</title>
+<ellipse fill="none" stroke="#000000" cx="311" cy="-178" rx="245.0565" ry="18"/>
+<text text-anchor="middle" x="311" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">19: v = ((hex_values[digit_high] * 16) + hex_values[digit_low])</text>
+</g>
+<!-- 13&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>13&#45;&gt;14</title>
+<path fill="none" stroke="#0000ff" d="M308.6216,-246.9735C309.0279,-235.1918 309.5669,-219.5607 310.029,-206.1581"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="313.5324,-206.1181 310.3792,-196.0034 306.5366,-205.8768 313.5324,-206.1181"/>
+<text text-anchor="middle" x="314.5" y="-217.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 15 -->
+<g id="node17" class="node">
+<title>15</title>
+<ellipse fill="none" stroke="#000000" cx="311" cy="-91" rx="77.1866" ry="18"/>
+<text text-anchor="middle" x="311" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">20: t = (t + chr(v))</text>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="#000000" d="M311,-159.9735C311,-148.1918 311,-132.5607 311,-119.1581"/>
+<polygon fill="#000000" stroke="#000000" points="314.5001,-119.0033 311,-109.0034 307.5001,-119.0034 314.5001,-119.0033"/>
+</g>
+<!-- 15&#45;&gt;17 -->
+<g id="edge18" class="edge">
+<title>15&#45;&gt;17</title>
+<path fill="none" stroke="#000000" d="M311,-72.9551C311,-64.8828 311,-55.1764 311,-46.1817"/>
+<polygon fill="#000000" stroke="#000000" points="314.5001,-46.0903 311,-36.0904 307.5001,-46.0904 314.5001,-46.0903"/>
+</g>
+<!-- 16&#45;&gt;17 -->
+<g id="edge20" class="edge">
+<title>16&#45;&gt;17</title>
+<path fill="none" stroke="#000000" d="M556.4249,-374.3485C568.3823,-356.8392 584,-328.7534 584,-301.5 584,-301.5 584,-301.5 584,-91 584,-48.7737 460.566,-30.3283 379.6953,-22.7747"/>
+<polygon fill="#000000" stroke="#000000" points="379.8385,-19.2736 369.5653,-21.8643 379.2119,-26.2455 379.8385,-19.2736"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Appendices">Appendices<a class="anchor-link" href="#Appendices">&#182;</a></h3><ul>
-<li><a href="ExpectError.html">Error Handling</a></li>
-<li><a href="Timer.html">Timer</a></li>
-<li><a href="ControlFlow.html">Control Flow Graph</a></li>
-<li><a href="RailroadDiagrams.html">Railroad Diagrams</a></li>
-</ul>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="gcd">gcd<a class="anchor-link" href="#gcd">&#182;</a></h4></div>
 </div>
 </div>
 </div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">gcd</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">a</span><span class="o">&lt;</span><span class="n">b</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">c</span>
+
+    <span class="k">while</span> <span class="n">b</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">c</span> <span class="o">%</span> <span class="n">b</span>
+    <span class="k">return</span> <span class="n">a</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">to_graph</span><span class="p">(</span><span class="n">gen_cfg</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">gcd</span><span class="p">)))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Source</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea output_execute_result">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="304pt" height="656pt"
+ viewBox="0.00 0.00 304.49 656.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 652)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-652 300.4879,-652 300.4879,4 -4,4"/>
+<!-- 1 -->
+<g id="node1" class="node">
+<title>1</title>
+<ellipse fill="none" stroke="#000000" cx="198.8437" cy="-630" rx="75.2868" ry="18"/>
+<text text-anchor="middle" x="198.8437" y="-626.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: enter: gcd(a, b)</text>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<ellipse fill="none" stroke="#000000" cx="198.8437" cy="-557" rx="54.6905" ry="18"/>
+<text text-anchor="middle" x="198.8437" y="-553.3" font-family="Times,serif" font-size="14.00" fill="#000000">2: if: (a &lt; b)</text>
+</g>
+<!-- 1&#45;&gt;3 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M198.8437,-611.9551C198.8437,-603.8828 198.8437,-594.1764 198.8437,-585.1817"/>
+<polygon fill="#000000" stroke="#000000" points="202.3438,-585.0903 198.8437,-575.0904 195.3438,-585.0904 202.3438,-585.0903"/>
+</g>
+<!-- 2 -->
+<g id="node2" class="node">
+<title>2</title>
+<ellipse fill="none" stroke="#000000" cx="70.8437" cy="-91" rx="70.6878" ry="18"/>
+<text text-anchor="middle" x="70.8437" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: exit: gcd(a, b)</text>
+</g>
+<!-- 11 -->
+<g id="node3" class="node">
+<title>11</title>
+<ellipse fill="none" stroke="#000000" cx="80.8437" cy="-164" rx="52.7911" ry="18"/>
+<text text-anchor="middle" x="80.8437" y="-160.3" font-family="Times,serif" font-size="14.00" fill="#000000">11: return a</text>
+</g>
+<!-- 11&#45;&gt;2 -->
+<g id="edge1" class="edge">
+<title>11&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M78.3718,-145.9551C77.266,-137.8828 75.9364,-128.1764 74.7042,-119.1817"/>
+<polygon fill="#000000" stroke="#000000" points="78.1467,-118.5228 73.3218,-109.0904 71.2115,-119.4729 78.1467,-118.5228"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<ellipse fill="none" stroke="#000000" cx="163.8437" cy="-470" rx="37.8943" ry="18"/>
+<text text-anchor="middle" x="163.8437" y="-466.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: c = a</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge3" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#0000ff" d="M191.5917,-538.9735C186.7258,-526.8784 180.2279,-510.7263 174.7433,-497.0934"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="177.9461,-495.6768 170.9667,-487.7057 171.452,-498.2894 177.9461,-495.6768"/>
+<text text-anchor="middle" x="188.3437" y="-509.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<ellipse fill="none" stroke="#000000" cx="197.8437" cy="-251" rx="72.5877" ry="18"/>
+<text text-anchor="middle" x="197.8437" y="-247.3" font-family="Times,serif" font-size="14.00" fill="#000000">7: while: (b != 0)</text>
+</g>
+<!-- 3&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>3&#45;&gt;7</title>
+<path fill="none" stroke="#ff0000" d="M210.016,-539.0817C219.5896,-521.9944 231.8437,-495.2006 231.8437,-470 231.8437,-470 231.8437,-470 231.8437,-324 231.8437,-307.5289 224.6429,-290.7573 216.869,-277.4503"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="219.75,-275.4563 211.4769,-268.8375 213.8168,-279.1708 219.75,-275.4563"/>
+<text text-anchor="middle" x="235.8437" y="-393.3" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<ellipse fill="none" stroke="#000000" cx="157.8437" cy="-397" rx="38.1938" ry="18"/>
+<text text-anchor="middle" x="157.8437" y="-393.3" font-family="Times,serif" font-size="14.00" fill="#000000">4: a = b</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge4" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M162.3606,-451.9551C161.6971,-443.8828 160.8993,-434.1764 160.16,-425.1817"/>
+<polygon fill="#000000" stroke="#000000" points="163.6381,-424.77 159.3306,-415.0904 156.6616,-425.3435 163.6381,-424.77"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<ellipse fill="none" stroke="#000000" cx="163.8437" cy="-324" rx="38.1938" ry="18"/>
+<text text-anchor="middle" x="163.8437" y="-320.3" font-family="Times,serif" font-size="14.00" fill="#000000">5: b = c</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge5" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M159.3269,-378.9551C159.9903,-370.8828 160.7881,-361.1764 161.5274,-352.1817"/>
+<polygon fill="#000000" stroke="#000000" points="165.0258,-352.3435 162.3568,-342.0904 158.0494,-351.77 165.0258,-352.3435"/>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge6" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M172.0742,-306.3287C175.9833,-297.9356 180.7443,-287.7133 185.1054,-278.3499"/>
+<polygon fill="#000000" stroke="#000000" points="188.4035,-279.5584 189.4529,-269.0157 182.058,-276.6029 188.4035,-279.5584"/>
+</g>
+<!-- 7&#45;&gt;11 -->
+<g id="edge12" class="edge">
+<title>7&#45;&gt;11</title>
+<path fill="none" stroke="#ff0000" d="M174.7283,-233.8116C156.5474,-220.2925 131.0629,-201.3424 111.2322,-186.5966"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="113.2304,-183.7208 103.1173,-180.5624 109.0535,-189.3381 113.2304,-183.7208"/>
+<text text-anchor="middle" x="150.8437" y="-203.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 8 -->
+<g id="node10" class="node">
+<title>8</title>
+<ellipse fill="none" stroke="#000000" cx="197.8437" cy="-164" rx="37.8943" ry="18"/>
+<text text-anchor="middle" x="197.8437" y="-160.3" font-family="Times,serif" font-size="14.00" fill="#000000">8: c = a</text>
+</g>
+<!-- 7&#45;&gt;8 -->
+<g id="edge9" class="edge">
+<title>7&#45;&gt;8</title>
+<path fill="none" stroke="#0000ff" d="M197.8437,-232.9735C197.8437,-221.1918 197.8437,-205.5607 197.8437,-192.1581"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="201.3438,-192.0033 197.8437,-182.0034 194.3438,-192.0034 201.3438,-192.0033"/>
+<text text-anchor="middle" x="202.3437" y="-203.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 10 -->
+<g id="node9" class="node">
+<title>10</title>
+<ellipse fill="none" stroke="#000000" cx="230.8437" cy="-18" rx="65.7887" ry="18"/>
+<text text-anchor="middle" x="230.8437" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">10: b = (c % b)</text>
+</g>
+<!-- 10&#45;&gt;7 -->
+<g id="edge8" class="edge">
+<title>10&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M236.777,-36.1905C245.8583,-66.9643 260.5835,-130.934 244.8437,-182 239.9874,-197.7557 230.1674,-213.1327 220.7535,-225.3569"/>
+<polygon fill="#000000" stroke="#000000" points="217.9166,-223.2994 214.3671,-233.282 223.3671,-227.6917 217.9166,-223.2994"/>
+</g>
+<!-- 9 -->
+<g id="node11" class="node">
+<title>9</title>
+<ellipse fill="none" stroke="#000000" cx="197.8437" cy="-91" rx="38.1938" ry="18"/>
+<text text-anchor="middle" x="197.8437" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">9: a = b</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge10" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M197.8437,-145.9551C197.8437,-137.8828 197.8437,-128.1764 197.8437,-119.1817"/>
+<polygon fill="#000000" stroke="#000000" points="201.3438,-119.0903 197.8437,-109.0904 194.3438,-119.0904 201.3438,-119.0903"/>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge11" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M205.8321,-73.3287C209.6262,-64.9356 214.2473,-54.7133 218.4801,-45.3499"/>
+<polygon fill="#000000" stroke="#000000" points="221.7696,-46.5696 222.6996,-36.0157 215.3911,-43.6861 221.7696,-46.5696"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">compute_gcd</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span> 
+
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">y</span><span class="p">:</span> 
+        <span class="n">small</span> <span class="o">=</span> <span class="n">y</span> 
+    <span class="k">else</span><span class="p">:</span> 
+        <span class="n">small</span> <span class="o">=</span> <span class="n">x</span> 
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">small</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> 
+        <span class="k">if</span><span class="p">((</span><span class="n">x</span> <span class="o">%</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y</span> <span class="o">%</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)):</span> 
+            <span class="n">gcd</span> <span class="o">=</span> <span class="n">i</span> 
+
+    <span class="k">return</span> <span class="n">gcd</span> 
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">to_graph</span><span class="p">(</span><span class="n">gen_cfg</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">compute_gcd</span><span class="p">)))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Source</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea output_execute_result">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="589pt" height="524pt"
+ viewBox="0.00 0.00 588.58 524.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 520)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-520 584.5767,-520 584.5767,4 -4,4"/>
+<!-- 1 -->
+<g id="node1" class="node">
+<title>1</title>
+<ellipse fill="none" stroke="#000000" cx="291.2405" cy="-498" rx="111.5806" ry="18"/>
+<text text-anchor="middle" x="291.2405" y="-494.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: enter: compute_gcd(x, y)</text>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<ellipse fill="none" stroke="#000000" cx="291.2405" cy="-425" rx="55.4913" ry="18"/>
+<text text-anchor="middle" x="291.2405" y="-421.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: if: (x &gt; y)</text>
+</g>
+<!-- 1&#45;&gt;3 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M291.2405,-479.9551C291.2405,-471.8828 291.2405,-462.1764 291.2405,-453.1817"/>
+<polygon fill="#000000" stroke="#000000" points="294.7406,-453.0903 291.2405,-443.0904 287.7406,-453.0904 294.7406,-453.0903"/>
+</g>
+<!-- 2 -->
+<g id="node2" class="node">
+<title>2</title>
+<ellipse fill="none" stroke="#000000" cx="107.2405" cy="-105" rx="107.4815" ry="18"/>
+<text text-anchor="middle" x="107.2405" y="-101.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: exit: compute_gcd(x, y)</text>
+</g>
+<!-- 10 -->
+<g id="node3" class="node">
+<title>10</title>
+<ellipse fill="none" stroke="#000000" cx="130.2405" cy="-178" rx="61.99" ry="18"/>
+<text text-anchor="middle" x="130.2405" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">11: return gcd</text>
+</g>
+<!-- 10&#45;&gt;2 -->
+<g id="edge1" class="edge">
+<title>10&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M124.5551,-159.9551C121.9841,-151.7951 118.887,-141.9652 116.0273,-132.8887"/>
+<polygon fill="#000000" stroke="#000000" points="119.2835,-131.5764 112.9402,-123.0904 112.6071,-133.68 119.2835,-131.5764"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<ellipse fill="none" stroke="#000000" cx="228.2405" cy="-338" rx="53.8905" ry="18"/>
+<text text-anchor="middle" x="228.2405" y="-334.3" font-family="Times,serif" font-size="14.00" fill="#000000">4: small = y</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge3" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#0000ff" d="M278.4915,-407.3943C269.4399,-394.8944 257.1405,-377.9096 246.9756,-363.8724"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="249.6705,-361.6262 240.9705,-355.5796 244.0008,-365.7318 249.6705,-361.6262"/>
+<text text-anchor="middle" x="268.7405" y="-377.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<ellipse fill="none" stroke="#000000" cx="354.2405" cy="-338" rx="53.8905" ry="18"/>
+<text text-anchor="middle" x="354.2405" y="-334.3" font-family="Times,serif" font-size="14.00" fill="#000000">6: small = x</text>
+</g>
+<!-- 3&#45;&gt;5 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;5</title>
+<path fill="none" stroke="#ff0000" d="M303.9895,-407.3943C313.0411,-394.8944 325.3404,-377.9096 335.5053,-363.8724"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="338.4801,-365.7318 341.5105,-355.5796 332.8105,-361.6262 338.4801,-365.7318"/>
+<text text-anchor="middle" x="330.2405" y="-377.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<ellipse fill="none" stroke="#000000" cx="290.2405" cy="-265" rx="181.9677" ry="18"/>
+<text text-anchor="middle" x="290.2405" y="-261.3" font-family="Times,serif" font-size="14.00" fill="#000000">7: for: (True if range(1, (small + 1)) else False)</text>
+</g>
+<!-- 4&#45;&gt;6 -->
+<g id="edge5" class="edge">
+<title>4&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M243.249,-320.3287C250.7525,-311.4939 259.9775,-300.6323 268.2611,-290.8789"/>
+<polygon fill="#000000" stroke="#000000" points="271.1337,-292.9034 274.9395,-283.0157 265.7983,-288.3719 271.1337,-292.9034"/>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M339.0734,-320.7C331.1983,-311.7175 321.4218,-300.5661 312.6898,-290.6062"/>
+<polygon fill="#000000" stroke="#000000" points="315.1912,-288.1502 305.9671,-282.9381 309.9277,-292.7649 315.1912,-288.1502"/>
+</g>
+<!-- 6&#45;&gt;10 -->
+<g id="edge12" class="edge">
+<title>6&#45;&gt;10</title>
+<path fill="none" stroke="#ff0000" d="M255.2011,-247.3315C243.9827,-241.5808 231.5427,-235.1053 220.2405,-229 202.5085,-219.4214 183.0284,-208.4405 166.7401,-199.1274"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="168.4667,-196.0829 158.0507,-194.1445 164.9845,-202.1553 168.4667,-196.0829"/>
+<text text-anchor="middle" x="224.2405" y="-217.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 7 -->
+<g id="node10" class="node">
+<title>7</title>
+<ellipse fill="none" stroke="#000000" cx="402.2405" cy="-178" rx="131.8766" ry="18"/>
+<text text-anchor="middle" x="402.2405" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">7: i = range(1, (small + 1)).shift()</text>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge9" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#0000ff" d="M313.447,-246.9735C330.116,-234.0253 352.7704,-216.4276 371.024,-202.2485"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="373.3135,-204.902 379.0637,-196.0034 369.0193,-199.3739 373.3135,-204.902"/>
+<text text-anchor="middle" x="356.7405" y="-217.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 9 -->
+<g id="node8" class="node">
+<title>9</title>
+<ellipse fill="none" stroke="#000000" cx="258.2405" cy="-18" rx="45.4919" ry="18"/>
+<text text-anchor="middle" x="258.2405" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">9: gcd = i</text>
+</g>
+<!-- 9&#45;&gt;6 -->
+<g id="edge7" class="edge">
+<title>9&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M256.3016,-36.1908C253.332,-68.6888 249.1823,-138.6856 261.2405,-196 264.238,-210.2477 270.167,-225.2415 275.8872,-237.599"/>
+<polygon fill="#000000" stroke="#000000" points="272.8688,-239.3972 280.3699,-246.8795 279.1721,-236.3526 272.8688,-239.3972"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<ellipse fill="none" stroke="#000000" cx="425.2405" cy="-105" rx="155.1726" ry="18"/>
+<text text-anchor="middle" x="425.2405" y="-101.3" font-family="Times,serif" font-size="14.00" fill="#000000">8: if: (((x % i) == 0) and ((y % i) == 0))</text>
+</g>
+<!-- 8&#45;&gt;6 -->
+<g id="edge8" class="edge">
+<title>8&#45;&gt;6</title>
+<path fill="none" stroke="#ff0000" d="M492.5504,-121.2826C512.2749,-129.5203 531.6413,-141.7963 543.2405,-160 551.8384,-173.4935 552.9524,-183.2847 543.2405,-196 525.4069,-219.3487 461.2484,-236.6926 402.0082,-248.1519"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="401.3454,-244.7151 392.1691,-250.011 402.6451,-251.5934 401.3454,-244.7151"/>
+<text text-anchor="middle" x="553.2405" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge11" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#0000ff" d="M391.4455,-87.3943C363.4092,-72.7885 323.6185,-52.0592 294.8347,-37.0641"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="296.3907,-33.9283 285.905,-32.412 293.1566,-40.1363 296.3907,-33.9283"/>
+<text text-anchor="middle" x="355.7405" y="-57.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 7&#45;&gt;8 -->
+<g id="edge10" class="edge">
+<title>7&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M407.9259,-159.9551C410.4968,-151.7951 413.5939,-141.9652 416.4536,-132.8887"/>
+<polygon fill="#000000" stroke="#000000" points="419.8739,-133.68 419.5408,-123.0904 413.1974,-131.5764 419.8739,-133.68"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="fib">fib<a class="anchor-link" href="#fib">&#182;</a></h4><p>Note that the <em>for-loop</em> requires additional massaging. While we show the labels correctly, the <em>comparison node</em> needs to be extracted. Hence, the representation is not accurate.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fib</span><span class="p">(</span><span class="n">n</span><span class="p">,):</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>
+        <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">l</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">graph</span> <span class="o">=</span> <span class="n">to_graph</span><span class="p">(</span><span class="n">gen_cfg</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">fib</span><span class="p">)))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Source</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea output_execute_result">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="454pt" height="350pt"
+ viewBox="0.00 0.00 453.68 350.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 346)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-346 449.684,-346 449.684,4 -4,4"/>
+<!-- 1 -->
+<g id="node1" class="node">
+<title>1</title>
+<ellipse fill="none" stroke="#000000" cx="229.4948" cy="-324" rx="63.0888" ry="18"/>
+<text text-anchor="middle" x="229.4948" y="-320.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: enter: fib(n)</text>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<ellipse fill="none" stroke="#000000" cx="229.4948" cy="-251" rx="51.9908" ry="18"/>
+<text text-anchor="middle" x="229.4948" y="-247.3" font-family="Times,serif" font-size="14.00" fill="#000000">2: l = [0, 1]</text>
+</g>
+<!-- 1&#45;&gt;3 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M229.4948,-305.9551C229.4948,-297.8828 229.4948,-288.1764 229.4948,-279.1817"/>
+<polygon fill="#000000" stroke="#000000" points="232.9949,-279.0903 229.4948,-269.0904 225.9949,-279.0904 232.9949,-279.0903"/>
+</g>
+<!-- 2 -->
+<g id="node2" class="node">
+<title>2</title>
+<ellipse fill="none" stroke="#000000" cx="58.4948" cy="-18" rx="58.4896" ry="18"/>
+<text text-anchor="middle" x="58.4948" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: exit: fib(n)</text>
+</g>
+<!-- 7 -->
+<g id="node3" class="node">
+<title>7</title>
+<ellipse fill="none" stroke="#000000" cx="58.4948" cy="-91" rx="46.5926" ry="18"/>
+<text text-anchor="middle" x="58.4948" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">5: return l</text>
+</g>
+<!-- 7&#45;&gt;2 -->
+<g id="edge1" class="edge">
+<title>7&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M58.4948,-72.9551C58.4948,-64.8828 58.4948,-55.1764 58.4948,-46.1817"/>
+<polygon fill="#000000" stroke="#000000" points="61.9949,-46.0903 58.4948,-36.0904 54.9949,-46.0904 61.9949,-46.0903"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<ellipse fill="none" stroke="#000000" cx="229.4948" cy="-178" rx="155.9723" ry="18"/>
+<text text-anchor="middle" x="229.4948" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: for: (True if range((n &#45; 2)) else False)</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge3" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M229.4948,-232.9551C229.4948,-224.8828 229.4948,-215.1764 229.4948,-206.1817"/>
+<polygon fill="#000000" stroke="#000000" points="232.9949,-206.0903 229.4948,-196.0904 225.9949,-206.0904 232.9949,-206.0903"/>
+</g>
+<!-- 4&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>4&#45;&gt;7</title>
+<path fill="none" stroke="#ff0000" d="M194.8904,-160.3943C166.1826,-145.7885 125.4388,-125.0592 95.9656,-110.0641"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="97.3218,-106.8272 86.8219,-105.412 94.1476,-113.0661 97.3218,-106.8272"/>
+<text text-anchor="middle" x="158.4948" y="-130.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 5 -->
+<g id="node7" class="node">
+<title>5</title>
+<ellipse fill="none" stroke="#000000" cx="229.4948" cy="-91" rx="105.8812" ry="18"/>
+<text text-anchor="middle" x="229.4948" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: i = range((n &#45; 2)).shift()</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="#0000ff" d="M229.4948,-159.9735C229.4948,-148.1918 229.4948,-132.5607 229.4948,-119.1581"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="232.9949,-119.0033 229.4948,-109.0034 225.9949,-119.0034 232.9949,-119.0033"/>
+<text text-anchor="middle" x="233.9948" y="-130.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 6 -->
+<g id="node6" class="node">
+<title>6</title>
+<ellipse fill="none" stroke="#000000" cx="323.4948" cy="-18" rx="122.3786" ry="18"/>
+<text text-anchor="middle" x="323.4948" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">4: l.append((l[(&#45; 1)] + l[(&#45; 2)]))</text>
+</g>
+<!-- 6&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>6&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M334.9509,-36.1976C345.442,-55.3981 357.5161,-86.0019 344.4948,-109 332.4496,-130.2742 310.9389,-145.7046 289.7539,-156.5061"/>
+<polygon fill="#000000" stroke="#000000" points="288.2139,-153.363 280.723,-160.8555 291.2513,-159.6697 288.2139,-153.363"/>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M252.2496,-73.3287C264.3986,-63.8939 279.5238,-52.1477 292.7089,-41.9082"/>
+<polygon fill="#000000" stroke="#000000" points="294.8725,-44.6595 300.6238,-35.7615 290.5789,-39.1309 294.8725,-44.6595"/>
+</g>
+</g>
+</svg>
+
+</div>
+
 </div>
 
         
@@ -12318,7 +14047,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/00_Table_of_Contents.ipynb" target=_blank)>Last change: 2019-01-29 16:29:55+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ControlFlow.ipynb" target=_blank)>Last change: 2019-01-29 16:35:43+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -12334,19 +14063,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/00_Table_of_Contents.html">Generating Software Tests</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/00_Table_of_Contents.html">https://www.fuzzingbook.org/html/00_Table_of_Contents.html</a>.  Retrieved 2019-01-29 16:29:55+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/ControlFlow.html">Control Flow Graph</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/ControlFlow.html">https://www.fuzzingbook.org/html/ControlFlow.html</a>.  Retrieved 2019-01-29 16:35:43+01:00.
 </p>
 <pre>
-@incollection{fuzzingbook2019:00_Table_of_Contents,
+@incollection{fuzzingbook2019:ControlFlow,
     author = {Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler},
     booktitle = {Generating Software Tests},
-    title = {Generating Software Tests},
+    title = {Control Flow Graph},
     year = {2019},
     publisher = {Saarland University},
-    howpublished = {\url{https://www.fuzzingbook.org/html/00_Table_of_Contents.html}},
-    note = {Retrieved 2019-01-29 16:29:55+01:00},
-    url = {https://www.fuzzingbook.org/html/00_Table_of_Contents.html},
-    urldate = {2019-01-29 16:29:55+01:00}
+    howpublished = {\url{https://www.fuzzingbook.org/html/ControlFlow.html}},
+    note = {Retrieved 2019-01-29 16:35:43+01:00},
+    url = {https://www.fuzzingbook.org/html/ControlFlow.html},
+    urldate = {2019-01-29 16:35:43+01:00}
 }
 </pre>
 </div>
