@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2018-12-30 13:22:18+01:00
+# Last change: 2019-01-29 16:12:25+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -559,7 +559,7 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'curl -O http://ftp.gnu.org/gnu/bc/bc-1.07.1.tar.gz')
+    os.system(r'curl -O mirrors.kernel.org/gnu/bc/bc-1.07.1.tar.gz')
 
 
 if __name__ == "__main__":

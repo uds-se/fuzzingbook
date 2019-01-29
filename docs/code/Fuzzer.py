@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2019-01-22 02:19:57-08:00
+# Last change: 2019-01-28 15:50:20+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -36,6 +36,18 @@ if __name__ == "__main__":
 
 
 
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+
+if __package__ is None or __package__ == "":
+    import Intro_Testing
+else:
+    from . import Intro_Testing
+
+
 # ## A Testing Assignment
 
 if __name__ == "__main__":
@@ -50,12 +62,6 @@ if __name__ == "__main__":
     print('\n## A Simple Fuzzer')
 
 
-
-
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
 
 
 import random
@@ -324,8 +330,10 @@ if __name__ == "__main__":
         """)
 
 
+from fuzzingbook_utils import print_file
+
 if __name__ == "__main__":
-    print(open("program.c").read())
+    print_file("program.c")
 
 
 if __name__ == "__main__":
@@ -357,31 +365,20 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    s = ("<space for reply>" + fuzzer(100)
+    secrets = ("<space for reply>" + fuzzer(100)
          + "<secret-certificate>" + fuzzer(100)
          + "<secret-key>" + fuzzer(100) + "<other-secrets>")
 
 
-
 if __name__ == "__main__":
     uninitialized_memory_marker = "deadbeef"
-    while len(s) < 2048:
-        s += uninitialized_memory_marker
+    while len(secrets) < 2048:
+        secrets += uninitialized_memory_marker
 
 
-if __name__ == "__main__":
-    memory = []
-    for c in s:
-        memory.append(c)
-
-
-def heartbeat(reply, length):
-    global memory
-
+def heartbeat(reply, length, memory):
     # Store reply in memory
-    for i in range(len(reply)):
-        memory[i] = reply[i]
-    memory[i + 1] = '\n'
+    memory = reply + memory[len(reply):]
 
     # Send back heartbeat
     s = ""
@@ -389,17 +386,16 @@ def heartbeat(reply, length):
         s += memory[i]
     return s
 
-
 if __name__ == "__main__":
-    heartbeat("potato", 6)
-
-
-if __name__ == "__main__":
-    heartbeat("bird", 4)
+    heartbeat("potato", 6, memory=secrets)
 
 
 if __name__ == "__main__":
-    heartbeat("hat", 500)
+    heartbeat("bird", 4, memory=secrets)
+
+
+if __name__ == "__main__":
+    heartbeat("hat", 500, memory=secrets)
 
 
 if __package__ is None or __package__ == "":
@@ -411,7 +407,7 @@ else:
 if __name__ == "__main__":
     with ExpectError():
         for i in range(10):
-            s = heartbeat(fuzzer(), random.randint(1, 500))
+            s = heartbeat(fuzzer(), random.randint(1, 500), memory=secrets)
             assert not s.find(uninitialized_memory_marker)
             assert not s.find("secret")
 
