@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2019-01-05 20:04:12+01:00
+# Last change: 2019-01-25 19:31:44+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -34,6 +34,18 @@ if __name__ == "__main__":
     print('# Fuzzing with Grammars')
 
 
+
+
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+
+if __package__ is None or __package__ == "":
+    import Fuzzer
+else:
+    from . import Fuzzer
 
 
 # ## Input Languages
@@ -74,12 +86,6 @@ if __name__ == "__main__":
     print('\n## Representing Grammars in Python')
 
 
-
-
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
 
 
 DIGIT_GRAMMAR = {
@@ -418,9 +424,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from MutationFuzzer import MutationFuzzer
+    from MutationFuzzer import MutationFuzzer  # minor dependency
 else:
-    from .MutationFuzzer import MutationFuzzer
+    from .MutationFuzzer import MutationFuzzer  # minor dependency
 
 
 if __name__ == "__main__":

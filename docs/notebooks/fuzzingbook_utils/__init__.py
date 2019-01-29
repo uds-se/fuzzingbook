@@ -31,6 +31,25 @@ class YouTubeVideo(IPython.display.YouTubeVideo):
         super().__init__(video_id, width=640, height=360, **kwargs)
 
 
+# Checking for inheritance conflicts
+
+# Multiple inheritance is a tricky thing.  If you have two classes $A'$ and $A''$ which both inherit from $A$, the same method $m()$ of $A$ may be overloaded in both $A'$ and $A''$.  If one now inherits from _both_ $A'$ and $A''$, and calls $m()$, which of the $m()$ implementations should be called?  Python "resolves" this conflict by simply invoking the one $m()$ method in the class one inherits from first.
+# To avoid such conflicts, one can check whether the order in which one inherits makes a difference.  So try this method to compare the attributes with each other; if they refer to different code, you have to resolve the conflict.
+
+from inspect import getattr_static
+
+def inheritance_conflicts(c1, c2):
+    """Return attributes defined differently in classes c1 and c2"""
+    class c1c2(c1, c2):
+        pass
+
+    class c2c1(c2, c1):
+        pass
+
+    return [attr for attr in dir(c1c2) if getattr_static(
+        c1c2, attr) != getattr_static(c2c1, attr)]
+
+
   
 # Printing files with syntax highlighting
 def print_file(filename, lexer=None):
