@@ -2,7 +2,7 @@
 # This file defines the chapter files to be included
 
 # Most recent chapter
-NEW_CHAPTERS = Carver.ipynb
+NEW_CHAPTERS = Reducer.ipynb
 
 # Chapters to include in the book, in this order
 
