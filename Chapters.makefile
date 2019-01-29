@@ -30,17 +30,17 @@ SYNTACTICAL_PART = \
 	GrammarCoverageFuzzer.ipynb \
 	Parser.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
-	GeneratorGrammarFuzzer.ipynb
-SYNTACTICAL_PART_READY = \
+	GeneratorGrammarFuzzer.ipynb \
 	Reducer.ipynb
+SYNTACTICAL_PART_READY = 
 SYNTACTICAL_PART_TODO =
 	
 SEMANTICAL_PART = 
 SEMANTICAL_PART_READY = \
 	04_Semantical_Fuzzing.ipynb \
 	GrammarMiner.ipynb
-SEMANTICAL_PART_TODO = \
 	InformationFlow.ipynb \
+SEMANTICAL_PART_TODO = \
 	# SymbolicFuzzer.ipynb
 
 DOMAINS_PART = \
