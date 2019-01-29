@@ -65,6 +65,7 @@ MANAGEMENT_PART_TODO = \
 APPENDICES = \
 	ExpectError.ipynb \
 	Timer.ipynb \
+	ControlFlow.ipynb \
 	RailroadDiagrams.ipynb
 
 # Additional notebooks for special pages (not to be included in distributions)
