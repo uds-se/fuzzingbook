@@ -44,6 +44,7 @@ menu_start = r"""
                <ul>
                    <li><a href="__SITE_HTML__html/ExpectError.html">Error Handling</a></li>
                    <li><a href="__SITE_HTML__html/Timer.html">Timer</a></li>
+                   <li><a href="__SITE_HTML__html/ControlFlow.html">Control Flow Graph</a></li>
                    <li><a href="__SITE_HTML__html/00_Index.html">Index (beta)</a></i></li>
                </ul>
            </li>
