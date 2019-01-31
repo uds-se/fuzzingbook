@@ -38,8 +38,8 @@ SYNTACTICAL_PART_TODO =
 SEMANTICAL_PART = 
 SEMANTICAL_PART_READY = \
 	04_Semantical_Fuzzing.ipynb \
-	GrammarMiner.ipynb
-	InformationFlow.ipynb \
+	GrammarMiner.ipynb \
+	InformationFlow.ipynb
 SEMANTICAL_PART_TODO = \
 	# SymbolicFuzzer.ipynb
 
