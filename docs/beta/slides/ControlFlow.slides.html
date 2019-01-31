@@ -13823,10 +13823,11 @@ a.anchor-link {
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Control-Flow-Graph">Control Flow Graph<a class="anchor-link" href="#Control-Flow-Graph">&#182;</a></h2><p>The class <code>PyCFG</code> allows one to obtain the control flow graph.</p>
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ControlFlow</span> <span class="kn">import</span> <span class="n">PyCFG</span>
-
-<span class="n">cfg</span> <span class="o">=</span> <span class="n">PyCFG</span><span class="o">.</span><span class="n">gen_cfg</span><span class="p">(</span><span class="n">function_source</span><span class="p">)</span>
-<span class="n">graph</span> <span class="o">=</span> <span class="n">PyCFG</span><span class="o">.</span><span class="n">to_graph</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ControlFlow</span> <span class="kn">import</span> <span class="n">gen_cfg</span><span class="p">,</span> <span class="n">to_graph</span>
+<span class="kn">from</span> <span class="nn">graphviz</span> <span class="kn">import</span> <span class="n">Source</span>
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">gen_cfg</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">my_function</span><span class="p">))</span>
+<span class="n">graph</span> <span class="o">=</span> <span class="n">to_graph</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+<span class="n">Source</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -13917,7 +13918,8 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="CFGNode">CFGNode<a class="anchor-link" href="#CFGNode">&#182;</a></h3><p>We start with the <code>CFGNode</code> representing each node in the control flow graph.</p>
+<h3 id="CFGNode">CFGNode<a class="anchor-link" href="#CFGNode">&#182;</a></h3><p>We start with the <code>CFGNode</code> representing each node in the control flow graph.
+\todo{Augmented and annotated assignments (<code>a += 1</code>), (<code>a:int = 1</code>)}.</p>
 
 </div>
 </div>
@@ -13936,12 +13938,7 @@ a.anchor-link {
         <span class="bp">self</span><span class="o">.</span><span class="n">update_children</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span>  <span class="c1"># requires self.rid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calls</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_child_annotation</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># one shot annotation for branches (if)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">child_node_annotations</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="nf">set_oneshot_annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_child_annotation</span> <span class="o">=</span> <span class="n">a</span>
-        
     <span class="k">def</span> <span class="nf">i</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rid</span><span class="p">)</span>
 
@@ -13952,18 +13949,12 @@ a.anchor-link {
     <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-        <span class="c1"># the current annotation is in self._child_annotation</span>
-        <span class="c1"># it is a oneshot annotation: essentially True/False</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_child_annotation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># there can be only one annotation to an edge to c.rid</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">child_node_annotations</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">rid</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_child_annotation</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_child_annotation</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">lineno</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ast_node</span><span class="o">.</span><span class="n">lineno</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="s1">&#39;lineno&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;id:</span><span class="si">%d</span><span class="s2"> line[</span><span class="si">%d</span><span class="s2">] parents: </span><span class="si">%s</span><span class="s2"> : </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="k">return</span> <span class="s2">&quot;id:</span><span class="si">%d</span><span class="s2"> line[</span><span class="si">%d</span><span class="s2">] parents: </span><span class="si">%s</span><span class="s2"> : </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineno</span><span class="p">(),</span> <span class="nb">str</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">rid</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parents</span><span class="p">]),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">())</span>
 
@@ -14108,16 +14099,16 @@ a.anchor-link {
     <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">walk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">walk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;on_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">node</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
             <span class="n">fn</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">)</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">fn</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">v</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">myparents</span>
 
-    <span class="k">def</span> <span class="nf">on_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Module(stmt* body)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -14128,7 +14119,7 @@ a.anchor-link {
             <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">p</span>
 
-    <span class="k">def</span> <span class="nf">on_assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign(expr* targets, expr value)</span>
 <span class="sd">        TODO: AugAssign(expr target, operator op, expr value)</span>
@@ -14143,10 +14134,10 @@ a.anchor-link {
 
         <span class="k">return</span> <span class="n">p</span>
 
-    <span class="k">def</span> <span class="nf">on_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span> <span class="n">ast</span><span class="o">=</span><span class="n">node</span><span class="p">)]</span>
 
-    <span class="k">def</span> <span class="nf">on_break</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_break</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="n">parent</span> <span class="o">=</span> <span class="n">myparents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">while</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;exit_nodes&#39;</span><span class="p">):</span>
             <span class="c1"># we have ordered parents</span>
@@ -14161,7 +14152,7 @@ a.anchor-link {
         <span class="c1"># break doesnt have immediate children</span>
         <span class="k">return</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="nf">on_continue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_continue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="n">parent</span> <span class="o">=</span> <span class="n">myparents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">while</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;exit_nodes&#39;</span><span class="p">):</span>
             <span class="c1"># we have ordered parents</span>
@@ -14176,9 +14167,9 @@ a.anchor-link {
         <span class="c1"># for the just next node</span>
         <span class="k">return</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="nf">on_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="c1"># node.target in node.iter: node.body</span>
-        <span class="c1"># TODO: The For loop in python (no else) can be translated</span>
+        <span class="c1"># The For loop in python (no else) can be translated</span>
         <span class="c1"># as follows:</span>
         <span class="c1"># </span>
         <span class="c1"># for a in iterator:</span>
@@ -14189,24 +14180,24 @@ a.anchor-link {
         <span class="c1">#     a = next(__iv)</span>
         <span class="c1">#     mystatements</span>
         
+        <span class="n">init_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span>
+            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;__iv = iter(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">iter</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">init_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">iter</span><span class="p">)</span>
+        
         <span class="n">_test_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
-            <span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span>
-            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;_for: True if </span><span class="si">%s</span><span class="s1"> else False&#39;</span> <span class="o">%</span> <span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span>
-                <span class="n">node</span><span class="o">.</span><span class="n">iter</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="n">init_node</span><span class="p">],</span>
+            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;_for: __iv.__length__hint__() &gt; 0&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">_test_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
 
         <span class="c1"># we attach the label node here so that break can find it.</span>
         <span class="n">_test_node</span><span class="o">.</span><span class="n">exit_nodes</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">test_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">iter</span><span class="p">,</span> <span class="p">[</span><span class="n">_test_node</span><span class="p">])</span>
 
-        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
-        <span class="n">extract_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
-            <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="n">_test_node</span><span class="p">],</span>
-            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = </span><span class="si">%s</span><span class="s1">.shift()&#39;</span> <span class="o">%</span>
-                          <span class="p">(</span><span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
-                           <span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">iter</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">extract_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">_test_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">)</span>
+        <span class="n">extract_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">test_node</span><span class="p">,</span>
+            <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> = next(__iv)&#39;</span> <span class="o">%</span> <span class="n">astunparse</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">extract_node</span><span class="o">.</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">iter</span><span class="p">)</span>
 
+        
         <span class="c1"># now we evaluate the body, one at a time.</span>
         <span class="n">p1</span> <span class="o">=</span> <span class="p">[</span><span class="n">extract_node</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
@@ -14215,10 +14206,9 @@ a.anchor-link {
         <span class="c1"># the test node is looped back at the end of processing.</span>
         <span class="n">_test_node</span><span class="o">.</span><span class="n">add_parents</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
 
-        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_test_node</span><span class="o">.</span><span class="n">exit_nodes</span> <span class="o">+</span> <span class="n">test_node</span>
 
-    <span class="k">def</span> <span class="nf">on_while</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_while</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="c1"># For a while, the earliest parent is the node.test</span>
         <span class="n">_test_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
             <span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span>
@@ -14232,7 +14222,6 @@ a.anchor-link {
 
         <span class="c1"># now we evaluate the body, one at a time.</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
         <span class="n">p1</span> <span class="o">=</span> <span class="n">test_node</span>
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
             <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">p1</span><span class="p">)</span>
@@ -14241,10 +14230,9 @@ a.anchor-link {
         <span class="n">_test_node</span><span class="o">.</span><span class="n">add_parents</span><span class="p">(</span><span class="n">p1</span><span class="p">)</span>
 
         <span class="c1"># link label node back to the condition.</span>
-        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_test_node</span><span class="o">.</span><span class="n">exit_nodes</span> <span class="o">+</span> <span class="n">test_node</span>
 
-    <span class="k">def</span> <span class="nf">on_if</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_if</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="n">_test_node</span> <span class="o">=</span> <span class="n">CFGNode</span><span class="p">(</span>
             <span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span>
             <span class="n">ast</span><span class="o">=</span><span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span>
@@ -14253,29 +14241,27 @@ a.anchor-link {
         <span class="n">test_node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">test</span><span class="p">,</span> <span class="p">[</span><span class="n">_test_node</span><span class="p">])</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="n">g1</span> <span class="o">=</span> <span class="n">test_node</span>
-        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
             <span class="n">g1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">g1</span><span class="p">)</span>
         <span class="n">g2</span> <span class="o">=</span> <span class="n">test_node</span>
-        <span class="n">test_node</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_oneshot_annotation</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">orelse</span><span class="p">:</span>
             <span class="n">g2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">g2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">g1</span> <span class="o">+</span> <span class="n">g2</span>
 
-    <span class="k">def</span> <span class="nf">on_binop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_binop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">myparents</span><span class="p">)</span>
         <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="n">left</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">right</span>
 
-    <span class="k">def</span> <span class="nf">on_compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_compare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="n">myparents</span><span class="p">)</span>
         <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">comparators</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">left</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">right</span>
 
-    <span class="k">def</span> <span class="nf">on_unaryop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_unaryop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">operand</span><span class="p">,</span> <span class="n">myparents</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">on_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">get_func</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ast</span><span class="o">.</span><span class="n">Name</span><span class="p">:</span>
                 <span class="n">mid</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">id</span>
@@ -14302,11 +14288,11 @@ a.anchor-link {
             <span class="n">c</span><span class="o">.</span><span class="n">calllink</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="n">p</span>
 
-    <span class="k">def</span> <span class="nf">on_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="n">CFGNode</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">myparents</span><span class="p">,</span> <span class="n">ast</span><span class="o">=</span><span class="n">node</span><span class="p">)]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">on_return</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_return</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">myparents</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
             <span class="n">parent</span> <span class="o">=</span> <span class="n">myparents</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -14326,7 +14312,7 @@ a.anchor-link {
         <span class="c1"># return doesnt have immediate children</span>
         <span class="k">return</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="nf">on_functiondef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">,</span> <span class="n">annot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_functiondef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">myparents</span><span class="p">):</span>
         <span class="c1"># a function definition does not actually continue the thread of</span>
         <span class="c1"># control flow</span>
         <span class="c1"># name, args, body, decorator_list, returns</span>
@@ -14520,8 +14506,9 @@ a.anchor-link {
     <span class="k">return</span> <span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">founder</span><span class="o">.</span><span class="n">ast_node</span><span class="o">.</span><span class="n">lineno</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">last_node</span><span class="o">.</span><span class="n">ast_node</span><span class="o">.</span><span class="n">lineno</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">to_graph</span><span class="p">(</span><span class="n">cache</span><span class="p">,</span> <span class="n">arcs</span><span class="o">=</span><span class="p">[]):</span>
-    <span class="n">graph</span> <span class="o">=</span> <span class="n">Digraph</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s1">&#39;The Round Table&#39;</span><span class="p">)</span>
-    <span class="n">colors</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">}</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">Digraph</span><span class="p">(</span><span class="n">comment</span><span class="o">=</span><span class="s1">&#39;Control Flow Graph&#39;</span><span class="p">)</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">}</span>
+    <span class="n">kind</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;F&#39;</span><span class="p">}</span>
     <span class="n">cov_lines</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">arcs</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">nid</span><span class="p">,</span> <span class="n">cnode</span> <span class="ow">in</span> <span class="n">cache</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">lineno</span> <span class="o">=</span> <span class="n">cnode</span><span class="o">.</span><span class="n">lineno</span><span class="p">()</span>
@@ -14551,11 +14538,12 @@ a.anchor-link {
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">a</span> <span class="o">=</span> <span class="n">pn</span><span class="o">.</span><span class="n">child_node_annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cnode</span><span class="o">.</span><span class="n">rid</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">a</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
+                <span class="n">order</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="o">.</span><span class="n">i</span><span class="p">():</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">children</span><span class="p">)}</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
                     <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">o</span> <span class="o">=</span> <span class="n">order</span><span class="p">[</span><span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">()]</span>
+                    <span class="n">graph</span><span class="o">.</span><span class="n">edge</span><span class="p">(</span><span class="n">pn</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">cnode</span><span class="o">.</span><span class="n">i</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">o</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">kind</span><span class="p">[</span><span class="n">o</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">graph</span>
 </pre></div>
 
@@ -15535,28 +15523,28 @@ a.anchor-link {
 <!-- Generated by graphviz version 2.40.1 (20161225.0304)
  -->
 <!-- Title: %3 Pages: 1 -->
-<svg width="589pt" height="524pt"
- viewBox="0.00 0.00 588.58 524.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 520)">
+<svg width="589pt" height="597pt"
+ viewBox="0.00 0.00 588.58 597.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 593)">
 <title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-520 584.5767,-520 584.5767,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-593 584.5767,-593 584.5767,4 -4,4"/>
 <!-- 1 -->
 <g id="node1" class="node">
 <title>1</title>
-<ellipse fill="none" stroke="#000000" cx="291.2405" cy="-498" rx="111.5806" ry="18"/>
-<text text-anchor="middle" x="291.2405" y="-494.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: enter: compute_gcd(x, y)</text>
+<ellipse fill="none" stroke="#000000" cx="276.2405" cy="-571" rx="111.5806" ry="18"/>
+<text text-anchor="middle" x="276.2405" y="-567.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: enter: compute_gcd(x, y)</text>
 </g>
 <!-- 3 -->
 <g id="node4" class="node">
 <title>3</title>
-<ellipse fill="none" stroke="#000000" cx="291.2405" cy="-425" rx="55.4913" ry="18"/>
-<text text-anchor="middle" x="291.2405" y="-421.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: if: (x &gt; y)</text>
+<ellipse fill="none" stroke="#000000" cx="276.2405" cy="-498" rx="55.4913" ry="18"/>
+<text text-anchor="middle" x="276.2405" y="-494.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: if: (x &gt; y)</text>
 </g>
 <!-- 1&#45;&gt;3 -->
 <g id="edge2" class="edge">
 <title>1&#45;&gt;3</title>
-<path fill="none" stroke="#000000" d="M291.2405,-479.9551C291.2405,-471.8828 291.2405,-462.1764 291.2405,-453.1817"/>
-<polygon fill="#000000" stroke="#000000" points="294.7406,-453.0903 291.2405,-443.0904 287.7406,-453.0904 294.7406,-453.0903"/>
+<path fill="none" stroke="#000000" d="M276.2405,-552.9551C276.2405,-544.8828 276.2405,-535.1764 276.2405,-526.1817"/>
+<polygon fill="#000000" stroke="#000000" points="279.7406,-526.0903 276.2405,-516.0904 272.7406,-526.0904 279.7406,-526.0903"/>
 </g>
 <!-- 2 -->
 <g id="node2" class="node">
@@ -15564,119 +15552,131 @@ a.anchor-link {
 <ellipse fill="none" stroke="#000000" cx="107.2405" cy="-105" rx="107.4815" ry="18"/>
 <text text-anchor="middle" x="107.2405" y="-101.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: exit: compute_gcd(x, y)</text>
 </g>
-<!-- 10 -->
+<!-- 11 -->
 <g id="node3" class="node">
-<title>10</title>
+<title>11</title>
 <ellipse fill="none" stroke="#000000" cx="130.2405" cy="-178" rx="61.99" ry="18"/>
 <text text-anchor="middle" x="130.2405" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">11: return gcd</text>
 </g>
-<!-- 10&#45;&gt;2 -->
+<!-- 11&#45;&gt;2 -->
 <g id="edge1" class="edge">
-<title>10&#45;&gt;2</title>
+<title>11&#45;&gt;2</title>
 <path fill="none" stroke="#000000" d="M124.5551,-159.9551C121.9841,-151.7951 118.887,-141.9652 116.0273,-132.8887"/>
 <polygon fill="#000000" stroke="#000000" points="119.2835,-131.5764 112.9402,-123.0904 112.6071,-133.68 119.2835,-131.5764"/>
 </g>
 <!-- 4 -->
 <g id="node5" class="node">
 <title>4</title>
-<ellipse fill="none" stroke="#000000" cx="228.2405" cy="-338" rx="53.8905" ry="18"/>
-<text text-anchor="middle" x="228.2405" y="-334.3" font-family="Times,serif" font-size="14.00" fill="#000000">4: small = y</text>
+<ellipse fill="none" stroke="#000000" cx="213.2405" cy="-411" rx="53.8905" ry="18"/>
+<text text-anchor="middle" x="213.2405" y="-407.3" font-family="Times,serif" font-size="14.00" fill="#000000">4: small = y</text>
 </g>
 <!-- 3&#45;&gt;4 -->
 <g id="edge3" class="edge">
 <title>3&#45;&gt;4</title>
-<path fill="none" stroke="#0000ff" d="M278.4915,-407.3943C269.4399,-394.8944 257.1405,-377.9096 246.9756,-363.8724"/>
-<polygon fill="#0000ff" stroke="#0000ff" points="249.6705,-361.6262 240.9705,-355.5796 244.0008,-365.7318 249.6705,-361.6262"/>
-<text text-anchor="middle" x="268.7405" y="-377.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+<path fill="none" stroke="#0000ff" d="M263.4915,-480.3943C254.4399,-467.8944 242.1405,-450.9096 231.9756,-436.8724"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="234.6705,-434.6262 225.9705,-428.5796 229.0008,-438.7318 234.6705,-434.6262"/>
+<text text-anchor="middle" x="253.7405" y="-450.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
 </g>
 <!-- 5 -->
 <g id="node6" class="node">
 <title>5</title>
-<ellipse fill="none" stroke="#000000" cx="354.2405" cy="-338" rx="53.8905" ry="18"/>
-<text text-anchor="middle" x="354.2405" y="-334.3" font-family="Times,serif" font-size="14.00" fill="#000000">6: small = x</text>
+<ellipse fill="none" stroke="#000000" cx="339.2405" cy="-411" rx="53.8905" ry="18"/>
+<text text-anchor="middle" x="339.2405" y="-407.3" font-family="Times,serif" font-size="14.00" fill="#000000">6: small = x</text>
 </g>
 <!-- 3&#45;&gt;5 -->
 <g id="edge4" class="edge">
 <title>3&#45;&gt;5</title>
-<path fill="none" stroke="#ff0000" d="M303.9895,-407.3943C313.0411,-394.8944 325.3404,-377.9096 335.5053,-363.8724"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="338.4801,-365.7318 341.5105,-355.5796 332.8105,-361.6262 338.4801,-365.7318"/>
-<text text-anchor="middle" x="330.2405" y="-377.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+<path fill="none" stroke="#ff0000" d="M288.9895,-480.3943C298.0411,-467.8944 310.3404,-450.9096 320.5053,-436.8724"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="323.4801,-438.7318 326.5105,-428.5796 317.8105,-434.6262 323.4801,-438.7318"/>
+<text text-anchor="middle" x="315.2405" y="-450.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
 </g>
 <!-- 6 -->
 <g id="node7" class="node">
 <title>6</title>
-<ellipse fill="none" stroke="#000000" cx="290.2405" cy="-265" rx="181.9677" ry="18"/>
-<text text-anchor="middle" x="290.2405" y="-261.3" font-family="Times,serif" font-size="14.00" fill="#000000">7: for: (True if range(1, (small + 1)) else False)</text>
+<ellipse fill="none" stroke="#000000" cx="275.2405" cy="-338" rx="139.9756" ry="18"/>
+<text text-anchor="middle" x="275.2405" y="-334.3" font-family="Times,serif" font-size="14.00" fill="#000000">7: __iv = iter(range(1, (small + 1)))</text>
 </g>
 <!-- 4&#45;&gt;6 -->
 <g id="edge5" class="edge">
 <title>4&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M243.249,-320.3287C250.7525,-311.4939 259.9775,-300.6323 268.2611,-290.8789"/>
-<polygon fill="#000000" stroke="#000000" points="271.1337,-292.9034 274.9395,-283.0157 265.7983,-288.3719 271.1337,-292.9034"/>
+<path fill="none" stroke="#000000" d="M228.249,-393.3287C235.7525,-384.4939 244.9775,-373.6323 253.2611,-363.8789"/>
+<polygon fill="#000000" stroke="#000000" points="256.1337,-365.9034 259.9395,-356.0157 250.7983,-361.3719 256.1337,-365.9034"/>
 </g>
 <!-- 5&#45;&gt;6 -->
 <g id="edge6" class="edge">
 <title>5&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M339.0734,-320.7C331.1983,-311.7175 321.4218,-300.5661 312.6898,-290.6062"/>
-<polygon fill="#000000" stroke="#000000" points="315.1912,-288.1502 305.9671,-282.9381 309.9277,-292.7649 315.1912,-288.1502"/>
-</g>
-<!-- 6&#45;&gt;10 -->
-<g id="edge12" class="edge">
-<title>6&#45;&gt;10</title>
-<path fill="none" stroke="#ff0000" d="M255.2011,-247.3315C243.9827,-241.5808 231.5427,-235.1053 220.2405,-229 202.5085,-219.4214 183.0284,-208.4405 166.7401,-199.1274"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="168.4667,-196.0829 158.0507,-194.1445 164.9845,-202.1553 168.4667,-196.0829"/>
-<text text-anchor="middle" x="224.2405" y="-217.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+<path fill="none" stroke="#000000" d="M324.0734,-393.7C316.1983,-384.7175 306.4218,-373.5661 297.6898,-363.6062"/>
+<polygon fill="#000000" stroke="#000000" points="300.1912,-361.1502 290.9671,-355.9381 294.9277,-365.7649 300.1912,-361.1502"/>
 </g>
 <!-- 7 -->
-<g id="node10" class="node">
+<g id="node8" class="node">
 <title>7</title>
-<ellipse fill="none" stroke="#000000" cx="402.2405" cy="-178" rx="131.8766" ry="18"/>
-<text text-anchor="middle" x="402.2405" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">7: i = range(1, (small + 1)).shift()</text>
+<ellipse fill="none" stroke="#000000" cx="275.2405" cy="-265" rx="144.0747" ry="18"/>
+<text text-anchor="middle" x="275.2405" y="-261.3" font-family="Times,serif" font-size="14.00" fill="#000000">7: for: (__iv.__length__hint__() &gt; 0)</text>
 </g>
 <!-- 6&#45;&gt;7 -->
-<g id="edge9" class="edge">
-<title>6&#45;&gt;7</title>
-<path fill="none" stroke="#0000ff" d="M313.447,-246.9735C330.116,-234.0253 352.7704,-216.4276 371.024,-202.2485"/>
-<polygon fill="#0000ff" stroke="#0000ff" points="373.3135,-204.902 379.0637,-196.0034 369.0193,-199.3739 373.3135,-204.902"/>
-<text text-anchor="middle" x="356.7405" y="-217.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
-</g>
-<!-- 9 -->
-<g id="node8" class="node">
-<title>9</title>
-<ellipse fill="none" stroke="#000000" cx="258.2405" cy="-18" rx="45.4919" ry="18"/>
-<text text-anchor="middle" x="258.2405" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">9: gcd = i</text>
-</g>
-<!-- 9&#45;&gt;6 -->
 <g id="edge7" class="edge">
-<title>9&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M256.3016,-36.1908C253.332,-68.6888 249.1823,-138.6856 261.2405,-196 264.238,-210.2477 270.167,-225.2415 275.8872,-237.599"/>
-<polygon fill="#000000" stroke="#000000" points="272.8688,-239.3972 280.3699,-246.8795 279.1721,-236.3526 272.8688,-239.3972"/>
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M275.2405,-319.9551C275.2405,-311.8828 275.2405,-302.1764 275.2405,-293.1817"/>
+<polygon fill="#000000" stroke="#000000" points="278.7406,-293.0903 275.2405,-283.0904 271.7406,-293.0904 278.7406,-293.0903"/>
+</g>
+<!-- 7&#45;&gt;11 -->
+<g id="edge13" class="edge">
+<title>7&#45;&gt;11</title>
+<path fill="none" stroke="#ff0000" d="M245.5477,-247.1843C222.5244,-233.3703 190.528,-214.1725 166.0798,-199.5036"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="167.8204,-196.4663 157.4447,-194.3225 164.2189,-202.4688 167.8204,-196.4663"/>
+<text text-anchor="middle" x="216.2405" y="-217.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
 </g>
 <!-- 8 -->
-<g id="node9" class="node">
+<g id="node11" class="node">
 <title>8</title>
-<ellipse fill="none" stroke="#000000" cx="425.2405" cy="-105" rx="155.1726" ry="18"/>
-<text text-anchor="middle" x="425.2405" y="-101.3" font-family="Times,serif" font-size="14.00" fill="#000000">8: if: (((x % i) == 0) and ((y % i) == 0))</text>
-</g>
-<!-- 8&#45;&gt;6 -->
-<g id="edge8" class="edge">
-<title>8&#45;&gt;6</title>
-<path fill="none" stroke="#ff0000" d="M492.5504,-121.2826C512.2749,-129.5203 531.6413,-141.7963 543.2405,-160 551.8384,-173.4935 552.9524,-183.2847 543.2405,-196 525.4069,-219.3487 461.2484,-236.6926 402.0082,-248.1519"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="401.3454,-244.7151 392.1691,-250.011 402.6451,-251.5934 401.3454,-244.7151"/>
-<text text-anchor="middle" x="553.2405" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
-</g>
-<!-- 8&#45;&gt;9 -->
-<g id="edge11" class="edge">
-<title>8&#45;&gt;9</title>
-<path fill="none" stroke="#0000ff" d="M391.4455,-87.3943C363.4092,-72.7885 323.6185,-52.0592 294.8347,-37.0641"/>
-<polygon fill="#0000ff" stroke="#0000ff" points="296.3907,-33.9283 285.905,-32.412 293.1566,-40.1363 296.3907,-33.9283"/>
-<text text-anchor="middle" x="355.7405" y="-57.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+<ellipse fill="none" stroke="#000000" cx="340.2405" cy="-178" rx="70.3881" ry="18"/>
+<text text-anchor="middle" x="340.2405" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">7: i = next(__iv)</text>
 </g>
 <!-- 7&#45;&gt;8 -->
 <g id="edge10" class="edge">
 <title>7&#45;&gt;8</title>
-<path fill="none" stroke="#000000" d="M407.9259,-159.9551C410.4968,-151.7951 413.5939,-141.9652 416.4536,-132.8887"/>
-<polygon fill="#000000" stroke="#000000" points="419.8739,-133.68 419.5408,-123.0904 413.1974,-131.5764 419.8739,-133.68"/>
+<path fill="none" stroke="#0000ff" d="M288.7085,-246.9735C298.0084,-234.5261 310.5183,-217.782 320.8834,-203.9087"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="323.8307,-205.8116 327.0121,-195.7057 318.2229,-201.6219 323.8307,-205.8116"/>
+<text text-anchor="middle" x="315.7405" y="-217.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 10 -->
+<g id="node9" class="node">
+<title>10</title>
+<ellipse fill="none" stroke="#000000" cx="258.2405" cy="-18" rx="45.4919" ry="18"/>
+<text text-anchor="middle" x="258.2405" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">9: gcd = i</text>
+</g>
+<!-- 10&#45;&gt;7 -->
+<g id="edge8" class="edge">
+<title>10&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M257.4585,-36.0065C256.3011,-68.216 254.8972,-137.7754 261.2405,-196 262.7298,-209.6703 265.6138,-224.6509 268.3791,-237.1502"/>
+<polygon fill="#000000" stroke="#000000" points="264.9881,-238.0218 270.6408,-246.9827 271.81,-236.4526 264.9881,-238.0218"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<ellipse fill="none" stroke="#000000" cx="425.2405" cy="-105" rx="155.1726" ry="18"/>
+<text text-anchor="middle" x="425.2405" y="-101.3" font-family="Times,serif" font-size="14.00" fill="#000000">8: if: (((x % i) == 0) and ((y % i) == 0))</text>
+</g>
+<!-- 9&#45;&gt;7 -->
+<g id="edge9" class="edge">
+<title>9&#45;&gt;7</title>
+<path fill="none" stroke="#ff0000" d="M429.0549,-123.1192C432.1416,-142.8147 433.8811,-174.3637 419.2405,-196 403.4666,-219.311 377.5541,-234.9849 352.0262,-245.4127"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="350.7313,-242.1608 342.658,-249.0217 353.2478,-248.6928 350.7313,-242.1608"/>
+<text text-anchor="middle" x="434.2405" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge12" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="#0000ff" d="M391.4455,-87.3943C363.4092,-72.7885 323.6185,-52.0592 294.8347,-37.0641"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="296.3907,-33.9283 285.905,-32.412 293.1566,-40.1363 296.3907,-33.9283"/>
+<text text-anchor="middle" x="355.7405" y="-57.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge11" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M360.3843,-160.7C371.1541,-151.4507 384.6014,-139.9018 396.4547,-129.7219"/>
+<polygon fill="#000000" stroke="#000000" points="399.0477,-132.1086 404.3536,-122.9381 394.487,-126.7982 399.0477,-132.1086"/>
 </g>
 </g>
 </svg>
@@ -15756,28 +15756,28 @@ a.anchor-link {
 <!-- Generated by graphviz version 2.40.1 (20161225.0304)
  -->
 <!-- Title: %3 Pages: 1 -->
-<svg width="454pt" height="350pt"
- viewBox="0.00 0.00 453.68 350.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 346)">
+<svg width="405pt" height="423pt"
+ viewBox="0.00 0.00 404.68 423.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 419)">
 <title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-346 449.684,-346 449.684,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-419 400.684,-419 400.684,4 -4,4"/>
 <!-- 1 -->
 <g id="node1" class="node">
 <title>1</title>
-<ellipse fill="none" stroke="#000000" cx="229.4948" cy="-324" rx="63.0888" ry="18"/>
-<text text-anchor="middle" x="229.4948" y="-320.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: enter: fib(n)</text>
+<ellipse fill="none" stroke="#000000" cx="193.4948" cy="-397" rx="63.0888" ry="18"/>
+<text text-anchor="middle" x="193.4948" y="-393.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: enter: fib(n)</text>
 </g>
 <!-- 3 -->
 <g id="node4" class="node">
 <title>3</title>
-<ellipse fill="none" stroke="#000000" cx="229.4948" cy="-251" rx="51.9908" ry="18"/>
-<text text-anchor="middle" x="229.4948" y="-247.3" font-family="Times,serif" font-size="14.00" fill="#000000">2: l = [0, 1]</text>
+<ellipse fill="none" stroke="#000000" cx="193.4948" cy="-324" rx="51.9908" ry="18"/>
+<text text-anchor="middle" x="193.4948" y="-320.3" font-family="Times,serif" font-size="14.00" fill="#000000">2: l = [0, 1]</text>
 </g>
 <!-- 1&#45;&gt;3 -->
 <g id="edge2" class="edge">
 <title>1&#45;&gt;3</title>
-<path fill="none" stroke="#000000" d="M229.4948,-305.9551C229.4948,-297.8828 229.4948,-288.1764 229.4948,-279.1817"/>
-<polygon fill="#000000" stroke="#000000" points="232.9949,-279.0903 229.4948,-269.0904 225.9949,-279.0904 232.9949,-279.0903"/>
+<path fill="none" stroke="#000000" d="M193.4948,-378.9551C193.4948,-370.8828 193.4948,-361.1764 193.4948,-352.1817"/>
+<polygon fill="#000000" stroke="#000000" points="196.9949,-352.0903 193.4948,-342.0904 189.9949,-352.0904 196.9949,-352.0903"/>
 </g>
 <!-- 2 -->
 <g id="node2" class="node">
@@ -15785,67 +15785,79 @@ a.anchor-link {
 <ellipse fill="none" stroke="#000000" cx="58.4948" cy="-18" rx="58.4896" ry="18"/>
 <text text-anchor="middle" x="58.4948" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">1: exit: fib(n)</text>
 </g>
-<!-- 7 -->
+<!-- 8 -->
 <g id="node3" class="node">
-<title>7</title>
+<title>8</title>
 <ellipse fill="none" stroke="#000000" cx="58.4948" cy="-91" rx="46.5926" ry="18"/>
 <text text-anchor="middle" x="58.4948" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">5: return l</text>
 </g>
-<!-- 7&#45;&gt;2 -->
+<!-- 8&#45;&gt;2 -->
 <g id="edge1" class="edge">
-<title>7&#45;&gt;2</title>
+<title>8&#45;&gt;2</title>
 <path fill="none" stroke="#000000" d="M58.4948,-72.9551C58.4948,-64.8828 58.4948,-55.1764 58.4948,-46.1817"/>
 <polygon fill="#000000" stroke="#000000" points="61.9949,-46.0903 58.4948,-36.0904 54.9949,-46.0904 61.9949,-46.0903"/>
 </g>
 <!-- 4 -->
 <g id="node5" class="node">
 <title>4</title>
-<ellipse fill="none" stroke="#000000" cx="229.4948" cy="-178" rx="155.9723" ry="18"/>
-<text text-anchor="middle" x="229.4948" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: for: (True if range((n &#45; 2)) else False)</text>
+<ellipse fill="none" stroke="#000000" cx="193.4948" cy="-251" rx="113.18" ry="18"/>
+<text text-anchor="middle" x="193.4948" y="-247.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: __iv = iter(range((n &#45; 2)))</text>
 </g>
 <!-- 3&#45;&gt;4 -->
 <g id="edge3" class="edge">
 <title>3&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M229.4948,-232.9551C229.4948,-224.8828 229.4948,-215.1764 229.4948,-206.1817"/>
-<polygon fill="#000000" stroke="#000000" points="232.9949,-206.0903 229.4948,-196.0904 225.9949,-206.0904 232.9949,-206.0903"/>
-</g>
-<!-- 4&#45;&gt;7 -->
-<g id="edge7" class="edge">
-<title>4&#45;&gt;7</title>
-<path fill="none" stroke="#ff0000" d="M194.8904,-160.3943C166.1826,-145.7885 125.4388,-125.0592 95.9656,-110.0641"/>
-<polygon fill="#ff0000" stroke="#ff0000" points="97.3218,-106.8272 86.8219,-105.412 94.1476,-113.0661 97.3218,-106.8272"/>
-<text text-anchor="middle" x="158.4948" y="-130.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
+<path fill="none" stroke="#000000" d="M193.4948,-305.9551C193.4948,-297.8828 193.4948,-288.1764 193.4948,-279.1817"/>
+<polygon fill="#000000" stroke="#000000" points="196.9949,-279.0903 193.4948,-269.0904 189.9949,-279.0904 196.9949,-279.0903"/>
 </g>
 <!-- 5 -->
-<g id="node7" class="node">
+<g id="node6" class="node">
 <title>5</title>
-<ellipse fill="none" stroke="#000000" cx="229.4948" cy="-91" rx="105.8812" ry="18"/>
-<text text-anchor="middle" x="229.4948" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: i = range((n &#45; 2)).shift()</text>
+<ellipse fill="none" stroke="#000000" cx="193.4948" cy="-178" rx="144.0747" ry="18"/>
+<text text-anchor="middle" x="193.4948" y="-174.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: for: (__iv.__length__hint__() &gt; 0)</text>
 </g>
 <!-- 4&#45;&gt;5 -->
-<g id="edge5" class="edge">
+<g id="edge4" class="edge">
 <title>4&#45;&gt;5</title>
-<path fill="none" stroke="#0000ff" d="M229.4948,-159.9735C229.4948,-148.1918 229.4948,-132.5607 229.4948,-119.1581"/>
-<polygon fill="#0000ff" stroke="#0000ff" points="232.9949,-119.0033 229.4948,-109.0034 225.9949,-119.0034 232.9949,-119.0033"/>
-<text text-anchor="middle" x="233.9948" y="-130.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+<path fill="none" stroke="#000000" d="M193.4948,-232.9551C193.4948,-224.8828 193.4948,-215.1764 193.4948,-206.1817"/>
+<polygon fill="#000000" stroke="#000000" points="196.9949,-206.0903 193.4948,-196.0904 189.9949,-206.0904 196.9949,-206.0903"/>
+</g>
+<!-- 5&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>5&#45;&gt;8</title>
+<path fill="none" stroke="#ff0000" d="M165.8498,-160.1843C144.1937,-146.2282 114.0106,-126.7768 91.162,-112.0522"/>
+<polygon fill="#ff0000" stroke="#ff0000" points="92.7896,-108.9373 82.4879,-106.4622 88.9977,-114.8213 92.7896,-108.9373"/>
+<text text-anchor="middle" x="138.4948" y="-130.8" font-family="Times,serif" font-size="14.00" fill="#000000">F</text>
 </g>
 <!-- 6 -->
-<g id="node6" class="node">
+<g id="node8" class="node">
 <title>6</title>
-<ellipse fill="none" stroke="#000000" cx="323.4948" cy="-18" rx="122.3786" ry="18"/>
-<text text-anchor="middle" x="323.4948" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">4: l.append((l[(&#45; 1)] + l[(&#45; 2)]))</text>
-</g>
-<!-- 6&#45;&gt;4 -->
-<g id="edge4" class="edge">
-<title>6&#45;&gt;4</title>
-<path fill="none" stroke="#000000" d="M334.9509,-36.1976C345.442,-55.3981 357.5161,-86.0019 344.4948,-109 332.4496,-130.2742 310.9389,-145.7046 289.7539,-156.5061"/>
-<polygon fill="#000000" stroke="#000000" points="288.2139,-153.363 280.723,-160.8555 291.2513,-159.6697 288.2139,-153.363"/>
+<ellipse fill="none" stroke="#000000" cx="193.4948" cy="-91" rx="70.3881" ry="18"/>
+<text text-anchor="middle" x="193.4948" y="-87.3" font-family="Times,serif" font-size="14.00" fill="#000000">3: i = next(__iv)</text>
 </g>
 <!-- 5&#45;&gt;6 -->
 <g id="edge6" class="edge">
 <title>5&#45;&gt;6</title>
-<path fill="none" stroke="#000000" d="M252.2496,-73.3287C264.3986,-63.8939 279.5238,-52.1477 292.7089,-41.9082"/>
-<polygon fill="#000000" stroke="#000000" points="294.8725,-44.6595 300.6238,-35.7615 290.5789,-39.1309 294.8725,-44.6595"/>
+<path fill="none" stroke="#0000ff" d="M193.4948,-159.9735C193.4948,-148.1918 193.4948,-132.5607 193.4948,-119.1581"/>
+<polygon fill="#0000ff" stroke="#0000ff" points="196.9949,-119.0033 193.4948,-109.0034 189.9949,-119.0034 196.9949,-119.0033"/>
+<text text-anchor="middle" x="197.9948" y="-130.8" font-family="Times,serif" font-size="14.00" fill="#000000">T</text>
+</g>
+<!-- 7 -->
+<g id="node7" class="node">
+<title>7</title>
+<ellipse fill="none" stroke="#000000" cx="274.4948" cy="-18" rx="122.3786" ry="18"/>
+<text text-anchor="middle" x="274.4948" y="-14.3" font-family="Times,serif" font-size="14.00" fill="#000000">4: l.append((l[(&#45; 1)] + l[(&#45; 2)]))</text>
+</g>
+<!-- 7&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>7&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M278.2147,-36.0651C281.2333,-55.1549 283.4059,-85.6672 272.4948,-109 263.9686,-127.2328 248.0779,-142.584 232.7715,-154.1431"/>
+<polygon fill="#000000" stroke="#000000" points="230.4606,-151.4935 224.3786,-160.1688 234.5431,-157.1798 230.4606,-151.4935"/>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M213.1027,-73.3287C223.2978,-64.1405 235.9254,-52.7601 247.0723,-42.7141"/>
+<polygon fill="#000000" stroke="#000000" points="249.4196,-45.3104 254.5048,-36.0157 244.7333,-40.1105 249.4196,-45.3104"/>
 </g>
 </g>
 </svg>
