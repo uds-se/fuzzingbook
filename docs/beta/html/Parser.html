@@ -12830,7 +12830,7 @@ It is an old but reliable model!
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0 valid strings, that is GrammarFuzzer generated 0.000000% valid entries from 1000 inputs
-Total time of 6.774539 seconds
+Total time of 6.406718 seconds
 </pre>
 </div>
 
@@ -20960,7 +20960,7 @@ x=10;y=20;z=(x+y)*(x-y)
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>61 valid strings, that is LangFuzzer generated 61.000000% valid entries
-Total time of 0.013047 seconds
+Total time of 0.012025 seconds
 </pre>
 </div>
 
@@ -20998,7 +20998,7 @@ Total time of 0.013047 seconds
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>4 valid strings, that is GrammarFuzzer generated 4.000000% valid entries
-Total time of 1.653911 seconds
+Total time of 1.561160 seconds
 </pre>
 </div>
 
@@ -22117,7 +22117,7 @@ SyntaxError: at &#39;aa&#39; (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The basic idea of Earley parsing is the following</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The basic idea of Earley parsing is the following:</p>
 <ul>
 <li>Start with the alternative expressions corresponding to the START_SYMBOL. These represent the possible ways to parse the string from a high level. Essentially each expression represents a parsing path. Queue each expression in our set of possible parses of the string. The parsed index of an expression is the part of expression that has already been recognized. In the beginning of parse, the parsed index of all expressions is at the beginning. Further, each letter gets a queue of expressions that recognizes that letter at that point in our parse.</li>
 <li>Examine our queue of possible parses and check if any of them start with a nonterminal. If it does, then that nonterminal needs to be recognized from the input before the given rule can be parsed. Hence, add the alternative expressions corresponding to the nonterminal to the queue. Do this recursively.</li>
@@ -22126,7 +22126,15 @@ SyntaxError: at &#39;aa&#39; (expected)
 <li>Continue this procedure recursively until all expressions that we have queued for the current letter have been processed. Then start processing the queue for the next letter.</li>
 </ul>
 <p>We explain each step in detail with examples in the coming sections.</p>
-<p>The parser uses dynamic programming to generate a table containing a <em>forest of possible parses</em> at each letter index – the table contains as many columns as there are letters in the input, and each column contains different parsing rules at various stages of the parse.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The parser uses dynamic programming to generate a table containing a <em>forest of possible parses</em> at each letter index – the table contains as many columns as there are letters in the input, and each column contains different parsing rules at various stages of the parse.</p>
 <p>For example, given an input <code>adcd</code>, the Column 0 would contain the following:</p>
 
 <pre><code>&lt;start&gt; : ● &lt;A&gt; &lt;B&gt;</code></pre>
@@ -22134,7 +22142,15 @@ SyntaxError: at &#39;aa&#39; (expected)
 
 <pre><code>&lt;A&gt; : ● a &lt;B&gt; c
 &lt;A&gt; : ● a &lt;A&gt;</code></pre>
-<p>Column 1 would contain the following, which represents the possible completion after reading <code>a</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Column 1 would contain the following, which represents the possible completion after reading <code>a</code>.</p>
 
 <pre><code>&lt;A&gt; : a ● &lt;B&gt; c
 &lt;A&gt; : a ● &lt;A&gt;
@@ -22143,24 +22159,56 @@ SyntaxError: at &#39;aa&#39; (expected)
 &lt;A&gt; : ● a &lt;B&gt; c
 &lt;A&gt; : ● a &lt;A&gt;
 &lt;D&gt; : ● d</code></pre>
-<p>Column 2 would contain the following after reading <code>d</code></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Column 2 would contain the following after reading <code>d</code></p>
 
 <pre><code>&lt;D&gt; : d ●
 &lt;B&gt; : &lt;D&gt; ●
 &lt;A&gt; : a &lt;B&gt; ● c</code></pre>
-<p>Similarly, Column 3 would contain the following after reading <code>c</code></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Similarly, Column 3 would contain the following after reading <code>c</code></p>
 
 <pre><code>&lt;A&gt; : a &lt;B&gt; c ●
 &lt;start&gt; : &lt;A&gt; ● &lt;B&gt;
 &lt;B&gt; : ● b &lt;C&gt;
 &lt;B&gt; : ● &lt;D&gt;
 &lt;D&gt; : ● d</code></pre>
-<p>Finally, Column 4 would contain the following after reading <code>d</code>, with the <code>●</code> at the end of the <code>&lt;start&gt;</code> rule indicating that the parse was successful.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Finally, Column 4 would contain the following after reading <code>d</code>, with the <code>●</code> at the end of the <code>&lt;start&gt;</code> rule indicating that the parse was successful.</p>
 
 <pre><code>&lt;D&gt; : d ●
 &lt;B&gt; : &lt;D&gt; ●
 &lt;start&gt; : &lt;A&gt; &lt;B&gt; ●</code></pre>
-<p>As you can see from above, we are essentially filling a table (a table is also called a <strong>chart</strong>) of entries based on each letter we read, and the grammar rules that can be applied. This chart gives the parser its other name -- Chart parsing.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As you can see from above, we are essentially filling a table (a table is also called a <strong>chart</strong>) of entries based on each letter we read, and the grammar rules that can be applied. This chart gives the parser its other name -- Chart parsing.</p>
 </div>
 </div>
 </div>
@@ -25357,8 +25405,8 @@ SyntaxError: at &#39;a&#39; (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;S&gt;&#39;}
-E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
+<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;S&gt;&#39;}
+E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 </pre>
 </div>
 
@@ -27310,16 +27358,8 @@ The <code>seq_1</code> and <code>seq_2</code> are arbitrary symbol sequences.</p
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Here is one way to visualize the chain.</p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here is one way to visualize the chain:</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <pre><code>&lt;C&gt; : seq_3 &lt;B&gt; ● (s_3, e)  
              |  constraints satisfied by &lt;C&gt; : seq_3 ● &lt;B&gt; (s_3, s_2)
             &lt;B&gt; : seq_2 &lt;A&gt; ● (s_2, e)  
@@ -27342,16 +27382,9 @@ The <code>seq_1</code> and <code>seq_2</code> are arbitrary symbol sequences.</p
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Note that the completions are in the same column (<code>e</code>), with each candiates with constraints satisfied in further and further earlier columns (as shown below).</p>
-</div>
-</div>
-</div>
-</div>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Note that the completions are in the same column (<code>e</code>), with each candidates with constraints satisfied 
+in further and further earlier columns (as shown below):</p>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <pre><code>&lt;C&gt; : seq_3 ● &lt;B&gt; (s_3, s_2)  --&gt;              &lt;C&gt; : seq_3 &lt;B&gt; ● (s_3, e)
                |
               &lt;B&gt; : seq_2 ● &lt;A&gt; (s_2, s_1) --&gt; &lt;B&gt; : seq_2 &lt;A&gt; ● (s_2, e)  
@@ -27758,7 +27791,7 @@ It should result in the following table:</p>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2019-01-25 19:35:36+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2019-02-03 16:53:14+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -27774,7 +27807,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2019-01-25 19:35:36+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing and Recombining Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2019-02-03 16:53:14+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:Parser,
@@ -27784,9 +27817,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Parser.html}},
-    note = {Retrieved 2019-01-25 19:35:36+01:00},
+    note = {Retrieved 2019-02-03 16:53:14+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Parser.html},
-    urldate = {2019-01-25 19:35:36+01:00}
+    urldate = {2019-02-03 16:53:14+01:00}
 }
 </pre>
 </div>
