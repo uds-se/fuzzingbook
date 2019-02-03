@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2019-01-31 12:20:00+01:00
+# Last change: 2019-02-03 16:19:53+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -82,6 +82,9 @@ def reset_registry():
 def register_node(node):
     node.rid = get_registry_idx()
     REGISTRY[node.rid] = node
+
+def get_registry():
+    return dict(REGISTRY)
 
 # ### CFGNode
 
@@ -587,7 +590,15 @@ def to_graph(cache, arcs=[]):
     cov_lines = set(i for i, j in arcs)
     for nid, cnode in cache.items():
         lineno = cnode.lineno()
-        graph.node(cnode.i(), "%d: %s" % (lineno, unhack(cnode.source())))
+        shape, peripheries = 'oval', '1'
+        if isinstance(cnode.ast_node, ast.AnnAssign):
+            if cnode.ast_node.target.id in {'_if', '_for', '_while'}:
+                shape = 'diamond'
+            elif cnode.ast_node.target.id in {'enter', 'exit'}:
+                shape, peripheries = 'oval', '2'
+        else:
+            shape = 'rectangle'
+        graph.node(cnode.i(), "%d: %s" % (lineno, unhack(cnode.source())), shape=shape, peripheries=peripheries)
         for pn in cnode.parents:
             plineno = pn.lineno()
             if hasattr(pn, 'calllink') and pn.calllink > 0 and not hasattr(
@@ -742,7 +753,6 @@ if __name__ == "__main__":
 
 
 def compute_gcd(x, y): 
-  
     if x > y: 
         small = y 
     else: 
@@ -777,6 +787,39 @@ def fib(n,):
 
 if __name__ == "__main__":
     graph = to_graph(gen_cfg(inspect.getsource(fib)))
+
+
+if __name__ == "__main__":
+    Source(graph)
+
+
+# #### quad_solver
+
+if __name__ == "__main__":
+    print('\n#### quad_solver')
+
+
+
+
+def quad_solver(a, b, c):
+    discriminant = b^2 - 4*a*c
+    r1, r2 = 0, 0
+    i1, i2 = 0, 0
+    if discriminant >= 0:
+        droot = math.sqrt(discriminant)
+        r1 = (-b + droot) / (2*a)
+        r2 = (-b - droot) / (2*a)
+    else:
+        droot = math.sqrt(-1 * discriminant)
+        droot_ = droot/(2*a)
+        r1, i1 = -b/(2*a), droot_
+        r2, i2 = -b/(2*a), -droot_
+    if i1 == 0 and i2 == 0:
+        return (r1, r2)
+    return ((r1,i1), (r2,i2))
+
+if __name__ == "__main__":
+    graph = to_graph(gen_cfg(inspect.getsource(quad_solver)))
 
 
 if __name__ == "__main__":
