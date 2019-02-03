@@ -40,14 +40,7 @@ menu_start = r"""
      <li class="has-sub"><a href="#"><span title="__BOOKTITLE__"><i class="fa fa-fw fa-bars"></i> </span><span class="menu_1">__BOOKTITLE_BETA__</span></a>
         <ol>
            <__STRUCTURED_ALL_CHAPTERS_MENU__>
-           <li class="has-sub"><a>Appendices <i class="fa fa-fw fa-caret-right"></i></a>
-               <ul>
-                   <li><a href="__SITE_HTML__html/ExpectError.html">Error Handling</a></li>
-                   <li><a href="__SITE_HTML__html/Timer.html">Timer</a></li>
-                   <li><a href="__SITE_HTML__html/ControlFlow.html">Control Flow Graph</a></li>
-                   <li><a href="__SITE_HTML__html/00_Index.html">Index (beta)</a></i></li>
-               </ul>
-           </li>
+           <li><a href="__SITE_HTML__html/00_Index.html">Index (beta)</a></i></li>
            <li><a href="__SITE_HTML__#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
      </li>
@@ -480,8 +473,8 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
     if menu_ipynb_file in new_chapters:
         file_title += new_suffix
         
-    is_part = file_title.startswith("Part ")
-    if is_part:
+    is_part = file_title.startswith("Part ") or file_title.startswith("Append")
+    if file_title.startswith("Part "):
         file_title = '<span class="part_number">' + \
             file_title.replace("Part ", "") \
             .replace(":", '</span>')

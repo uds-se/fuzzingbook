@@ -90,6 +90,7 @@ PUBLIC_SOURCES = $(PUBLIC_CHAPTERS:%=$(NOTEBOOKS)/%)
 READY_SOURCES = $(READY_CHAPTERS:%=$(NOTEBOOKS)/%)
 TODO_SOURCES = $(TODO_CHAPTERS:%=$(NOTEBOOKS)/%)
 NEW_SOURCES = $(NEW_CHAPTERS:%=$(NOTEBOOKS)/%)
+APPENDICES_SOURCES = $(APPENDICES:%=$(NOTEBOOKS)/%)
 
 # Where to place the pdf, html, slides
 PDF_TARGET      = pdf/
@@ -465,7 +466,7 @@ $(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(AD
 
 
 POST_HTML_OPTIONS = $(BETA_FLAG) \
-	--public-chapters="$(CHAPTER_SOURCES)" \
+	--public-chapters="$(CHAPTER_SOURCES) $(APPENDICES_SOURCES)" \
 	--ready-chapters="$(READY_SOURCES)" \
 	--todo-chapters="$(TODO_SOURCES)" \
 	--new-chapters="$(NEW_SOURCES)" \
