@@ -923,7 +923,7 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
 		
 # Index
 .PHONY: index
-index: $(DOCS_TARGET)/notebooks/00_Index.ipynb
+index: $(DOCS_TARGET)/notebooks/00_Index.ipynb $(DOCS_TARGET)/html/00_Index.html
 $(DOCS_TARGET)notebooks/00_Index.ipynb: utils/nbindex.py \
 	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
 	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
