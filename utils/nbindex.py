@@ -69,7 +69,7 @@ ITEMS = {
     ]
 }
 
-RE_LOCATION = re.compile(r"^#* (.*)")
+RE_LOCATION = re.compile(r"^#+ (.*)")
 
 index = {}
 
@@ -92,6 +92,7 @@ def collect_index(notebook_name):
                 else:
                     subtitle = match
                 fragment = title_to_fragment(match)
+                # print(match, file=sys.stderr)
 
         for (tp, regex, formatter) in ITEMS.get(cell.cell_type, []):
             for match in regex.findall(cell.source):
