@@ -29,11 +29,13 @@ SYNTACTICAL_PART = \
 	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
 	Parser.ipynb \
+	LangFuzzer.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
 	GeneratorGrammarFuzzer.ipynb \
 	Reducer.ipynb
-SYNTACTICAL_PART_READY = 
-SYNTACTICAL_PART_TODO =
+SYNTACTICAL_PART_READY =
+SYNTACTICAL_PART_TODO = \
+	EvoGrammarFuzzer.ipynb
 	
 SEMANTICAL_PART = 
 SEMANTICAL_PART_READY = \
