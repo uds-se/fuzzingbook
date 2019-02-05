@@ -49,9 +49,9 @@ DOMAINS_PART = \
 	05_Domain-Specific_Fuzzing.ipynb \
 	ConfigurationFuzzer.ipynb \
 	APIFuzzer.ipynb \
-	Carver.ipynb
+	Carver.ipynb \
+	WebFuzzer.ipynb
 DOMAINS_PART_READY = \
-	WebFuzzer.ipynb \
 	GUIFuzzer.ipynb
 DOMAINS_PART_TODO =
 
