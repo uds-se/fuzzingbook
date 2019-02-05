@@ -43,7 +43,7 @@ SEMANTICAL_PART_READY = \
 	GrammarMiner.ipynb \
 	InformationFlow.ipynb
 SEMANTICAL_PART_TODO = \
-	SymbolicFuzzing.ipynb
+	SymbolicFuzzer.ipynb
 
 DOMAINS_PART = \
 	05_Domain-Specific_Fuzzing.ipynb \
