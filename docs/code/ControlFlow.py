@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2019-01-29 16:35:43+01:00
+# Last change: 2019-02-03 16:19:53+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -83,6 +83,9 @@ def register_node(node):
     node.rid = get_registry_idx()
     REGISTRY[node.rid] = node
 
+def get_registry():
+    return dict(REGISTRY)
+
 # ### CFGNode
 
 if __name__ == "__main__":
@@ -100,12 +103,7 @@ class CFGNode(dict):
         self.update_children(parents)  # requires self.rid
         self.children = []
         self.calls = []
-        self._child_annotation = None  # one shot annotation for branches (if)
-        self.child_node_annotations = {}
 
-    def set_oneshot_annotation(self, a):
-        self._child_annotation = a
-        
     def i(self):
         return str(self.rid)
 
@@ -116,18 +114,12 @@ class CFGNode(dict):
     def add_child(self, c):
         if c not in self.children:
             self.children.append(c)
-        # the current annotation is in self._child_annotation
-        # it is a oneshot annotation: essentially True/False
-        if self._child_annotation is not None:
-            # there can be only one annotation to an edge to c.rid
-            self.child_node_annotations[c.rid] = self._child_annotation
-            self._child_annotation = None
 
     def lineno(self):
         return self.ast_node.lineno if hasattr(self.ast_node, 'lineno') else 0
 
     def __str__(self):
-        return "id:%d line[%d] parents: %s : %s %s" % (
+        return "id:%d line[%d] parents: %s : %s" % (
             self.rid, self.lineno(), str([p.rid for p in self.parents]),
             self.source())
 
@@ -206,16 +198,16 @@ class PyCFG:
     def parse(self, src):
         return ast.parse(src)
 
-    def walk(self, node, myparents, annot=None):
+    def walk(self, node, myparents):
         fname = "on_%s" % node.__class__.__name__.lower()
         if hasattr(self, fname):
             fn = getattr(self, fname)
-            v = fn(node, myparents, annot)
+            v = fn(node, myparents)
             return v
         else:
             return myparents
 
-    def on_module(self, node, myparents, annot):
+    def on_module(self, node, myparents):
         """
         Module(stmt* body)
         """
@@ -226,7 +218,7 @@ class PyCFG:
             p = self.walk(n, p)
         return p
 
-    def on_assign(self, node, myparents, annot):
+    def on_assign(self, node, myparents):
         """
         Assign(expr* targets, expr value)
         TODO: AugAssign(expr target, operator op, expr value)
@@ -241,10 +233,10 @@ class PyCFG:
 
         return p
 
-    def on_pass(self, node, myparents, annot):
+    def on_pass(self, node, myparents):
         return [CFGNode(parents=myparents, ast=node)]
 
-    def on_break(self, node, myparents, annot):
+    def on_break(self, node, myparents):
         parent = myparents[0]
         while not hasattr(parent, 'exit_nodes'):
             # we have ordered parents
@@ -259,7 +251,7 @@ class PyCFG:
         # break doesnt have immediate children
         return []
 
-    def on_continue(self, node, myparents, annot):
+    def on_continue(self, node, myparents):
         parent = myparents[0]
         while not hasattr(parent, 'exit_nodes'):
             # we have ordered parents
@@ -274,9 +266,9 @@ class PyCFG:
         # for the just next node
         return []
 
-    def on_for(self, node, myparents, annot):
+    def on_for(self, node, myparents):
         # node.target in node.iter: node.body
-        # TODO: The For loop in python (no else) can be translated
+        # The For loop in python (no else) can be translated
         # as follows:
         # 
         # for a in iterator:
@@ -287,24 +279,24 @@ class PyCFG:
         #     a = next(__iv)
         #     mystatements
         
+        init_node = CFGNode(parents=myparents,
+            ast=ast.parse('__iv = iter(%s)' % astunparse.unparse(node.iter).strip()).body[0])
+        ast.copy_location(init_node.ast_node, node.iter)
+        
         _test_node = CFGNode(
-            parents=myparents,
-            ast=ast.parse('_for: True if %s else False' % astunparse.unparse(
-                node.iter).strip()).body[0])
+            parents=[init_node],
+            ast=ast.parse('_for: __iv.__length__hint__() > 0').body[0])
         ast.copy_location(_test_node.ast_node, node)
 
         # we attach the label node here so that break can find it.
         _test_node.exit_nodes = []
         test_node = self.walk(node.iter, [_test_node])
 
-        test_node[0].set_oneshot_annotation('T')
-        extract_node = CFGNode(
-            parents=[_test_node],
-            ast=ast.parse('%s = %s.shift()' %
-                          (astunparse.unparse(node.target).strip(),
-                           astunparse.unparse(node.iter).strip())).body[0])
-        ast.copy_location(extract_node.ast_node, _test_node.ast_node)
+        extract_node = CFGNode(parents=test_node,
+            ast=ast.parse('%s = next(__iv)' % astunparse.unparse(node.target).strip()).body[0])
+        ast.copy_location(extract_node.ast_node, node.iter)
 
+        
         # now we evaluate the body, one at a time.
         p1 = [extract_node]
         for n in node.body:
@@ -313,10 +305,9 @@ class PyCFG:
         # the test node is looped back at the end of processing.
         _test_node.add_parents(p1)
 
-        test_node[0].set_oneshot_annotation('F')
         return _test_node.exit_nodes + test_node
 
-    def on_while(self, node, myparents, annot):
+    def on_while(self, node, myparents):
         # For a while, the earliest parent is the node.test
         _test_node = CFGNode(
             parents=myparents,
@@ -330,7 +321,6 @@ class PyCFG:
 
         # now we evaluate the body, one at a time.
         assert len(test_node) == 1
-        test_node[0].set_oneshot_annotation('T')
         p1 = test_node
         for n in node.body:
             p1 = self.walk(n, p1)
@@ -339,10 +329,9 @@ class PyCFG:
         _test_node.add_parents(p1)
 
         # link label node back to the condition.
-        test_node[0].set_oneshot_annotation('F')
         return _test_node.exit_nodes + test_node
 
-    def on_if(self, node, myparents, annot):
+    def on_if(self, node, myparents):
         _test_node = CFGNode(
             parents=myparents,
             ast=ast.parse(
@@ -351,29 +340,27 @@ class PyCFG:
         test_node = self.walk(node.test, [_test_node])
         assert len(test_node) == 1
         g1 = test_node
-        test_node[0].set_oneshot_annotation('T')
         for n in node.body:
             g1 = self.walk(n, g1)
         g2 = test_node
-        test_node[0].set_oneshot_annotation('F')
         for n in node.orelse:
             g2 = self.walk(n, g2)
         return g1 + g2
 
-    def on_binop(self, node, myparents, annot):
+    def on_binop(self, node, myparents):
         left = self.walk(node.left, myparents)
         right = self.walk(node.right, left)
         return right
 
-    def on_compare(self, node, myparents, annot):
+    def on_compare(self, node, myparents):
         left = self.walk(node.left, myparents)
         right = self.walk(node.comparators[0], left)
         return right
 
-    def on_unaryop(self, node, myparents, annot):
+    def on_unaryop(self, node, myparents):
         return self.walk(node.operand, myparents)
 
-    def on_call(self, node, myparents, annot):
+    def on_call(self, node, myparents):
         def get_func(node):
             if type(node.func) is ast.Name:
                 mid = node.func.id
@@ -400,11 +387,11 @@ class PyCFG:
             c.calllink = 0
         return p
 
-    def on_expr(self, node, myparents, annot):
+    def on_expr(self, node, myparents):
         p = [CFGNode(parents=myparents, ast=node)]
         return self.walk(node.value, p)
 
-    def on_return(self, node, myparents, annot):
+    def on_return(self, node, myparents):
         if type(myparents) is tuple:
             parent = myparents[0][0]
         else:
@@ -424,7 +411,7 @@ class PyCFG:
         # return doesnt have immediate children
         return []
 
-    def on_functiondef(self, node, myparents, annot):
+    def on_functiondef(self, node, myparents):
         # a function definition does not actually continue the thread of
         # control flow
         # name, args, body, decorator_list, returns
@@ -597,12 +584,21 @@ def get_cfg(src):
     return (g, cfg.founder.ast_node.lineno, cfg.last_node.ast_node.lineno)
 
 def to_graph(cache, arcs=[]):
-    graph = Digraph(comment='The Round Table')
-    colors = {'T': 'blue', 'F': 'red'}
+    graph = Digraph(comment='Control Flow Graph')
+    colors = {0: 'blue', 1: 'red'}
+    kind = {0: 'T', 1: 'F'}
     cov_lines = set(i for i, j in arcs)
     for nid, cnode in cache.items():
         lineno = cnode.lineno()
-        graph.node(cnode.i(), "%d: %s" % (lineno, unhack(cnode.source())))
+        shape, peripheries = 'oval', '1'
+        if isinstance(cnode.ast_node, ast.AnnAssign):
+            if cnode.ast_node.target.id in {'_if', '_for', '_while'}:
+                shape = 'diamond'
+            elif cnode.ast_node.target.id in {'enter', 'exit'}:
+                shape, peripheries = 'oval', '2'
+        else:
+            shape = 'rectangle'
+        graph.node(cnode.i(), "%d: %s" % (lineno, unhack(cnode.source())), shape=shape, peripheries=peripheries)
         for pn in cnode.parents:
             plineno = pn.lineno()
             if hasattr(pn, 'calllink') and pn.calllink > 0 and not hasattr(
@@ -628,11 +624,12 @@ def to_graph(cache, arcs=[]):
                 else:
                     graph.edge(pn.i(), cnode.i(), color='red')
             else:
-                a = pn.child_node_annotations.get(cnode.rid, None)
-                if a is not None:
-                    graph.edge(pn.i(), cnode.i(), color=colors[a], label=a)
-                else:
+                order = {c.i():i for i,c in enumerate(pn.children)}
+                if len(order) < 2:
                     graph.edge(pn.i(), cnode.i())
+                else:
+                    o = order[cnode.i()]
+                    graph.edge(pn.i(), cnode.i(), color=colors[o], label=kind[o])
     return graph
 
 def unhack(v):
@@ -756,7 +753,6 @@ if __name__ == "__main__":
 
 
 def compute_gcd(x, y): 
-  
     if x > y: 
         small = y 
     else: 
@@ -791,6 +787,39 @@ def fib(n,):
 
 if __name__ == "__main__":
     graph = to_graph(gen_cfg(inspect.getsource(fib)))
+
+
+if __name__ == "__main__":
+    Source(graph)
+
+
+# #### quad_solver
+
+if __name__ == "__main__":
+    print('\n#### quad_solver')
+
+
+
+
+def quad_solver(a, b, c):
+    discriminant = b^2 - 4*a*c
+    r1, r2 = 0, 0
+    i1, i2 = 0, 0
+    if discriminant >= 0:
+        droot = math.sqrt(discriminant)
+        r1 = (-b + droot) / (2*a)
+        r2 = (-b - droot) / (2*a)
+    else:
+        droot = math.sqrt(-1 * discriminant)
+        droot_ = droot/(2*a)
+        r1, i1 = -b/(2*a), droot_
+        r2, i2 = -b/(2*a), -droot_
+    if i1 == 0 and i2 == 0:
+        return (r1, r2)
+    return ((r1,i1), (r2,i2))
+
+if __name__ == "__main__":
+    graph = to_graph(gen_cfg(inspect.getsource(quad_solver)))
 
 
 if __name__ == "__main__":

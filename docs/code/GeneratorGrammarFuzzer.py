@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2019-01-25 19:54:31+01:00
+# Last change: 2019-02-04 15:48:12+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -698,9 +698,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from Parser import VAR_GRAMMAR  # minor dependency
+    from LangFuzzer import VAR_GRAMMAR  # minor dependency
 else:
-    from .Parser import VAR_GRAMMAR  # minor dependency
+    from .LangFuzzer import VAR_GRAMMAR  # minor dependency
 
 
 if __name__ == "__main__":
