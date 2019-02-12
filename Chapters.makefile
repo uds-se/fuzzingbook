@@ -1,8 +1,8 @@
 # Fuzzingbook Makefile
 # This file defines the chapter files to be included
 
-# Most recent chapter
-NEW_CHAPTERS = Reducer.ipynb
+# Chapter(s) to be marked as "new" in menu
+NEW_CHAPTERS = GUIFuzzer.ipynb
 
 # Chapters to include in the book, in this order
 
@@ -50,9 +50,9 @@ DOMAINS_PART = \
 	ConfigurationFuzzer.ipynb \
 	APIFuzzer.ipynb \
 	Carver.ipynb \
-	WebFuzzer.ipynb
-DOMAINS_PART_READY = \
+	WebFuzzer.ipynb \
 	GUIFuzzer.ipynb
+DOMAINS_PART_READY = 
 DOMAINS_PART_TODO =
 
 MANAGEMENT_PART = 
