@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2019-01-27 23:44:40-08:00
+# Last change: 2019-02-12 14:09:57+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -108,7 +108,7 @@ HTML_ORDER_FORM += """
 </body></html>
 """
 
-from IPython.core.display import display
+from IPython.display import display
 from fuzzingbook_utils import HTML
 
 if __name__ == "__main__":
