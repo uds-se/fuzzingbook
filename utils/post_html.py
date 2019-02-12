@@ -271,6 +271,9 @@ def add_links_to_imports(contents):
         elif module.startswith("IPython"):
             # Point to IPython doc
             link = "https://ipython.readthedocs.io/en/stable/api/generated/" + module + ".html"
+        elif module.startswith("selenium"):
+            # Point to Selenium doc
+            link = "https://selenium-python.readthedocs.io/"
         elif module[0].islower():
             # Point to Python doc
             link = "https://docs.python.org/3/library/" + module + ".html"
