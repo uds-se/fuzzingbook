@@ -986,6 +986,9 @@ docker-stop:
 	docker stop fuzzing-book-instance
 	
 
+## Getting rid of stray processes
+kill:
+	killall firefox-bin
 
 ## Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot *.fls *.fdb_latexmk \
