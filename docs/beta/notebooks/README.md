@@ -108,16 +108,17 @@ Here's our current release plan.  New chapters are coming out every Tuesday.
 1. [Reducing Failure-Inducing Inputs](Reducer.ipynb) – 2019-01-29
 1. [Web Testing](WebFuzzer.ipynb) – 2019-02-05
 1. [GUI Testing](WebFuzzer.ipynb) – 2019-02-12
-1. [Information Flow](InformationFlow.ipynb) – 2019-02-19
+1. [Tracking Information Flow](InformationFlow.ipynb) – 2019-02-19
 1. [Mining Input Grammars](GrammarMiner.ipynb) – 2019-02-26
 1. [Search-Based Fuzzing](SearchBasedFuzzer.ipynb) – 2019-03-05
 1. [Fuzzing with Input Fragments](LangFuzzer.ipynb) – 2019-03-12
 1. Fast Mutation-Based Fuzzing – 2019-03-19
 1. [Search-Based Grammar Fuzzing](SearchBasedGrammarFuzzer.ipynb) – 2019-03-26
 1. Symbolic Fuzzing – 2019-04-02
-1. Fuzzing in the Large – 2019-04-09
+1. Fuzzing with Natural Language - 2019-04-09
 1. Mutation Analysis – 2019-04-16
-1. When to Stop Fuzzing – 2019-04-23
+1. Fuzzing in the Large – 2019-04-23
+1. When to Stop Fuzzing – 2019-04-30
 
 See the [table of contents](00_Table_of_Contents.ipynb) for those chapters that are already done.
 
