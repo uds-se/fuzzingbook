@@ -37,10 +37,10 @@ SYNTACTICAL_PART_READY =
 SYNTACTICAL_PART_TODO = \
 	EvoGrammarFuzzer.ipynb
 	
-SEMANTICAL_PART = 
-SEMANTICAL_PART_READY = \
+SEMANTICAL_PART = \
 	04_Semantical_Fuzzing.ipynb \
-	GrammarMiner.ipynb \
+	GrammarMiner.ipynb
+SEMANTICAL_PART_READY = \
 	InformationFlow.ipynb
 SEMANTICAL_PART_TODO = \
 	SymbolicFuzzer.ipynb
