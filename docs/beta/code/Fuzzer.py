@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2019-01-31 14:22:51-08:00
+# Last change: 2019-02-19 10:16:57+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -330,7 +330,11 @@ if __name__ == "__main__":
         """)
 
 
-from fuzzingbook_utils import print_file
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import print_file
+else:
+    from .fuzzingbook_utils import print_file
+
 
 if __name__ == "__main__":
     print_file("program.c")

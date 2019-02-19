@@ -112,7 +112,11 @@ if __package__ is None or __package__ == "":
 else:
     from .Grammars import is_valid_grammar, EXPR_GRAMMAR, START_SYMBOL, crange, syntax_diagram
 
-from Grammars import opts, exp_string, exp_opt, set_opts
+if __package__ is None or __package__ == "":
+    from Grammars import opts, exp_string, exp_opt, set_opts
+else:
+    from .Grammars import opts, exp_string, exp_opt, set_opts
+
 
 PROBABILISTIC_EXPR_GRAMMAR = {
     "<start>":
@@ -803,7 +807,11 @@ if __package__ is None or __package__ == "":
 else:
     from .Coverage import Coverage, cgi_decode
 
-from Grammars import CGI_GRAMMAR
+if __package__ is None or __package__ == "":
+    from Grammars import CGI_GRAMMAR
+else:
+    from .Grammars import CGI_GRAMMAR
+
 
 if __name__ == "__main__":
     cgi_fuzzer = GrammarFuzzer(CGI_GRAMMAR)
@@ -982,7 +990,11 @@ if __name__ == "__main__":
 
 
 
-from fuzzingbook_utils import inheritance_conflicts
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import inheritance_conflicts
+else:
+    from .fuzzingbook_utils import inheritance_conflicts
+
 
 if __name__ == "__main__":
     inheritance_conflicts(GrammarCoverageFuzzer, ProbabilisticGrammarFuzzer)

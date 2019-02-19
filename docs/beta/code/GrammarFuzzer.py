@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2019-01-31 04:44:14-08:00
+# Last change: 2019-02-19 11:09:48+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -50,7 +50,11 @@ if __name__ == "__main__":
     random.seed(2001)
 
 
-from fuzzingbook_utils import unicode_escape
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import unicode_escape
+else:
+    from .fuzzingbook_utils import unicode_escape
+
 
 if __package__ is None or __package__ == "":
     from Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer, is_valid_grammar, exp_string, exp_opts
@@ -199,6 +203,7 @@ if __name__ == "__main__":
 
 
 from graphviz import Digraph
+
 from IPython.display import display
 
 import re

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2019-02-13 10:53:47+01:00
+# Last change: 2019-02-19 11:12:44+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -76,7 +76,12 @@ if __name__ == "__main__":
 
 
 from IPython.display import display, Image
-from fuzzingbook_utils import HTML, rich_output
+
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import HTML, rich_output
+else:
+    from .fuzzingbook_utils import HTML, rich_output
+
 
 if __name__ == "__main__":
     HTML(webbrowser(httpd_url))
@@ -525,8 +530,14 @@ if __name__ == "__main__":
 
 
 from graphviz import Digraph
+
 from IPython.display import display
-from GrammarFuzzer import dot_escape
+
+if __package__ is None or __package__ == "":
+    from GrammarFuzzer import dot_escape
+else:
+    from .GrammarFuzzer import dot_escape
+
 
 if __name__ == "__main__":
     dot = Digraph(comment="Finite State Machine")
@@ -566,8 +577,16 @@ if __package__ is None or __package__ == "":
 else:
     from .Grammars import nonterminals, START_SYMBOL
 
-from Grammars import extend_grammar, unreachable_nonterminals, opts, crange, srange
-from Grammars import syntax_diagram, is_valid_grammar
+if __package__ is None or __package__ == "":
+    from Grammars import extend_grammar, unreachable_nonterminals, opts, crange, srange
+else:
+    from .Grammars import extend_grammar, unreachable_nonterminals, opts, crange, srange
+
+if __package__ is None or __package__ == "":
+    from Grammars import syntax_diagram, is_valid_grammar
+else:
+    from .Grammars import syntax_diagram, is_valid_grammar
+
 
 class GUIGrammarMiner(GUIGrammarMiner):
     START_STATE = "<state>"
@@ -682,7 +701,11 @@ if __name__ == "__main__":
 
 from collections import deque
 
-from fuzzingbook_utils import unicode_escape
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import unicode_escape
+else:
+    from .fuzzingbook_utils import unicode_escape
+
 
 def fsm_diagram(grammar, start_symbol=START_SYMBOL):
     def left_align(label):
@@ -1093,7 +1116,11 @@ else:
     from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
 
 
-from fuzzingbook_utils import inheritance_conflicts
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import inheritance_conflicts
+else:
+    from .fuzzingbook_utils import inheritance_conflicts
+
 
 if __name__ == "__main__":
     inheritance_conflicts(GUIFuzzer, GrammarCoverageFuzzer)

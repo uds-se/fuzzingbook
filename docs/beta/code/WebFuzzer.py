@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2019-02-12 14:09:57+01:00
+# Last change: 2019-02-19 11:11:27+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -109,7 +109,12 @@ HTML_ORDER_FORM += """
 """
 
 from IPython.display import display
-from fuzzingbook_utils import HTML
+
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import HTML
+else:
+    from .fuzzingbook_utils import HTML
+
 
 if __name__ == "__main__":
     HTML(HTML_ORDER_FORM)
@@ -436,7 +441,11 @@ if __name__ == "__main__":
     HTTPD_MESSAGE_QUEUE.put("I am one more message")
 
 
-from fuzzingbook_utils import rich_output, terminal_escape
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import rich_output, terminal_escape
+else:
+    from .fuzzingbook_utils import rich_output, terminal_escape
+
 
 def display_httpd_message(message):
     if rich_output():

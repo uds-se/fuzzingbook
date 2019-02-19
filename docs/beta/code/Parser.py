@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2019-02-05 09:32:58-08:00
+# Last change: 2019-02-04 15:45:09+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -110,11 +110,27 @@ if __package__ is None or __package__ == "":
 else:
     from .Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL, is_valid_grammar, syntax_diagram
 
-from Fuzzer import Fuzzer
-from GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
+if __package__ is None or __package__ == "":
+    from Fuzzer import Fuzzer
+else:
+    from .Fuzzer import Fuzzer
 
-from ExpectError import ExpectError
-from Timer import Timer
+if __package__ is None or __package__ == "":
+    from GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
+else:
+    from .GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
+
+
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectError
+else:
+    from .ExpectError import ExpectError
+
+if __package__ is None or __package__ == "":
+    from Timer import Timer
+else:
+    from .Timer import Timer
+
 
 if __name__ == "__main__":
     syntax_diagram(CSV_GRAMMAR)

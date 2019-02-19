@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2019-01-15 10:00:41-08:00
+# Last change: 2019-01-15 18:40:00+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -61,7 +61,11 @@ if __package__ is None or __package__ == "":
 else:
     from .Grammars import URL_GRAMMAR, is_valid_grammar, START_SYMBOL, new_symbol, opts, extend_grammar
 
-from GrammarFuzzer import GrammarFuzzer, display_tree, all_terminals
+if __package__ is None or __package__ == "":
+    from GrammarFuzzer import GrammarFuzzer, display_tree, all_terminals
+else:
+    from .GrammarFuzzer import GrammarFuzzer, display_tree, all_terminals
+
 
 if __name__ == "__main__":
     url_fuzzer = GrammarFuzzer(URL_GRAMMAR)

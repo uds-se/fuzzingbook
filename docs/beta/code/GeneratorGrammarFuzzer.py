@@ -55,7 +55,11 @@ if __package__ is None or __package__ == "":
 else:
     from .Grammars import EXPR_GRAMMAR, is_valid_grammar, is_nonterminal, extend_grammar
 
-from Grammars import opts, exp_opt, exp_string, crange
+if __package__ is None or __package__ == "":
+    from Grammars import opts, exp_opt, exp_string, crange
+else:
+    from .Grammars import opts, exp_opt, exp_string, crange
+
 
 CHARGE_GRAMMAR = {
     "<start>": ["Charge <amount> to my credit card <credit-card-number>"],
@@ -530,7 +534,11 @@ if __name__ == "__main__":
 
 
 
-from fuzzingbook_utils import HTML
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import HTML
+else:
+    from .fuzzingbook_utils import HTML
+
 
 if __name__ == "__main__":
     HTML("<strong>A bold text</strong>")
@@ -865,7 +873,11 @@ else:
     from .ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer  # minor dependency
 
 
-from fuzzingbook_utils import inheritance_conflicts
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import inheritance_conflicts
+else:
+    from .fuzzingbook_utils import inheritance_conflicts
+
 
 if __name__ == "__main__":
     inheritance_conflicts(ProbabilisticGrammarFuzzer, GeneratorGrammarFuzzer)
