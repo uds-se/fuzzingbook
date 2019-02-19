@@ -115,7 +115,11 @@ if __package__ is None or __package__ == "":
 else:
     from .Grammars import crange, srange, convert_ebnf_grammar, extend_grammar, is_valid_grammar
 
-from Grammars import START_SYMBOL, new_symbol
+if __package__ is None or __package__ == "":
+    from Grammars import START_SYMBOL, new_symbol
+else:
+    from .Grammars import START_SYMBOL, new_symbol
+
 
 PROCESS_NUMBERS_EBNF_GRAMMAR = {
     "<start>": ["<operator> <integers>"],

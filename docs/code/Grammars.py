@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2019-02-12 10:12:14+01:00
+# Last change: 2019-02-19 11:09:15+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -223,6 +223,7 @@ if __package__ is None or __package__ == "":
     from RailroadDiagrams import NonTerminal, Terminal, Choice, HorizontalChoice, Sequence, Diagram, show_diagram
 else:
     from .RailroadDiagrams import NonTerminal, Terminal, Choice, HorizontalChoice, Sequence, Diagram, show_diagram
+
 
 from IPython.display import SVG, display
 

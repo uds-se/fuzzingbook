@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2019-01-03 22:30:50-08:00
+# Last change: 2019-01-06 14:14:33+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -55,7 +55,11 @@ if __package__ is None or __package__ == "":
 else:
     from .Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
 
-from Grammars import is_valid_grammar, extend_grammar
+if __package__ is None or __package__ == "":
+    from Grammars import is_valid_grammar, extend_grammar
+else:
+    from .Grammars import is_valid_grammar, extend_grammar
+
 
 if __name__ == "__main__":
     EXPR_GRAMMAR["<factor>"]
@@ -519,7 +523,11 @@ if __package__ is None or __package__ == "":
 else:
     from .Grammars import new_symbol, unreachable_nonterminals
 
-from GrammarFuzzer import expansion_to_children
+if __package__ is None or __package__ == "":
+    from GrammarFuzzer import expansion_to_children
+else:
+    from .GrammarFuzzer import expansion_to_children
+
 
 def duplicate_context(grammar, symbol, expansion=None, depth=float('inf')):
     """Duplicate an expansion within a grammar.

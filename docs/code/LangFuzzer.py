@@ -47,7 +47,11 @@ if __package__ is None or __package__ == "":
 else:
     from .Parser import PEGParser
 
-from GrammarFuzzer import GrammarFuzzer
+if __package__ is None or __package__ == "":
+    from GrammarFuzzer import GrammarFuzzer
+else:
+    from .GrammarFuzzer import GrammarFuzzer
+
 
 # ## Recombining Parsed Inputs
 
@@ -106,7 +110,11 @@ if __package__ is None or __package__ == "":
 else:
     from .Parser import PEGParser, highlight_node
 
-from GrammarFuzzer import display_tree
+if __package__ is None or __package__ == "":
+    from GrammarFuzzer import display_tree
+else:
+    from .GrammarFuzzer import display_tree
+
 
 if __name__ == "__main__":
     parser = PEGParser(VAR_GRAMMAR)
@@ -334,8 +342,16 @@ if __package__ is None or __package__ == "":
 else:
     from .Grammars import EXPR_GRAMMAR
 
-from GrammarFuzzer import display_tree
-from Parser import EarleyParser
+if __package__ is None or __package__ == "":
+    from GrammarFuzzer import display_tree
+else:
+    from .GrammarFuzzer import display_tree
+
+if __package__ is None or __package__ == "":
+    from Parser import EarleyParser
+else:
+    from .Parser import EarleyParser
+
 
 if __name__ == "__main__":
     parser = EarleyParser(EXPR_GRAMMAR)
