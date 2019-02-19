@@ -798,6 +798,7 @@ publish-code: code publish-code-setup \
 	$(DOCS_TARGET)code/LICENSE.md \
 	$(DOCS_TARGET)code/README.md \
 	$(DOCS_TARGET)code/setup.py \
+	$(DOCS_TARGET)code/__init__.py \
 	$(UTILITY_FILES:%=$(DOCS_TARGET)code/fuzzingbook_utils/%) \
 	$(PUBLIC_CHAPTERS:%.ipynb=$(DOCS_TARGET)code/%.py) \
 	$(APPENDICES:%.ipynb=$(DOCS_TARGET)code/%.py)
@@ -818,7 +819,8 @@ dist publish-dist: check-import check-code publish-code toc \
 	$(DOCS_TARGET)dist/fuzzingbook-code.zip \
 	$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip
 
-$(DOCS_TARGET)dist/fuzzingbook-code.zip: $(PYS) $(CODE_TARGET)README.md $(CODE_TARGET)LICENSE.md $(CHAPTERS_MAKEFILE)
+$(DOCS_TARGET)dist/fuzzingbook-code.zip: \
+	$(PYS) $(CODE_TARGET)README.md $(CODE_TARGET)LICENSE.md $(CHAPTERS_MAKEFILE)
 	@-mkdir $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)dist/*
 	$(RM) -r $(DOCS_TARGET)fuzzingbook
