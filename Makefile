@@ -720,9 +720,17 @@ check-import check-imports: code
 	cd $(CODE_TARGET); $(PYTHON) import_all.py 2>&1 | tee import_all.py.out
 	@test ! -s $(CODE_TARGET)import_all.py.out && echo "All import checks passed."
 	@$(RM) $(CODE_TARGET)import_all.py*
+	
+check-package: code
+	@echo "#!/usr/bin/env $(PYTHON)" > import_packages.py
+	@(for file in $(IMPORTS); do echo import code.$$file; done) | grep -v '^import code.[0-9][0-9]' >> import_packages.py
+	$(PYTHON) import_packages.py 2>&1 | tee import_packages.py.out
+	@test ! -s import_packages.py.out && echo "Package check passed."
+	@$(RM) import_packages.py*
+
 
 .PHONY: run
-run: check-import check-code
+run: check-import check-package check-code
 	
 # Todo checks
 check-todo todo:
@@ -739,7 +747,7 @@ spell spellcheck check-spell:
 
 # All checks
 .PHONY: check check-all
-check check-all: check-import check-code check-style check-crossref check-todo
+check check-all: check-import check-package check-code check-style check-crossref check-todo
 	
 # Add notebook metadata (add table of contents, bib reference, etc.)
 .PHONY: metadata
@@ -815,7 +823,7 @@ $(DOCS_TARGET)code/%: $(CODE_TARGET)%
 	cp -pr $< $@
 
 .PHONY: dist publish-dist
-dist publish-dist: check-import check-code publish-code toc \
+dist publish-dist: check-import check-package check-code publish-code toc \
 	$(DOCS_TARGET)dist/fuzzingbook-code.zip \
 	$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip
 
