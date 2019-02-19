@@ -2,7 +2,7 @@
 # This file defines the chapter files to be included
 
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = GUIFuzzer.ipynb
+NEW_CHAPTERS = GrammarMiner.ipynb
 
 # Chapters to include in the book, in this order
 
