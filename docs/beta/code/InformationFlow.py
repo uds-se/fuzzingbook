@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2019-03-05 15:53:01+01:00
+# Last change: 2019-03-05 16:40:37+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -67,10 +67,10 @@ class DB:
     def __init__(self, db={}):
         self.db = dict(db)
 
-# ### create_table
+# ### Representing Tables
 
 if __name__ == "__main__":
-    print('\n### create_table')
+    print('\n### Representing Tables')
 
 
 
@@ -487,6 +487,22 @@ if __name__ == "__main__":
             traceback.print_exc()
             break
         print()
+
+
+# ## The Evil of Eval
+
+if __name__ == "__main__":
+    print('\n## The Evil of Eval')
+
+
+
+
+if __name__ == "__main__":
+    db.sql('select year from inventory where year < 2000')
+
+
+if __name__ == "__main__":
+    db.sql('select year - 1900 if year < 2000 else year - 2000 from inventory')
 
 
 if __name__ == "__main__":

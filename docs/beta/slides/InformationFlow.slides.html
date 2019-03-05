@@ -13915,7 +13915,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="create_table">create_table<a class="anchor-link" href="#create_table">&#182;</a></h3><p>The database contains tables, which is created by a method call <code>create_table()</code>. Each table data structure is a pair of values. The first one is the meta data containing column names and types. The second value is a list of values in the table.</p>
+<h3 id="Representing-Tables">Representing Tables<a class="anchor-link" href="#Representing-Tables">&#182;</a></h3><p>The database contains tables, which are created by a method call <code>create_table()</code>. Each table data structure is a pair of values. The first one is the meta data containing column names and types. The second value is a list of values in the table.</p>
 
 </div>
 </div>
@@ -13942,7 +13942,7 @@ a.anchor-link {
 
 </div>
 </div>
-</div></div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
@@ -13959,7 +13959,7 @@ a.anchor-link {
 </div>
 </div>
 
-</div></div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -13967,7 +13967,7 @@ a.anchor-link {
 
 </div>
 </div>
-</div><div class="fragment">
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[8]:</div>
@@ -13992,7 +13992,7 @@ a.anchor-link {
 
 </div>
 </div>
-</div></div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[9]:</div>
@@ -14026,7 +14026,7 @@ a.anchor-link {
 </div>
 </div>
 
-</div></div></section><section>
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -14181,7 +14181,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Using <code>eval</code> here to evaluate conditions allows us to unleash the full expressive power of Python.  However, it also introduces some important security issues, which we will discuss in a moment.  For the time, let us enjoy our SQL statements.</p>
+<p><strong>Note:</strong> Using <code>eval()</code> here introduces some important security issues, which we will discuss later in this chapter.</p>
 
 </div>
 </div>
@@ -14265,7 +14265,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Inserting-Data">Inserting Data<a class="anchor-link" href="#Inserting-Data">&#182;</a></h3><p>The <code>do_insert()</code> method handles <code>insert</code> statements.</p>
+<h3 id="Inserting-Data">Inserting Data<a class="anchor-link" href="#Inserting-Data">&#182;</a></h3><p>The <code>do_insert()</code> method handles SQL <code>insert</code> statements.</p>
 
 </div>
 </div>
@@ -15381,7 +15381,15 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Fuzzing does not seem to have triggered any crashes.  However, are crashes the only errors that we should be worried about? What if the user tries the following?</p>
+<p>Fuzzing does not seem to have triggered any crashes.  However, are crashes the only errors that we should be worried about?</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="The-Evil-of-Eval">The Evil of Eval<a class="anchor-link" href="#The-Evil-of-Eval">&#182;</a></h2><p>In our implementation, we have made use of <code>eval()</code> to evaluate expressions using the Python interpreter.  This allows us to unleash the full power of Python expressions within our SQL statements.</p>
 
 </div>
 </div>
@@ -15389,6 +15397,104 @@ a.anchor-link {
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select year from inventory where year &lt; 2000&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[49]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[1998, 1999]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the above query, the clause <code>year &lt; 2000</code> is evaluated using <code>expression_clause()</code> using Python in the context of each row; hence, <code>year &lt; 2000</code> evaluates to either <code>True</code> or <code>False</code>.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The same holds for the expressions being <code>select</code>ed:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select year - 1900 if year &lt; 2000 else year - 2000 from inventory&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[50]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[98, 0, 99]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This works because <code>year - 1900 if year &lt; 2000 else year - 2000</code> is a valid Python expression.  (It is not a valid SQL expression, though.)</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The problem with the above is that there is <em>no limitation</em> to what the Python expression can do.  What if the user tries the following?</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select __import__(&quot;os&quot;).popen(&quot;pwd&quot;).read() from inventory&#39;</span><span class="p">)</span>
@@ -15404,7 +15510,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[49]:</div>
+    <div class="prompt output_prompt">Out[51]:</div>
 
 
 
@@ -15424,7 +15530,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Indeed, <em>we shouldn't be allowing the user access to dangerous functionalities such as above.</em> How can we enhance fuzzing to look for such vulnerabilities?</p>
+<p>The above statement effectively reads from the users' file system.  Instead of <code>os.popen("pwd").read()</code>, it could execute arbitrary Python commands – to access data, install software, run a background process.  This is where "the full power of Python expressions" turns back on us.</p>
 
 </div>
 </div>
@@ -15432,11 +15538,19 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>What we need is a way to determine when expectations are violated at certain portions of program which may not lead to a crash. One of these methods is that of <em>dynamic taint analysis</em>. The idea is to identify the functions that accept user input as <em>sources</em> that <em>taint</em> any string that comes in through them, and those functions that perform dangerous operations as <em>sinks</em>. Finally we bless certain functions as <em>taint sanitizers</em>. The idea is that an input from the source should never reach the sink without undergoing sanitization first. This allows us to use a stronger oracle than simply checking for crashes.</p>
+<p>What we want is to allow our <em>program</em> to make full use of its power; yet, the <em>user</em> (or any third party) should not be entrusted to do the same.  Hence, we need to differentiate between (trusted) <em>input from the program</em> and (untrusted) <em>input from the user</em>.</p>
 
 </div>
 </div>
-</div></section></section><section><section>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>One method that allows such differentiation is that of <em>dynamic taint analysis</em>. The idea is to identify the functions that accept user input as <em>sources</em> that <em>taint</em> any string that comes in through them, and those functions that perform dangerous operations as <em>sinks</em>. Finally we bless certain functions as <em>taint sanitizers</em>. The idea is that an input from the source should never reach the sink without undergoing sanitization first. This allows us to use a stronger oracle than simply checking for crashes.</p>
+
+</div>
+</div>
+</div></div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -15455,7 +15569,7 @@ a.anchor-link {
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
@@ -15473,7 +15587,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
@@ -15488,7 +15602,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
@@ -15511,7 +15625,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;LOW&#39;</span><span class="p">)</span>
@@ -15524,7 +15638,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span><span class="o">.</span><span class="n">taint</span>
@@ -15540,7 +15654,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[54]:</div>
+    <div class="prompt output_prompt">Out[56]:</div>
 
 
 
@@ -15557,7 +15671,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="prompt input_prompt">In&nbsp;[57]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">repr</span><span class="p">(</span><span class="n">thello</span><span class="p">)</span><span class="o">.</span><span class="n">taint</span>
@@ -15573,7 +15687,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[55]:</div>
+    <div class="prompt output_prompt">Out[57]:</div>
 
 
 
@@ -15598,7 +15712,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
@@ -15633,7 +15747,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="prompt input_prompt">In&nbsp;[59]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
@@ -15656,7 +15770,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[58]:</div>
+<div class="prompt input_prompt">In&nbsp;[60]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_str_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
@@ -15681,7 +15795,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[59]:</div>
+<div class="prompt input_prompt">In&nbsp;[61]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;__format__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__getitem__&#39;</span><span class="p">,</span> <span class="s1">&#39;__add__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mul__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmul__&#39;</span><span class="p">,</span>
@@ -15707,7 +15821,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
@@ -15730,7 +15844,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[61]:</div>
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;LOW&#39;</span><span class="p">)</span>
@@ -15751,7 +15865,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">taint</span>
@@ -15767,7 +15881,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[62]:</div>
+    <div class="prompt output_prompt">Out[64]:</div>
 
 
 
@@ -15784,7 +15898,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">taint</span>
@@ -15800,7 +15914,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[63]:</div>
+    <div class="prompt output_prompt">Out[65]:</div>
 
 
 
@@ -15825,7 +15939,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;HIGH&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">taint</span>
@@ -15841,7 +15955,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[64]:</div>
+    <div class="prompt output_prompt">Out[66]:</div>
 
 
 
@@ -15866,56 +15980,10 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="s1">&#39;foo&#39;</span> <span class="o">+</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;HIGH&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">taint</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[65]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;HIGH&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[66]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span> <span class="o">+=</span> <span class="s1">&#39;, world&#39;</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
 <div class="prompt input_prompt">In&nbsp;[67]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span><span class="o">.</span><span class="n">taint</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="s1">&#39;foo&#39;</span> <span class="o">+</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;bar&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;HIGH&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
     </div>
@@ -15934,7 +16002,7 @@ a.anchor-link {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;LOW&#39;</pre>
+<pre>&#39;HIGH&#39;</pre>
 </div>
 
 </div>
@@ -15942,44 +16010,16 @@ a.anchor-link {
 </div>
 </div>
 
-</div></div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Other operators such as multiplication also work:</p>
-
-</div>
-</div>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[68]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="n">thello</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">taint</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span> <span class="o">+=</span> <span class="s1">&#39;, world&#39;</span>
 </pre></div>
 
     </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[68]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;LOW&#39;</pre>
-</div>
-
-</div>
-
 </div>
 </div>
 
@@ -15989,7 +16029,7 @@ a.anchor-link {
 <div class="prompt input_prompt">In&nbsp;[69]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="s1">&#39;hw </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">thello</span><span class="p">)</span><span class="o">.</span><span class="n">taint</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
     </div>
@@ -16016,10 +16056,84 @@ a.anchor-link {
 </div>
 </div>
 
-</div></div></section><section>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Other operators such as multiplication also work:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[70]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="n">thello</span> <span class="o">*</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">taint</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[70]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;LOW&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[71]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="s1">&#39;hw </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">thello</span><span class="p">)</span><span class="o">.</span><span class="n">taint</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[71]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;LOW&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[72]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;hello </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;HIGH&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="s1">&#39;world&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">taint</span>
@@ -16035,7 +16149,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[70]:</div>
+    <div class="prompt output_prompt">Out[72]:</div>
 
 
 
@@ -16060,7 +16174,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[72]:</div>
+<div class="prompt input_prompt">In&nbsp;[74]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TrustedDB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
@@ -16085,7 +16199,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[73]:</div>
+<div class="prompt input_prompt">In&nbsp;[75]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">bdb</span> <span class="o">=</span> <span class="n">TrustedDB</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">db</span><span class="p">)</span>
@@ -16098,7 +16212,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[75]:</div>
+<div class="prompt input_prompt">In&nbsp;[77]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -16120,9 +16234,9 @@ a.anchor-link {
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-75-65a521f9999f&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-77-65a521f9999f&gt;&#34;, line 2, in &lt;module&gt;
     bdb.sql(&#34;select year from INVENTORY&#34;)
-  File &#34;&lt;ipython-input-72-53a654b6cc10&gt;&#34;, line 3, in sql
+  File &#34;&lt;ipython-input-74-53a654b6cc10&gt;&#34;, line 3, in sql
     assert isinstance(s, tstr), &#34;Need a tainted string&#34;
 AssertionError: Need a tainted string (expected)
 </pre>
@@ -16143,7 +16257,7 @@ AssertionError: Need a tainted string (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[76]:</div>
+<div class="prompt input_prompt">In&nbsp;[78]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">bad_user_input</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;__import__(&quot;os&quot;).popen(&quot;ls&quot;).read()&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;UNTRUSTED&#39;</span><span class="p">)</span>
@@ -16166,9 +16280,9 @@ AssertionError: Need a tainted string (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-76-82c5b2d628ed&gt;&#34;, line 3, in &lt;module&gt;
+  File &#34;&lt;ipython-input-78-82c5b2d628ed&gt;&#34;, line 3, in &lt;module&gt;
     bdb.sql(bad_user_input)
-  File &#34;&lt;ipython-input-72-53a654b6cc10&gt;&#34;, line 4, in sql
+  File &#34;&lt;ipython-input-74-53a654b6cc10&gt;&#34;, line 4, in sql
     assert s.taint == &#39;TRUSTED&#39;, &#34;Need a string with trusted taint&#34;
 AssertionError: Need a string with trusted taint (expected)
 </pre>
@@ -16189,7 +16303,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[78]:</div>
+<div class="prompt input_prompt">In&nbsp;[80]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">sanitize</span><span class="p">(</span><span class="n">user_input</span><span class="p">):</span>
@@ -16208,7 +16322,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[79]:</div>
+<div class="prompt input_prompt">In&nbsp;[81]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">good_user_input</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;select year,model from inventory&quot;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;UNTRUSTED&#39;</span><span class="p">)</span>
@@ -16226,7 +16340,7 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[79]:</div>
+    <div class="prompt output_prompt">Out[81]:</div>
 
 
 
@@ -16243,7 +16357,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[80]:</div>
+<div class="prompt input_prompt">In&nbsp;[82]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sanitized_input</span><span class="o">.</span><span class="n">taint</span>
@@ -16259,7 +16373,7 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[80]:</div>
+    <div class="prompt output_prompt">Out[82]:</div>
 
 
 
@@ -16276,7 +16390,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[81]:</div>
+<div class="prompt input_prompt">In&nbsp;[83]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">bdb</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="n">sanitized_input</span><span class="p">)</span>
@@ -16292,7 +16406,7 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[81]:</div>
+    <div class="prompt output_prompt">Out[83]:</div>
 
 
 
@@ -16317,7 +16431,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[82]:</div>
+<div class="prompt input_prompt">In&nbsp;[84]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sanitized_input</span> <span class="o">=</span> <span class="n">sanitize</span><span class="p">(</span><span class="n">bad_user_input</span><span class="p">)</span>
@@ -16334,7 +16448,7 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[82]:</div>
+    <div class="prompt output_prompt">Out[84]:</div>
 
 
 
@@ -16351,7 +16465,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[83]:</div>
+<div class="prompt input_prompt">In&nbsp;[85]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sanitized_input</span><span class="o">.</span><span class="n">taint</span>
@@ -16367,7 +16481,7 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[83]:</div>
+    <div class="prompt output_prompt">Out[85]:</div>
 
 
 
@@ -16384,7 +16498,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[84]:</div>
+<div class="prompt input_prompt">In&nbsp;[86]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -16406,9 +16520,9 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-84-e59f9e5c9d30&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-86-e59f9e5c9d30&gt;&#34;, line 2, in &lt;module&gt;
     bdb.sql(sanitized_input)
-  File &#34;&lt;ipython-input-72-53a654b6cc10&gt;&#34;, line 4, in sql
+  File &#34;&lt;ipython-input-74-53a654b6cc10&gt;&#34;, line 4, in sql
     assert s.taint == &#39;TRUSTED&#39;, &#34;Need a string with trusted taint&#34;
 AssertionError: Need a string with trusted taint (expected)
 </pre>
@@ -16437,7 +16551,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[85]:</div>
+<div class="prompt input_prompt">In&nbsp;[87]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Tainted</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -16463,7 +16577,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[86]:</div>
+<div class="prompt input_prompt">In&nbsp;[88]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TaintedDB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
@@ -16491,7 +16605,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[87]:</div>
+<div class="prompt input_prompt">In&nbsp;[89]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tdb</span> <span class="o">=</span> <span class="n">TaintedDB</span><span class="p">()</span>
@@ -16504,7 +16618,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[88]:</div>
+<div class="prompt input_prompt">In&nbsp;[90]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tdb</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">db</span>
@@ -16525,7 +16639,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[90]:</div>
+<div class="prompt input_prompt">In&nbsp;[92]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
@@ -16611,7 +16725,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[91]:</div>
+<div class="prompt input_prompt">In&nbsp;[93]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">secrets</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;&lt;Plenty of secret keys&gt;&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;SECRET&#39;</span><span class="p">)</span>
@@ -16632,7 +16746,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[92]:</div>
+<div class="prompt input_prompt">In&nbsp;[94]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">secrets</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">taint</span>
@@ -16648,7 +16762,7 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[92]:</div>
+    <div class="prompt output_prompt">Out[94]:</div>
 
 
 
@@ -16673,7 +16787,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[93]:</div>
+<div class="prompt input_prompt">In&nbsp;[95]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">user_input</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span>
@@ -16687,7 +16801,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[94]:</div>
+<div class="prompt input_prompt">In&nbsp;[96]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">isinstance</span><span class="p">(</span><span class="n">reply</span><span class="p">,</span> <span class="n">tstr</span><span class="p">)</span>
@@ -16703,7 +16817,7 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[94]:</div>
+    <div class="prompt output_prompt">Out[96]:</div>
 
 
 
@@ -16728,7 +16842,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[95]:</div>
+<div class="prompt input_prompt">In&nbsp;[97]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">reply</span> <span class="o">=</span> <span class="n">user_input</span> <span class="o">+</span> <span class="n">secrets</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
@@ -16741,7 +16855,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[96]:</div>
+<div class="prompt input_prompt">In&nbsp;[98]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">reply</span>
@@ -16757,7 +16871,7 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[96]:</div>
+    <div class="prompt output_prompt">Out[98]:</div>
 
 
 
@@ -16774,7 +16888,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[97]:</div>
+<div class="prompt input_prompt">In&nbsp;[99]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">reply</span><span class="o">.</span><span class="n">taint</span>
@@ -16790,7 +16904,7 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[97]:</div>
+    <div class="prompt output_prompt">Out[99]:</div>
 
 
 
@@ -16815,7 +16929,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[98]:</div>
+<div class="prompt input_prompt">In&nbsp;[100]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">send_back</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -16830,7 +16944,7 @@ AssertionError: Need a string with trusted taint (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[99]:</div>
+<div class="prompt input_prompt">In&nbsp;[101]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -16852,9 +16966,9 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-99-e02d8e55c3ba&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-101-e02d8e55c3ba&gt;&#34;, line 2, in &lt;module&gt;
     send_back(reply)
-  File &#34;&lt;ipython-input-98-a105f7cd1cab&gt;&#34;, line 2, in send_back
+  File &#34;&lt;ipython-input-100-a105f7cd1cab&gt;&#34;, line 2, in send_back
     assert not isinstance(s, tstr) and not s.taint == &#39;SECRET&#39;
 AssertionError (expected)
 </pre>
@@ -16875,7 +16989,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[101]:</div>
+<div class="prompt input_prompt">In&nbsp;[103]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">reply</span> <span class="o">=</span> <span class="n">heartbeat</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="n">secrets</span><span class="p">)</span>
@@ -16888,7 +17002,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[102]:</div>
+<div class="prompt input_prompt">In&nbsp;[104]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">reply</span><span class="o">.</span><span class="n">taint</span>
@@ -16904,7 +17018,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[102]:</div>
+    <div class="prompt output_prompt">Out[104]:</div>
 
 
 
@@ -16941,7 +17055,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[103]:</div>
+<div class="prompt input_prompt">In&nbsp;[105]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thilo</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;HIGH&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">tstr</span><span class="p">(</span><span class="s2">&quot;Low&quot;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;LOW&#39;</span><span class="p">)</span>
@@ -16962,7 +17076,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[104]:</div>
+<div class="prompt input_prompt">In&nbsp;[106]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thilo</span>
@@ -16978,7 +17092,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[104]:</div>
+    <div class="prompt output_prompt">Out[106]:</div>
 
 
 
@@ -16995,7 +17109,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[105]:</div>
+<div class="prompt input_prompt">In&nbsp;[107]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thilo</span><span class="o">.</span><span class="n">taint</span>
@@ -17011,7 +17125,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[105]:</div>
+    <div class="prompt output_prompt">Out[107]:</div>
 
 
 
@@ -17083,7 +17197,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[106]:</div>
+<div class="prompt input_prompt">In&nbsp;[108]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
@@ -17111,7 +17225,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[107]:</div>
+<div class="prompt input_prompt">In&nbsp;[109]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -17126,7 +17240,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[108]:</div>
+<div class="prompt input_prompt">In&nbsp;[110]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -17148,7 +17262,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[109]:</div>
+<div class="prompt input_prompt">In&nbsp;[111]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -17171,7 +17285,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[110]:</div>
+<div class="prompt input_prompt">In&nbsp;[112]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
@@ -17193,7 +17307,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[111]:</div>
+<div class="prompt input_prompt">In&nbsp;[113]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tworld</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;world&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
@@ -17207,7 +17321,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[112]:</div>
+<div class="prompt input_prompt">In&nbsp;[114]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;hello</span><span class="se">\t</span><span class="s2">world&quot;</span><span class="p">)</span>
@@ -17220,7 +17334,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[113]:</div>
+<div class="prompt input_prompt">In&nbsp;[115]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">repr</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">.</span><span class="n">origin</span>
@@ -17236,7 +17350,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[113]:</div>
+    <div class="prompt output_prompt">Out[115]:</div>
 
 
 
@@ -17261,7 +17375,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[114]:</div>
+<div class="prompt input_prompt">In&nbsp;[116]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">thello</span><span class="p">))</span> <span class="o">==</span> <span class="nb">str</span>
@@ -17282,7 +17396,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[115]:</div>
+<div class="prompt input_prompt">In&nbsp;[117]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">repr</span><span class="p">(</span><span class="n">thello</span><span class="p">)</span>
@@ -17298,7 +17412,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[115]:</div>
+    <div class="prompt output_prompt">Out[117]:</div>
 
 
 
@@ -17315,7 +17429,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[116]:</div>
+<div class="prompt input_prompt">In&nbsp;[118]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">repr</span><span class="p">(</span><span class="n">thello</span><span class="p">)</span><span class="o">.</span><span class="n">origin</span>
@@ -17331,7 +17445,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[116]:</div>
+    <div class="prompt output_prompt">Out[118]:</div>
 
 
 
@@ -17356,7 +17470,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[117]:</div>
+<div class="prompt input_prompt">In&nbsp;[119]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -17375,7 +17489,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[118]:</div>
+<div class="prompt input_prompt">In&nbsp;[120]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -17394,7 +17508,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[119]:</div>
+<div class="prompt input_prompt">In&nbsp;[121]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;Hello&#39;</span><span class="p">)</span>
@@ -17408,7 +17522,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[120]:</div>
+<div class="prompt input_prompt">In&nbsp;[122]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span><span class="o">.</span><span class="n">clear_origin</span><span class="p">()</span>
@@ -17438,7 +17552,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[121]:</div>
+<div class="prompt input_prompt">In&nbsp;[123]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -17453,7 +17567,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[122]:</div>
+<div class="prompt input_prompt">In&nbsp;[124]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;HIGH&#39;</span><span class="p">)</span>
@@ -17467,7 +17581,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[123]:</div>
+<div class="prompt input_prompt">In&nbsp;[125]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tworld</span><span class="o">.</span><span class="n">origin</span>
@@ -17483,7 +17597,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[123]:</div>
+    <div class="prompt output_prompt">Out[125]:</div>
 
 
 
@@ -17500,7 +17614,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[124]:</div>
+<div class="prompt input_prompt">In&nbsp;[126]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tworld</span><span class="o">.</span><span class="n">taint</span>
@@ -17516,7 +17630,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[124]:</div>
+    <div class="prompt output_prompt">Out[126]:</div>
 
 
 
@@ -17533,7 +17647,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[125]:</div>
+<div class="prompt input_prompt">In&nbsp;[127]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="p">(</span><span class="n">thello</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="n">tworld</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span>
@@ -17555,7 +17669,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[126]:</div>
+<div class="prompt input_prompt">In&nbsp;[128]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -17577,7 +17691,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[127]:</div>
+<div class="prompt input_prompt">In&nbsp;[129]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">hello</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;HIGH&#39;</span><span class="p">)</span>
@@ -17595,7 +17709,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[127]:</div>
+    <div class="prompt output_prompt">Out[129]:</div>
 
 
 
@@ -17628,7 +17742,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[128]:</div>
+<div class="prompt input_prompt">In&nbsp;[130]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -17651,7 +17765,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[129]:</div>
+<div class="prompt input_prompt">In&nbsp;[131]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr_iterator</span><span class="p">():</span>
@@ -17684,58 +17798,11 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[130]:</div>
+<div class="prompt input_prompt">In&nbsp;[132]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thw</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;HIGH&#39;</span><span class="p">)</span>
 <span class="n">thw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[130]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;hello&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[131]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">thw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">has_taint</span><span class="p">()</span>
-<span class="k">assert</span> <span class="n">thw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">has_origin</span><span class="p">()</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[132]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">thw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">taint</span>
 </pre></div>
 
     </div>
@@ -17754,6 +17821,53 @@ AssertionError (expected)
 
 
 <div class="output_text output_subarea output_execute_result">
+<pre>&#39;hello&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[133]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">thw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">has_taint</span><span class="p">()</span>
+<span class="k">assert</span> <span class="n">thw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">has_origin</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[134]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">thw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">taint</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[134]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
 <pre>&#39;HIGH&#39;</pre>
 </div>
 
@@ -17765,7 +17879,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[133]:</div>
+<div class="prompt input_prompt">In&nbsp;[135]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">origin</span>
@@ -17781,7 +17895,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[133]:</div>
+    <div class="prompt output_prompt">Out[135]:</div>
 
 
 
@@ -17805,7 +17919,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[134]:</div>
+<div class="prompt input_prompt">In&nbsp;[136]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_split_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
@@ -17822,7 +17936,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[135]:</div>
+<div class="prompt input_prompt">In&nbsp;[137]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;split&#39;</span><span class="p">,</span> <span class="s1">&#39;rsplit&#39;</span><span class="p">,</span> <span class="s1">&#39;splitlines&#39;</span><span class="p">]:</span>
@@ -17837,7 +17951,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[136]:</div>
+<div class="prompt input_prompt">In&nbsp;[138]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;LOW&#39;</span><span class="p">)</span>
@@ -17854,7 +17968,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[136]:</div>
+    <div class="prompt output_prompt">Out[138]:</div>
 
 
 
@@ -17871,7 +17985,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[137]:</div>
+<div class="prompt input_prompt">In&nbsp;[139]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">taint</span>
@@ -17887,7 +18001,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[137]:</div>
+    <div class="prompt output_prompt">Out[139]:</div>
 
 
 
@@ -17920,7 +18034,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[138]:</div>
+<div class="prompt input_prompt">In&nbsp;[140]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -17940,7 +18054,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[139]:</div>
+<div class="prompt input_prompt">In&nbsp;[141]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
@@ -17964,7 +18078,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[140]:</div>
+<div class="prompt input_prompt">In&nbsp;[142]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">space</span> <span class="o">=</span> <span class="s2">&quot;  &quot;</span>
@@ -17999,7 +18113,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[141]:</div>
+<div class="prompt input_prompt">In&nbsp;[143]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18024,7 +18138,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[142]:</div>
+<div class="prompt input_prompt">In&nbsp;[144]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">shello</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span>
@@ -18056,7 +18170,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[143]:</div>
+<div class="prompt input_prompt">In&nbsp;[145]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18082,7 +18196,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[144]:</div>
+<div class="prompt input_prompt">In&nbsp;[146]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thw</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
@@ -18095,7 +18209,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[145]:</div>
+<div class="prompt input_prompt">In&nbsp;[147]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">thw</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="mi">101</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">]</span>
@@ -18108,7 +18222,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[146]:</div>
+<div class="prompt input_prompt">In&nbsp;[148]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">thw</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">101</span><span class="p">,</span> <span class="mi">105</span><span class="p">))</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">]</span>
@@ -18136,7 +18250,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[147]:</div>
+<div class="prompt input_prompt">In&nbsp;[149]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18167,7 +18281,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[148]:</div>
+<div class="prompt input_prompt">In&nbsp;[150]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;aa cde aa&quot;</span><span class="p">)</span>
@@ -18185,7 +18299,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[149]:</div>
+<div class="prompt input_prompt">In&nbsp;[151]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;aa cde aa&quot;</span><span class="p">)</span>
@@ -18218,7 +18332,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[150]:</div>
+<div class="prompt input_prompt">In&nbsp;[152]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18269,7 +18383,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[151]:</div>
+<div class="prompt input_prompt">In&nbsp;[153]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;ab cdef ghij kl&#39;</span><span class="p">)</span>
@@ -18289,7 +18403,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[152]:</div>
+<div class="prompt input_prompt">In&nbsp;[154]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;ab   cdef ghij    kl&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;HIGH&#39;</span><span class="p">)</span>
@@ -18318,7 +18432,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[153]:</div>
+<div class="prompt input_prompt">In&nbsp;[155]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18342,7 +18456,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[154]:</div>
+<div class="prompt input_prompt">In&nbsp;[156]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str1</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;  abc  &quot;</span><span class="p">)</span>
@@ -18357,7 +18471,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[155]:</div>
+<div class="prompt input_prompt">In&nbsp;[157]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str1</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;  abc  &quot;</span><span class="p">)</span>
@@ -18372,7 +18486,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[156]:</div>
+<div class="prompt input_prompt">In&nbsp;[158]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str1</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;  abc  &quot;</span><span class="p">)</span>
@@ -18394,7 +18508,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[157]:</div>
+<div class="prompt input_prompt">In&nbsp;[159]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18417,7 +18531,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[158]:</div>
+<div class="prompt input_prompt">In&nbsp;[160]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s2">&quot;ab</span><span class="se">\t</span><span class="s2">cd&quot;</span><span class="p">)</span>
@@ -18433,7 +18547,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[159]:</div>
+<div class="prompt input_prompt">In&nbsp;[161]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span>
@@ -18447,7 +18561,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[160]:</div>
+<div class="prompt input_prompt">In&nbsp;[162]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18476,7 +18590,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[161]:</div>
+<div class="prompt input_prompt">In&nbsp;[163]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;ab cd&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
@@ -18491,7 +18605,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[162]:</div>
+<div class="prompt input_prompt">In&nbsp;[164]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">v4</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">v2</span><span class="p">,</span> <span class="n">v3</span><span class="p">,</span> <span class="n">v1</span><span class="p">])</span>
@@ -18508,7 +18622,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[163]:</div>
+<div class="prompt input_prompt">In&nbsp;[165]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_str</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;ab cd&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
@@ -18523,7 +18637,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[164]:</div>
+<div class="prompt input_prompt">In&nbsp;[166]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">v4</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">v2</span><span class="p">,</span> <span class="n">v3</span><span class="p">,</span> <span class="n">v1</span><span class="p">])</span>
@@ -18545,7 +18659,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[165]:</div>
+<div class="prompt input_prompt">In&nbsp;[167]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18578,7 +18692,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[166]:</div>
+<div class="prompt input_prompt">In&nbsp;[168]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18599,7 +18713,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[167]:</div>
+<div class="prompt input_prompt">In&nbsp;[169]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18627,7 +18741,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[168]:</div>
+<div class="prompt input_prompt">In&nbsp;[170]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18651,7 +18765,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[169]:</div>
+<div class="prompt input_prompt">In&nbsp;[171]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18675,7 +18789,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[170]:</div>
+<div class="prompt input_prompt">In&nbsp;[172]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;hello </span><span class="si">%s</span><span class="s1"> world&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
@@ -18692,7 +18806,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[170]:</div>
+    <div class="prompt output_prompt">Out[172]:</div>
 
 
 
@@ -18709,7 +18823,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[171]:</div>
+<div class="prompt input_prompt">In&nbsp;[173]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="p">(</span><span class="n">a</span> <span class="o">%</span> <span class="s1">&#39;good&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">origin</span>
@@ -18725,7 +18839,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[171]:</div>
+    <div class="prompt output_prompt">Out[173]:</div>
 
 
 
@@ -18742,7 +18856,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[172]:</div>
+<div class="prompt input_prompt">In&nbsp;[174]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">b</span> <span class="o">=</span> <span class="s1">&#39;hello </span><span class="si">%s</span><span class="s1"> world&#39;</span>
@@ -18760,7 +18874,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[172]:</div>
+    <div class="prompt output_prompt">Out[174]:</div>
 
 
 
@@ -18784,7 +18898,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[173]:</div>
+<div class="prompt input_prompt">In&nbsp;[175]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="n">ostr</span><span class="p">):</span>
@@ -18811,7 +18925,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[174]:</div>
+<div class="prompt input_prompt">In&nbsp;[176]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;aa&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
@@ -18828,7 +18942,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[174]:</div>
+    <div class="prompt output_prompt">Out[176]:</div>
 
 
 
@@ -18860,7 +18974,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[175]:</div>
+<div class="prompt input_prompt">In&nbsp;[177]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_str_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
@@ -18877,7 +18991,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[178]:</div>
+<div class="prompt input_prompt">In&nbsp;[180]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ostr_members</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">ostr</span><span class="p">,</span> <span class="n">callable</span><span class="p">)</span>
@@ -18911,7 +19025,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[179]:</div>
+<div class="prompt input_prompt">In&nbsp;[181]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_str_abort_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
@@ -18929,7 +19043,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[180]:</div>
+<div class="prompt input_prompt">In&nbsp;[182]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">callable</span><span class="p">):</span>
@@ -18956,77 +19070,11 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[181]:</div>
+<div class="prompt input_prompt">In&nbsp;[183]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[181]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;e&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[182]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">origin</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[182]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>[101]</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[183]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -19045,34 +19093,54 @@ AssertionError (expected)
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>True</pre>
+<pre>&#39;e&#39;</pre>
 </div>
 
 </div>
 
-</div>
-</div>
-
-</div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[184]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;world&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-</pre></div>
-
-    </div>
 </div>
 </div>
 
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
+<div class="prompt input_prompt">In&nbsp;[184]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">origin</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[184]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[101]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
 <div class="prompt input_prompt">In&nbsp;[185]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -19091,7 +19159,7 @@ AssertionError (expected)
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>False</pre>
+<pre>True</pre>
 </div>
 
 </div>
@@ -19099,13 +19167,13 @@ AssertionError (expected)
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[186]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">u</span> <span class="o">=</span> <span class="n">s</span> <span class="o">+</span> <span class="n">t</span> <span class="o">+</span> <span class="s2">&quot;!&quot;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;world&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -19118,7 +19186,7 @@ AssertionError (expected)
 <div class="prompt input_prompt">In&nbsp;[187]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">u</span><span class="o">.</span><span class="n">origin</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">set</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -19137,7 +19205,7 @@ AssertionError (expected)
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[100, 101, 102, 103, 104, 200, 201, 202, 203, 204, -1]</pre>
+<pre>False</pre>
 </div>
 
 </div>
@@ -19149,6 +19217,52 @@ AssertionError (expected)
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[188]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">u</span> <span class="o">=</span> <span class="n">s</span> <span class="o">+</span> <span class="n">t</span> <span class="o">+</span> <span class="s2">&quot;!&quot;</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[189]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">u</span><span class="o">.</span><span class="n">origin</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[189]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[100, 101, 102, 103, 104, 200, 201, 202, 203, 204, -1]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[190]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ostr</span><span class="o">.</span><span class="n">UNKNOWN_ORIGIN</span> <span class="ow">in</span> <span class="n">u</span><span class="o">.</span><span class="n">origin</span>
@@ -19164,7 +19278,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[188]:</div>
+    <div class="prompt output_prompt">Out[190]:</div>
 
 
 
@@ -19189,7 +19303,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[189]:</div>
+<div class="prompt input_prompt">In&nbsp;[191]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">SECRET_ORIGIN</span> <span class="o">=</span> <span class="mi">1000</span>
@@ -19210,7 +19324,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[190]:</div>
+<div class="prompt input_prompt">In&nbsp;[192]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">secret</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;&lt;again, some super-secret input&gt;&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">SECRET_ORIGIN</span><span class="p">)</span>
@@ -19231,7 +19345,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[191]:</div>
+<div class="prompt input_prompt">In&nbsp;[193]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">secret</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
@@ -19270,7 +19384,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[192]:</div>
+<div class="prompt input_prompt">In&nbsp;[194]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">heartbeat</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="n">secret</span><span class="p">)</span>
@@ -19287,7 +19401,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[192]:</div>
+    <div class="prompt output_prompt">Out[194]:</div>
 
 
 
@@ -19304,7 +19418,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[193]:</div>
+<div class="prompt input_prompt">In&nbsp;[195]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
@@ -19343,7 +19457,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[194]:</div>
+<div class="prompt input_prompt">In&nbsp;[196]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">s</span><span class="o">.</span><span class="n">origin</span> <span class="o">==</span> <span class="p">[</span><span class="n">ostr</span><span class="o">.</span><span class="n">UNKNOWN_ORIGIN</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
@@ -19356,7 +19470,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[195]:</div>
+<div class="prompt input_prompt">In&nbsp;[197]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">origin</span> <span class="o">==</span> <span class="n">ostr</span><span class="o">.</span><span class="n">UNKNOWN_ORIGIN</span> <span class="k">for</span> <span class="n">origin</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
@@ -19369,7 +19483,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[196]:</div>
+<div class="prompt input_prompt">In&nbsp;[198]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">origin</span> <span class="o">&gt;=</span> <span class="n">SECRET_ORIGIN</span> <span class="k">for</span> <span class="n">origin</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
@@ -19398,7 +19512,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[197]:</div>
+<div class="prompt input_prompt">In&nbsp;[199]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">heartbeat</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">memory</span><span class="o">=</span><span class="n">secret</span><span class="p">)</span>
@@ -19415,7 +19529,7 @@ AssertionError (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[197]:</div>
+    <div class="prompt output_prompt">Out[199]:</div>
 
 
 
@@ -19440,7 +19554,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[198]:</div>
+<div class="prompt input_prompt">In&nbsp;[200]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">origin</span><span class="p">)</span>
@@ -19471,7 +19585,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[199]:</div>
+<div class="prompt input_prompt">In&nbsp;[201]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -19493,7 +19607,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-199-6cac9e5bbde7&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-201-6cac9e5bbde7&gt;&#34;, line 2, in &lt;module&gt;
     assert s.origin == [ostr.UNKNOWN_ORIGIN] * len(s)
 AssertionError (expected)
 </pre>
@@ -19506,7 +19620,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[200]:</div>
+<div class="prompt input_prompt">In&nbsp;[202]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -19528,7 +19642,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-200-860ea80b8867&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-202-860ea80b8867&gt;&#34;, line 2, in &lt;module&gt;
     assert all(origin == ostr.UNKNOWN_ORIGIN for origin in s.origin)
 AssertionError (expected)
 </pre>
@@ -19541,7 +19655,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[201]:</div>
+<div class="prompt input_prompt">In&nbsp;[203]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -19563,7 +19677,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-201-9630f3080c59&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-203-9630f3080c59&gt;&#34;, line 2, in &lt;module&gt;
     assert not any(origin &gt;= SECRET_ORIGIN for origin in s.origin)
 AssertionError (expected)
 </pre>
@@ -19601,7 +19715,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[202]:</div>
+<div class="prompt input_prompt">In&nbsp;[204]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TrackingDB</span><span class="p">(</span><span class="n">TaintedDB</span><span class="p">):</span>
@@ -19637,7 +19751,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[207]:</div>
+<div class="prompt input_prompt">In&nbsp;[209]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TaintedGrammarFuzzer</span><span class="p">(</span><span class="n">GrammarFuzzer</span><span class="p">):</span>
@@ -19709,7 +19823,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[208]:</div>
+<div class="prompt input_prompt">In&nbsp;[210]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TaintedGrammarFuzzer</span><span class="p">(</span><span class="n">TaintedGrammarFuzzer</span><span class="p">):</span>
@@ -19751,7 +19865,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[209]:</div>
+<div class="prompt input_prompt">In&nbsp;[211]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">trdb</span> <span class="o">=</span> <span class="n">TrackingDB</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">db</span><span class="p">)</span>
@@ -19772,7 +19886,7 @@ AssertionError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[210]:</div>
+<div class="prompt input_prompt">In&nbsp;[212]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TaintedGrammarFuzzer</span><span class="p">(</span><span class="n">TaintedGrammarFuzzer</span><span class="p">):</span>
@@ -19800,7 +19914,7 @@ AssertionError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[211]:</div>
+<div class="prompt input_prompt">In&nbsp;[213]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">TaintedGrammarFuzzer</span><span class="p">(</span><span class="n">TaintedGrammarFuzzer</span><span class="p">):</span>
@@ -19840,7 +19954,7 @@ AssertionError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[212]:</div>
+<div class="prompt input_prompt">In&nbsp;[214]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">tree_type</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
@@ -19855,7 +19969,7 @@ AssertionError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[213]:</div>
+<div class="prompt input_prompt">In&nbsp;[215]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tgf</span> <span class="o">=</span> <span class="n">TaintedGrammarFuzzer</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR_F</span><span class="p">)</span>
@@ -19942,7 +20056,7 @@ Tainted[(---3)]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[214]:</div>
+<div class="prompt input_prompt">In&nbsp;[216]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tgf</span><span class="o">.</span><span class="n">ctp_grammar</span>
@@ -19958,7 +20072,7 @@ Tainted[(---3)]
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[214]:</div>
+    <div class="prompt output_prompt">Out[216]:</div>
 
 
 
@@ -20217,7 +20331,7 @@ Tainted[(---3)]
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[215]:</div>
+<div class="prompt input_prompt">In&nbsp;[217]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">strip_all_info</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -20234,86 +20348,11 @@ Tainted[(---3)]
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[216]:</div>
+<div class="prompt input_prompt">In&nbsp;[218]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;Secret&quot;</span><span class="p">)</span>
 <span class="n">thello</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[216]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&#39;Secret&#39;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div></div></section><section>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[217]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span><span class="o">.</span><span class="n">origin</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[217]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>[0, 1, 2, 3, 4, 5]</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div><div class="fragment">
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The taints and origins will not propagate through the number conversion:</p>
-
-</div>
-</div>
-</div></div><div class="fragment">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[218]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello_stripped</span> <span class="o">=</span> <span class="n">strip_all_info</span><span class="p">(</span><span class="n">thello</span><span class="p">)</span>
-<span class="n">thello_stripped</span>
 </pre></div>
 
     </div>
@@ -20340,10 +20379,85 @@ Tainted[(---3)]
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[219]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello</span><span class="o">.</span><span class="n">origin</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[219]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[0, 1, 2, 3, 4, 5]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The taints and origins will not propagate through the number conversion:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[220]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">thello_stripped</span> <span class="o">=</span> <span class="n">strip_all_info</span><span class="p">(</span><span class="n">thello</span><span class="p">)</span>
+<span class="n">thello_stripped</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[220]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;Secret&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[221]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -20365,7 +20479,7 @@ Tainted[(---3)]
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-219-56d5157cf575&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-221-56d5157cf575&gt;&#34;, line 2, in &lt;module&gt;
     thello_stripped.origin
 AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected)
 </pre>
@@ -20401,7 +20515,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[220]:</div>
+<div class="prompt input_prompt">In&nbsp;[222]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">hello</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
@@ -20419,7 +20533,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[220]:</div>
+    <div class="prompt output_prompt">Out[222]:</div>
 
 
 
@@ -20444,7 +20558,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[221]:</div>
+<div class="prompt input_prompt">In&nbsp;[223]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -20466,7 +20580,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-221-ad148b54cc0b&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-223-ad148b54cc0b&gt;&#34;, line 2, in &lt;module&gt;
     &#39;&#39;.join([hello, &#39; &#39;, world]).origin
 AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected)
 </pre>
@@ -20487,7 +20601,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[222]:</div>
+<div class="prompt input_prompt">In&nbsp;[224]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">strip_all_info_again</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -20558,7 +20672,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>Taint analysis on Python using a library approach as we implemented in this chapter was discussed by Conti et al. \cite{Conti2010}. The concolic execution technique used in this chapter was pioneered by PeerCheck \cite{PeerCheck}, and Python Error Finder \cite{Barsotti2018}.</p>
+<h2 id="Background">Background<a class="anchor-link" href="#Background">&#182;</a></h2><p>Taint analysis on Python using a library approach as we implemented in this chapter was discussed by Conti et al. \cite{Conti2010}.</p>
 
 </div>
 </div>
