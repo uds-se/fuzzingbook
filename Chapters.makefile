@@ -41,7 +41,7 @@ SEMANTICAL_PART = \
 	04_Semantical_Fuzzing.ipynb \
 	GrammarMiner.ipynb \
 	InformationFlow.ipynb
-SEMANTICAL_PART_READY = \
+SEMANTICAL_PART_READY =
 SEMANTICAL_PART_TODO = \
 	SymbolicFuzzer.ipynb
 	# ConcolicFuzzer.ipynb
