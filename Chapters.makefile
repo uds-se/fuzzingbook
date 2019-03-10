@@ -43,8 +43,8 @@ SEMANTICAL_PART = \
 	InformationFlow.ipynb
 SEMANTICAL_PART_READY =
 SEMANTICAL_PART_TODO = \
-	SymbolicFuzzer.ipynb
-	# ConcolicFuzzer.ipynb
+	SymbolicFuzzer.ipynb \
+	ConcolicFuzzer.ipynb
 
 DOMAINS_PART = \
 	05_Domain-Specific_Fuzzing.ipynb \
