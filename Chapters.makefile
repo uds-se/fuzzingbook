@@ -60,9 +60,8 @@ MANAGEMENT_PART =
 MANAGEMENT_PART_READY =
 MANAGEMENT_PART_TODO = \
 	06_Managing_Fuzzing.ipynb \
- 	FuzzingInTheLarge.ipynb
-	# WhenToStopFuzzing.ipynb
-
+ 	FuzzingInTheLarge.ipynb \
+	WhenToStopFuzzing.ipynb
 
 # Appendices for the book
 APPENDICES = \
