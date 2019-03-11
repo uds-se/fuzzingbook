@@ -307,7 +307,8 @@ CONVERT_TO_WORD = $(PANDOC)
 CONVERT_TO_MARKDOWN = $(NBCONVERT) --to markdown --output-dir=$(MARKDOWN_TARGET)
 
 # Run
-EXECUTE_TIMEOUT = 60
+# WhenToStopFuzzing needs about 120 seconds to render
+EXECUTE_TIMEOUT = 140
 EXECUTE_OPTIONS = --ExecutePreprocessor.timeout=$(EXECUTE_TIMEOUT)
 EXECUTE_NOTEBOOK = $(NBCONVERT) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(FULL_NOTEBOOKS)
 
