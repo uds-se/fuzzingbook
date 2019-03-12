@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2019-03-05 16:55:53+01:00
+# Last change: 2019-03-12 15:11:41+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -360,6 +360,7 @@ if __name__ == "__main__":
 
 
 def update_inventory(sqldb, vehicle):
+    inventory_def = sqldb.db['inventory'][0]
     k, v = zip(*inventory_def.items())
     val = [repr(cast(val)) for cast, val in zip(v, vehicle.split(','))]
     sqldb.sql('insert into inventory (%s) values (%s)' % (','.join(k),
