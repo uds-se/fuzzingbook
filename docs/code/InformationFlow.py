@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2019-03-12 15:11:41+01:00
+# Last change: 2019-03-12 08:05:26-07:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -94,6 +94,18 @@ def sample_db():
 if __name__ == "__main__":
     db = sample_db()
     db.table('inventory')
+
+
+class DB(DB):
+    def column(self, table_decl, c_name):
+        if c_name in table_decl: 
+            return table_decl[c_name]
+        raise SQLException('Column (%s) was not found' % repr(c_name))
+
+if __name__ == "__main__":
+    db = sample_db()
+    decl, rows = db.table('inventory')
+    db.column(decl, 'year')
 
 
 # ### Executing SQL Statements
@@ -198,7 +210,13 @@ class DB(DB):
         table_end = query.find('(')
         t_name = query[:table_end].strip()
         names_end = query.find(')')
+        decls, table = self.table(t_name)
         names = [i.strip() for i in query[table_end + 1:names_end].split(',')]
+
+        # verify columns exist
+        for k in names:
+            self.column(decls, k)
+
         values_start = query.find(VALUES)
 
         if values_start < 0:
@@ -211,12 +229,7 @@ class DB(DB):
         if len(names) != len(values):
             raise SQLException(
                 'names(%s) != values(%s)' % (repr(names), repr(values)))
-            
-        decls, table = self.table(t_name)
-        for k in names:
-            if k not in decls:
-                raise SQLException('Invalid Column(%s)' % k)
-    
+
         kvs = {k: self.convert(decls[k], v) for k, v in zip(names, values)}
         table.append(kvs)
 
@@ -273,17 +286,17 @@ class DB(DB):
             
         sets = [[i.strip() for i in name.split('=')]
                 for name in names.split(',')]
-        
+
+        # verify columns exist
+        for k, v in sets:
+            self.column(decls, k)
+
         if where:
             selected = self.expression_clause(table, "(%s)" % where)
             updated = [hm for i, d, hm in selected if d]
         else:
             updated = table
-            
-        for k, v in sets:
-            if k not in decls:
-                raise SQLException('Invalid Column(%s)' % k)
-                
+
         for hm in updated:
             for k, v in sets:
                 hm[k] = self.convert(decls[k], v)
@@ -454,11 +467,13 @@ INVENTORY_GRAMMAR = dict(
             'delete from <table> where <bexpr>',
         ],
         '<table>': ['<word>'],
-        '<names>': ['<word>,<names>', '<word>'],
+        '<names>': ['<column>,<names>', '<column>'],
+        '<column>': ['<word>'],
         '<literals>': ['<literal>', '<literal>,<literals>'],
         '<literal>': ['<number>', "'<chars>'"],
         '<assignments>': ['<kvp>,<assignments>', '<kvp>'],
-        '<kvp>': ['<word>=<word>'],
+        '<kvp>': ['<column>=<value>'],
+        '<value>': ['<word>'],
         '<chars>': ['<char>', '<char><chars>'],
         '<char>':
         [i for i in string.printable if i not in "<>'\"\t\n\r\x0b\x0c\x00"

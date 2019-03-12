@@ -74,19 +74,19 @@ def fix_imports(code):
     if code.startswith("from IPython"):
         return code
 
-    code = re.sub(r"^from *([A-Z].*)",
+    code = re.sub(r"^from *([A-Z].*|fuzzingbook_utils.*)$",
 r'''if __package__ is None or __package__ == "":
     from \1
 else:
     from .\1
-''', code)
+''', code, flags=re.MULTILINE)
 
-    code = re.sub(r"^import *([A-Z].*)",
+    code = re.sub(r"^import *([A-Z].*|fuzzingbook_utils.*)$",
 r'''if __package__ is None or __package__ == "":
     import \1
 else:
     from . import \1
-''', code)
+''', code, flags=re.MULTILINE)
 
     return code
 
@@ -146,6 +146,8 @@ def export_notebook_code(notebook_name, path=None):
                 print_if_main(SET_FIXED_SEED)
             elif RE_FROM_FUZZINGBOOK_UTILS.match(code):
                 # This would be "from fuzzingbook_utils import HTML"
+                # print ("Code: ", repr(code))
+                code = fix_imports(code)
                 print_utf8("\n" + code + "\n")
             elif RE_IGNORE.match(code):
                 # Code to ignore - comment out
