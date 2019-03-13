@@ -2,7 +2,7 @@
 # This file defines the chapter files to be included
 
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = InformationFlow.ipynb
+NEW_CHAPTERS = ConcolicFuzzer.ipynb
 
 # Chapters to include in the book, in this order
 
@@ -40,11 +40,12 @@ SYNTACTICAL_PART_TODO = \
 SEMANTICAL_PART = \
 	04_Semantical_Fuzzing.ipynb \
 	GrammarMiner.ipynb \
-	InformationFlow.ipynb
+	InformationFlow.ipynb \
+	ConcolicFuzzer.ipynb
 SEMANTICAL_PART_READY =
 SEMANTICAL_PART_TODO = \
 	SymbolicFuzzer.ipynb \
-	ConcolicFuzzer.ipynb
+	DynamicInvariants.ipynb
 
 DOMAINS_PART = \
 	05_Domain-Specific_Fuzzing.ipynb \
