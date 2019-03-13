@@ -18896,7 +18896,201 @@ This declares a symbolic string variable <code>s</code>
 
 </div>
 </div>
-</div></div></section></section><section><section>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h5 id="Splitting-Strings">Splitting Strings<a class="anchor-link" href="#Splitting-Strings">&#182;</a></h5><p>We implement string <code>split()</code> as follows.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[155]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zstr</span><span class="p">(</span><span class="n">zstr</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">sep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># default space based split is complicated</span>
+        <span class="k">assert</span> <span class="n">maxsplit</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># for now.</span>
+        <span class="n">zsep</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">StringVal</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+        <span class="n">zl</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">Length</span><span class="p">(</span><span class="n">zsep</span><span class="p">)</span>
+        <span class="n">zi</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">IndexOf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">zsep</span><span class="p">,</span> <span class="n">z3</span><span class="o">.</span><span class="n">IntVal</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>  <span class="c1"># zi would be the length of prefix</span>
+        <span class="c1"># Z3Bug: There is a bug in the `z3.IndexOf` method which returns</span>
+        <span class="c1"># `z3.SeqRef` instead of `z3.ArithRef`. So we need to fix it.</span>
+        <span class="n">zi</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">ArithRef</span><span class="p">(</span><span class="n">zi</span><span class="o">.</span><span class="n">ast</span><span class="p">,</span> <span class="n">zi</span><span class="o">.</span><span class="n">ctx</span><span class="p">)</span>
+
+        <span class="n">vi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">zbool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">zi</span> <span class="o">&gt;=</span> <span class="n">z3</span><span class="o">.</span><span class="n">IntVal</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">vi</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">zprefix</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">SubString</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">z3</span><span class="o">.</span><span class="n">IntVal</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">zi</span><span class="p">)</span>
+            <span class="n">zmid</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">SubString</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">zi</span><span class="p">,</span> <span class="n">zl</span><span class="p">)</span>
+            <span class="n">zsuffix</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">SubString</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">zi</span> <span class="o">+</span> <span class="n">zl</span><span class="p">,</span>
+                                   <span class="n">z3</span><span class="o">.</span><span class="n">Length</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">zstr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">zprefix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">vi</span><span class="p">])]</span> <span class="o">+</span> <span class="n">zstr</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="n">zsuffix</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">[</span><span class="n">vi</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">sep</span><span class="p">):])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+                    <span class="n">sep</span><span class="p">,</span> <span class="n">maxsplit</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[156]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">tstr10</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[157]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">_</span><span class="p">[</span><span class="n">tstr10</span><span class="p">](</span><span class="s1">&#39;a,b,c&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>True
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[158]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[158]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(&#39;sat&#39;, {&#39;s&#39;: &#39;a,b,c&#39;})</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h5 id="Trip-Wire">Trip Wire<a class="anchor-link" href="#Trip-Wire">&#182;</a></h5><p>For easier debugging, we abort any calls to methods in <code>str</code> that are not overridden by <code>zstr</code>.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[159]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_str_abort_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">proxy</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Not implemented in `zstr`&#39;</span> <span class="o">%</span> <span class="n">fun</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">proxy</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[160]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">strmembers</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">zstr</span><span class="p">,</span> <span class="n">callable</span><span class="p">)</span>
+<span class="n">zstrmembers</span> <span class="o">=</span> <span class="p">{</span><span class="n">m</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">strmembers</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span>
+    <span class="n">m</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="s1">&#39;zstr&#39;</span> <span class="ow">in</span> <span class="n">m</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">}</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">callable</span><span class="p">):</span>
+    <span class="c1"># Omitted &#39;splitlines&#39; as this is needed for formatting output in</span>
+    <span class="c1"># IPython/Jupyter</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">zstrmembers</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s1">&#39;splitlines&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__class__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__contains__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__delattr__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__dir__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__format__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__ge__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__getattribute__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__getnewargs__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__gt__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__hash__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__le__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__len__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__lt__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__mod__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__mul__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__ne__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__reduce__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__reduce_ex__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__repr__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__rmod__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__rmul__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__setattr__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__sizeof__&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;__str__&#39;</span><span class="p">]:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">zstr</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">make_str_abort_wrapper</span><span class="p">(</span><span class="n">fn</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -18914,7 +19108,7 @@ This declares a symbolic string variable <code>s</code>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[155]:</div>
+<div class="prompt input_prompt">In&nbsp;[161]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -18954,7 +19148,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[156]:</div>
+<div class="prompt input_prompt">In&nbsp;[162]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">path</span>
@@ -18970,15 +19164,15 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[156]:</div>
+    <div class="prompt output_prompt">Out[162]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[Not(triangle_a_int_48 == triangle_b_int_49),
- Not(triangle_b_int_49 == triangle_c_int_50),
- Not(triangle_a_int_48 == triangle_c_int_50)]</pre>
+<pre>[Not(triangle_a_int_49 == triangle_b_int_50),
+ Not(triangle_b_int_50 == triangle_c_int_51),
+ Not(triangle_a_int_49 == triangle_c_int_51)]</pre>
 </div>
 
 </div>
@@ -18989,7 +19183,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[157]:</div>
+<div class="prompt input_prompt">In&nbsp;[163]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
@@ -19005,7 +19199,7 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[157]:</div>
+    <div class="prompt output_prompt">Out[163]:</div>
 
 
 
@@ -19030,7 +19224,7 @@ This declares a symbolic string variable <code>s</code>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[158]:</div>
+<div class="prompt input_prompt">In&nbsp;[164]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">za</span><span class="p">,</span> <span class="n">zb</span><span class="p">,</span> <span class="n">zc</span> <span class="o">=</span> <span class="p">[</span><span class="n">z3</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">_</span><span class="o">.</span><span class="n">context</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
@@ -19051,7 +19245,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[159]:</div>
+<div class="prompt input_prompt">In&nbsp;[165]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">({</span><span class="mi">1</span><span class="p">:</span> <span class="n">zb</span> <span class="o">==</span> <span class="n">zc</span><span class="p">})</span>
@@ -19067,7 +19261,7 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[159]:</div>
+    <div class="prompt output_prompt">Out[165]:</div>
 
 
 
@@ -19084,7 +19278,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[160]:</div>
+<div class="prompt input_prompt">In&nbsp;[166]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">triangle</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -19100,7 +19294,7 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[160]:</div>
+    <div class="prompt output_prompt">Out[166]:</div>
 
 
 
@@ -19133,7 +19327,7 @@ This declares a symbolic string variable <code>s</code>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[161]:</div>
+<div class="prompt input_prompt">In&nbsp;[167]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">round10</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
@@ -19157,7 +19351,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[162]:</div>
+<div class="prompt input_prompt">In&nbsp;[168]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -19179,7 +19373,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[163]:</div>
+<div class="prompt input_prompt">In&nbsp;[169]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">context</span>
@@ -19195,24 +19389,24 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[163]:</div>
+    <div class="prompt output_prompt">Out[169]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>({&#39;round10_r_int_51&#39;: &#39;Int&#39;},
- [0 != round10_r_int_51%10,
-  0 != (round10_r_int_51 + 1)%10,
-  0 != (round10_r_int_51 + 1 + 1)%10,
-  0 != (round10_r_int_51 + 1 + 1 + 1)%10,
-  0 != (round10_r_int_51 + 1 + 1 + 1 + 1)%10,
-  0 != (round10_r_int_51 + 1 + 1 + 1 + 1 + 1)%10,
-  0 != (round10_r_int_51 + 1 + 1 + 1 + 1 + 1 + 1)%10,
-  0 != (round10_r_int_51 + 1 + 1 + 1 + 1 + 1 + 1 + 1)%10,
-  0 != (round10_r_int_51 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1)%10,
+<pre>({&#39;round10_r_int_52&#39;: &#39;Int&#39;},
+ [0 != round10_r_int_52%10,
+  0 != (round10_r_int_52 + 1)%10,
+  0 != (round10_r_int_52 + 1 + 1)%10,
+  0 != (round10_r_int_52 + 1 + 1 + 1)%10,
+  0 != (round10_r_int_52 + 1 + 1 + 1 + 1)%10,
+  0 != (round10_r_int_52 + 1 + 1 + 1 + 1 + 1)%10,
+  0 != (round10_r_int_52 + 1 + 1 + 1 + 1 + 1 + 1)%10,
+  0 != (round10_r_int_52 + 1 + 1 + 1 + 1 + 1 + 1 + 1)%10,
+  0 != (round10_r_int_52 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1)%10,
   Not(0 !=
-      (round10_r_int_51 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1)%
+      (round10_r_int_52 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1)%
       10)])</pre>
 </div>
 
@@ -19232,7 +19426,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[164]:</div>
+<div class="prompt input_prompt">In&nbsp;[170]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
@@ -19248,7 +19442,7 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[164]:</div>
+    <div class="prompt output_prompt">Out[170]:</div>
 
 
 
@@ -19273,7 +19467,7 @@ This declares a symbolic string variable <code>s</code>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[165]:</div>
+<div class="prompt input_prompt">In&nbsp;[171]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">abs_value</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
@@ -19298,7 +19492,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[166]:</div>
+<div class="prompt input_prompt">In&nbsp;[172]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">abs_max</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
@@ -19326,7 +19520,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[167]:</div>
+<div class="prompt input_prompt">In&nbsp;[173]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -19348,7 +19542,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[168]:</div>
+<div class="prompt input_prompt">In&nbsp;[174]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">context</span>
@@ -19364,16 +19558,16 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[168]:</div>
+    <div class="prompt output_prompt">Out[174]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>({&#39;abs_max_a_int_52&#39;: &#39;Int&#39;, &#39;abs_max_b_int_53&#39;: &#39;Int&#39;},
- [0 &lt; abs_max_a_int_52,
-  0 &lt; abs_max_b_int_53,
-  abs_max_a_int_52 &gt; abs_max_b_int_53])</pre>
+<pre>({&#39;abs_max_a_int_53&#39;: &#39;Int&#39;, &#39;abs_max_b_int_54&#39;: &#39;Int&#39;},
+ [0 &lt; abs_max_a_int_53,
+  0 &lt; abs_max_b_int_54,
+  abs_max_a_int_53 &gt; abs_max_b_int_54])</pre>
 </div>
 
 </div>
@@ -19384,7 +19578,7 @@ This declares a symbolic string variable <code>s</code>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[169]:</div>
+<div class="prompt input_prompt">In&nbsp;[175]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
@@ -19400,7 +19594,7 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[169]:</div>
+    <div class="prompt output_prompt">Out[175]:</div>
 
 
 
@@ -19433,7 +19627,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[170]:</div>
+<div class="prompt input_prompt">In&nbsp;[176]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -19447,7 +19641,7 @@ This declares a symbolic string variable <code>s</code>
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[171]:</div>
+<div class="prompt input_prompt">In&nbsp;[177]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">context</span>
@@ -19463,16 +19657,16 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[171]:</div>
+    <div class="prompt output_prompt">Out[177]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>({&#39;abs_max_a_int_54&#39;: &#39;Int&#39;, &#39;abs_max_b_int_55&#39;: &#39;Int&#39;},
- [Not(0 &lt; abs_max_a_int_54),
-  Not(0 &lt; abs_max_b_int_55),
-  -abs_max_a_int_54 &gt; -abs_max_b_int_55])</pre>
+<pre>({&#39;abs_max_a_int_55&#39;: &#39;Int&#39;, &#39;abs_max_b_int_56&#39;: &#39;Int&#39;},
+ [Not(0 &lt; abs_max_a_int_55),
+  Not(0 &lt; abs_max_b_int_56),
+  -abs_max_a_int_55 &gt; -abs_max_b_int_56])</pre>
 </div>
 
 </div>
@@ -19483,7 +19677,7 @@ This declares a symbolic string variable <code>s</code>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[172]:</div>
+<div class="prompt input_prompt">In&nbsp;[178]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
@@ -19499,7 +19693,7 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[172]:</div>
+    <div class="prompt output_prompt">Out[178]:</div>
 
 
 
@@ -19544,7 +19738,7 @@ $$
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[173]:</div>
+<div class="prompt input_prompt">In&nbsp;[179]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">factorial</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
@@ -19562,7 +19756,7 @@ $$
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[174]:</div>
+<div class="prompt input_prompt">In&nbsp;[180]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">permutation</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
@@ -19576,7 +19770,7 @@ $$
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[175]:</div>
+<div class="prompt input_prompt">In&nbsp;[181]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">combination</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
@@ -19590,7 +19784,7 @@ $$
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[176]:</div>
+<div class="prompt input_prompt">In&nbsp;[182]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">binomial</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
@@ -19614,7 +19808,7 @@ $$
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[177]:</div>
+<div class="prompt input_prompt">In&nbsp;[183]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -19636,7 +19830,7 @@ $$
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[178]:</div>
+<div class="prompt input_prompt">In&nbsp;[184]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
@@ -19652,7 +19846,7 @@ $$
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[178]:</div>
+    <div class="prompt output_prompt">Out[184]:</div>
 
 
 
@@ -19700,7 +19894,7 @@ $$
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[181]:</div>
+<div class="prompt input_prompt">In&nbsp;[187]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">sample_db</span><span class="p">()</span>
@@ -19715,7 +19909,7 @@ $$
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[182]:</div>
+<div class="prompt input_prompt">In&nbsp;[188]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">db</span>
@@ -19731,7 +19925,7 @@ $$
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[182]:</div>
+    <div class="prompt output_prompt">Out[188]:</div>
 
 
 
@@ -19759,7 +19953,7 @@ $$
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[183]:</div>
+<div class="prompt input_prompt">In&nbsp;[189]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ConcolicDB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
@@ -19768,13 +19962,19 @@ $$
             <span class="k">if</span> <span class="n">t_name</span> <span class="o">==</span> <span class="n">k</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">v</span>
         <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span><span class="s1">&#39;Table (</span><span class="si">%s</span><span class="s1">) was not found&#39;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">t_name</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decl</span><span class="p">,</span> <span class="n">c_name</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">decl</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c_name</span> <span class="o">==</span> <span class="n">k</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">decl</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span><span class="s1">&#39;Column (</span><span class="si">%s</span><span class="s1">) was not found&#39;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">c_name</span><span class="p">))</span>
 </pre></div>
 
     </div>
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -19782,10 +19982,10 @@ $$
 
 </div>
 </div>
-</div></div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[184]:</div>
+<div class="prompt input_prompt">In&nbsp;[190]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">db_select</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -19799,7 +19999,7 @@ $$
 </div>
 </div>
 
-</div><div class="fragment">
+</div></div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -19810,7 +20010,7 @@ $$
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[185]:</div>
+<div class="prompt input_prompt">In&nbsp;[191]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -19832,7 +20032,7 @@ $$
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[186]:</div>
+<div class="prompt input_prompt">In&nbsp;[192]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">path</span>
@@ -19848,54 +20048,54 @@ $$
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[186]:</div>
+    <div class="prompt output_prompt">Out[192]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[str.indexof(db_select_s_str_58, &#34;select &#34;, 0) == 0,
- str.indexof(db_select_s_str_58, &#34;select &#34;, 0) == 0,
+<pre>[str.indexof(db_select_s_str_59, &#34;select &#34;, 0) == 0,
+ str.indexof(db_select_s_str_59, &#34;select &#34;, 0) == 0,
  Not(0 &gt;
-     str.indexof(str.substr(db_select_s_str_58, 7, 19),
+     str.indexof(str.substr(db_select_s_str_59, 7, 19),
                  &#34; from &#34;,
                  0)),
  Not(19 &lt;
-     str.indexof(str.substr(db_select_s_str_58, 7, 19),
+     str.indexof(str.substr(db_select_s_str_59, 7, 19),
                  &#34; from &#34;,
                  0)),
  Or(0 &lt;
-    str.indexof(str.substr(db_select_s_str_58, 7, 19),
+    str.indexof(str.substr(db_select_s_str_59, 7, 19),
                 &#34; from &#34;,
                 0),
-    str.indexof(str.substr(db_select_s_str_58, 7, 19),
+    str.indexof(str.substr(db_select_s_str_59, 7, 19),
                 &#34; from &#34;,
                 0) ==
     0),
  Not(Or(0 &lt;
-        str.indexof(str.substr(db_select_s_str_58, 7, 19),
+        str.indexof(str.substr(db_select_s_str_59, 7, 19),
                     &#34; where &#34;,
                     0),
-        str.indexof(str.substr(db_select_s_str_58, 7, 19),
+        str.indexof(str.substr(db_select_s_str_59, 7, 19),
                     &#34; where &#34;,
                     0) ==
         0)),
  Not(19 &lt;
-     str.indexof(str.substr(db_select_s_str_58, 7, 19),
+     str.indexof(str.substr(db_select_s_str_59, 7, 19),
                  &#34; from &#34;,
                  0) +
      6),
  Or(19 &gt;
-    str.indexof(str.substr(db_select_s_str_58, 7, 19),
+    str.indexof(str.substr(db_select_s_str_59, 7, 19),
                 &#34; from &#34;,
                 0) +
     6,
     19 ==
-    str.indexof(str.substr(db_select_s_str_58, 7, 19),
+    str.indexof(str.substr(db_select_s_str_59, 7, 19),
                 &#34; from &#34;,
                 0) +
     6),
- str.substr(str.substr(db_select_s_str_58, 7, 19), 10, 9) ==
+ str.substr(str.substr(db_select_s_str_59, 7, 19), 10, 9) ==
  &#34;inventory&#34;]</pre>
 </div>
 
@@ -19915,7 +20115,7 @@ $$
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[187]:</div>
+<div class="prompt input_prompt">In&nbsp;[193]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
@@ -19931,7 +20131,7 @@ $$
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[187]:</div>
+    <div class="prompt output_prompt">Out[193]:</div>
 
 
 
@@ -19981,7 +20181,7 @@ $$
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[191]:</div>
+<div class="prompt input_prompt">In&nbsp;[197]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleConcolicFuzzer</span><span class="p">(</span><span class="n">Fuzzer</span><span class="p">):</span>
@@ -20009,7 +20209,7 @@ $$
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[192]:</div>
+<div class="prompt input_prompt">In&nbsp;[198]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleConcolicFuzzer</span><span class="p">(</span><span class="n">SimpleConcolicFuzzer</span><span class="p">):</span>
@@ -20034,7 +20234,7 @@ $$
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[193]:</div>
+<div class="prompt input_prompt">In&nbsp;[199]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleConcolicFuzzer</span><span class="p">(</span><span class="n">SimpleConcolicFuzzer</span><span class="p">):</span>
@@ -20062,7 +20262,7 @@ $$
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[194]:</div>
+<div class="prompt input_prompt">In&nbsp;[200]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">scf</span> <span class="o">=</span> <span class="n">SimpleConcolicFuzzer</span><span class="p">()</span>
@@ -20115,7 +20315,7 @@ $$
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[195]:</div>
+<div class="prompt input_prompt">In&nbsp;[201]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleConcolicFuzzer</span><span class="p">(</span><span class="n">SimpleConcolicFuzzer</span><span class="p">):</span>
@@ -20147,7 +20347,7 @@ $$
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[196]:</div>
+<div class="prompt input_prompt">In&nbsp;[202]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleConcolicFuzzer</span><span class="p">(</span><span class="n">SimpleConcolicFuzzer</span><span class="p">):</span>
@@ -20181,7 +20381,7 @@ $$
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[197]:</div>
+<div class="prompt input_prompt">In&nbsp;[203]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
@@ -20204,12 +20404,12 @@ $$
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-197-ff2b46f545ec&gt;&#34;, line 3, in &lt;module&gt;
+  File &#34;&lt;ipython-input-203-ff2b46f545ec&gt;&#34;, line 3, in &lt;module&gt;
     _[hang_if_no_space](&#39;abcd&#39;)
   File &#34;&lt;ipython-input-33-635d2b1b13c2&gt;&#34;, line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File &#34;&lt;string&gt;&#34;, line 7, in hang_if_no_space
-  File &#34;&lt;string&gt;&#34;, line 7, in hang_if_no_space
+  File &#34;&lt;string&gt;&#34;, line 4, in hang_if_no_space
+  File &#34;&lt;string&gt;&#34;, line 4, in hang_if_no_space
   File &#34;&lt;string&gt;&#34;, line 16, in check_time
 TimeoutError (expected)
 </pre>
@@ -20230,7 +20430,7 @@ TimeoutError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[198]:</div>
+<div class="prompt input_prompt">In&nbsp;[204]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">scf</span> <span class="o">=</span> <span class="n">SimpleConcolicFuzzer</span><span class="p">()</span>
@@ -20252,7 +20452,7 @@ TimeoutError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[199]:</div>
+<div class="prompt input_prompt">In&nbsp;[205]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
@@ -20304,7 +20504,7 @@ TimeoutError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[201]:</div>
+<div class="prompt input_prompt">In&nbsp;[207]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -20318,7 +20518,7 @@ TimeoutError (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[202]:</div>
+<div class="prompt input_prompt">In&nbsp;[208]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">scf</span> <span class="o">=</span> <span class="n">SimpleConcolicFuzzer</span><span class="p">()</span>
@@ -20332,7 +20532,7 @@ TimeoutError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[203]:</div>
+<div class="prompt input_prompt">In&nbsp;[209]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
@@ -20361,7 +20561,7 @@ TimeoutError (expected)
 %\x02
 \x00\x00%\x00
 \x00+\x00
-\x00\x00\x00+\x04
+\x00\x00\x00+\x02
 \x00\x00\x00%\x00
 \x00\x00% 
 \x00\x00+\x00
@@ -20392,7 +20592,7 @@ TimeoutError (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[206]:</div>
+<div class="prompt input_prompt">In&nbsp;[212]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ConcolicGrammarFuzzer</span><span class="p">(</span><span class="n">GrammarFuzzer</span><span class="p">):</span>
@@ -20443,7 +20643,7 @@ TimeoutError (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[207]:</div>
+<div class="prompt input_prompt">In&nbsp;[213]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tgf</span> <span class="o">=</span> <span class="n">ConcolicGrammarFuzzer</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR</span><span class="p">)</span>
@@ -20461,7 +20661,7 @@ TimeoutError (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[209]:</div>
+<div class="prompt input_prompt">In&nbsp;[215]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -20485,7 +20685,7 @@ TimeoutError (expected)
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>&#39;select N&lt;n from _582 where A==v(F,_)-I&#39;
+<pre>&#39;select z,(k(w)+N) from W0 where T9(e)*i+b-E!=Yt&#39;
 </pre>
 </div>
 </div>
@@ -20497,17 +20697,17 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-209-6cbadb7bcf98&gt;&#34;, line 4, in &lt;module&gt;
+  File &#34;&lt;ipython-input-215-6cbadb7bcf98&gt;&#34;, line 4, in &lt;module&gt;
     res = _[db_select](str(query))
   File &#34;&lt;ipython-input-33-635d2b1b13c2&gt;&#34;, line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File &#34;&lt;ipython-input-184-26b52b86ed9e&gt;&#34;, line 4, in db_select
+  File &#34;&lt;ipython-input-190-26b52b86ed9e&gt;&#34;, line 4, in db_select
     r = my_db.sql(s)
   File &#34;&lt;string&gt;&#34;, line 18, in sql
   File &#34;&lt;string&gt;&#34;, line 17, in do_select
-  File &#34;&lt;ipython-input-183-3c207d1c78ac&gt;&#34;, line 6, in table
+  File &#34;&lt;ipython-input-189-d1ea3580462a&gt;&#34;, line 6, in table
     raise SQLException(&#39;Table (%s) was not found&#39; % repr(t_name))
-InformationFlow.SQLException: Table (&#39;_582&#39;) was not found (expected)
+InformationFlow.SQLException: Table (&#39;W0&#39;) was not found (expected)
 </pre>
 </div>
 </div>
@@ -20526,7 +20726,7 @@ InformationFlow.SQLException: Table (&#39;_582&#39;) was not found (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[210]:</div>
+<div class="prompt input_prompt">In&nbsp;[216]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
@@ -20547,71 +20747,71 @@ InformationFlow.SQLException: Table (&#39;_582&#39;) was not found (expected)
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0 str.indexof(db_select_s_str_61, &#34;select &#34;, 0) == 0
-1 str.indexof(db_select_s_str_61, &#34;select &#34;, 0) == 0
+<pre>0 str.indexof(db_select_s_str_62, &#34;select &#34;, 0) == 0
+1 str.indexof(db_select_s_str_62, &#34;select &#34;, 0) == 0
 2 Not(0 &gt;
-    str.indexof(str.substr(db_select_s_str_61, 7, 31),
+    str.indexof(str.substr(db_select_s_str_62, 7, 40),
                 &#34; from &#34;,
                 0))
-3 Not(31 &lt;
-    str.indexof(str.substr(db_select_s_str_61, 7, 31),
+3 Not(40 &lt;
+    str.indexof(str.substr(db_select_s_str_62, 7, 40),
                 &#34; from &#34;,
                 0))
 4 Or(0 &lt;
-   str.indexof(str.substr(db_select_s_str_61, 7, 31),
+   str.indexof(str.substr(db_select_s_str_62, 7, 40),
                &#34; from &#34;,
                0),
-   str.indexof(str.substr(db_select_s_str_61, 7, 31),
+   str.indexof(str.substr(db_select_s_str_62, 7, 40),
                &#34; from &#34;,
                0) ==
    0)
 5 Or(0 &lt;
-   str.indexof(str.substr(db_select_s_str_61, 7, 31),
+   str.indexof(str.substr(db_select_s_str_62, 7, 40),
                &#34; where &#34;,
                0),
-   str.indexof(str.substr(db_select_s_str_61, 7, 31),
+   str.indexof(str.substr(db_select_s_str_62, 7, 40),
                &#34; where &#34;,
                0) ==
    0)
-6 Not(31 &lt;
-    str.indexof(str.substr(db_select_s_str_61, 7, 31),
+6 Not(40 &lt;
+    str.indexof(str.substr(db_select_s_str_62, 7, 40),
                 &#34; from &#34;,
                 0) +
     6)
-7 Not(31 &lt;
-    str.indexof(str.substr(db_select_s_str_61, 7, 31),
+7 Not(40 &lt;
+    str.indexof(str.substr(db_select_s_str_62, 7, 40),
                 &#34; where &#34;,
                 0))
-8 Or(str.indexof(str.substr(db_select_s_str_61, 7, 31),
+8 Or(str.indexof(str.substr(db_select_s_str_62, 7, 40),
                &#34; from &#34;,
                0) +
    6 &lt;
-   str.indexof(str.substr(db_select_s_str_61, 7, 31),
+   str.indexof(str.substr(db_select_s_str_62, 7, 40),
                &#34; where &#34;,
                0),
-   str.indexof(str.substr(db_select_s_str_61, 7, 31),
+   str.indexof(str.substr(db_select_s_str_62, 7, 40),
                &#34; where &#34;,
                0) ==
-   str.indexof(str.substr(db_select_s_str_61, 7, 31),
+   str.indexof(str.substr(db_select_s_str_62, 7, 40),
                &#34; from &#34;,
                0) +
    6)
-9 Not(31 &lt;
-    str.indexof(str.substr(db_select_s_str_61, 7, 31),
+9 Not(40 &lt;
+    str.indexof(str.substr(db_select_s_str_62, 7, 40),
                 &#34; where &#34;,
                 0) +
     7)
-10 Or(31 &gt;
-   str.indexof(str.substr(db_select_s_str_61, 7, 31),
+10 Or(40 &gt;
+   str.indexof(str.substr(db_select_s_str_62, 7, 40),
                &#34; where &#34;,
                0) +
    7,
-   31 ==
-   str.indexof(str.substr(db_select_s_str_61, 7, 31),
+   40 ==
+   str.indexof(str.substr(db_select_s_str_62, 7, 40),
                &#34; where &#34;,
                0) +
    7)
-11 Not(str.substr(str.substr(db_select_s_str_61, 7, 31), 9, 4) ==
+11 Not(str.substr(str.substr(db_select_s_str_62, 7, 40), 16, 2) ==
     &#34;inventory&#34;)
 </pre>
 </div>
@@ -20639,7 +20839,7 @@ InformationFlow.SQLException: Table (&#39;_582&#39;) was not found (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[211]:</div>
+<div class="prompt input_prompt">In&nbsp;[217]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">new_path</span> <span class="o">=</span> <span class="n">_</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">z3</span><span class="o">.</span><span class="n">Not</span><span class="p">(</span><span class="n">_</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
@@ -20652,7 +20852,7 @@ InformationFlow.SQLException: Table (&#39;_582&#39;) was not found (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[212]:</div>
+<div class="prompt input_prompt">In&nbsp;[218]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">new_</span> <span class="o">=</span> <span class="n">ConcolicTracer</span><span class="p">((</span><span class="n">_</span><span class="o">.</span><span class="n">decls</span><span class="p">,</span> <span class="n">new_path</span><span class="p">))</span>
@@ -20667,7 +20867,7 @@ InformationFlow.SQLException: Table (&#39;_582&#39;) was not found (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[213]:</div>
+<div class="prompt input_prompt">In&nbsp;[219]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">new_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
@@ -20683,7 +20883,7 @@ InformationFlow.SQLException: Table (&#39;_582&#39;) was not found (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[213]:</div>
+    <div class="prompt output_prompt">Out[219]:</div>
 
 
 
@@ -20708,7 +20908,7 @@ InformationFlow.SQLException: Table (&#39;_582&#39;) was not found (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[214]:</div>
+<div class="prompt input_prompt">In&nbsp;[220]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">_</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
@@ -20729,7 +20929,7 @@ InformationFlow.SQLException: Table (&#39;_582&#39;) was not found (expected)
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Not(str.substr(str.substr(db_select_s_str_61, 7, 31), 9, 4) ==
+<pre>Not(str.substr(str.substr(db_select_s_str_62, 7, 40), 16, 2) ==
     &#34;inventory&#34;)
 no solution
 </pre>
@@ -20750,11 +20950,11 @@ no solution
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[216]:</div>
+<div class="prompt input_prompt">In&nbsp;[222]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">prune_tokens</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;&lt;assignments&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;names&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;literals&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;exprs&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;bexpr&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;table&gt;&#39;</span>
+    <span class="s1">&#39;&lt;value&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;table&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;column&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;literals&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;exprs&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;bexpr&gt;&#39;</span>
 <span class="p">]</span>
 <span class="n">dt</span> <span class="o">=</span> <span class="n">tgf</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">qtree</span><span class="p">,</span> <span class="n">prune_tokens</span><span class="p">)</span>
 <span class="n">display_tree</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
@@ -20781,11 +20981,11 @@ no solution
 <!-- Generated by graphviz version 2.40.1 (20161225.0304)
  -->
 <!-- Title: %3 Pages: 1 -->
-<svg width="361pt" height="176pt"
- viewBox="0.00 0.00 361.00 176.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="375pt" height="176pt"
+ viewBox="0.00 0.00 374.50 176.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 172)">
 <title>%3</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-172 357,-172 357,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-172 370.5,-172 370.5,4 -4,4"/>
 <!-- 0 -->
 <g id="node1" class="node">
 <title>0</title>
@@ -20871,7 +21071,7 @@ no solution
 <!-- 4 -->
 <g id="node5" class="node">
 <title>4</title>
-<text text-anchor="middle" x="78" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">N&lt;n</text>
+<text text-anchor="middle" x="78" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">z,(k(w)+N)</text>
 </g>
 <!-- 3&#45;&gt;4 -->
 <g id="edge4" class="edge">
@@ -20882,7 +21082,7 @@ no solution
 <!-- 7 -->
 <g id="node8" class="node">
 <title>7</title>
-<text text-anchor="middle" x="194" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">_582</text>
+<text text-anchor="middle" x="194" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">W0</text>
 </g>
 <!-- 6&#45;&gt;7 -->
 <g id="edge7" class="edge">
@@ -20893,7 +21093,7 @@ no solution
 <!-- 10 -->
 <g id="node11" class="node">
 <title>10</title>
-<text text-anchor="middle" x="318" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">A==v(F,_)&#45;I</text>
+<text text-anchor="middle" x="318" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">T9(e)*i+b&#45;E!=Yt</text>
 </g>
 <!-- 9&#45;&gt;10 -->
 <g id="edge10" class="edge">
@@ -20922,7 +21122,7 @@ no solution
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[218]:</div>
+<div class="prompt input_prompt">In&nbsp;[224]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">span</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">node_start</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
@@ -20956,7 +21156,7 @@ no solution
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[219]:</div>
+<div class="prompt input_prompt">In&nbsp;[225]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">span_hm</span><span class="p">,</span> <span class="n">_n</span> <span class="o">=</span> <span class="n">span</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">INVENTORY_GRAMMAR</span><span class="p">)</span>
@@ -20969,7 +21169,7 @@ no solution
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[220]:</div>
+<div class="prompt input_prompt">In&nbsp;[226]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">span_hm</span>
@@ -20985,16 +21185,16 @@ no solution
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[220]:</div>
+    <div class="prompt output_prompt">Out[226]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;exprs&gt;&#39;: (7, 3),
- &#39;&lt;table&gt;&#39;: (16, 4),
- &#39;&lt;bexpr&gt;&#39;: (27, 11),
- &#39;&lt;query&gt;&#39;: (0, 38)}</pre>
+<pre>{&#39;&lt;exprs&gt;&#39;: (7, 10),
+ &#39;&lt;table&gt;&#39;: (23, 2),
+ &#39;&lt;bexpr&gt;&#39;: (32, 15),
+ &#39;&lt;query&gt;&#39;: (0, 47)}</pre>
 </div>
 
 </div>
@@ -21013,7 +21213,7 @@ no solution
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[221]:</div>
+<div class="prompt input_prompt">In&nbsp;[227]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;query:&quot;</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
@@ -21036,11 +21236,11 @@ no solution
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>query: select N&lt;n from _582 where A==v(F,_)-I
-&lt;exprs&gt; N&lt;n
-&lt;table&gt; _582
-&lt;bexpr&gt; A==v(F,_)-I
-&lt;query&gt; select N&lt;n from _582 where A==v(F,_)-I
+<pre>query: select z,(k(w)+N) from W0 where T9(e)*i+b-E!=Yt
+&lt;exprs&gt; z,(k(w)+N)
+&lt;table&gt; W0
+&lt;bexpr&gt; T9(e)*i+b-E!=Yt
+&lt;query&gt; select z,(k(w)+N) from W0 where T9(e)*i+b-E!=Yt
 </pre>
 </div>
 </div>
@@ -21059,7 +21259,7 @@ no solution
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[222]:</div>
+<div class="prompt input_prompt">In&nbsp;[228]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">unwrap_substrings</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -21089,7 +21289,7 @@ no solution
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[223]:</div>
+<div class="prompt input_prompt">In&nbsp;[229]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">traverse_z3</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">hm</span><span class="p">):</span>
@@ -21140,7 +21340,7 @@ no solution
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[224]:</div>
+<div class="prompt input_prompt">In&nbsp;[230]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">comparisons</span> <span class="o">=</span> <span class="p">{}</span>
@@ -21159,13 +21359,13 @@ no solution
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[224]:</div>
+    <div class="prompt output_prompt">Out[230]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;inventory&#39;: (16, 4)}</pre>
+<pre>{&#39;inventory&#39;: (23, 2)}</pre>
 </div>
 
 </div>
@@ -21184,7 +21384,7 @@ no solution
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[225]:</div>
+<div class="prompt input_prompt">In&nbsp;[231]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">find_alternatives</span><span class="p">(</span><span class="n">spans</span><span class="p">,</span> <span class="nb">cmp</span><span class="p">):</span>
@@ -21218,7 +21418,7 @@ no solution
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[226]:</div>
+<div class="prompt input_prompt">In&nbsp;[232]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">alternatives</span> <span class="o">=</span> <span class="n">find_alternatives</span><span class="p">(</span><span class="n">span_hm</span><span class="p">,</span> <span class="n">comparisons</span><span class="p">)</span>
@@ -21235,7 +21435,7 @@ no solution
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[226]:</div>
+    <div class="prompt output_prompt">Out[232]:</div>
 
 
 
@@ -21260,7 +21460,7 @@ no solution
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[227]:</div>
+<div class="prompt input_prompt">In&nbsp;[233]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">INVENTORY_GRAMMAR_NEW</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR</span><span class="p">)</span>
@@ -21273,7 +21473,7 @@ no solution
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[228]:</div>
+<div class="prompt input_prompt">In&nbsp;[234]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">alternatives</span><span class="p">:</span>
@@ -21295,7 +21495,7 @@ no solution
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[229]:</div>
+<div class="prompt input_prompt">In&nbsp;[235]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">INVENTORY_GRAMMAR_NEW</span><span class="p">[</span><span class="s1">&#39;&lt;table&gt;&#39;</span><span class="p">]</span>
@@ -21311,7 +21511,7 @@ no solution
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[229]:</div>
+    <div class="prompt output_prompt">Out[235]:</div>
 
 
 
@@ -21336,7 +21536,7 @@ no solution
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[230]:</div>
+<div class="prompt input_prompt">In&nbsp;[236]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgf</span> <span class="o">=</span> <span class="n">ConcolicGrammarFuzzer</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR_NEW</span><span class="p">)</span>
@@ -21349,7 +21549,7 @@ no solution
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[231]:</div>
+<div class="prompt input_prompt">In&nbsp;[237]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
@@ -21380,35 +21580,35 @@ no solution
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>update inventory set H=A9 where g==(sB5)
-Invalid WHERE (&#39;(g==(sB5))&#39;)
+<pre>select (A*S*l(e)+h) from inventory where l/j&lt;G(G)&lt;P
+Invalid WHERE (&#39;(l/j&lt;G(G)&lt;P)&#39;)
 
-delete from inventory where :==3.78&gt;Bo(H)-U+C-W+e
-Invalid WHERE (&#39;:==3.78&gt;Bo(H)-U+C-W+e&#39;)
+update W5RhS set TT8=P7 where E!=b+e
+Table (&#39;W5RhS&#39;) was not found
 
-select (k(T)-a/m&lt;n/P(X)) from inventory where W==H
-Invalid WHERE (&#39;(W==H)&#39;)
+delete from inventory where Z(F)/y*W/v&lt;R/w/L(Y)/R
+Invalid WHERE (&#39;Z(F)/y*W/v&lt;R/w/L(Y)/R&#39;)
 
-update inventory set A4=y9K101 where s(W,N)&lt;g-:/U+d
-Invalid WHERE (&#39;(s(W,N)&lt;g-:/U+d)&#39;)
+delete from Y where -02==:
+Table (&#39;Y&#39;) was not found
 
-insert into P (v,:) values (&#39;7&#39;)
-names([&#39;v&#39;, &#39;:&#39;]) != values([&#34;&#39;7&#39;&#34;])
+insert into ZQ (C3y,h4,o3) values (&#39;D&#39;,&#39;.{Y&#39;)
+Table (&#39;ZQ&#39;) was not found
 
-delete from inventory where d-l+T*f4(W,W)&gt;wM((r),t)
-Invalid WHERE (&#39;d-l+T*f4(W,W)&gt;wM((r),t)&#39;)
+select oy((r42),K==_==D!=(:),((h&gt;N/W)),(k!=p)) from inventory
+Invalid WHERE (&#39;(oy((r42),K==_==D!=(:),((h&gt;N/W)),(k!=p)))&#39;)
 
-select (W/R*m*J-z*B/_),(m+i+_) from inventory
-Invalid WHERE (&#39;((W/R*m*J-z*B/_),(m+i+_))&#39;)
+select X==(r),Y,l from inventory where J/x*f&gt;M(h)/B
+Invalid WHERE (&#39;(J/x*f&gt;M(h)/B)&#39;)
 
-insert into inventory (y6Yu) values (&#39;y&#39;,60)
-names([&#39;y6Yu&#39;]) != values([&#34;&#39;y&#39;&#34;, &#39;60&#39;])
+select _6(U,K5)&gt;a-N-n+C*e+s-n from inventory
+Invalid WHERE (&#39;(_6(U,K5)&gt;a-N-n+C*e+s-n)&#39;)
 
-insert into u7ql (SOn,pH,A,k) values (9,&#39;^&#39;)
-names([&#39;SOn&#39;, &#39;pH&#39;, &#39;A&#39;, &#39;k&#39;]) != values([&#39;9&#39;, &#34;&#39;^&#39;&#34;])
+select n-V/X/X&lt;e(s),fqw(f+v) from inventory
+Invalid WHERE (&#39;(n-V/X/X&lt;e(s),fqw(f+v))&#39;)
 
-select S6(((Y)),_)*U+Z/K-g,m2 from inventory
-Invalid WHERE (&#39;(S6(((Y)),_)*U+Z/K-g,m2)&#39;)
+select (d769R090x1Of),(b9S9G89) from inventory
+Invalid WHERE (&#39;((d769R090x1Of),(b9S9G89))&#39;)
 
 </pre>
 </div>
@@ -21430,7 +21630,7 @@ In effect, what we have done is to lift parts of predicates to the grammar. The 
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[232]:</div>
+<div class="prompt input_prompt">In&nbsp;[238]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gf</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR</span><span class="p">)</span>
@@ -21460,35 +21660,35 @@ In effect, what we have done is to lift parts of predicates to the grammar. The 
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>select ((7)!=U)==((L*S-i+l/E-w*N/j))!=((((Q)==G))) from If1508n9bb200Vy5
-Table (&#39;If1508n9bb200Vy5&#39;) was not found
+<pre>select (D),j from _4 where N/d/I*o&gt;h
+Table (&#39;_4&#39;) was not found
 
-insert into pC (cp,G,i) values (-53.1816,1.4992)
-names([&#39;cp&#39;, &#39;G&#39;, &#39;i&#39;]) != values([&#39;-53.1816&#39;, &#39;1.4992&#39;])
+select r-u*Z/d*S/L-h,qN,T!=r from t
+Table (&#39;t&#39;) was not found
 
-select z&gt;q,4 from Q where .&lt;N*X-u
-Table (&#39;Q&#39;) was not found
+delete from _04e where -5!=(X)*p(x)+w*l(J,i,b)/Y/d
+Table (&#39;_04e&#39;) was not found
 
-update F set z6J=R4 where d+O*r+x(R)&lt;N((k))+Z+I(v)
+delete from c3 where --6!=o8M!=o==79156.443
+Table (&#39;c3&#39;) was not found
+
+insert into F (Lu9g:917s) values (&#39;B&#39;)
 Table (&#39;F&#39;) was not found
 
-delete from i7 where E/_/j-n/K/R&lt;l/K*c*Z
-Table (&#39;i7&#39;) was not found
+delete from W where j/S*S+P/d/x&gt;a(a)+M(V)
+Table (&#39;W&#39;) was not found
 
-select (((((m*j*E==hX))))),(T==T!=G),(A*.(S)) from w
-Table (&#39;w&#39;) was not found
+delete from NQ where D(u)-R+X(X,X)==x/w*s/R
+Table (&#39;NQ&#39;) was not found
 
-update G set k4=q where G*e+G&lt;S-L-Q(:,b)
-Table (&#39;G&#39;) was not found
+delete from C3 where A*q+u/M(z,X)&lt;v&lt;8+X*I(A)==821.2
+Table (&#39;C3&#39;) was not found
 
-update m set h=l8Dl8 where 996!=M
-Table (&#39;m&#39;) was not found
+delete from Tg06M6 where t+V/S&lt;s+.+S
+Table (&#39;Tg06M6&#39;) was not found
 
-update F set G=Q0,Y=M where i+w*e&gt;K-f
-Table (&#39;F&#39;) was not found
-
-select V*k&lt;r*C,w&gt;x-K,7!=j from gm1S
-Table (&#39;gm1S&#39;) was not found
+select 5,G from z3 where W&gt;Z==l(W)/g*D-T
+Table (&#39;z3&#39;) was not found
 
 </pre>
 </div>
@@ -21516,7 +21716,7 @@ Table (&#39;gm1S&#39;) was not found
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[233]:</div>
+<div class="prompt input_prompt">In&nbsp;[239]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ConcolicGrammarFuzzer</span><span class="p">(</span><span class="n">ConcolicGrammarFuzzer</span><span class="p">):</span>
@@ -21528,9 +21728,11 @@ Table (&#39;gm1S&#39;) was not found
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">trace</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
             <span class="n">traverse_z3</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">comparisons</span><span class="p">)</span>
         <span class="n">alternatives</span> <span class="o">=</span> <span class="n">find_alternatives</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">span_range</span><span class="p">,</span> <span class="n">comparisons</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Alternatives:&#39;</span><span class="p">,</span> <span class="n">alternatives</span><span class="p">,</span> <span class="s1">&#39;Span:&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">span_range</span><span class="p">)</span>
         <span class="n">new_grammar</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">alternatives</span><span class="p">:</span>
-            <span class="n">new_grammar</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_grammar</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">alternatives</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+            <span class="n">new_grammar</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">new_grammar</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">alternatives</span><span class="p">[</span><span class="n">k</span><span class="p">])))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">new_grammar</span>
 </pre></div>
 
@@ -21549,7 +21751,7 @@ Table (&#39;gm1S&#39;) was not found
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[234]:</div>
+<div class="prompt input_prompt">In&nbsp;[240]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ConcolicGrammarFuzzer</span><span class="p">(</span><span class="n">ConcolicGrammarFuzzer</span><span class="p">):</span>
@@ -21576,7 +21778,7 @@ Table (&#39;gm1S&#39;) was not found
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[235]:</div>
+<div class="prompt input_prompt">In&nbsp;[241]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">inventory</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;inventory&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -21589,11 +21791,10 @@ Table (&#39;gm1S&#39;) was not found
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[236]:</div>
+<div class="prompt input_prompt">In&nbsp;[242]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s1">&#39;vehicles&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inventory</span>
-<span class="n">db</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s1">&#39;years&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">({</span><span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">},</span> <span class="p">[])</span>
 <span class="n">db</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="s1">&#39;months&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">({</span>
     <span class="s1">&#39;month&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="nb">str</span>
@@ -21617,7 +21818,7 @@ Table (&#39;gm1S&#39;) was not found
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[236]:</div>
+    <div class="prompt output_prompt">Out[242]:</div>
 
 
 
@@ -21627,7 +21828,6 @@ Table (&#39;gm1S&#39;) was not found
   [{&#39;year&#39;: 1997, &#39;kind&#39;: &#39;van&#39;, &#39;company&#39;: &#39;Ford&#39;, &#39;model&#39;: &#39;E350&#39;},
    {&#39;year&#39;: 2000, &#39;kind&#39;: &#39;car&#39;, &#39;company&#39;: &#39;Mercury&#39;, &#39;model&#39;: &#39;Cougar&#39;},
    {&#39;year&#39;: 1999, &#39;kind&#39;: &#39;car&#39;, &#39;company&#39;: &#39;Chevy&#39;, &#39;model&#39;: &#39;Venture&#39;}]),
- &#39;years&#39;: ({&#39;year&#39;: int, &#39;type&#39;: str}, []),
  &#39;months&#39;: ({&#39;month&#39;: int, &#39;name&#39;: str},
   [{&#39;month&#39;: 1, &#39;name&#39;: &#39;jan&#39;},
    {&#39;month&#39;: 2, &#39;name&#39;: &#39;feb&#39;},
@@ -21659,7 +21859,7 @@ Table (&#39;gm1S&#39;) was not found
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[237]:</div>
+<div class="prompt input_prompt">In&nbsp;[243]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgf</span> <span class="o">=</span> <span class="n">ConcolicGrammarFuzzer</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR</span><span class="p">)</span>
@@ -21692,35 +21892,35 @@ Table (&#39;gm1S&#39;) was not found
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>select ((Q)!=G8((x),M)!=p(J&gt;t)*h!=H/y) from _
-Table (&#39;_&#39;) was not found
+<pre>delete from b where m/C!=L-K*Q&lt;H+c(O)+-0*H/G
+Table (&#39;b&#39;) was not found
 
-update months set J4r3=:,J=O,X=J where P(N&lt;h)&gt;q*s
-Invalid WHERE (&#39;(P(N&lt;h)&gt;q*s)&#39;)
+update O8F set E=g,p=Z where y&gt;p
+Table (&#39;O8F&#39;) was not found
 
-insert into months (B,U8) values (&#39;A&#39;)
-names([&#39;B&#39;, &#39;U8&#39;]) != values([&#34;&#39;A&#39;&#34;])
+update F0 set X=Z,.=t where Y+c&gt;n/k-V
+Table (&#39;F0&#39;) was not found
 
-select :==j,Q(x)+p==a from months where lA(Y)&lt;H(K==z)
-Invalid WHERE (&#39;(lA(Y)&lt;H(K==z))&#39;)
+delete from months where (((D+K-w/v*w-Z)))&gt;Y((E!=e)*k-e*m)
+Invalid WHERE (&#39;(((D+K-w/v*w-Z)))&gt;Y((E!=e)*k-e*m)&#39;)
 
-delete from vehicles where s+B+C+y(A)!=J-b&gt;k==r/J-J
-Invalid WHERE (&#39;s+B+C+y(A)!=J-b&gt;k==r/J-J&#39;)
+insert into months (k61) values (&#39;%&#39;)
+Column (&#39;k61&#39;) was not found
 
-select B*V/(T) from vehicles where e-R&gt;A/h-r*y+n
-Invalid WHERE (&#39;(e-R&gt;A/h-r*y+n)&#39;)
+update a set month=n3 where (sNx)!=Q(6.6853,(((mmbQP0))))&lt;_
+Table (&#39;a&#39;) was not found
 
-select -6.33 from months where _!=((S30zix))
-Invalid WHERE (&#39;(_!=((S30zix)))&#39;)
+select O1(K==q,S)/o+j(f),C,w&lt;r from u
+Table (&#39;u&#39;) was not found
 
-select 5,X/z/h,L from vehicles where H/M*v+g&gt;m
-Invalid WHERE (&#39;(H/M*v+g&gt;m)&#39;)
+update months set r=y,month=.,name=J where :E4h==m!=(A)
+Column (&#39;r&#39;) was not found
 
-update vehicles set cG=v4 where c-i-k(V)!=(q8)
-Invalid WHERE (&#39;(c-i-k(V)!=(q8))&#39;)
+insert into rPS (T6.) values (40)
+Table (&#39;rPS&#39;) was not found
 
-update months set w=a,d=b where 2==D&lt;j-P*.
-Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
+insert into vehicles (name) values (&#39;PO&#39;)
+Column (&#39;name&#39;) was not found
 
 </pre>
 </div>
@@ -21760,7 +21960,29 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 
 </div>
 </div>
-</div></section></section><section><section>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We're done, so we clean up:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[245]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;_.smt&#39;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;_.smt&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -21818,7 +22040,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[238]:</div>
+<div class="prompt input_prompt">In&nbsp;[246]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zfloat</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
@@ -21841,7 +22063,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[239]:</div>
+<div class="prompt input_prompt">In&nbsp;[247]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zfloat</span><span class="p">(</span><span class="n">zfloat</span><span class="p">):</span>
@@ -21869,7 +22091,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[240]:</div>
+<div class="prompt input_prompt">In&nbsp;[248]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zfloat</span><span class="p">(</span><span class="n">zfloat</span><span class="p">):</span>
@@ -21892,7 +22114,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[241]:</div>
+<div class="prompt input_prompt">In&nbsp;[249]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zfloat</span><span class="p">(</span><span class="n">zfloat</span><span class="p">):</span>
@@ -21918,7 +22140,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[242]:</div>
+<div class="prompt input_prompt">In&nbsp;[250]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_float_bool_wrapper</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">zfun</span><span class="p">):</span>
@@ -21946,7 +22168,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[243]:</div>
+<div class="prompt input_prompt">In&nbsp;[251]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">FLOAT_BOOL_OPS</span> <span class="o">=</span> <span class="p">[</span>
@@ -21968,7 +22190,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[244]:</div>
+<div class="prompt input_prompt">In&nbsp;[252]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">FLOAT_BOOL_OPS</span><span class="p">:</span>
@@ -21992,7 +22214,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[245]:</div>
+<div class="prompt input_prompt">In&nbsp;[253]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_float_binary_wrapper</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">zfun</span><span class="p">):</span>
@@ -22020,7 +22242,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[246]:</div>
+<div class="prompt input_prompt">In&nbsp;[254]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">FLOAT_BINARY_OPS</span> <span class="o">=</span> <span class="p">[</span>
@@ -22060,7 +22282,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[247]:</div>
+<div class="prompt input_prompt">In&nbsp;[255]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">FLOAT_BINARY_OPS</span><span class="p">:</span>
@@ -22084,7 +22306,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[248]:</div>
+<div class="prompt input_prompt">In&nbsp;[256]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -22101,7 +22323,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[249]:</div>
+<div class="prompt input_prompt">In&nbsp;[257]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">context</span>
@@ -22117,7 +22339,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[249]:</div>
+    <div class="prompt output_prompt">Out[257]:</div>
 
 
 
@@ -22142,7 +22364,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[250]:</div>
+<div class="prompt input_prompt">In&nbsp;[258]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_int_binary_wrapper</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">zfun</span><span class="p">):</span>
@@ -22167,7 +22389,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[251]:</div>
+<div class="prompt input_prompt">In&nbsp;[259]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">INT_BINARY_OPS</span><span class="p">:</span>
@@ -22191,7 +22413,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[252]:</div>
+<div class="prompt input_prompt">In&nbsp;[260]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -22205,7 +22427,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[253]:</div>
+<div class="prompt input_prompt">In&nbsp;[261]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
@@ -22221,7 +22443,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[253]:</div>
+    <div class="prompt output_prompt">Out[261]:</div>
 
 
 
@@ -22239,7 +22461,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Exercise-2:-Bit-manipulation">Exercise 2: Bit manipulation<a class="anchor-link" href="#Exercise-2:-Bit-manipulation">&#182;</a></h3>
+<h3 id="Exercise-2:-Bit-Manipulation">Exercise 2: Bit Manipulation<a class="anchor-link" href="#Exercise-2:-Bit-Manipulation">&#182;</a></h3>
 </div>
 </div>
 </div><div class="fragment">
@@ -22269,7 +22491,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[254]:</div>
+<div class="prompt input_prompt">In&nbsp;[262]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_int_bit_wrapper</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">zfun</span><span class="p">):</span>
@@ -22301,7 +22523,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[255]:</div>
+<div class="prompt input_prompt">In&nbsp;[263]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">BIT_OPS</span> <span class="o">=</span> <span class="p">[</span>
@@ -22325,7 +22547,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[256]:</div>
+<div class="prompt input_prompt">In&nbsp;[264]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">BIT_OPS</span><span class="p">:</span>
@@ -22349,7 +22571,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[257]:</div>
+<div class="prompt input_prompt">In&nbsp;[265]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zint</span><span class="p">(</span><span class="n">zint</span><span class="p">):</span>
@@ -22373,7 +22595,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[258]:</div>
+<div class="prompt input_prompt">In&nbsp;[266]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">my_fn</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
@@ -22400,7 +22622,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[259]:</div>
+<div class="prompt input_prompt">In&nbsp;[267]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -22440,7 +22662,7 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[260]:</div>
+<div class="prompt input_prompt">In&nbsp;[268]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -22460,22 +22682,22 @@ Invalid WHERE (&#39;(2==D&lt;j-P*.)&#39;)
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>(declare-const my_fn_a_int_84 Int)
-(declare-const my_fn_b_int_85 Int)
-(assert (let ((a!1 (bvnot (bvor (bvnot ((_ int2bv 64) my_fn_a_int_84))
-                        (bvnot ((_ int2bv 64) my_fn_b_int_85))))))
-(let ((a!2 (bvor (bvnot (bvor ((_ int2bv 64) my_fn_a_int_84)
-                              ((_ int2bv 64) my_fn_b_int_85)))
+<pre>(declare-const my_fn_a_int_85 Int)
+(declare-const my_fn_b_int_86 Int)
+(assert (let ((a!1 (bvnot (bvor (bvnot ((_ int2bv 64) my_fn_a_int_85))
+                        (bvnot ((_ int2bv 64) my_fn_b_int_86))))))
+(let ((a!2 (bvor (bvnot (bvor ((_ int2bv 64) my_fn_a_int_85)
+                              ((_ int2bv 64) my_fn_b_int_86)))
                  a!1)))
   (not (= 0 (bv2int (bvnot a!2)))))))
 (check-sat)
 (get-model)
 sat
 (model 
-  (define-fun my_fn_a_int_84 () Int
-    (- 1))
-  (define-fun my_fn_b_int_85 () Int
-    (- 6))
+  (define-fun my_fn_a_int_85 () Int
+    (- 18446744073709551617))
+  (define-fun my_fn_b_int_86 () Int
+    (- 2))
 )
 </pre>
 </div>
@@ -22483,13 +22705,13 @@ sat
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[260]:</div>
+    <div class="prompt output_prompt">Out[268]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(&#39;sat&#39;, {&#39;a&#39;: [&#39;-&#39;, &#39;1&#39;], &#39;b&#39;: [&#39;-&#39;, &#39;6&#39;]})</pre>
+<pre>(&#39;sat&#39;, {&#39;a&#39;: [&#39;-&#39;, &#39;18446744073709551617&#39;], &#39;b&#39;: [&#39;-&#39;, &#39;2&#39;]})</pre>
 </div>
 
 </div>

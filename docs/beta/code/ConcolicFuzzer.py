@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2019-03-12 15:11:41+01:00
+# Last change: 2019-03-13 19:43:20+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -1326,6 +1326,102 @@ if __name__ == "__main__":
     _.zeval()
 
 
+# ##### Splitting Strings
+
+if __name__ == "__main__":
+    print('\n##### Splitting Strings')
+
+
+
+
+class zstr(zstr):
+    def split(self, sep=None, maxsplit=-1):
+        assert sep is not None  # default space based split is complicated
+        assert maxsplit == -1  # for now.
+        zsep = z3.StringVal(sep)
+        zl = z3.Length(zsep)
+        zi = z3.IndexOf(self.z, zsep, z3.IntVal(0))  # zi would be the length of prefix
+        # Z3Bug: There is a bug in the `z3.IndexOf` method which returns
+        # `z3.SeqRef` instead of `z3.ArithRef`. So we need to fix it.
+        zi = z3.ArithRef(zi.ast, zi.ctx)
+
+        vi = self.v.find(sep)
+        if zbool(self.context, zi >= z3.IntVal(0), vi >= 0):
+            zprefix = z3.SubString(self.z, z3.IntVal(0), zi)
+            zmid = z3.SubString(self.z, zi, zl)
+            zsuffix = z3.SubString(self.z, zi + zl,
+                                   z3.Length(self.z))
+            return [zstr(self.context, zprefix, self.v[0:vi])] + zstr(
+                self.context, zsuffix, self.v[vi + len(sep):]).split(
+                    sep, maxsplit)
+        else:
+            return [self]
+
+def tstr10(s):
+    if s.split(',') == ['a', 'b', 'c']:
+        return True
+    else:
+        return False
+
+if __name__ == "__main__":
+    with ConcolicTracer() as _:
+        r = _[tstr10]('a,b,c')
+        print(r)
+
+
+if __name__ == "__main__":
+    _.zeval()
+
+
+# ##### Trip Wire
+
+if __name__ == "__main__":
+    print('\n##### Trip Wire')
+
+
+
+
+def make_str_abort_wrapper(fun):
+    def proxy(*args, **kwargs):
+        raise Exception( '%s Not implemented in `zstr`' % fun.__name__)
+    return proxy
+
+if __name__ == "__main__":
+    strmembers = inspect.getmembers(zstr, callable)
+    zstrmembers = {m[0] for m in strmembers if len(
+        m) == 2 and 'zstr' in m[1].__qualname__}
+    for name, fn in inspect.getmembers(str, callable):
+        # Omitted 'splitlines' as this is needed for formatting output in
+        # IPython/Jupyter
+        if name not in zstrmembers and name not in [
+            'splitlines',
+            '__class__',
+            '__contains__',
+            '__delattr__',
+            '__dir__',
+            '__format__',
+            '__ge__',
+            '__getattribute__',
+            '__getnewargs__',
+            '__gt__',
+            '__hash__',
+            '__le__',
+            '__len__',
+            '__lt__',
+            '__mod__',
+            '__mul__',
+            '__ne__',
+            '__reduce__',
+            '__reduce_ex__',
+            '__repr__',
+            '__rmod__',
+            '__rmul__',
+            '__setattr__',
+            '__sizeof__',
+            '__str__']:
+            setattr(zstr, name, make_str_abort_wrapper(fn))
+
+
 # ## Examples
 
 if __name__ == "__main__":
@@ -1513,6 +1609,12 @@ class ConcolicDB(DB):
             if t_name == k:
                 return v
         raise SQLException('Table (%s) was not found' % repr(t_name))
+
+    def column(self, decl, c_name):
+        for k in decl:
+            if c_name == k:
+                return decl[k]
+        raise SQLException('Column (%s) was not found' % repr(c_name))
 
 def db_select(s):
     my_db = ConcolicDB()
@@ -1765,7 +1867,7 @@ else:
 
 if __name__ == "__main__":
     prune_tokens = [
-        '<assignments>', '<names>', '<literals>', '<exprs>', '<bexpr>', '<table>'
+        '<value>', '<table>', '<column>', '<literals>', '<exprs>', '<bexpr>'
     ]
     dt = tgf.prune_tree(qtree, prune_tokens)
     display_tree(dt)
@@ -1946,9 +2048,11 @@ class ConcolicGrammarFuzzer(ConcolicGrammarFuzzer):
         for p in trace.path:
             traverse_z3(p, comparisons)
         alternatives = find_alternatives(self.span_range, comparisons)
+        if self.log:
+            print('Alternatives:', alternatives, 'Span:', self.span_range)
         new_grammar = dict(self.grammar)
         for k in alternatives:
-            new_grammar[k] = new_grammar[k] + list(alternatives[k])
+            new_grammar[k] = list(set(new_grammar[k] + list(alternatives[k])))
         self.grammar = new_grammar
 
 class ConcolicGrammarFuzzer(ConcolicGrammarFuzzer):
@@ -1965,7 +2069,6 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     db.db['vehicles'] = inventory
-    db.db['years'] = ({'year': int, 'type': str}, [])
     db.db['months'] = ({
         'month': int,
         'name': str
@@ -2010,6 +2113,13 @@ if __name__ == "__main__":
     print('\n## Lessons Learned')
 
 
+
+
+import os
+
+if __name__ == "__main__":
+    if os.path.exists('_.smt'):
+        os.remove('_.smt')
 
 
 # ## Next Steps
@@ -2182,10 +2292,10 @@ if __name__ == "__main__":
     _.zeval()
 
 
-# ### Exercise 2: Bit manipulation
+# ### Exercise 2: Bit Manipulation
 
 if __name__ == "__main__":
-    print('\n### Exercise 2: Bit manipulation')
+    print('\n### Exercise 2: Bit Manipulation')
 
 
 
