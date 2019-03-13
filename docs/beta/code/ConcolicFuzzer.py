@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2019-03-13 19:43:20+01:00
+# Last change: 2019-03-13 21:45:56+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -796,15 +796,21 @@ if __name__ == "__main__":
     parse_sexp('abcd (hello 123 (world "hello world"))')
 
 
+import tempfile
+
 def zeval_smt(path, cc, log):
     s = cc.smt_expr(True, True, path)
-    with open('_.smt', 'w+') as f:
+    
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.smt') as f:
         f.write(s)
         f.write("\n(check-sat)")
         f.write("\n(get-model)")
-    if log:
-        print(s, '(check-sat)', '(get-model)', sep='\n')
-    output = subprocess.getoutput("z3 _.smt")
+        f.flush()
+
+        if log:
+            print(s, '(check-sat)', '(get-model)', sep='\n')
+        output = subprocess.getoutput("z3 " + f.name)
+    
     if log:
         print(output)
     o = parse_sexp(output)
@@ -2113,13 +2119,6 @@ if __name__ == "__main__":
     print('\n## Lessons Learned')
 
 
-
-
-import os
-
-if __name__ == "__main__":
-    if os.path.exists('_.smt'):
-        os.remove('_.smt')
 
 
 # ## Next Steps

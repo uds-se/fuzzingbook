@@ -11893,7 +11893,7 @@ MathJax.Hub.Config({
 <li><a href="InformationFlow.html">Tracking Information Flow</a></li>
 <li><a href="ConcolicFuzzer.html" class="this_page">Concolic Fuzzing <strong class="new_chapter">&bull;</strong></a></li>
 <li><a href="SymbolicFuzzer.html">Symbolic Fuzzing&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
-<li><a href="DynamicInvariants.html">Mining Function Specifications with Dynamic Invariants&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
+<li><a href="DynamicInvariants.html">Mining Function Specifications&nbsp;<i class="fa fa-fw fa-wrench"></i></a></li>
 </ul><li class="has-sub"><a href="05_Domain-Specific_Fuzzing.html" class="chapters"><span class="part_number">V</span> Domain-Specific Fuzzing <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
 <li><a href="ConfigurationFuzzer.html">Testing Configurations</a></li>
@@ -15180,15 +15180,33 @@ This declares a symbolic string variable <code>s</code>
 
 <div class="inner_cell">
 <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/tempfile.html" class="import" target="_blank">tempfile</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">zeval_smt</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">log</span><span class="p">):</span>
     <span class="n">s</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">smt_expr</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;_.smt&#39;</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.smt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">(check-sat)&quot;</span><span class="p">)</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">(get-model)&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s1">&#39;(check-sat)&#39;</span><span class="p">,</span> <span class="s1">&#39;(get-model)&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">getoutput</span><span class="p">(</span><span class="s2">&quot;z3 _.smt&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s1">&#39;(check-sat)&#39;</span><span class="p">,</span> <span class="s1">&#39;(get-model)&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">getoutput</span><span class="p">(</span><span class="s2">&quot;z3 &quot;</span> <span class="o">+</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
     <span class="n">o</span> <span class="o">=</span> <span class="n">parse_sexp</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
@@ -18351,12 +18369,12 @@ $$</p>
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-203-ff2b46f545ec&gt;&#34;, line 3, in &lt;module&gt;
+  File &#34;&lt;ipython-input-204-ff2b46f545ec&gt;&#34;, line 3, in &lt;module&gt;
     _[hang_if_no_space](&#39;abcd&#39;)
   File &#34;&lt;ipython-input-33-635d2b1b13c2&gt;&#34;, line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File &#34;&lt;string&gt;&#34;, line 4, in hang_if_no_space
-  File &#34;&lt;string&gt;&#34;, line 4, in hang_if_no_space
+  File &#34;&lt;string&gt;&#34;, line 7, in hang_if_no_space
+  File &#34;&lt;string&gt;&#34;, line 7, in hang_if_no_space
   File &#34;&lt;string&gt;&#34;, line 16, in check_time
 TimeoutError (expected)
 </pre>
@@ -18685,15 +18703,15 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-215-6cbadb7bcf98&gt;&#34;, line 4, in &lt;module&gt;
+  File &#34;&lt;ipython-input-216-6cbadb7bcf98&gt;&#34;, line 4, in &lt;module&gt;
     res = _[db_select](str(query))
   File &#34;&lt;ipython-input-33-635d2b1b13c2&gt;&#34;, line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File &#34;&lt;ipython-input-190-26b52b86ed9e&gt;&#34;, line 4, in db_select
+  File &#34;&lt;ipython-input-191-26b52b86ed9e&gt;&#34;, line 4, in db_select
     r = my_db.sql(s)
   File &#34;&lt;string&gt;&#34;, line 18, in sql
   File &#34;&lt;string&gt;&#34;, line 17, in do_select
-  File &#34;&lt;ipython-input-189-d1ea3580462a&gt;&#34;, line 6, in table
+  File &#34;&lt;ipython-input-190-d1ea3580462a&gt;&#34;, line 6, in table
     raise SQLException(&#39;Table (%s) was not found&#39; % repr(t_name))
 InformationFlow.SQLException: Table (&#39;W0&#39;) was not found (expected)
 </pre>
@@ -19831,26 +19849,26 @@ Table (&#39;O8F&#39;) was not found
 update F0 set X=Z,.=t where Y+c&gt;n/k-V
 Table (&#39;F0&#39;) was not found
 
-delete from months where (((D+K-w/v*w-Z)))&gt;Y((E!=e)*k-e*m)
+delete from vehicles where (((D+K-w/v*w-Z)))&gt;Y((E!=e)*k-e*m)
 Invalid WHERE (&#39;(((D+K-w/v*w-Z)))&gt;Y((E!=e)*k-e*m)&#39;)
 
-insert into months (k61) values (&#39;%&#39;)
+insert into vehicles (k61) values (&#39;%&#39;)
 Column (&#39;k61&#39;) was not found
 
-update a set month=n3 where (sNx)!=Q(6.6853,(((mmbQP0))))&lt;_
+update a set company=C70 where -66.3==(M*q+hL(D)/p/J/YR(x))
 Table (&#39;a&#39;) was not found
 
-select O1(K==q,S)/o+j(f),C,w&lt;r from u
-Table (&#39;u&#39;) was not found
+delete from months where K(E,e)+p&lt;:/x*r/R*I&lt;(-84)*H==-5
+Invalid WHERE (&#39;K(E,e)+p&lt;:/x*r/R*I&lt;(-84)*H==-5&#39;)
 
-update months set r=y,month=.,name=J where :E4h==m!=(A)
-Column (&#39;r&#39;) was not found
+delete from vehicles where ((j(M,d)))!=(-5.56)!=((((g&lt;:==(:!=_==q)))))
+Invalid WHERE (&#39;((j(M,d)))!=(-5.56)!=((((g&lt;:==(:!=_==q)))))&#39;)
 
-insert into rPS (T6.) values (40)
-Table (&#39;rPS&#39;) was not found
+delete from months where r(I)+(P*k-g)&lt;R(y)*C-C(g)
+Invalid WHERE (&#39;r(I)+(P*k-g)&lt;R(y)*C-C(g)&#39;)
 
-insert into vehicles (name) values (&#39;PO&#39;)
-Column (&#39;name&#39;) was not found
+insert into ER50 (O) values (&#39;?&#39;,83)
+Table (&#39;ER50&#39;) was not found
 </pre>
 </div>
 
@@ -19887,44 +19905,6 @@ Column (&#39;name&#39;) was not found
 </ul>
 </div>
 </div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We're done, so we clean up:</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/os.html" class="import" target="_blank">os</a></span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;_.smt&#39;</span><span class="p">):</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;_.smt&#39;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
 </div>
 </div>
 
@@ -20711,7 +20691,7 @@ sat
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConcolicFuzzer.ipynb" target=_blank)>Last change: 2019-03-13 19:43:20+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConcolicFuzzer.ipynb" target=_blank)>Last change: 2019-03-13 21:45:56+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -20729,7 +20709,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">Concolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html</a>.  Retrieved 2019-03-13 19:43:20+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">Concolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html</a>.  Retrieved 2019-03-13 21:45:56+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:ConcolicFuzzer,
@@ -20739,9 +20719,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html}},
-    note = {Retrieved 2019-03-13 19:43:20+01:00},
+    note = {Retrieved 2019-03-13 21:45:56+01:00},
     url = {https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html},
-    urldate = {2019-03-13 19:43:20+01:00}
+    urldate = {2019-03-13 21:45:56+01:00}
 }
 </pre>
 </div>
