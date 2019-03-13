@@ -53,17 +53,24 @@ def inheritance_conflicts(c1, c2):
   
 # Printing files with syntax highlighting
 def print_file(filename, lexer=None):
+    content = open(filename, "rb").read().decode('utf-8')
+    print_content(content, filename, lexer)
+    
+def print_content(content, filename=None, lexer=None):
     from pygments import highlight, lexers, formatters
-    from pygments.lexers import get_lexer_for_filename
+    from pygments.lexers import get_lexer_for_filename, guess_lexer
 
-    contents = open(filename, "rb").read().decode('utf-8')
     if rich_output():
         if lexer is None:
-            lexer = get_lexer_for_filename(filename)
-        colorful_contents = highlight(contents, lexer, formatters.TerminalFormatter())
-        print(colorful_contents, end="")
+            if filename is None:
+                lexer = guess_lexer(content)
+            else:
+                lexer = get_lexer_for_filename(filename)
+
+        colorful_content = highlight(content, lexer, formatters.TerminalFormatter())
+        print(colorful_content, end="")
     else:
-        print(contents, end="")
+        print(content, end="")
 
 
 # Escaping unicode characters into ASCII for user-facing strings
