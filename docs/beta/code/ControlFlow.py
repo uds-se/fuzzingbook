@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2019-02-03 16:19:53+01:00
+# Last change: 2019-03-19 14:33:06+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -217,13 +217,28 @@ class PyCFG:
         for n in node.body:
             p = self.walk(n, p)
         return p
+    
+    def on_augassign(self, node, myparents):
+        """
+         AugAssign(expr target, operator op, expr value)
+        """
+        p = [CFGNode(parents=myparents, ast=node)]
+        p = self.walk(node.value, p)
 
+        return p
+    
+    def on_annassign(self, node, myparents):
+        """
+        AnnAssign(expr target, expr annotation, expr? value, int simple)
+        """
+        p = [CFGNode(parents=myparents, ast=node)]
+        p = self.walk(node.value, p)
+
+        return p
+    
     def on_assign(self, node, myparents):
         """
         Assign(expr* targets, expr value)
-        TODO: AugAssign(expr target, operator op, expr value)
-        -- 'simple' indicates that we annotate simple name without parens
-        TODO: AnnAssign(expr target, expr annotation, expr? value, int simple)
         """
         if len(node.targets) > 1:
             raise NotImplemented('Parallel assignments')
@@ -702,18 +717,18 @@ def cgi_decode(s):
     while i < len(s):
         c = s[i]
         if c == '+':
-            t = t + ' '
+            t += ' '
         elif c == '%':
             digit_high, digit_low = s[i + 1], s[i + 2]
-            i = i + 2
+            i += 2
             if digit_high in hex_values and digit_low in hex_values:
                 v = hex_values[digit_high] * 16 + hex_values[digit_low]
-                t = t + chr(v)
+                t += chr(v)
             else:
                 raise ValueError("Invalid encoding")
         else:
-            t = t + c
-        i = i + 1
+            t += c
+        i += 1
     return t
 
 if __name__ == "__main__":
@@ -734,14 +749,14 @@ if __name__ == "__main__":
 
 def gcd(a, b):
     if a<b:
-        c = a
-        a = b
-        b = c
+        c: int = a
+        a: int = b
+        b: int = c
 
     while b != 0 :
-        c = a
-        a = b
-        b = c % b
+        c: int = a
+        a: int = b
+        b: int = c % b
     return a
 
 if __name__ == "__main__":
