@@ -17,7 +17,7 @@ ARG publish=no
 ARG branch=master
 
 # Install required python packages
-RUN pip install matplotlib numpy pandas graphviz svglib jupyter_contrib_nbextensions autopep8 mypy notedown nbdime nbstripout
+RUN pip install matplotlib numpy pandas graphviz svglib jupyter_contrib_nbextensions autopep8 mypy notedown nbdime nbstripout astunparse enforce showast
 
 RUN if [ "$publish" = "yes" ]; then pip install ipypublish autopep8 yapf ; fi
 
