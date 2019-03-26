@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2019-03-19 14:33:06+01:00
+# Last change: 2019-03-26 10:45:02+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -839,4 +839,183 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     Source(graph)
+
+
+# ## Call Graph
+
+if __name__ == "__main__":
+    print('\n## Call Graph')
+
+
+
+
+import os
+import networkx as nx
+from graphviz import Source
+
+def install_pyan():
+    os.system("pip install pydot")
+    os.system("git clone https://github.com/davidfraser/pyan")
+
+# ### Call Graph Helpers
+
+if __name__ == "__main__":
+    print('\n### Call Graph Helpers')
+
+
+
+
+def construct_callgraph(code, name="callgraph"):
+    file_name = name + ".py"
+    with open(file_name, 'w') as f:
+        f.write(code)
+    if not os.path.isdir("pyan"):
+        install_pyan()
+    cg_file = name + '.dot'
+    os.system(f'python "pyan/pyan.py" {file_name} --uses --defines --colored --grouped --annotated --dot > {cg_file}')
+    
+def callgraph(code, name="callgraph"):
+    if not os.path.isfile(name + '.dot'):
+        construct_callgraph(code, name)
+    return Source.from_file(name + '.dot')
+
+def get_callgraph(code, name="callgraph"):
+    if not os.path.isfile("name + '.dot'"):
+        construct_callgraph(code, name)
+    return nx.drawing.nx_pydot.read_dot(name + '.dot')
+
+# ### Example: Maze
+
+if __name__ == "__main__":
+    print('\n### Example: Maze')
+
+
+
+
+if __name__ == "__main__":
+    maze_string = """
+    +-+-----+
+    |X|     |
+    | | --+ |
+    | |   | |
+    | +-- | |
+    |     |#|
+    +-----+-+
+    """
+
+
+def generate_print_maze(maze_string):
+    return """
+def print_maze(out, row, col):
+    output  = out +"\\n"
+    c_row = 0
+    c_col = 0
+    for c in list(\"\"\"%s\"\"\"):
+        if c == '\\n':
+            c_row += 1
+            c_col = 0
+            output += "\\n"
+        else:
+            if c_row == row and c_col == col: output += "X"
+            elif c == "X": output += " "
+            else: output += c
+            c_col += 1
+    return output
+""" % maze_string
+
+def generate_trap_tile(row, col):
+    return """
+def tile_%d_%d(input, index):
+    try: HTMLParser().feed(input)
+    except: pass
+    return print_maze("INVALID", %d, %d)
+""" % (row, col, row, col)
+
+def generate_good_tile(c, row, col):
+    code = """
+def tile_%d_%d(input, index):
+    if (index == len(input)): return print_maze("VALID", %d, %d)
+    elif input[index] == 'L': return tile_%d_%d(input, index + 1)
+    elif input[index] == 'R': return tile_%d_%d(input, index + 1)
+    elif input[index] == 'U': return tile_%d_%d(input, index + 1)
+    elif input[index] == 'D': return tile_%d_%d(input, index + 1)
+    else : return tile_%d_%d(input, index + 1)
+""" % (row, col, row, col,
+       row, col - 1, 
+       row, col + 1, 
+       row - 1, col, 
+       row + 1, col,
+       row, col)
+    
+    if c == "X":
+        code += """
+def maze(input):
+    return tile_%d_%d(list(input), 0)
+""" % (row, col)
+
+    return code
+
+def generate_target_tile(row, col):
+    return """
+def tile_%d_%d(input, index):
+    return print_maze("SOLVED", %d, %d)
+
+def target_tile():
+    return "tile_%d_%d"
+""" % (row, col, row, col, row, col)
+
+def generate_maze_code(maze, name="maze"):
+    row = 0
+    col = 0
+    code = generate_print_maze(maze)
+    
+    for c in list(maze):
+        if c == '\n':
+            row += 1
+            col = 0
+        else: 
+            if c == "-" or c == "+" or c == "|":
+                code += generate_trap_tile(row, col)
+            elif c == " " or c == "X":
+                code += generate_good_tile(c, row, col)
+            elif c == "#":
+                code += generate_target_tile(row, col)
+            else: 
+                print("Invalid maze! Try another one.")
+            col += 1
+
+    return code
+
+if __name__ == "__main__":
+    maze_code = generate_maze_code(maze_string)
+    exec(maze_code)
+
+
+if __name__ == "__main__":
+    print(maze("DDDDRRRRUULLUURRRRDDD")) # Appending one more 'D', you have reached the target.
+
+
+if __name__ == "__main__":
+    callgraph(maze_code)
+
+
+# ## Cleanup
+
+if __name__ == "__main__":
+    print('\n## Cleanup')
+
+
+
+
+import shutil
+
+if __name__ == "__main__":
+    if os.path.exists('callgraph.dot'):
+        os.remove('callgraph.dot')
+
+    if os.path.exists('callgraph.py'):
+        os.remove('callgraph.py')
+
+    if os.path.exists('pyan'):
+        shutil.rmtree('pyan')
 

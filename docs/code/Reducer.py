@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2019-02-15 05:26:03-08:00
+# Last change: 2019-03-24 14:48:44+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -249,7 +249,7 @@ class EvalMysteryRunner(MysteryRunner):
 
     def run(self, inp):
         try:
-            tree = self.parser.parse(inp)[0]
+            tree, *_ = self.parser.parse(inp)
         except SyntaxError as exc:
             return (inp, Runner.UNRESOLVED)
 
@@ -279,7 +279,7 @@ else:
 
 
 if __name__ == "__main__":
-    derivation_tree = EarleyParser(EXPR_GRAMMAR).parse(expr_input)[0]
+    derivation_tree, *_ = EarleyParser(EXPR_GRAMMAR).parse(expr_input)
     display_tree(derivation_tree)
 
 
@@ -633,7 +633,7 @@ class GrammarReducer(GrammarReducer):
 
 class GrammarReducer(GrammarReducer):
     def parse(self, inp):
-        tree = self.parser.parse(inp)[0]
+        tree, *_ = self.parser.parse(inp)
         if self.log_reduce:
             print(all_terminals(tree))
         return tree

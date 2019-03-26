@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2019-03-13 11:10:21+01:00
+# Last change: 2019-03-25 08:54:37+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -261,7 +261,7 @@ else:
 INT_EBNF_GRAMMAR = {
     "<start>": ["<int>"],
     "<int>": ["<_int>"],
-    "<_int>": ["(-)?<leaddigit><digit>*"],
+    "<_int>": ["(-)?<leaddigit><digit>*", "0"],
     "<leaddigit>": crange('1', '9'),
     "<digit>": crange('0', '9')
 }

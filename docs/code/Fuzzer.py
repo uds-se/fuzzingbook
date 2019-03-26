@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2019-03-19 13:33:51+01:00
+# Last change: 2019-03-19 14:56:45+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -76,7 +76,7 @@ def fuzzer(max_length=100, char_start=32, char_range=32):
     return out
 
 if __name__ == "__main__":
-    fuzzer(10000, ord('0'), 10)
+    fuzzer()
 
 
 if __name__ == "__main__":

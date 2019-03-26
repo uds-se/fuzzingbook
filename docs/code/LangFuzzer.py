@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/LangFuzzer.html
-# Last change: 2019-03-19 13:37:25+01:00
+# Last change: 2019-03-24 14:48:44+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -355,7 +355,7 @@ else:
 
 if __name__ == "__main__":
     parser = EarleyParser(EXPR_GRAMMAR)
-    tree = parser.parse("1 + 2 * 3")[0]
+    tree,*_ = parser.parse("1 + 2 * 3")
     display_tree(tree)
 
 

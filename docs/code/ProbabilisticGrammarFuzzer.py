@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2019-03-05 14:01:15+01:00
+# Last change: 2019-03-24 14:48:44+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -549,7 +549,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    tree = parser.parse("127.0.0.1")[0]
+    tree, *_ = parser.parse("127.0.0.1")
     display_tree(tree)
 
 
@@ -603,7 +603,7 @@ class ExpansionCountMiner(ExpansionCountMiner):
 class ExpansionCountMiner(ExpansionCountMiner):
     def count_expansions(self, inputs):
         for inp in inputs:
-            tree = self.parser.parse(inp)[0]
+            tree, *_ = self.parser.parse(inp)
             self.add_tree(tree)
 
     def counts(self):
@@ -707,7 +707,8 @@ if __name__ == "__main__":
     url_parser = EarleyParser(URL_GRAMMAR, tokens=URL_TOKENS)
     url_input = URL_SAMPLE[2]
     print(url_input)
-    display_tree(url_parser.parse(url_input)[0])
+    tree, *_ = url_parser.parse(url_input)
+    display_tree(tree)
 
 
 if __name__ == "__main__":
