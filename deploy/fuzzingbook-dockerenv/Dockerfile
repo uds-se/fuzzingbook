@@ -7,7 +7,8 @@ USER root
 
 # Install required APT packages
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends graphviz curl inkscape bc ed texinfo groff wget vim firefox
+RUN apt-get install -y --no-install-recommends graphviz curl inkscape bc ed texinfo groff wget
+RUN if [ "$publish" = "yes" ]; then apt-get install -y --no-install-recommends firefox vim tmux ; fi
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -17,12 +18,11 @@ ARG publish=yes
 ARG branch=master
 
 # Install required python packages
-RUN conda install -c anaconda python=3.6
-RUN conda install -c conda-forge geckodriver
-RUN conda install -c conda-forge selenium
-RUN pip install jupyter jupyterlab matplotlib scipy numpy pandas graphviz svglib jupyter_contrib_nbextensions mypy notedown nbdime nbstripout astunparse enforce==0.3.4 showast astor z3-solver tornado
-
+RUN if [ "$publish" = "yes" ]; then conda install -c anaconda python=3.6 ; fi
+RUN if [ "$publish" = "yes" ]; then conda install -c conda-forge geckodriver ; fi
+RUN if [ "$publish" = "yes" ]; then conda install -c conda-forge selenium ; fi
 RUN if [ "$publish" = "yes" ]; then pip install ipypublish==0.6.7 autopep8 yapf ; fi
+RUN pip install jupyter jupyterlab matplotlib scipy numpy pandas graphviz svglib jupyter_contrib_nbextensions mypy notedown nbdime nbstripout astunparse enforce==0.3.4 showast astor z3-solver tornado
 
 WORKDIR /home/$NB_USER
 
