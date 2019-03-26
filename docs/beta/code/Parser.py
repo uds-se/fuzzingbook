@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2019-02-04 15:45:09+01:00
+# Last change: 2019-03-26 00:00:18+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -476,7 +476,7 @@ class Parser(object):
         self._grammar = grammar
         self._start_symbol = kwargs.get('start_symbol', START_SYMBOL)
         self.log = kwargs.get('log', False)
-        self.coalesce = kwargs.get('coalesce', True)
+        self.coalesce_tokens = kwargs.get('coalesce', True)
         self.tokens = kwargs.get('tokens', set())
 
     def grammar(self):
@@ -512,7 +512,7 @@ class Parser(object):
 
     def prune_tree(self, tree):
         name, children = tree
-        if self.coalesce:
+        if self.coalesce_tokens:
             children = self.coalesce(children)
         if name in self.tokens:
             return (name, [(tree_to_string(tree), [])])
@@ -577,6 +577,7 @@ class Parser(Parser):
         self._start_symbol = kwargs.get('start_symbol', START_SYMBOL)
         self.log = kwargs.get('log', False)
         self.tokens = kwargs.get('tokens', set())
+        self.coalesce_tokens = kwargs.get('coalesce', True)
         self.cgrammar = canonical(grammar)
 
 # ### The Parser
@@ -1087,11 +1088,13 @@ class EarleyParser(EarleyParser):
     def parse(self, text):
         cursor, states = self.parse_prefix(text)
         start = next((s for s in states if s.finished()), None)
+
         if cursor < len(text) or not start:
             raise SyntaxError("at " + repr(text[cursor:]))
 
-        forest = self.extract_trees(self.parse_forest(self.table, start))
-        return [self.prune_tree(tree) for tree in forest]
+        forest = self.parse_forest(self.table, start)
+        for tree in self.extract_trees(forest):
+            yield self.prune_tree(tree)
 
 # ### Parsing Paths
 
@@ -1139,13 +1142,13 @@ if __name__ == "__main__":
 
 
 class EarleyParser(EarleyParser):
-    def parse_forest(self, chart, state):
-        def forest(s, kind):
-            return self.parse_forest(chart, s) if kind == 'n' else (s, [])
+    def forest(self, s, kind, chart):
+        return self.parse_forest(chart, s) if kind == 'n' else (s, [])
 
+    def parse_forest(self, chart, state):
         pathexprs = self.parse_paths(state.expr, chart, state.s_col.index,
                                      state.e_col.index) if state.expr else []
-        return state.name, [[forest(v, k) for v, k in reversed(pathexpr)]
+        return state.name, [[(v, k, chart) for v, k in reversed(pathexpr)]
                             for pathexpr in pathexprs]
 
 if __name__ == "__main__":
@@ -1167,16 +1170,23 @@ class EarleyParser(EarleyParser):
         name, paths = forest_node
         if not paths:
             return (name, [])
-        return (name, [self.extract_a_tree(p) for p in paths[0]])
+        return (name, [self.extract_a_tree(self.forest(*p)) for p in paths[0]])
 
     def extract_trees(self, forest):
-        return [self.extract_a_tree(forest)]
+        yield self.extract_a_tree(forest)
 
 A3_GRAMMAR = {
-    "<start>": ["<expr>"],
-    "<expr>": ["<expr>+<expr>", "<expr>-<expr>", "(<expr>)", "<integer>"],
+    "<start>": ["<bexpr>"],
+    "<bexpr>": [
+        "<aexpr><gt><aexpr>", "<aexpr><lt><aexpr>", "<aexpr>=<aexpr>",
+        "<bexpr>=<bexpr>", "<bexpr>&<bexpr>", "<bexpr>|<bexpr>", "(<bexrp>)"
+    ],
+    "<aexpr>":
+    ["<aexpr>+<aexpr>", "<aexpr>-<aexpr>", "(<aexpr>)", "<integer>"],
     "<integer>": ["<digit><integer>", "<digit>"],
-    "<digit>": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    "<digit>": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+    "<lt>": ['<'],
+    "<gt>": ['>']
 }
 
 if __name__ == "__main__":
@@ -1184,7 +1194,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    mystring = '(1+24)-33'
+    mystring = '(1+24)=33'
     parser = EarleyParser(A3_GRAMMAR)
     for tree in parser.parse(mystring):
         assert tree_to_string(tree) == mystring
@@ -1203,15 +1213,15 @@ class EarleyParser(EarleyParser):
     def extract_trees(self, forest_node):
         name, paths = forest_node
         if not paths:
-            return [(name, [])]
+            yield (name, [])
         results = []
         for path in paths:
-            ptrees = zip(*[self.extract_trees(p) for p in path])
-            results.extend([(name, p) for p in ptrees])
-        return results
+            ptrees = [self.extract_trees(self.forest(*p)) for p in path]
+            for p in zip(*ptrees):
+                yield (name, p) 
 
 if __name__ == "__main__":
-    mystring = '12+23-34'
+    mystring = '1+2'
     parser = EarleyParser(A1_GRAMMAR)
     for tree in parser.parse(mystring):
         assert mystring == tree_to_string(tree)
@@ -1348,6 +1358,27 @@ if __name__ == "__main__":
     parser = EarleyParser(E_GRAMMAR)
     for tree in parser.parse(mystring):
         display_tree(tree)
+
+
+DIRECTLY_SELF_REFERRING = {
+    '<start>': ['<query>'],
+    '<query>': ['select <expr> from a'],
+    "<expr>": [ "<expr>", "a"],
+}
+INDIRECTLY_SELF_REFERRING = {
+    '<start>': ['<query>'],
+    '<query>': ['select <expr> from a'],
+    "<expr>": [ "<aexpr>", "a"],
+    "<aexpr>": [ "<expr>"],
+}
+
+if __name__ == "__main__":
+    mystring = 'select a from a'
+    for grammar in [DIRECTLY_SELF_REFERRING, INDIRECTLY_SELF_REFERRING]:
+        trees = EarleyParser(grammar).parse(mystring)
+        for tree in trees:
+            assert mystring == tree_to_string(tree)
+            display_tree(tree)
 
 
 # ### More Earley Parsing
@@ -1562,10 +1593,12 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     result = EarleyParser(LR_GRAMMAR, log=True).parse(mystring)
+    for _ in result: pass # consume the generator so that we can see the logs
 
 
 if __name__ == "__main__":
     result = EarleyParser(RR_GRAMMAR, log=True).parse(mystring)
+    for _ in result: pass
 
 
 class LeoParser(EarleyParser):
@@ -1613,7 +1646,7 @@ class LeoParser(LeoParser):
         st_B_inc = self.uniq_postdot(state_A)
         if not st_B_inc:
             return None
-
+        
         t_name = st_B_inc.name
         if t_name in st_B_inc.e_col.transitives:
             return st_B_inc.e_col.transitives[t_name]
@@ -1635,6 +1668,7 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     result = LeoParser(RR_GRAMMAR, log=True).parse(mystring)
+    for _ in result: pass
 
 
 RR_GRAMMAR2 = {
@@ -1645,6 +1679,7 @@ mystring2 = 'ababababab'
 
 if __name__ == "__main__":
     result = LeoParser(RR_GRAMMAR2, log=True).parse(mystring2)
+    for _ in result: pass
 
 
 RR_GRAMMAR3 = {
@@ -1655,6 +1690,7 @@ mystring3 = 'cababababab'
 
 if __name__ == "__main__":
     result = LeoParser(RR_GRAMMAR3, log=True).parse(mystring3)
+    for _ in result: pass
 
 
 RR_GRAMMAR4 = {
@@ -1665,6 +1701,7 @@ mystring4 = 'ababababc'
 
 if __name__ == "__main__":
     result = LeoParser(RR_GRAMMAR4, log=True).parse(mystring4)
+    for _ in result: pass
 
 
 RR_GRAMMAR5 = {
@@ -1676,6 +1713,7 @@ mystring5 = 'abababab'
 
 if __name__ == "__main__":
     result = LeoParser(RR_GRAMMAR5, log=True).parse(mystring5)
+    for _ in result: pass
 
 
 RR_GRAMMAR6 = {
@@ -1687,6 +1725,7 @@ mystring6 = 'abababab'
 
 if __name__ == "__main__":
     result = LeoParser(RR_GRAMMAR6, log=True).parse(mystring6)
+    for _ in result: pass
 
 
 RR_GRAMMAR7 = {
@@ -1697,12 +1736,12 @@ mystring7 = 'aaaaaaaa'
 
 if __name__ == "__main__":
     result = LeoParser(RR_GRAMMAR7, log=True).parse(mystring7)
+    for _ in result: pass
 
 
 if __name__ == "__main__":
     result = LeoParser(LR_GRAMMAR, log=True).parse(mystring)
-    for tree in result:
-        print(tree_to_string(tree))
+    for _ in result: pass
 
 
 class Column(Column):
@@ -1712,23 +1751,43 @@ class Column(Column):
                                        state.s_col, state.e_col)
         return self.transitives[key]
 
+class State(State):
+    def back(self):
+        return TState(self.name, self.expr, self.dot - 1, self.s_col, self.e_col)
+
 class TState(State):
     def copy(self):
         return TState(self.name, self.expr, self.dot, self.s_col, self.e_col)
 
 class LeoParser(LeoParser):
-    def traverse_constraints(self, st_C_name, s_3, e, r_table):
-        candidates = [
-            s for s in r_table[s_3].states if s.name == st_C_name
-            and s.dot == len(s.expr) - 1 and s.e_col.index <= e.index
-            and s.at_dot() in self.cgrammar
+    def __init__(self, grammar, **kwargs):
+        super().__init__(grammar, **kwargs)
+        self._postdots = {}
+        self.cgrammar = canonical(grammar, letters=True)
+      
+
+class LeoParser(LeoParser):
+    def uniq_postdot(self, st_A):
+        col_s1 = st_A.s_col
+        parent_states = [
+            s for s in col_s1.states if s.expr and s.at_dot() == st_A.name
         ]
-        if not candidates:
+        if len(parent_states) > 1:
+            return None
+        matching_st_B = [s for s in parent_states if s.dot == len(s.expr) - 1]
+        if matching_st_B:
+            self._postdots[matching_st_B[0]._t()] = st_A
+            return matching_st_B[0]
+        return None
+      
+
+class LeoParser(LeoParser):
+    def expand_tstate(self, state, e):
+        if state._t() not in self._postdots:
             return
-        c_C, *empty = candidates
-        assert empty == []
+        c_C = self._postdots[state._t()]
         e.add(c_C.advance())
-        self.traverse_constraints(c_C.at_dot(), c_C.e_col.index, e, r_table)
+        self.expand_tstate(c_C.back(), e)
 
 class LeoParser(LeoParser):
     def rearrange(self, table):
@@ -1755,13 +1814,14 @@ class LeoParser(LeoParser):
 
         self.r_table = self.rearrange(self.table)
         forest = self.extract_trees(self.parse_forest(self.table, start))
-        return [self.prune_tree(tree) for tree in forest]
+        for tree in forest:
+            yield self.prune_tree(tree)
 
 class LeoParser(LeoParser):
     def parse_forest(self, chart, state):
         if isinstance(state, TState):
-            self.traverse_constraints(state.name, state.s_col.index,
-                                      state.e_col, self.r_table)
+            self.expand_tstate(state.back(), state.e_col)
+        
         return super().parse_forest(chart, state)
 
 if __name__ == "__main__":
@@ -1812,10 +1872,265 @@ if __name__ == "__main__":
         assert mystring == tree_to_string(tree)
 
 
-# ### Exercise 6: First Set of a Nonterminal
+RR_GRAMMAR8 = {
+   '<start>': ['<A>'],
+   '<A>': ['a<A>', 'a']
+}
+mystring8 = 'aa'
+
+RR_GRAMMAR9 = {
+   '<start>': ['<A>'],
+   '<A>': ['<B><A>', '<B>'],
+   '<B>': ['b']
+}
+mystring9 = 'bbbbbbb'
 
 if __name__ == "__main__":
-    print('\n### Exercise 6: First Set of a Nonterminal')
+    result = LeoParser(RR_GRAMMAR8).parse(mystring8)
+    for tree in result:
+        print(repr(tree_to_string(tree)))
+        assert mystring8 == tree_to_string(tree)
+
+
+if __name__ == "__main__":
+    result = LeoParser(RR_GRAMMAR9).parse(mystring9)
+    for tree in result:
+        print(repr(tree_to_string(tree)))
+        assert mystring9 == tree_to_string(tree)
+
+
+# ### Exercise 6: Filtered Earley Parser
+
+if __name__ == "__main__":
+    print('\n### Exercise 6: Filtered Earley Parser')
+
+
+
+
+RECURSION_GRAMMAR = {
+    "<start>": ["<A>"],
+    "<A>": ["<A>", "<A>aa", "AA", "<B>"],
+    "<B>": ["<C>", "<C>cc" ,"CC"],
+    "<C>": ["<B>", "<B>bb", "BB"]
+}
+
+if __package__ is None or __package__ == "":
+    from ExpectError import ExpectTimeout
+else:
+    from .ExpectError import ExpectTimeout
+
+
+if __name__ == "__main__":
+    with ExpectTimeout(1):
+        mystring = 'AA'
+        parser = LeoParser(RECURSION_GRAMMAR)
+        tree, *_ = parser.parse(mystring)
+        assert tree_to_string(tree) == mystring
+        display_tree(tree)
+
+
+class FilteredLeoParser(LeoParser):
+    def forest(self, s, kind, seen, chart):
+        return self.parse_forest(chart, s, seen) if kind == 'n' else (s, [])
+
+    def parse_forest(self, chart, state, seen=None):
+        if isinstance(state, TState):
+            self.expand_tstate(state.back(), state.e_col)
+        
+        def was_seen(chain, s):
+            if isinstance(s, str):
+                return False
+            if len(s.expr) > 1:
+                return False
+            return s in chain
+
+        if len(state.expr) > 1:  # things get reset if we have a non loop
+            seen = set()
+        elif seen is None:  # initialization
+            seen = {state}
+
+        pathexprs = self.parse_paths(state.expr, chart, state.s_col.index,
+                                     state.e_col.index) if state.expr else []
+        return state.name, [[(s, k, seen | {s}, chart)
+                             for s, k in reversed(pathexpr)
+                             if not was_seen(seen, s)] for pathexpr in pathexprs]
+
+if __name__ == "__main__":
+    mystring = 'AA'
+    parser = FilteredLeoParser(RECURSION_GRAMMAR)
+    tree, *_ = parser.parse(mystring)
+    assert tree_to_string(tree) == mystring
+    display_tree(tree)
+
+
+if __name__ == "__main__":
+    mystring = 'AAaa'
+    parser = FilteredLeoParser(RECURSION_GRAMMAR)
+    tree, *_ = parser.parse(mystring)
+    assert tree_to_string(tree) == mystring
+    display_tree(tree)
+
+
+if __name__ == "__main__":
+    mystring = 'AAaaaa'
+    parser = FilteredLeoParser(RECURSION_GRAMMAR)
+    tree, *_ = parser.parse(mystring)
+    assert tree_to_string(tree) == mystring
+    display_tree(tree)
+
+
+if __name__ == "__main__":
+    mystring = 'CC'
+    parser = FilteredLeoParser(RECURSION_GRAMMAR)
+    tree, *_ = parser.parse(mystring)
+    assert tree_to_string(tree) == mystring
+    display_tree(tree)
+
+
+if __name__ == "__main__":
+    mystring = 'BBcc'
+    parser = FilteredLeoParser(RECURSION_GRAMMAR)
+    tree, *_ = parser.parse(mystring)
+    assert tree_to_string(tree) == mystring
+    display_tree(tree)
+
+
+if __name__ == "__main__":
+    mystring = 'BB'
+    parser = FilteredLeoParser(RECURSION_GRAMMAR)
+    tree, *_ = parser.parse(mystring)
+    assert tree_to_string(tree) == mystring
+    display_tree(tree)
+
+
+if __name__ == "__main__":
+    mystring = 'BBccbb'
+    parser = FilteredLeoParser(RECURSION_GRAMMAR)
+    tree, *_ = parser.parse(mystring)
+    assert tree_to_string(tree) == mystring
+    display_tree(tree)
+
+
+# ### Exercise 7: Iterative Earley Parser
+
+if __name__ == "__main__":
+    print('\n### Exercise 7: Iterative Earley Parser')
+
+
+
+
+class IterativeEarleyParser(EarleyParser):
+    def __init__(self, grammar, **kwargs):
+        super().__init__(grammar, **kwargs)
+        self.shuffle = kwargs.get('shuffle_rules', True)
+        
+    def parse_paths(self, named_expr, chart, frm, til):
+        if not named_expr:
+            return []
+
+        paths = []
+        # stack of (expr, index, path) tuples
+        path_build_stack = [(named_expr, til, [])]
+
+        def evaluate_path(path, index, expr):
+            if expr:  # path is still being built
+                path_build_stack.append((expr, index, path))
+            elif index == frm:  # path is complete
+                paths.append(path)
+
+        while path_build_stack:
+            expr, chart_index, path = path_build_stack.pop()
+            *expr, symbol = expr
+
+            if symbol in self.cgrammar:
+                for state in chart[chart_index].states:
+                    if state.name == symbol and state.finished():
+                        extended_path = path + [(state, 'n')]
+                        evaluate_path(extended_path, state.s_col.index, expr)
+
+            elif chart_index > 0 and chart[chart_index].letter == symbol:
+                extended_path = path + [(symbol, 't')]
+                evaluate_path(extended_path, chart_index - len(symbol), expr)
+
+        return paths
+
+class IterativeEarleyParser(EarleyParser):
+    def parse_forest(self, chart, state):
+        if not state.expr:
+            return (state.name, [])
+
+        outermost_forest = []
+        forest_build_stack = [(state, outermost_forest)]
+
+        while forest_build_stack:
+            st, forest = forest_build_stack.pop()
+            paths = self.parse_paths(st.expr, chart, st.s_col.index,
+                                     st.e_col.index)
+
+            if not paths:
+                continue
+
+            next_path = random.choice(paths) if self.shuffle else paths[0]
+            path_forest = []
+            for symbol_or_state, kind in reversed(next_path):
+                if kind == 'n':
+                    new_forest = []
+                    forest_build_stack.append((symbol_or_state, new_forest))
+                    path_forest.append((symbol_or_state.name, new_forest))
+                else:
+                    path_forest.append((symbol_or_state, []))
+
+            forest.append(path_forest)
+
+        return (state.name, outermost_forest)
+
+class IterativeEarleyParser(EarleyParser):
+    def extract_a_tree(self, forest_node):
+        outermost_tree = []
+        tree_build_stack = [(forest_node, outermost_tree)]
+
+        while tree_build_stack:
+            node, tree = tree_build_stack.pop()
+            name, node_paths = node
+
+            if node_paths:
+                for path in random.choice(node_paths):
+                    new_tree = []
+                    tree_build_stack.append((path, new_tree))
+                    tree.append((path[0], new_tree))
+            else:
+                tree.append((name, []))
+
+        return (forest_node[0], outermost_tree)
+
+class IterativeEarleyParser(EarleyParser):
+    def extract_trees(self, forest):
+        yield self.extract_a_tree(forest)
+
+if __name__ == "__main__":
+    test_cases = [
+        (A1_GRAMMAR, '1-2-3+4-5'),
+        (A2_GRAMMAR, '1+2'),
+        (A3_GRAMMAR, '1+2+3-6=6-1-2-3'),
+        (LR_GRAMMAR, 'aaaaa'),
+        (RR_GRAMMAR, 'aa'),
+        (DIRECTLY_SELF_REFERRING, 'select a from a'),
+        (INDIRECTLY_SELF_REFERRING, 'select a from a'),
+        (RECURSION_GRAMMAR, 'AA'),
+        (RECURSION_GRAMMAR, 'AAaaaa'),
+        (RECURSION_GRAMMAR, 'BBccbb')
+    ]
+
+    for i, (grammar, text) in enumerate(test_cases):
+        print(i, text)
+        tree, *_ =  IterativeEarleyParser(grammar).parse(text)
+        assert text == tree_to_string(tree)
+
+
+# ### Exercise 8: First Set of a Nonterminal
+
+if __name__ == "__main__":
+    print('\n### Exercise 8: First Set of a Nonterminal')
 
 
 
@@ -1845,10 +2160,10 @@ if __name__ == "__main__":
     firstset(canonical(A1_GRAMMAR), EPSILON)
 
 
-# ### Exercise 7: Follow Set of a Nonterminal
+# ### Exercise 9: Follow Set of a Nonterminal
 
 if __name__ == "__main__":
-    print('\n### Exercise 7: Follow Set of a Nonterminal')
+    print('\n### Exercise 9: Follow Set of a Nonterminal')
 
 
 
@@ -1879,10 +2194,10 @@ if __name__ == "__main__":
     followset(canonical(A1_GRAMMAR), START_SYMBOL)
 
 
-# ### Exercise 8: A LL(1) Parser
+# ### Exercise 10: A LL(1) Parser
 
 if __name__ == "__main__":
-    print('\n### Exercise 8: A LL(1) Parser')
+    print('\n### Exercise 10: A LL(1) Parser')
 
 
 
