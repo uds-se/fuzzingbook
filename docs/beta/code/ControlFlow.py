@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2019-03-25 18:13:34+01:00
+# Last change: 2019-03-26 10:45:02+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -997,4 +997,25 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     callgraph(maze_code)
+
+
+# ## Cleanup
+
+if __name__ == "__main__":
+    print('\n## Cleanup')
+
+
+
+
+import shutil
+
+if __name__ == "__main__":
+    if os.path.exists('callgraph.dot'):
+        os.remove('callgraph.dot')
+
+    if os.path.exists('callgraph.py'):
+        os.remove('callgraph.py')
+
+    if os.path.exists('pyan'):
+        shutil.rmtree('pyan')
 

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2019-03-26 09:36:10+01:00
+# Last change: 2019-03-26 10:27:20+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -41,6 +41,11 @@ if __name__ == "__main__":
     import random
     random.seed(2001)
 
+
+if __package__ is None or __package__ == "":
+    import Coverage
+else:
+    from . import Coverage
 
 if __package__ is None or __package__ == "":
     import Intro_Testing
@@ -1341,14 +1346,14 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer
+    from GrammarFuzzer import GrammarFuzzer  # minor dependency
 else:
-    from .GrammarFuzzer import GrammarFuzzer
+    from .GrammarFuzzer import GrammarFuzzer  # minor dependency
 
 if __package__ is None or __package__ == "":
-    from Grammars import is_valid_grammar, crange, convert_ebnf_grammar
+    from Grammars import is_valid_grammar, crange, convert_ebnf_grammar  # minor dependency
 else:
-    from .Grammars import is_valid_grammar, crange, convert_ebnf_grammar
+    from .Grammars import is_valid_grammar, crange, convert_ebnf_grammar  # minor dependency
 
 
 SUM2_EBNF_GRAMMAR = {
