@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2019-03-26 10:27:20+01:00
+# Last change: 2019-03-26 14:52:29+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -1089,6 +1089,19 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
+    my_sqrt(0.01)
+
+
+if __name__ == "__main__":
+    with InvariantTracker() as tracker:
+        y = my_sqrt(25.0)
+        y = my_sqrt(10.0)
+        y = my_sqrt(0.01)
+
+    pretty_invariants(tracker.invariants('my_sqrt'))
+
+
+if __name__ == "__main__":
     with InvariantTracker() as tracker:
         y = sum3(1, 2, 3)
         y = sum3(-4, -5, -6)
@@ -1157,6 +1170,7 @@ class InvariantAnnotator(InvariantAnnotator):
 if __name__ == "__main__":
     with InvariantAnnotator() as annotator:
         y = my_sqrt(25.0)
+        y = my_sqrt(0.01)
         y = sum3(1, 2, 3)
 
 
@@ -1181,6 +1195,7 @@ class InvariantAnnotator(InvariantAnnotator):
 if __name__ == "__main__":
     with InvariantAnnotator() as annotator:
         y = my_sqrt(25.0)
+        y = my_sqrt(0.01)
         y = sum3(1, 2, 3)
 
 
@@ -1208,6 +1223,7 @@ class InvariantAnnotator(InvariantAnnotator):
 if __name__ == "__main__":
     with InvariantAnnotator() as annotator:
         y = my_sqrt(25.0)
+        y = my_sqrt(0.01)
         y = sum3(1, 2, 3)
 
 
@@ -1276,6 +1292,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     with InvariantAnnotator() as annotator:
         y = my_sqrt(25.0)
+        y = my_sqrt(0.01)
 
 
 if __name__ == "__main__":
@@ -1446,50 +1463,132 @@ def my_sqrt_with_local_types(x: Union[int, float]) -> float:
         guess: float = (approx + x / approx) / 2
     return approx
 
-# ### Exercise 3: Save Initial Values
+# ### Exercise 3: Verbose Invariant Checkers
 
 if __name__ == "__main__":
-    print('\n### Exercise 3: Save Initial Values')
+    print('\n### Exercise 3: Verbose Invariant Checkers')
 
 
 
 
-# ### Exercise 4: Implications
-
-if __name__ == "__main__":
-    print('\n### Exercise 4: Implications')
-
-
-
-
-# ### Exercise 5: Local Variables
+@precondition(lambda s: len(s) > 0)
+def remove_first_char(s):
+    return s[1:]
 
 if __name__ == "__main__":
-    print('\n### Exercise 5: Local Variables')
+    with ExpectError():
+        remove_first_char('')
 
 
+def condition(precondition=None, postcondition=None, doc='Unknown'):
+   def decorator(func):
+       @functools.wraps(func) # preserves name, docstring, etc
+       def wrapper(*args, **kwargs):
+           if precondition is not None:
+               assert precondition(*args, **kwargs), "Precondition violated: " + doc
 
+           retval = func(*args, **kwargs) # call original function or method
+           if postcondition is not None:
+               assert postcondition(retval, *args, **kwargs), "Postcondition violated: " + doc
 
-# ### Exercise 6: Exploring Invariant Alternatives
+           return retval
+       return wrapper
+   return decorator
+
+def precondition(check, **kwargs):
+   return condition(precondition=check, doc=kwargs.get('doc', 'Unknown'))
+
+def postcondition(check, **kwargs):
+   return condition(postcondition=check, doc=kwargs.get('doc', 'Unknown'))
+
+@precondition(lambda s: len(s) > 0, doc="len(s) > 0")
+def remove_first_char(s):
+    return s[1:]
+
+remove_first_char('abc')
 
 if __name__ == "__main__":
-    print('\n### Exercise 6: Exploring Invariant Alternatives')
+    with ExpectError():
+        remove_first_char('')
 
 
+class InvariantAnnotator(InvariantAnnotator):
+   def preconditions(self, function_name):
+       conditions = []
 
+       for inv in pretty_invariants(self.invariants(function_name)):
+           if inv.find(RETURN_VALUE) >= 0:
+               continue  # Postcondition
 
-# ### Exercise 7: Grammar-Generated Properties
+           cond = "@precondition(lambda " + self.params(function_name) + ": " + inv + ', doc=' + repr(inv) + ")"
+           conditions.append(cond)
+
+       return conditions
+
+class InvariantAnnotator(InvariantAnnotator):
+   def postconditions(self, function_name):
+       conditions = []
+
+       for inv in pretty_invariants(self.invariants(function_name)):
+           if inv.find(RETURN_VALUE) < 0:
+               continue  # Precondition
+
+           cond = ("@postcondition(lambda " + 
+               RETURN_VALUE + ", " + self.params(function_name) + ": " + inv + ', doc=' + repr(inv) + ")")
+           conditions.append(cond)
+
+       return conditions
 
 if __name__ == "__main__":
-    print('\n### Exercise 7: Grammar-Generated Properties')
+    with InvariantAnnotator() as annotator:
+        y = sum2(2, 2)
+    print_content(annotator.functions_with_invariants(), '.py')
 
 
-
-
-# ### Exercise 8: Embedding Invariants as Assertions
+# ### Exercise 4: Save Initial Values
 
 if __name__ == "__main__":
-    print('\n### Exercise 8: Embedding Invariants as Assertions')
+    print('\n### Exercise 4: Save Initial Values')
+
+
+
+
+# ### Exercise 5: Implications
+
+if __name__ == "__main__":
+    print('\n### Exercise 5: Implications')
+
+
+
+
+# ### Exercise 6: Local Variables
+
+if __name__ == "__main__":
+    print('\n### Exercise 6: Local Variables')
+
+
+
+
+# ### Exercise 7: Exploring Invariant Alternatives
+
+if __name__ == "__main__":
+    print('\n### Exercise 7: Exploring Invariant Alternatives')
+
+
+
+
+# ### Exercise 8: Grammar-Generated Properties
+
+if __name__ == "__main__":
+    print('\n### Exercise 8: Grammar-Generated Properties')
+
+
+
+
+# ### Exercise 9: Embedding Invariants as Assertions
+
+if __name__ == "__main__":
+    print('\n### Exercise 9: Embedding Invariants as Assertions')
 
 
 
