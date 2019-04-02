@@ -7,19 +7,22 @@ USER root
 
 # Install required APT packages
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends graphviz curl inkscape bc ed texinfo groff wget vim
+RUN apt-get install -y --no-install-recommends graphviz curl inkscape bc ed texinfo groff wget
+RUN if [ "$publish" = "yes" ]; then apt-get install -y --no-install-recommends firefox vim tmux ; fi
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
 USER $NB_UID
 
-ARG publish=no
+ARG publish=yes
 ARG branch=master
 
 # Install required python packages
-RUN pip install matplotlib numpy pandas graphviz svglib jupyter_contrib_nbextensions autopep8 mypy notedown nbdime nbstripout astunparse enforce showast
-
-RUN if [ "$publish" = "yes" ]; then pip install ipypublish autopep8 yapf ; fi
+RUN if [ "$publish" = "yes" ]; then conda install -c anaconda python=3.6 ; fi
+RUN if [ "$publish" = "yes" ]; then conda install -c conda-forge geckodriver ; fi
+RUN if [ "$publish" = "yes" ]; then conda install -c conda-forge selenium ; fi
+RUN if [ "$publish" = "yes" ]; then pip install ipypublish==0.6.7 autopep8 yapf ; fi
+RUN pip install jupyter jupyterlab matplotlib scipy numpy pandas graphviz svglib jupyter_contrib_nbextensions mypy notedown nbdime nbstripout astunparse enforce==0.3.4 showast astor z3-solver tornado
 
 WORKDIR /home/$NB_USER
 
@@ -88,3 +91,4 @@ RUN mv /usr/local/bin/start-singleuser.sh /usr/local/bin/start-singleuser-old.sh
 
 # Quit root mode
 USER $NB_UID
+ENV EXECUTE_TIMEOUT=3000
