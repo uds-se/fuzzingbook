@@ -14168,54 +14168,129 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Which lines are these, actually?  To this end, we encode the source code into an array <code>cgi_decode_lines</code>.  (An actual coverage tool could also access the source code file directly.)</p>
+<p>Which lines are these, actually?  To this end, we get the source code of <code>cgi_decode_code</code> and encode it into an array <code>cgi_decode_lines</code>, which we will then annotate with coverage information.  First, let us get the source code of <code>cgi_encode</code>:</p>
 
 </div>
 </div>
-</div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">def cgi_decode(s):</span>
-<span class="s2">    </span><span class="se">\&quot;\&quot;\&quot;</span><span class="s2">Decode the CGI-encoded string `s`:</span>
-<span class="s2">       * replace &quot;+&quot; by &quot; &quot;</span>
-<span class="s2">       * replace &quot;</span><span class="si">%x</span><span class="s2">x&quot; by the character with hex number xx.</span>
-<span class="s2">       Return the decoded string.  Raise `ValueError` for invalid inputs.</span><span class="se">\&quot;\&quot;\&quot;</span><span class="s2"></span>
-
-<span class="s2">    # Mapping of hex digits to their integer values</span>
-<span class="s2">    hex_values = {</span>
-<span class="s2">        &#39;0&#39;: 0, &#39;1&#39;: 1, &#39;2&#39;: 2, &#39;3&#39;: 3, &#39;4&#39;: 4,</span>
-<span class="s2">        &#39;5&#39;: 5, &#39;6&#39;: 6, &#39;7&#39;: 7, &#39;8&#39;: 8, &#39;9&#39;: 9,</span>
-<span class="s2">        &#39;a&#39;: 10, &#39;b&#39;: 11, &#39;c&#39;: 12, &#39;d&#39;: 13, &#39;e&#39;: 14, &#39;f&#39;: 15,</span>
-<span class="s2">        &#39;A&#39;: 10, &#39;B&#39;: 11, &#39;C&#39;: 12, &#39;D&#39;: 13, &#39;E&#39;: 14, &#39;F&#39;: 15,</span>
-<span class="s2">    }</span>
-
-<span class="s2">    t = &quot;&quot;</span>
-<span class="s2">    i = 0</span>
-<span class="s2">    while i &lt; len(s):</span>
-<span class="s2">        c = s[i]</span>
-<span class="s2">        if c == &#39;+&#39;:</span>
-<span class="s2">            t += &#39; &#39;</span>
-<span class="s2">        elif c == &#39;%&#39;:</span>
-<span class="s2">            digit_high, digit_low = s[i + 1], s[i + 2]</span>
-<span class="s2">            i += 2</span>
-<span class="s2">            if digit_high in hex_values and digit_low in hex_values:</span>
-<span class="s2">                v = hex_values[digit_high] * 16 + hex_values[digit_low]</span>
-<span class="s2">                t += chr(v)</span>
-<span class="s2">            else:</span>
-<span class="s2">                raise ValueError(&quot;Invalid encoding&quot;)</span>
-<span class="s2">        else:</span>
-<span class="s2">            t += c</span>
-<span class="s2">        i += 1</span>
-<span class="s2">    return t</span>
-<span class="s2">&quot;&quot;&quot;</span>
-<span class="n">cgi_decode_lines</span> <span class="o">=</span> <span class="n">cgi_decode_code</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_code</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">cgi_decode</span><span class="p">)</span>
 </pre></div>
 
     </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><code>cgi_decode_code</code> is a string holding the source code.  We can print it out with Python syntax highlighting:</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">cgi_decode_code</span><span class="p">[:</span><span class="mi">300</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="s2">&quot;.py&quot;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">cgi_decode</span>(s):
+    <span class="ansi-yellow-fg">&#34;&#34;&#34;Decode the CGI-encoded string `s`:</span>
+<span class="ansi-yellow-fg">       * replace &#34;+&#34; by &#34; &#34;</span>
+<span class="ansi-yellow-fg">       * replace &#34;%xx&#34; by the character with hex number xx.</span>
+<span class="ansi-yellow-fg">       Return the decoded string.  Raise `ValueError` for invalid inputs.&#34;&#34;&#34;</span>
+
+    <span class="ansi-white-fg"># Mapping of hex digits to their integer values</span>
+    hex_values = {
+  ...
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Using <code>splitlines()</code>, we split the code into an array of lines, indexed by line number.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">cgi_decode_code</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><code>cgi_decode_lines[L]</code> is line L of the source code.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[15]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;def cgi_decode(s):&#39;</pre>
+</div>
+
+</div>
+
 </div>
 </div>
 
@@ -14230,7 +14305,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_lines</span><span class="p">[</span><span class="mi">9</span><span class="p">:</span><span class="mi">13</span><span class="p">]</span>
@@ -14246,7 +14321,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[11]:</div>
+    <div class="prompt output_prompt">Out[16]:</div>
 
 
 
@@ -14274,7 +14349,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_lines</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span>
@@ -14290,7 +14365,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[12]:</div>
+    <div class="prompt output_prompt">Out[17]:</div>
 
 
 
@@ -14315,7 +14390,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">covered_lines</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">coverage</span><span class="p">)</span>
@@ -14348,14 +14423,14 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Let us print out the code, annotating lines not covered with '#':</p>
+<p>Let us print out the full code, annotating lines not covered with '#':</p>
 
 </div>
 </div>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">lineno</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cgi_decode_lines</span><span class="p">)):</span>
@@ -14363,7 +14438,8 @@ a.anchor-link {
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;# &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%2d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">cgi_decode_lines</span><span class="p">[</span><span class="n">lineno</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%2d</span><span class="s2">  &quot;</span> <span class="o">%</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">print_content</span><span class="p">(</span><span class="n">cgi_decode_lines</span><span class="p">[</span><span class="n">lineno</span><span class="p">],</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -14380,38 +14456,38 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>#  1 def cgi_decode(s):
-#  2     &#34;&#34;&#34;Decode the CGI-encoded string `s`:
-#  3        * replace &#34;+&#34; by &#34; &#34;
-#  4        * replace &#34;%xx&#34; by the character with hex number xx.
-#  5        Return the decoded string.  Raise `ValueError` for invalid inputs.&#34;&#34;&#34;
-#  6 
-#  7     # Mapping of hex digits to their integer values
-#  8     hex_values = {
-   9         &#39;0&#39;: 0, &#39;1&#39;: 1, &#39;2&#39;: 2, &#39;3&#39;: 3, &#39;4&#39;: 4,
-  10         &#39;5&#39;: 5, &#39;6&#39;: 6, &#39;7&#39;: 7, &#39;8&#39;: 8, &#39;9&#39;: 9,
-  11         &#39;a&#39;: 10, &#39;b&#39;: 11, &#39;c&#39;: 12, &#39;d&#39;: 13, &#39;e&#39;: 14, &#39;f&#39;: 15,
-  12         &#39;A&#39;: 10, &#39;B&#39;: 11, &#39;C&#39;: 12, &#39;D&#39;: 13, &#39;E&#39;: 14, &#39;F&#39;: 15,
-# 13     }
-# 14 
-  15     t = &#34;&#34;
-  16     i = 0
-  17     while i &lt; len(s):
-  18         c = s[i]
-  19         if c == &#39;+&#39;:
-  20             t += &#39; &#39;
-  21         elif c == &#39;%&#39;:
-# 22             digit_high, digit_low = s[i + 1], s[i + 2]
-# 23             i += 2
-# 24             if digit_high in hex_values and digit_low in hex_values:
-# 25                 v = hex_values[digit_high] * 16 + hex_values[digit_low]
-# 26                 t += chr(v)
-# 27             else:
-# 28                 raise ValueError(&#34;Invalid encoding&#34;)
-# 29         else:
-  30             t += c
-  31         i += 1
-  32     return t
+<pre>#  1  <span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">cgi_decode</span>(s):
+#  2      <span class="ansi-yellow-fg">&#34;&#34;&#34;</span><span class="ansi-yellow-fg">Decode the CGI-encoded string `s`:</span>
+#  3         * replace <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">+</span><span class="ansi-yellow-fg">&#34;</span> by <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg"> </span><span class="ansi-yellow-fg">&#34;</span>
+#  4         * replace <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">%x</span><span class="ansi-yellow-fg">x</span><span class="ansi-yellow-fg">&#34;</span> by the character <span class="ansi-blue-fg">with</span> <span class="ansi-cyan-fg">hex</span> number xx.
+#  5         Return the decoded string.  Raise <span class="ansi-yellow-fg">`ValueError`</span> <span class="ansi-blue-fg">for</span> invalid inputs.<span class="ansi-yellow-fg">&#34;&#34;&#34;</span>
+#  6  
+#  7      <span class="ansi-white-fg"># Mapping of hex digits to their integer values</span>
+#  8      hex_values = {
+   9          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">0</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">0</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">1</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">1</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">2</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">2</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">3</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">3</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">4</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">4</span>,
+  10          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">5</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">5</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">6</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">6</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">7</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">7</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">8</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">8</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">9</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">9</span>,
+  11          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">a</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">10</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">b</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">11</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">c</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">12</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">d</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">13</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">e</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">14</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">15</span>,
+  12          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">A</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">10</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">B</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">11</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">C</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">12</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">D</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">13</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">E</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">14</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">F</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">15</span>,
+# 13      }
+# 14  
+  15      t = <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">&#34;</span>
+  16      i = <span class="ansi-blue-fg">0</span>
+  17      <span class="ansi-blue-fg">while</span> i &lt; <span class="ansi-cyan-fg">len</span>(s):
+  18          c = s[i]
+  19          <span class="ansi-blue-fg">if</span> c == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">+</span><span class="ansi-yellow-fg">&#39;</span>:
+  20              t += <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-yellow-fg">&#39;</span>
+  21          <span class="ansi-blue-fg">elif</span> c == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">%</span><span class="ansi-yellow-fg">&#39;</span>:
+# 22              digit_high, digit_low = s[i + <span class="ansi-blue-fg">1</span>], s[i + <span class="ansi-blue-fg">2</span>]
+# 23              i += <span class="ansi-blue-fg">2</span>
+# 24              <span class="ansi-blue-fg">if</span> digit_high <span class="ansi-magenta-fg">in</span> hex_values <span class="ansi-magenta-fg">and</span> digit_low <span class="ansi-magenta-fg">in</span> hex_values:
+# 25                  v = hex_values[digit_high] * <span class="ansi-blue-fg">16</span> + hex_values[digit_low]
+# 26                  t += <span class="ansi-cyan-fg">chr</span>(v)
+# 27              <span class="ansi-blue-fg">else</span>:
+# 28                  <span class="ansi-blue-fg">raise</span> <span class="ansi-cyan-fg">ValueError</span>(<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Invalid encoding</span><span class="ansi-yellow-fg">&#34;</span>)
+# 29          <span class="ansi-blue-fg">else</span>:
+  30              t += c
+  31          i += <span class="ansi-blue-fg">1</span>
+  32      <span class="ansi-blue-fg">return</span> t
 </pre>
 </div>
 </div>
@@ -14463,7 +14539,7 @@ a.anchor-link {
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Coverage</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -14516,7 +14592,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
@@ -14539,7 +14615,7 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{(&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 20), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)}
+<pre>{(&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 31), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 9)}
 </pre>
 </div>
 </div>
@@ -14566,7 +14642,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_plus</span><span class="p">:</span>
@@ -14587,7 +14663,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[17]:</div>
+    <div class="prompt output_prompt">Out[22]:</div>
 
 
 
@@ -14620,7 +14696,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_max</span><span class="p">:</span>
@@ -14648,7 +14724,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">cov_plus</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -14664,7 +14740,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[20]:</div>
+    <div class="prompt output_prompt">Out[25]:</div>
 
 
 
@@ -14702,7 +14778,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sample</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
@@ -14719,7 +14795,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[22]:</div>
+    <div class="prompt output_prompt">Out[27]:</div>
 
 
 
@@ -14744,7 +14820,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_fuzz</span><span class="p">:</span>
@@ -14765,7 +14841,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[23]:</div>
+    <div class="prompt output_prompt">Out[28]:</div>
 
 
 
@@ -14806,7 +14882,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">cov_fuzz</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -14822,7 +14898,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[24]:</div>
+    <div class="prompt output_prompt">Out[29]:</div>
 
 
 
@@ -14851,7 +14927,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">100</span>
@@ -14864,7 +14940,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">population_coverage</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
@@ -14898,7 +14974,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">hundred_inputs</span><span class="p">():</span>
@@ -14923,7 +14999,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_coverage</span><span class="p">,</span> <span class="n">cumulative_coverage</span> <span class="o">=</span> <span class="n">population_coverage</span><span class="p">(</span>
@@ -14937,7 +15013,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_coverage</span><span class="p">)</span>
@@ -14956,7 +15032,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[31]:</div>
+    <div class="prompt output_prompt">Out[36]:</div>
 
 
 
@@ -14996,7 +15072,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="mi">100</span>
@@ -15022,7 +15098,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">average_coverage</span><span class="p">)</span>
@@ -15041,7 +15117,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[33]:</div>
+    <div class="prompt output_prompt">Out[38]:</div>
 
 
 
@@ -15108,7 +15184,7 @@ Hello World
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
@@ -15136,7 +15212,7 @@ Hello World
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">+=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
@@ -15174,7 +15250,7 @@ Hello World
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">+=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
@@ -15216,7 +15292,7 @@ Hello World
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">+=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
@@ -15254,7 +15330,7 @@ Hello World
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;cgi_decode.c&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -15265,7 +15341,106 @@ Hello World
 </div>
 </div>
 
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And here we have the C code with its syntax highlighted:</p>
+
+</div>
+</div>
 </div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_file</span><span class="p">(</span><span class="s2">&quot;cgi_decode.c&quot;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre><span class="ansi-white-fg">/* CGI decoding as C program */</span>
+
+<span class="ansi-cyan-fg">#</span><span class="ansi-cyan-fg">include</span> <span class="ansi-white-fg">&lt;stdlib.h&gt;</span>
+<span class="ansi-cyan-fg">#</span><span class="ansi-cyan-fg">include</span> <span class="ansi-white-fg">&lt;string.h&gt;</span>
+<span class="ansi-cyan-fg">#</span><span class="ansi-cyan-fg">include</span> <span class="ansi-white-fg">&lt;stdio.h&gt;</span>
+
+
+<span class="ansi-cyan-fg">int</span> hex_values[<span class="ansi-blue-fg">256</span>];
+
+<span class="ansi-cyan-fg">void</span> <span class="ansi-green-fg">init_hex_values</span>() {
+    <span class="ansi-blue-fg">for</span> (<span class="ansi-cyan-fg">int</span> i = <span class="ansi-blue-fg">0</span>; i &lt; <span class="ansi-blue-fg">sizeof</span>(hex_values) / <span class="ansi-blue-fg">sizeof</span>(<span class="ansi-cyan-fg">int</span>); i++) {
+        hex_values[i] = -<span class="ansi-blue-fg">1</span>;
+    }
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">0</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">0</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">1</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">1</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">2</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">2</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">3</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">3</span>;
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">4</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">4</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">5</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">5</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">6</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">6</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">7</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">7</span>;
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">8</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">8</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">9</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">9</span>;
+
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">a</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">10</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">b</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">11</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">c</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">12</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">d</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">13</span>;
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">e</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">14</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">15</span>;
+
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">A</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">10</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">B</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">11</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">C</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">12</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">D</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">13</span>;
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">E</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">14</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">F</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">15</span>;
+}
+
+<span class="ansi-cyan-fg">int</span> <span class="ansi-green-fg">cgi_decode</span>(<span class="ansi-cyan-fg">char</span> *s, <span class="ansi-cyan-fg">char</span> *t) {
+    <span class="ansi-blue-fg">while</span> (*s != <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">\0</span><span class="ansi-yellow-fg">&#39;</span>) {
+        <span class="ansi-blue-fg">if</span> (*s == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">+</span><span class="ansi-yellow-fg">&#39;</span>)
+            *t++ = <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-yellow-fg">&#39;</span>;
+        <span class="ansi-blue-fg">else</span> <span class="ansi-blue-fg">if</span> (*s == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">%</span><span class="ansi-yellow-fg">&#39;</span>) {
+            <span class="ansi-cyan-fg">int</span> digit_high = *++s;
+            <span class="ansi-cyan-fg">int</span> digit_low = *++s;
+            <span class="ansi-blue-fg">if</span> (hex_values[digit_high] &gt;= <span class="ansi-blue-fg">0</span> &amp;&amp; hex_values[digit_low] &gt;= <span class="ansi-blue-fg">0</span>) {
+                *t++ = hex_values[digit_high] * <span class="ansi-blue-fg">16</span> + hex_values[digit_low];
+            }
+            <span class="ansi-blue-fg">else</span>
+                <span class="ansi-blue-fg">return</span> -<span class="ansi-blue-fg">1</span>;
+        }
+        <span class="ansi-blue-fg">else</span>
+            *t++ = *s;
+        s++;
+    }
+    *t = <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">\0</span><span class="ansi-yellow-fg">&#39;</span>;
+    <span class="ansi-blue-fg">return</span> <span class="ansi-blue-fg">0</span>;
+}
+
+<span class="ansi-cyan-fg">int</span> <span class="ansi-green-fg">main</span>(<span class="ansi-cyan-fg">int</span> argc, <span class="ansi-cyan-fg">char</span> *argv[]) {
+    init_hex_values();
+
+    <span class="ansi-blue-fg">if</span> (argc &gt;= <span class="ansi-blue-fg">2</span>) {
+        <span class="ansi-cyan-fg">char</span> *s = argv[<span class="ansi-blue-fg">1</span>];
+        <span class="ansi-cyan-fg">char</span> *t = malloc(strlen(s) + <span class="ansi-blue-fg">1</span>); <span class="ansi-white-fg">/* output is at most as long as input */</span>
+        <span class="ansi-cyan-fg">int</span> ret = cgi_decode(s, t);
+        printf(<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">%s</span><span class="ansi-yellow-fg">\n</span><span class="ansi-yellow-fg">&#34;</span>, t);
+        <span class="ansi-blue-fg">return</span> ret;
+    }
+    <span class="ansi-blue-fg">else</span>
+    {
+        printf(<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">cgi_decode: usage: cgi_decode STRING</span><span class="ansi-yellow-fg">\n</span><span class="ansi-yellow-fg">&#34;</span>);
+        <span class="ansi-blue-fg">return</span> <span class="ansi-blue-fg">1</span>;
+    }
+}
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -15276,7 +15451,7 @@ Hello World
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>cc --coverage -o cgi_decode cgi_decode.c
@@ -15297,7 +15472,7 @@ Hello World
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>./cgi_decode <span class="s1">&#39;Send+mail+to+me%40fuzzingbook.org&#39;</span>
@@ -15336,7 +15511,7 @@ Hello World
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>gcov cgi_decode.c
@@ -15378,7 +15553,7 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">lines</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;cgi_decode.c.gcov&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
@@ -15438,7 +15613,7 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">read_gcov_coverage</span><span class="p">(</span><span class="n">c_file</span><span class="p">):</span>
@@ -15462,7 +15637,7 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">coverage</span> <span class="o">=</span> <span class="n">read_gcov_coverage</span><span class="p">(</span><span class="s1">&#39;cgi_decode.c&#39;</span><span class="p">)</span>
@@ -15475,7 +15650,7 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">coverage</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
@@ -15491,17 +15666,17 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[45]:</div>
+    <div class="prompt output_prompt">Out[52]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[(&#39;cgi_decode.c&#39;, 15),
- (&#39;cgi_decode.c&#39;, 33),
- (&#39;cgi_decode.c&#39;, 44),
- (&#39;cgi_decode.c&#39;, 19),
- (&#39;cgi_decode.c&#39;, 30)]</pre>
+<pre>[(&#39;cgi_decode.c&#39;, 45),
+ (&#39;cgi_decode.c&#39;, 34),
+ (&#39;cgi_decode.c&#39;, 22),
+ (&#39;cgi_decode.c&#39;, 41),
+ (&#39;cgi_decode.c&#39;, 55)]</pre>
 </div>
 
 </div>
@@ -15536,7 +15711,7 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ExpectError</span> <span class="k">import</span> <span class="n">ExpectError</span>
@@ -15549,7 +15724,7 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -15576,7 +15751,7 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-47-086d4892c70e&gt;&#34;, line 5, in &lt;module&gt;
+  File &#34;&lt;ipython-input-54-086d4892c70e&gt;&#34;, line 5, in &lt;module&gt;
     cgi_decode(s)
   File &#34;&lt;ipython-input-1-4d0fb90b50b4&gt;&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
@@ -15599,7 +15774,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span>
@@ -15615,7 +15790,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[48]:</div>
+    <div class="prompt output_prompt">Out[55]:</div>
 
 
 
@@ -15704,7 +15879,7 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -15726,7 +15901,7 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-51-11dfaa12d229&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-58-11dfaa12d229&gt;&#34;, line 2, in &lt;module&gt;
     assert cgi_decode(&#39;%&#39;) == &#39;%&#39;
   File &#34;&lt;ipython-input-1-4d0fb90b50b4&gt;&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
@@ -15741,7 +15916,7 @@ IndexError: string index out of range (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="prompt input_prompt">In&nbsp;[59]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -15763,7 +15938,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-52-ef9edd8b32b3&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-59-ef9edd8b32b3&gt;&#34;, line 2, in &lt;module&gt;
     assert cgi_decode(&#39;%4&#39;) == &#39;%4&#39;
   File &#34;&lt;ipython-input-1-4d0fb90b50b4&gt;&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
@@ -15778,7 +15953,7 @@ IndexError: string index out of range (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="prompt input_prompt">In&nbsp;[60]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;%40&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span>
@@ -15799,7 +15974,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="prompt input_prompt">In&nbsp;[61]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fixed_cgi_decode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -15843,7 +16018,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span>
@@ -15856,7 +16031,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%4&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;%4&#39;</span>
@@ -15869,7 +16044,7 @@ IndexError: string index out of range (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%40&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span>
@@ -15890,7 +16065,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[58]:</div>
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
@@ -15916,7 +16091,7 @@ IndexError: string index out of range (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[59]:</div>
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">=</span> <span class="n">cgi_c_code</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
@@ -15968,7 +16143,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="prompt input_prompt">In&nbsp;[67]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
@@ -15987,7 +16162,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[60]:</div>
+    <div class="prompt output_prompt">Out[67]:</div>
 
 
 
@@ -16031,7 +16206,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[61]:</div>
+<div class="prompt input_prompt">In&nbsp;[68]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">branch_coverage</span><span class="p">(</span><span class="n">trace</span><span class="p">):</span>
@@ -16052,7 +16227,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="prompt input_prompt">In&nbsp;[69]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">branch_coverage</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
@@ -16068,7 +16243,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[62]:</div>
+    <div class="prompt output_prompt">Out[69]:</div>
 
 
 
@@ -16108,7 +16283,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">BranchCoverage</span><span class="p">(</span><span class="n">Coverage</span><span class="p">):</span>
@@ -16147,7 +16322,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="prompt input_prompt">In&nbsp;[71]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
@@ -16170,7 +16345,7 @@ IndexError: string index out of range (expected)
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{((&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12)), ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11)), ((&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)), ((&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21)), ((&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18)), ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20)), ((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)), ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25)), ((&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32)), ((&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 15))}
+<pre>{((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)), ((&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11)), ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 15)), ((&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19)), ((&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)), ((&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18)), ((&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21)), ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25)), ((&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20)), ((&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10)), ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17))}
 </pre>
 </div>
 </div>
@@ -16181,7 +16356,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="prompt input_prompt">In&nbsp;[72]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_plus</span><span class="p">:</span>
@@ -16202,7 +16377,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[65]:</div>
+    <div class="prompt output_prompt">Out[72]:</div>
 
 
 
@@ -16220,7 +16395,7 @@ IndexError: string index out of range (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[66]:</div>
+<div class="prompt input_prompt">In&nbsp;[73]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_max</span><span class="p">:</span>
@@ -16240,7 +16415,7 @@ IndexError: string index out of range (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[67]:</div>
+<div class="prompt input_prompt">In&nbsp;[74]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">cov_plus</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -16256,7 +16431,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[67]:</div>
+    <div class="prompt output_prompt">Out[74]:</div>
 
 
 
@@ -16281,7 +16456,7 @@ IndexError: string index out of range (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[68]:</div>
+<div class="prompt input_prompt">In&nbsp;[75]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sample</span>
@@ -16297,7 +16472,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[68]:</div>
+    <div class="prompt output_prompt">Out[75]:</div>
 
 
 
@@ -16314,7 +16489,7 @@ IndexError: string index out of range (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[69]:</div>
+<div class="prompt input_prompt">In&nbsp;[76]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_fuzz</span><span class="p">:</span>
@@ -16335,7 +16510,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[69]:</div>
+    <div class="prompt output_prompt">Out[76]:</div>
 
 
 
@@ -16370,7 +16545,7 @@ IndexError: string index out of range (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[70]:</div>
+<div class="prompt input_prompt">In&nbsp;[77]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">cov_fuzz</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -16386,7 +16561,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[70]:</div>
+    <div class="prompt output_prompt">Out[77]:</div>
 
 
 
@@ -16407,7 +16582,7 @@ IndexError: string index out of range (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[71]:</div>
+<div class="prompt input_prompt">In&nbsp;[78]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">population_branch_coverage</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
@@ -16433,7 +16608,7 @@ IndexError: string index out of range (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[72]:</div>
+<div class="prompt input_prompt">In&nbsp;[79]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_branch_coverage</span><span class="p">,</span> <span class="n">cumulative_branch_coverage</span> <span class="o">=</span> <span class="n">population_branch_coverage</span><span class="p">(</span>
@@ -16447,7 +16622,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[75]:</div>
+<div class="prompt input_prompt">In&nbsp;[82]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_branch_coverage</span><span class="p">)</span>
@@ -16466,7 +16641,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[75]:</div>
+    <div class="prompt output_prompt">Out[82]:</div>
 
 
 
@@ -16498,7 +16673,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[76]:</div>
+<div class="prompt input_prompt">In&nbsp;[83]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">())</span>
@@ -16514,7 +16689,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[76]:</div>
+    <div class="prompt output_prompt">Out[83]:</div>
 
 
 
@@ -16531,7 +16706,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[77]:</div>
+<div class="prompt input_prompt">In&nbsp;[84]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_branch_coverage</span> <span class="o">-</span> <span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -16547,7 +16722,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[77]:</div>
+    <div class="prompt output_prompt">Out[84]:</div>
 
 
 
@@ -16573,7 +16748,7 @@ IndexError: string index out of range (expected)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[78]:</div>
+<div class="prompt input_prompt">In&nbsp;[85]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">all_branch_coverage</span>
@@ -16589,7 +16764,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[78]:</div>
+    <div class="prompt output_prompt">Out[85]:</div>
 
 
 
@@ -16630,7 +16805,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[79]:</div>
+<div class="prompt input_prompt">In&nbsp;[86]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="mi">100</span>
@@ -16657,7 +16832,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[80]:</div>
+<div class="prompt input_prompt">In&nbsp;[87]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">average_coverage</span><span class="p">)</span>
@@ -16676,7 +16851,7 @@ IndexError: string index out of range (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[80]:</div>
+    <div class="prompt output_prompt">Out[87]:</div>
 
 
 

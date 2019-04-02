@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2019-03-26 10:45:02+01:00
+# Last change: 2019-04-02 15:22:03+13:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
 import ast
 import re
-import astunparse
+import astor
 from graphviz import Source, Graph, Digraph
 
 # ### Registry
@@ -147,7 +147,7 @@ class CFGNode(dict):
         self.calls.append(func)
 
     def source(self):
-        return astunparse.unparse(self.ast_node).strip()
+        return astor.to_source(self.ast_node).strip()
 
     def to_json(self):
         return {
@@ -195,9 +195,11 @@ class PyCFG:
         self.functions = {}
         self.functions_node = {}
 
+class PyCFG(PyCFG):
     def parse(self, src):
         return ast.parse(src)
 
+class PyCFG(PyCFG):
     def walk(self, node, myparents):
         fname = "on_%s" % node.__class__.__name__.lower()
         if hasattr(self, fname):
@@ -207,6 +209,7 @@ class PyCFG:
         else:
             return myparents
 
+class PyCFG(PyCFG):
     def on_module(self, node, myparents):
         """
         Module(stmt* body)
@@ -217,7 +220,8 @@ class PyCFG:
         for n in node.body:
             p = self.walk(n, p)
         return p
-    
+
+class PyCFG(PyCFG):
     def on_augassign(self, node, myparents):
         """
          AugAssign(expr target, operator op, expr value)
@@ -226,7 +230,8 @@ class PyCFG:
         p = self.walk(node.value, p)
 
         return p
-    
+
+class PyCFG(PyCFG):
     def on_annassign(self, node, myparents):
         """
         AnnAssign(expr target, expr annotation, expr? value, int simple)
@@ -235,7 +240,8 @@ class PyCFG:
         p = self.walk(node.value, p)
 
         return p
-    
+
+class PyCFG(PyCFG):
     def on_assign(self, node, myparents):
         """
         Assign(expr* targets, expr value)
@@ -248,9 +254,11 @@ class PyCFG:
 
         return p
 
+class PyCFG(PyCFG):
     def on_pass(self, node, myparents):
         return [CFGNode(parents=myparents, ast=node)]
 
+class PyCFG(PyCFG):
     def on_break(self, node, myparents):
         parent = myparents[0]
         while not hasattr(parent, 'exit_nodes'):
@@ -263,9 +271,10 @@ class PyCFG:
         # make the break one of the parents of label node.
         parent.exit_nodes.append(p)
 
-        # break doesnt have immediate children
+        # break doesn't have immediate children
         return []
 
+class PyCFG(PyCFG):
     def on_continue(self, node, myparents):
         parent = myparents[0]
         while not hasattr(parent, 'exit_nodes'):
@@ -281,6 +290,7 @@ class PyCFG:
         # for the just next node
         return []
 
+class PyCFG(PyCFG):
     def on_for(self, node, myparents):
         # node.target in node.iter: node.body
         # The For loop in python (no else) can be translated
@@ -295,7 +305,7 @@ class PyCFG:
         #     mystatements
         
         init_node = CFGNode(parents=myparents,
-            ast=ast.parse('__iv = iter(%s)' % astunparse.unparse(node.iter).strip()).body[0])
+            ast=ast.parse('__iv = iter(%s)' % astor.to_source(node.iter).strip()).body[0])
         ast.copy_location(init_node.ast_node, node.iter)
         
         _test_node = CFGNode(
@@ -308,7 +318,7 @@ class PyCFG:
         test_node = self.walk(node.iter, [_test_node])
 
         extract_node = CFGNode(parents=test_node,
-            ast=ast.parse('%s = next(__iv)' % astunparse.unparse(node.target).strip()).body[0])
+            ast=ast.parse('%s = next(__iv)' % astor.to_source(node.target).strip()).body[0])
         ast.copy_location(extract_node.ast_node, node.iter)
 
         
@@ -322,12 +332,13 @@ class PyCFG:
 
         return _test_node.exit_nodes + test_node
 
+class PyCFG(PyCFG):
     def on_while(self, node, myparents):
         # For a while, the earliest parent is the node.test
         _test_node = CFGNode(
             parents=myparents,
             ast=ast.parse(
-                '_while: %s' % astunparse.unparse(node.test).strip()).body[0])
+                '_while: %s' % astor.to_source(node.test).strip()).body[0])
         ast.copy_location(_test_node.ast_node, node.test)
         _test_node.exit_nodes = []
         test_node = self.walk(node.test, [_test_node])
@@ -346,13 +357,14 @@ class PyCFG:
         # link label node back to the condition.
         return _test_node.exit_nodes + test_node
 
+class PyCFG(PyCFG):
     def on_if(self, node, myparents):
         _test_node = CFGNode(
             parents=myparents,
             ast=ast.parse(
-                '_if: %s' % astunparse.unparse(node.test).strip()).body[0])
+                '_if: %s' % astor.to_source(node.test).strip()).body[0])
         ast.copy_location(_test_node.ast_node, node.test)
-        test_node = self.walk(node.test, [_test_node])
+        test_node = self.walk(node.test, [ _test_node])
         assert len(test_node) == 1
         g1 = test_node
         for n in node.body:
@@ -362,19 +374,23 @@ class PyCFG:
             g2 = self.walk(n, g2)
         return g1 + g2
 
+class PyCFG(PyCFG):
     def on_binop(self, node, myparents):
         left = self.walk(node.left, myparents)
         right = self.walk(node.right, left)
         return right
 
+class PyCFG(PyCFG):
     def on_compare(self, node, myparents):
         left = self.walk(node.left, myparents)
         right = self.walk(node.comparators[0], left)
         return right
 
+class PyCFG(PyCFG):
     def on_unaryop(self, node, myparents):
         return self.walk(node.operand, myparents)
 
+class PyCFG(PyCFG):
     def on_call(self, node, myparents):
         def get_func(node):
             if type(node.func) is ast.Name:
@@ -402,10 +418,12 @@ class PyCFG:
             c.calllink = 0
         return p
 
+class PyCFG(PyCFG):
     def on_expr(self, node, myparents):
         p = [CFGNode(parents=myparents, ast=node)]
         return self.walk(node.value, p)
 
+class PyCFG(PyCFG):
     def on_return(self, node, myparents):
         if type(myparents) is tuple:
             parent = myparents[0][0]
@@ -426,6 +444,7 @@ class PyCFG:
         # return doesnt have immediate children
         return []
 
+class PyCFG(PyCFG):
     def on_functiondef(self, node, myparents):
         # a function definition does not actually continue the thread of
         # control flow
@@ -464,6 +483,7 @@ class PyCFG:
 
         return myparents
 
+class PyCFG(PyCFG):
     def get_defining_function(self, node):
         if node.lineno() in self.functions_node:
             return self.functions_node[node.lineno()]
@@ -474,6 +494,7 @@ class PyCFG:
         self.functions_node[node.lineno()] = val
         return val
 
+class PyCFG(PyCFG):
     def link_functions(self):
         for nid, node in REGISTRY.items():
             if node.calls:
@@ -502,15 +523,18 @@ class PyCFG:
                             # #for c in passn.children: c.add_parent(exit)
                             # #passn.ast_node = exit.ast_node
 
+class PyCFG(PyCFG):
     def update_functions(self):
         for nid, node in REGISTRY.items():
             _n = self.get_defining_function(node)
 
+class PyCFG(PyCFG):
     def update_children(self):
         for nid, node in REGISTRY.items():
             for p in node.parents:
                 p.add_child(node)
 
+class PyCFG(PyCFG):
     def gen_cfg(self, src):
         """
         >>> i = PyCFG()
@@ -553,8 +577,6 @@ def compute_dominator(cfg, start=0, key='parents'):
                 c = True
             dominator[n] = v
     return dominator
-
-
 
 def compute_flow(pythonfile):
     cfg, first, last = get_cfg(pythonfile)

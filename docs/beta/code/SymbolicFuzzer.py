@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2019-03-24 15:13:29+01:00
+# Last change: 2019-04-02 15:33:32+13:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -363,7 +363,7 @@ if __name__ == "__main__":
 
 
 import ast
-import astunparse
+import astor
 
 def prefix_vars(astnode, prefix):
     if isinstance(astnode, ast.BoolOp):
@@ -406,7 +406,7 @@ if __name__ == "__main__":
 
 
 def to_src(astnode):
-    return astunparse.unparse(astnode).strip()
+    return astor.to_source(astnode).strip()
 
 if __name__ == "__main__":
     to_src(e)
@@ -414,7 +414,7 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     abs_value_summary_ast = get_expression(str(abs_value_summary))
-    to_src(prefix_vars(abs_value_summary_ast, 'x1_'))
+    print(to_src(prefix_vars(abs_value_summary_ast, 'x1_')))
 
 
 # #### Get Names and Types of Variables Used
@@ -991,7 +991,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    assert to_src(rename_variables(ba, env)) == 'z3.And((_x_1 == 1), (_y_0 == 2))'
+    assert to_src(rename_variables(ba, env)) == 'z3.And(_x_1 == 1, _y_0 == 2)'
 
 
 if __name__ == "__main__":
@@ -1000,7 +1000,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    assert to_src(rename_variables(bo, env)) == 'z3.Or((_x_1 == 1), (_y_0 == 2))'
+    assert to_src(rename_variables(bo, env)) == 'z3.Or(_x_1 == 1, _y_0 == 2)'
 
 
 if __name__ == "__main__":
@@ -1018,7 +1018,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    assert to_src(rename_variables(u, env)) == '(- _y_0)'
+    assert to_src(rename_variables(u, env)) == '(-_y_0)'
 
 
 if __name__ == "__main__":
