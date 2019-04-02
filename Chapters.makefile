@@ -2,7 +2,7 @@
 # This file defines the chapter files to be included
 
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = DynamicInvariants.ipynb
+NEW_CHAPTERS = SearchBasedFuzzer.ipynb
 
 # Chapters to include in the book, in this order
 
@@ -17,9 +17,9 @@ LEXICAL_PART = \
 	02_Lexical_Fuzzing.ipynb \
 	Fuzzer.ipynb \
 	Coverage.ipynb \
-	MutationFuzzer.ipynb
-LEXICAL_PART_READY = \
+	MutationFuzzer.ipynb \
 	SearchBasedFuzzer.ipynb
+LEXICAL_PART_READY = 
 LEXICAL_PART_TODO = \
 	# AFLFast.ipynb
 
