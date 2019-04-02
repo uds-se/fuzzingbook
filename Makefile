@@ -246,15 +246,18 @@ endif
 endif
 
 
+# Book base name
+BOOK = fuzzingbook
+
 ifeq ($(PUBLISH),bookbook)
 # Use bookbook
 CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(HTML_TARGET)
 CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template fuzzingbook.tplx --output-dir=$(PDF_TARGET)
-BOOK_TEX    = $(PDF_TARGET)book.tex
-BOOK_PDF    = $(PDF_TARGET)book.pdf
-BOOK_HTML   = $(HTML_TARGET)book.html
-BOOK_HTML_FILES = $(HTML_TARGET)book_files
-BOOK_PDF_FILES  = $(PDF_TARGET)book_files
+BOOK_TEX    = $(PDF_TARGET)$(BOOK).tex
+BOOK_PDF    = $(PDF_TARGET)$(BOOK).pdf
+BOOK_HTML   = $(HTML_TARGET)$(BOOK).html
+BOOK_HTML_FILES = $(HTML_TARGET)$(BOOK)_files
+BOOK_PDF_FILES  = $(PDF_TARGET)$(BOOK)_files
 PUBLISH_PLUGINS = 
 else
 ifeq ($(PUBLISH),nbpublish)
@@ -262,11 +265,11 @@ ifeq ($(PUBLISH),nbpublish)
 CONVERT_TO_HTML   = $(NBPUBLISH) -f html_ipypublish_chapter --outpath $(HTML_TARGET)
 CONVERT_TO_TEX    = $(NBPUBLISH) -f latex_ipypublish_chapter --outpath $(PDF_TARGET)
 # CONVERT_TO_SLIDES = $(NBPUBLISH) -f slides_ipypublish_all --outpath $(SLIDES_TARGET)
-BOOK_TEX    = $(PDF_TARGET)book.tex
-BOOK_PDF    = $(PDF_TARGET)book.pdf
-BOOK_HTML   = $(HTML_TARGET)book.html
-BOOK_HTML_FILES = $(HTML_TARGET)book_files
-BOOK_PDF_FILES  = $(PDF_TARGET)book_files
+BOOK_TEX    = $(PDF_TARGET)$(BOOK).tex
+BOOK_PDF    = $(PDF_TARGET)$(BOOK).pdf
+BOOK_HTML   = $(HTML_TARGET)$(BOOK).html
+BOOK_HTML_FILES = $(HTML_TARGET)$(BOOK)_files
+BOOK_PDF_FILES  = $(PDF_TARGET)$(BOOK)_files
 PUBLISH_PLUGINS = \
     ipypublish_plugins/html_ipypublish_chapter.py \
 	ipypublish_plugins/latex_ipypublish_book.py \
@@ -328,7 +331,7 @@ chapters default: html code
 
 # The book is recreated after any change to any source
 .PHONY: book all and more
-book:	book-html book-pdf
+book fuzzingbook:	book-html book-pdf
 all:	chapters pdf code slides book
 and more:	word markdown epub
 
@@ -345,8 +348,8 @@ epub: $(EPUBS)
 full-notebooks full fulls: $(FULLS)
 rendered-notebooks rendered renders: $(RENDERS)
 
-book-pdf:  ipypublish-book $(BOOK_PDF)
-book-html: ipypublish-book $(BOOK_HTML)
+book-pdf fuzzingbook-pdf:  ipypublish-book $(BOOK_PDF)
+book-html fuzzingbook-html: ipypublish-book $(BOOK_HTML)
 
 .PHONY: ipypublish-book ipypublish-chapters
 ifeq ($(PUBLISH),bookbook)
@@ -586,46 +589,46 @@ $(EPUB_TARGET)%.epub: $(MARKDOWN_TARGET)%.md
 	cd $(MARKDOWN_TARGET); $(PANDOC) -o ../$@ ../$<
 
 # Conversion rules - entire book
-# We create a book/ folder with the chapters ordered by number, 
-# and let the book converters run on this
+# We create a fuzzingbook/ folder with the chapters ordered by number, 
+# and let the fuzzingbook converters run on this
 ifeq ($(PUBLISH),nbpublish)
 # With nbpublish
-$(PDF_TARGET)book.tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
-	-$(RM) -r book
-	$(MKDIR) book
+$(PDF_TARGET)$(BOOK).tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
+	-$(RM) -r $(BOOK)
+	$(MKDIR) $(BOOK)
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
-	    ln -s ../$(RENDERED_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
+	    ln -s ../$(RENDERED_NOTEBOOKS)/$$file $(BOOK)/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
 		chapter=$$(expr $$chapter + 1); \
 	done
-	ln -s ../$(BIB) book
-	$(NBPUBLISH) -f latex_ipypublish_book --outpath $(PDF_TARGET) book
-	$(RM) -r book
-	cd $(PDF_TARGET) && $(RM) book.nbpub.log
+	ln -s ../$(BIB) $(BOOK)
+	$(NBPUBLISH) -f latex_ipypublish_book --outpath $(PDF_TARGET) $(BOOK)
+	$(RM) -r $(BOOK)
+	cd $(PDF_TARGET) && $(RM) $(BOOK).nbpub.log
 	@echo Created $@
 
-$(HTML_TARGET)book.html: $(FULLS) $(BIB) utils/post_html.py
-	-$(RM) -r book
-	$(MKDIR) book
+$(HTML_TARGET)$(BOOK).html: $(FULLS) $(BIB) utils/post_html.py
+	-$(RM) -r $(BOOK)
+	$(MKDIR) $(BOOK)
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
-	    ln -s ../$(FULL_NOTEBOOKS)/$$file book/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
+	    ln -s ../$(FULL_NOTEBOOKS)/$$file $(BOOK)/$$(echo $$file | sed 's/.*/Ch'$${chnum}'_&/g'); \
 		chapter=$$(expr $$chapter + 1); \
 	done
-	ln -s ../$(BIB) book
-	$(CONVERT_TO_HTML) book
-	$(PYTHON) utils/nbmerge.py book/Ch*.ipynb > notebooks/book.ipynb
+	ln -s ../$(BIB) $(BOOK)
+	$(CONVERT_TO_HTML) $(BOOK)
+	$(PYTHON) utils/nbmerge.py $(BOOK)/Ch*.ipynb > notebooks/$(BOOK).ipynb
 	$(PYTHON) utils/post_html.py $(BETA_FLAG) $(POST_HTML_OPTIONS) $@
-	$(RM) -r book notebooks/book.ipynb
-	cd $(HTML_TARGET) && $(RM) book.nbpub.log book_files/$(BIB)
+	$(RM) -r $(BOOK) notebooks/$(BOOK).ipynb
+	cd $(HTML_TARGET) && $(RM) $(BOOK).nbpub.log $(BOOK)_files/$(BIB)
 	@echo Created $@
 else
 # With bookbook
-$(PDF_TARGET)book.tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
-	-$(RM) -r book
-	$(MKDIR) book
+$(PDF_TARGET)$(BOOK).tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFILE)
+	-$(RM) -r $(BOOK)
+	$(MKDIR) $(BOOK)
 	chapter=0; \
 	for file in $(SOURCE_FILES); do \
 		chnum=$$(printf "%02d" $$chapter); \
