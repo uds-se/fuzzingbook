@@ -11875,6 +11875,7 @@ MathJax.Hub.Config({
 <li><a href="Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a></li>
 <li><a href="Coverage.html" class="this_page">Getting Coverage</a></li>
 <li><a href="MutationFuzzer.html">Mutation-Based Fuzzing</a></li>
+<li><a href="SearchBasedFuzzer.html">Search-Based Fuzzing <strong class="new_chapter">&bull;</strong></a></li>
 </ul><li class="has-sub"><a href="03_Syntactical_Fuzzing.html" class="chapters"><span class="part_number">III</span> Syntactical Fuzzing <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
 <li><a href="Grammars.html">Fuzzing with Grammars</a></li>
@@ -11891,7 +11892,7 @@ MathJax.Hub.Config({
 <li><a href="InformationFlow.html">Tracking Information Flow</a></li>
 <li><a href="ConcolicFuzzer.html">Concolic Fuzzing</a></li>
 <li><a href="SymbolicFuzzer.html">Symbolic Fuzzing</a></li>
-<li><a href="DynamicInvariants.html">Mining Function Specifications <strong class="new_chapter">&bull;</strong></a></li>
+<li><a href="DynamicInvariants.html">Mining Function Specifications</a></li>
 </ul><li class="has-sub"><a href="05_Domain-Specific_Fuzzing.html" class="chapters"><span class="part_number">V</span> Domain-Specific Fuzzing <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
 <li><a href="ConfigurationFuzzer.html">Testing Configurations</a></li>
@@ -12368,7 +12369,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Which lines are these, actually?  To this end, we encode the source code into an array <code>cgi_decode_lines</code>.  (An actual coverage tool could also access the source code file directly.)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Which lines are these, actually?  To this end, we get the source code of <code>cgi_decode_code</code> and encode it into an array <code>cgi_decode_lines</code>, which we will then annotate with coverage information.  First, let us get the source code of <code>cgi_encode</code>:</p>
 </div>
 </div>
 </div>
@@ -12380,46 +12381,135 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">def cgi_decode(s):</span>
-<span class="s2">    </span><span class="se">\&quot;\&quot;\&quot;</span><span class="s2">Decode the CGI-encoded string `s`:</span>
-<span class="s2">       * replace &quot;+&quot; by &quot; &quot;</span>
-<span class="s2">       * replace &quot;</span><span class="si">%x</span><span class="s2">x&quot; by the character with hex number xx.</span>
-<span class="s2">       Return the decoded string.  Raise `ValueError` for invalid inputs.</span><span class="se">\&quot;\&quot;\&quot;</span><span class="s2"></span>
-
-<span class="s2">    # Mapping of hex digits to their integer values</span>
-<span class="s2">    hex_values = {</span>
-<span class="s2">        &#39;0&#39;: 0, &#39;1&#39;: 1, &#39;2&#39;: 2, &#39;3&#39;: 3, &#39;4&#39;: 4,</span>
-<span class="s2">        &#39;5&#39;: 5, &#39;6&#39;: 6, &#39;7&#39;: 7, &#39;8&#39;: 8, &#39;9&#39;: 9,</span>
-<span class="s2">        &#39;a&#39;: 10, &#39;b&#39;: 11, &#39;c&#39;: 12, &#39;d&#39;: 13, &#39;e&#39;: 14, &#39;f&#39;: 15,</span>
-<span class="s2">        &#39;A&#39;: 10, &#39;B&#39;: 11, &#39;C&#39;: 12, &#39;D&#39;: 13, &#39;E&#39;: 14, &#39;F&#39;: 15,</span>
-<span class="s2">    }</span>
-
-<span class="s2">    t = &quot;&quot;</span>
-<span class="s2">    i = 0</span>
-<span class="s2">    while i &lt; len(s):</span>
-<span class="s2">        c = s[i]</span>
-<span class="s2">        if c == &#39;+&#39;:</span>
-<span class="s2">            t += &#39; &#39;</span>
-<span class="s2">        elif c == &#39;%&#39;:</span>
-<span class="s2">            digit_high, digit_low = s[i + 1], s[i + 2]</span>
-<span class="s2">            i += 2</span>
-<span class="s2">            if digit_high in hex_values and digit_low in hex_values:</span>
-<span class="s2">                v = hex_values[digit_high] * 16 + hex_values[digit_low]</span>
-<span class="s2">                t += chr(v)</span>
-<span class="s2">            else:</span>
-<span class="s2">                raise ValueError(&quot;Invalid encoding&quot;)</span>
-<span class="s2">        else:</span>
-<span class="s2">            t += c</span>
-<span class="s2">        i += 1</span>
-<span class="s2">    return t</span>
-<span class="s2">&quot;&quot;&quot;</span>
-<span class="n">cgi_decode_lines</span> <span class="o">=</span> <span class="n">cgi_decode_code</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/inspect.html" class="import" target="_blank">inspect</a></span>
 </pre></div>
 
 </div>
 </div></div>
 </div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_code</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">cgi_decode</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p><code>cgi_decode_code</code> is a string holding the source code.  We can print it out with Python syntax highlighting:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils" class="import" target="_blank">fuzzingbook_utils</a></span> <span class="k">import</span> <span class="n">print_content</span><span class="p">,</span> <span class="n">print_file</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">cgi_decode_code</span><span class="p">[:</span><span class="mi">300</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="s2">&quot;.py&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">cgi_decode</span>(s):
+    <span class="ansi-yellow-fg">&#34;&#34;&#34;Decode the CGI-encoded string `s`:</span>
+<span class="ansi-yellow-fg">       * replace &#34;+&#34; by &#34; &#34;</span>
+<span class="ansi-yellow-fg">       * replace &#34;%xx&#34; by the character with hex number xx.</span>
+<span class="ansi-yellow-fg">       Return the decoded string.  Raise `ValueError` for invalid inputs.&#34;&#34;&#34;</span>
+
+    <span class="ansi-white-fg"># Mapping of hex digits to their integer values</span>
+    hex_values = {
+  ...
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Using <code>splitlines()</code>, we split the code into an array of lines, indexed by line number.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">cgi_decode_code</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p><code>cgi_decode_lines[L]</code> is line L of the source code.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;def cgi_decode(s):&#39;
+</pre>
+</div>
+
 </div>
 
 <div class="input_markdown">
@@ -12525,7 +12615,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let us print out the code, annotating lines not covered with '#':</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us print out the full code, annotating lines not covered with '#':</p>
 </div>
 </div>
 </div>
@@ -12542,7 +12632,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;# &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%2d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">cgi_decode_lines</span><span class="p">[</span><span class="n">lineno</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%2d</span><span class="s2">  &quot;</span> <span class="o">%</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">print_content</span><span class="p">(</span><span class="n">cgi_decode_lines</span><span class="p">[</span><span class="n">lineno</span><span class="p">],</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12553,38 +12644,38 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>#  1 def cgi_decode(s):
-#  2     &#34;&#34;&#34;Decode the CGI-encoded string `s`:
-#  3        * replace &#34;+&#34; by &#34; &#34;
-#  4        * replace &#34;%xx&#34; by the character with hex number xx.
-#  5        Return the decoded string.  Raise `ValueError` for invalid inputs.&#34;&#34;&#34;
-#  6 
-#  7     # Mapping of hex digits to their integer values
-#  8     hex_values = {
-   9         &#39;0&#39;: 0, &#39;1&#39;: 1, &#39;2&#39;: 2, &#39;3&#39;: 3, &#39;4&#39;: 4,
-  10         &#39;5&#39;: 5, &#39;6&#39;: 6, &#39;7&#39;: 7, &#39;8&#39;: 8, &#39;9&#39;: 9,
-  11         &#39;a&#39;: 10, &#39;b&#39;: 11, &#39;c&#39;: 12, &#39;d&#39;: 13, &#39;e&#39;: 14, &#39;f&#39;: 15,
-  12         &#39;A&#39;: 10, &#39;B&#39;: 11, &#39;C&#39;: 12, &#39;D&#39;: 13, &#39;E&#39;: 14, &#39;F&#39;: 15,
-# 13     }
-# 14 
-  15     t = &#34;&#34;
-  16     i = 0
-  17     while i &lt; len(s):
-  18         c = s[i]
-  19         if c == &#39;+&#39;:
-  20             t += &#39; &#39;
-  21         elif c == &#39;%&#39;:
-# 22             digit_high, digit_low = s[i + 1], s[i + 2]
-# 23             i += 2
-# 24             if digit_high in hex_values and digit_low in hex_values:
-# 25                 v = hex_values[digit_high] * 16 + hex_values[digit_low]
-# 26                 t += chr(v)
-# 27             else:
-# 28                 raise ValueError(&#34;Invalid encoding&#34;)
-# 29         else:
-  30             t += c
-  31         i += 1
-  32     return t
+<pre>#  1  <span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">cgi_decode</span>(s):
+#  2      <span class="ansi-yellow-fg">&#34;&#34;&#34;</span><span class="ansi-yellow-fg">Decode the CGI-encoded string `s`:</span>
+#  3         * replace <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">+</span><span class="ansi-yellow-fg">&#34;</span> by <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg"> </span><span class="ansi-yellow-fg">&#34;</span>
+#  4         * replace <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">%x</span><span class="ansi-yellow-fg">x</span><span class="ansi-yellow-fg">&#34;</span> by the character <span class="ansi-blue-fg">with</span> <span class="ansi-cyan-fg">hex</span> number xx.
+#  5         Return the decoded string.  Raise <span class="ansi-yellow-fg">`ValueError`</span> <span class="ansi-blue-fg">for</span> invalid inputs.<span class="ansi-yellow-fg">&#34;&#34;&#34;</span>
+#  6  
+#  7      <span class="ansi-white-fg"># Mapping of hex digits to their integer values</span>
+#  8      hex_values = {
+   9          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">0</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">0</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">1</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">1</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">2</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">2</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">3</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">3</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">4</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">4</span>,
+  10          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">5</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">5</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">6</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">6</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">7</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">7</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">8</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">8</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">9</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">9</span>,
+  11          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">a</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">10</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">b</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">11</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">c</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">12</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">d</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">13</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">e</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">14</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">15</span>,
+  12          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">A</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">10</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">B</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">11</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">C</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">12</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">D</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">13</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">E</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">14</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">F</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">15</span>,
+# 13      }
+# 14  
+  15      t = <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">&#34;</span>
+  16      i = <span class="ansi-blue-fg">0</span>
+  17      <span class="ansi-blue-fg">while</span> i &lt; <span class="ansi-cyan-fg">len</span>(s):
+  18          c = s[i]
+  19          <span class="ansi-blue-fg">if</span> c == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">+</span><span class="ansi-yellow-fg">&#39;</span>:
+  20              t += <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-yellow-fg">&#39;</span>
+  21          <span class="ansi-blue-fg">elif</span> c == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">%</span><span class="ansi-yellow-fg">&#39;</span>:
+# 22              digit_high, digit_low = s[i + <span class="ansi-blue-fg">1</span>], s[i + <span class="ansi-blue-fg">2</span>]
+# 23              i += <span class="ansi-blue-fg">2</span>
+# 24              <span class="ansi-blue-fg">if</span> digit_high <span class="ansi-magenta-fg">in</span> hex_values <span class="ansi-magenta-fg">and</span> digit_low <span class="ansi-magenta-fg">in</span> hex_values:
+# 25                  v = hex_values[digit_high] * <span class="ansi-blue-fg">16</span> + hex_values[digit_low]
+# 26                  t += <span class="ansi-cyan-fg">chr</span>(v)
+# 27              <span class="ansi-blue-fg">else</span>:
+# 28                  <span class="ansi-blue-fg">raise</span> <span class="ansi-cyan-fg">ValueError</span>(<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Invalid encoding</span><span class="ansi-yellow-fg">&#34;</span>)
+# 29          <span class="ansi-blue-fg">else</span>:
+  30              t += c
+  31          i += <span class="ansi-blue-fg">1</span>
+  32      <span class="ansi-blue-fg">return</span> t
 </pre>
 </div>
 
@@ -12710,7 +12801,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{(&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 20), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)}
+<pre>{(&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 31), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 9)}
 </pre>
 </div>
 
@@ -13447,6 +13538,111 @@ Hello World
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>And here we have the C code with its syntax highlighted:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils" class="import" target="_blank">fuzzingbook_utils</a></span> <span class="k">import</span> <span class="n">print_file</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_file</span><span class="p">(</span><span class="s2">&quot;cgi_decode.c&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre><span class="ansi-white-fg">/* CGI decoding as C program */</span>
+
+<span class="ansi-cyan-fg">#</span><span class="ansi-cyan-fg">include</span> <span class="ansi-white-fg">&lt;stdlib.h&gt;</span>
+<span class="ansi-cyan-fg">#</span><span class="ansi-cyan-fg">include</span> <span class="ansi-white-fg">&lt;string.h&gt;</span>
+<span class="ansi-cyan-fg">#</span><span class="ansi-cyan-fg">include</span> <span class="ansi-white-fg">&lt;stdio.h&gt;</span>
+
+<span class="ansi-cyan-fg">int</span> hex_values[<span class="ansi-blue-fg">256</span>];
+
+<span class="ansi-cyan-fg">void</span> <span class="ansi-green-fg">init_hex_values</span>() {
+    <span class="ansi-blue-fg">for</span> (<span class="ansi-cyan-fg">int</span> i = <span class="ansi-blue-fg">0</span>; i &lt; <span class="ansi-blue-fg">sizeof</span>(hex_values) / <span class="ansi-blue-fg">sizeof</span>(<span class="ansi-cyan-fg">int</span>); i++) {
+        hex_values[i] = -<span class="ansi-blue-fg">1</span>;
+    }
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">0</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">0</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">1</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">1</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">2</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">2</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">3</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">3</span>;
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">4</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">4</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">5</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">5</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">6</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">6</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">7</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">7</span>;
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">8</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">8</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">9</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">9</span>;
+
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">a</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">10</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">b</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">11</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">c</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">12</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">d</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">13</span>;
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">e</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">14</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">15</span>;
+
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">A</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">10</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">B</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">11</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">C</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">12</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">D</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">13</span>;
+    hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">E</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">14</span>; hex_values[<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">F</span><span class="ansi-yellow-fg">&#39;</span>] = <span class="ansi-blue-fg">15</span>;
+}
+
+<span class="ansi-cyan-fg">int</span> <span class="ansi-green-fg">cgi_decode</span>(<span class="ansi-cyan-fg">char</span> *s, <span class="ansi-cyan-fg">char</span> *t) {
+    <span class="ansi-blue-fg">while</span> (*s != <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">\0</span><span class="ansi-yellow-fg">&#39;</span>) {
+        <span class="ansi-blue-fg">if</span> (*s == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">+</span><span class="ansi-yellow-fg">&#39;</span>)
+            *t++ = <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-yellow-fg">&#39;</span>;
+        <span class="ansi-blue-fg">else</span> <span class="ansi-blue-fg">if</span> (*s == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">%</span><span class="ansi-yellow-fg">&#39;</span>) {
+            <span class="ansi-cyan-fg">int</span> digit_high = *++s;
+            <span class="ansi-cyan-fg">int</span> digit_low = *++s;
+            <span class="ansi-blue-fg">if</span> (hex_values[digit_high] &gt;= <span class="ansi-blue-fg">0</span> &amp;&amp; hex_values[digit_low] &gt;= <span class="ansi-blue-fg">0</span>) {
+                *t++ = hex_values[digit_high] * <span class="ansi-blue-fg">16</span> + hex_values[digit_low];
+            }
+            <span class="ansi-blue-fg">else</span>
+                <span class="ansi-blue-fg">return</span> -<span class="ansi-blue-fg">1</span>;
+        }
+        <span class="ansi-blue-fg">else</span>
+            *t++ = *s;
+        s++;
+    }
+    *t = <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">\0</span><span class="ansi-yellow-fg">&#39;</span>;
+    <span class="ansi-blue-fg">return</span> <span class="ansi-blue-fg">0</span>;
+}
+
+<span class="ansi-cyan-fg">int</span> <span class="ansi-green-fg">main</span>(<span class="ansi-cyan-fg">int</span> argc, <span class="ansi-cyan-fg">char</span> *argv[]) {
+    init_hex_values();
+
+    <span class="ansi-blue-fg">if</span> (argc &gt;= <span class="ansi-blue-fg">2</span>) {
+        <span class="ansi-cyan-fg">char</span> *s = argv[<span class="ansi-blue-fg">1</span>];
+        <span class="ansi-cyan-fg">char</span> *t = malloc(strlen(s) + <span class="ansi-blue-fg">1</span>); <span class="ansi-white-fg">/* output is at most as long as input */</span>
+        <span class="ansi-cyan-fg">int</span> ret = cgi_decode(s, t);
+        printf(<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">%s</span><span class="ansi-yellow-fg">\n</span><span class="ansi-yellow-fg">&#34;</span>, t);
+        <span class="ansi-blue-fg">return</span> ret;
+    }
+    <span class="ansi-blue-fg">else</span>
+    {
+        printf(<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">cgi_decode: usage: cgi_decode STRING</span><span class="ansi-yellow-fg">\n</span><span class="ansi-yellow-fg">&#34;</span>);
+        <span class="ansi-blue-fg">return</span> <span class="ansi-blue-fg">1</span>;
+    }
+}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>We can now compile the C code into an executable.  The <code>--coverage</code> option instructs the C compiler to instrument the code such that at runtime, coverage information will be collected.  (The exact options vary from compiler to compiler.)</p>
 </div>
 </div>
@@ -13651,11 +13847,11 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[(&#39;cgi_decode.c&#39;, 15),
- (&#39;cgi_decode.c&#39;, 33),
- (&#39;cgi_decode.c&#39;, 44),
- (&#39;cgi_decode.c&#39;, 19),
- (&#39;cgi_decode.c&#39;, 30)]
+<pre>[(&#39;cgi_decode.c&#39;, 45),
+ (&#39;cgi_decode.c&#39;, 34),
+ (&#39;cgi_decode.c&#39;, 22),
+ (&#39;cgi_decode.c&#39;, 41),
+ (&#39;cgi_decode.c&#39;, 55)]
 </pre>
 </div>
 
@@ -13726,7 +13922,7 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-47-086d4892c70e&gt;&#34;, line 5, in &lt;module&gt;
+  File &#34;&lt;ipython-input-54-086d4892c70e&gt;&#34;, line 5, in &lt;module&gt;
     cgi_decode(s)
   File &#34;&lt;ipython-input-1-4d0fb90b50b4&gt;&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
@@ -14002,7 +14198,7 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Coverage.ipynb" target=_blank)>Last change: 2019-03-13 11:09:02+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Coverage.ipynb" target=_blank)>Last change: 2019-04-02 11:47:54+13:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14020,7 +14216,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Coverage.html">Getting Coverage</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Coverage.html">https://www.fuzzingbook.org/html/Coverage.html</a>.  Retrieved 2019-03-13 11:09:02+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Coverage.html">Getting Coverage</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/Coverage.html">https://www.fuzzingbook.org/html/Coverage.html</a>.  Retrieved 2019-04-02 11:47:54+13:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:Coverage,
@@ -14030,9 +14226,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/Coverage.html}},
-    note = {Retrieved 2019-03-13 11:09:02+01:00},
+    note = {Retrieved 2019-04-02 11:47:54+13:00},
     url = {https://www.fuzzingbook.org/html/Coverage.html},
-    urldate = {2019-03-13 11:09:02+01:00}
+    urldate = {2019-04-02 11:47:54+13:00}
 }
 </pre>
 </div>

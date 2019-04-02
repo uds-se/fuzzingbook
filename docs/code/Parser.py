@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2019-03-26 10:45:48+01:00
+# Last change: 2019-04-02 16:20:20+13:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -1921,7 +1921,7 @@ else:
 
 
 if __name__ == "__main__":
-    with ExpectTimeout(1):
+    with ExpectTimeout(1, print_traceback=False):
         mystring = 'AA'
         parser = LeoParser(RECURSION_GRAMMAR)
         tree, *_ = parser.parse(mystring)

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2019-03-26 14:52:29+01:00
+# Last change: 2019-04-02 15:12:16+13:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -397,7 +397,7 @@ if __name__ == "__main__":
 
 import ast
 import inspect
-import astunparse
+import astor
 
 if __name__ == "__main__":
     my_sqrt_source = inspect.getsource(my_sqrt)
@@ -419,7 +419,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    print(astunparse.dump(my_sqrt_ast))
+    print(astor.dump_tree(my_sqrt_ast))
 
 
 if __package__ is None or __package__ == "":
@@ -435,7 +435,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    print_content(astunparse.unparse(my_sqrt_ast), '.py')
+    print_content(astor.to_source(my_sqrt_ast), '.py')
 
 
 # ### Annotating Functions with Given Types
@@ -457,11 +457,11 @@ def parse_type(name):
     return name_visitor.value_node
 
 if __name__ == "__main__":
-    print(astunparse.dump(parse_type('int')))
+    print(astor.dump_tree(parse_type('int')))
 
 
 if __name__ == "__main__":
-    print(astunparse.dump(parse_type('[object]')))
+    print(astor.dump_tree(parse_type('[object]')))
 
 
 class TypeTransformer(ast.NodeTransformer):
@@ -508,7 +508,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    print_content(astunparse.unparse(new_ast), '.py')
+    print_content(astor.to_source(new_ast), '.py')
 
 
 if __name__ == "__main__":
@@ -524,7 +524,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    print_content(astunparse.unparse(new_ast), '.py')
+    print_content(astor.to_source(new_ast), '.py')
 
 
 # ### Annotating Functions with Mined Types
@@ -607,7 +607,7 @@ def annotate_function_ast_with_types(function_ast, function_calls):
     return annotated_function_ast
 
 if __name__ == "__main__":
-    print_content(astunparse.unparse(annotate_types(tracker.calls())['my_sqrt']), '.py')
+    print_content(astor.to_source(annotate_types(tracker.calls())['my_sqrt']), '.py')
 
 
 # ### All-in-one Annotation
@@ -633,13 +633,13 @@ class TypeAnnotator(TypeTracker):
             functions = ''
             for f_name in self.calls():
                 try:
-                    f_text = astunparse.unparse(self.typed_functions_ast(f_name))
+                    f_text = astor.to_source(self.typed_functions_ast(f_name))
                 except KeyError:
                     f_text = ''
                 functions += f_text
             return functions
 
-        return astunparse.unparse(self.typed_functions_ast(function_name))
+        return astor.to_source(self.typed_functions_ast(function_name))
 
 if __name__ == "__main__":
     with TypeAnnotator() as annotator:
@@ -676,7 +676,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    print_content(astunparse.unparse(annotate_types(tracker.calls())['my_sqrt']), '.py')
+    print_content(astor.to_source(annotate_types(tracker.calls())['my_sqrt']), '.py')
 
 
 def sum3(a, b, c):
@@ -933,7 +933,7 @@ def instantiate_prop_ast(prop, var_names):
 
 def instantiate_prop(prop, var_names):
     prop_ast = instantiate_prop_ast(prop, var_names)
-    prop_text = astunparse.unparse(prop_ast).strip()
+    prop_text = astor.to_source(prop_ast).strip()
     while prop_text.startswith('(') and prop_text.endswith(')'):
         prop_text = prop_text[1:-1]
     return prop_text
@@ -1605,13 +1605,13 @@ class EmbeddedInvariantAnnotator(InvariantTracker):
             functions = ''
             for f_name in self.invariants():
                 try:
-                    f_text = astunparse.unparse(self.functions_with_invariants_ast(f_name))
+                    f_text = astor.to_source(self.functions_with_invariants_ast(f_name))
                 except KeyError:
                     f_text = ''
                 functions += f_text
             return functions
 
-        return astunparse.unparse(self.functions_with_invariants_ast(function_name))
+        return astor.to_source(self.functions_with_invariants_ast(function_name))
     
     def function_with_invariants(self, function_name):
         return self.functions_with_invariants(function_name)
@@ -1715,7 +1715,7 @@ class EmbeddedInvariantTransformer(PreconditionTransformer):
 
         body_ends_with_return = isinstance(new_body[-1], ast.Return)
         if body_ends_with_return:
-            saver = RETURN_VALUE + " = " + astunparse.unparse(new_body[-1].value)
+            saver = RETURN_VALUE + " = " + astor.to_source(new_body[-1].value)
         else:
             saver = RETURN_VALUE + " = None"
     

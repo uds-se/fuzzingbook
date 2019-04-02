@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2019-02-19 09:35:09-08:00
+# Last change: 2019-04-02 15:56:14+13:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -1180,7 +1180,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    gui_driver.get("https://www.fuzzingbook.org/")
+    gui_driver.get("https://www.fuzzingbook.org/html/Fuzzer.html")
 
 
 if __name__ == "__main__":
@@ -1195,8 +1195,10 @@ if __name__ == "__main__":
     book_fuzzer = GUICoverageFuzzer(gui_driver, log_gui_exploration=True)  # , disp_gui_exploration=True)
 
 
+ACTIONS = 5
+
 if __name__ == "__main__":
-    book_fuzzer.explore_all(book_runner, max_actions=10)
+    book_fuzzer.explore_all(book_runner, max_actions=ACTIONS)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2019-03-13 11:09:02+01:00
+# Last change: 2019-04-02 11:47:54+13:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -77,7 +77,6 @@ def cgi_decode(s):
         i += 1
     return t
 
-
 if __name__ == "__main__":
     cgi_decode("Hello+world")
 
@@ -148,42 +147,28 @@ if __name__ == "__main__":
     print(coverage)
 
 
+import inspect
+
 if __name__ == "__main__":
-    cgi_decode_code = """
-    def cgi_decode(s):
-        \"\"\"Decode the CGI-encoded string `s`:
-           * replace "+" by " "
-           * replace "%xx" by the character with hex number xx.
-           Return the decoded string.  Raise `ValueError` for invalid inputs.\"\"\"
+    cgi_decode_code = inspect.getsource(cgi_decode)
 
-        # Mapping of hex digits to their integer values
-        hex_values = {
-            '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
-            '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
-            'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
-            'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
-        }
 
-        t = ""
-        i = 0
-        while i < len(s):
-            c = s[i]
-            if c == '+':
-                t += ' '
-            elif c == '%':
-                digit_high, digit_low = s[i + 1], s[i + 2]
-                i += 2
-                if digit_high in hex_values and digit_low in hex_values:
-                    v = hex_values[digit_high] * 16 + hex_values[digit_low]
-                    t += chr(v)
-                else:
-                    raise ValueError("Invalid encoding")
-            else:
-                t += c
-            i += 1
-        return t
-    """
-    cgi_decode_lines = cgi_decode_code.splitlines()
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import print_content, print_file
+else:
+    from .fuzzingbook_utils import print_content, print_file
+
+
+if __name__ == "__main__":
+    print_content(cgi_decode_code[:300] + "...", ".py")
+
+
+if __name__ == "__main__":
+    cgi_decode_lines = [""] + cgi_decode_code.splitlines()
+
+
+if __name__ == "__main__":
+    cgi_decode_lines[1]
 
 
 if __name__ == "__main__":
@@ -205,7 +190,8 @@ if __name__ == "__main__":
             print("# ", end="")
         else:
             print("  ", end="")
-        print("%2d" % lineno, cgi_decode_lines[lineno])
+        print("%2d  " % lineno, end="")
+        print_content(cgi_decode_lines[lineno], '.py')
 
 
 # ## A Coverage Class
@@ -481,6 +467,16 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     with open("cgi_decode.c", "w") as f:
         f.write(cgi_c_code)
+
+
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import print_file
+else:
+    from .fuzzingbook_utils import print_file
+
+
+if __name__ == "__main__":
+    print_file("cgi_decode.c")
 
 
 if __name__ == "__main__":
