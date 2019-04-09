@@ -32,7 +32,8 @@ SYNTACTICAL_PART = \
 	LangFuzzer.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
 	GeneratorGrammarFuzzer.ipynb \
-	Reducer.ipynb
+	Reducer.ipynb \
+	MutationAnalysis.ipynb
 SYNTACTICAL_PART_READY =
 SYNTACTICAL_PART_TODO = \
 	EvoGrammarFuzzer.ipynb
