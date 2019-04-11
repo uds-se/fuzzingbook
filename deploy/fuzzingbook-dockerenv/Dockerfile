@@ -23,6 +23,7 @@ RUN if [ "$publish" = "yes" ]; then conda install -c conda-forge geckodriver ; f
 RUN if [ "$publish" = "yes" ]; then conda install -c conda-forge selenium ; fi
 RUN if [ "$publish" = "yes" ]; then pip install ipypublish==0.6.7 autopep8 yapf ; fi
 RUN pip install jupyter jupyterlab matplotlib scipy numpy pandas graphviz svglib jupyter_contrib_nbextensions mypy notedown nbdime nbstripout astunparse enforce==0.3.4 showast astor z3-solver tornado
+RUN pip install git+https://github.com/ttylec/pyan#egg=pyan
 
 WORKDIR /home/$NB_USER
 
