@@ -159,6 +159,9 @@ PDF_FILES     = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%_files)
 HTML_FILES    = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%_files)
 SLIDES_FILES  = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%_files)
 
+SITEMAP_SVG = $(DOCS_TARGET)notebooks/00_Sitemap.svg
+
+
 # Configuration
 # What we use for production: nbpublish (preferred), bookbook, or nbconvert
 PUBLISH ?= nbpublish
@@ -1075,7 +1078,6 @@ endif
 
 ## Dependencies as graph
 NBDEPEND = utils/nbdepend.py
-SITEMAP_SVG = $(DOCS_TARGET)notebooks/00_Sitemap.svg
 SITEMAP_OPTIONS = --graph --transitive-reduction # --cluster-by-parts
 
 sitemap: $(SITEMAP_SVG)

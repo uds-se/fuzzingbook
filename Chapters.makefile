@@ -2,7 +2,7 @@
 # This file defines the chapter files to be included
 
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = SearchBasedFuzzer.ipynb
+NEW_CHAPTERS = MutationAnalysis.ipynb
 
 # Chapters to include in the book, in this order
 
@@ -18,7 +18,8 @@ LEXICAL_PART = \
 	Fuzzer.ipynb \
 	Coverage.ipynb \
 	MutationFuzzer.ipynb \
-	SearchBasedFuzzer.ipynb
+	SearchBasedFuzzer.ipynb \
+	MutationAnalysis.ipynb
 LEXICAL_PART_READY = 
 LEXICAL_PART_TODO = \
 	# AFLFast.ipynb
@@ -34,8 +35,7 @@ SYNTACTICAL_PART = \
 	GeneratorGrammarFuzzer.ipynb \
 	Reducer.ipynb
 SYNTACTICAL_PART_READY =
-SYNTACTICAL_PART_TODO = \
-	EvoGrammarFuzzer.ipynb
+SYNTACTICAL_PART_TODO = 
 	
 SEMANTICAL_PART = \
 	04_Semantical_Fuzzing.ipynb \
