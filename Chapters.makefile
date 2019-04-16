@@ -2,7 +2,7 @@
 # This file defines the chapter files to be included
 
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = MutationAnalysis.ipynb
+NEW_CHAPTERS = GreyboxFuzzer.ipynb
 
 # Chapters to include in the book, in this order
 
@@ -18,11 +18,11 @@ LEXICAL_PART = \
 	Fuzzer.ipynb \
 	Coverage.ipynb \
 	MutationFuzzer.ipynb \
+	GreyboxFuzzer.ipynb \
 	SearchBasedFuzzer.ipynb \
 	MutationAnalysis.ipynb
 LEXICAL_PART_READY = 
 LEXICAL_PART_TODO = \
-	# AFLFast.ipynb
 
 SYNTACTICAL_PART = \
 	03_Syntactical_Fuzzing.ipynb \
