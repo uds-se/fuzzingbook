@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2019-04-02 15:22:03+13:00
+# Last change: 2019-04-16 20:53:40+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -902,7 +902,7 @@ def callgraph(code, name="callgraph"):
     return Source.from_file(name + '.dot')
 
 def get_callgraph(code, name="callgraph"):
-    if not os.path.isfile("name + '.dot'"):
+    if not os.path.isfile(name + '.dot'):
         construct_callgraph(code, name)
     return nx.drawing.nx_pydot.read_dot(name + '.dot')
 
