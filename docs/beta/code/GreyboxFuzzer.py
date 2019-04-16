@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2019-04-16 21:11:20+01:00
+# Last change: 2019-04-16 21:13:14+01:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -341,8 +341,7 @@ if __name__ == "__main__":
     plt.legend(handles=[line_bb, line_gb])
     plt.title('Coverage over time')
     plt.xlabel('# of inputs')
-    plt.ylabel('lines covered')
-    plt.show()
+    plt.ylabel('lines covered');
 
 
 # ### Boosted Greybox Fuzzer
@@ -409,8 +408,10 @@ if __name__ == "__main__":
     plt.ylim(0, n)
     #plt.yscale("log")
     #plt.yticks([10,100,1000,10000])
-    plt.show()
+    plt;
 
+
+if __name__ == "__main__":
     print("             path id 'p'           : path frequency 'f(p)'")
     fast_schedule.path_frequency
 
@@ -435,8 +436,10 @@ if __name__ == "__main__":
     plt.ylim(0, n)
     #plt.yscale("log")
     #plt.yticks([10,100,1000,10000])
-    plt.show()
+    plt;
 
+
+if __name__ == "__main__":
     print("             path id 'p'           : path frequency 'f(p)'")
     orig_schedule.path_frequency
 
@@ -463,8 +466,7 @@ if __name__ == "__main__":
     plt.legend(handles=[line_orig, line_fast])
     plt.title('Coverage over time')
     plt.xlabel('# of inputs')
-    plt.ylabel('lines covered')
-    plt.show()
+    plt.ylabel('lines covered');
 
 
 # ### Complex Example: XMLParser
@@ -512,8 +514,7 @@ if __name__ == "__main__":
     plt.legend(handles=[line_boost, line_grey, line_black])
     plt.title('Coverage over time')
     plt.xlabel('# of inputs')
-    plt.ylabel('lines covered')
-    plt.show()
+    plt.ylabel('lines covered');
 
 
 if __name__ == "__main__":
@@ -744,8 +745,7 @@ if __name__ == "__main__":
     plt.scatter(x, y)
     plt.ylim(0,max(y))
     plt.xlabel("Seed ID")
-    plt.ylabel("Distance")
-    plt.show()
+    plt.ylabel("Distance");
 
 
 class AFLGoSchedule(DirectedSchedule):
