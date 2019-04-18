@@ -13,7 +13,12 @@ ARG FB_USER=fuzzingbook
 ENV FB_USER=${FB_USER}
 
 # Specify whether we install publish extensions.
-ARG PUBLISH
+ARG PUBLISH=no
+
+# This specifies the git repository that you want to clone.
+ARG OWNER=uds-se
+ENV OWNER=${OWNER}
+ARG REPO=https://github.com/${OWNER}/fuzzingbook.git
 
 # Since you are running git within the container, this specifies the branch we
 # want to checkout and work on.
@@ -58,15 +63,15 @@ WORKDIR /root
 # removed it from the file and kept everything else I could find in the original
 # Dockerfile. 
 ADD requirements.txt /root/install-requirements.txt
-# ADD https://raw.githubusercontent.com/uds-se/fuzzingbook/${FUZZINGBOOK_VERSION}/deploy/fuzzingbook-base/requirements.txt /root/install-requirements.txt
-ADD https://raw.githubusercontent.com/uds-se/fuzzingbook/$FUZZINGBOOK_VERSION/binder/requirements.txt /root/fuzzingbook-requirements.txt
+# ADD https://raw.githubusercontent.com/$OWNER/fuzzingbook/${FUZZINGBOOK_VERSION}/deploy/fuzzingbook-base/requirements.txt /root/install-requirements.txt
+ADD https://raw.githubusercontent.com/$OWNER/fuzzingbook/$FUZZINGBOOK_VERSION/binder/requirements.txt /root/fuzzingbook-requirements.txt
 ADD https://raw.githubusercontent.com/MozillaSecurity/FuzzManager/${FUZZMANAGER_VERSION}/server/requirements.txt /root/fuzzmanager-requirements.txt
 
 # Same for the ubuntu packages. These have been moved to a file to facilitate 
 # the installation and mainenance. 
 ADD apt.txt /root/install-packages.txt
-# ADD https://raw.githubusercontent.com/uds-se/fuzzingbook/${FUZZINGBOOK_VERSION}/deploy/fuzzingbook-base/apt.txt /root/install-packages.txt
-ADD https://raw.githubusercontent.com/uds-se/fuzzingbook/${FUZZINGBOOK_VERSION}/binder/apt.txt /root/fuzzingbook-packages.txt
+# ADD https://raw.githubusercontent.com/$OWNER/fuzzingbook/${FUZZINGBOOK_VERSION}/deploy/fuzzingbook-base/apt.txt /root/install-packages.txt
+ADD https://raw.githubusercontent.com/$OWNER/fuzzingbook/${FUZZINGBOOK_VERSION}/binder/apt.txt /root/fuzzingbook-packages.txt
 
 # Install python3, curl and git using apt.
 # Install pip manually (to avoid installing 0.9 using apt first, upgrading and 
@@ -126,7 +131,7 @@ ADD settings.py.patch /home/${FB_USER}/settings.py.patch
 # the jupyter instance. We shallow clone and omit history at this point
 # to speed up initial build process. You can change (remove the switch)
 # this at any time to get a full clone.
-RUN git clone --branch ${BRANCH} --depth 1 https://github.com/uds-se/fuzzingbook.git ${BASEDIR} \
+RUN git clone --branch ${BRANCH} --depth 1 https://github.com/$OWNER/fuzzingbook.git ${BASEDIR} \
   && nbdime extensions --enable \
   && jupyter nbextension enable nbdime --py \
   && nbdime config-git --enable --global \
