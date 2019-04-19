@@ -34,3 +34,10 @@ docker build -t sjust/fuzzingbook --squash .
 
 NOTE: the `--squash` option (Squash newly built layers into a single new layer) 
 is optional and requires experimental features turned on in the Docker daemon.
+
+
+## For the students
+
+You can run `make run-temporary` to get a temporary instance with the required
+software pre-installed. Use `make shell` to gain access to this instance. Your
+`fuzzingbook` directory will be mounted under root as `/fuzzingbook`.

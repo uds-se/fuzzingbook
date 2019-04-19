@@ -32,9 +32,12 @@ container: $(tag)
 	$(info Creating container with name $(image))
 	docker create -p 8080:8080 -p 8000:8000 --name $(image) $(tag)
 
+fbdir:=$(shell realpath $(CURDIR)/../../)
+mount:=-v $(fbdir):/fuzzingbook
+
 debug: $(tag)
 	$(info Starting temporary container with image $(image))
-	@docker run --rm -it -p 8080:8080 -p 8000:8000 --user root $(tag) /bin/bash
+	@docker run --rm -it $(mount) -p 8080:8080 -p 8000:8000 --user root $(tag) /bin/bash
 
 start: container
 	$(info Attaching to persistent container with name $(image))
@@ -42,7 +45,7 @@ start: container
 
 run-temporary: $(tag)
 	@echo "Starting temporary local docker container..."
-	@docker run --rm -d -p 8888:8888 -p 8000:8000 --name $(instance) $(tag)
+	@docker run --rm $(mount) -d -p 8888:8888 -p 8000:8000 --name $(instance) $(tag)
 	@while ! docker exec -u fuzzingbook -it $(instance) jupyter notebook list | grep http; do sleep 1; done
 	@echo "Container is running, run 'docker stop $(instance)' to stop and remove container..."
 
@@ -56,6 +59,11 @@ rootshell:
 # Stop the instance started with run-temporary
 stop:
 	docker stop $(instance)
+
+CHECKP=8888
+checkport:
+	-netstat -vanp tcp | grep $(CHECKP)
+	-sudo lsof -i tcp:$(CHECKP)
 
 # Check environment variables
 check-env:
