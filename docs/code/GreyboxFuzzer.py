@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2019-04-16 21:13:14+01:00
+# Last change: 2019-04-20 14:52:28+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -667,6 +667,7 @@ if __name__ == "__main__":
 
 
 import networkx as nx
+
 if __package__ is None or __package__ == "":
     from ControlFlow import get_callgraph
 else:
