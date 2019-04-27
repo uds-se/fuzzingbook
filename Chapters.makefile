@@ -2,7 +2,7 @@
 # This file defines the chapter files to be included
 
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = GreyboxFuzzer.ipynb
+NEW_CHAPTERS = GreyboxGrammarFuzzer.ipynb
 
 # Chapters to include in the book, in this order
 
@@ -30,9 +30,9 @@ SYNTACTICAL_PART = \
 	GrammarFuzzer.ipynb \
 	GrammarCoverageFuzzer.ipynb \
 	Parser.ipynb \
-	LangFuzzer.ipynb \
 	ProbabilisticGrammarFuzzer.ipynb \
 	GeneratorGrammarFuzzer.ipynb \
+	GreyboxGrammarFuzzer.ipynb \
 	Reducer.ipynb
 SYNTACTICAL_PART_READY =
 SYNTACTICAL_PART_TODO = 
