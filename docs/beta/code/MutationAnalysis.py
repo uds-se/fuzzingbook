@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/MutationAnalysis.html
-# Last change: 2019-04-10 08:52:38+08:00
+# Last change: 2019-04-20 14:44:33+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -864,10 +864,26 @@ if __name__ == "__main__":
         print(mutant.diff())
 
 
-# ### Exercise 2: Byte Code Mutator
+# ### Exercise 2: Optimizing Mutation Analysis
 
 if __name__ == "__main__":
-    print('\n### Exercise 2: Byte Code Mutator')
+    print('\n### Exercise 2: Optimizing Mutation Analysis')
+
+
+
+
+# ### Exercise 3: Byte Code Mutator
+
+if __name__ == "__main__":
+    print('\n### Exercise 3: Byte Code Mutator')
+
+
+
+
+# ### Exercise 4: Estimating Residual Defect Density
+
+if __name__ == "__main__":
+    print('\n### Exercise 4: Estimating Residual Defect Density')
 
 
 

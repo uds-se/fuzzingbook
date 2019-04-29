@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2019-04-02 22:40:00+13:00
+# Last change: 2019-04-21 06:26:44+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -1017,15 +1017,17 @@ JSON_EBNF_GRAMMAR = {
 
     "<member>": ["<ws><string><ws>:<element>"],
 
-    "<array>": ["{<ws>}", "{<elements>}"],
+    "<array>": ["[<ws>]", "[<elements>]"],
 
     "<elements>": ["<element>(,<elements>)*"],
 
     "<element>": ["<ws><value><ws>"],
 
     "<string>": ['"' + "<characters>" + '"'],
+    
+    "<characters>": ["<character>*"],
 
-    "<characters>": srange(CHARACTERS_WITHOUT_QUOTE),
+    "<character>": srange(CHARACTERS_WITHOUT_QUOTE),
 
     "<number>": ["<int><frac><exp>"],
 
@@ -1059,7 +1061,7 @@ else:
 
 
 if __name__ == "__main__":
-    for i in range(10):
+    for i in range(50):
         with ExpectError():
             print(simple_grammar_fuzzer(JSON_GRAMMAR, '<object>'))
 

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2019-04-16 20:53:40+01:00
+# Last change: 2019-04-27 13:05:00+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -875,10 +875,6 @@ import os
 import networkx as nx
 from graphviz import Source
 
-def install_pyan():
-    os.system("pip install pydot")
-    os.system("git clone https://github.com/davidfraser/pyan")
-
 # ### Call Graph Helpers
 
 if __name__ == "__main__":
@@ -891,10 +887,8 @@ def construct_callgraph(code, name="callgraph"):
     file_name = name + ".py"
     with open(file_name, 'w') as f:
         f.write(code)
-    if not os.path.isdir("pyan"):
-        install_pyan()
     cg_file = name + '.dot'
-    os.system(f'python "pyan/pyan.py" {file_name} --uses --defines --colored --grouped --annotated --dot > {cg_file}')
+    os.system(f'pyan {file_name} --uses --defines --colored --grouped --annotated --dot > {cg_file}')
     
 def callgraph(code, name="callgraph"):
     if not os.path.isfile(name + '.dot'):
@@ -1037,7 +1031,4 @@ if __name__ == "__main__":
 
     if os.path.exists('callgraph.py'):
         os.remove('callgraph.py')
-
-    if os.path.exists('pyan'):
-        shutil.rmtree('pyan')
 
