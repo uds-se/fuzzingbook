@@ -115,11 +115,10 @@ Here's our current release plan.  New chapters are coming out every Tuesday.
 1. [Mining Function Specifications](DynamicInvariants) – 2019-03-26
 1. [Search-Based Fuzzing](SearchBasedFuzzer.ipynb) – 2019-04-02
 1. [Evaluating Test Effectiveness with Mutation Analysis](MutationAnalysis.ipynb) – 2019-04-09
-1. Fast Mutation-Based Fuzzing – 2019-04-16 <!-- AFL Style -->
-1. [Fuzzing with Input Fragments](LangFuzzer.ipynb) – 2019-04-23
-<!-- 1. Fuzzing with Natural Language - 2019-04-30 -->
-1. Fuzzing in the Large – 2019-04-30
-1. When to Stop Fuzzing – 2019-05-07
+1. [Greybox Fuzzing](GreyboxFuzzer.ipynb) – 2019-04-16
+1. [Fuzzing with Input Fragments](LangFuzzer.ipynb) – 2019-04-30
+1. Fuzzing in the Large – 2019-05-07
+1. When to Stop Fuzzing – 2019-05-14
 
 See the [table of contents](00_Table_of_Contents.ipynb) for those chapters that are already done.
 

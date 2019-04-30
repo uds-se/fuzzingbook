@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2019-04-20 14:52:28+02:00
+# Last change: 2019-04-27 19:42:33+08:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -36,6 +36,12 @@ if __name__ == "__main__":
 
 
 
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+
 # ## Ingredients for Greybox Fuzzing
 
 if __name__ == "__main__":
@@ -60,12 +66,6 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
-
 import random
 if __package__ is None or __package__ == "":
     from Coverage import Coverage, population_coverage
@@ -82,6 +82,13 @@ class Mutator(object):
         ]
 
 class Mutator(Mutator):
+    def insert_random_character(self,s):
+        """Returns s with a random character inserted"""
+        pos = random.randint(0, len(s))
+        random_character = chr(random.randrange(32, 127))
+        return s[:pos] + random_character + s[pos:]
+
+class Mutator(Mutator):
     def delete_random_character(self,s):
         """Returns s with a random character deleted"""
         if s == "":
@@ -89,13 +96,6 @@ class Mutator(Mutator):
 
         pos = random.randint(0, len(s) - 1)
         return s[:pos] + s[pos + 1:]
-
-class Mutator(Mutator):
-    def insert_random_character(self,s):
-        """Returns s with a random character inserted"""
-        pos = random.randint(0, len(s))
-        random_character = chr(random.randrange(32, 127))
-        return s[:pos] + random_character + s[pos:]
 
 class Mutator(Mutator):
     def flip_random_character(self,s):
@@ -175,6 +175,14 @@ if __name__ == "__main__":
     hits
 
 
+# ### Runner and Sample Program
+
+if __name__ == "__main__":
+    print('\n### Runner and Sample Program')
+
+
+
+
 if __package__ is None or __package__ == "":
     from MutationFuzzer import FunctionCoverageRunner
 else:
@@ -191,6 +199,14 @@ def crashme (s):
 crashme_runner = FunctionCoverageRunner(crashme)
 crashme_runner.run("good")
 list(crashme_runner.coverage())
+
+# ## Blackbox, Greybox, and Boosted Greybox Fuzzing
+
+if __name__ == "__main__":
+    print('\n## Blackbox, Greybox, and Boosted Greybox Fuzzing')
+
+
+
 
 if __package__ is None or __package__ == "":
     from Fuzzer import Fuzzer
@@ -252,7 +268,7 @@ if __name__ == "__main__":
     blackbox_fuzzer = MutationFuzzer([seed_input], Mutator(), PowerSchedule())
 
     start = time.time()
-    blackbox_fuzzer.runs(crashme_runner, trials=n)
+    blackbox_fuzzer.runs(FunctionCoverageRunner(crashme), trials=n)
     end = time.time()
 
     "It took the blackbox mutation-based fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
@@ -314,7 +330,7 @@ if __name__ == "__main__":
     greybox_fuzzer = GreyboxFuzzer([seed_input], Mutator(), PowerSchedule())
 
     start = time.time()
-    greybox_fuzzer.runs(crashme_runner, trials=n)
+    greybox_fuzzer.runs(FunctionCoverageRunner(crashme), trials=n)
     end = time.time()
 
     "It took the greybox mutation-based fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
@@ -393,7 +409,7 @@ if __name__ == "__main__":
     fast_schedule = AFLFastSchedule(5)
     fast_fuzzer = CountingGreyboxFuzzer([seed_input], Mutator(), fast_schedule)
     start = time.time()
-    fast_fuzzer.runs(crashme_runner, trials=n)
+    fast_fuzzer.runs(FunctionCoverageRunner(crashme), trials=n)
     end = time.time()
 
     "It took the fuzzer w/ exponential schedule %0.2f seconds to generate and execute %d inputs." % (end - start, n)
@@ -421,7 +437,7 @@ if __name__ == "__main__":
     orig_schedule = PowerSchedule()
     orig_fuzzer = CountingGreyboxFuzzer([seed_input], Mutator(), orig_schedule)
     start = time.time()
-    orig_fuzzer.runs(crashme_runner, trials=n)
+    orig_fuzzer.runs(FunctionCoverageRunner(crashme), trials=n)
     end = time.time()
 
     "It took the fuzzer w/ original schedule %0.2f seconds to generate and execute %d inputs." % (end - start, n)
@@ -488,7 +504,6 @@ if __name__ == "__main__":
 
     n = 5000
     seed_input = " " # empty seed
-    parser_runner = FunctionCoverageRunner(my_parser)
     blackbox_fuzzer = MutationFuzzer([seed_input], Mutator(), PowerSchedule())
     greybox_fuzzer  = GreyboxFuzzer([seed_input], Mutator(), PowerSchedule())
     boosted_fuzzer  = CountingGreyboxFuzzer([seed_input], Mutator(), AFLFastSchedule(5))
@@ -496,9 +511,9 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     start = time.time()
-    blackbox_fuzzer.runs(parser_runner, trials=n)
-    greybox_fuzzer.runs(parser_runner, trials=n)
-    boosted_fuzzer.runs(parser_runner, trials=n)
+    blackbox_fuzzer.runs(FunctionCoverageRunner(my_parser), trials=n)
+    greybox_fuzzer.runs(FunctionCoverageRunner(my_parser), trials=n)
+    boosted_fuzzer.runs(FunctionCoverageRunner(my_parser), trials=n)
     end = time.time()
 
     "It took all three fuzzers %0.2f seconds to generate and execute %d inputs." % (end - start, n)
@@ -618,13 +633,12 @@ if __name__ == "__main__":
     n = 10000
     seed_input = " " # empty seed
 
-    maze_runner = FunctionCoverageRunner(maze)
     maze_mutator = MazeMutator(["L","R","U","D"])
     maze_schedule = PowerSchedule()
     maze_fuzzer  = GreyboxFuzzer([seed_input], maze_mutator, maze_schedule)
 
     start = time.time()
-    maze_fuzzer.runs(maze_runner, trials=n)
+    maze_fuzzer.runs(FunctionCoverageRunner(maze), trials=n)
     end = time.time()
 
     "It took the fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
@@ -667,7 +681,6 @@ if __name__ == "__main__":
 
 
 import networkx as nx
-
 if __package__ is None or __package__ == "":
     from ControlFlow import get_callgraph
 else:
@@ -700,6 +713,14 @@ if __name__ == "__main__":
     {k: distance[k] for k in list(distance) if distance[k] < 0xFFFF}
 
 
+# ### Directed Power Schedule
+
+if __name__ == "__main__":
+    print('\n### Directed Power Schedule')
+
+
+
+
 class DirectedSchedule(PowerSchedule):
     def __init__(self, distance, exponent):
         self.distance = distance
@@ -730,7 +751,7 @@ if __name__ == "__main__":
     directed_fuzzer  = GreyboxFuzzer([seed_input], maze_mutator, directed_schedule)
 
     start = time.time()
-    directed_fuzzer.runs(maze_runner, trials=n)
+    directed_fuzzer.runs(FunctionCoverageRunner(maze), trials=n)
     end = time.time()
 
     "It took the fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
@@ -781,7 +802,7 @@ if __name__ == "__main__":
     aflgo_fuzzer  = GreyboxFuzzer([seed_input], maze_mutator, aflgo_schedule)
 
     start = time.time()
-    aflgo_fuzzer.runs(maze_runner, trials=n)
+    aflgo_fuzzer.runs(FunctionCoverageRunner(maze), trials=n)
     end = time.time()
 
     "It took the fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
@@ -825,9 +846,6 @@ if __name__ == "__main__":
 
     if os.path.exists('callgraph.py'):
         os.remove('callgraph.py')
-
-    if os.path.exists('pyan'):
-        shutil.rmtree('pyan')
 
 
 # ## Background
