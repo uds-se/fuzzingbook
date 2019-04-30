@@ -1,7 +1,7 @@
 # Define the contents of this file as a package
 __all__ = ["PrettyTable", "YouTubeVideo", 
            "print_file", "HTML", 
-           "unicode_escape", "terminal_escape"]
+           "unicode_escape", "terminal_escape", "extract_class_definition"]
 
 
 # Setup loader such that workbooks can be imported directly
@@ -36,7 +36,7 @@ class YouTubeVideo(IPython.display.YouTubeVideo):
 # Multiple inheritance is a tricky thing.  If you have two classes $A'$ and $A''$ which both inherit from $A$, the same method $m()$ of $A$ may be overloaded in both $A'$ and $A''$.  If one now inherits from _both_ $A'$ and $A''$, and calls $m()$, which of the $m()$ implementations should be called?  Python "resolves" this conflict by simply invoking the one $m()$ method in the class one inherits from first.
 # To avoid such conflicts, one can check whether the order in which one inherits makes a difference.  So try this method to compare the attributes with each other; if they refer to different code, you have to resolve the conflict.
 
-from inspect import getattr_static
+from inspect import getattr_static, getsource
 
 def inheritance_conflicts(c1, c2):
     """Return attributes defined differently in classes c1 and c2"""
@@ -50,6 +50,19 @@ def inheritance_conflicts(c1, c2):
         c1c2, attr) != getattr_static(c2c1, attr)]
 
 
+# Given a class, extract the final definitions of all methods defined so far.
+def extract_class_definition(cls):
+    parents = [i.__name__ for i in cls.mro() if i.__name__ != cls.__name__]
+    print("class %s(%s):" % (cls.__name__, ', '.join(parents)))
+    seen = set()
+    for parent in cls.mro():
+        for fn_name in dir(parent):
+            if fn_name in seen: continue
+            fn = parent.__dict__.get(fn_name)
+            if fn is not None:
+                if (fn.__class__.__name__ == 'function'):
+                    seen.add(fn_name)
+                    print(getsource(fn))
   
 # Printing files with syntax highlighting
 def print_file(filename, lexer=None):
