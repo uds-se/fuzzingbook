@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
-# Last change: 2019-04-29 18:05:28+02:00
+# Last change: 2019-04-30 10:21:22+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -830,6 +830,14 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     print('\n## Exercises')
+
+
+
+
+# ### Exercise 1: The Big Greybox Fuzzer Shoot-Out
+
+if __name__ == "__main__":
+    print('\n### Exercise 1: The Big Greybox Fuzzer Shoot-Out')
 
 
 
