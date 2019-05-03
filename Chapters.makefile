@@ -2,7 +2,7 @@
 # This file defines the chapter files to be included
 
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = GreyboxGrammarFuzzer.ipynb
+NEW_CHAPTERS = FuzzingInTheLarge.ipynb
 
 # Chapters to include in the book, in this order
 
@@ -58,10 +58,10 @@ DOMAINS_PART_READY =
 DOMAINS_PART_TODO =
 
 MANAGEMENT_PART = 
-MANAGEMENT_PART_READY =
-MANAGEMENT_PART_TODO = \
+MANAGEMENT_PART_READY = \
 	06_Managing_Fuzzing.ipynb \
- 	FuzzingInTheLarge.ipynb \
+ 	FuzzingInTheLarge.ipynb
+MANAGEMENT_PART_TODO = \
 	WhenToStopFuzzing.ipynb
 
 # Appendices for the book
