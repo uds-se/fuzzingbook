@@ -71,7 +71,13 @@ def indent_code(code):
 def fix_imports(code):
     # For proper packaging, we must import our modules from the local dir
     # Our modules all start with an upper-case letter
+
     if code.startswith("from IPython"):
+        # IPython
+        return code
+
+    if code.find("Collector") >= 0 or code.find("FTB") >= 0:
+        # FuzzManager imports
         return code
 
     code = re.sub(r"^from *([A-Z].*|fuzzingbook_utils.*)$",
