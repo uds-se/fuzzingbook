@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'grep --help')
+    os.system('grep --help')
 
 
 # ## Options in Python
@@ -446,7 +446,7 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'autopep8 --help')
+    os.system('autopep8 --help')
 
 
 # ### Autopep8 Setup
@@ -555,7 +555,7 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'autopep8 foo.py')
+    os.system('autopep8 foo.py')
 
 
 if __package__ is None or __package__ == "":

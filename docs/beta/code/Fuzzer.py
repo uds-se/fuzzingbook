@@ -342,22 +342,22 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'clang -fsanitize=address -g -o program program.c')
+    os.system('clang -fsanitize=address -g -o program program.c')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'./program 99; echo $?')
+    os.system('./program 99; echo $?')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'./program 110')
+    os.system('./program 110')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'rm -fr program program.*')
+    os.system('rm -fr program program.*')
 
 
 # #### Information Leaks

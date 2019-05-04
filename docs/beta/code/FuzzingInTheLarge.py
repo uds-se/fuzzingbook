@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2019-05-04 16:58:23+02:00
+# Last change: 2019-05-04 21:09:40+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -95,26 +95,96 @@ if __name__ == "__main__":
 import os
 
 if __name__ == "__main__":
-    if not os.path.exists('FuzzManager'):
-        os.system("git clone https://github.com/MozillaSecurity/FuzzManager")
-        os.system("pip install -r FuzzManager/server/requirements.txt")
-        os.system("cd FuzzManager/server; python manage.py migrate")
+    import os
+    os.system('git clone https://github.com/MozillaSecurity/FuzzManager')
 
-
-# ### Clearing the Database
 
 if __name__ == "__main__":
-    print('\n### Clearing the Database')
+    import os
+    os.system('pip install -r FuzzManager/server/requirements.txt > /dev/null')
 
 
+if __name__ == "__main__":
+    import os
+    os.system('cd FuzzManager/server; python ./manage.py migrate > /dev/null')
 
 
 import sqlite3
 
 if __name__ == "__main__":
     db_connection = sqlite3.connect("FuzzManager/server/db.sqlite3")
+
+
+if __name__ == "__main__":
     db_connection.execute("DELETE FROM crashmanager_crashentry;")
     db_connection.commit()
+
+
+if __name__ == "__main__":
+    db_connection.execute("DELETE FROM auth_user WHERE username = 'demo';")
+    db_connection.commit()
+
+
+if __name__ == "__main__":
+    import os
+    os.system('(cd FuzzManager/server; echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser(\'demo\', \'demo@fuzzingbook.org\', \'demo\')" | python manage.py shell)')
+
+
+import subprocess
+import sys
+
+if __name__ == "__main__":
+    result = subprocess.run(['python', 'FuzzManager/server/manage.py', 'get_auth_token', 'demo'], 
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    err = result.stderr.decode('ascii')
+    if len(err) > 0:
+        print(err, file=sys.stderr, end="")
+
+
+if __name__ == "__main__":
+    token = result.stdout
+    token = token.decode('ascii').strip()
+    token
+
+
+if __name__ == "__main__":
+    assert len(token) > 10, "Invalid token " + repr(token)
+
+
+if __name__ == "__main__":
+    home = os.path.expanduser("~")
+    conf = os.path.join(home, ".fuzzmanagerconf")
+    conf
+
+
+if __name__ == "__main__":
+    fuzzmanagerconf = """
+    [Main]
+    sigdir = /home/example/fuzzingbok
+    serverhost = 127.0.0.1
+    serverport = 8000
+    serverproto = http
+    serverauthtoken = %s
+    tool = fuzzingbook
+    """ % token
+
+
+if __name__ == "__main__":
+    with open(conf, "w") as file:
+        file.write(fuzzmanagerconf)
+
+
+from pygments.lexers.configs import IniLexer
+
+if __package__ is None or __package__ == "":
+    from fuzzingbook_utils import print_file
+else:
+    from .fuzzingbook_utils import print_file
+
+
+if __name__ == "__main__":
+    print_file(conf, lexer=IniLexer())
 
 
 # ### Starting the Server
@@ -210,6 +280,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     login = gui_driver.find_element_by_tag_name("button")
     login.click()
+    time.sleep(1)
 
 
 if __name__ == "__main__":
@@ -226,12 +297,12 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'git clone https://github.com/choller/simply-buggy')
+    os.system('git clone https://github.com/choller/simply-buggy')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'(cd simply-buggy && make)')
+    os.system('(cd simply-buggy && make)')
 
 
 if __package__ is None or __package__ == "":
@@ -244,15 +315,13 @@ if __name__ == "__main__":
     print_file("simply-buggy/simple-crash.cpp")
 
 
-from pygments.lexers.configs import IniLexer
-
 if __name__ == "__main__":
     print_file("simply-buggy/simple-crash.fuzzmanagerconf", lexer=IniLexer())
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'simply-buggy/simple-crash')
+    os.system('simply-buggy/simple-crash')
 
 
 import subprocess
@@ -359,6 +428,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     crash = gui_driver.find_element_by_xpath('//td/a[contains(@href,"/crashmanager/crashes/")]')
     crash.click()
+    time.sleep(1)
 
 
 if __name__ == "__main__":
@@ -380,6 +450,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     create = gui_driver.find_element_by_xpath('//a[contains(@href,"/signatures/new/")]')
     create.click()
+    time.sleep(1)
 
 
 if __name__ == "__main__":
@@ -393,6 +464,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     save = gui_driver.find_element_by_name("submit_save")
     save.click()
+    time.sleep(1)
 
 
 # ### Crash Signatures
@@ -404,6 +476,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
+    gui_driver.set_window_size(1400, 800)
     Image(gui_driver.get_screenshot_as_png())
 
 
@@ -532,17 +605,17 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'(cd simply-buggy && make clean && make coverage)')
+    os.system('(cd simply-buggy && make clean && make coverage)')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'git clone https://github.com/choller/simply-buggy $HOME/simply-buggy-server    ')
+    os.system('git clone https://github.com/choller/simply-buggy $HOME/simply-buggy-server    ')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'python3 FuzzManager/server/manage.py setup_repository simply-buggy GITSourceCodeProvider $HOME/simply-buggy-server')
+    os.system('python3 FuzzManager/server/manage.py setup_repository simply-buggy GITSourceCodeProvider $HOME/simply-buggy-server')
 
 
 import random
@@ -587,12 +660,12 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'grcov simply-buggy/ -t coveralls+ --commit-sha $(cd simply-buggy && git rev-parse HEAD) --token NONE -p `pwd`/simply-buggy/ > coverage.json')
+    os.system('grcov simply-buggy/ -t coveralls+ --commit-sha $(cd simply-buggy && git rev-parse HEAD) --token NONE -p `pwd`/simply-buggy/ > coverage.json')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'python3 -mCovReporter --repository simply-buggy --description "Test1" --submit coverage.json')
+    os.system('python3 -mCovReporter --repository simply-buggy --description "Test1" --submit coverage.json')
 
 
 if __name__ == "__main__":
@@ -606,6 +679,7 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     first_id = gui_driver.find_element_by_xpath('//td/a[contains(@href,"/browse")]')
     first_id.click()
+    time.sleep(1)
 
 
 if __name__ == "__main__":
@@ -615,14 +689,13 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     maze_cpp = gui_driver.find_element_by_xpath("//*[contains(text(), 'maze.cpp')]")
     maze_cpp.click()
+    time.sleep(1)
 
 
 if __name__ == "__main__":
+    gui_driver.set_window_size(1400, 1400)
     Image(gui_driver.get_screenshot_as_png())
 
-
-import random
-import subprocess
 
 if __name__ == "__main__":
     random.seed(0)
@@ -686,7 +759,8 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     home = os.path.expanduser("~")
     for temp_dir in ['coverage', 'simply-buggy', 'simply-buggy-server', 
-                     os.path.join(home, 'simply-buggy-server')]:
+                     os.path.join(home, 'simply-buggy-server'),
+                    'FuzzManager']:
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
 

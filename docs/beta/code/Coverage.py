@@ -481,17 +481,17 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'cc --coverage -o cgi_decode cgi_decode.c')
+    os.system('cc --coverage -o cgi_decode cgi_decode.c')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r"./cgi_decode 'Send+mail+to+me%40fuzzingbook.org'")
+    os.system("./cgi_decode 'Send+mail+to+me%40fuzzingbook.org'")
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'gcov cgi_decode.c')
+    os.system('gcov cgi_decode.c')
 
 
 if __name__ == "__main__":
