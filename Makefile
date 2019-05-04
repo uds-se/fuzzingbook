@@ -1005,7 +1005,7 @@ docker-stop:
 
 ## Getting rid of stray processes
 kill:
-	-pkill -HUP -f jupyter-lab firefox-bin
+	-pkill -HUP -l -f jupyter-lab firefox-bin runserver
 
 ## Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot *.fls *.fdb_latexmk \
