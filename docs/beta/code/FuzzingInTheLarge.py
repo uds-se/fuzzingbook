@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2019-05-04 21:09:40+02:00
+# Last change: 2019-05-05 12:53:33+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -76,18 +76,10 @@ if __name__ == "__main__":
 
 
 
-# ### Running the Given Server
+# ### Running a Crash Server
 
 if __name__ == "__main__":
-    print('\n### Running the Given Server')
-
-
-
-
-# ### Running your own Server
-
-if __name__ == "__main__":
-    print('\n### Running your own Server')
+    print('\n### Running a Crash Server')
 
 
 
@@ -246,9 +238,9 @@ else:
 
 
 if __package__ is None or __package__ == "":
-    from GUIFuzzer import start_webdriver
+    from GUIFuzzer import start_webdriver  # minor dependency
 else:
-    from .GUIFuzzer import start_webdriver
+    from .GUIFuzzer import start_webdriver  # minor dependency
 
 
 if __name__ == "__main__":
@@ -660,7 +652,7 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system('grcov simply-buggy/ -t coveralls+ --commit-sha $(cd simply-buggy && git rev-parse HEAD) --token NONE -p `pwd`/simply-buggy/ > coverage.json')
+    os.system('export PATH=$HOME/.cargo/bin:$PATH; grcov simply-buggy/ -t coveralls+ --commit-sha $(cd simply-buggy && git rev-parse HEAD) --token NONE -p `pwd`/simply-buggy/ > coverage.json')
 
 
 if __name__ == "__main__":
