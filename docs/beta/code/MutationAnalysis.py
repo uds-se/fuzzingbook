@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/MutationAnalysis.html
-# Last change: 2019-04-20 14:44:33+02:00
+# Last change: 2019-05-05 13:29:41+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -28,10 +28,10 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-# # Evaluating Test Effectiveness with Mutation Analysis
+# # Mutation Analysis
 
 if __name__ == "__main__":
-    print('# Evaluating Test Effectiveness with Mutation Analysis')
+    print('# Mutation Analysis')
 
 
 

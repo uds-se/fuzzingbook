@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2019-03-24 15:13:29+01:00
+# Last change: 2019-05-05 13:31:23+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -1594,9 +1594,9 @@ else:
 
 
 if __package__ is None or __package__ == "":
-    from GrammarMiner import VEHICLES
+    from GrammarMiner import VEHICLES  # minor dependency
 else:
-    from .GrammarMiner import VEHICLES
+    from .GrammarMiner import VEHICLES  # minor dependency
 
 
 if __name__ == "__main__":

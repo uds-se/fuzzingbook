@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2019-04-02 04:33:32+02:00
+# Last change: 2019-05-05 13:33:09+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -139,9 +139,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from ConcolicFuzzer import ArcCoverage
+    from ConcolicFuzzer import ArcCoverage  # minor dependency
 else:
-    from .ConcolicFuzzer import ArcCoverage
+    from .ConcolicFuzzer import ArcCoverage  # minor dependency
 
 
 if __name__ == "__main__":
