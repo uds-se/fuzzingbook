@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2019-05-03 18:31:44+02:00
+# Last change: 2019-05-07 08:45:41+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -1455,7 +1455,7 @@ class ScopeTreeMiner(ScopeTreeMiner):
                 if v_scope != scope:
                     if nt_seq > scope:
                         continue
-                if v not in key:
+                if not v or v not in key:
                     continue
                 prefix_k_suffix = [
                     (nt_var, [(v, [], nt_seq)],

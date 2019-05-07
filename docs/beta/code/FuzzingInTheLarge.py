@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2019-05-05 14:53:38+02:00
+# Last change: 2019-05-07 08:43:30+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -85,6 +85,12 @@ if __name__ == "__main__":
 
 
 import os
+import shutil
+
+if __name__ == "__main__":
+    if os.path.exists('FuzzManager'):
+        shutil.rmtree('FuzzManager')
+
 
 if __name__ == "__main__":
     import os
@@ -99,22 +105,6 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     import os
     os.system('cd FuzzManager/server; python ./manage.py migrate > /dev/null')
-
-
-import sqlite3
-
-if __name__ == "__main__":
-    db_connection = sqlite3.connect("FuzzManager/server/db.sqlite3")
-
-
-if __name__ == "__main__":
-    db_connection.execute("DELETE FROM crashmanager_crashentry;")
-    db_connection.commit()
-
-
-if __name__ == "__main__":
-    db_connection.execute("DELETE FROM auth_user WHERE username = 'demo';")
-    db_connection.commit()
 
 
 if __name__ == "__main__":
