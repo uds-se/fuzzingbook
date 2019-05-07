@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2019-04-10 07:04:51+08:00
+# Last change: 2019-05-04 12:18:17+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -99,40 +99,34 @@ from selenium import webdriver
 
 BROWSER = 'firefox'
 
-# Uncomment for using Chrome instead
 # BROWSER = 'chrome'
 
 HEADLESS = True
 
-# Uncomment for interactive sessions
-# HEADLESS = False
-
-if __name__ == "__main__":
-    if BROWSER == 'firefox':
+def start_webdriver(browser=BROWSER, headless=HEADLESS, zoom=1.4):
+    if browser == 'firefox':
         options = webdriver.FirefoxOptions()
-    if BROWSER == 'chrome':
+    if browser == 'chrome':
         options = webdriver.ChromeOptions()
 
-
-if __name__ == "__main__":
-    if HEADLESS and BROWSER == 'chrome':
+    if headless and browser == 'chrome':
         options.add_argument('headless')
     else:
-        options.headless = HEADLESS
-    options.arguments
-
-
-if __name__ == "__main__":
-    profile = webdriver.firefox.firefox_profile.FirefoxProfile()
-    ZOOM = 1.4
-    profile.set_preference("layout.css.devPixelsPerPx", repr(ZOOM))
-
-
-if __name__ == "__main__":
-    if BROWSER == 'firefox':
+        options.headless = headless
+    
+    # Start the browser, and obtain a _web driver_ object such that we can interact with it.
+    if browser == 'firefox':
+        # For firefox, set a higher resolution for our screenshots
+        profile = webdriver.firefox.firefox_profile.FirefoxProfile()
+        profile.set_preference("layout.css.devPixelsPerPx", repr(zoom))
         gui_driver = webdriver.Firefox(firefox_profile=profile, options=options)
-    if BROWSER == 'chrome':
+    if browser == 'chrome':
         gui_driver = webdriver.Chrome(options=options)
+        
+    return gui_driver
+
+if __name__ == "__main__":
+    gui_driver = start_webdriver(browser=BROWSER, headless=HEADLESS)
 
 
 if __name__ == "__main__":

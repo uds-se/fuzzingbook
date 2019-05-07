@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2019-04-30 11:12:58+02:00
+# Last change: 2019-04-30 12:11:18+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -464,14 +464,14 @@ if __name__ == "__main__":
     orig_energy = orig_schedule.normalizedEnergy(orig_fuzzer.population)
 
     for (seed, norm_energy) in zip(orig_fuzzer.population, orig_energy):
-        print("'%s', %0.5f, %s" % (getPathID(seed.coverage), norm_energy, seed.data))
+        print("'%s', %0.5f, %s" % (getPathID(seed.coverage), norm_energy, repr(seed.data)))
 
 
 if __name__ == "__main__":
     fast_energy = fast_schedule.normalizedEnergy(fast_fuzzer.population)
 
     for (seed, norm_energy) in zip(fast_fuzzer.population, fast_energy):
-        print("'%s', %0.5f, %s" % (getPathID(seed.coverage), norm_energy, seed.data))
+        print("'%s', %0.5f, %s" % (getPathID(seed.coverage), norm_energy, repr(seed.data)))
 
 
 if __name__ == "__main__":
@@ -655,7 +655,8 @@ def print_stats(fuzzer):
         elif "VALID" in s: valid += 1
         elif "SOLVED" in s: 
             solved += 1
-            if solved == 1: print("First solution: %s" % seed)
+            if solved == 1: 
+                print("First solution: %s" % repr(seed))
         else: print("??")
 
     print("""Out of %d seeds, 

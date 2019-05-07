@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2019-04-16 10:52:41+01:00
+# Last change: 2019-05-03 15:34:23+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -342,22 +342,22 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'clang -fsanitize=address -g -o program program.c')
+    os.system('clang -fsanitize=address -g -o program program.c')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'./program 99; echo $?')
+    os.system('./program 99; echo $?')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'./program 110')
+    os.system('./program 110')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'rm -fr program program.*')
+    os.system('rm -fr program program.*')
 
 
 # #### Information Leaks

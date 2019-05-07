@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2019-03-24 15:13:29+01:00
+# Last change: 2019-05-03 16:41:31+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -50,15 +50,13 @@ if __name__ == "__main__":
 
 
 
-if __package__ is None or __package__ == "":
-    from GrammarMiner import VEHICLES
-else:
-    from .GrammarMiner import VEHICLES
+INVENTORY = """\
+1997,van,Ford,E350
+2000,car,Mercury,Cougar
+1999,car,Chevy,Venture\
+"""
 
-
-if __name__ == "__main__":
-    VEHICLES
-
+VEHICLES = INVENTORY.split('\n')
 
 class SQLException(Exception):
     pass

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2019-04-02 11:47:54+13:00
+# Last change: 2019-05-05 13:35:43+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -28,10 +28,10 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-# # Getting Coverage
+# # Code Coverage
 
 if __name__ == "__main__":
-    print('# Getting Coverage')
+    print('# Code Coverage')
 
 
 
@@ -481,17 +481,17 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'cc --coverage -o cgi_decode cgi_decode.c')
+    os.system('cc --coverage -o cgi_decode cgi_decode.c')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r"./cgi_decode 'Send+mail+to+me%40fuzzingbook.org'")
+    os.system("./cgi_decode 'Send+mail+to+me%40fuzzingbook.org'")
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'gcov cgi_decode.c')
+    os.system('gcov cgi_decode.c')
 
 
 if __name__ == "__main__":

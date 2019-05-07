@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2019-04-16 10:34:40+01:00
+# Last change: 2019-04-30 11:54:33+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -567,37 +567,37 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     import os
-    os.system(r'curl -O mirrors.kernel.org/gnu/bc/bc-1.07.1.tar.gz')
+    os.system('curl -O mirrors.kernel.org/gnu/bc/bc-1.07.1.tar.gz')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'tar xfz bc-1.07.1.tar.gz')
+    os.system('tar xfz bc-1.07.1.tar.gz')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'cd bc-1.07.1; ./configure')
+    os.system('cd bc-1.07.1; ./configure')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'cd bc-1.07.1; make CFLAGS="--coverage"')
+    os.system('cd bc-1.07.1; make CFLAGS="--coverage"')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'cd bc-1.07.1/bc; echo 2 + 2 | ./bc')
+    os.system('cd bc-1.07.1/bc; echo 2 + 2 | ./bc')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'cd bc-1.07.1/bc; gcov main.c')
+    os.system('cd bc-1.07.1/bc; gcov main.c')
 
 
 if __name__ == "__main__":
     import os
-    os.system(r'rm -fr bc-1.07.1 bc-1.07.1.tar.gz')
+    os.system('rm -fr bc-1.07.1 bc-1.07.1.tar.gz')
 
 
 # ### Exercise 3

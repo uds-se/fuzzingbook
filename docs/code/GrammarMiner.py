@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2019-03-24 15:13:29+01:00
+# Last change: 2019-05-07 08:45:41+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -561,9 +561,16 @@ if __name__ == "__main__":
 
 class GrammarMiner(GrammarMiner):
     def update_grammar(self, inputstr, trace):
-        dt = TreeMiner(inputstr, DefineTracker(inputstr, trace).assignments())
+        at = self.create_tracker(inputstr, trace)
+        dt = self.create_tree_miner(inputstr, at.assignments())
         self.add_tree(dt)
         return self.grammar
+
+    def create_tracker(self, *args):
+        return DefineTracker(*args)
+
+    def create_tree_miner(self, *args):
+        return TreeMiner(*args)
 
 def recover_grammar(fn, inputs, **kwargs):
     miner = GrammarMiner()
@@ -1009,10 +1016,13 @@ class AssignmentTracker(DefineTracker):
         self.options(kwargs)
         self.my_input = my_input
 
-        self.my_assignments = AssignmentVars(my_input)
+        self.my_assignments = self.create_assignments(my_input)
 
         self.trace = trace
         self.process()
+
+    def create_assignments(self, *args):
+        return AssignmentVars(*args)
 
 class AssignmentTracker(AssignmentTracker):
     def options(self, kwargs):
@@ -1157,10 +1167,16 @@ if __name__ == "__main__":
 
 class GrammarMiner(GrammarMiner):
     def update_grammar(self, inputstr, trace):
-        at = AssignmentTracker(inputstr, trace)
-        dt = TreeMiner(inputstr, at.my_assignments.defined_vars())
+        at = self.create_tracker(inputstr, trace)
+        dt = self.create_tree_miner(inputstr, at.my_assignments.defined_vars())
         self.add_tree(dt)
         return self.grammar
+
+    def create_tracker(self, *args):
+        return AssignmentTracker(*args)
+
+    def create_tree_miner(self, *args):
+        return TreeMiner(*args)
 
 if __name__ == "__main__":
     url_grammar = recover_grammar(url_parse, URLS_X, files=['urllib/parse.py'])
@@ -1312,8 +1328,11 @@ if __name__ == "__main__":
 
 class ScopedVars(AssignmentVars):
     def method_init(self):
-        self.call_stack = InputStack(self.my_input)
+        self.call_stack = self.create_call_stack(self.my_input)
         self.event_locations = {self.call_stack.method_id: []}
+
+    def create_call_stack(self, i):
+        return InputStack(i)
 
 class ScopedVars(ScopedVars):
     def method_enter(self, cxt, my_vars):
@@ -1382,13 +1401,11 @@ if __name__ == "__main__":
 
 class ScopeTracker(AssignmentTracker):
     def __init__(self, my_input, trace, **kwargs):
-        self.options(kwargs)
-
         self.current_event = None
-        self.my_assignments = ScopedVars(my_input)
+        super().__init__(my_input, trace, **kwargs)
 
-        self.trace = trace
-        self.process()
+    def create_assignments(self, *args):
+        return ScopedVars(*args)
 
 class ScopeTracker(ScopeTracker):
     def is_input_fragment(self, var, value):
@@ -1438,7 +1455,7 @@ class ScopeTreeMiner(ScopeTreeMiner):
                 if v_scope != scope:
                     if nt_seq > scope:
                         continue
-                if v not in key:
+                if not v or v not in key:
                     continue
                 prefix_k_suffix = [
                     (nt_var, [(v, [], nt_seq)],
@@ -1607,13 +1624,18 @@ if __name__ == "__main__":
 
 class ScopedGrammarMiner(ScopedGrammarMiner):
     def update_grammar(self, inputstr, trace):
-        at = ScopeTracker(inputstr, trace)
-        dt = ScopeTreeMiner(
-            inputstr,
-            at.my_assignments.defined_vars(
+        at = self.create_tracker(inputstr, trace)
+        dt = self.create_tree_miner(
+            inputstr, at.my_assignments.defined_vars(
                 formatted=False))
         self.add_tree(dt)
         return self.grammar
+
+    def create_tracker(self, *args):
+        return ScopeTracker(*args)
+
+    def create_tree_miner(self, *args):
+        return ScopeTreeMiner(*args)
 
 def recover_grammar(fn, inputs, **kwargs):
     miner = ScopedGrammarMiner()
@@ -1816,4 +1838,59 @@ if __name__ == "__main__":
     print('\n### Exercise 2: Incorporating Taints from InformationFlow')
 
 
+
+
+if __package__ is None or __package__ == "":
+    from InformationFlow import ostr
+else:
+    from .InformationFlow import ostr
+
+
+def is_fragment(fragment, original):
+    assert isinstance(original, ostr)
+    if not isinstance(fragment, ostr):
+        return False
+    return set(fragment.origin) <= set(original.origin)
+
+class TaintedInputStack(InputStack):
+    def in_current_record(self, val):
+        return any(is_fragment(val, var) for var in self.inputs[-1].values())
+
+class TaintedInputStack(TaintedInputStack):
+    def ignored(self, val):
+        return not isinstance(val, ostr)
+
+class TaintedScopedVars(ScopedVars):
+    def create_call_stack(self, i):
+        return TaintedInputStack(i)
+
+class TaintedScopeTracker(ScopeTracker):
+    def create_assignments(self, *args):
+        return TaintedScopedVars(*args)
+
+class TaintedScopedGrammarMiner(ScopedGrammarMiner):
+    def create_tracker(self, *args):
+        return TaintedScopeTracker(*args)
+
+    def create_tree_miner(self, *args):
+        return ScopeTreeMiner(*args)
+
+def recover_grammar_with_taints(fn, inputs, **kwargs):
+    miner = TaintedScopedGrammarMiner()
+    for inputstr in inputs:
+        with Tracer(ostr(inputstr), **kwargs) as tracer:
+            fn(tracer.my_input)
+        miner.update_grammar(tracer.my_input, tracer.trace)
+    return readable(miner.clean_grammar())
+
+if __name__ == "__main__":
+    inventory_grammar = recover_grammar_with_taints(
+        process_inventory, [INVENTORY],
+        methods=[
+            'process_inventory', 'process_vehicle', 'process_car', 'process_van'
+        ])
+
+
+if __name__ == "__main__":
+    syntax_diagram(inventory_grammar)
 
