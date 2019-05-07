@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2019-05-07 08:43:30+02:00
+# Last change: 2019-05-07 09:36:06+02:00
 #
 #
 # Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
@@ -28,10 +28,10 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-# # Fuzzing In the Large
+# # Fuzzing in the Large
 
 if __name__ == "__main__":
-    print('# Fuzzing In the Large')
+    print('# Fuzzing in the Large')
 
 
 
@@ -48,10 +48,10 @@ else:
     from . import Fuzzer
 
 
-# ## A Crash Server
+# ## Collecting Crashes from Multiple Fuzzers
 
 if __name__ == "__main__":
-    print('\n## A Crash Server')
+    print('\n## Collecting Crashes from Multiple Fuzzers')
 
 
 
@@ -76,10 +76,10 @@ if __name__ == "__main__":
 
 
 
-# ### Running a Crash Server
+# ### Setting up the Server
 
 if __name__ == "__main__":
-    print('\n### Running a Crash Server')
+    print('\n### Setting up the Server')
 
 
 
