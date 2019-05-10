@@ -833,9 +833,15 @@ $(DOCS_TARGET)code/%: $(CODE_TARGET)%
 dist publish-dist: check-import check-package check-code publish-code toc \
 	$(DOCS_TARGET)dist/fuzzingbook-code.zip \
 	$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip
+	
+DIST_CODE_FILES = \
+	$(DOCS_TARGET)code/README.md \
+	$(DOCS_TARGET)code/LICENSE.md \
+	$(DOCS_TARGET)code/setup.py \
+	$(DOCS_TARGET)code/__init__.py
 
 $(DOCS_TARGET)dist/fuzzingbook-code.zip: \
-	$(PYS) $(CODE_TARGET)README.md $(CODE_TARGET)LICENSE.md $(CHAPTERS_MAKEFILE)
+	$(PYS) $(DIST_CODE_FILES) $(CHAPTERS_MAKEFILE)
 	@-mkdir $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)dist/*
 	$(RM) -r $(DOCS_TARGET)fuzzingbook
