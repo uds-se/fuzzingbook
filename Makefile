@@ -724,10 +724,14 @@ IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
 check-import check-imports: code
 	@echo "#!/usr/bin/env $(PYTHON)" > $(CODE_TARGET)import_all.py
 	@(for file in $(IMPORTS); do echo import $$file; done) | grep -v '^import [0-9][0-9]' >> $(CODE_TARGET)import_all.py
-	cd $(CODE_TARGET); PYTHONPATH= $(PYTHON) import_all.py 2>&1 | tee import_all.py.out
+	cd $(CODE_TARGET); $(PYTHON) import_all.py 2>&1 | tee import_all.py.out
 	@test ! -s $(CODE_TARGET)import_all.py.out && echo "All import checks passed."
 	@$(RM) $(CODE_TARGET)import_all.py*
 	
+# Same as above, but using Python standard packages only; import should work too
+check-standard-imports: code
+	PYTHONPATH= $(MAKE) check-imports
+
 check-package: code
 	@echo "#!/usr/bin/env $(PYTHON)" > import_packages.py
 	@(for file in $(IMPORTS); do echo import code.$$file; done) | grep -v '^import code.[0-9][0-9]' >> import_packages.py
@@ -737,8 +741,8 @@ check-package: code
 
 
 .PHONY: run
-run: check-import check-package check-code
-	
+run: check-imports check-standard-imports check-package check-code
+
 # Todo checks
 check-todo todo:
 	@grep '\\todo' $(PUBLIC_SOURCES) $(READY_SOURCES); \
