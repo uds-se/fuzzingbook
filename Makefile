@@ -724,7 +724,7 @@ IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
 check-import check-imports: code
 	@echo "#!/usr/bin/env $(PYTHON)" > $(CODE_TARGET)import_all.py
 	@(for file in $(IMPORTS); do echo import $$file; done) | grep -v '^import [0-9][0-9]' >> $(CODE_TARGET)import_all.py
-	cd $(CODE_TARGET); $(PYTHON) import_all.py 2>&1 | tee import_all.py.out
+	cd $(CODE_TARGET); PYTHONPATH= $(PYTHON) import_all.py 2>&1 | tee import_all.py.out
 	@test ! -s $(CODE_TARGET)import_all.py.out && echo "All import checks passed."
 	@$(RM) $(CODE_TARGET)import_all.py*
 	

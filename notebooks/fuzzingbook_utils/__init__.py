@@ -5,7 +5,8 @@ __all__ = ["PrettyTable", "YouTubeVideo",
 
 
 # Setup loader such that workbooks can be imported directly
-from . import import_notebooks
+if __name__ == "__main__":
+    from . import import_notebooks
 
 
 # Set fixed seed
@@ -24,11 +25,12 @@ def rich_output():
 
 
 # Wrapper for YouTubeVideo
-import IPython.display
+if __name__ == "__main__":
+    import IPython.display
 
-class YouTubeVideo(IPython.display.YouTubeVideo):
-    def __init__(self, video_id, **kwargs):
-        super().__init__(video_id, width=640, height=360, **kwargs)
+    class YouTubeVideo(IPython.display.YouTubeVideo):
+        def __init__(self, video_id, **kwargs):
+            super().__init__(video_id, width=640, height=360, **kwargs)
 
 
 # Checking for inheritance conflicts

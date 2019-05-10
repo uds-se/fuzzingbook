@@ -14,6 +14,9 @@ RE_IGNORE = re.compile(r'^get_ipython().*|^%.*')
 RE_IMPORT_FUZZINGBOOK_UTILS = re.compile(r'^import fuzzingbook_utils.*$', re.MULTILINE)
 RE_FROM_FUZZINGBOOK_UTILS = re.compile(r'^from fuzzingbook_utils import .*$', re.MULTILINE)
 
+# Things to import only if main (reduces dependencies)
+RE_IMPORT_IF_MAIN = re.compile(r'^(from|import) (matplotlib|graphviz|mpl_toolkits|numpy|IPython|requests|FTB|Collector|fuzzingbook_utils import YouTubeVideo).*$')
+
 # Strip blank lines
 RE_BLANK_LINES = re.compile(r'^[ \t]*$', re.MULTILINE)
 
@@ -29,7 +32,7 @@ HEADER = """#!/usr/bin/env python3
 # Last change: {timestamp}
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -150,6 +153,8 @@ def export_notebook_code(notebook_name, path=None):
             if RE_IMPORT_FUZZINGBOOK_UTILS.match(code):
                 # Don't import all of fuzzingbook_utils (requires nbformat & Ipython)
                 print_if_main(SET_FIXED_SEED)
+            elif RE_IMPORT_IF_MAIN.match(code):
+                print_if_main(code)
             elif RE_FROM_FUZZINGBOOK_UTILS.match(code):
                 # This would be "from fuzzingbook_utils import HTML"
                 # print ("Code: ", repr(code))
