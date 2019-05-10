@@ -3,10 +3,10 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2019-04-30 12:11:18+02:00
+# Last change: 2019-05-10 13:34:45+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -137,7 +137,9 @@ class Seed(object):
         return self.data
     __repr__ = __str__
 
-import numpy as np
+if __name__ == "__main__":
+    import numpy as np
+
 
 class PowerSchedule(object):    
     def assignEnergy(self, population):
@@ -154,6 +156,8 @@ class PowerSchedule(object):
     
     def choose(self, population):
         """Choose weighted by normalized energy."""
+        import numpy as np
+
         self.assignEnergy(population)
         norm_energy = self.normalizedEnergy(population)
         seed = np.random.choice(population, p=norm_energy)
@@ -349,7 +353,9 @@ if __name__ == "__main__":
 
 # %matplotlib inline
 
-import matplotlib.pyplot as plt
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
 
 if __name__ == "__main__":
     line_bb, = plt.plot(blackbox_coverage, label="Blackbox")

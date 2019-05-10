@@ -3,10 +3,10 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2019-05-04 12:18:17+02:00
+# Last change: 2019-05-10 13:49:14+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -75,7 +75,9 @@ if __name__ == "__main__":
     print_url(httpd_url)
 
 
-from IPython.display import display, Image
+if __name__ == "__main__":
+    from IPython.display import display, Image
+
 
 if __package__ is None or __package__ == "":
     from fuzzingbook_utils import HTML, rich_output
@@ -523,9 +525,13 @@ if __name__ == "__main__":
 
 
 
-from graphviz import Digraph
+if __name__ == "__main__":
+    from graphviz import Digraph
 
-from IPython.display import display
+
+if __name__ == "__main__":
+    from IPython.display import display
+
 
 if __package__ is None or __package__ == "":
     from GrammarFuzzer import dot_escape

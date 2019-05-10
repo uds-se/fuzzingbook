@@ -3,10 +3,10 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2019-05-03 15:34:23+02:00
+# Last change: 2019-05-10 13:32:00+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -225,7 +225,9 @@ else:
     from .RailroadDiagrams import NonTerminal, Terminal, Choice, HorizontalChoice, Sequence, Diagram, show_diagram
 
 
-from IPython.display import SVG, display
+if __name__ == "__main__":
+    from IPython.display import SVG, display
+
 
 def syntax_diagram_symbol(symbol):
     if is_nonterminal(symbol):
@@ -273,6 +275,8 @@ if __name__ == "__main__":
 
 
 def syntax_diagram(grammar):
+    from IPython.core.display import SVG, display
+
     for key in grammar:
         print("%s" % key[1:-1])
         display(SVG(show_diagram(syntax_diagram_alt(grammar[key]))))

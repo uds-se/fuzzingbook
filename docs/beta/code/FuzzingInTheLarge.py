@@ -6,7 +6,7 @@
 # Last change: 2019-05-07 09:36:06+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -56,7 +56,9 @@ if __name__ == "__main__":
 
 
 
-from graphviz import Digraph
+if __name__ == "__main__":
+    from graphviz import Digraph
+
 
 if __name__ == "__main__":
     g = Digraph()
@@ -219,7 +221,9 @@ if __name__ == "__main__":
     fuzzmanager_url = "http://127.0.0.1:8000"
 
 
-from IPython.display import display, Image
+if __name__ == "__main__":
+    from IPython.display import display, Image
+
 
 if __package__ is None or __package__ == "":
     from fuzzingbook_utils import HTML, rich_output
@@ -336,7 +340,9 @@ if __name__ == "__main__":
 
 
 
-from FTB.ProgramConfiguration import ProgramConfiguration
+if __name__ == "__main__":
+    from FTB.ProgramConfiguration import ProgramConfiguration
+
 
 if __name__ == "__main__":
     configuration = ProgramConfiguration.fromBinary('simply-buggy/simple-crash')
@@ -351,7 +357,9 @@ if __name__ == "__main__":
 
 
 
-from FTB.Signatures.CrashInfo import CrashInfo
+if __name__ == "__main__":
+    from FTB.Signatures.CrashInfo import CrashInfo
+
 
 if __name__ == "__main__":
     cmd = ["simply-buggy/simple-crash"]
@@ -381,7 +389,9 @@ if __name__ == "__main__":
 
 
 
-from Collector.Collector import Collector
+if __name__ == "__main__":
+    from Collector.Collector import Collector
+
 
 if __name__ == "__main__":
     collector = Collector()
