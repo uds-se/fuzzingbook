@@ -6,7 +6,7 @@
 # Last change: 2019-05-05 13:31:23+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -97,7 +97,9 @@ else:
     from .ControlFlow import PyCFG, CFGNode, to_graph, gen_cfg
 
 
-from graphviz import Source, Graph
+if __name__ == "__main__":
+    from graphviz import Source, Graph
+
 
 if __name__ == "__main__":
     Source(to_graph(gen_cfg(inspect.getsource(factorial)), arcs=cov.arcs()))

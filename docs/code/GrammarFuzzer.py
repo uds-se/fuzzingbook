@@ -3,10 +3,10 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2019-02-19 11:09:48+01:00
+# Last change: 2019-05-10 13:29:32+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -138,7 +138,9 @@ if __name__ == "__main__":
 
 
 
-from graphviz import Digraph
+if __name__ == "__main__":
+    from graphviz import Digraph
+
 
 if __name__ == "__main__":
     tree = Digraph("root")
@@ -202,9 +204,13 @@ if __name__ == "__main__":
                          )])
 
 
-from graphviz import Digraph
+if __name__ == "__main__":
+    from graphviz import Digraph
 
-from IPython.display import display
+
+if __name__ == "__main__":
+    from IPython.display import display
+
 
 import re
 
@@ -238,6 +244,10 @@ def display_tree(derivation_tree,
                  node_attr=default_node_attr,
                  edge_attr=default_edge_attr,
                  graph_attr=default_graph_attr):
+    
+    # If we import display_tree, we also have to import its functions
+    from graphviz import Digraph
+
     counter = 0
 
     def traverse_tree(dot, tree, id=0):
@@ -257,7 +267,7 @@ def display_tree(derivation_tree,
     traverse_tree(dot, derivation_tree)
     if log:
         print(dot)
-    display(dot)
+    return dot
 
 if __name__ == "__main__":
     display_tree(derivation_tree)
@@ -281,7 +291,7 @@ def display_annotated_tree(tree, a_nodes, a_edges, log=False):
         else:
             dot.edge(repr(start_node), repr(stop_node))
 
-    display_tree(tree, log=log,
+    return display_tree(tree, log=log,
                  node_attr=annotate_node,
                  edge_attr=annotate_edge,
                  graph_attr=graph_attr)
@@ -441,6 +451,8 @@ if __name__ == "__main__":
     tree = ("<integer>", None)
     display_tree(tree)
 
+
+if __name__ == "__main__":
     print("After:")
     tree = f.expand_node_randomly(tree)
     display_tree(tree)
@@ -706,7 +718,7 @@ class GrammarFuzzer(GrammarFuzzer):
         if self.log:
             print("Tree:", all_terminals(tree))
             if self.disp:
-                display_tree(tree)
+                display(display_tree(tree))
             # print(self.possible_expansions(tree), "possible expansion(s) left")
 
     def expand_tree_with_strategy(self, tree, expand_node_method, limit=None):
@@ -777,7 +789,7 @@ class GrammarFuzzer(GrammarFuzzer):
         if self.log:
             print(repr(all_terminals(tree)))
         if self.disp:
-            display_tree(tree)
+            display(display_tree(tree))
         return tree
 
     def fuzz(self):

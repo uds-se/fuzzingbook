@@ -6,7 +6,7 @@
 # Last change: 2019-05-03 16:41:31+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the

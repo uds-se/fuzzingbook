@@ -6,7 +6,7 @@
 # Last change: 2019-05-05 13:33:09+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -84,7 +84,9 @@ else:
 
 import inspect
 
-from graphviz import Source, Graph
+if __name__ == "__main__":
+    from graphviz import Source, Graph
+
 
 def show_cfg(fn, **kwargs):
     return Source(to_graph(gen_cfg(inspect.getsource(fn)), **kwargs))

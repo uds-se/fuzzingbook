@@ -3,10 +3,10 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2019-05-03 16:38:44+02:00
+# Last change: 2019-05-10 12:09:17+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -123,9 +123,17 @@ if __name__ == "__main__":
     calculate_distance(274, 153)
 
 
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-import numpy as np
+if __name__ == "__main__":
+    from mpl_toolkits.mplot3d import Axes3D
+
+
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
+
+if __name__ == "__main__":
+    import numpy as np
+
 
 # %matplotlib inline
 # 
@@ -304,7 +312,9 @@ if __name__ == "__main__":
     data = plotting_hillclimber(get_fitness)
 
 
-import matplotlib.pyplot as plt
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
 
 if __name__ == "__main__":
     fig = plt.figure()
@@ -334,7 +344,10 @@ def bad_fitness(x, y):
     fitness = distance
     return fitness
 
-from mpl_toolkits.mplot3d import Axes3D
+if __name__ == "__main__":
+    from mpl_toolkits.mplot3d import Axes3D
+
+
 from math import exp, tan
 
 if __name__ == "__main__":
@@ -388,7 +401,9 @@ if __name__ == "__main__":
     data = restarting_hillclimber(bad_fitness)
 
 
-import matplotlib.pyplot as plt
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
 
 if __name__ == "__main__":
     fig = plt.figure()
@@ -708,7 +723,9 @@ if __name__ == "__main__":
 def normalize(x):
     return x / (1.0 + x)
 
-import matplotlib.pyplot as plt
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
 
 if __name__ == "__main__":
     fig = plt.figure()

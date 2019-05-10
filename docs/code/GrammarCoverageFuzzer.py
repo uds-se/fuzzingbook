@@ -3,10 +3,10 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2019-01-06 14:14:33+01:00
+# Last change: 2019-05-10 12:11:09+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -694,8 +694,13 @@ if __name__ == "__main__":
 
 # %matplotlib inline
 
-import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
+
+if __name__ == "__main__":
+    import matplotlib.ticker as mtick
+
 
 if __name__ == "__main__":
     ax = plt.axes(label="coverage")
@@ -711,7 +716,9 @@ if __name__ == "__main__":
     plt.scatter(xs, ys);
 
 
-import numpy as np
+if __name__ == "__main__":
+    import numpy as np
+
 
 if __name__ == "__main__":
     np.corrcoef(xs, ys)

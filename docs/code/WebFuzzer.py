@@ -3,10 +3,10 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2019-04-02 00:34:27+02:00
+# Last change: 2019-05-10 14:40:00+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -108,7 +108,9 @@ HTML_ORDER_FORM += """
 </body></html>
 """
 
-from IPython.display import display
+if __name__ == "__main__":
+    from IPython.display import display
+
 
 if __package__ is None or __package__ == "":
     from fuzzingbook_utils import HTML
@@ -485,10 +487,14 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
                     format % args))
         HTTPD_MESSAGE_QUEUE.put(message)
 
-import requests
+if __name__ == "__main__":
+    import requests
+
 
 def webbrowser(url, mute=False):
     """Download the http/https resource given by the URL"""
+    import requests  # for imports
+    
     try:
         r = requests.get(url)
         contents = r.text
@@ -755,8 +761,6 @@ if __name__ == "__main__":
     [mutate_order_fuzzer.fuzz() for i in range(5)]
 
 
-import requests
-
 if __name__ == "__main__":
     while True:
         path = mutate_order_fuzzer.fuzz()
@@ -794,6 +798,7 @@ class WebRunner(Runner):
         if self.base_url is not None:
             url = urljoin(self.base_url, url)
 
+        import requests  # for imports
         r = requests.get(url)
         if r.status_code == HTTPStatus.OK:
             return url, Runner.PASS

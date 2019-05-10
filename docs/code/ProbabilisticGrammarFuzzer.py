@@ -6,7 +6,7 @@
 # Last change: 2019-03-24 14:48:44+01:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -77,7 +77,9 @@ if __name__ == "__main__":
     [(d, "%.2f" % digit_probs[d - 1]) for d in range(1, 10)]
 
 
-import matplotlib.pyplot as plt
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
 
 if __name__ == "__main__":
     labels = range(1, 10)

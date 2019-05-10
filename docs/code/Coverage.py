@@ -6,7 +6,7 @@
 # Last change: 2019-05-05 13:35:43+02:00
 #
 #
-# Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -345,7 +345,9 @@ if __name__ == "__main__":
 
 # %matplotlib inline
 
-import matplotlib.pyplot as plt
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
 
 if __name__ == "__main__":
     plt.plot(cumulative_coverage)
@@ -800,7 +802,9 @@ if __name__ == "__main__":
 
 # %matplotlib inline
 
-import matplotlib.pyplot as plt
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
 
 if __name__ == "__main__":
     plt.plot(cumulative_branch_coverage)
