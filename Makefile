@@ -833,15 +833,25 @@ $(DOCS_TARGET)code/%: $(CODE_TARGET)%
 dist publish-dist: check-import check-package check-code publish-code toc \
 	$(DOCS_TARGET)dist/fuzzingbook-code.zip \
 	$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip
-	
+
 DIST_CODE_FILES = \
 	$(DOCS_TARGET)code/README.md \
 	$(DOCS_TARGET)code/LICENSE.md \
 	$(DOCS_TARGET)code/setup.py \
 	$(DOCS_TARGET)code/__init__.py
+	
+check-fuzzingbook-install:
+	@-$(PYTHON) -c 'import fuzzingbook' 2> /dev/null; \
+	if [ $$? = 0 ]; then \
+		echo "Error: Installed fuzzingbook package conflicts with package creation" >&2; \
+		echo "Please uninstall it; e.g. with 'pip uninstall fuzzingbook'." >&2; \
+		exit 1; \
+	else \
+		exit 0; \
+	fi
 
 $(DOCS_TARGET)dist/fuzzingbook-code.zip: \
-	$(PYS) $(DIST_CODE_FILES) $(CHAPTERS_MAKEFILE)
+	$(PYS) $(DIST_CODE_FILES) $(CHAPTERS_MAKEFILE) check-fuzzingbook-install
 	@-mkdir $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)dist/*
 	$(RM) -r $(DOCS_TARGET)fuzzingbook
@@ -849,7 +859,7 @@ $(DOCS_TARGET)dist/fuzzingbook-code.zip: \
 	ln -s ../code $(DOCS_TARGET)fuzzingbook/fuzzingbook
 	mv $(DOCS_TARGET)fuzzingbook/fuzzingbook/setup.py $(DOCS_TARGET)fuzzingbook
 	mv $(DOCS_TARGET)fuzzingbook/fuzzingbook/README.md $(DOCS_TARGET)fuzzingbook
-	cd $(DOCS_TARGET)fuzzingbook; $(PYTHON) setup.py sdist bdist_wheel
+	cd $(DOCS_TARGET)fuzzingbook; PYTHONPATH= $(PYTHON) ./setup.py sdist
 	mv $(DOCS_TARGET)fuzzingbook/dist/* $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)fuzzingbook/*.egg-info
 	$(RM) -r $(DOCS_TARGET)fuzzingbook/dist $(DOCS_TARGET)fuzzingbook/build
@@ -961,7 +971,7 @@ $(DOCS_TARGET)notebooks/00_Index.ipynb: utils/nbindex.py \
 .PHONY: upload-dist
 upload-dist: dist
 	@echo "Use your pypi.org password to upload"
-	cd $(DOCS_TARGET); twine upload dist/*.whl dist/*.tar.gz
+	cd $(DOCS_TARGET); twine upload dist/*.tar.gz
 
 
 
