@@ -131,7 +131,7 @@ __AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__
 </p>
 <pre>
 @incollection{fuzzingbook__YEAR__:__CHAPTER__,
-    author = {__AUTHORS__},
+    author = {__AUTHORS_BIBTEX__},
     booktitle = {__BOOKTITLE__},
     title = {__CHAPTER_TITLE__},
     year = {__YEAR__},
@@ -582,7 +582,6 @@ chapter_contents = chapter_contents \
     .replace("__BOOKIMAGE__", bookimage) \
     .replace("__DESCRIPTION__", description) \
     .replace("__AUTHORS__", authors) \
-    .replace("__AUTHORS_BIBTEX__", authors_bibtex) \
     .replace("__CHAPTER__", chapter) \
     .replace("__CHAPTER_TITLE__", chapter_title) \
     .replace("__CHAPTER_TITLE_BETA__", chapter_title_beta) \
@@ -613,6 +612,11 @@ else:
 
 # Recode TeX accents imported from fuzzingbook.bib
 chapter_contents = bibtex_unescape(chapter_contents)
+
+# Expand BibTeX authors at the end, because Marcel needs his Umlaut encoded
+chapter_contents = \
+    chapter_contents.replace("__AUTHORS_BIBTEX__", authors_bibtex)
+
 
 if args.home:
     chapter_contents = chapter_contents.replace("custom.css", menu_prefix + "custom.css")
