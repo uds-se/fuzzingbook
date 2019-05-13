@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2019-04-16 22:33:18+02:00
+# Last change: 2019-05-13 17:33:29+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -36,6 +36,23 @@ if __name__ == "__main__":
 
 
 
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+
+if __package__ is None or __package__ == "":
+    import Fuzzer
+else:
+    from . import Fuzzer
+
+if __package__ is None or __package__ == "":
+    import Coverage
+else:
+    from . import Coverage
+
+
 # ## The Enigma Machine
 
 if __name__ == "__main__":
@@ -50,12 +67,6 @@ if __name__ == "__main__":
     print('\n### The Kenngruppenbuch')
 
 
-
-
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
 
 
 import string

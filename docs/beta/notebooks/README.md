@@ -116,9 +116,10 @@ Here's our current release plan.  New chapters are coming out every Tuesday.
 1. [Search-Based Fuzzing](SearchBasedFuzzer.ipynb) – 2019-04-02
 1. [Evaluating Test Effectiveness with Mutation Analysis](MutationAnalysis.ipynb) – 2019-04-09
 1. [Greybox Fuzzing](GreyboxFuzzer.ipynb) – 2019-04-16
-1. [Fuzzing with Input Fragments](LangFuzzer.ipynb) – 2019-04-30
-1. Fuzzing in the Large – 2019-05-07
-1. When to Stop Fuzzing – 2019-05-14
+1. [Greybox Fuzzing with Grammars](GreyboxGrammarFuzzer.ipynb) – 2019-04-30
+1. [Fuzzing in the Large](FuzzingInTheLarge.ipynb) – 2019-05-07
+1. [When to Stop Fuzzing](WhenToStopFuzzing.ipynb) – 2019-05-14
+1. [A Tour of the Book](Tour.ipynb) - 2019-05-21
 
 See the [table of contents](00_Table_of_Contents.ipynb) for those chapters that are already done.
 
