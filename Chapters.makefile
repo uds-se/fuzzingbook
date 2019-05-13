@@ -2,7 +2,7 @@
 # This file defines the chapter files to be included
 
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = FuzzingInTheLarge.ipynb
+NEW_CHAPTERS = WhenToStopFuzzing.ipynb
 
 # Chapters to include in the book, in this order
 
