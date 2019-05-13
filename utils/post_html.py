@@ -73,7 +73,7 @@ menu_end = r"""
 site_header_template = menu_start + r"""
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
-     <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit Notebooks (beta)</a></li>
+     <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit Notebooks</a></li>
      <li><a href="__SITE_HTML__dist/fuzzingbook-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
      <li><a href="__SITE_HTML__dist/fuzzingbook-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
      <li><a href="__GITHUB_HTML__" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
@@ -85,7 +85,7 @@ site_header_template = menu_start + r"""
 chapter_header_template = menu_start + r"""
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
-     <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook (beta)</a></li>
+     <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit as Notebook</a></li>
      <li><a href="__SITE_HTML__slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
      <li><a href="__SITE_HTML__code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Download Code (.py)</a></li>
      <li><a href="__SITE_HTML__notebooks/__CHAPTER__.ipynb"><i class="fa fa-fw fa-download"></i> Download Notebook (.ipynb)</a></li>
