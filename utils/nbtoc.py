@@ -44,20 +44,21 @@ def notebook_toc_entry(notebook_name, prefix, path=None):
 def notebook_toc(public_chapters, appendices):
     title = "# Generating Software Tests"
 
-    chapter_toc = "## Table of Contents\n\n"
+    chapter_toc = "## [Table of Contents](index.ipynb)\n\n"
     counter = 1
-    for notebook in public_chapters:
+    for notebook in public_chapters + appendices:
         notebook_title = get_title(notebook)
-        if notebook_title.startswith("Part "):
+        if (notebook_title.startswith("Part ") or
+            notebook_title.startswith("Appendices")):
             # chapter_toc += "\n### " + notebook_title + "\n\n"
             chapter_toc += "\n" + notebook_toc_entry(notebook, "###") + "\n"
         else:
             chapter_toc += notebook_toc_entry(notebook, "*") # repr(counter) + ".")
             counter += 1
 
-    appendix_toc = "### Appendices\n\n"
-    for notebook in appendices:
-        appendix_toc += notebook_toc_entry(notebook, "*")
+    # appendix_toc = "### [Appendices](99_Appendices.ipynb)\n\n"
+    # for notebook in appendices:
+    #     appendix_toc += notebook_toc_entry(notebook, "*")
         
     sitemap = r"""## Sitemap
 This sitemap shows possible paths through the book chapters.  An arrow $A \rightarrow B$ means that chapter $A$ is a prerequisite for chapter $B$."""
@@ -71,8 +72,8 @@ This sitemap shows possible paths through the book chapters.  An arrow $A \right
             nbformat.v4.new_markdown_cell(source=sitemap),
             nbformat.v4.new_code_cell(source=sitemap_code_1),
             nbformat.v4.new_code_cell(source=sitemap_code_2),
-            nbformat.v4.new_markdown_cell(source=chapter_toc),
-            nbformat.v4.new_markdown_cell(source=appendix_toc),
+            nbformat.v4.new_markdown_cell(source=chapter_toc)
+            # nbformat.v4.new_markdown_cell(source=appendix_toc),
         ])
 
     # Get along with TOC extension
