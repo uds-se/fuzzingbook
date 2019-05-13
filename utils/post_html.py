@@ -41,7 +41,6 @@ menu_start = r"""
         <ol>
            <__STRUCTURED_ALL_CHAPTERS_MENU__>
            <li><a href="__SITE_HTML__html/00_Index.html">Index (beta)</a></i></li>
-           <li><a href="__SITE_HTML__#News" class="more_coming">More Chapters Coming!</a></li>
         </ol>
      </li>
      <li class="has-sub"><a href="#"><span title="__CHAPTER_TITLE__"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">__CHAPTER_TITLE_BETA__</span></a>
