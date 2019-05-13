@@ -59,9 +59,9 @@ DOMAINS_PART_TODO =
 
 MANAGEMENT_PART = \
 	06_Managing_Fuzzing.ipynb \
- 	FuzzingInTheLarge.ipynb
-MANAGEMENT_PART_READY = \
+ 	FuzzingInTheLarge.ipynb \
 	WhenToStopFuzzing.ipynb
+MANAGEMENT_PART_READY =
 MANAGEMENT_PART_TODO =
 
 # Appendices for the book
