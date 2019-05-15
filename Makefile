@@ -163,6 +163,9 @@ SITEMAP_SVG = $(DOCS_TARGET)notebooks/00_Sitemap.svg
 
 
 # Configuration
+# The site
+SITE = https://www.fuzzingbook.org
+
 # What we use for production: nbpublish (preferred), bookbook, or nbconvert
 PUBLISH ?= nbpublish
 
@@ -783,9 +786,11 @@ docs: publish-notebooks publish-index publish-html publish-code publish-dist \
 	$(DOCS_TARGET)index.html $(DOCS_TARGET)404.html README.md binder/postBuild
 	@echo "Now use 'make publish-all' to commit changes to docs."
 
-# github does not like script tags
-README.md: $(MARKDOWN_TARGET)index.md
-	sed 's!<script.*</script>!!g' $< > $@
+# github does not like script tags;
+# links to notebooks need to get adapted
+README.md: $(MARKDOWN_TARGET)index.md Makefile
+	sed 's!<script.*</script>!!g' $< | \
+	sed 's!(\([_a-zA-Z0-9]*\).ipynb)!($(SITE)/html/\1.html)!g'> $@
 
 .PHONY: publish
 publish: run docs
