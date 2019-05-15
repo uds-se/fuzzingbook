@@ -22,7 +22,7 @@ LEXICAL_PART = \
 	SearchBasedFuzzer.ipynb \
 	MutationAnalysis.ipynb
 LEXICAL_PART_READY = 
-LEXICAL_PART_TODO = \
+LEXICAL_PART_TODO = 
 
 SYNTACTICAL_PART = \
 	03_Syntactical_Fuzzing.ipynb \
