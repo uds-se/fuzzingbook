@@ -679,7 +679,7 @@ autopep8 reformat: $(PYCODESTYLE_CFG)
 .PHONY: check-crossref crossref xref
 check-crossref crossref xref: $(SOURCES)
 	@echo "Referenced notebooks (* = missing)"
-	@files=$$(grep '\.ipynb)' $(SOURCES) | sed 's/.*[(]\([a-zA-Z0-9_][a-zA-Z0-9_]*\.ipynb\)[)].*/\1/' | sort | uniq); \
+	@files=$$(grep '\.ipynb)' $(SOURCES) | sed 's/.*[(]\([a-zA-Z0-9_][a-zA-Z0-9_-]*\.ipynb\)[)].*/\1/' | grep -v http | sort | uniq); \
 	for file in $$files; do \
 		if [ -f $(NOTEBOOKS)/$$file ]; then \
 		    echo '  ' $$file; \
