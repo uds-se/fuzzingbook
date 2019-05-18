@@ -78,7 +78,8 @@ def update_synopsis(notebook_name, synopsis):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--update", action='store_true', help="Produce graph")
+    parser.add_argument("--update", action='store_true', 
+                        help="Update synopis section")
     parser.add_argument("notebooks", nargs='*', help="notebooks to extract/update synopsis for")
     args = parser.parse_args()
 
