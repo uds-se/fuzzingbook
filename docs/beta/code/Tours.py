@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Tours.html
-# Last change: 2019-05-18 17:20:30+02:00
+# Last change: 2019-05-18 17:44:02+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -44,50 +44,50 @@ if __name__ == "__main__":
     SVG(filename='PICS/Sitemap.svg')
 
 
-# ## The "Pragmatic Programmer" Tour
+# ## The Pragmatic Programmer Tour
 
 if __name__ == "__main__":
-    print('\n## The "Pragmatic Programmer" Tour')
+    print('\n## The Pragmatic Programmer Tour')
 
 
 
 
-# ## The "Standard" Tours
-
-if __name__ == "__main__":
-    print('\n## The "Standard" Tours')
-
-
-
-
-# ## The "Undergraduate" Tour
+# ## The Page-by-Page Tours
 
 if __name__ == "__main__":
-    print('\n## The "Undergraduate" Tour')
+    print('\n## The Page-by-Page Tours')
 
 
 
 
-# ## The "Graduate" Tour
-
-if __name__ == "__main__":
-    print('\n## The "Graduate" Tour')
-
-
-
-
-# ## The "Researcher" Tour
+# ## The Undergraduate Tour
 
 if __name__ == "__main__":
-    print('\n## The "Researcher" Tour')
+    print('\n## The Undergraduate Tour')
 
 
 
 
-# ## The "Author" Tour
+# ## The Graduate Tour
 
 if __name__ == "__main__":
-    print('\n## The "Author" Tour')
+    print('\n## The Graduate Tour')
+
+
+
+
+# ## The Researcher Tour
+
+if __name__ == "__main__":
+    print('\n## The Researcher Tour')
+
+
+
+
+# ## The Author Tour
+
+if __name__ == "__main__":
+    print('\n## The Author Tour')
 
 
 
