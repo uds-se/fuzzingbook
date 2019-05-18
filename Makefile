@@ -159,7 +159,7 @@ PDF_FILES     = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%_files)
 HTML_FILES    = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%_files)
 SLIDES_FILES  = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%_files)
 
-SITEMAP_SVG = $(DOCS_TARGET)notebooks/00_Sitemap.svg
+SITEMAP_SVG = PICS/Sitemap.svg
 
 
 # Configuration
@@ -952,7 +952,7 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
 	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
 	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
 	$(CHAPTERS_MAKEFILE) \
-	$(DOCS_TARGET)notebooks/00_Sitemap.svg
+	$(SITEMAP_SVG)
 	$(RM) $@
 	$(PYTHON) utils/nbtoc.py \
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
@@ -1109,6 +1109,12 @@ sitemap: $(SITEMAP_SVG)
 $(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND)
 	$(PYTHON) $(NBDEPEND) $(SITEMAP_OPTIONS) $(CHAPTER_SOURCES) > $@~ && mv $@~ $@
 	@$(OPEN) $@
+
+$(FULL_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVH)	
+$(RENDERED_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVH)	
+
+$(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVH)	
+$(RENDERED_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVH)	
 
 
 ## Dependencies - should come at the very end
