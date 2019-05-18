@@ -2,16 +2,16 @@
 # This file defines the chapter files to be included
 
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = WhenToStopFuzzing.ipynb
+NEW_CHAPTERS = Tours.ipynb
 
 # Chapters to include in the book, in this order
 
 INTRO_PART = \
 	01_Intro.ipynb \
+	Tours.ipynb \
 	Intro_Testing.ipynb
-INTRO_PART_READY = 
-INTRO_PART_TODO = \
-	# Tour.ipynb
+INTRO_PART_READY =
+INTRO_PART_TODO =
 
 LEXICAL_PART = \
 	02_Lexical_Fuzzing.ipynb \
