@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/02_Lexical_Fuzzing.html
-# Last change: 2019-03-08 18:10:04+01:00
+# Last change: 2019-05-18 15:56:40+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors

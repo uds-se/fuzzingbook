@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2019-05-10 13:32:00+02:00
+# Last change: 2019-05-18 16:21:34+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -275,7 +275,7 @@ if __name__ == "__main__":
 
 
 def syntax_diagram(grammar):
-    from IPython.core.display import SVG, display
+    from IPython.display import SVG, display
 
     for key in grammar:
         print("%s" % key[1:-1])

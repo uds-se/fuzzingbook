@@ -41,7 +41,7 @@ This work is designed as a _textbook_ for a course in software testing; as _supp
 
 ## News
 
-This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
+This book is _work in progress,_ with new chapters coming out every week.  After all chapters are out, we will switch to a release-based schedule with minor and major releases.  To get notified on updates, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
 
 <a class="twitter-timeline" data-width="500" data-chrome="noheader nofooter noborders transparent" data-link-color="#A93226" data-align="center" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> 
 
@@ -119,9 +119,9 @@ Here's our current release plan.  New chapters are coming out every Tuesday.
 1. [Greybox Fuzzing with Grammars](https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html) – 2019-04-30
 1. [Fuzzing in the Large](https://www.fuzzingbook.org/html/FuzzingInTheLarge.html) – 2019-05-07
 1. [When to Stop Fuzzing](https://www.fuzzingbook.org/html/WhenToStopFuzzing.html) – 2019-05-14
-1. [A Tour of the Book](https://www.fuzzingbook.org/html/Tour.html) - 2019-05-21
+1. [Tours through the Book](https://www.fuzzingbook.org/html/Tours.html) - 2019-05-21
 
-See the [table of contents](https://www.fuzzingbook.org/html/00_Table_of_Contents.html) for those chapters that are already done.
+See the [table of contents](https://www.fuzzingbook.org/html/00_Table_of_Contents.html) for those chapters that are already done.  After all chapters are out, we will switch to a release-based schedule, with numbered minor and major releases coming out when they are ready.
 
 #### How do I cite your work?
 
