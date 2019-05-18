@@ -159,7 +159,7 @@ PDF_FILES     = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%_files)
 HTML_FILES    = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%_files)
 SLIDES_FILES  = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%_files)
 
-SITEMAP_SVG = PICS/Sitemap.svg
+SITEMAP_SVG = $(NOTEBOOKS)/PICS/Sitemap.svg
 
 
 # Configuration
