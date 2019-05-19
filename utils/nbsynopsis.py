@@ -25,6 +25,7 @@ def notebook_synopsis(notebook_name):
     synopsis = ""
     in_synopsis = False
     first_synopsis = True
+    svg_count = 1
     
     for cell in notebook.cells:
         if not first_synopsis and cell.source.startswith(SYNOPSIS_TITLE):
@@ -52,7 +53,18 @@ def notebook_synopsis(notebook_name):
                         except AttributeError:
                             pass
                         if svg is not None:
-                            text = svg[svg.find('<svg'):]
+                            notebook_noext = os.path.splitext(notebook_path)[0]
+                            svg_basename = (os.path.basename(notebook_noext) +
+                                '-synopsis-' + repr(svg_count) + '.svg')
+                                
+                            svg_filename = os.path.join(
+                                os.path.dirname(notebook_path),
+                                'PICS', svg_basename)
+                                
+                            print("Creating", svg_filename)
+                            with open(svg_filename, "w") as f:
+                                f.write(svg)
+                            text = "![](" + svg_filename + ')'
 
                     # Text output
                     if text is None:
@@ -70,10 +82,10 @@ def notebook_synopsis(notebook_name):
                     
                     if text is not None:
                         output_text += text + '\n'
-                        
+
                 if output_text:
-                    if output_text.startswith('<svg'):
-                        synopsis += output_text
+                    if output_text.startswith('![]'):
+                        synopsis += '\n' + output_text + '\n'
                     else:
                         synopsis += "```\n=> " + output_text + "```\n"
             else:
