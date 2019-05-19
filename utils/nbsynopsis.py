@@ -85,6 +85,9 @@ if __name__ == "__main__":
 
     for notebook in args.notebooks:
         synopsis = notebook_synopsis(notebook)
+        if not synopsis:
+            continue
+
         if args.update:
             update_synopsis(notebook, synopsis)
         else:
