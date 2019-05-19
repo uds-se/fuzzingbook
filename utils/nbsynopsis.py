@@ -87,7 +87,7 @@ def notebook_synopsis(notebook_name):
                     if output_text.startswith('![]'):
                         synopsis += '\n' + output_text + '\n'
                     else:
-                        synopsis += "```\n=> " + output_text + "```\n"
+                        synopsis += "```python\n=> " + output_text + "```\n"
             else:
                 synopsis += cell.source + "\n\n"
             
