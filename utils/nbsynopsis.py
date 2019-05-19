@@ -64,7 +64,7 @@ def notebook_synopsis(notebook_name):
                             print("Creating", svg_filename)
                             with open(svg_filename, "w") as f:
                                 f.write(svg)
-                            text = "![](" + svg_filename + ')'
+                            text = "![](" + 'PICS/' + svg_basename + ')'
 
                     # Text output
                     if text is None:
