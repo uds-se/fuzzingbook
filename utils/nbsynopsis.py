@@ -41,21 +41,41 @@ def notebook_synopsis(notebook_name):
                 output_text = ''
                 for output in cell.outputs:
                     text = None
+
+                    # SVG output
+                    if text is None:
+                        svg = None
+                        try:
+                            svg = output.data['image/svg+xml']
+                        except KeyError:
+                            pass
+                        except AttributeError:
+                            pass
+                        if svg is not None:
+                            text = svg[svg.find('<svg'):]
+
+                    # Text output
                     if text is None:
                         try:
                             text = output.text
                         except AttributeError:
                             pass
+
+                    # Data output
                     if text is None:
                         try:
                             text = output.data['text/plain']
                         except KeyError:
                             pass
+                    
                     if text is not None:
                         output_text += text + '\n'
                         
                 if output_text:
-                    synopsis += "```\n=> " + output_text + "```\n"
+                    if output_text.startswith('<svg'):
+                        synopsis += output_text
+                    else:
+                        synopsis += "```\n=> " + output_text + "```\n"
             else:
                 synopsis += cell.source + "\n\n"
             
