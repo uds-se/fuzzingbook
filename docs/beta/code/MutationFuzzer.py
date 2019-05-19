@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2019-04-30 11:54:33+02:00
+# Last change: 2019-05-19 19:01:16+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Mutation-Based Fuzzing')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -457,11 +465,36 @@ if __name__ == "__main__":
     all_coverage, cumulative_coverage = population_coverage(
         mutation_fuzzer.population, http_program)
 
+
+if __name__ == "__main__":
     import matplotlib.pyplot as plt
+
+
+if __name__ == "__main__":
     plt.plot(cumulative_coverage)
     plt.title('Coverage of urlparse() with random inputs')
     plt.xlabel('# of inputs')
     plt.ylabel('lines covered');
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    seed_input = "http://www.google.com/search?q=fuzzing"
+    mutation_fuzzer = MutationFuzzer(seed=[seed_input])
+    [mutation_fuzzer.fuzz() for i in range(10)]
+
+
+if __name__ == "__main__":
+    mutation_fuzzer = MutationCoverageFuzzer(seed=[seed_input])
+    mutation_fuzzer.runs(http_runner, trials=10000)
+    mutation_fuzzer.population[:5]
 
 
 # ## Lessons Learned

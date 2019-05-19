@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2019-05-05 13:35:43+02:00
+# Last change: 2019-05-19 19:01:14+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Code Coverage')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -549,6 +557,27 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     s
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    with Coverage() as cov:
+        cgi_decode("a+b")
+
+
+if __name__ == "__main__":
+    print(cov.trace())
+
+
+if __name__ == "__main__":
+    print(cov.coverage())
 
 
 # ## Lessons Learned

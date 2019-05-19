@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2019-05-18 15:58:30+02:00
+# Last change: 2019-05-19 19:01:16+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Mining Input Grammars')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -1671,6 +1679,38 @@ if __name__ == "__main__":
     f = GrammarFuzzer(inventory_grammar)
     for _ in range(10):
         print(f.fuzz())
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    url_parse('https://www.fuzzingbook.org/')
+
+
+if __name__ == "__main__":
+    URLS
+
+
+if __name__ == "__main__":
+    grammar = recover_grammar(url_parse, URLS)
+    grammar
+
+
+if __package__ is None or __package__ == "":
+    from GrammarCoverageFuzzer import GrammarCoverageFuzzer
+else:
+    from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
+
+
+if __name__ == "__main__":
+    fuzzer = GrammarCoverageFuzzer(grammar)
+    [fuzzer.fuzz() for i in range(5)]
 
 
 # ## Lessons Learned

@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2019-03-24 14:48:44+01:00
+# Last change: 2019-05-19 19:01:17+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Reducing Failure-Inducing Inputs')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -764,6 +772,45 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     dd_time.elapsed_time()
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    import os
+    os.system("python -c 'x = 1 + 2 * 3 / 0'")
+
+
+if __package__ is None or __package__ == "":
+    from Fuzzer import ProgramRunner
+else:
+    from .Fuzzer import ProgramRunner
+
+
+class ZeroDivisionRunner(ProgramRunner):
+    """Make outcome 'FAIL' if ZeroDivisionError occurs"""
+    def run(self, inp=""):
+        result, outcome = super().run(inp)
+        if result.stderr.find('ZeroDivisionError') >= 0:
+            outcome = 'FAIL'
+        return result, outcome
+
+if __name__ == "__main__":
+    python_input = "x = 1 + 2 * 3 / 0"
+    python_runner = ZeroDivisionRunner("python")
+    result, outcome = python_runner.run(python_input)
+    outcome
+
+
+if __name__ == "__main__":
+    dd = DeltaDebuggingReducer(python_runner)
+    dd.reduce(python_input)
 
 
 # ## Lessons Learned

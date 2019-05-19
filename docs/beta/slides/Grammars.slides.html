@@ -13808,6 +13808,41 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
+
+
+
+<p>This chapter introduces <em>grammars</em> as a simple means to specify input languages, and to use them for testing programs with syntactically valid inputs.  A grammar is defined as a mapping of nonterminal symbols to lists of alternative expansions, as in the following example:</p>
+<div class="highlight"><pre><span></span><span class="n">US_PHONE_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;phone-number&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;phone-number&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;(&lt;area&gt;)&lt;exchange&gt;-&lt;line&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;area&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;exchange&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;line&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;lead-digit&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+<p>Nonterminal symbols are enclosed in angle brackets (say, <code>&lt;digit&gt;</code>).  To generate an input string from a grammar, a <em>producer</em> starts with the start symbol (<code>&lt;start&gt;</code>) and randomly chooses a random expansion for this symbol.  It continues the process until all nonterminal symbols are expanded.  The function <code>simple_grammar_fuzzer()</code> does just that:</p>
+<div class="highlight"><pre><span></span><span class="p">[</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="p">[</span><span class="s1">&#39;(692)449-5179&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(519)230-7422&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(613)761-0853&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(979)881-3858&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(810)914-5475&#39;</span><span class="p">]</span>
+</pre></div>
+<p>In practice, though, instead of <code>simple_grammar_fuzzer()</code>, you should use <a href="GrammarFuzzer.slides.html">the <code>GrammarFuzzer</code> class</a> or one of its <a href="GrammarCoverageFuzzer.slides.html">coverage-based</a>, <a href="ProbabilisticGrammarFuzzer.slides.html">probabilistic-based</a>, or <a href="GeneratorGrammarFuzzer.slides.html">generator-based</a> derivatives; these are more efficient, protect against infinite growth, and provide several additional features.</p>
+<p>This chapter also introduces a <a href="#A-Grammar-Toolbox">grammar toolbox</a> with several helper functions that ease the writing of grammars, such as using shortcut notations for character classes and repetitions, or extending grammars</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Input-Languages">Input Languages<a class="anchor-link" href="#Input-Languages">&#182;</a></h2><p>All possible behaviors of a program can be triggered by its input.  "Input" here can be a wide range of possible sources: We are talking about data that is read from files, from the environment, or over the network, data input by the user, or data acquired from interaction with other resources.  The set of all these inputs determines how the program will behave – including its failures.  When testing, it is thus very helpful to think about possible input sources, how to get them under control, and <em>how to systematically test them</em>.</p>
 
 </div>
@@ -19288,6 +19323,98 @@ http://fuzzingbook.com:8080/def
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><p>This chapter introduces <em>grammars</em> as a simple means to specify input languages, and to use them for testing programs with syntactically valid inputs.  A grammar is defined as a mapping of nonterminal symbols to lists of alternative expansions, as in the following example:</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[98]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">US_PHONE_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;phone-number&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;phone-number&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;(&lt;area&gt;)&lt;exchange&gt;-&lt;line&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;area&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;exchange&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;line&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;lead-digit&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Nonterminal symbols are enclosed in angle brackets (say, <code>&lt;digit&gt;</code>).  To generate an input string from a grammar, a <em>producer</em> starts with the start symbol (<code>&lt;start&gt;</code>) and randomly chooses a random expansion for this symbol.  It continues the process until all nonterminal symbols are expanded.  The function <code>simple_grammar_fuzzer()</code> does just that:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[99]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="p">[</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[99]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;(692)449-5179&#39;,
+ &#39;(519)230-7422&#39;,
+ &#39;(613)761-0853&#39;,
+ &#39;(979)881-3858&#39;,
+ &#39;(810)914-5475&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In practice, though, instead of <code>simple_grammar_fuzzer()</code>, you should use <a href="GrammarFuzzer.slides.html">the <code>GrammarFuzzer</code> class</a> or one of its <a href="GrammarCoverageFuzzer.slides.html">coverage-based</a>, <a href="ProbabilisticGrammarFuzzer.slides.html">probabilistic-based</a>, or <a href="GeneratorGrammarFuzzer.slides.html">generator-based</a> derivatives; these are more efficient, protect against infinite growth, and provide several additional features.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This chapter also introduces a <a href="#A-Grammar-Toolbox">grammar toolbox</a> with several helper functions that ease the writing of grammars, such as using shortcut notations for character classes and repetitions, or extending grammars</p>
+
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li>Grammars are powerful tools to express and produce syntactically valid inputs.</li>
 <li>Inputs produced from grammars can be used as is, or used as seeds for mutation-based fuzzing.</li>
@@ -19497,7 +19624,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[106]:</div>
+<div class="prompt input_prompt">In&nbsp;[108]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">expression_grammar_fn</span><span class="p">():</span>
@@ -19524,7 +19651,7 @@ http://fuzzingbook.com:8080/def
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[107]:</div>
+<div class="prompt input_prompt">In&nbsp;[109]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -19546,9 +19673,9 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-107-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-109-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
     expression_grammar_fn()
-  File &#34;&lt;ipython-input-106-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
+  File &#34;&lt;ipython-input-108-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
     expr = &#34;&lt;term&gt; + &lt;expr&gt;&#34; | &#34;&lt;term&gt; - &lt;expr&gt;&#34;
 TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (expected)
 </pre>
@@ -19577,7 +19704,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[109]:</div>
+<div class="prompt input_prompt">In&nbsp;[111]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">source</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">expression_grammar_fn</span><span class="p">)</span>
@@ -19594,7 +19721,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[109]:</div>
+    <div class="prompt output_prompt">Out[111]:</div>
 
 
 
@@ -19619,7 +19746,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[110]:</div>
+<div class="prompt input_prompt">In&nbsp;[112]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
@@ -19640,7 +19767,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[111]:</div>
+<div class="prompt input_prompt">In&nbsp;[113]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_alternatives</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">to_expr</span><span class="o">=</span><span class="k">lambda</span> <span class="n">o</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">s</span><span class="p">):</span>
@@ -19664,7 +19791,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[112]:</div>
+<div class="prompt input_prompt">In&nbsp;[114]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">funct_parser</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">to_expr</span><span class="o">=</span><span class="k">lambda</span> <span class="n">o</span><span class="p">:</span> <span class="n">o</span><span class="o">.</span><span class="n">s</span><span class="p">):</span>
@@ -19687,7 +19814,7 @@ TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (e
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[113]:</div>
+<div class="prompt input_prompt">In&nbsp;[115]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">grammar</span> <span class="o">=</span> <span class="n">funct_parser</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
@@ -19756,7 +19883,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[116]:</div>
+<div class="prompt input_prompt">In&nbsp;[118]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_name</span><span class="p">(</span><span class="n">o</span><span class="p">):</span>
@@ -19770,7 +19897,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[117]:</div>
+<div class="prompt input_prompt">In&nbsp;[119]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_expr</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
@@ -19786,7 +19913,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[118]:</div>
+<div class="prompt input_prompt">In&nbsp;[120]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">define_ex_grammar</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
@@ -19852,7 +19979,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[119]:</div>
+<div class="prompt input_prompt">In&nbsp;[121]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">identifier_grammar_fn</span><span class="p">():</span>

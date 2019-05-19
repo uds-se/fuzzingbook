@@ -13808,6 +13808,44 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
+
+
+
+<p>This chapter introduces a <code>MutationFuzzer</code> class that takes a list of <em>seed inputs</em> which are then mutated:</p>
+<div class="highlight"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
+<span class="p">[</span><span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="p">[</span><span class="s1">&#39;http://www.google.com/search?q=fuzzing&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;http://www.g=oNogl.om/search?q=fuzzing/&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;RttpX://w)ww.goo(gle.comq/sarc(q=fuzzng&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;hdt8p://&quot;wWw.goole.com/seDarb`*?q=fuzzing&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;httop://www.CooglGe.om/s$arch?q=fuzzingY&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;http://wwlw.google.c&quot;om/secrch?yq=fuzzin&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;hup://www.google.comC/search?q=fuzzing&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;http://w7w.google.com/search?q=ufuzgzing&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;http://www,google.com/sear4ch?.q=fuzzing&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;http://w&amp;ww.google.cKom/search7q=fuzzing&#39;</span><span class="p">]</span>
+</pre></div>
+<p>The <code>MutationCoverageFuzzer</code> maintains a <em>population</em> of inputs, which are then evolved in order to maximize coverage.</p>
+<div class="highlight"><pre><span></span><span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationCoverageFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
+<span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="n">http_runner</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">population</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="p">[</span><span class="s1">&#39;http://www.google.com/search?q=fuzzing&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;htTp://www.googld.cqom/searchq=fuzzIng&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;htTp://www.gloogld.qom/|searchq=fuzzng&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;htTp://www.googld.cqomo0searchq=fuzzIng&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;htTp://www*goegld.cqoe/sa7#hq=fuzIng&#39;</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Fuzzing-with-Mutations">Fuzzing with Mutations<a class="anchor-link" href="#Fuzzing-with-Mutations">&#182;</a></h2><p>On November 2013, the first version of <a href="http://lcamtuf.coredump.cx/afl/">American Fuzzy Lop</a> (AFL) was released. Since then, AFL has become one of the most successful fuzzing tools and comes in many flavours, e.g., <a href="https://github.com/mboehme/aflfast">AFLFast</a>, <a href="https://github.com/aflgo/aflgo">AFLGo</a>, and <a href="https://github.com/aflsmart/aflsmart">AFLSmart</a> (which are discussed in this book). AFL has made fuzzing a popular choice for automated vulnerability detection. It was the first to demonstrate that vulnerabilities can be detected automatically at a large scale in many security-critical, real-world applications.</p>
 <p><img src="PICS/afl_screen.png" alt="American Fuzzy Lop Command Line User Interface"></p>
 <center><b>Figure 1.</b> American Fuzzy Lop Command Line User Interface</center><p>In this chapter, we are going to introduce the basics of mutational fuzz testing; the next chapter will then further show how to direct fuzzing towards specific code goals.</p>
@@ -14203,7 +14241,7 @@ a.anchor-link {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>5.696456599980593e-05</pre>
+<pre>5.675472499569878e-05</pre>
 </div>
 
 </div>
@@ -14245,7 +14283,7 @@ a.anchor-link {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>4236458173.566681</pre>
+<pre>4220852285.566021</pre>
 </div>
 
 </div>
@@ -14289,7 +14327,7 @@ a.anchor-link {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>134.2452586244417</pre>
+<pre>133.75073787506088</pre>
 </div>
 
 </div>
@@ -14788,7 +14826,7 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Success after 3656 trials in 0.010860710986889899 seconds
+<pre>Success after 3656 trials in 0.011464359995443374 seconds
 </pre>
 </div>
 </div>
@@ -15297,7 +15335,7 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[(&#39;urlsplit&#39;, 444), (&#39;urlsplit&#39;, 426), (&#39;urlparse&#39;, 373), (&#39;urlsplit&#39;, 400), (&#39;urlparse&#39;, 367)]
+<pre>[(&#39;_coerce_args&#39;, 119), (&#39;http_program&#39;, 6), (&#39;urlsplit&#39;, 401), (&#39;_coerce_args&#39;, 115), (&#39;urlparse&#39;, 373)]
 </pre>
 </div>
 </div>
@@ -15385,53 +15423,49 @@ a.anchor-link {
  &#39;http://www.goog.com/search;q=fuzzilng&#39;,
  &#39;http://ww.6goog\x0eoomosearch;/q=f}zzilng&#39;,
  &#39;http://uv.Lboo.comoseakrch;q=fuzilng&#39;,
- &#39;http://ww\x7fw.gog+.com/s&gt;earch;q=fuzzing&#39;,
+ &#39;http://ww.6goog\x0eo/mosarch;/q=f}z{il~g&#39;,
  &#39;Http://www.g/ogle.com/earchq=fuzzing&#39;,
- &#39;httP://ww\x7fw.gog+.coM-s&gt;earch;q=fuzzine&#39;,
- &#39;http://www.gokgl.#om/searsh?q}fuzzing&#39;,
- &#39;http://www.goigl.#om/Seash?q}fuzzing&#39;,
- &#39;httP://ww\x7fw.gog+.c#oM-s&gt;earch;q=fuzine&#39;,
- &#39;httP://ww\x7fu/go+.coMA\rs&lt;ercx;q=fuzine&#39;,
- &#39;htTp://uww.gkgl.#Gom/sZearsh?qyfuzing&#39;,
- &#39;httP://ww\x7fw.gog.coM-s\x1eearch;q=fuzzine&#39;,
- &#39;http://w.6goog\x0e/omoseargh;/q=f}zzilng&#39;,
- &#39;Http://w&lt;w&amp;g/ogle.gom/eara@hq=dEuzzing&#39;,
- &#39;httP://www.gog.coM-s\x1eearc(;q=fu?zzineJ&#39;,
- &#39;http://w.6goog\x0e/omoseargh;/q?f}zzilnhg&#39;,
- &#39;Http://w&lt;w&amp;g/ogle.;gom/mqra@q=dEuzzing&#39;,
- &#39;Http://w&lt;w&amp;g/og,Ye.;gom?mqra@q=dEuzzing&#39;,
- &#39;Http://w&lt;w&amp;g/ogYd.;gom?mrap@q=dEuzzing&#39;,
- &#39;http://ww\x7fw.gog+G.com/s&gt;earch;q=fuz?zing&#39;,
- &#39;http://www.Sgoofle&amp;cbo5m/searcx^?q=fwzzng&#39;,
- &#39;http://ww?\x7f.g+G.ucom/s&gt;ea#rch;qt=fuz?zing&#39;,
- &#39;http://w.{6goog\x0e/oomor|yeargh;/q=&amp;}hzzilng&#39;,
- &#39;httP://ww\x7fq/co+.coMA\rs&lt;ecx;q=fuzine&#39;,
- &#39;Http://w&lt;w&amp;g/ogle.;gom/mqraq?dEuzzing&#39;,
- &#39;Http://w&lt;w&amp;g/ogleQ.;gom/qra@q=dEuzzing&#39;,
- &#39;httP://ww.tgog.coM-s\x1eeerc(;q=fu?zzinpeJ&#39;,
- &#39;Http://w&lt;w&amp;g/og,e.;gom/mq|raq?dEuzzing&#39;,
- &#39;http://w.6goog\x0e/omoseargh;/q?f}hzzilng&#39;,
- &#39;hTtp://wwT?\x7f.g+G.ucom/s&gt;ea#rch;qv=fuz?zing&#39;,
- &#39;Http://w&lt;w&amp;/og,e.;gom/mq|raq?=dEuzzing#&#39;,
- &#39;Http://w&lt;wx&amp;/og,e.;gomomq|raq?=dEuzzing#&#39;,
- &#39;Http://w&lt;wx&amp;/og,e.;gomomqraq==dEu{zi3ng#&#39;,
- &#34;Http://w&lt;wx&amp;/og,.;gommq4raqds==dEu{3kn&#39;#&#34;,
- &#39;http://w.{6goo\x0e/oomor|yerghq=&amp;}hzziOlng&#39;,
- &#39;http://w.{6Ego\\og\x0e/oomo}yeirgh;/q=&amp;}hzz#iln&#39;,
- &#39;http://w.{6Ego\\og\x0e/oomo}yeirgh;?q=&amp;}hzz#idn&#39;,
- &#39;http://w.6gooc\x0e/omosargh;/?#fz&#34;zilnhg&#39;,
- &#34;http://uv.boo.cmmoseakrCh;q=fuziln&#39;&#34;,
- &#39;http://u.{6Ego\\og\x0e/omoyeigh;q=&amp;}h&lt;zz#iln&#39;,
- &#39;Https://&lt;w&amp;/og,}e.;gom/m|raq?=dDuzzing#&#39;,
- &#39;Http://w&lt;wx&amp;/og,e.;gomomq|r\x01q?=dEuzzing#&#39;,
- &#39;Http://w&lt;Qw$\x0fog-e.;gom/`m|Ra?=dEuzzing#&#39;,
- &#39;http://w.{6g\\og\x0e/o%om?o}yeirgh;6q=&amp;hzx#idn&#39;,
- &#39;http://w.{6Ego\\og\x0e/oomo}yeirh;?=&amp;}zz#nidn&#39;,
- &#39;Http://w&lt;w&amp;gN/og,e.;6gkm/Um#q|raq&gt;?dEjzng&#39;,
- &#39;http://w.v{6Ego\\og\x0e/oomo}ayeirgh;/q=&amp;}`zz#iln&#39;,
- &#39;Http://w&lt;w&amp;gN/og,e.~;6gkm/Um#q|raq&gt;?dEnzng&#39;,
- &#39;http://ww\x7fw.go+G.com|/s&gt;eaD2ch;q=fuz?zing&#39;,
- &#39;http://w.6cooc\x0e/omosargh;/?#fx&#34;zilnhg&#39;]</pre>
+ &#39;http://www.goog.com/lsearkh;q=fuzzilng&#39;,
+ &#39;http://www.Ifnole.com/searchq=fzzing&#39;,
+ &#39;Http://ww.g/ogle.com/earchq=furzing&#39;,
+ &#39;Http://wwQw.g/oGle.ug/m/ear#hq=uzzGing&#39;,
+ &#39;Http://ww.g/ogle.cnom?earchq=fZrzing&#39;,
+ &#39;http://www.goog.co#m/lsearkh;q=fuzilng&#39;,
+ &#39;Http://wwQw.g/oGle.ug/m/ear#hqg=uzzGvi~g&#39;,
+ &#39;http://RuV.Lboo.comose`krch;q=ftzil~g&#39;,
+ &#34;http://www.googco#_mx/lsa&#39;rkhq=fuzilng&#34;,
+ &#39;htTp://w.6goog\x0eo/mosarch;/q=f}z{il~g&#39;,
+ &#39;http://www.google.com/sea[arch?q=fuzzGing&#39;,
+ &#39;Http://wwQ?w.g/oGle6.ug/m/ekar#hq=uzzGing&#39;,
+ &#39;httP://uv.Lboo.comoseakrch;q=fzilng&#39;,
+ &#39;http://ww.6goog\x0eo/mosarch;/?q=fz{il~g&#39;,
+ &#39;htTp://w.6eoog\x0eo/mosarch;?p=f}z{il~w&#39;,
+ &#39;http://www.goog\x0eom/sea7rch;#q=fuezzi-mog&#39;,
+ &#39;httP://uv.L&#34;Noo.omosekrch;q=fziln&#39;,
+ &#39;htTp://w.6go7opg\x0eo/mosayrch;/ #q=b}z{il~g&#39;,
+ &#39;Http://wwQ?w.g/%oGle6.ug//ekar!hq=uzzGinc&#39;,
+ &#39;htTp://wS.6eoog\x0e/msarcah;?p=f}z{i~7,&#39;,
+ &#39;http://www.goog\x0eo}/qa5ch;Y#q=fuezzi-mog&#39;,
+ &#39;http://ww.W=6goxog\x0eo/mosarXch;+?q=fz{il~g&#39;,
+ &#39;htTp://w.6Foo\x0en/mosarch;q=fK}z{il~g&#39;,
+ &#39;htTp://7.6Gogo\x0e/iowarcj;q=fK}z{Il~gX&#39;,
+ &#39;http://ww.62gogo/m%/saRch;/q=fl}ziil~g&#39;,
+ &#39;http://www.go?og\x0eo}/qac`P;Y#eq=fuezzik-mog&#39;,
+ &#39;http://www.go?g\x0ek}/qa`P;Y#q=fuezzik-moga&#39;,
+ &#39;htTp://Hw.6g7`g\x0eo/mosayrc)h;/K #q=j}zyil~g&#39;,
+ &#39;htTp://Hw.6g`g\x0eo/moseyrc)h;OK(#q=j}zyil~g&#39;,
+ &#39;http://*ww.W=goxog\x0e/2RmosarXch;+?Cq=f{i2l~g&#39;,
+ &#39;htTp://.6,gokg\x0eo~/mosrch;/?f\\}z{il~g&#39;,
+ &#39;htTp://Hw.6g`g\x0eo/}oseyrc)h;OK(#p=j}zyil~g&#39;,
+ &#39;htTp://w.A6go7evopg\nFo/mosayvch;?R#q=b}z{il~g&#39;,
+ &#39;htTp://w.Ago7e%vopgV\nzFo/oayv=ch;?R6#q=b}z{il~g&#39;,
+ &#39;Http://wwQ?w.g/oGle6.ug/m/ka2#hq9=uzzGing&#39;,
+ &#39;http://wHw.67`g\x0eo/mosaygrc)h;/K #q=j}zyil~g&#39;,
+ &#39;htTp://w.g&amp;o\x0eo/mocarh;/q=b}Mx{iBl~g&#39;,
+ &#39;http://w.Ago7e%vopoV\nzIFo/oayv=ch;?R6#q=b}z{il~+g=&#39;,
+ &#39;htTp://.6O,gokg\x0eo~/mTmsrc;h;/?f\\}Ez{il~g&#39;,
+ &#39;http://ww%.6goog\x0eo/mosach;/?q=fz{il~g&#39;,
+ &#39;http://wHw.67`g\x0eo/mosaygc)h;/K #q#`=j}zyilg&#39;]</pre>
 </div>
 
 </div>
@@ -15455,9 +15489,32 @@ a.anchor-link {
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_coverage</span><span class="p">,</span> <span class="n">cumulative_coverage</span> <span class="o">=</span> <span class="n">population_coverage</span><span class="p">(</span>
     <span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">population</span><span class="p">,</span> <span class="n">http_program</span><span class="p">)</span>
+</pre></div>
 
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_coverage</span><span class="p">)</span>
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_coverage</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Coverage of urlparse() with random inputs&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;# of inputs&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;lines covered&#39;</span><span class="p">);</span>
@@ -15479,7 +15536,7 @@ a.anchor-link {
 
 
 <div class="output_png output_subarea ">
-<img src="data:image/png;base64,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
+<img src="data:image/png;base64,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
 "
 >
 </div>
@@ -15497,6 +15554,105 @@ a.anchor-link {
 
 </div>
 </div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><p>This chapter introduces a <code>MutationFuzzer</code> class that takes a list of <em>seed inputs</em> which are then mutated:</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">seed_input</span> <span class="o">=</span> <span class="s2">&quot;http://www.google.com/search?q=fuzzing&quot;</span>
+<span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
+<span class="p">[</span><span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[53]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;http://www.google.com/search?q=fuzzing&#39;,
+ &#39;http://www.g=oNogl.om/search?q=fuzzing/&#39;,
+ &#39;RttpX://w)ww.goo(gle.comq/sarc(q=fuzzng&#39;,
+ &#39;hdt8p://&#34;wWw.goole.com/seDarb`*?q=fuzzing&#39;,
+ &#39;httop://www.CooglGe.om/s$arch?q=fuzzingY&#39;,
+ &#39;http://wwlw.google.c&#34;om/secrch?yq=fuzzin&#39;,
+ &#39;hup://www.google.comC/search?q=fuzzing&#39;,
+ &#39;http://w7w.google.com/search?q=ufuzgzing&#39;,
+ &#39;http://www,google.com/sear4ch?.q=fuzzing&#39;,
+ &#39;http://w&amp;ww.google.cKom/search7q=fuzzing&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>MutationCoverageFuzzer</code> maintains a <em>population</em> of inputs, which are then evolved in order to maximize coverage.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mutation_fuzzer</span> <span class="o">=</span> <span class="n">MutationCoverageFuzzer</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="p">[</span><span class="n">seed_input</span><span class="p">])</span>
+<span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="n">http_runner</span><span class="p">,</span> <span class="n">trials</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">mutation_fuzzer</span><span class="o">.</span><span class="n">population</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[54]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;http://www.google.com/search?q=fuzzing&#39;,
+ &#39;htTp://www.googld.cqom/searchq=fuzzIng&#39;,
+ &#39;htTp://www.gloogld.qom/|searchq=fuzzng&#39;,
+ &#39;htTp://www.googld.cqomo0searchq=fuzzIng&#39;,
+ &#39;htTp://www*goegld.cqoe/sa7#hq=fuzIng&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
 </div></div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
@@ -15534,7 +15690,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">seed</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Hello World&quot;</span><span class="p">]</span>
@@ -15550,7 +15706,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="prompt input_prompt">In&nbsp;[57]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span><span class="o">.</span><span class="n">population</span>
@@ -15566,13 +15722,13 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[53]:</div>
+    <div class="prompt output_prompt">Out[57]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;Hello World&#39;, &#34;*He,&#39;n Wnrllf+&#34;, &#39;*H,%bfWnrLlf\t&#39;, &#39;*H-,%bfWoLVlb+&#39;]</pre>
+<pre>[&#39;Hello World&#39;, &#39;he_&lt;+llo(or&lt;D&#39;, &#39;L}eml &amp;Wol%dD&#39;, &#39;L)q&lt;}aml &amp;cWol%d3D+&#39;]</pre>
 </div>
 
 </div>
@@ -15583,7 +15739,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_runner</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -15599,7 +15755,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[54]:</div>
+    <div class="prompt output_prompt">Out[58]:</div>
 
 
 
@@ -15615,6 +15771,7 @@ a.anchor-link {
  (&#39;cgi_decode&#39;, 17),
  (&#39;cgi_decode&#39;, 18),
  (&#39;cgi_decode&#39;, 19),
+ (&#39;cgi_decode&#39;, 20),
  (&#39;cgi_decode&#39;, 21),
  (&#39;cgi_decode&#39;, 22),
  (&#39;cgi_decode&#39;, 23),
@@ -15635,7 +15792,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="prompt input_prompt">In&nbsp;[59]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_coverage</span><span class="p">,</span> <span class="n">cumulative_coverage</span> <span class="o">=</span> <span class="n">population_coverage</span><span class="p">(</span>
@@ -15703,7 +15860,7 @@ a.anchor-link {
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>curl -O mirrors.kernel.org/gnu/bc/bc-1.07.1.tar.gz
@@ -15725,7 +15882,7 @@ a.anchor-link {
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100  410k  100  410k    0     0   339k      0  0:00:01  0:00:01 --:--:--  340k
+100  410k  100  410k    0     0   362k      0  0:00:01  0:00:01 --:--:--  362k
 </pre>
 </div>
 </div>
@@ -15736,7 +15893,7 @@ a.anchor-link {
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[61]:</div>
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>tar xfz bc-1.07.1.tar.gz
@@ -15757,7 +15914,7 @@ a.anchor-link {
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span><span class="nb">cd</span> bc-1.07.1<span class="p">;</span> ./configure
@@ -15870,7 +16027,7 @@ config.status: executing depfiles commands
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="prompt input_prompt">In&nbsp;[67]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span><span class="nb">cd</span> bc-1.07.1<span class="p">;</span> make <span class="nv">CFLAGS</span><span class="o">=</span><span class="s2">&quot;--coverage&quot;</span>
@@ -15990,7 +16147,7 @@ restore=: &amp;&amp; backupdir=&#34;.am$$&#34; &amp;&amp; \
 	  $restore $backupdir/* `echo &#34;./dc.info&#34; | sed &#39;s|[^/]*$||&#39;`; \
 	fi; \
 	rm -rf $backupdir; exit $rc
-make[3]: Nothing to be done for `all-am&#39;.
+make[4]: Nothing to be done for `all-am&#39;.
 </pre>
 </div>
 </div>
@@ -16009,7 +16166,7 @@ make[3]: Nothing to be done for `all-am&#39;.
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="prompt input_prompt">In&nbsp;[68]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span><span class="nb">cd</span> bc-1.07.1/bc<span class="p">;</span> <span class="nb">echo</span> <span class="m">2</span> + <span class="m">2</span> <span class="p">|</span> ./bc
@@ -16048,7 +16205,7 @@ make[3]: Nothing to be done for `all-am&#39;.
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="prompt input_prompt">In&nbsp;[69]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span><span class="nb">cd</span> bc-1.07.1/bc<span class="p">;</span> gcov main.c
@@ -16106,7 +16263,7 @@ main.c:creating &#39;main.c.gcov&#39;
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[66]:</div>
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>rm -fr bc-1.07.1 bc-1.07.1.tar.gz

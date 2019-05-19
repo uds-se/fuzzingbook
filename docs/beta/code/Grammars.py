@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2019-05-18 16:21:34+02:00
+# Last change: 2019-05-19 19:01:16+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -46,6 +46,14 @@ if __package__ is None or __package__ == "":
     import Fuzzer
 else:
     from . import Fuzzer
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
 
 
 # ## Input Languages
@@ -959,6 +967,30 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     assert not is_valid_grammar({"<start>": [1, 2, 3]})
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+US_PHONE_GRAMMAR = {
+    "<start>": ["<phone-number>"],
+    "<phone-number>": ["(<area>)<exchange>-<line>"],
+    "<area>": ["<lead-digit><digit><digit>"],
+    "<exchange>": ["<lead-digit><digit><digit>"],
+    "<line>": ["<digit><digit><digit><digit>"],
+    "<lead-digit>": ["2", "3", "4", "5", "6", "7", "8", "9"],
+    "<digit>": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+}
+
+assert is_valid_grammar(US_PHONE_GRAMMAR)
+
+if __name__ == "__main__":
+    [simple_grammar_fuzzer(US_PHONE_GRAMMAR) for i in range(5)]
 
 
 # ## Lessons Learned

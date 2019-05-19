@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
-# Last change: 2019-04-27 13:28:32+02:00
+# Last change: 2019-05-19 19:01:14+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Error Handling')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -192,5 +200,23 @@ if __name__ == "__main__":
     with ExpectTimeout(5):
         with ExpectTimeout(3):
             long_running_test()
+        long_running_test()
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    with ExpectError():
+        x = 1 / 0
+
+
+if __name__ == "__main__":
+    with ExpectTimeout(5):
         long_running_test()
 

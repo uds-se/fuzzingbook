@@ -11918,7 +11918,10 @@ MathJax.Hub.Config({
         </ol>
      </li>
      <li class="has-sub"><a href="#"><span title="Fuzzing: Breaking Things with Random Inputs"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Fuzzing: Breaking Things with Random Inputs</span></a>
-           <ul><li class="has-sub"><a href="#A-Testing-Assignment">A Testing Assignment</a>
+           <ul><li class="has-sub"><a href="#Synopsis">Synopsis</a>
+<ul><li class="has-sub"><a href="#Fuzzers">Fuzzers</a>
+</li><li class="has-sub"><a href="#Runners">Runners</a>
+</ul></li><li class="has-sub"><a href="#A-Testing-Assignment">A Testing Assignment</a>
 </li><li class="has-sub"><a href="#A-Simple-Fuzzer">A Simple Fuzzer</a>
 </li><li class="has-sub"><a href="#Fuzzing-External-Programs">Fuzzing External Programs</a>
 <ul><li class="has-sub"><a href="#Creating-Input-Files">Creating Input Files</a>
@@ -11935,6 +11938,9 @@ MathJax.Hub.Config({
 </ul></li><li class="has-sub"><a href="#A-Fuzzing-Architecture">A Fuzzing Architecture</a>
 <ul><li class="has-sub"><a href="#Runner-Classes">Runner Classes</a>
 </li><li class="has-sub"><a href="#Fuzzer-Classes">Fuzzer Classes</a>
+</ul></li><li class="has-sub"><a href="#Synopsis">Synopsis</a>
+<ul><li class="has-sub"><a href="#Fuzzers">Fuzzers</a>
+</li><li class="has-sub"><a href="#Runners">Runners</a>
 </ul></li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps">Next Steps</a>
 </li><li class="has-sub"><a href="#Background">Background</a>
@@ -12050,6 +12056,53 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
+
+<p>This chapter provides two important classes, introduced in <a href="#A-Fuzzing-Architecture">A Fuzzing Architecture</a>:</p>
+<ul>
+<li><code>Fuzzer</code> as a base class for fuzzers; and</li>
+<li><code>Runner</code> as a base class for programs under test.</li>
+</ul>
+<h3 id="Fuzzers">Fuzzers<a class="anchor-link" href="#Fuzzers">&#182;</a></h3><p><code>Fuzzer</code> is a base class for fuzzers, with <code>RandomFuzzer</code> as a simple instantiation.  The <code>fuzz()</code> method of <code>Fuzzer</code> objects returns a string with a generated input.</p>
+<div class="highlight"><pre><span></span><span class="n">random_fuzzer</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">()</span>
+<span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="s1">&#39;%$&lt;1&amp;&lt;%+=!&quot;83?+)9:++9138 42/ &quot;7;0-,)06 &quot;1(2;6&gt;?99$%7!!*#96=&gt;2&amp;-/(5*)=$;0$$+;&lt;12&quot;?30&amp;&#39;</span>
+</pre></div>
+<p>The <code>RandomFuzzer()</code> constructor allows to specify a number of keyword arguments:</p>
+<div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">RandomFuzzer</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="n">Produce</span> <span class="n">strings</span> <span class="n">of</span> <span class="sb">`min_length`</span> <span class="n">to</span> <span class="sb">`max_length`</span> <span class="n">characters</span>
+           <span class="ow">in</span> <span class="n">the</span> <span class="nb">range</span> <span class="p">[</span><span class="sb">`char_start`</span><span class="p">,</span> <span class="sb">`char_start`</span> <span class="o">+</span> <span class="sb">`char_range`</span><span class="p">]</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="n">random_fuzzer</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">char_start</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span> <span class="n">char_range</span><span class="o">=</span><span class="mi">26</span><span class="p">)</span>
+<span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="s1">&#39;XGZVDDPZOOW&#39;</span>
+</pre></div>
+<h3 id="Runners">Runners<a class="anchor-link" href="#Runners">&#182;</a></h3><p>A <code>Fuzzer</code> can be paired with a <code>Runner</code>, which takes the fuzzed strings as input. Its result is a class-specific <em>status</em> and an <em>outcome</em> (<code>PASS</code>, <code>FAIL</code>, or <code>UNRESOLVED</code>). A <code>PrintRunner</code> will simply print out the given input and return a <code>PASS</code> outcome:</p>
+<div class="highlight"><pre><span></span><span class="n">print_runner</span> <span class="o">=</span> <span class="n">PrintRunner</span><span class="p">()</span>
+<span class="n">random_fuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">print_runner</span><span class="p">)</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="n">EQYGAXPTVPJGTYHXFJ</span>
+
+<span class="p">(</span><span class="s1">&#39;EQYGAXPTVPJGTYHXFJ&#39;</span><span class="p">,</span> <span class="s1">&#39;UNRESOLVED&#39;</span><span class="p">)</span>
+</pre></div>
+<p>A <code>ProgramRunner</code> will feed the generated input into an external program.  Its result is a pair of the program status (a <code>CompletedProcess</code> instance) and an <em>outcome</em> (<code>PASS</code>, <code>FAIL</code>, or <code>UNRESOLVED</code>):</p>
+<div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">=</span> <span class="n">ProgramRunner</span><span class="p">(</span><span class="s1">&#39;cat&#39;</span><span class="p">)</span>
+<span class="n">random_fuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="p">(</span><span class="n">CompletedProcess</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="s1">&#39;cat&#39;</span><span class="p">,</span> <span class="n">returncode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="s1">&#39;BZOQTXFBTEOVYX&#39;</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+ <span class="s1">&#39;PASS&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
@@ -12287,7 +12340,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpmdgobnik/input.txt
+<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpzlupolir/input.txt
 </pre>
 </div>
 
@@ -12613,15 +12666,15 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>&#39;5*,55&amp;8&gt;&#34;86,?&#34;/7!1%5-**&amp;-$&amp;)$91;&#34;21(\&#39;8&#34;(%$&#39;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpmdgobnik/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpmdgobnik/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpmdgobnik/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpmdgobnik/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpmdgobnik/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpmdgobnik/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpmdgobnik/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpmdgobnik/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpmdgobnik/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpzlupolir/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpzlupolir/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpzlupolir/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpzlupolir/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpzlupolir/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpzlupolir/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpzlupolir/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpzlupolir/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpzlupolir/input.txt 1: illegal character: $
 </pre>
 </div>
 
@@ -12915,10 +12968,10 @@ ValueError (expected)
 <pre>Traceback (most recent call last):
   File &#34;&lt;ipython-input-26-8e40f7d62a1b&gt;&#34;, line 5, in &lt;module&gt;
     hang_if_no_space(s)
-  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
-    if i &lt; len(s):
-  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 4, in hang_if_no_space
-    if i &lt; len(s):
+  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 7, in hang_if_no_space
+    i += 1
+  File &#34;&lt;ipython-input-24-5f437edacff4&gt;&#34;, line 7, in hang_if_no_space
+    i += 1
   File &#34;&lt;string&gt;&#34;, line 16, in check_time
 TimeoutError (expected)
 </pre>
@@ -13259,15 +13312,15 @@ ValueError (expected)
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>=================================================================
-<span class="ansi-red-intense-fg ansi-bold">==33160==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60b0000000ae at pc 0x0001083d3ea5 bp 0x7ffee782c4e0 sp 0x7ffee782c4d8
+<span class="ansi-red-intense-fg ansi-bold">==60816==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60b0000000ae at pc 0x000107c08ea5 bp 0x7ffee7ff74a0 sp 0x7ffee7ff7498
 </span><span class="ansi-blue-intense-fg ansi-bold">READ of size 1 at 0x60b0000000ae thread T0</span>
-    #0 0x1083d3ea4 in main program.c:12
+    #0 0x107c08ea4 in main program.c:12
     #1 0x7fff7e6993d4 in start (libdyld.dylib:x86_64+0x163d4)
 
 <span class="ansi-green-intense-fg ansi-bold">0x60b0000000ae is located 10 bytes to the right of 100-byte region [0x60b000000040,0x60b0000000a4)
 </span><span class="ansi-magenta-intense-fg ansi-bold">allocated by thread T0 here:</span>
-    #0 0x108436053 in wrap_malloc (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x5c053)
-    #1 0x1083d3df4 in main program.c:7
+    #0 0x107c68053 in wrap_malloc (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x5c053)
+    #1 0x107c08df4 in main program.c:7
     #2 0x7fff7e6993d4 in start (libdyld.dylib:x86_64+0x163d4)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow program.c:12 in main
@@ -13303,7 +13356,7 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     <span class="ansi-blue-intense-fg ansi-bold">ca</span>
   Right alloca redzone:    <span class="ansi-blue-intense-fg ansi-bold">cb</span>
   Shadow gap:              cc
-==33160==ABORTING
+==60816==ABORTING
 </pre>
 </div>
 
@@ -14524,14 +14577,14 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">RandomFuzzer</span><span class="p">(</span><span class="n">Fuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
                  <span class="n">char_start</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">char_range</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Produce strings of `min_length` to `max_length` characters</span>
+<span class="sd">           in the range [`char_start`, `char_start` + `char_range`]&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_length</span> <span class="o">=</span> <span class="n">min_length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">=</span> <span class="n">max_length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">char_start</span> <span class="o">=</span> <span class="n">char_start</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">char_range</span> <span class="o">=</span> <span class="n">char_range</span>
 
     <span class="k">def</span> <span class="nf">fuzz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;A string of `min_length` to `max_length` characters</span>
-<span class="sd">           in the range [`char_start`, `char_start` + `char_range`]&quot;&quot;&quot;</span>
         <span class="n">string_length</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">string_length</span><span class="p">):</span>
@@ -14711,6 +14764,185 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><p>This chapter provides two important classes, introduced in <a href="#A-Fuzzing-Architecture">A Fuzzing Architecture</a>:</p>
+<ul>
+<li><code>Fuzzer</code> as a base class for fuzzers; and</li>
+<li><code>Runner</code> as a base class for programs under test.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Fuzzers">Fuzzers<a class="anchor-link" href="#Fuzzers">&#182;</a></h3><p><code>Fuzzer</code> is a base class for fuzzers, with <code>RandomFuzzer</code> as a simple instantiation.  The <code>fuzz()</code> method of <code>Fuzzer</code> objects returns a string with a generated input.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">random_fuzzer</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">()</span>
+<span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;%$&lt;1&amp;&lt;%+=!&#34;83?+)9:++9138 42/ &#34;7;0-,)06 &#34;1(2;6&gt;?99$%7!!*#96=&gt;2&amp;-/(5*)=$;0$$+;&lt;12&#34;?30&amp;&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>RandomFuzzer()</code> constructor allows to specify a number of keyword arguments:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">RandomFuzzer</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Produce strings of `min_length` to `max_length` characters
+           in the range [`char_start`, `char_start` + `char_range`]
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">random_fuzzer</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">char_start</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span> <span class="n">char_range</span><span class="o">=</span><span class="mi">26</span><span class="p">)</span>
+<span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;XGZVDDPZOOW&#39;
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Runners">Runners<a class="anchor-link" href="#Runners">&#182;</a></h3><p>A <code>Fuzzer</code> can be paired with a <code>Runner</code>, which takes the fuzzed strings as input. Its result is a class-specific <em>status</em> and an <em>outcome</em> (<code>PASS</code>, <code>FAIL</code>, or <code>UNRESOLVED</code>). A <code>PrintRunner</code> will simply print out the given input and return a <code>PASS</code> outcome:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_runner</span> <span class="o">=</span> <span class="n">PrintRunner</span><span class="p">()</span>
+<span class="n">random_fuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">print_runner</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>EQYGAXPTVPJGTYHXFJ
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(&#39;EQYGAXPTVPJGTYHXFJ&#39;, &#39;UNRESOLVED&#39;)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>A <code>ProgramRunner</code> will feed the generated input into an external program.  Its result is a pair of the program status (a <code>CompletedProcess</code> instance) and an <em>outcome</em> (<code>PASS</code>, <code>FAIL</code>, or <code>UNRESOLVED</code>):</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cat</span> <span class="o">=</span> <span class="n">ProgramRunner</span><span class="p">(</span><span class="s1">&#39;cat&#39;</span><span class="p">)</span>
+<span class="n">random_fuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>(CompletedProcess(args=&#39;cat&#39;, returncode=0, stdout=&#39;BZOQTXFBTEOVYX&#39;, stderr=&#39;&#39;),
+ &#39;PASS&#39;)
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li>Randomly generating inputs ("fuzzing") is a simple, cost-effective way to quickly test arbitrary programs for their robustness.</li>
 <li>Bugs fuzzers find are mainly due to errors and deficiencies in <em>input processing</em>.</li>
@@ -14867,7 +15099,7 @@ Some paragraph</code></pre>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2019-05-18 15:55:50+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Fuzzer.ipynb" target=_blank)>Last change: 2019-05-19 19:01:14+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -14885,7 +15117,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">https://www.fuzzingbook.org/beta/html/Fuzzer.html</a>.  Retrieved 2019-05-18 15:55:50+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">Fuzzing: Breaking Things with Random Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Fuzzer.html">https://www.fuzzingbook.org/beta/html/Fuzzer.html</a>.  Retrieved 2019-05-19 19:01:14+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:Fuzzer,
@@ -14895,9 +15127,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Fuzzer.html}},
-    note = {Retrieved 2019-05-18 15:55:50+02:00},
+    note = {Retrieved 2019-05-19 19:01:14+02:00},
     url = {https://www.fuzzingbook.org/beta/html/Fuzzer.html},
-    urldate = {2019-05-18 15:55:50+02:00}
+    urldate = {2019-05-19 19:01:14+02:00}
 }
 </pre>
 </div>

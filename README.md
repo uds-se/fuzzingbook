@@ -149,11 +149,13 @@ We have successfully used the material in various courses.
 
 * Now, the goal of the book is to be completely self-contained; that is, it should work without additional support.  Hence, we now give out completed chapters to students in a _flipped classroom_ setting, with the students working on the notebooks at their leisure.  We would meet in the classroom to discuss experiences with past notebooks and discuss future notebooks.
 
+* We have the students work on exercises from the book or work on larger (fuzzing) projects.  We also have students who use the book as a base for their research; indeed, it is very easy to prototype in Python for Python.
+
 When running a course, [do not rely on mybinder.org](#Troubleshooting) – it will not provide sufficient resources for a larger group of students.  Instead, [install and run your own hub.](#Do-I-have-alternatives-to-the-interactive-notebook?)
 
 #### Are there specific subsets I can focus on?
 
-Our [Sitemap](https://www.fuzzingbook.org/html/00_Table_of_Contents.html) lists the dependencies between the individual chapters.  After you have gone through the [basics of fuzzing](https://www.fuzzingbook.org/html/Fuzzer.html), you can, for instance, limit yourself to [lexical (character-based) fuzzing](https://www.fuzzingbook.org/html/02_Lexical_Fuzzing.html), and take a path towards [mutation-based "AFL-style" fuzzing](https://www.fuzzingbook.org/html/MutationFuzzer.html).  Or you can go for Web and GUI testing and take the path through [syntactical (grammar-based) fuzzing](https://www.fuzzingbook.org/html/03_Syntactical_Fuzzing.html) instead.
+We have compiled a number of [tours through the book](https://www.fuzzingbook.org/html/Tours.html) for various audiences.  Our [Sitemap](https://www.fuzzingbook.org/html/00_Table_of_Contents.html) lists the dependencies between the individual chapters.
 
 #### How can I extend or adapt your slides?
 
@@ -164,7 +166,7 @@ Download the Jupyter Notebooks (using the menu at the top) and adapt the noteboo
 
 #### Do you provide PDFs of your material?
 
-At this point, we do not provide support for PDF versions.  We will be producing PDF and print versions once the book is complete.
+At this point, we do not provide support for PDF versions.  We will be producing PDF and print versions after the book is complete.
 
 ### Other Issues
 

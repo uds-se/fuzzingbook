@@ -11918,7 +11918,8 @@ MathJax.Hub.Config({
         </ol>
      </li>
      <li class="has-sub"><a href="#"><span title="Fuzzing with Grammars"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Fuzzing with Grammars</span></a>
-           <ul><li class="has-sub"><a href="#Input-Languages">Input Languages</a>
+           <ul><li class="has-sub"><a href="#Synopsis">Synopsis</a>
+</li><li class="has-sub"><a href="#Input-Languages">Input Languages</a>
 </li><li class="has-sub"><a href="#Grammars">Grammars</a>
 <ul><li class="has-sub"><a href="#Rules-and-Expansions">Rules and Expansions</a>
 </li><li class="has-sub"><a href="#Arithmetic-Expressions">Arithmetic Expressions</a>
@@ -11938,6 +11939,7 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Grammar-Shortcuts">Grammar Shortcuts</a>
 </li><li class="has-sub"><a href="#Grammar-Extensions">Grammar Extensions</a>
 </ul></li><li class="has-sub"><a href="#Checking-Grammars">Checking Grammars</a>
+</li><li class="has-sub"><a href="#Synopsis">Synopsis</a>
 </li><li class="has-sub"><a href="#Lessons-Learned">Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps">Next Steps</a>
 </li><li class="has-sub"><a href="#Background">Background</a>
@@ -12036,6 +12038,40 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
+
+<p>This chapter introduces <em>grammars</em> as a simple means to specify input languages, and to use them for testing programs with syntactically valid inputs.  A grammar is defined as a mapping of nonterminal symbols to lists of alternative expansions, as in the following example:</p>
+<div class="highlight"><pre><span></span><span class="n">US_PHONE_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;phone-number&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;phone-number&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;(&lt;area&gt;)&lt;exchange&gt;-&lt;line&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;area&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;exchange&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;line&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;lead-digit&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+<p>Nonterminal symbols are enclosed in angle brackets (say, <code>&lt;digit&gt;</code>).  To generate an input string from a grammar, a <em>producer</em> starts with the start symbol (<code>&lt;start&gt;</code>) and randomly chooses a random expansion for this symbol.  It continues the process until all nonterminal symbols are expanded.  The function <code>simple_grammar_fuzzer()</code> does just that:</p>
+<div class="highlight"><pre><span></span><span class="p">[</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="p">[</span><span class="s1">&#39;(692)449-5179&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(519)230-7422&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(613)761-0853&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(979)881-3858&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(810)914-5475&#39;</span><span class="p">]</span>
+</pre></div>
+<p>In practice, though, instead of <code>simple_grammar_fuzzer()</code>, you should use <a href="GrammarFuzzer.html">the <code>GrammarFuzzer</code> class</a> or one of its <a href="GrammarCoverageFuzzer.html">coverage-based</a>, <a href="ProbabilisticGrammarFuzzer.html">probabilistic-based</a>, or <a href="GeneratorGrammarFuzzer.html">generator-based</a> derivatives; these are more efficient, protect against infinite growth, and provide several additional features.</p>
+<p>This chapter also introduces a <a href="#A-Grammar-Toolbox">grammar toolbox</a> with several helper functions that ease the writing of grammars, such as using shortcut notations for character classes and repetitions, or extending grammars</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -17280,6 +17316,93 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><p>This chapter introduces <em>grammars</em> as a simple means to specify input languages, and to use them for testing programs with syntactically valid inputs.  A grammar is defined as a mapping of nonterminal symbols to lists of alternative expansions, as in the following example:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">US_PHONE_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;phone-number&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;phone-number&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;(&lt;area&gt;)&lt;exchange&gt;-&lt;line&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;area&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;exchange&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;line&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;lead-digit&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;6&quot;</span><span class="p">,</span> <span class="s2">&quot;7&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;9&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Nonterminal symbols are enclosed in angle brackets (say, <code>&lt;digit&gt;</code>).  To generate an input string from a grammar, a <em>producer</em> starts with the start symbol (<code>&lt;start&gt;</code>) and randomly chooses a random expansion for this symbol.  It continues the process until all nonterminal symbols are expanded.  The function <code>simple_grammar_fuzzer()</code> does just that:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="p">[</span><span class="n">simple_grammar_fuzzer</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;(692)449-5179&#39;,
+ &#39;(519)230-7422&#39;,
+ &#39;(613)761-0853&#39;,
+ &#39;(979)881-3858&#39;,
+ &#39;(810)914-5475&#39;]
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>In practice, though, instead of <code>simple_grammar_fuzzer()</code>, you should use <a href="GrammarFuzzer.html">the <code>GrammarFuzzer</code> class</a> or one of its <a href="GrammarCoverageFuzzer.html">coverage-based</a>, <a href="ProbabilisticGrammarFuzzer.html">probabilistic-based</a>, or <a href="GeneratorGrammarFuzzer.html">generator-based</a> derivatives; these are more efficient, protect against infinite growth, and provide several additional features.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This chapter also introduces a <a href="#A-Grammar-Toolbox">grammar toolbox</a> with several helper functions that ease the writing of grammars, such as using shortcut notations for character classes and repetitions, or extending grammars</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li>Grammars are powerful tools to express and produce syntactically valid inputs.</li>
 <li>Inputs produced from grammars can be used as is, or used as seeds for mutation-based fuzzing.</li>
@@ -17567,9 +17690,9 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-107-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-109-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
     expression_grammar_fn()
-  File &#34;&lt;ipython-input-106-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
+  File &#34;&lt;ipython-input-108-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
     expr = &#34;&lt;term&gt; + &lt;expr&gt;&#34; | &#34;&lt;term&gt; - &lt;expr&gt;&#34;
 TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (expected)
 </pre>
@@ -17912,7 +18035,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2019-05-18 16:21:34+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2019-05-19 19:01:16+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -17930,7 +18053,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2019-05-18 16:21:34+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/beta/html/Grammars.html">https://www.fuzzingbook.org/beta/html/Grammars.html</a>.  Retrieved 2019-05-19 19:01:16+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:Grammars,
@@ -17940,9 +18063,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Grammars.html}},
-    note = {Retrieved 2019-05-18 16:21:34+02:00},
+    note = {Retrieved 2019-05-19 19:01:16+02:00},
     url = {https://www.fuzzingbook.org/beta/html/Grammars.html},
-    urldate = {2019-05-18 16:21:34+02:00}
+    urldate = {2019-05-19 19:01:16+02:00}
 }
 </pre>
 </div>

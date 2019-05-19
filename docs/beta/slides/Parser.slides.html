@@ -13817,6 +13817,34 @@ strings) can later be recombined using the same grammar to produce new strings.<
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
+
+
+
+<p>This chapter introduces <code>Parser</code> classes, parsing a string into a <em>derivation tree</em> as introduced in the <a href="GrammarFuzzer.slides.html">chapter on efficient grammar fuzzing</a>.  Two important parser classes are provided:</p>
+<ul>
+<li><a href="#Parsing-Expression-Grammars">Parsing Expression Grammar parsers</a> (<code>PEGParser</code>), which are very efficient, but limited to specific grammar structure; and</li>
+<li><a href="#Parsing-Context-Free-Grammars">Earley parsers</a> (<code>EarleyParser</code>), which accept any kind of context-free grammars.</li>
+</ul>
+<p>Using any of these is fairly easy, though.  First, instantiate them with a grammar:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Grammars</span> <span class="kn">import</span> <span class="n">US_PHONE_GRAMMAR</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="n">us_phone_parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+<p>Then, use the <code>parse()</code> method to retrieve a list of possible derivation trees:</p>
+<div class="highlight"><pre><span></span><span class="n">trees</span> <span class="o">=</span> <span class="n">us_phone_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;(555)987-6543&quot;</span><span class="p">)</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">trees</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+</pre></div>
+<p><img src="PICS/Parser-synopsis-1.svg" alt=""></p>
+<p>These derivation trees can then be used for test generation, notably for mutating and recombining existing inputs.</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Fuzzing-a-Simple-Program">Fuzzing a Simple Program<a class="anchor-link" href="#Fuzzing-a-Simple-Program">&#182;</a></h2>
 </div>
 </div>
@@ -14609,7 +14637,7 @@ It is an old but reliable model!
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0 valid strings, that is GrammarFuzzer generated 0.000000% valid entries from 1000 inputs
-Total time of 5.397545 seconds
+Total time of 5.438628 seconds
 </pre>
 </div>
 </div>
@@ -20816,20 +20844,20 @@ d chart[4]
 
 <div class="output_text output_subarea output_execute_result">
 <pre>(&#39;&lt;start&gt;&#39;,
- [[(&lt;__main__.State at 0x1160bb6d8&gt;,
+ [[(&lt;__main__.State at 0x115644390&gt;,
     &#39;n&#39;,
-    [&lt;__main__.Column at 0x1160bb390&gt;,
-     &lt;__main__.Column at 0x1160bbfd0&gt;,
-     &lt;__main__.Column at 0x1160bbb38&gt;,
-     &lt;__main__.Column at 0x1160bbdd8&gt;,
-     &lt;__main__.Column at 0x1160bb438&gt;]),
-   (&lt;__main__.State at 0x1160581d0&gt;,
+    [&lt;__main__.Column at 0x1155a4d30&gt;,
+     &lt;__main__.Column at 0x1155a43c8&gt;,
+     &lt;__main__.Column at 0x1155a4f60&gt;,
+     &lt;__main__.Column at 0x1155a4fd0&gt;,
+     &lt;__main__.Column at 0x1155fa588&gt;]),
+   (&lt;__main__.State at 0x115644588&gt;,
     &#39;n&#39;,
-    [&lt;__main__.Column at 0x1160bb390&gt;,
-     &lt;__main__.Column at 0x1160bbfd0&gt;,
-     &lt;__main__.Column at 0x1160bbb38&gt;,
-     &lt;__main__.Column at 0x1160bbdd8&gt;,
-     &lt;__main__.Column at 0x1160bb438&gt;])]])</pre>
+    [&lt;__main__.Column at 0x1155a4d30&gt;,
+     &lt;__main__.Column at 0x1155a43c8&gt;,
+     &lt;__main__.Column at 0x1155a4f60&gt;,
+     &lt;__main__.Column at 0x1155a4fd0&gt;,
+     &lt;__main__.Column at 0x1155fa588&gt;])]])</pre>
 </div>
 
 </div>
@@ -22760,7 +22788,398 @@ The ALL(*) (used by ANTLR) on the other hand is a grammar representation that us
 
 </div>
 </div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><p>This chapter introduces <code>Parser</code> classes, parsing a string into a <em>derivation tree</em> as introduced in the <a href="GrammarFuzzer.slides.html">chapter on efficient grammar fuzzing</a>.  Two important parser classes are provided:</p>
+<ul>
+<li><a href="#Parsing-Expression-Grammars">Parsing Expression Grammar parsers</a> (<code>PEGParser</code>), which are very efficient, but limited to specific grammar structure; and</li>
+<li><a href="#Parsing-Context-Free-Grammars">Earley parsers</a> (<code>EarleyParser</code>), which accept any kind of context-free grammars.</li>
+</ul>
+<p>Using any of these is fairly easy, though.  First, instantiate them with a grammar:</p>
+
+</div>
+</div>
 </div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[142]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">us_phone_parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Then, use the <code>parse()</code> method to retrieve a list of possible derivation trees:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[143]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">trees</span> <span class="o">=</span> <span class="n">us_phone_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;(555)987-6543&quot;</span><span class="p">)</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">trees</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[143]:</div>
+
+
+
+<div class="output_svg output_subarea output_execute_result">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="646pt" height="227pt"
+ viewBox="0.00 0.00 646.00 227.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 223)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-223 642,-223 642,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="263" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="263" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;phone&#45;number&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="#000000" d="M263,-203.9748C263,-197.195 263,-186.966 263,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="266.5001,-178.0561 263,-168.0561 259.5001,-178.0561 266.5001,-178.0561"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="128" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">(</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M236.4141,-152.9442C211.0368,-145.3061 172.0321,-132.4442 140,-117 139.7898,-116.8986 139.5786,-116.7945 139.3669,-116.6878"/>
+<polygon fill="#000000" stroke="#000000" points="141.031,-113.6036 130.6668,-111.4047 137.3976,-119.5868 141.031,-113.6036"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="169" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;area&gt;</text>
+</g>
+<!-- 1&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>1&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M249.13,-152.9748C234.1346,-144.839 209.9849,-131.7365 192.1123,-122.0397"/>
+<polygon fill="#000000" stroke="#000000" points="193.3857,-118.7486 182.9269,-117.0561 190.0475,-124.9014 193.3857,-118.7486"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="236" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">)</text>
+</g>
+<!-- 1&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>1&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M259.0161,-152.9748C254.8794,-145.1611 248.3174,-132.7662 243.2566,-123.2069"/>
+<polygon fill="#000000" stroke="#000000" points="246.3123,-121.4982 238.5401,-114.298 240.1258,-124.7735 246.3123,-121.4982"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="291" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;exchange&gt;</text>
+</g>
+<!-- 1&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>1&#45;&gt;11</title>
+<path fill="none" stroke="#000000" d="M267.1315,-152.9748C271.0192,-145.8936 276.9726,-135.05 281.9609,-125.9641"/>
+<polygon fill="#000000" stroke="#000000" points="285.1069,-127.5063 286.8516,-117.0561 278.9709,-124.1375 285.1069,-127.5063"/>
+</g>
+<!-- 18 -->
+<g id="node19" class="node">
+<title>18</title>
+<text text-anchor="middle" x="346" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&#45;</text>
+</g>
+<!-- 1&#45;&gt;18 -->
+<g id="edge18" class="edge">
+<title>1&#45;&gt;18</title>
+<path fill="none" stroke="#000000" d="M275.3339,-152.9891C289.5119,-144.3445 313.4713,-129.7036 334,-117 334.1985,-116.8772 334.3987,-116.7532 334.6004,-116.6282"/>
+<polygon fill="#000000" stroke="#000000" points="336.6106,-119.4993 343.2399,-111.2347 332.9037,-113.5614 336.6106,-119.4993"/>
+</g>
+<!-- 19 -->
+<g id="node20" class="node">
+<title>19</title>
+<text text-anchor="middle" x="497" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;line&gt;</text>
+</g>
+<!-- 1&#45;&gt;19 -->
+<g id="edge19" class="edge">
+<title>1&#45;&gt;19</title>
+<path fill="none" stroke="#000000" d="M297.5275,-152.9748C343.9191,-142.8638 425.5081,-125.0816 468.5573,-115.6991"/>
+<polygon fill="#000000" stroke="#000000" points="469.3532,-119.1078 478.3785,-113.5585 467.8625,-112.2684 469.3532,-119.1078"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="35" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;lead&#45;digit&gt;</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M149.2278,-101.9748C126.8619,-93.4624 90.2097,-79.5126 64.4685,-69.7156"/>
+<polygon fill="#000000" stroke="#000000" points="65.4443,-66.3421 54.8533,-66.0561 62.9543,-72.8843 65.4443,-66.3421"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="109" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 3&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>3&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M160.1468,-101.9748C151.1071,-94.291 136.8553,-82.177 125.6893,-72.6859"/>
+<polygon fill="#000000" stroke="#000000" points="127.7757,-69.8658 117.8895,-66.0561 123.2422,-75.1994 127.7757,-69.8658"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="169" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 3&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>3&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M169,-101.9748C169,-95.195 169,-84.966 169,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="172.5001,-76.0561 169,-66.0561 165.5001,-76.0561 172.5001,-76.0561"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="35" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M35,-50.9748C35,-44.195 35,-33.966 35,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="38.5001,-25.0561 35,-15.0561 31.5001,-25.0561 38.5001,-25.0561"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="109" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M109,-50.9748C109,-44.195 109,-33.966 109,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="112.5001,-25.0561 109,-15.0561 105.5001,-25.0561 112.5001,-25.0561"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="169" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M169,-50.9748C169,-44.195 169,-33.966 169,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="172.5001,-25.0561 169,-15.0561 165.5001,-25.0561 172.5001,-25.0561"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="243" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;lead&#45;digit&gt;</text>
+</g>
+<!-- 11&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>11&#45;&gt;12</title>
+<path fill="none" stroke="#000000" d="M283.9174,-101.9748C276.8983,-94.517 265.9513,-82.8857 257.1459,-73.53"/>
+<polygon fill="#000000" stroke="#000000" points="259.514,-70.9393 250.1116,-66.0561 254.4166,-75.7369 259.514,-70.9393"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="317" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 11&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>11&#45;&gt;14</title>
+<path fill="none" stroke="#000000" d="M294.8364,-101.9748C298.408,-94.969 303.8571,-84.2803 308.4584,-75.2547"/>
+<polygon fill="#000000" stroke="#000000" points="311.7241,-76.5548 313.1479,-66.0561 305.4878,-73.3755 311.7241,-76.5548"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="377" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 11&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>11&#45;&gt;16</title>
+<path fill="none" stroke="#000000" d="M303.6896,-101.9748C317.2817,-93.9143 339.0948,-80.9787 355.399,-71.3099"/>
+<polygon fill="#000000" stroke="#000000" points="357.4423,-74.1674 364.2583,-66.0561 353.8718,-68.1465 357.4423,-74.1674"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="243" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">9</text>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="#000000" d="M243,-50.9748C243,-44.195 243,-33.966 243,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="246.5001,-25.0561 243,-15.0561 239.5001,-25.0561 246.5001,-25.0561"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="317" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">8</text>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="#000000" d="M317,-50.9748C317,-44.195 317,-33.966 317,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="320.5001,-25.0561 317,-15.0561 313.5001,-25.0561 320.5001,-25.0561"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+<text text-anchor="middle" x="377" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">7</text>
+</g>
+<!-- 16&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>16&#45;&gt;17</title>
+<path fill="none" stroke="#000000" d="M377,-50.9748C377,-44.195 377,-33.966 377,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="380.5001,-25.0561 377,-15.0561 373.5001,-25.0561 380.5001,-25.0561"/>
+</g>
+<!-- 20 -->
+<g id="node21" class="node">
+<title>20</title>
+<text text-anchor="middle" x="437" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 19&#45;&gt;20 -->
+<g id="edge20" class="edge">
+<title>19&#45;&gt;20</title>
+<path fill="none" stroke="#000000" d="M488.1468,-101.9748C479.1071,-94.291 464.8553,-82.177 453.6893,-72.6859"/>
+<polygon fill="#000000" stroke="#000000" points="455.7757,-69.8658 445.8895,-66.0561 451.2422,-75.1994 455.7757,-69.8658"/>
+</g>
+<!-- 22 -->
+<g id="node23" class="node">
+<title>22</title>
+<text text-anchor="middle" x="497" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 19&#45;&gt;22 -->
+<g id="edge22" class="edge">
+<title>19&#45;&gt;22</title>
+<path fill="none" stroke="#000000" d="M497,-101.9748C497,-95.195 497,-84.966 497,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="500.5001,-76.0561 497,-66.0561 493.5001,-76.0561 500.5001,-76.0561"/>
+</g>
+<!-- 24 -->
+<g id="node25" class="node">
+<title>24</title>
+<text text-anchor="middle" x="557" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 19&#45;&gt;24 -->
+<g id="edge24" class="edge">
+<title>19&#45;&gt;24</title>
+<path fill="none" stroke="#000000" d="M505.8532,-101.9748C514.8929,-94.291 529.1447,-82.177 540.3107,-72.6859"/>
+<polygon fill="#000000" stroke="#000000" points="542.7578,-75.1994 548.1105,-66.0561 538.2243,-69.8658 542.7578,-75.1994"/>
+</g>
+<!-- 26 -->
+<g id="node27" class="node">
+<title>26</title>
+<text text-anchor="middle" x="617" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 19&#45;&gt;26 -->
+<g id="edge26" class="edge">
+<title>19&#45;&gt;26</title>
+<path fill="none" stroke="#000000" d="M514.7064,-101.9748C534.5584,-93.5377 566.9786,-79.7591 589.996,-69.9767"/>
+<polygon fill="#000000" stroke="#000000" points="591.3866,-73.1887 599.2209,-66.0561 588.6486,-66.7464 591.3866,-73.1887"/>
+</g>
+<!-- 21 -->
+<g id="node22" class="node">
+<title>21</title>
+<text text-anchor="middle" x="437" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">6</text>
+</g>
+<!-- 20&#45;&gt;21 -->
+<g id="edge21" class="edge">
+<title>20&#45;&gt;21</title>
+<path fill="none" stroke="#000000" d="M437,-50.9748C437,-44.195 437,-33.966 437,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="440.5001,-25.0561 437,-15.0561 433.5001,-25.0561 440.5001,-25.0561"/>
+</g>
+<!-- 23 -->
+<g id="node24" class="node">
+<title>23</title>
+<text text-anchor="middle" x="497" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+</g>
+<!-- 22&#45;&gt;23 -->
+<g id="edge23" class="edge">
+<title>22&#45;&gt;23</title>
+<path fill="none" stroke="#000000" d="M497,-50.9748C497,-44.195 497,-33.966 497,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="500.5001,-25.0561 497,-15.0561 493.5001,-25.0561 500.5001,-25.0561"/>
+</g>
+<!-- 25 -->
+<g id="node26" class="node">
+<title>25</title>
+<text text-anchor="middle" x="557" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">4</text>
+</g>
+<!-- 24&#45;&gt;25 -->
+<g id="edge25" class="edge">
+<title>24&#45;&gt;25</title>
+<path fill="none" stroke="#000000" d="M557,-50.9748C557,-44.195 557,-33.966 557,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="560.5001,-25.0561 557,-15.0561 553.5001,-25.0561 560.5001,-25.0561"/>
+</g>
+<!-- 27 -->
+<g id="node28" class="node">
+<title>27</title>
+<text text-anchor="middle" x="617" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+</g>
+<!-- 26&#45;&gt;27 -->
+<g id="edge27" class="edge">
+<title>26&#45;&gt;27</title>
+<path fill="none" stroke="#000000" d="M617,-50.9748C617,-44.195 617,-33.966 617,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="620.5001,-25.0561 617,-15.0561 613.5001,-25.0561 620.5001,-25.0561"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>These derivation trees can then be used for test generation, notably for mutating and recombining existing inputs.</p>
+
+</div>
+</div>
+</div></div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -22793,7 +23212,7 @@ The ALL(*) (used by ANTLR) on the other hand is a grammar representation that us
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[141]:</div>
+<div class="prompt input_prompt">In&nbsp;[144]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PackratParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
@@ -22836,7 +23255,7 @@ The ALL(*) (used by ANTLR) on the other hand is a grammar representation that us
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[142]:</div>
+<div class="prompt input_prompt">In&nbsp;[145]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s2">&quot;1 + (2 * 3)&quot;</span>
@@ -22871,7 +23290,7 @@ The ALL(*) (used by ANTLR) on the other hand is a grammar representation that us
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[143]:</div>
+<div class="prompt input_prompt">In&nbsp;[146]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;aaaaaa&#39;</span>
@@ -22969,7 +23388,7 @@ in further and further earlier columns (as shown below):</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[150]:</div>
+<div class="prompt input_prompt">In&nbsp;[153]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LeoParser</span><span class="p">(</span><span class="n">LeoParser</span><span class="p">):</span>
@@ -23003,7 +23422,7 @@ in further and further earlier columns (as shown below):</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[159]:</div>
+<div class="prompt input_prompt">In&nbsp;[162]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">LeoParser</span><span class="p">(</span><span class="n">RR_GRAMMAR4</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring4</span><span class="p">)</span>
@@ -23071,7 +23490,7 @@ c chart[9]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[166]:</div>
+<div class="prompt input_prompt">In&nbsp;[169]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">LeoParser</span><span class="p">(</span><span class="n">LR_GRAMMAR</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">)</span>
@@ -23138,7 +23557,7 @@ a chart[6]
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[173]:</div>
+<div class="prompt input_prompt">In&nbsp;[176]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LeoParser</span><span class="p">(</span><span class="n">LeoParser</span><span class="p">):</span>
@@ -23157,7 +23576,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[175]:</div>
+<div class="prompt input_prompt">In&nbsp;[178]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LeoParser</span><span class="p">(</span><span class="n">LeoParser</span><span class="p">):</span>
@@ -23180,7 +23599,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[176]:</div>
+<div class="prompt input_prompt">In&nbsp;[179]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LeoParser</span><span class="p">(</span><span class="n">LeoParser</span><span class="p">):</span>
@@ -23213,7 +23632,7 @@ a chart[6]
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[189]:</div>
+<div class="prompt input_prompt">In&nbsp;[192]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">RECURSION_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
@@ -23239,7 +23658,7 @@ a chart[6]
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[191]:</div>
+<div class="prompt input_prompt">In&nbsp;[194]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -23317,7 +23736,7 @@ a chart[6]
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[205]:</div>
+<div class="prompt input_prompt">In&nbsp;[208]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">firstset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">nullable</span><span class="p">):</span>
@@ -23342,7 +23761,7 @@ a chart[6]
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[206]:</div>
+<div class="prompt input_prompt">In&nbsp;[209]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">first_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">nullable</span><span class="p">):</span>
@@ -23361,7 +23780,7 @@ a chart[6]
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[207]:</div>
+<div class="prompt input_prompt">In&nbsp;[210]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@fixpoint</span>
@@ -23379,7 +23798,7 @@ a chart[6]
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[208]:</div>
+<div class="prompt input_prompt">In&nbsp;[211]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">firstset</span><span class="p">(</span><span class="n">canonical</span><span class="p">(</span><span class="n">A1_GRAMMAR</span><span class="p">),</span> <span class="n">EPSILON</span><span class="p">)</span>
@@ -23395,24 +23814,24 @@ a chart[6]
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[208]:</div>
+    <div class="prompt output_prompt">Out[211]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;1&#39;: {&#39;1&#39;},
+<pre>{&#39;+&#39;: {&#39;+&#39;},
  &#39;8&#39;: {&#39;8&#39;},
  &#39;0&#39;: {&#39;0&#39;},
+ &#39;-&#39;: {&#39;-&#39;},
+ &#39;5&#39;: {&#39;5&#39;},
+ &#39;3&#39;: {&#39;3&#39;},
  &#39;6&#39;: {&#39;6&#39;},
+ &#39;1&#39;: {&#39;1&#39;},
+ &#39;9&#39;: {&#39;9&#39;},
+ &#39;4&#39;: {&#39;4&#39;},
  &#39;2&#39;: {&#39;2&#39;},
  &#39;7&#39;: {&#39;7&#39;},
- &#39;9&#39;: {&#39;9&#39;},
- &#39;3&#39;: {&#39;3&#39;},
- &#39;5&#39;: {&#39;5&#39;},
- &#39;-&#39;: {&#39;-&#39;},
- &#39;+&#39;: {&#39;+&#39;},
- &#39;4&#39;: {&#39;4&#39;},
  &#39;&lt;start&gt;&#39;: {&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
  &#39;&lt;expr&gt;&#39;: {&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
  &#39;&lt;integer&gt;&#39;: {&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
@@ -23435,7 +23854,7 @@ a chart[6]
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[209]:</div>
+<div class="prompt input_prompt">In&nbsp;[212]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">EOF</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\0</span><span class="s1">&#39;</span>
@@ -23448,7 +23867,7 @@ a chart[6]
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[210]:</div>
+<div class="prompt input_prompt">In&nbsp;[213]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">followset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
@@ -23475,7 +23894,7 @@ a chart[6]
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[211]:</div>
+<div class="prompt input_prompt">In&nbsp;[214]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@fixpoint</span>
@@ -23498,7 +23917,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[212]:</div>
+<div class="prompt input_prompt">In&nbsp;[215]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">followset</span><span class="p">(</span><span class="n">canonical</span><span class="p">(</span><span class="n">A1_GRAMMAR</span><span class="p">),</span> <span class="n">START_SYMBOL</span><span class="p">)</span>
@@ -23514,7 +23933,7 @@ a chart[6]
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[212]:</div>
+    <div class="prompt output_prompt">Out[215]:</div>
 
 
 
@@ -23678,7 +24097,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[215]:</div>
+<div class="prompt input_prompt">In&nbsp;[218]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LL1Parser</span><span class="p">(</span><span class="n">LL1Parser</span><span class="p">):</span>
@@ -23715,7 +24134,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[216]:</div>
+<div class="prompt input_prompt">In&nbsp;[219]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ll1parser</span> <span class="o">=</span> <span class="n">LL1Parser</span><span class="p">(</span><span class="n">A2_GRAMMAR</span><span class="p">)</span>
@@ -23762,7 +24181,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[217]:</div>
+<div class="prompt input_prompt">In&nbsp;[220]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LL1Parser</span><span class="p">(</span><span class="n">LL1Parser</span><span class="p">):</span>
@@ -23813,7 +24232,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[218]:</div>
+<div class="prompt input_prompt">In&nbsp;[221]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ll1parser</span> <span class="o">=</span> <span class="n">LL1Parser</span><span class="p">(</span><span class="n">A2_GRAMMAR</span><span class="p">)</span>
@@ -23831,7 +24250,7 @@ a chart[6]
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[218]:</div>
+    <div class="prompt output_prompt">Out[221]:</div>
 
 
 

@@ -13828,6 +13828,57 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
+
+
+
+<p>This chapter provides two classes that automatically extract specifications from a function and a set of inputs:</p>
+<ul>
+<li><code>TypeAnnotator</code> for <em>types</em>, and</li>
+<li><code>InvariantAnnotator</code> for <em>pre-</em> and <em>postconditions</em>.</li>
+</ul>
+<p>Both work by <em>observing</em> a function and its invocations within a <code>with</code> clause.  Here is an example for the type annotator:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sum2</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">TypeAnnotator</span><span class="p">()</span> <span class="k">as</span> <span class="n">type_annotator</span><span class="p">:</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+<p>The <code>typed_functions()</code> method will return a representation of <code>sum2()</code> annotated with types observed during execution.</p>
+<div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">type_annotator</span><span class="o">.</span><span class="n">typed_functions</span><span class="p">())</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="k">def</span> <span class="nf">sum2</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span><span class="nb">int</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</pre></div>
+<p>The invariant annotator works in a similar fashion:</p>
+<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">InvariantAnnotator</span><span class="p">()</span> <span class="k">as</span> <span class="n">inv_annotator</span><span class="p">:</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+<p>The <code>functions_with_invariants()</code> method will return a representation of <code>sum2()</code> annotated with inferred pre- and postconditions that all hold for the observed values.</p>
+<div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">inv_annotator</span><span class="o">.</span><span class="n">functions_with_invariants</span><span class="p">())</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">=&gt;</span> <span class="nd">@precondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+<span class="nd">@precondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">==</span> <span class="n">return_value</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
+<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">b</span> <span class="o">==</span> <span class="n">return_value</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">return_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">return_value</span> <span class="o">==</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">return_value</span> <span class="o">==</span> <span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">sum2</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</pre></div>
+<p>Such type specifications and invariants can be helpful as <em>oracles</em> (to detect deviations from a given set of runs) as well as for all kinds of <em>symbolic code analyses</em>.  The chapter gives details on how to customize the properties checked for.</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Specifications-and-Assertions">Specifications and Assertions<a class="anchor-link" href="#Specifications-and-Assertions">&#182;</a></h2><p>When implementing a function or program, one usually works against a <em>specification</em> – a set of documented requirements to be satisfied by the code.  Such specifications can come in natural language.  A formal specification, however, allows the computer to check whether the specification is satisfied.</p>
 <p>In the <a href="Intro_Testing.slides.html">introduction to testing</a>, we have seen how <em>preconditions</em> and <em>postconditions</em> can describe what a function does.  Consider the following (simple) square root function:</p>
 
@@ -14014,10 +14065,10 @@ ZeroDivisionError: float division by zero (expected)
 <pre>Traceback (most recent call last):
   File &#34;&lt;ipython-input-9-b72078127dc0&gt;&#34;, line 2, in &lt;module&gt;
     x = my_sqrt(-1.0)
-  File &#34;&lt;ipython-input-5-47185ad159a1&gt;&#34;, line 7, in my_sqrt
-    guess = (approx + x / approx) / 2
-  File &#34;&lt;ipython-input-5-47185ad159a1&gt;&#34;, line 7, in my_sqrt
-    guess = (approx + x / approx) / 2
+  File &#34;&lt;ipython-input-5-47185ad159a1&gt;&#34;, line 6, in my_sqrt
+    approx = guess
+  File &#34;&lt;ipython-input-5-47185ad159a1&gt;&#34;, line 6, in my_sqrt
+    approx = guess
   File &#34;&lt;string&gt;&#34;, line 16, in check_time
 TimeoutError (expected)
 </pre>
@@ -14246,7 +14297,7 @@ enforce.exceptions.RuntimeTypeError:
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpdqa5vg76.py&#39;</pre>
+<pre>&#39;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpil5jww5i.py&#39;</pre>
 </div>
 
 </div>
@@ -14369,10 +14420,10 @@ enforce.exceptions.RuntimeTypeError:
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpdqa5vg76.py:1: error: Function is missing a type annotation
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpdqa5vg76.py:12: warning: Returning Any from function declared to return &#34;float&#34;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpdqa5vg76.py:12: error: Call to untyped function &#34;my_sqrt&#34; in typed context
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpdqa5vg76.py:14: error: Argument 1 to &#34;my_sqrt_with_type_annotations&#34; has incompatible type &#34;str&#34;; expected &#34;float&#34;
+<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpil5jww5i.py:1: error: Function is missing a type annotation
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpil5jww5i.py:12: warning: Returning Any from function declared to return &#34;float&#34;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpil5jww5i.py:12: error: Call to untyped function &#34;my_sqrt&#34; in typed context
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpil5jww5i.py:14: error: Argument 1 to &#34;my_sqrt_with_type_annotations&#34; has incompatible type &#34;str&#34;; expected &#34;float&#34;
 
 </pre>
 </div>
@@ -14767,7 +14818,7 @@ enforce.exceptions.RuntimeTypeError:
 my_sqrt(x=25) returns 5.0
 my_sqrt(x=2.0)
 my_sqrt(x=2.0) returns 1.414213562373095
-__exit__(self=&lt;__main__.CallTracker object at 0x11887c7b8&gt;, exc_type=None, exc_value=None, tb=None)
+__exit__(self=&lt;__main__.CallTracker object at 0x115569be0&gt;, exc_type=None, exc_value=None, tb=None)
 </pre>
 </div>
 </div>
@@ -19733,10 +19784,10 @@ AssertionError: Precondition violated (expected)
 <pre>Traceback (most recent call last):
   File &#34;&lt;ipython-input-171-afc7add26ad6&gt;&#34;, line 2, in &lt;module&gt;
     my_sqrt(-1.0)
-  File &#34;&lt;ipython-input-5-47185ad159a1&gt;&#34;, line 7, in my_sqrt
-    guess = (approx + x / approx) / 2
-  File &#34;&lt;ipython-input-5-47185ad159a1&gt;&#34;, line 7, in my_sqrt
-    guess = (approx + x / approx) / 2
+  File &#34;&lt;ipython-input-5-47185ad159a1&gt;&#34;, line 6, in my_sqrt
+    approx = guess
+  File &#34;&lt;ipython-input-5-47185ad159a1&gt;&#34;, line 6, in my_sqrt
+    approx = guess
   File &#34;&lt;string&gt;&#34;, line 16, in check_time
 TimeoutError (expected)
 </pre>
@@ -20208,6 +20259,170 @@ AssertionError: Postcondition violated (expected)
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><p>This chapter provides two classes that automatically extract specifications from a function and a set of inputs:</p>
+<ul>
+<li><code>TypeAnnotator</code> for <em>types</em>, and</li>
+<li><code>InvariantAnnotator</code> for <em>pre-</em> and <em>postconditions</em>.</li>
+</ul>
+<p>Both work by <em>observing</em> a function and its invocations within a <code>with</code> clause.  Here is an example for the type annotator:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[184]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">sum2</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[185]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">TypeAnnotator</span><span class="p">()</span> <span class="k">as</span> <span class="n">type_annotator</span><span class="p">:</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>typed_functions()</code> method will return a representation of <code>sum2()</code> annotated with types observed during execution.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[186]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">type_annotator</span><span class="o">.</span><span class="n">typed_functions</span><span class="p">())</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>def sum2(a: int, b: int) -&gt;int:
+    return a + b
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The invariant annotator works in a similar fashion:</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[187]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">InvariantAnnotator</span><span class="p">()</span> <span class="k">as</span> <span class="n">inv_annotator</span><span class="p">:</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">sum2</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>functions_with_invariants()</code> method will return a representation of <code>sum2()</code> annotated with inferred pre- and postconditions that all hold for the observed values.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[188]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">inv_annotator</span><span class="o">.</span><span class="n">functions_with_invariants</span><span class="p">())</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>@precondition(lambda a, b: isinstance(a, int))
+@precondition(lambda a, b: isinstance(b, int))
+@postcondition(lambda return_value, a, b: a == return_value - b)
+@postcondition(lambda return_value, a, b: b == return_value - a)
+@postcondition(lambda return_value, a, b: isinstance(return_value, int))
+@postcondition(lambda return_value, a, b: return_value == a + b)
+@postcondition(lambda return_value, a, b: return_value == b + a)
+def sum2(a, b):
+    return a + b
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Such type specifications and invariants can be helpful as <em>oracles</em> (to detect deviations from a given set of runs) as well as for all kinds of <em>symbolic code analyses</em>.  The chapter gives details on how to customize the properties checked for.</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
 <li>Type annotations and explicit invariants allow for <em>checking</em> arguments and results for expected data types and other properties.</li>
 <li>One can automatically <em>mine</em> data types and invariants by observing arguments and results at runtime.</li>
@@ -20280,7 +20495,7 @@ AssertionError: Postcondition violated (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[185]:</div>
+<div class="prompt input_prompt">In&nbsp;[190]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">my_sqrt_with_union_type</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -20310,7 +20525,7 @@ AssertionError: Postcondition violated (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[186]:</div>
+<div class="prompt input_prompt">In&nbsp;[191]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">my_sqrt_with_local_types</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -20346,7 +20561,7 @@ AssertionError: Postcondition violated (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[187]:</div>
+<div class="prompt input_prompt">In&nbsp;[192]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@precondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
@@ -20361,7 +20576,7 @@ AssertionError: Postcondition violated (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[188]:</div>
+<div class="prompt input_prompt">In&nbsp;[193]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -20383,7 +20598,7 @@ AssertionError: Postcondition violated (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-188-dda18930f6db&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-193-dda18930f6db&gt;&#34;, line 2, in &lt;module&gt;
     remove_first_char(&#39;&#39;)
   File &#34;&lt;ipython-input-100-39ada1fd0b7e&gt;&#34;, line 6, in wrapper
     assert precondition(*args, **kwargs), &#34;Precondition violated&#34;
@@ -20406,7 +20621,7 @@ AssertionError: Precondition violated (expected)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[189]:</div>
+<div class="prompt input_prompt">In&nbsp;[194]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">condition</span><span class="p">(</span><span class="n">precondition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">postcondition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s1">&#39;Unknown&#39;</span><span class="p">):</span>
@@ -20438,7 +20653,7 @@ AssertionError: Precondition violated (expected)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[190]:</div>
+<div class="prompt input_prompt">In&nbsp;[195]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@precondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s2">&quot;len(s) &gt; 0&quot;</span><span class="p">)</span>
@@ -20458,7 +20673,7 @@ AssertionError: Precondition violated (expected)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[190]:</div>
+    <div class="prompt output_prompt">Out[195]:</div>
 
 
 
@@ -20475,7 +20690,7 @@ AssertionError: Precondition violated (expected)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[191]:</div>
+<div class="prompt input_prompt">In&nbsp;[196]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -20497,9 +20712,9 @@ AssertionError: Precondition violated (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-191-dda18930f6db&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-196-dda18930f6db&gt;&#34;, line 2, in &lt;module&gt;
     remove_first_char(&#39;&#39;)
-  File &#34;&lt;ipython-input-189-683ee268305f&gt;&#34;, line 6, in wrapper
+  File &#34;&lt;ipython-input-194-683ee268305f&gt;&#34;, line 6, in wrapper
     assert precondition(*args, **kwargs), &#34;Precondition violated: &#34; + doc
 AssertionError: Precondition violated: len(s) &gt; 0 (expected)
 </pre>

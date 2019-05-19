@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2019-05-16 09:55:58+02:00
+# Last change: 2019-05-19 19:01:17+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Probabilistic Grammar Fuzzing')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -951,6 +959,31 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     chisquare(random_counts, expected_random_counts)
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from Grammars import US_PHONE_GRAMMAR, extend_grammar, opts
+else:
+    from .Grammars import US_PHONE_GRAMMAR, extend_grammar, opts
+
+
+PROBABILISTIC_US_PHONE_GRAMMAR = extend_grammar(US_PHONE_GRAMMAR,
+{
+      "<lead-digit>": ["2", "3", "4", "5", "6", "7", "8", 
+                      ("9", opts(prob=0.9))],                                              
+})
+
+if __name__ == "__main__":
+    probabilistic_us_phone_fuzzer = ProbabilisticGrammarFuzzer(PROBABILISTIC_US_PHONE_GRAMMAR)
+    [probabilistic_us_phone_fuzzer.fuzz() for i in range(5)]
 
 
 # ## Lessons Learned
