@@ -29,7 +29,7 @@ def notebook_synopsis(notebook_name):
     for cell in notebook.cells:
         if not first_synopsis and cell.source.startswith(SYNOPSIS_TITLE):
             in_synopsis = True
-            synopsis = SYNOPSIS_TITLE + "\n\n<!-- Automatically generated. Do not edit. -->\n\n"
+            synopsis = SYNOPSIS_TITLE + "\n\n<!-- Automatically generated. Do not edit. -->\n\n" + cell.source[len(SYNOPSIS_TITLE):] + "\n\n"
             continue
         elif cell.source.startswith("## "):
             in_synopsis = False
@@ -38,8 +38,24 @@ def notebook_synopsis(notebook_name):
         if in_synopsis:
             if cell.cell_type == 'code':
                 synopsis += "```python\n" + cell.source + "\n```\n"
+                output_text = ''
                 for output in cell.outputs:
-                    synopsis += "```\n=> " + output.text + "```\n"
+                    text = None
+                    if text is None:
+                        try:
+                            text = output.text
+                        except AttributeError:
+                            pass
+                    if text is None:
+                        try:
+                            text = output.data['text/plain']
+                        except KeyError:
+                            pass
+                    if text is not None:
+                        output_text += text + '\n'
+                        
+                if output_text:
+                    synopsis += "```\n=> " + output_text + "```\n"
             else:
                 synopsis += cell.source + "\n\n"
             
