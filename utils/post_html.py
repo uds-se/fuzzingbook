@@ -208,6 +208,19 @@ def anchor(title):
     return '#' + title.replace(' ', '-')
 
 
+def decorate(section):
+    if section == "Synopsis":
+        section = '<i class="fa fa-fw fa-map"></i> ' + section
+    elif section == "Lessons Learned":
+        section = '<i class="fa fa-fw fa-trophy"></i> ' + section
+    elif section == "Next Steps":
+        section = '<i class="fa fa-fw fa-arrows"></i> ' + section
+    elif section == "Background":
+        section = '<i class="fa fa-fw fa-mortar-board"></i> ' + section
+    elif section == "Exercises":
+        section = '<i class="fa fa-fw fa-edit"></i> ' + section
+
+    return section
 
 # Authors
 def bibtex_escape(authors):
@@ -449,7 +462,7 @@ for section in sections:
     if depth < current_depth:
         all_sections_menu += "</ul></li>" * (current_depth - depth)
 
-    all_sections_menu += '<li class="has-sub"><a href="%s">%s</a>\n' % (anchor(section), section)
+    all_sections_menu += '<li class="has-sub"><a href="%s">%s</a>\n' % (anchor(section), decorate(section))
     current_depth = depth
 
 while current_depth > 1:
