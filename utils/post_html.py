@@ -311,6 +311,24 @@ def cgi_escape(text):
     }
     return "".join(cgi_escape_table.get(c,c) for c in text)
 
+    
+# Highlight Synopsis
+def highlight_synopsis(text):
+    synopsis_start = text.find('<h2 id="Synopsis">')
+    if synopsis_start < 0:
+        return text  # No synopsis
+
+    synopsis_end = text.find('<div class="input_markdown">', synopsis_start + 1)
+    if synopsis_end < 0:
+        return text  # No synopsis
+        
+    text = (text[:synopsis_start] + 
+        '<div class="synopsis">' +  
+        text[synopsis_start:synopsis_end] +
+        '</div>\n\n' +  
+        text[synopsis_end:])
+
+    return text
 
 
 # Process arguments
@@ -611,15 +629,17 @@ else:
     chapter_contents = re.sub(r'<a (xlink:href|href)="([a-zA-Z0-9_]*)\.ipynb', 
         r'<a \1="\2.html', chapter_contents)
 
-
 # Recode TeX accents imported from fuzzingbook.bib
 chapter_contents = bibtex_unescape(chapter_contents)
 
 # Expand BibTeX authors at the end, because Marcel needs his Umlaut encoded
 chapter_contents = \
     chapter_contents.replace("__AUTHORS_BIBTEX__", authors_bibtex)
+    
+# Highlight the (first) synopsis
+chapter_contents = highlight_synopsis(chapter_contents)
 
-
+# Get proper links for CSS and Favicon
 if args.home:
     chapter_contents = chapter_contents.replace("custom.css", menu_prefix + "custom.css")
     chapter_contents = chapter_contents.replace("favicon/", menu_prefix + "favicon/")
