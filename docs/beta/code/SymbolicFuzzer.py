@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2019-05-05 13:33:09+02:00
+# Last change: 2019-05-21 18:25:49+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Symbolic Fuzzing')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -1472,6 +1480,21 @@ if __name__ == "__main__":
         d = [sym_to_float(r[i]) for i in ['a', 'b', 'c']]
         v = roots3(*d)
         print(d, v)
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    gcd_fuzzer = AdvancedSymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
+    for i in range(10):
+        r = gcd_fuzzer.fuzz()
+        print(r)
 
 
 # ## Limitations

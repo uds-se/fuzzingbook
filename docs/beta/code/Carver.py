@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2019-05-10 14:30:30+02:00
+# Last change: 2019-05-21 18:25:50+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -46,6 +46,14 @@ if __package__ is None or __package__ == "":
     import APIFuzzer
 else:
     from . import APIFuzzer
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
 
 
 # ## System Tests vs Unit Tests
@@ -733,6 +741,59 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     webbrowser_timer.elapsed_time() / urlsplit_timer.elapsed_time()
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+# ### Recording Calls
+
+if __name__ == "__main__":
+    print('\n### Recording Calls')
+
+
+
+
+if __name__ == "__main__":
+    with CallCarver() as carver:
+        y = my_sqrt(2)
+        y = my_sqrt(4)
+
+
+if __name__ == "__main__":
+    carver.called_functions()
+
+
+if __name__ == "__main__":
+    carver.arguments('my_sqrt')
+
+
+# ### Synthesizing Calls
+
+if __name__ == "__main__":
+    print('\n### Synthesizing Calls')
+
+
+
+
+if __name__ == "__main__":
+    my_sqrt_miner = CallGrammarMiner(carver)
+    my_sqrt_grammar = my_sqrt_miner.mine_call_grammar()
+    my_sqrt_grammar
+
+
+if __name__ == "__main__":
+    fuzzer = GrammarCoverageFuzzer(my_sqrt_grammar)
+    fuzzer.fuzz()
+
+
+if __name__ == "__main__":
+    eval(fuzzer.fuzz())
 
 
 # ## Lessons Learned

@@ -13333,6 +13333,16 @@ a:active {
     margin-top: 1cm;
 }
 
+/* Synopsis */
+.synopsis {
+    border-style: dotted;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+
 /* Solutions */
 .solution_link {
 	/* font-size: 12px; */
@@ -13820,6 +13830,53 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
+
+<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.Carver</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
+</pre></div>
+<p>and then make use of the following features.</p>
+<p>This chapter provides means to <em>record and replay function calls</em> during a system test.  Since individual function calls are much faster than a whole system run, such "carving" mechanisms have the potential to run tests much faster.</p>
+<h3 id="Recording-Calls">Recording Calls<a class="anchor-link" href="#Recording-Calls">&#182;</a></h3><p>The <code>CallCarver</code> class records all calls occurring while it is active.  It is used in conjunction with a <code>with</code> clause:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">CallCarver</span><span class="p">()</span> <span class="k">as</span> <span class="n">carver</span><span class="p">:</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="n">y</span> <span class="o">=</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="n">y</span> <span class="o">=</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+<p>After execution, <code>called_functions()</code> lists the names of functions encountered:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">()</span>
+<span class="p">[</span><span class="s1">&#39;my_sqrt&#39;</span><span class="p">,</span> <span class="s1">&#39;__exit__&#39;</span><span class="p">]</span>
+</pre></div>
+<p>The <code>arguments()</code> method lists the arguments recorded for a function.  This is a mapping of the function name to a list of lists of arguments; each argument is a pair (parameter name, value).</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s1">&#39;my_sqrt&#39;</span><span class="p">)</span>
+<span class="p">[[(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)],</span> <span class="p">[(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)]]</span>
+</pre></div>
+<p>Complex arguments are properly serialized, such that they can be easily restored.</p>
+<h3 id="Synthesizing-Calls">Synthesizing Calls<a class="anchor-link" href="#Synthesizing-Calls">&#182;</a></h3><p>While such recorded arguments already could be turned into arguments and calls, a much nicer alternative is to create a <em>grammar</em> for recorded calls.  This allows to synthesize arbitrary <em>combinations</em> of arguments, and also offers a base for further customization of calls.</p>
+<p>The <code>CallGrammarMiner</code> class turns a list of carved executions into a grammar.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">my_sqrt_miner</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">carver</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">my_sqrt_grammar</span> <span class="o">=</span> <span class="n">my_sqrt_miner</span><span class="o">.</span><span class="n">mine_call_grammar</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">my_sqrt_grammar</span>
+<span class="p">{</span><span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;call&gt;&#39;</span><span class="p">],</span>
+ <span class="s1">&#39;&lt;call&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;my_sqrt&gt;&#39;</span><span class="p">],</span>
+ <span class="s1">&#39;&lt;my_sqrt-x&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;4&#39;</span><span class="p">],</span>
+ <span class="s1">&#39;&lt;my_sqrt&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;my_sqrt(&lt;my_sqrt-x&gt;)&#39;</span><span class="p">]}</span>
+</pre></div>
+<p>This grammar can be used to synthesize calls.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">my_sqrt_grammar</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+<span class="s1">&#39;my_sqrt(4)&#39;</span>
+</pre></div>
+<p>These calls can be executed in isolation, effectively extracting unit tests from system tests:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">eval</span><span class="p">(</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+<span class="mf">1.414213562373095</span>
+</pre></div>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="System-Tests-vs-Unit-Tests">System Tests vs Unit Tests<a class="anchor-link" href="#System-Tests-vs-Unit-Tests">&#182;</a></h2><p>Remember the URL grammar introduced for <a href="Grammars.slides.html">grammar fuzzing</a>?  With such a grammar, we can happily test a Web browser again and again, checking how it reacts to arbitrary page requests.</p>
 <p>Let us define a very simple "web browser" that goes and downloads the content given by the URL.</p>
 
@@ -13879,7 +13936,7 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Downloaded 414793 bytes in 0.29 seconds
+<pre>Downloaded 414793 bytes in 0.21 seconds
 </pre>
 </div>
 </div>
@@ -14027,7 +14084,7 @@ a.anchor-link {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>1.9475300214253367e-06</pre>
+<pre>2.037209000263829e-06</pre>
 </div>
 
 </div>
@@ -14068,7 +14125,7 @@ a.anchor-link {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.29249410901684314</pre>
+<pre>0.20738039600018965</pre>
 </div>
 
 </div>
@@ -14109,7 +14166,7 @@ a.anchor-link {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>150187.2144711668</pre>
+<pre>101796.32819869382</pre>
 </div>
 
 </div>
@@ -14374,7 +14431,7 @@ a.anchor-link {
 
 <div class="output_text output_subarea output_execute_result">
 <pre>{&#39;my_sqrt&#39;: [[(&#39;x&#39;, 2)], [(&#39;x&#39;, 4)]],
- &#39;__exit__&#39;: [[(&#39;self&#39;, &lt;__main__.CallCarver at 0x109e0f7f0&gt;),
+ &#39;__exit__&#39;: [[(&#39;self&#39;, &lt;__main__.CallCarver at 0x10db74828&gt;),
    (&#39;exc_type&#39;, None),
    (&#39;exc_value&#39;, None),
    (&#39;tb&#39;, None)]]}</pre>
@@ -14511,7 +14568,7 @@ a.anchor-link {
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>my_sqrt(x=2)
 my_sqrt(x=4)
-__exit__(self=&lt;__main__.CallCarver object at 0x109e0f7f0&gt;, exc_type=None, exc_value=None, tb=None)
+__exit__(self=&lt;__main__.CallCarver object at 0x10db74828&gt;, exc_type=None, exc_value=None, tb=None)
 </pre>
 </div>
 </div>
@@ -14900,7 +14957,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x109e0f7f0&gt;, exc_type=None, 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;email.parser.parse(self=&lt;email.parser.Parser object at 0x117d06b38&gt;, fp=&lt;_io.StringIO object at 0x117ec9828&gt;, headersonly=False)&#39;</pre>
+<pre>&#39;email.parser.parse(self=&lt;email.parser.Parser object at 0x10dc1feb8&gt;, fp=&lt;_io.StringIO object at 0x11bc098b8&gt;, headersonly=False)&#39;</pre>
 </div>
 
 </div>
@@ -14950,7 +15007,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x109e0f7f0&gt;, exc_type=None, 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;email.parser.Parser at 0x117d06b38&gt;</pre>
+<pre>&lt;email.parser.Parser at 0x10dc1feb8&gt;</pre>
 </div>
 
 </div>
@@ -15026,7 +15083,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x109e0f7f0&gt;, exc_type=None, 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;email.parser.Parser at 0x117e2ff28&gt;</pre>
+<pre>&lt;email.parser.Parser at 0x11bc9bf60&gt;</pre>
 </div>
 
 </div>
@@ -15117,7 +15174,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x109e0f7f0&gt;, exc_type=None, 
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>pickle.loads(b&#39;\x80\x03cemail.parser\nParser\nq\x00)\x81q\x01}q\x02(X\x06\x00\x00\x00_classq\x03chttp.client\nHTTPMessage\nq\x04X\x06\x00\x00\x00policyq\x05cemail._policybase\nCompat32\nq\x06)\x81q\x07ub.&#39;).parse(fp=pickle.loads(b&#39;\x80\x03c_io\nStringIO\nq\x00)\x81q\x01(XG\x01\x00\x00Content-Encoding: gzip\r\nCache-Control: max-age=604800\r\nContent-Type: text/html; charset=UTF-8\r\nDate: Sun, 19 May 2019 17:32:32 GMT\r\nEtag: &#34;1541025663+gzip&#34;\r\nExpires: Sun, 26 May 2019 17:32:32 GMT\r\nLast-Modified: Fri, 09 Aug 2013 23:54:35 GMT\r\nServer: ECS (dcb/7EEB)\r\nVary: Accept-Encoding\r\nX-Cache: HIT\r\nContent-Length: 606\r\n\r\nq\x02X\x01\x00\x00\x00\nq\x03MG\x01Ntq\x04b.&#39;), headersonly=False)
+<pre>pickle.loads(b&#39;\x80\x03cemail.parser\nParser\nq\x00)\x81q\x01}q\x02(X\x06\x00\x00\x00_classq\x03chttp.client\nHTTPMessage\nq\x04X\x06\x00\x00\x00policyq\x05cemail._policybase\nCompat32\nq\x06)\x81q\x07ub.&#39;).parse(fp=pickle.loads(b&#39;\x80\x03c_io\nStringIO\nq\x00)\x81q\x01(X]\x01\x00\x00Content-Encoding: gzip\r\nAccept-Ranges: bytes\r\nCache-Control: max-age=604800\r\nContent-Type: text/html; charset=UTF-8\r\nDate: Tue, 21 May 2019 17:22:42 GMT\r\nEtag: &#34;1541025663+gzip&#34;\r\nExpires: Tue, 28 May 2019 17:22:42 GMT\r\nLast-Modified: Fri, 09 Aug 2013 23:54:35 GMT\r\nServer: ECS (dcb/7F5C)\r\nVary: Accept-Encoding\r\nX-Cache: HIT\r\nContent-Length: 606\r\n\r\nq\x02X\x01\x00\x00\x00\nq\x03M]\x01Ntq\x04b.&#39;), headersonly=False)
 </pre>
 </div>
 </div>
@@ -15158,7 +15215,7 @@ __exit__(self=&lt;__main__.CallCarver object at 0x109e0f7f0&gt;, exc_type=None, 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;http.client.HTTPMessage at 0x1089e62e8&gt;</pre>
+<pre>&lt;http.client.HTTPMessage at 0x10c6cd1d0&gt;</pre>
 </div>
 
 </div>
@@ -15284,16 +15341,16 @@ __exit__(self=&lt;__main__.CallCarver object at 0x109e0f7f0&gt;, exc_type=None, 
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>NameError(&#34;name &#39;posixpath&#39; is not defined&#34;,)
-NameError(&#34;name &#39;requests&#39; is not defined&#34;,)
-NameError(&#34;name &#39;urllib3&#39; is not defined&#34;,)
-TypeError(&#34;iter_content() got multiple values for argument &#39;self&#39;&#34;,)
-TypeError(&#39;module.__new__(): not enough arguments&#39;,)
-NameError(&#34;name &#39;OrderedDict&#39; is not defined&#34;,)
-NameError(&#34;name &#39;odict_values&#39; is not defined&#34;,)
-PicklingError(&#34;Can&#39;t pickle &lt;class &#39;method_descriptor&#39;&gt;: attribute lookup method_descriptor on builtins failed&#34;,)
-TypeError(&#34;can&#39;t pickle generator objects&#34;,)
+<pre>NameError(&#34;name &#39;genericpath&#39; is not defined&#34;,)
+TypeError(&#34;putheader() got an unexpected keyword argument &#39;values&#39;&#34;,)
+TypeError(&#34;cannot serialize &#39;_io.TextIOWrapper&#39; object&#34;,)
+AttributeError(&#34;Can&#39;t pickle local object &#39;PoolManager.__init__.&lt;locals&gt;.&lt;lambda&gt;&#39;&#34;,)
+NameError(&#34;name &#39;environ&#39; is not defined&#34;,)
 NameError(&#34;name &#39;ItemsView&#39; is not defined&#34;,)
+NameError(&#34;name &#39;odict_values&#39; is not defined&#34;,)
+TypeError(&#34;can&#39;t pickle generator objects&#34;,)
+NameError(&#34;name &#39;ParseResult&#39; is not defined&#34;,)
+NameError(&#34;name &#39;posixpath&#39; is not defined&#34;,)
 </pre>
 </div>
 </div>
@@ -15708,7 +15765,7 @@ NameError(&#34;name &#39;ItemsView&#39; is not defined&#34;,)
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;], &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;]}</pre>
+<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;1&#39;, &#39;3&#39;], &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;]}</pre>
 </div>
 
 </div>
@@ -15833,7 +15890,7 @@ NameError(&#34;name &#39;ItemsView&#39; is not defined&#34;,)
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;],
+<pre>{&#39;&lt;power-x&gt;&#39;: [&#39;1&#39;, &#39;3&#39;],
  &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;],
  &#39;&lt;power&gt;&#39;: [&#39;power(&lt;power-x&gt;, &lt;power-y&gt;)&#39;]}</pre>
 </div>
@@ -15999,7 +16056,7 @@ NameError(&#34;name &#39;ItemsView&#39; is not defined&#34;,)
 <div class="output_text output_subarea output_execute_result">
 <pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;call&gt;&#39;],
  &#39;&lt;call&gt;&#39;: [&#39;&lt;power&gt;&#39;],
- &#39;&lt;power-x&gt;&#39;: [&#39;3&#39;, &#39;1&#39;],
+ &#39;&lt;power-x&gt;&#39;: [&#39;1&#39;, &#39;3&#39;],
  &#39;&lt;power-y&gt;&#39;: [&#39;2&#39;, &#39;4&#39;],
  &#39;&lt;power&gt;&#39;: [&#39;power(&lt;power-x&gt;, &lt;power-y&gt;)&#39;]}</pre>
 </div>
@@ -16043,7 +16100,7 @@ NameError(&#34;name &#39;ItemsView&#39; is not defined&#34;,)
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;power(1, 2)&#39;, &#39;power(3, 4)&#39;, &#39;power(1, 2)&#39;, &#39;power(1, 2)&#39;, &#39;power(3, 2)&#39;]</pre>
+<pre>[&#39;power(3, 2)&#39;, &#39;power(1, 4)&#39;, &#39;power(3, 2)&#39;, &#39;power(3, 2)&#39;, &#39;power(1, 2)&#39;]</pre>
 </div>
 
 </div>
@@ -16384,7 +16441,7 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>1.830898690968752e-05</pre>
+<pre>1.6847999177116435e-05</pre>
 </div>
 
 </div>
@@ -16419,7 +16476,7 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.18392783199669793</pre>
+<pre>0.12127981899993756</pre>
 </div>
 
 </div>
@@ -16452,7 +16509,7 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>10045.767846356335</pre>
+<pre>7198.470140280172</pre>
 </div>
 
 </div>
@@ -16469,6 +16526,264 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 </div>
 </div>
 </div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><p>This chapter provides means to <em>record and replay function calls</em> during a system test.  Since individual function calls are much faster than a whole system run, such "carving" mechanisms have the potential to run tests much faster.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Recording-Calls">Recording Calls<a class="anchor-link" href="#Recording-Calls">&#182;</a></h3><p>The <code>CallCarver</code> class records all calls occurring while it is active.  It is used in conjunction with a <code>with</code> clause:</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[87]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CallCarver</span><span class="p">()</span> <span class="k">as</span> <span class="n">carver</span><span class="p">:</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>After execution, <code>called_functions()</code> lists the names of functions encountered:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[88]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">carver</span><span class="o">.</span><span class="n">called_functions</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[88]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;my_sqrt&#39;, &#39;__exit__&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>arguments()</code> method lists the arguments recorded for a function.  This is a mapping of the function name to a list of lists of arguments; each argument is a pair (parameter name, value).</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[89]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">carver</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span><span class="s1">&#39;my_sqrt&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[89]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[[(&#39;x&#39;, 2)], [(&#39;x&#39;, 4)]]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Complex arguments are properly serialized, such that they can be easily restored.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Synthesizing-Calls">Synthesizing Calls<a class="anchor-link" href="#Synthesizing-Calls">&#182;</a></h3><p>While such recorded arguments already could be turned into arguments and calls, a much nicer alternative is to create a <em>grammar</em> for recorded calls.  This allows to synthesize arbitrary <em>combinations</em> of arguments, and also offers a base for further customization of calls.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>CallGrammarMiner</code> class turns a list of carved executions into a grammar.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[90]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_sqrt_miner</span> <span class="o">=</span> <span class="n">CallGrammarMiner</span><span class="p">(</span><span class="n">carver</span><span class="p">)</span>
+<span class="n">my_sqrt_grammar</span> <span class="o">=</span> <span class="n">my_sqrt_miner</span><span class="o">.</span><span class="n">mine_call_grammar</span><span class="p">()</span>
+<span class="n">my_sqrt_grammar</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[90]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: [&#39;&lt;call&gt;&#39;],
+ &#39;&lt;call&gt;&#39;: [&#39;&lt;my_sqrt&gt;&#39;],
+ &#39;&lt;my_sqrt-x&gt;&#39;: [&#39;2&#39;, &#39;4&#39;],
+ &#39;&lt;my_sqrt&gt;&#39;: [&#39;my_sqrt(&lt;my_sqrt-x&gt;)&#39;]}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This grammar can be used to synthesize calls.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[91]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">my_sqrt_grammar</span><span class="p">)</span>
+<span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[91]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>&#39;my_sqrt(4)&#39;</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>These calls can be executed in isolation, effectively extracting unit tests from system tests:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[92]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">eval</span><span class="p">(</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[92]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>1.414213562373095</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -16519,7 +16834,7 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[87]:</div>
+<div class="prompt input_prompt">In&nbsp;[93]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ResultCarver</span><span class="p">(</span><span class="n">CallCarver</span><span class="p">):</span>
@@ -16541,7 +16856,7 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[88]:</div>
+<div class="prompt input_prompt">In&nbsp;[94]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ResultCarver</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">result_carver</span><span class="p">:</span>
@@ -16564,7 +16879,7 @@ urlsplit(&#39;https://www.fuzzingbook.org/&#39;, &#39;&#39;, True)
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>my_sqrt(x=2)
 Result: 1.414213562373095
-__exit__(self=&lt;__main__.ResultCarver object at 0x1a1abe9780&gt;, exc_type=None, exc_value=None, tb=None)
+__exit__(self=&lt;__main__.ResultCarver object at 0x1a1e9a4860&gt;, exc_type=None, exc_value=None, tb=None)
 </pre>
 </div>
 </div>

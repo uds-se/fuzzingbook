@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2019-05-05 13:31:23+02:00
+# Last change: 2019-05-21 18:25:49+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -40,6 +40,14 @@ if __name__ == "__main__":
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
 
 
 # ## Tracking Constraints
@@ -2113,6 +2121,61 @@ if __name__ == "__main__":
     print('\n## Limitations')
 
 
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from Coverage import cgi_decode
+else:
+    from .Coverage import cgi_decode
+
+
+if __name__ == "__main__":
+    with ConcolicTracer() as _:
+        _[cgi_decode]('abcd')
+
+
+if __name__ == "__main__":
+    scf = SimpleConcolicFuzzer()
+    scf.add_trace(_)
+
+
+if __name__ == "__main__":
+    for i in range(10):
+        v = scf.fuzz()
+        if v is None:
+            break
+        print(v)
+
+
+if __package__ is None or __package__ == "":
+    from InformationFlow import INVENTORY_GRAMMAR, SQLException
+else:
+    from .InformationFlow import INVENTORY_GRAMMAR, SQLException
+
+
+if __name__ == "__main__":
+    cgf = ConcolicGrammarFuzzer(INVENTORY_GRAMMAR)
+    cgf.prune_tokens(prune_tokens)
+    for i in range(10):
+        query = cgf.fuzz()
+        print(query)
+        with ConcolicTracer() as _:
+            with ExpectError():
+                try:
+                    res = _[db_select](query)
+                    print(repr(res))
+                except SQLException as e:
+                    print(e)
+            cgf.update_grammar(_)
+            print()
 
 
 # ## Lessons Learned

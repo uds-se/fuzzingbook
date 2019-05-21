@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2019-05-03 16:41:31+02:00
+# Last change: 2019-05-21 18:25:48+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -40,6 +40,14 @@ if __name__ == "__main__":
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
 
 
 # ## A Vulnerable Database
@@ -1982,6 +1990,30 @@ if __name__ == "__main__":
     print('\n#### Enforcing Tainting')
 
 
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    thello = tstr('hello', taint='LOW')
+
+
+if __name__ == "__main__":
+    thello[1:2].taint
+
+
+if __name__ == "__main__":
+    ohw = ostr("hello\tworld", origin=100)
+
+
+if __name__ == "__main__":
+    (ohw[0:4] +"-"+ ohw[6:]).origin
 
 
 # ## Lessons Learned

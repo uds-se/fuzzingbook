@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2019-05-07 09:36:06+02:00
+# Last change: 2019-05-21 18:25:50+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -46,6 +46,14 @@ if __package__ is None or __package__ == "":
     import Fuzzer
 else:
     from . import Fuzzer
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
 
 
 # ## Collecting Crashes from Multiple Fuzzers
@@ -722,6 +730,14 @@ if __name__ == "__main__":
             break
 
     print("Done!")
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
 
 
 # ## Lessons Learned
