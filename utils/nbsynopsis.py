@@ -13,6 +13,7 @@ from IPython.core.interactiveshell import InteractiveShell
 
 import nbformat
 import argparse
+import base64
 
 SYNOPSIS_TITLE = "## Synopsis"
 
@@ -25,7 +26,7 @@ def notebook_synopsis(notebook_name):
     synopsis = ""
     in_synopsis = False
     first_synopsis = True
-    svg_count = 1
+    img_count = 1
     
     notebook_noext = os.path.splitext(notebook_path)[0]
     notebook_basename = os.path.basename(notebook_noext)
@@ -68,8 +69,9 @@ and then make use of the following features.
                             pass
                         if svg is not None:
                             svg_basename = (notebook_basename +
-                                '-synopsis-' + repr(svg_count) + '.svg')
-                                
+                                '-synopsis-' + repr(img_count) + '.svg')
+                            img_count += 1
+                            
                             svg_filename = os.path.join(
                                 os.path.dirname(notebook_path),
                                 'PICS', svg_basename)
@@ -78,6 +80,29 @@ and then make use of the following features.
                             with open(svg_filename, "w") as f:
                                 f.write(svg)
                             text = "![](" + 'PICS/' + svg_basename + ')'
+
+                    # PNG output
+                    if text is None:
+                        png = None
+                        try:
+                            png = output.data['image/png']
+                        except KeyError:
+                            pass
+                        except AttributeError:
+                            pass
+                        if png is not None:
+                            png_basename = (notebook_basename +
+                                '-synopsis-' + repr(img_count) + '.png')
+                            img_count += 1
+                                                            
+                            png_filename = os.path.join(
+                                os.path.dirname(notebook_path),
+                                'PICS', png_basename)
+                                
+                            print("Creating", png_filename)
+                            with open(png_filename, "wb") as f:
+                                f.write(base64.b64decode(png, validate=True))
+                            text = "![](" + 'PICS/' + png_basename + ')'
 
                     # Text output
                     if text is None:
