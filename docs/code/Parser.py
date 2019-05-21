@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2019-04-02 05:20:20+02:00
+# Last change: 2019-05-21 19:58:00+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Parsing Inputs')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -1482,6 +1490,30 @@ if __name__ == "__main__":
     print('\n## Background')
 
 
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from Grammars import US_PHONE_GRAMMAR
+else:
+    from .Grammars import US_PHONE_GRAMMAR
+
+
+if __name__ == "__main__":
+    us_phone_parser = EarleyParser(US_PHONE_GRAMMAR)
+
+
+if __name__ == "__main__":
+    trees = us_phone_parser.parse("(555)987-6543")
+    tree = list(trees)[0]
+    display_tree(tree)
 
 
 # ## Lessons Learned

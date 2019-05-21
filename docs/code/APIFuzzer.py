@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2019-03-25 08:54:37+01:00
+# Last change: 2019-05-21 19:58:03+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Fuzzing APIs')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -423,6 +431,42 @@ if __name__ == "__main__":
     float_list_fuzzer = ProbabilisticGeneratorGrammarFuzzer(list_grammar(
         float_grammar_with_range(900.0, 900.9)))
     [float_list_fuzzer.fuzz() for i in range(10)]
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from GeneratorGrammarFuzzer import ProbabilisticGeneratorGrammarFuzzer
+else:
+    from .GeneratorGrammarFuzzer import ProbabilisticGeneratorGrammarFuzzer
+
+
+if __name__ == "__main__":
+    int_grammar = int_grammar_with_range(100, 200)
+    fuzzer = ProbabilisticGeneratorGrammarFuzzer(int_grammar)
+    [fuzzer.fuzz() for i in range(10)]
+
+
+from math import sqrt
+
+if __name__ == "__main__":
+    eval("sqrt(" + fuzzer.fuzz() + ")")
+
+
+if __name__ == "__main__":
+    int_list_grammar = list_grammar(int_grammar)
+    fuzzer = ProbabilisticGeneratorGrammarFuzzer(int_list_grammar)
+    [fuzzer.fuzz() for i in range(5)]
+
+
+if __name__ == "__main__":
+    eval("len(" + fuzzer.fuzz() + ")")
 
 
 # ## Lessons Learned

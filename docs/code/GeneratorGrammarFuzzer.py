@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2019-02-12 14:09:59+01:00
+# Last change: 2019-05-21 19:58:00+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Fuzzing with Generators')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -999,6 +1007,33 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     PGGCFuzzer = ProbabilisticGeneratorGrammarCoverageFuzzer
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from Grammars import US_PHONE_GRAMMAR, extend_grammar, opts
+else:
+    from .Grammars import US_PHONE_GRAMMAR, extend_grammar, opts
+
+
+def pick_area_code():
+    return random.choice(['555', '554', '553'])
+
+PICKED_US_PHONE_GRAMMAR = extend_grammar(US_PHONE_GRAMMAR,
+{
+    "<area>": [("<lead-digit><digit><digit>", opts(pre=pick_area_code))]
+})
+
+if __name__ == "__main__":
+    picked_us_phone_fuzzer = GeneratorGrammarFuzzer(PICKED_US_PHONE_GRAMMAR)
+    [picked_us_phone_fuzzer.fuzz() for i in range(5)]
 
 
 # ## Lessons Learned

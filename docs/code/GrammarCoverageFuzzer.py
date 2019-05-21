@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2019-05-10 12:11:09+02:00
+# Last change: 2019-05-21 19:58:00+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Grammar Coverage')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -824,6 +832,29 @@ if __name__ == "__main__":
     print('\n#### Deep Data Processing')
 
 
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from Grammars import US_PHONE_GRAMMAR
+else:
+    from .Grammars import US_PHONE_GRAMMAR
+
+
+if __name__ == "__main__":
+    phone_fuzzer = GrammarCoverageFuzzer(US_PHONE_GRAMMAR)
+    phone_fuzzer.fuzz()
+
+
+if __name__ == "__main__":
+    phone_fuzzer.expansion_coverage()
 
 
 # ## Lessons Learned

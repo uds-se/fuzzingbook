@@ -27,11 +27,13 @@ YouTubeVideo("w4u5gCgPlmg")
 
 ## A Textbook for Paper, Screen, and Keyboard
 
-You can use this book in three ways:
+You can use this book in four ways:
 
-* You can __read chapters in your browser__.  Check out the list of chapters in the menu above, or start right away with the [introduction to testing](Intro_Testing.ipynb) or the [introduction to fuzzing](Fuzzer.ipynb).  All code is available for download.
+* You can __read chapters in your browser__.  Check out the list of chapters in the menu above, or start right away with the [introduction to testing](https://www.fuzzingbook.org/html/Intro_Testing.html) or the [introduction to fuzzing](https://www.fuzzingbook.org/html/Fuzzer.html).  All code is available for download.
 
 * You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you to edit and extend the code, experimenting _live in your browser._  Simply select "Resources $\rightarrow$ Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
+
+* You can __use the code in your own projects__.  You can download the code as Python programs; simply select "Resources $\rightarrow$ Download Code" for one chapter or "Resources $\rightarrow$ All Code" for all chapters.  These code files can be executed, yielding (hopefully) the same results as the notebooks.  Even easier: [Install the fuzzingbook Python package](#Using-the-Code).
 
 * You can __present chapters as slides__.  This allows for presenting the material in lectures.  Just select "Resources $\rightarrow$ View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing the slides for the introduction to fuzzing.</a>
 
@@ -41,7 +43,7 @@ This work is designed as a _textbook_ for a course in software testing; as _supp
 
 ## News
 
-This book is _work in progress,_ with new chapters coming out every week.  To get notified when a new chapter comes out, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
+This book is _work in progress,_ with new chapters coming out every week.  After all chapters are out, we will switch to a release-based schedule with minor and major releases.  To get notified on updates, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
 
 <a class="twitter-timeline" data-width="500" data-chrome="noheader nofooter noborders transparent" data-link-color="#A93226" data-align="center" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> 
 
@@ -88,39 +90,9 @@ Technically, yes; but this would cost money and effort, which we'd rather spend 
 
 ### Content
 
-#### Which content will be coming up?
+#### Which content has come up?
 
-Here's our current release plan.  New chapters are coming out every Tuesday.
-
-1. [Introduction to Software Testing](Intro_Testing.ipynb) – 2018-10-30
-1. [Fuzzing: Breaking Things with Random Inputs](Fuzzer.ipynb) – 2018-10-30
-1. [Getting Coverage](Coverage.ipynb) – 2018-11-06
-1. [Mutation-Based Fuzzing](MutationFuzzer.ipynb) – 2018-11-06
-1. [Fuzzing with Grammars](Grammars.ipynb) – 2018-11-13
-1. [Efficient Grammar Fuzzing](GrammarFuzzer.ipynb) – 2018-11-20
-1. [Grammar Coverage](GrammarCoverageFuzzer.ipynb) – 2018-11-27
-1. [Testing Configurations](ConfigurationFuzzer.ipynb) – 2018-12-04
-1. [Parsing and Recombining Inputs](Parser.ipynb) – 2018-12-11
-1. [Probabilistic Grammar Fuzzing](ProbabilisticGrammarFuzzer.ipynb) – 2018-12-18
-1. [Fuzzing with Generators](GeneratorGrammarFuzzer.ipynb) – 2019-01-08
-1. [Fuzzing APIs](APIFuzzer.ipynb) – 2019-01-15
-1. [Carving Unit Tests](Carver.ipynb) – 2019-01-22
-1. [Reducing Failure-Inducing Inputs](Reducer.ipynb) – 2019-01-29
-1. [Web Testing](WebFuzzer.ipynb) – 2019-02-05
-1. [GUI Testing](GUIFuzzer.ipynb) – 2019-02-12
-1. [Mining Input Grammars](GrammarMiner.ipynb) – 2019-02-19
-1. [Tracking Information Flow](InformationFlow.ipynb) – 2019-03-05
-1. [Concolic Fuzzing](SymbolicFuzzer.ipynb) – 2019-03-12
-1. [Symbolic Fuzzing](SymbolicFuzzer.ipynb) – 2019-03-19
-1. [Mining Function Specifications](DynamicInvariants) – 2019-03-26
-1. [Search-Based Fuzzing](SearchBasedFuzzer.ipynb) – 2019-04-02
-1. [Evaluating Test Effectiveness with Mutation Analysis](MutationAnalysis.ipynb) – 2019-04-09
-1. [Greybox Fuzzing](GreyboxFuzzer.ipynb) – 2019-04-16
-1. [Fuzzing with Input Fragments](LangFuzzer.ipynb) – 2019-04-30
-1. Fuzzing in the Large – 2019-05-07
-1. When to Stop Fuzzing – 2019-05-14
-
-See the [table of contents](00_Table_of_Contents.ipynb) for those chapters that are already done.
+See the [release notes](https://www.fuzzingbook.org/html/ReleaseNotes.html) for details.
 
 #### How do I cite your work?
 
@@ -128,7 +100,7 @@ Thanks for referring to our work!  Once the book is complete, you will be able t
 
 #### Can you cite my paper?  And possibly write a chapter about it?
 
-We're always happy to get suggestions!  If we missed an important reference, we will of course add it.  If you'd like specific material to be covered, the best way is to _write a notebook_ yourself; see our [Guide for Authors](Guide_for_Authors.ipynb) for instructions on coding and writing.  We can then refer to it or even host it.
+We're always happy to get suggestions!  If we missed an important reference, we will of course add it.  If you'd like specific material to be covered, the best way is to _write a notebook_ yourself; see our [Guide for Authors](https://www.fuzzingbook.org/html/Guide_for_Authors.html) for instructions on coding and writing.  We can then refer to it or even host it.
 
 ### Teaching and Coursework
 
@@ -148,11 +120,13 @@ We have successfully used the material in various courses.
 
 * Now, the goal of the book is to be completely self-contained; that is, it should work without additional support.  Hence, we now give out completed chapters to students in a _flipped classroom_ setting, with the students working on the notebooks at their leisure.  We would meet in the classroom to discuss experiences with past notebooks and discuss future notebooks.
 
+* We have the students work on exercises from the book or work on larger (fuzzing) projects.  We also have students who use the book as a base for their research; indeed, it is very easy to prototype in Python for Python.
+
 When running a course, [do not rely on mybinder.org](#Troubleshooting) – it will not provide sufficient resources for a larger group of students.  Instead, [install and run your own hub.](#Do-I-have-alternatives-to-the-interactive-notebook?)
 
 #### Are there specific subsets I can focus on?
 
-Our [Sitemap](00_Table_of_Contents.ipynb) lists the dependencies between the individual chapters.  After you have gone through the [basics of fuzzing](Fuzzer.ipynb), you can, for instance, limit yourself to [lexical (character-based) fuzzing](02_Lexical_Fuzzing.ipynb), and take a path towards [mutation-based "AFL-style" fuzzing](MutationFuzzer.ipynb).  Or you can go for Web and GUI testing and take the path through [syntactical (grammar-based) fuzzing](03_Syntactical_Fuzzing.ipynb) instead.
+We have compiled a number of [tours through the book](https://www.fuzzingbook.org/html/Tours.html) for various audiences.  Our [Sitemap](https://www.fuzzingbook.org/html/00_Table_of_Contents.html) lists the dependencies between the individual chapters.
 
 #### How can I extend or adapt your slides?
 
@@ -163,7 +137,7 @@ Download the Jupyter Notebooks (using the menu at the top) and adapt the noteboo
 
 #### Do you provide PDFs of your material?
 
-At this point, we do not provide support for PDF versions.  We will be producing PDF and print versions once the book is complete.
+At this point, we do not provide support for PDF versions.  We will be producing PDF and print versions after the book is complete.
 
 ### Other Issues
 
@@ -194,4 +168,4 @@ Again, we're glad you're here!  We are happy to accept
 * **Code fixes and improvements.**  Please place any code under the MIT license such that we can easily include it.
 * **Additional text, chapters, and notebooks** on specialized topics.  We plan to set up a special folder for third-party contributions.
 
-See our [Guide for Authors](Guide_for_Authors.ipynb) for instructions on coding and writing.
+See our [Guide for Authors](https://www.fuzzingbook.org/html/Guide_for_Authors.html) for instructions on coding and writing.

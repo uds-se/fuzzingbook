@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2019-05-10 14:40:00+02:00
+# Last change: 2019-05-21 19:58:03+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Testing Web Applications')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -1417,6 +1425,55 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     orders_db_is_empty()
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+# ### Fuzzing Web Forms
+
+if __name__ == "__main__":
+    print('\n### Fuzzing Web Forms')
+
+
+
+
+if __name__ == "__main__":
+    web_form_fuzzer = WebFormFuzzer(httpd_url)
+
+
+if __name__ == "__main__":
+    web_form_fuzzer.grammar['<start>']
+
+
+if __name__ == "__main__":
+    web_form_fuzzer.grammar['<action>']
+
+
+if __name__ == "__main__":
+    web_form_fuzzer.grammar['<query>']
+
+
+if __name__ == "__main__":
+    web_form_fuzzer.fuzz()
+
+
+# ### SQL Injection Attacks
+
+if __name__ == "__main__":
+    print('\n### SQL Injection Attacks')
+
+
+
+
+if __name__ == "__main__":
+    sql_fuzzer = SQLInjectionFuzzer(httpd_url, "DELETE FROM orders")
+    sql_fuzzer.fuzz()
 
 
 # ## Lessons Learned

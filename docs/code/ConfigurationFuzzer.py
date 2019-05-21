@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2019-02-12 11:16:27+01:00
+# Last change: 2019-05-21 19:58:02+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Testing Configurations')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -811,6 +819,43 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     len(mypy_runner.ebnf_grammar()["<option>"]) * \
         (len(mypy_runner.ebnf_grammar()["<option>"]) - 1)
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    autopep8_runner = OptionRunner("autopep8", "foo.py")
+
+
+if __name__ == "__main__":
+    option_ebnf_grammar = autopep8_runner.ebnf_grammar()
+    print(option_ebnf_grammar)
+
+
+if __package__ is None or __package__ == "":
+    from Grammars import convert_ebnf_grammar
+else:
+    from .Grammars import convert_ebnf_grammar
+
+
+if __name__ == "__main__":
+    fuzzer = GrammarCoverageFuzzer(convert_ebnf_grammar(option_ebnf_grammar))
+    [fuzzer.fuzz() for i in range(3)]
+
+
+if __name__ == "__main__":
+    autopep8_runner = OptionRunner("autopep8", "foo.py")
+    autopep8_fuzzer = OptionFuzzer(autopep8_runner)
+
+
+if __name__ == "__main__":
+    [autopep8_fuzzer.fuzz() for i in range(3)]
 
 
 # ## Lessons Learned

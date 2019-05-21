@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2019-04-02 04:12:16+02:00
+# Last change: 2019-05-21 19:58:02+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -51,6 +51,14 @@ if __package__ is None or __package__ == "":
     import Intro_Testing
 else:
     from . import Intro_Testing
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
 
 
 # ## Specifications and Assertions
@@ -1399,6 +1407,39 @@ if __name__ == "__main__":
             eval(sum2_fuzzer.fuzz())
 
     print_content(annotator.function_with_invariants('sum2'), '.py')
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+def sum2(a, b):
+    return a + b
+
+if __name__ == "__main__":
+    with TypeAnnotator() as type_annotator:
+        sum2(1, 2)
+        sum2(-4, -5)
+        sum2(0, 0)
+
+
+if __name__ == "__main__":
+    print(type_annotator.typed_functions())
+
+
+if __name__ == "__main__":
+    with InvariantAnnotator() as inv_annotator:
+        sum2(1, 2)
+        sum2(-4, -5)
+        sum2(0, 0)
+
+
+if __name__ == "__main__":
+    print(inv_annotator.functions_with_invariants())
 
 
 # ## Lessons Learned

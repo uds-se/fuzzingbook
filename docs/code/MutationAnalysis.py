@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/MutationAnalysis.html
-# Last change: 2019-05-05 13:29:41+02:00
+# Last change: 2019-05-21 19:57:59+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Mutation Analysis')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -783,6 +791,35 @@ if __name__ == "__main__":
     print("\n### Statistical Estimation of the Number of Immortals by Chao's Estimator")
 
 
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    for mutant in MuFunctionAnalyzer(gcd, log=True):
+        with mutant:
+            assert gcd(1, 0) == 1, "Minimal"
+            assert gcd(0, 1) == 1, "Mirror"
+    mutant.pm.score()
+
+
+class TestGCD(unittest.TestCase):
+    def test_simple(self):
+        assert cfg.gcd(1, 0) == 1
+
+    def test_mirror(self):
+        assert cfg.gcd(0, 1) == 1
+
+if __name__ == "__main__":
+    for mutant in MuProgramAnalyzer('gcd', gcd_src):
+        mutant[test_module].runTest('TestGCD')
+    mutant.pm.score()
 
 
 # ## Lessons Learned

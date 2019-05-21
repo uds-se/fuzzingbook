@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2019-05-10 13:29:32+02:00
+# Last change: 2019-05-21 19:58:00+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Efficient Grammar Fuzzing')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -346,6 +354,12 @@ else:
 class GrammarFuzzer(Fuzzer):
     def __init__(self, grammar, start_symbol=START_SYMBOL,
                  min_nonterminals=0, max_nonterminals=10, disp=False, log=False):
+        """Produce strings from `grammar`, starting with `start_symbol`.
+        If `min_nonterminals` or `max_nonterminals` is given, use them as limits 
+        for the number of nonterminals produced.  
+        If `disp` is set, display the intermediate derivation trees.
+        If `log` is set, show intermediate steps as text on standard output."""
+        
         self.grammar = grammar
         self.start_symbol = start_symbol
         self.min_nonterminals = min_nonterminals
@@ -851,6 +865,44 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     f = GrammarFuzzer(expr_grammar, max_nonterminals=10)
     f.fuzz()
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __package__ is None or __package__ == "":
+    from Grammars import US_PHONE_GRAMMAR
+else:
+    from .Grammars import US_PHONE_GRAMMAR
+
+
+if __name__ == "__main__":
+    phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
+    phone_fuzzer.fuzz()
+
+
+if __name__ == "__main__":
+    area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='<area>')
+    area_fuzzer.fuzz()
+
+
+import inspect
+
+if __name__ == "__main__":
+    print(inspect.getdoc(GrammarFuzzer.__init__))
+
+
+if __name__ == "__main__":
+    display_tree(phone_fuzzer.derivation_tree)
+
+
+if __name__ == "__main__":
+    phone_fuzzer.derivation_tree
 
 
 # ## Lessons Learned

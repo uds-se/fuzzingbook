@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2019-05-10 13:49:14+02:00
+# Last change: 2019-05-21 19:58:03+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Testing Graphical User Interfaces')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -122,20 +130,19 @@ def start_webdriver(browser=BROWSER, headless=HEADLESS, zoom=1.4):
         profile = webdriver.firefox.firefox_profile.FirefoxProfile()
         profile.set_preference("layout.css.devPixelsPerPx", repr(zoom))
         gui_driver = webdriver.Firefox(firefox_profile=profile, options=options)
-    if browser == 'chrome':
-        gui_driver = webdriver.Chrome(options=options)
         
+        # We set the window size such that it fits our order form exactly;
+        # this is useful for not wasting too much space when taking screen shots.
+        gui_driver.set_window_size(700, 300)
+
+    elif browser == 'chrome':
+        gui_driver = webdriver.Chrome(options=options)
+        gui_driver.set_window_size(700, 210 if headless else 340)
+            
     return gui_driver
 
 if __name__ == "__main__":
     gui_driver = start_webdriver(browser=BROWSER, headless=HEADLESS)
-
-
-if __name__ == "__main__":
-    if BROWSER == 'firefox':
-        gui_driver.set_window_size(700, 300)
-    if BROWSER == 'chrome':
-        gui_driver.set_window_size(700, 210 if HEADLESS else 340)
 
 
 if __name__ == "__main__":
@@ -1207,6 +1214,66 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
+    gui_driver.quit()
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    gui_driver = start_webdriver()
+
+
+if __name__ == "__main__":
+    gui_driver.get(httpd_url)
+    Image(gui_driver.get_screenshot_as_png())
+
+
+if __name__ == "__main__":
+    gui_fuzzer = GUICoverageFuzzer(gui_driver)
+
+
+if __name__ == "__main__":
+    gui_runner = GUIRunner(gui_driver)
+
+
+if __name__ == "__main__":
+    gui_fuzzer.explore_all(gui_runner)
+
+
+if __name__ == "__main__":
+    fsm_diagram(gui_fuzzer.grammar)
+
+
+if __name__ == "__main__":
+    gui_driver.get(httpd_url)
+    actions = gui_fuzzer.fuzz()
+    print(actions)
+
+
+if __name__ == "__main__":
+    gui_driver.get(httpd_url)
+    result, outcome = gui_runner.run(actions)
+
+
+if __name__ == "__main__":
+    Image(gui_driver.get_screenshot_as_png())
+
+
+# ## Lessons Learned
+
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
+
+
+if __name__ == "__main__":
     httpd_process.terminate()
 
 
@@ -1220,14 +1287,6 @@ if __name__ == "__main__":
     for temp_file in [ORDERS_DB, "geckodriver.log", "ghostdriver.log"]:
         if os.path.exists(temp_file):
             os.remove(temp_file)
-
-
-# ## Lessons Learned
-
-if __name__ == "__main__":
-    print('\n## Lessons Learned')
-
-
 
 
 # ## Next Steps

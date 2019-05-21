@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2019-05-03 15:34:23+02:00
+# Last change: 2019-05-21 19:57:59+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -46,6 +46,14 @@ if __package__ is None or __package__ == "":
     import Intro_Testing
 else:
     from . import Intro_Testing
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
 
 
 # ## A Testing Assignment
@@ -665,14 +673,14 @@ class Fuzzer(object):
 class RandomFuzzer(Fuzzer):
     def __init__(self, min_length=10, max_length=100,
                  char_start=32, char_range=32):
+        """Produce strings of `min_length` to `max_length` characters
+           in the range [`char_start`, `char_start` + `char_range`]"""
         self.min_length = min_length
         self.max_length = max_length
         self.char_start = char_start
         self.char_range = char_range
 
     def fuzz(self):
-        """A string of `min_length` to `max_length` characters
-           in the range [`char_start`, `char_start` + `char_range`]"""
         string_length = random.randrange(self.min_length, self.max_length + 1)
         out = ""
         for i in range(0, string_length):
@@ -700,6 +708,54 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     random_fuzzer.runs(cat, 10)
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+# ### Fuzzers
+
+if __name__ == "__main__":
+    print('\n### Fuzzers')
+
+
+
+
+if __name__ == "__main__":
+    random_fuzzer = RandomFuzzer()
+    random_fuzzer.fuzz()
+
+
+if __name__ == "__main__":
+    print(RandomFuzzer.__init__.__doc__)
+
+
+if __name__ == "__main__":
+    random_fuzzer = RandomFuzzer(min_length=10, max_length=20, char_start=65, char_range=26)
+    random_fuzzer.fuzz()
+
+
+# ### Runners
+
+if __name__ == "__main__":
+    print('\n### Runners')
+
+
+
+
+if __name__ == "__main__":
+    print_runner = PrintRunner()
+    random_fuzzer.run(print_runner)
+
+
+if __name__ == "__main__":
+    cat = ProgramRunner('cat')
+    random_fuzzer.run(cat)
 
 
 # ## Lessons Learned
