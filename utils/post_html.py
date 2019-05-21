@@ -77,6 +77,7 @@ site_header_template = menu_start + r"""
      <li><a href="__SITE_HTML__dist/fuzzingbook-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
      <li><a href="__SITE_HTML__dist/fuzzingbook-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
      <li><a href="__GITHUB_HTML__" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
+     <li><a href="html/ReleaseNotes.html" target="_blank"><i class="fa fa-fw fa-calendar"></i> Release Notes</a></li>
      </ul>
      </li>
 """ + menu_end
@@ -92,6 +93,7 @@ chapter_header_template = menu_start + r"""
      <li><a href="__SITE_HTML__dist/fuzzingbook-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
      <li><a href="__SITE_HTML__dist/fuzzingbook-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
      <li><a href="__GITHUB_HTML__" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
+     <li><a href="ReleaseNotes.html" target="_blank"><i class="fa fa-fw fa-calendar"></i> Release Notes</a></li>
      </ul>
      </li>
      """ + menu_end
@@ -208,7 +210,10 @@ def anchor(title):
     return '#' + title.replace(' ', '-')
 
 
-def decorate(section):
+def decorate(section, depth):
+    if depth != 2:
+        return section
+    
     if section == "Synopsis":
         section = '<i class="fa fa-fw fa-map"></i> ' + section
     elif section == "Lessons Learned":
@@ -219,6 +224,8 @@ def decorate(section):
         section = '<i class="fa fa-fw fa-mortar-board"></i> ' + section
     elif section == "Exercises":
         section = '<i class="fa fa-fw fa-edit"></i> ' + section
+    else:
+        section = '&nbsp;&bull;&nbsp;&nbsp; ' + section
 
     return section
 
@@ -462,7 +469,7 @@ for section in sections:
     if depth < current_depth:
         all_sections_menu += "</ul></li>" * (current_depth - depth)
 
-    all_sections_menu += '<li class="has-sub"><a href="%s">%s</a>\n' % (anchor(section), decorate(section))
+    all_sections_menu += '<li class="has-sub"><a href="%s">%s</a>\n' % (anchor(section), decorate(section, depth))
     current_depth = depth
 
 while current_depth > 1:
