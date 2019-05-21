@@ -976,6 +976,15 @@ $(DOCS_TARGET)notebooks/00_Index.ipynb: utils/nbindex.py \
 	$(CHAPTERS_MAKEFILE)
 	(cd $(NOTEBOOKS); $(PYTHON) ../utils/nbindex.py $(TOC_CHAPTERS) $(APPENDICES)) > $@
 	@$(OPEN) $@
+	
+	
+## Synopsis
+update-synopsis: 
+	$(NBSYNOPSYS) --update $(CHAPTER_SOURCES)
+
+no-synopsis:
+	@echo Chapters without synopsis:
+	@grep -L '## Synopsis' $(CHAPTER_SOURCES) | grep -v '[0-9]'
 
 
 ## Python packages
