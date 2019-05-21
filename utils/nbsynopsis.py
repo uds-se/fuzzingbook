@@ -27,10 +27,24 @@ def notebook_synopsis(notebook_name):
     first_synopsis = True
     svg_count = 1
     
+    notebook_noext = os.path.splitext(notebook_path)[0]
+    notebook_basename = os.path.basename(notebook_noext)
+    
     for cell in notebook.cells:
         if not first_synopsis and cell.source.startswith(SYNOPSIS_TITLE):
             in_synopsis = True
-            synopsis = SYNOPSIS_TITLE + "\n\n<!-- Automatically generated. Do not edit. -->\n\n" + cell.source[len(SYNOPSIS_TITLE):] + "\n\n"
+            synopsis = SYNOPSIS_TITLE + """
+<!-- Automatically generated. Do not edit. -->
+
+To [use the code provided in this chapter](index.ipynb#Using-the-Code), write
+
+```python
+from fuzzingbook.%s import <identifier>
+```
+
+and then make use of the following features.
+""" % notebook_basename
+            synopsis += cell.source[len(SYNOPSIS_TITLE):] + "\n\n"
             continue
         elif cell.source.startswith("## "):
             in_synopsis = False
@@ -53,8 +67,7 @@ def notebook_synopsis(notebook_name):
                         except AttributeError:
                             pass
                         if svg is not None:
-                            notebook_noext = os.path.splitext(notebook_path)[0]
-                            svg_basename = (os.path.basename(notebook_noext) +
+                            svg_basename = (notebook_basename +
                                 '-synopsis-' + repr(svg_count) + '.svg')
                                 
                             svg_filename = os.path.join(
