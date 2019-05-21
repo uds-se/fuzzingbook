@@ -40,7 +40,7 @@ def notebook_synopsis(notebook_name):
 To [use the code provided in this chapter](index.ipynb#Using-the-Code), write
 
 ```python
-from fuzzingbook.%s import <identifier>
+>>> from fuzzingbook.%s import <identifier>
 ```
 
 and then make use of the following features.
@@ -53,7 +53,7 @@ and then make use of the following features.
 
         if in_synopsis:
             if cell.cell_type == 'code':
-                synopsis += "```python\n" + cell.source + "\n```\n"
+                synopsis += "```python\n>>> " + cell.source.replace('\n', '\n>>> ') + "\n```\n"
                 output_text = ''
                 for output in cell.outputs:
                     text = None
@@ -125,10 +125,12 @@ and then make use of the following features.
                     if output_text.startswith('![]'):
                         synopsis += '\n' + output_text + '\n'
                     else:
-                        synopsis += "```python\n=> " + output_text + "```\n"
+                        synopsis += "```python\n" + output_text + "```\n"
             else:
                 synopsis += cell.source + "\n\n"
-            
+    
+    synopsis = synopsis.replace("```\n```python\n", "")
+
     return synopsis
     
 def update_synopsis(notebook_name, synopsis):
