@@ -275,6 +275,9 @@ def add_links_to_imports(contents):
         elif module.startswith("selenium"):
             # Point to Selenium doc
             link = "https://selenium-python.readthedocs.io/"
+        elif module.startswith("fuzzingbook"):
+            # Point to notebook
+            link = module[module.find('.') + 1:] + '.html'
         elif module[0].islower():
             # Point to Python doc
             link = "https://docs.python.org/3/library/" + module + ".html"
