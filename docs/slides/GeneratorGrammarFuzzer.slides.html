@@ -13333,6 +13333,16 @@ a:active {
     margin-top: 1cm;
 }
 
+/* Synopsis */
+.synopsis {
+    border-style: dotted;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+
 /* Solutions */
 .solution_link {
 	/* font-size: 12px; */
@@ -13812,6 +13822,51 @@ a.anchor-link {
 <ul>
 <li>As this chapter deeply interacts with the techniques discussed in the <a href="GrammarFuzzer.slides.html">chapter on efficient grammar fuzzing</a>, a good understanding of the techniques is recommended.</li>
 </ul>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
+
+<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.GeneratorGrammarFuzzer</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
+</pre></div>
+<p>and then make use of the following features.</p>
+<p>This chapter introduces the ability to attach <em>functions</em> to individual production rules:</p>
+<ul>
+<li>A <code>pre</code> function is executed <em>before</em> the expansion takes place.  Its result (typically a string) can <em>replace</em> the actual expansion.</li>
+<li>A <code>post</code> function is executed <em>after</em> the expansion has taken place.  If it returns a string, the string replaces the expansion; it it returns <code>False</code>, it triggers a new expansion.</li>
+</ul>
+<p>Both functions can return <code>None</code> to not interfere with grammar production at all.</p>
+<p>To attach a function <code>F</code> to an individual expansion <code>S</code> in a grammar, replace <code>S</code> with a pair</p>
+<div class="highlight"><pre><span></span><span class="p">(</span><span class="n">opts</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="n">F</span><span class="p">))</span>   <span class="c1"># Set a function to be executed before expansion</span>
+</pre></div>
+<p>or</p>
+<div class="highlight"><pre><span></span><span class="p">(</span><span class="n">opts</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="n">F</span><span class="p">))</span>  <span class="c1"># Set a function to be executed after expansion</span>
+</pre></div>
+<p>Here is an example, To take an area code from a list that is given programmatically, we can write:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">Grammars</span> <span class="kn">import</span> <span class="n">US_PHONE_GRAMMAR</span><span class="p">,</span> <span class="n">extend_grammar</span><span class="p">,</span> <span class="n">opts</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">def</span> <span class="nf">pick_area_code</span><span class="p">():</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;555&#39;</span><span class="p">,</span> <span class="s1">&#39;554&#39;</span><span class="p">,</span> <span class="s1">&#39;553&#39;</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">PICKED_US_PHONE_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">,</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">{</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="s2">&quot;&lt;area&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="n">pick_area_code</span><span class="p">))]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">})</span>
+</pre></div>
+<p>A <code>GeneratorGrammarFuzzer</code> will extract and interpret these options.  Here is an example:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">picked_us_phone_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">PICKED_US_PHONE_GRAMMAR</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">picked_us_phone_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+<span class="p">[</span><span class="s1">&#39;(553)200-6118&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(553)889-0205&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(555)317-0936&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(553)455-2577&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;(553)263-8511&#39;</span><span class="p">]</span>
+</pre></div>
+<p>As you can see, the area codes now all stem from <code>pick_area_code()</code>.  Such definitions allow to closely tie program code (such as <code>pick_area_code()</code>) to grammars.</p>
+<p>The <code>PGGCFuzzer</code> class incorporates all features from <a href="GrammarFuzzer.slides.html">the <code>GrammarFuzzer</code> class</a> and its <a href="GrammarCoverageFuzzer.slides.html">coverage-based</a>, <a href="ProbabilisticGrammarFuzzer.slides.html">probabilistic-based</a>, and <a href="GeneratorGrammarFuzzer.slides.html">generator-based</a> derivatives.</p>
 
 </div>
 </div>
@@ -14350,8 +14405,8 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>warning: option &#39;pre&#39; is not supported
-warning: option &#39;post&#39; is not supported
+<pre>warning: option &#39;post&#39; is not supported
+warning: option &#39;pre&#39; is not supported
 </pre>
 </div>
 </div>
@@ -14623,7 +14678,7 @@ warning: option &#39;post&#39; is not supported
 Expanding &lt;amount&gt; randomly
 Tree: $&lt;float&gt;
 Expanding &lt;float&gt; randomly
-&lt;function &lt;lambda&gt; at 0x106185378&gt;() = 382087.72
+&lt;function &lt;lambda&gt; at 0x106cd2400&gt;() = 382087.72
 Replacing &lt;integer&gt;.&lt;digit&gt;&lt;digit&gt; by 382087.72
 Tree: $382087.72
 &#39;$382087.72&#39;
@@ -16113,7 +16168,7 @@ q=3-2;MPy=q;p=2*5
 zj=+5*-+35.2-+1.5727978+(-(-0/6-7+3))*--+44*1
 Tl=((0*9+4-3)-6)/(-3-7*8*8/7)+9
 aXZ=-5/-+3*9/3/1-8-+0*0/3+7+4
-NA=-(8+g-1)*1.6;g=++7;a=++g*g*g
+NA=-(8+a-1)*1.6;g=++7;a=++g*g*g
 </pre>
 </div>
 </div>
@@ -16895,6 +16950,132 @@ u=-++33*+-6/(2*3*2+1/9-4*1-8)*((8.5))
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><p>This chapter introduces the ability to attach <em>functions</em> to individual production rules:</p>
+<ul>
+<li>A <code>pre</code> function is executed <em>before</em> the expansion takes place.  Its result (typically a string) can <em>replace</em> the actual expansion.</li>
+<li>A <code>post</code> function is executed <em>after</em> the expansion has taken place.  If it returns a string, the string replaces the expansion; it it returns <code>False</code>, it triggers a new expansion.</li>
+</ul>
+<p>Both functions can return <code>None</code> to not interfere with grammar production at all.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To attach a function <code>F</code> to an individual expansion <code>S</code> in a grammar, replace <code>S</code> with a pair</p>
+<div class="highlight"><pre><span></span><span class="p">(</span><span class="n">opts</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="n">F</span><span class="p">))</span>   <span class="c1"># Set a function to be executed before expansion</span>
+</pre></div>
+<p>or</p>
+<div class="highlight"><pre><span></span><span class="p">(</span><span class="n">opts</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="n">post</span><span class="o">=</span><span class="n">F</span><span class="p">))</span>  <span class="c1"># Set a function to be executed after expansion</span>
+</pre></div>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Here is an example, To take an area code from a list that is given programmatically, we can write:</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[100]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">pick_area_code</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="s1">&#39;555&#39;</span><span class="p">,</span> <span class="s1">&#39;554&#39;</span><span class="p">,</span> <span class="s1">&#39;553&#39;</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[101]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PICKED_US_PHONE_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">,</span>
+<span class="p">{</span>
+    <span class="s2">&quot;&lt;area&gt;&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;&lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="n">opts</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="n">pick_area_code</span><span class="p">))]</span>
+<span class="p">})</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>A <code>GeneratorGrammarFuzzer</code> will extract and interpret these options.  Here is an example:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[102]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">picked_us_phone_fuzzer</span> <span class="o">=</span> <span class="n">GeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">PICKED_US_PHONE_GRAMMAR</span><span class="p">)</span>
+<span class="p">[</span><span class="n">picked_us_phone_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt output_prompt">Out[102]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[&#39;(553)200-6118&#39;,
+ &#39;(553)889-0205&#39;,
+ &#39;(555)317-0936&#39;,
+ &#39;(553)455-2577&#39;,
+ &#39;(553)263-8511&#39;]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As you can see, the area codes now all stem from <code>pick_area_code()</code>.  Such definitions allow to closely tie program code (such as <code>pick_area_code()</code>) to grammars.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>PGGCFuzzer</code> class incorporates all features from <a href="GrammarFuzzer.slides.html">the <code>GrammarFuzzer</code> class</a> and its <a href="GrammarCoverageFuzzer.slides.html">coverage-based</a>, <a href="ProbabilisticGrammarFuzzer.slides.html">probabilistic-based</a>, and <a href="GeneratorGrammarFuzzer.slides.html">generator-based</a> derivatives.</p>
+
+</div>
+</div>
+</div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><p>Functions attached to grammar expansions can serve</p>
 <ul>
 <li>as <em>generators</em> to efficiently produce a symbol expansion from a function;</li>
@@ -16956,7 +17137,7 @@ u=-++33*+-6/(2*3*2+1/9-4*1-8)*((8.5))
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[99]:</div>
+<div class="prompt input_prompt">In&nbsp;[103]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ATTR_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>

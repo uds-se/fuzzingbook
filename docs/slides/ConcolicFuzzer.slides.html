@@ -13333,6 +13333,16 @@ a:active {
     margin-top: 1cm;
 }
 
+/* Synopsis */
+.synopsis {
+    border-style: dotted;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+
 /* Solutions */
 .solution_link {
 	/* font-size: 12px; */
@@ -13831,6 +13841,95 @@ a.anchor-link {
 </div>
 </div>
 </div></div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
+
+<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.ConcolicFuzzer</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
+</pre></div>
+<p>and then make use of the following features.</p>
+<p>This chapter defines two main classes: <code>SimpleConcolicFuzzer</code> and <code>ConcolicGrammarFuzzer</code>. The <code>SimpleConcolicFuzzer</code> first uses a sample input to collect predicates encountered. The fuzzer then negates random predicates to generate new input constraints. These, when solved, produce inputs that explore paths that are close to the original path. It can be used as follows.</p>
+<p>The <code>cgi_decode()</code> function <a href="Coverage.slides.html">from the chapter on coverage</a> is the subject program.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">Coverage</span> <span class="kn">import</span> <span class="n">cgi_decode</span>
+</pre></div>
+<p>We first obtain the constraints using <code>ConcolicTracer</code>.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="s1">&#39;abcd&#39;</span><span class="p">)</span>
+</pre></div>
+<p>These constraints are added to the concolic fuzzer as follows:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">scf</span> <span class="o">=</span> <span class="n">SimpleConcolicFuzzer</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">scf</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
+</pre></div>
+<p>The concolic fuzzer then uses the constraints added to guide its fuzzing as follows:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="n">v</span> <span class="o">=</span> <span class="n">scf</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+<span class="o">&gt;&gt;&gt;</span>         <span class="k">break</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="k">print</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+\<span class="n">x00</span>\<span class="n">x00</span><span class="o">%</span>\<span class="n">x00</span>
+\<span class="n">x00</span><span class="o">%</span>\<span class="n">x00</span>
+\<span class="n">x00</span>\<span class="n">x00</span><span class="o">+</span>\<span class="n">x00</span>
+\<span class="n">x00</span>\<span class="n">x00</span><span class="o">+</span>\<span class="n">x02</span>
+\<span class="n">x00</span>\<span class="n">x00</span><span class="o">+</span>\<span class="n">x01</span>
+<span class="o">%</span>\<span class="n">x00</span>
+<span class="o">%</span>\<span class="n">x10</span>
+\<span class="n">x00</span>\<span class="n">x00</span><span class="o">%</span> 
+<span class="o">%</span>\<span class="n">x04</span>
+\<span class="n">x00</span><span class="o">+</span>\<span class="n">x00</span>
+</pre></div>
+<p>The <code>SimpleConcolicFuzzer</code> simply explores all paths near the original path traversed by the sample input. It does not use any kind of feedback from fuzzing.
+The <code>ConcolicGrammarFuzzer</code> on the other hand, can collect feedback from the subject under fuzzing, and lift some of the constraints encountered to the grammar, enabling deeper fuzzing. It is used as follows:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">InformationFlow</span> <span class="kn">import</span> <span class="n">INVENTORY_GRAMMAR</span><span class="p">,</span> <span class="n">SQLException</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cgf</span> <span class="o">=</span> <span class="n">ConcolicGrammarFuzzer</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cgf</span><span class="o">.</span><span class="n">prune_tokens</span><span class="p">(</span><span class="n">prune_tokens</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="n">query</span> <span class="o">=</span> <span class="n">cgf</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="k">print</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
+<span class="o">&gt;&gt;&gt;</span>         <span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+<span class="o">&gt;&gt;&gt;</span>             <span class="k">try</span><span class="p">:</span>
+<span class="o">&gt;&gt;&gt;</span>                 <span class="n">res</span> <span class="o">=</span> <span class="n">_</span><span class="p">[</span><span class="n">db_select</span><span class="p">](</span><span class="n">query</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span>                 <span class="k">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span>             <span class="k">except</span> <span class="n">SQLException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="o">&gt;&gt;&gt;</span>                 <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span>         <span class="n">cgf</span><span class="o">.</span><span class="n">update_grammar</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span>         <span class="k">print</span><span class="p">()</span>
+<span class="n">update</span> <span class="n">m</span> <span class="nb">set</span> <span class="n">tj5</span><span class="o">=</span><span class="n">J</span><span class="p">,</span><span class="n">g</span><span class="o">=</span><span class="p">:</span><span class="mi">91</span><span class="n">Em85NJ9e5</span> <span class="n">where</span> <span class="n">v</span><span class="o">!=</span><span class="mi">57</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+
+<span class="n">update</span> <span class="n">m5</span> <span class="nb">set</span> <span class="n">h2</span><span class="o">=</span><span class="n">g</span> <span class="n">where</span> <span class="p">(</span><span class="o">-</span><span class="mf">81.7</span><span class="p">)</span><span class="o">!=</span><span class="n">BZ1</span><span class="p">(</span><span class="n">R</span><span class="p">(</span><span class="n">U</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">U</span><span class="p">)</span><span class="o">+</span><span class="n">Z</span><span class="o">/</span><span class="n">F</span><span class="o">-</span><span class="n">C</span><span class="o">/</span><span class="n">g</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="n">L</span><span class="p">)</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;m5&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+
+<span class="n">update</span> <span class="n">vehicles</span> <span class="nb">set</span> <span class="n">d1</span><span class="o">=</span><span class="n">g</span><span class="p">,</span><span class="n">E</span><span class="o">=</span><span class="n">x</span> <span class="n">where</span> <span class="n">W</span><span class="o">+</span><span class="n">o</span><span class="o">+</span><span class="n">S</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span><span class="o">!=</span><span class="n">X</span>
+<span class="n">Column</span> <span class="p">(</span><span class="s1">&#39;d1&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+
+<span class="n">update</span> <span class="n">vehicles</span> <span class="nb">set</span> <span class="n">BS</span><span class="o">=</span><span class="n">c</span><span class="p">,</span><span class="n">Deo827657</span><span class="o">=</span><span class="n">q</span> <span class="n">where</span> <span class="mi">8</span><span class="o">==</span><span class="n">wi</span>
+<span class="n">Column</span> <span class="p">(</span><span class="s1">&#39;BS&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+
+<span class="n">select</span> <span class="n">nQ</span><span class="p">,(</span><span class="n">a</span><span class="o">==</span><span class="n">R</span><span class="p">),</span><span class="n">i</span> <span class="kn">from</span> <span class="nn">eAi</span> <span class="nn">where</span> <span class="nn">F</span><span class="o">&gt;</span><span class="n">v</span><span class="o">*</span><span class="n">f</span><span class="o">/</span><span class="n">I</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;eAi&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+
+<span class="n">select</span> <span class="n">J8</span><span class="p">,(</span><span class="n">vV</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">vehicles</span> <span class="nn">where</span> <span class="mi">97</span><span class="o">!=</span><span class="p">(</span><span class="mi">51</span><span class="p">)</span><span class="o">-</span><span class="n">p</span><span class="o">-</span><span class="n">g</span><span class="o">*</span><span class="n">K</span><span class="o">*</span><span class="n">J</span><span class="o">*</span><span class="n">w</span><span class="o">/</span><span class="n">D</span><span class="o">-</span><span class="n">U</span><span class="o">----</span><span class="mf">16.0</span><span class="o">==</span><span class="p">(</span><span class="o">.</span><span class="p">)</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(97!=(51)-p-g*K*J*w/D-U----16.0==(.))&#39;</span><span class="p">)</span>
+
+<span class="n">select</span> <span class="n">I</span> <span class="kn">from</span> <span class="nn">months</span> <span class="nn">where</span> <span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="o">==</span><span class="mf">2.9</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;((w)==2.9)&#39;</span><span class="p">)</span>
+
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn">vehicles</span> <span class="nn">where</span> <span class="nn">D</span><span class="o">/</span><span class="n">a</span><span class="o">*</span><span class="n">D</span><span class="o">&gt;</span><span class="n">K</span><span class="o">-</span><span class="n">e</span><span class="o">-</span><span class="n">T</span><span class="o">-</span><span class="n">W</span><span class="o">/</span><span class="n">i</span><span class="o">+.+</span><span class="n">P</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;D/a*D&gt;K-e-T-W/i+.+P&#39;</span><span class="p">)</span>
+
+<span class="n">select</span> <span class="p">(((</span><span class="n">Qq3</span><span class="p">(</span><span class="n">j</span><span class="p">)))</span><span class="o">==</span><span class="n">N</span><span class="o">&lt;</span><span class="n">a</span><span class="o">+</span><span class="n">k</span><span class="o">/</span><span class="n">Z</span><span class="o">&lt;</span><span class="n">m1U</span><span class="p">),</span><span class="n">r</span> <span class="kn">from</span> <span class="nn">vehicles</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;((((Qq3(j)))==N&lt;a+k/Z&lt;m1U),r)&#39;</span><span class="p">)</span>
+
+<span class="n">select</span> <span class="n">A</span><span class="o">!=</span><span class="n">I</span><span class="p">,(</span><span class="n">_</span><span class="o">+</span><span class="n">v</span><span class="o">+</span><span class="n">X</span><span class="o">/</span><span class="n">l</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">c</span> <span class="nn">where</span> <span class="mi">638</span><span class="o">==</span><span class="n">O</span><span class="o">&gt;</span><span class="n">c</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+</pre></div>
+
+</div>
+</div>
+</div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -20404,8 +20503,8 @@ $$
     _[hang_if_no_space](&#39;abcd&#39;)
   File &#34;&lt;ipython-input-33-635d2b1b13c2&gt;&#34;, line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File &#34;&lt;string&gt;&#34;, line 4, in hang_if_no_space
-  File &#34;&lt;string&gt;&#34;, line 4, in hang_if_no_space
+  File &#34;&lt;string&gt;&#34;, line 7, in hang_if_no_space
+  File &#34;&lt;string&gt;&#34;, line 7, in hang_if_no_space
   File &#34;&lt;string&gt;&#34;, line 16, in check_time
 TimeoutError (expected)
 </pre>
@@ -21894,29 +21993,29 @@ Table (&#39;b&#39;) was not found
 update O8F set E=g,p=Z where y&gt;p
 Table (&#39;O8F&#39;) was not found
 
-update vehicles set wz=w5 where _*E/O-K(U)&lt;Z+v/G/r/c
-Column (&#39;wz&#39;) was not found
+update F0 set X=Z,.=t where Y+c&gt;n/k-V
+Table (&#39;F0&#39;) was not found
 
-delete from vehicles where r-z-Q-d*d-h-P!=r1R
-Invalid WHERE (&#39;r-z-Q-d*d-h-P!=r1R&#39;)
+delete from vehicles where (((D+K-w/v*w-Z)))&gt;Y((E!=e)*k-e*m)
+Invalid WHERE (&#39;(((D+K-w/v*w-Z)))&gt;Y((E!=e)*k-e*m)&#39;)
 
-insert into muc (n23f2W6sOP) values (&#39;y&#39;)
-Table (&#39;muc&#39;) was not found
+insert into vehicles (k61) values (&#39;%&#39;)
+Column (&#39;k61&#39;) was not found
 
-insert into vehicles (.9) values (&#39;T|gi&#39;,&#39;O&#39;,1.86,-501.9,0.1,48199462.8)
-Column (&#39;.9&#39;) was not found
+update a set model=C70 where -66.3==(M*q+hL(D)/p/J/YR(x))
+Table (&#39;a&#39;) was not found
 
-select w&lt;O/X-S from vehicles where Y/b&gt;Z*K*Z*B
-Invalid WHERE (&#39;(Y/b&gt;Z*K*Z*B)&#39;)
+delete from months where K(E,e)+p&lt;:/x*r/R*I&lt;(-84)*H==-5
+Invalid WHERE (&#39;K(E,e)+p&lt;:/x*r/R*I&lt;(-84)*H==-5&#39;)
 
-insert into months (q5.9) values (36,&#39;+)dc5&#39;,61530797.4)
-Column (&#39;q5.9&#39;) was not found
+delete from vehicles where ((j(M,d)))!=(-5.56)!=((((g&lt;:==(:!=_==q)))))
+Invalid WHERE (&#39;((j(M,d)))!=(-5.56)!=((((g&lt;:==(:!=_==q)))))&#39;)
 
-select -5.750 from months where z&lt;I!=D&lt;D-k
-Invalid WHERE (&#39;(z&lt;I!=D&lt;D-k)&#39;)
+delete from months where r(I)+(P*k-g)&lt;R(y)*C-C(g)
+Invalid WHERE (&#39;r(I)+(P*k-g)&lt;R(y)*C-C(g)&#39;)
 
-select S*q-z*Z(A)*g from months where z+Q-P==X
-Invalid WHERE (&#39;(z+Q-P==X)&#39;)
+insert into vz50 (company) values (&#39;v&#39;,0.0)
+Table (&#39;vz50&#39;) was not found
 
 </pre>
 </div>
@@ -21941,6 +22040,207 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 
 </div>
 </div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2>
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This chapter defines two main classes: <code>SimpleConcolicFuzzer</code> and <code>ConcolicGrammarFuzzer</code>. The <code>SimpleConcolicFuzzer</code> first uses a sample input to collect predicates encountered. The fuzzer then negates random predicates to generate new input constraints. These, when solved, produce inputs that explore paths that are close to the original path. It can be used as follows.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>cgi_decode()</code> function <a href="Coverage.slides.html">from the chapter on coverage</a> is the subject program.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We first obtain the constraints using <code>ConcolicTracer</code>.</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[246]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
+    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="s1">&#39;abcd&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>These constraints are added to the concolic fuzzer as follows:</p>
+
+</div>
+</div>
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[247]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">scf</span> <span class="o">=</span> <span class="n">SimpleConcolicFuzzer</span><span class="p">()</span>
+<span class="n">scf</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The concolic fuzzer then uses the constraints added to guide its fuzzing as follows:</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[248]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">scf</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">break</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>\x00\x00%\x00
+\x00%\x00
+\x00\x00+\x00
+\x00\x00+\x02
+\x00\x00+\x01
+%\x00
+%\x10
+\x00\x00% 
+%\x04
+\x00+\x00
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>SimpleConcolicFuzzer</code> simply explores all paths near the original path traversed by the sample input. It does not use any kind of feedback from fuzzing.
+The <code>ConcolicGrammarFuzzer</code> on the other hand, can collect feedback from the subject under fuzzing, and lift some of the constraints encountered to the grammar, enabling deeper fuzzing. It is used as follows:</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[250]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgf</span> <span class="o">=</span> <span class="n">ConcolicGrammarFuzzer</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR</span><span class="p">)</span>
+<span class="n">cgf</span><span class="o">.</span><span class="n">prune_tokens</span><span class="p">(</span><span class="n">prune_tokens</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">cgf</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">_</span><span class="p">[</span><span class="n">db_select</span><span class="p">](</span><span class="n">query</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
+            <span class="k">except</span> <span class="n">SQLException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">cgf</span><span class="o">.</span><span class="n">update_grammar</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>update m set tj5=J,g=:91Em85NJ9e5 where v!=57
+Table (&#39;m&#39;) was not found
+
+update m5 set h2=g where (-81.7)!=BZ1(R(U,n,U)+Z/F-C/g,P,L)
+Table (&#39;m5&#39;) was not found
+
+update vehicles set d1=g,E=x where W+o+S(Q)!=X
+Column (&#39;d1&#39;) was not found
+
+update vehicles set BS=c,Deo827657=q where 8==wi
+Column (&#39;BS&#39;) was not found
+
+select nQ,(a==R),i from eAi where F&gt;v*f/I
+Table (&#39;eAi&#39;) was not found
+
+select J8,(vV) from vehicles where 97!=(51)-p-g*K*J*w/D-U----16.0==(.)
+Invalid WHERE (&#39;(97!=(51)-p-g*K*J*w/D-U----16.0==(.))&#39;)
+
+select I from months where (w)==2.9
+Invalid WHERE (&#39;((w)==2.9)&#39;)
+
+delete from vehicles where D/a*D&gt;K-e-T-W/i+.+P
+Invalid WHERE (&#39;D/a*D&gt;K-e-T-W/i+.+P&#39;)
+
+select (((Qq3(j)))==N&lt;a+k/Z&lt;m1U),r from vehicles
+Invalid WHERE (&#39;((((Qq3(j)))==N&lt;a+k/Z&lt;m1U),r)&#39;)
+
+select A!=I,(_+v+X/l) from c where 638==O&gt;c
+Table (&#39;c&#39;) was not found
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
 </div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
@@ -22014,7 +22314,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[245]:</div>
+<div class="prompt input_prompt">In&nbsp;[251]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zfloat</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
@@ -22037,7 +22337,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[246]:</div>
+<div class="prompt input_prompt">In&nbsp;[252]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zfloat</span><span class="p">(</span><span class="n">zfloat</span><span class="p">):</span>
@@ -22065,7 +22365,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[247]:</div>
+<div class="prompt input_prompt">In&nbsp;[253]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zfloat</span><span class="p">(</span><span class="n">zfloat</span><span class="p">):</span>
@@ -22088,7 +22388,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[248]:</div>
+<div class="prompt input_prompt">In&nbsp;[254]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zfloat</span><span class="p">(</span><span class="n">zfloat</span><span class="p">):</span>
@@ -22114,7 +22414,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[249]:</div>
+<div class="prompt input_prompt">In&nbsp;[255]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_float_bool_wrapper</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">zfun</span><span class="p">):</span>
@@ -22142,7 +22442,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[250]:</div>
+<div class="prompt input_prompt">In&nbsp;[256]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">FLOAT_BOOL_OPS</span> <span class="o">=</span> <span class="p">[</span>
@@ -22164,7 +22464,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[251]:</div>
+<div class="prompt input_prompt">In&nbsp;[257]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">FLOAT_BOOL_OPS</span><span class="p">:</span>
@@ -22188,7 +22488,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[252]:</div>
+<div class="prompt input_prompt">In&nbsp;[258]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_float_binary_wrapper</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">zfun</span><span class="p">):</span>
@@ -22216,7 +22516,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[253]:</div>
+<div class="prompt input_prompt">In&nbsp;[259]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">FLOAT_BINARY_OPS</span> <span class="o">=</span> <span class="p">[</span>
@@ -22256,7 +22556,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[254]:</div>
+<div class="prompt input_prompt">In&nbsp;[260]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">FLOAT_BINARY_OPS</span><span class="p">:</span>
@@ -22280,7 +22580,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[255]:</div>
+<div class="prompt input_prompt">In&nbsp;[261]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -22297,7 +22597,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[256]:</div>
+<div class="prompt input_prompt">In&nbsp;[262]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">context</span>
@@ -22313,7 +22613,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[256]:</div>
+    <div class="prompt output_prompt">Out[262]:</div>
 
 
 
@@ -22338,7 +22638,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[257]:</div>
+<div class="prompt input_prompt">In&nbsp;[263]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_int_binary_wrapper</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">zfun</span><span class="p">):</span>
@@ -22363,7 +22663,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[258]:</div>
+<div class="prompt input_prompt">In&nbsp;[264]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">INT_BINARY_OPS</span><span class="p">:</span>
@@ -22387,7 +22687,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[259]:</div>
+<div class="prompt input_prompt">In&nbsp;[265]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -22401,7 +22701,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[260]:</div>
+<div class="prompt input_prompt">In&nbsp;[266]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
@@ -22417,7 +22717,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[260]:</div>
+    <div class="prompt output_prompt">Out[266]:</div>
 
 
 
@@ -22465,7 +22765,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[261]:</div>
+<div class="prompt input_prompt">In&nbsp;[267]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_int_bit_wrapper</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">fun</span><span class="p">,</span> <span class="n">zfun</span><span class="p">):</span>
@@ -22497,7 +22797,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[262]:</div>
+<div class="prompt input_prompt">In&nbsp;[268]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">BIT_OPS</span> <span class="o">=</span> <span class="p">[</span>
@@ -22521,7 +22821,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[263]:</div>
+<div class="prompt input_prompt">In&nbsp;[269]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">BIT_OPS</span><span class="p">:</span>
@@ -22545,7 +22845,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[264]:</div>
+<div class="prompt input_prompt">In&nbsp;[270]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">zint</span><span class="p">(</span><span class="n">zint</span><span class="p">):</span>
@@ -22569,7 +22869,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[265]:</div>
+<div class="prompt input_prompt">In&nbsp;[271]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">my_fn</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
@@ -22596,7 +22896,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[266]:</div>
+<div class="prompt input_prompt">In&nbsp;[272]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
@@ -22636,7 +22936,7 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[267]:</div>
+<div class="prompt input_prompt">In&nbsp;[273]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -22656,21 +22956,21 @@ Invalid WHERE (&#39;(z+Q-P==X)&#39;)
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>(declare-const my_fn_a_int_85 Int)
-(declare-const my_fn_b_int_86 Int)
-(assert (let ((a!1 (bvnot (bvor (bvnot ((_ int2bv 64) my_fn_a_int_85))
-                        (bvnot ((_ int2bv 64) my_fn_b_int_86))))))
-(let ((a!2 (bvor (bvnot (bvor ((_ int2bv 64) my_fn_a_int_85)
-                              ((_ int2bv 64) my_fn_b_int_86)))
+<pre>(declare-const my_fn_a_int_96 Int)
+(declare-const my_fn_b_int_97 Int)
+(assert (let ((a!1 (bvnot (bvor (bvnot ((_ int2bv 64) my_fn_a_int_96))
+                        (bvnot ((_ int2bv 64) my_fn_b_int_97))))))
+(let ((a!2 (bvor (bvnot (bvor ((_ int2bv 64) my_fn_a_int_96)
+                              ((_ int2bv 64) my_fn_b_int_97)))
                  a!1)))
   (not (= 0 (bv2int (bvnot a!2)))))))
 (check-sat)
 (get-model)
 sat
 (model 
-  (define-fun my_fn_a_int_85 () Int
+  (define-fun my_fn_a_int_96 () Int
     (- 18446744073709551617))
-  (define-fun my_fn_b_int_86 () Int
+  (define-fun my_fn_b_int_97 () Int
     (- 2))
 )
 </pre>
@@ -22679,7 +22979,7 @@ sat
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[267]:</div>
+    <div class="prompt output_prompt">Out[273]:</div>
 
 
 

@@ -90,40 +90,9 @@ Technically, yes; but this would cost money and effort, which we'd rather spend 
 
 ### Content
 
-#### Which content will be coming up?
+#### Which content has come up?
 
-Here's our current release plan.  New chapters are coming out every Tuesday.
-
-1. [Introduction to Software Testing](https://www.fuzzingbook.org/html/Intro_Testing.html) – 2018-10-30
-1. [Fuzzing: Breaking Things with Random Inputs](https://www.fuzzingbook.org/html/Fuzzer.html) – 2018-10-30
-1. [Getting Coverage](https://www.fuzzingbook.org/html/Coverage.html) – 2018-11-06
-1. [Mutation-Based Fuzzing](https://www.fuzzingbook.org/html/MutationFuzzer.html) – 2018-11-06
-1. [Fuzzing with Grammars](https://www.fuzzingbook.org/html/Grammars.html) – 2018-11-13
-1. [Efficient Grammar Fuzzing](https://www.fuzzingbook.org/html/GrammarFuzzer.html) – 2018-11-20
-1. [Grammar Coverage](https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html) – 2018-11-27
-1. [Testing Configurations](https://www.fuzzingbook.org/html/ConfigurationFuzzer.html) – 2018-12-04
-1. [Parsing and Recombining Inputs](https://www.fuzzingbook.org/html/Parser.html) – 2018-12-11
-1. [Probabilistic Grammar Fuzzing](https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html) – 2018-12-18
-1. [Fuzzing with Generators](https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html) – 2019-01-08
-1. [Fuzzing APIs](https://www.fuzzingbook.org/html/APIFuzzer.html) – 2019-01-15
-1. [Carving Unit Tests](https://www.fuzzingbook.org/html/Carver.html) – 2019-01-22
-1. [Reducing Failure-Inducing Inputs](https://www.fuzzingbook.org/html/Reducer.html) – 2019-01-29
-1. [Web Testing](https://www.fuzzingbook.org/html/WebFuzzer.html) – 2019-02-05
-1. [GUI Testing](https://www.fuzzingbook.org/html/GUIFuzzer.html) – 2019-02-12
-1. [Mining Input Grammars](https://www.fuzzingbook.org/html/GrammarMiner.html) – 2019-02-19
-1. [Tracking Information Flow](https://www.fuzzingbook.org/html/InformationFlow.html) – 2019-03-05
-1. [Concolic Fuzzing](https://www.fuzzingbook.org/html/SymbolicFuzzer.html) – 2019-03-12
-1. [Symbolic Fuzzing](https://www.fuzzingbook.org/html/SymbolicFuzzer.html) – 2019-03-19
-1. [Mining Function Specifications](DynamicInvariants) – 2019-03-26
-1. [Search-Based Fuzzing](https://www.fuzzingbook.org/html/SearchBasedFuzzer.html) – 2019-04-02
-1. [Evaluating Test Effectiveness with Mutation Analysis](https://www.fuzzingbook.org/html/MutationAnalysis.html) – 2019-04-09
-1. [Greybox Fuzzing](https://www.fuzzingbook.org/html/GreyboxFuzzer.html) – 2019-04-16
-1. [Greybox Fuzzing with Grammars](https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html) – 2019-04-30
-1. [Fuzzing in the Large](https://www.fuzzingbook.org/html/FuzzingInTheLarge.html) – 2019-05-07
-1. [When to Stop Fuzzing](https://www.fuzzingbook.org/html/WhenToStopFuzzing.html) – 2019-05-14
-1. [Tours through the Book](https://www.fuzzingbook.org/html/Tours.html) - 2019-05-21
-
-See the [table of contents](https://www.fuzzingbook.org/html/00_Table_of_Contents.html) for those chapters that are already done.  After all chapters are out, we will switch to a release-based schedule, with numbered minor and major releases coming out when they are ready.
+See the [release notes](https://www.fuzzingbook.org/html/ReleaseNotes.html) for details.
 
 #### How do I cite your work?
 
