@@ -3,7 +3,7 @@
 
 # This material is part of "Generating Software Tests".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2019-05-21 18:25:48+02:00
+# Last change: 2019-05-21 19:58:40+02:00
 #
 #
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -1820,24 +1820,32 @@ if __name__ == "__main__":
         print(t)
 
 
-def flatten(key, val):
+MAX_DEPTH = 10
+
+def set_flatten_depth(depth):
+    global MAX_DEPTH
+    MAX_DEPTH = depth
+
+def flatten(key, val, depth=MAX_DEPTH):
     tv = type(val)
+    if depth <= 0:
+        return [(key, val)]
     if isinstance(val, (int, float, complex, str, bytes, bytearray)):
         return [(key, val)]
     elif isinstance(val, (set, frozenset, list, tuple, range)):
-        values = [(i, e) for i, elt in enumerate(val) for e in flatten(i, elt)]
+        values = [(i, e) for i, elt in enumerate(val) for e in flatten(i, elt, depth-1)]
         return [("%s.%d" % (key, i), v) for i, v in values]
     elif isinstance(val, dict):
-        values = [e for k, elt in val.items() for e in flatten(k, elt)]
+        values = [e for k, elt in val.items() for e in flatten(k, elt, depth-1)]
         return [("%s.%s" % (key, k), v) for k, v in values]
     elif isinstance(val, str):
         return [(key, val)]
     elif hasattr(val, '__dict__'):
         values = [e for k, elt in val.__dict__.items()
-                  for e in flatten(k, elt)]
+                  for e in flatten(k, elt, depth-1)]
         return [("%s.%s" % (key, k), v) for k, v in values]
     else:
-        return [(key, str(v))]
+        return [(key, val)]
 
 class Context(Context):
     def extract_vars(self, frame):
