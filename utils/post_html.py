@@ -195,7 +195,11 @@ def get_sections(notebook):
         matches = re.findall(r'^(###? .*)', contents, re.MULTILINE)
 
     sections = [match.replace(r'\n', '') for match in matches]
-    # print("Sections", repr(sections).encode('utf-8'))
+    print("Sections", repr(sections).encode('utf-8'))
+
+    # Filter out second synopsis section
+    if '## Synopsis' in sections:
+        sections = ['## Synopsis'] + [sec for sec in sections if sec != '## Synopsis']
     return sections
 
     
@@ -327,6 +331,12 @@ def highlight_synopsis(text):
         text[synopsis_start:synopsis_end] +
         '</div>\n\n' +  
         text[synopsis_end:])
+    
+    # Strip original synopsis
+    orig_synopsis_start = text.find('<h2 id="Synopsis">', synopsis_end + 1)
+    orig_synopsis_end = text.find('<h2 ', orig_synopsis_start + 1)
+    
+    text = (text[:orig_synopsis_start] + text[orig_synopsis_end:])
 
     return text
 
