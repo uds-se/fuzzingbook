@@ -37,7 +37,7 @@ def notebook_synopsis(notebook_name):
             synopsis = SYNOPSIS_TITLE + """
 <!-- Automatically generated. Do not edit. -->
 
-To [use the code provided in this chapter](index.ipynb#Using-the-Code), write
+To [use the code provided in this chapter](Importing.ipynb), write
 
 ```python
 >>> from fuzzingbook.%s import <identifier>

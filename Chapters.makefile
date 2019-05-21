@@ -76,6 +76,8 @@ APPENDICES = \
 FRONTMATTER = \
 	index.ipynb
 EXTRAS = \
+	ReleaseNotes.ipynb \
+	Importing.ipynb \
 	Guide_for_Authors.ipynb \
 	Template.ipynb \
 	404.ipynb
