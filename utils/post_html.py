@@ -195,7 +195,7 @@ def get_sections(notebook):
         matches = re.findall(r'^(###? .*)', contents, re.MULTILINE)
 
     sections = [match.replace(r'\n', '') for match in matches]
-    print("Sections", repr(sections).encode('utf-8'))
+    # print("Sections", repr(sections).encode('utf-8'))
 
     # Filter out second synopsis section
     if '## Synopsis' in sections:
