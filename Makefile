@@ -199,7 +199,7 @@ PDFLATEX ?= pdflatex
 XELATEX ?= xelatex
 BIBTEX ?= bibtex
 LATEXMK ?= latexmk
-LATEXMK_OPTS ?= -xelatex -quiet
+LATEXMK_OPTS ?= -xelatex -quiet -f -interaction=nonstopmode
 
 # Word
 PANDOC ?= pandoc
