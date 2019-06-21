@@ -72,10 +72,10 @@ UTILITY_FILES = \
 # Where the notebooks are
 NOTEBOOKS = notebooks
 
-# Derived versions including HTML and text output cells
+# Derived versions including HTML, SVG, and text output cells (for Web)
 FULL_NOTEBOOKS = full_notebooks
 
-# Derived versions including PNG and text output cells
+# Derived versions including PNG and text output cells (for LaTeX and PDF)
 RENDERED_NOTEBOOKS = rendered
 
 
@@ -432,7 +432,7 @@ $(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $
 	$(RENDER_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
-	$(PYTHON) $(NBSYNOPSIS) --update $@
+	RENDER_HTML=1 $(PYTHON) $(NBSYNOPSIS) --update $@
 
 $(FULL_NOTEBOOKS)/fuzzingbook_utils:
 	$(MKDIR) $(FULL_NOTEBOOKS)/fuzzingbook_utils

@@ -70,16 +70,27 @@ and then make use of the following features.
                         if svg is not None:
                             svg_basename = (notebook_basename +
                                 '-synopsis-' + repr(img_count) + '.svg')
+                            png_basename = (notebook_basename +
+                                '-synopsis-' + repr(img_count) + '.png')
                             img_count += 1
                             
                             svg_filename = os.path.join(
                                 os.path.dirname(notebook_path),
                                 'PICS', svg_basename)
+                            png_filename = os.path.join(
+                                os.path.dirname(notebook_path),
+                                'PICS', png_basename)
                                 
                             print("Creating", svg_filename)
                             with open(svg_filename, "w") as f:
                                 f.write(svg)
-                            text = "![](" + 'PICS/' + svg_basename + ')'
+                            print("Creating", png_filename)
+                            os.system('convert -density 300 ' + svg_filename + ' ' + png_filename)
+                            if 'RENDER_HTML' in os.environ:
+                                # Render all HTML and SVG into PNG
+                                text = "![](" + 'PICS/' + png_basename + ')'
+                            else:
+                                text = "![](" + 'PICS/' + svg_basename + ')'
 
                     # PNG output
                     if text is None:
