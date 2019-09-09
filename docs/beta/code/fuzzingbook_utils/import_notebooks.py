@@ -8,6 +8,8 @@ import io, os, sys, types, re
 from IPython import get_ipython
 from nbformat import read
 from IPython.core.interactiveshell import InteractiveShell
+import linecache
+import ast
 
 # To avoid re-running notebook computations during import,
 # we only import code cells that match this regular expression
@@ -38,8 +40,10 @@ class NotebookLoader(object):
     def __init__(self, path=None):
         self.shell = InteractiveShell.instance()
         self.path = path
+        self.lines = {}
 
     def load_module(self, fullname):
+        self.lines[fullname] = ''
         """import a notebook as a module"""
         path = find_notebook(fullname, self.path)
 
@@ -64,21 +68,29 @@ class NotebookLoader(object):
         save_user_ns = self.shell.user_ns
         self.shell.user_ns = mod.__dict__
 
+
+        codecells = [self.shell.input_transformer_manager.transform_cell(cell.source)
+                              for cell in nb.cells if cell.cell_type == 'code']
+        source = [code for code in codecells if RE_CODE.match(code)]
+
+        lno = 1
+
         try:
-          for cell in nb.cells:
-            if cell.cell_type == 'code':
-                # transform the input to executable Python
-                code = self.shell.input_transformer_manager.transform_cell(cell.source)
-                if RE_CODE.match(code):
-                    # run the code in themodule
-                    # print("import", repr(code))
-                    exec(code, mod.__dict__)
-                else:
-                    # print("ignore", repr(code))
-                    pass
+            for code in source:
+                parsed = ast.parse(code, filename=path, mode='exec')
+                ast.increment_lineno(parsed, n=lno)
+                exec(compile(parsed, path, 'exec'), mod.__dict__)
+                lno += len(code.split('\n'))
+            self.lines[fullname] = '\n'.join(source)
+            p = len(self.lines[fullname].split('\n')) + 1
+            assert lno == p
     
         finally:
             self.shell.user_ns = save_user_ns
+            data = self.lines[fullname]
+            linecache.cache[path] = (len(data), None,
+                                    [line+'\n' for line in data.splitlines()],
+                                    fullname)
         return mod
 
 class NotebookFinder(object):
