@@ -11,7 +11,7 @@ with fuzzingbook adaptations -->
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" /><title>Symbolic Fuzzing - Generating Software Tests</title>
+<meta charset="utf-8" /><title>Symbolic Fuzzing - The Fuzzing Book</title>
 
 <style type="text/css">
     /*!
@@ -11792,7 +11792,7 @@ MathJax.Hub.Config({
 
 <meta property="og:url" content="https://www.fuzzingbook.org/html/SymbolicFuzzer.html" />
 <meta property="og:type" content="article" />
-<meta property="og:title" content="Symbolic Fuzzing - Generating Software Tests" />
+<meta property="og:title" content="Symbolic Fuzzing - The Fuzzing Book" />
 <meta property="og:description" content="One of the problems with traditional methods of fuzzing is that they fail to exercise all the possible behaviors that a system can have, especially when the input space is large. Quite often the execution of a specific branch of execution may happen only with very specific inputs, which could represent an extremely small fraction of the input space. The traditional fuzzing methods relies on chance to produce inputs they need. However, relying on randomness to generate values that we want is a bad idea when the space to be explored is huge. For example, a function that accepts a string, even if one only considers the first $10$ characters, already has $2^{80}$ possible inputs. If one is looking for a specific string, random generation of values will take a few thousand years even in one of the super computers.We saw previously how concolic tracing can offer a way out. We saw how concolic tracing can be implemented using direct information flows using the Python interpreter. However, there are two problems with this approach. The first is that, concolic tracing relies on the existence of sample inputs. What if one has no sample inputs? Secondly, direct information flows could to be unreliable if the program has indirect information flows such as those based on control flow. In such cases, static analysis becomes necessary to bridge the gap. However, that raises the question. Can we determine the complete behavior of the program by examining it statically, and check if it behaves unexpectedly under some (unknown) input or result in an unexpected output?Symbolic execution is one of the ways that we can reason about the behavior of a program without executing it. A program is a computation that can be treated as a system of equations that obtains the output values from the given inputs. Executing the program symbolically -- that is, solving these mathematically -- along with any specified objective such as covering a particular branch or obtaining a particular output will get us inputs that can accomplish this task.In this chapter, we investigate how symbolic execution can be implemented, and how it can be used to obtain interesting values for fuzzing.Prerequisites You should understand how to use type annotations in Python. A working knowledge of SMT solvers, especially Z3 is useful. You should have read the chapter on coverage. A familiarity with chapter on concolic fuzzing would be helpful." />
 <meta property="og:image" content="https://www.fuzzingbook.org/html/PICS/wordcloud.png" />
 
@@ -11862,7 +11862,7 @@ MathJax.Hub.Config({
 <nav>
 <div id="cssmenu">
   <ul>
-     <li class="has-sub"><a href="#"><span title="Generating Software Tests"><i class="fa fa-fw fa-bars"></i> </span><span class="menu_1">Generating Software Tests</span></a>
+     <li class="has-sub"><a href="#"><span title="The Fuzzing Book"><i class="fa fa-fw fa-bars"></i> </span><span class="menu_1">The Fuzzing Book</span></a>
         <ol>
            
 <li><a href="https://www.fuzzingbook.org/"><span class="part_number"><i class="fa fa-fw fa-home"></i></span> About this book</a></li>
@@ -12560,7 +12560,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Sym_Vars</span> <span class="o">=</span> <span class="p">{</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">SYM_VARS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="nb">int</span><span class="p">:</span> <span class="p">(</span>
         <span class="n">z3</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">z3</span><span class="o">.</span><span class="n">IntVal</span><span class="p">),</span> <span class="nb">float</span><span class="p">:</span> <span class="p">(</span>
             <span class="n">z3</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="n">z3</span><span class="o">.</span><span class="n">RealVal</span><span class="p">),</span> <span class="nb">str</span><span class="p">:</span> <span class="p">(</span>
@@ -12580,8 +12580,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_symbolicparams</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="n">params</span><span class="p">,</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">get_annotations</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">Sym_Vars</span><span class="p">[</span><span class="n">typ</span><span class="p">][</span><span class="mi">0</span><span class="p">](</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">params</span><span class="p">],</span> <span class="n">Sym_Vars</span><span class="p">[</span><span class="n">ret</span><span class="p">][</span><span class="mi">0</span><span class="p">](</span><span class="s1">&#39;__return__&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">SYM_VARS</span><span class="p">[</span><span class="n">typ</span><span class="p">][</span><span class="mi">0</span><span class="p">](</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">params</span><span class="p">],</span> <span class="n">SYM_VARS</span><span class="p">[</span><span class="n">ret</span><span class="p">][</span><span class="mi">0</span><span class="p">](</span><span class="s1">&#39;__return__&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12702,9 +12702,9 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
   (&#39;check_triangle&#39;, 3),
   (&#39;check_triangle&#39;, 4),
   (&#39;check_triangle&#39;, 5),
-  (&#39;__exit__&#39;, 24),
-  (&#39;__exit__&#39;, 25)],
- [(1, 2), (2, 3), (3, 4), (4, 5), (5, 24), (24, 25)])
+  (&#39;__exit__&#39;, 79),
+  (&#39;__exit__&#39;, 80)],
+ [(1, 2), (2, 3), (3, 4), (4, 5), (5, 79), (79, 80)])
 </pre>
 </div>
 
@@ -14174,7 +14174,7 @@ When parsing Python source code, it comes wrapped in a <code>Module</code> by de
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;_ast.Module at 0xa1746ca20&gt;
+<pre>&lt;_ast.Module at 0xa1edd85f8&gt;
 </pre>
 </div>
 
@@ -14231,7 +14231,7 @@ When parsing Python source code, it comes wrapped in a <code>Module</code> by de
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;_ast.BinOp at 0xa1746c898&gt;
+<pre>&lt;_ast.BinOp at 0xa20005fd0&gt;
 </pre>
 </div>
 
@@ -14468,7 +14468,7 @@ When parsing Python source code, it comes wrapped in a <code>Module</code> by de
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;x&#39;, &#39;v_0&#39;, &#39;v_1&#39;, &#39;v&#39;]
+<pre>[&#39;x&#39;, &#39;v&#39;, &#39;v_0&#39;, &#39;v_1&#39;]
 </pre>
 </div>
 
@@ -14516,11 +14516,11 @@ When parsing Python source code, it comes wrapped in a <code>Module</code> by de
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Sym_Vars_Str</span> <span class="o">=</span> <span class="p">{</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">SYM_VARS_STR</span> <span class="o">=</span> <span class="p">{</span>
     <span class="n">k</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;z3.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">v1</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;z3.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">v2</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">Sym_Vars</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">)</span> <span class="ow">in</span> <span class="n">SYM_VARS</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
 <span class="p">}</span>
-<span class="n">Sym_Vars_Str</span>
+<span class="n">SYM_VARS_STR</span>
 </pre></div>
 
 </div>
@@ -14555,7 +14555,7 @@ When parsing Python source code, it comes wrapped in a <code>Module</code> by de
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">translate_to_z3_name</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">Sym_Vars_Str</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">SYM_VARS_STR</span><span class="p">[</span><span class="n">v</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 
 </div>
@@ -18449,7 +18449,7 @@ ZeroDivisionError: float division by zero (expected)
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/SymbolicFuzzer.ipynb" target=_blank)>Last change: 2019-05-21 19:58:02+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/SymbolicFuzzer.ipynb" target=_blank)>Last change: 2019-06-20 19:21:52+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -18467,19 +18467,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/SymbolicFuzzer.html">Symbolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">Generating Software Tests</a>", <a href="https://www.fuzzingbook.org/html/SymbolicFuzzer.html">https://www.fuzzingbook.org/html/SymbolicFuzzer.html</a>.  Retrieved 2019-05-21 19:58:02+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/SymbolicFuzzer.html">Symbolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/SymbolicFuzzer.html">https://www.fuzzingbook.org/html/SymbolicFuzzer.html</a>.  Retrieved 2019-06-20 19:21:52+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:SymbolicFuzzer,
     author = {Andreas Zeller and Rahul Gopinath and Marcel B{\"o}hme and Gordon Fraser and Christian Holler},
-    booktitle = {Generating Software Tests},
+    booktitle = {The Fuzzing Book},
     title = {Symbolic Fuzzing},
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/SymbolicFuzzer.html}},
-    note = {Retrieved 2019-05-21 19:58:02+02:00},
+    note = {Retrieved 2019-06-20 19:21:52+02:00},
     url = {https://www.fuzzingbook.org/html/SymbolicFuzzer.html},
-    urldate = {2019-05-21 19:58:02+02:00}
+    urldate = {2019-06-20 19:21:52+02:00}
 }
 </pre>
 </div>

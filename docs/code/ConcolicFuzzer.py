@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "Generating Software Tests".
+# This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2019-05-21 19:58:02+02:00
+# Last change: 2019-09-09 17:11:40+02:00
 #
-#
+#!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -831,7 +831,7 @@ def zeval_smt(path, cc, log):
         return 'No Solutions', {}
     assert kind == 'sat'
     assert o[1][0] == 'model'
-    return 'sat', {i[1]: i[-1] for i in o[1][1:]}
+    return 'sat', {i[1]: (i[-1], i[-2]) for i in o[1][1:]}
 
 if __name__ == "__main__":
     with ConcolicTracer() as _:
@@ -1677,7 +1677,7 @@ class SimpleConcolicFuzzer(Fuzzer):
     def __init__(self):
         self.ct = []
         self.seen = set()
-        self.seen_strs = set()
+        self.seen_vals = set()
         self.max_tries = 1000
         self.last = None
         self.last_idx = None
@@ -1707,11 +1707,15 @@ if __name__ == "__main__":
 
 class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
     def get_newpath(self):
+        def get_v(t, v, p):
+            if t == 'String': return z3.String(p) != z3.StringVal(v)
+            elif t == 'Int': return z3.Int(p) != z3.IntVal(int(v))
+            print(repr(t))
+            assert False
         switch = random.randint(0, self.last_idx)
         if self.seen:
-            param = list(self.last.fn_args.values())[0]
-            sparam = z3.String(param)
-            seen = [sparam != z3.StringVal(i) for i in self.seen_strs]
+            p = list(self.last.fn_args.values())[0]
+            seen = [get_v(t,v,p) for v,t in self.seen_vals]
         else:
             seen = []
         new_path = self.last.path[0:switch] + \
@@ -1728,9 +1732,16 @@ class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
             s, v = zeval_smt(path, self.last, log=False)
             if s != 'sat':
                 continue
-            s = list(v.values())[0]
-            self.seen_strs.add(s)
-            return s
+            val = list(v.values())[0]
+            elt, typ = val
+            if len(elt) == 2 and elt[0] == '-': # negative numbers are [-, x]
+                elt = '-%s' % elt[1]
+            self.seen_vals.add((elt, typ))
+            if typ == 'Int':
+                return int(elt)
+            elif typ == 'String':
+                return elt
+            return elt
         return None
 
 if __name__ == "__main__":

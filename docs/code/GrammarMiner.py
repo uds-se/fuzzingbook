@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "Generating Software Tests".
+# This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2019-05-21 19:58:40+02:00
+# Last change: 2019-06-21 13:27:31+02:00
 #
-#
+#!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -194,9 +194,12 @@ class Tracer(Tracer):
 class Tracer(Tracer):
     def on_event(self, event, arg, cxt, my_vars):
         self.trace.append((event, arg, cxt, my_vars))
+        
+    def create_context(self, frame):
+        return Context(frame)
 
     def traceit(self, frame, event, arg):
-        cxt = Context(frame)
+        cxt = self.create_context(frame)
         if not self.tracing_context(cxt, event, arg):
             return self.traceit
         self.log(event, cxt)
@@ -373,6 +376,23 @@ def to_nonterminal(var):
     return "<" + var.lower() + ">"
 
 class TreeMiner(TreeMiner):
+    def string_part_of_value(self, part, value):
+        return (part in value)
+
+class TreeMiner(TreeMiner):
+    def partition(self, part, value):
+        return value.partition(part)
+
+class TreeMiner(TreeMiner):
+    def partition_by_part(self, pair, value):
+        k, part = pair
+        prefix_k_suffix = [
+                    (k, [[part, []]]) if i == 1 else (e, [])
+                    for i, e in enumerate(self.partition(part, value))
+                    if e]
+        return prefix_k_suffix
+
+class TreeMiner(TreeMiner):
     def insert_into_tree(self, my_tree, pair):
         var, values = my_tree
         k, v = pair
@@ -385,12 +405,8 @@ class TreeMiner(TreeMiner):
                 applied = self.insert_into_tree(value_, pair)
                 if applied:
                     break
-            elif v in value:
-                prefix_k_suffix = [
-                    (k, [[v, []]]) if i == 1 else (e, [])
-                    for i, e in enumerate(value.partition(v))
-                    if e
-                ]
+            elif self.string_part_of_value(v, value):
+                prefix_k_suffix = self.partition_by_part(pair, value)
                 del values[i]
                 for j, rep in enumerate(prefix_k_suffix):
                     values.insert(j + i, rep)
@@ -1448,6 +1464,16 @@ class ScopeTreeMiner(ScopeTreeMiner):
         return to_nonterminal("%s@%d:%s" % (method, lno, var))
 
 class ScopeTreeMiner(ScopeTreeMiner):
+    def partition(self, part, value):
+        return value.partition(part)
+    def partition_by_part(self, pair, value):
+        (nt_var, nt_seq), (v, v_scope) = pair
+        prefix_k_suffix = [
+                    (nt_var, [(v, [], nt_seq)]) if i == 1 else (e, [])
+                    for i, e in enumerate(self.partition(v, value))
+                    if e]
+        return prefix_k_suffix
+    
     def insert_into_tree(self, my_tree, pair):
         var, values, my_scope = my_tree
         (nt_var, nt_seq), (v, v_scope) = pair
@@ -1463,14 +1489,10 @@ class ScopeTreeMiner(ScopeTreeMiner):
                 if v_scope != scope:
                     if nt_seq > scope:
                         continue
-                if not v or v not in key:
+                if not v or not self.string_part_of_value(v, key):
                     continue
-                prefix_k_suffix = [
-                    (nt_var, [(v, [], nt_seq)],
-                     scope) if i == 1 else (e, [], scope)
-                    for i, e in enumerate(key.partition(v))
-                    if e
-                ]
+                prefix_k_suffix = [(k, children, scope) for k, children
+                                   in self.partition_by_part(pair, key)]
                 del values[i]
                 for j, rep in enumerate(prefix_k_suffix):
                     values.insert(j + i, rep)
@@ -1916,12 +1938,21 @@ class TaintedScopeTracker(ScopeTracker):
     def create_assignments(self, *args):
         return TaintedScopedVars(*args)
 
+class TaintedScopeTreeMiner(ScopeTreeMiner):
+    def string_part_of_value(self, part, value):
+        return str(part.origin).strip('[]') in str(value.origin).strip('[]')
+    
+    def partition(self, part, value):
+        begin = value.origin.index(part.origin[0])
+        end = value.origin.index(part.origin[-1])+1
+        return value[:begin], value[begin:end], value[end:]
+
 class TaintedScopedGrammarMiner(ScopedGrammarMiner):
     def create_tracker(self, *args):
         return TaintedScopeTracker(*args)
 
     def create_tree_miner(self, *args):
-        return ScopeTreeMiner(*args)
+        return TaintedScopeTreeMiner(*args)
 
 def recover_grammar_with_taints(fn, inputs, **kwargs):
     miner = TaintedScopedGrammarMiner()
@@ -1941,4 +1972,14 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     syntax_diagram(inventory_grammar)
+
+
+if __name__ == "__main__":
+    url_grammar = recover_grammar_with_taints(
+        url_parse, URLS_X + ['ftp://user4:pass1@host4/?key4=value3'],
+        methods=['urlsplit', 'urlparse', '_splitnetloc'])
+
+
+if __name__ == "__main__":
+    syntax_diagram(url_grammar)
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "Generating Software Tests".
+# This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Timer.html
-# Last change: 2019-04-27 13:25:22+02:00
+# Last change: 2019-05-19 19:01:17+02:00
 #
-#
+#!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Timer')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -94,4 +102,18 @@ if __name__ == "__main__":
     with Timer() as t:
         for i in range(10):
             print(t.elapsed_time())
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    with Timer() as t:
+        some_long_running_function()
+    t.elapsed_time()
 

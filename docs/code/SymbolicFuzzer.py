@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "Generating Software Tests".
+# This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2019-05-21 19:58:02+02:00
+# Last change: 2019-06-20 19:21:52+02:00
 #
-#
+#!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -126,18 +126,16 @@ if __name__ == "__main__":
     params, ret
 
 
-if __name__ == "__main__":
-    Sym_Vars = {
-        int: (
-            z3.Int, z3.IntVal), float: (
-                z3.Real, z3.RealVal), str: (
-                    z3.String, z3.StringVal)}
-
+SYM_VARS = {
+    int: (
+        z3.Int, z3.IntVal), float: (
+            z3.Real, z3.RealVal), str: (
+                z3.String, z3.StringVal)}
 
 def get_symbolicparams(fn):
     params, ret = get_annotations(fn)
-    return [Sym_Vars[typ][0](name)
-            for name, typ in params], Sym_Vars[ret][0]('__return__')
+    return [SYM_VARS[typ][0](name)
+            for name, typ in params], SYM_VARS[ret][0]('__return__')
 
 if __name__ == "__main__":
     (a, b, c), r = get_symbolicparams(check_triangle)
@@ -501,16 +499,14 @@ if __name__ == "__main__":
         'vars': abs_value_declarations}
 
 
-if __name__ == "__main__":
-    Sym_Vars_Str = {
-        k.__name__: ("z3.%s" % v1.__name__, "z3.%s" % v2.__name__)
-        for k, (v1, v2) in Sym_Vars.items()
-    }
-    Sym_Vars_Str
-
+SYM_VARS_STR = {
+    k.__name__: ("z3.%s" % v1.__name__, "z3.%s" % v2.__name__)
+    for k, (v1, v2) in SYM_VARS.items()
+}
+SYM_VARS_STR
 
 def translate_to_z3_name(v):
-    return Sym_Vars_Str[v][0]
+    return SYM_VARS_STR[v][0]
 
 def declarations(astnode, hm=None):
     if hm is None:

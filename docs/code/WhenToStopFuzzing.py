@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "Generating Software Tests".
+# This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2019-05-13 17:33:29+02:00
+# Last change: 2019-05-21 15:10:49+02:00
 #
-#
+#!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
@@ -89,10 +89,10 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     k_book = {}  # Kenngruppenbuch
 
-    for i in range(1, len(trigrams)):
+    for i in range(1, len(trigrams) + 1):
         trigram = trigrams[i - 1]
         # choose weights according to Benford's law
-        k_book[trigram] = log(1 + 1 / i) / log(26**3)
+        k_book[trigram] = log(1 + 1 / i) / log(26**3 + 1)
 
 
 if __name__ == "__main__":

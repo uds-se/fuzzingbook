@@ -1,6 +1,6 @@
 # Define the contents of this file as a package
-__all__ = ["PrettyTable", "YouTubeVideo", 
-           "print_file", "HTML", 
+__all__ = ["PrettyTable", "YouTubeVideo",
+           "print_file", "HTML",
            "unicode_escape", "terminal_escape", "extract_class_definition"]
 
 
@@ -10,8 +10,8 @@ try:
     have_ipython = True
 except:
     have_ipython = False
-    
-if have_ipython:    
+
+if have_ipython:
     from . import import_notebooks
 
 # Set fixed seed
@@ -63,24 +63,38 @@ def inheritance_conflicts(c1, c2):
 
 
 # Given a class, extract the final definitions of all methods defined so far.
-def extract_class_definition(cls):
-    parents = [i.__name__ for i in cls.mro() if i.__name__ != cls.__name__]
-    print("class %s(%s):" % (cls.__name__, ', '.join(parents)))
+
+def extract_class_definition(cls, log=False):
+    eldest = [c for c in cls.mro()
+                if c.__name__ == cls.__name__ and
+                   cls.__name__ not in {i.__name__ for i in c.__bases__}]
+    n_parents = sum([[j.__name__ for j in i.__bases__] for i in eldest], [])
+    s_parents = '(%s)' % ', '.join(set(n_parents)) if n_parents else ''
+    buf = ["class %s%s:" % (cls.__name__, s_parents)]
     seen = set()
-    for parent in cls.mro():
-        for fn_name in dir(parent):
+    i = 0
+    for curcls in cls.mro():
+        i += 1
+        if log: print('Parent: %d' % i, curcls.__name__)
+        if curcls.__name__ != cls.__name__: continue
+        for fn_name in dir(curcls):
+            if log: print('\t:', fn_name)
             if fn_name in seen: continue
-            fn = parent.__dict__.get(fn_name)
-            if fn is not None:
-                if (fn.__class__.__name__ == 'function'):
-                    seen.add(fn_name)
-                    print(getsource(fn))
-  
+            if fn_name == '__new__':
+                continue
+            fn = curcls.__dict__.get(fn_name)
+            if fn is None:
+                continue
+            if ('function' in str(type(fn))):
+                seen.add(fn_name)
+                buf.append(getsource(fn))
+    return '\n'.join(buf)
+
 # Printing files with syntax highlighting
 def print_file(filename, lexer=None):
     content = open(filename, "rb").read().decode('utf-8')
     print_content(content, filename, lexer)
-    
+
 def print_content(content, filename=None, lexer=None):
     from pygments import highlight, lexers, formatters
     from pygments.lexers import get_lexer_for_filename, guess_lexer
@@ -143,7 +157,7 @@ def HTML(data=None, url=None, filename=None, png=False, headless=True, zoom=2.0)
         profile = FirefoxProfile()
         profile.set_preference("layout.css.devPixelsPerPx", repr(zoom))
         firefox = webdriver.Firefox(firefox_profile=profile, options=options)
-    
+
     # Create a URL argument
     if data is not None:
         has_html = data.find('<html')

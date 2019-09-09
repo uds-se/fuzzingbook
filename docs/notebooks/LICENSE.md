@@ -1,4 +1,4 @@
-# "Generating Software Tests" License
+# "The Fuzzing Book" License
 
 The content of this project is licensed under the _Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License_. The source code that is part of the content, as well as the source code used to format and display that content is licensed under the _MIT License_.  Both licenses are reproduced below.
 
