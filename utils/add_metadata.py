@@ -53,7 +53,7 @@ def add_document_metadata(notebook, titlepage):
         notebook.metadata['ipub']['titlepage'] = {
             "author": "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler",
             "title": chapter_title,
-            "subtitle": 'A Chapter of "Generating Software Tests"'
+            "subtitle": 'A Chapter of "The Fuzzing Book"'
         }
 
     # Add table of contents

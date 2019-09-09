@@ -25,7 +25,7 @@ except:
 
 
 # Some fixed strings
-booktitle = "Generating Software Tests"
+booktitle = "The Fuzzing Book"
 authors = "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler"
 site_html = "https://www.fuzzingbook.org/"
 github_html = "https://github.com/uds-se/fuzzingbook/"

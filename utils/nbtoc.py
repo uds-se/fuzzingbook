@@ -42,7 +42,7 @@ def notebook_toc_entry(notebook_name, prefix, path=None):
     return prefix + " [" + notebook_title + "](" + notebook_base + ")\n"
     
 def notebook_toc(public_chapters, appendices):
-    title = "# Generating Software Tests"
+    title = "# The Fuzzing Book"
 
     chapter_toc = "## [Table of Contents](index.ipynb)\n\n"
     counter = 1
