@@ -193,6 +193,8 @@ def update_synopsis(notebook_name, synopsis):
     print("Updated " + notebook_path)
 
 
+# TODO: Have the "summarize" function return a target spec (section titles) for each summary
+# The summary would then be inserted at the beginning of each section
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
