@@ -170,4 +170,5 @@ config = {'TemplateExporter.filters': _filters,
           'Exporter.preprocessors': [MetaDefaults, SplitOutputs, LatexDocLinks, LatexCaptions],
           'SplitOutputs.split': True,
           'MetaDefaults.cell_defaults': cell_defaults,
+          'SVG2PDFPreprocessor.command': 'svg42pdf {from_filename} {to_filename}',
           'MetaDefaults.nb_defaults': nb_defaults}
