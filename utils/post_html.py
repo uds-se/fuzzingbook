@@ -362,59 +362,78 @@ def highlight_synopsis(text):
 
 # Handle Details switchers
 # Cells with <details> or </details> are moved to top level, allowing to
-# switch contents between them on or off    
-RE_DETAILS = re.compile(r'''
-<div[^>]*>[^<]*  # four divs
-<div[^>]*>[^<]*
-<div[^>]*>[^<]*
-<div[^>]*>[^<]*
-(?P<cell>.*?</?details>.*?)  # our group
-</div>[^<]*      # four closing divs
-</div>[^<]*
-</div>[^<]*
+# switch contents between them on or off
+# note: *? is non-greedy, minimal match
+RE_BEGIN_DETAILS = re.compile(r'''
+<div[^>]*?>[^<]*?  # four divs
+<div[^>]*?>[^<]*?
+<div[^>]*?>[^<]*?
+<div[^>]*?>[^<]*?
+<p>[^<]*?
+(?P<cell><details>.*?)  # our group
+</p>[^<]*?
+</div>[^<]*?      # four closing divs
+</div>[^<]*?
+</div>[^<]*?
+</div>''', re.DOTALL | re.VERBOSE)
+
+RE_END_DETAILS = re.compile(r'''
+<div[^>]*?>[^<]*?  # four divs
+<div[^>]*?>[^<]*?
+<div[^>]*?>[^<]*?
+<div[^>]*?>[^<]*?
+<p>[^<]*?
+(?P<cell></details>).*?  # our group
+</p>[^<]*?
+</div>[^<]*?      # four closing divs
+</div>[^<]*?
+</div>[^<]*?
 </div>''', re.DOTALL | re.VERBOSE)
 
 def fix_detail_switchers(text):
     text = text.replace('&lt;details&gt;',  '<details>')
     text = text.replace('&lt;/details&gt;', '</details>')
 
-    text = RE_DETAILS.sub(r'\g<cell>', text)
+    text = RE_BEGIN_DETAILS.sub(r'\g<cell>', text)
+    text = RE_END_DETAILS.sub(r'\g<cell>', text)
     return text
     
-# text1 = '''
-# Some stuff to begin with
-#
-# <div class="input_markdown">
-# <div class="cell border-box-sizing text_cell rendered">
-# <div class="inner_cell">
-# <div class="text_cell_render border-box-sizing rendered_html"><p><details>
-#     <summary>How does this work?</summary></p>
-# </div>
-# </div>
-# </div>
-# </div>'''
-#
-# assert RE_DETAILS.search(text1) is not None
-#
-# text2 = '''
-#
-# Some detail stuff
-#
-# <div class="input_markdown">
-# <div class="cell border-box-sizing text_cell rendered">
-# <div class="inner_cell">
-# <div class="text_cell_render border-box-sizing rendered_html">
-# &lt;/details&gt;</p>
-# </div>
-# </div>
-# </div>
-# </div>
-#
-# Some other stuff
-# '''
+text1 = '''
+Some stuff to begin with
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p><details>
+    <summary>How does this work?</summary></p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+Some more stuff
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>&lt;/details&gt;</p>
+</div>
+</div>
+</div>
+</div>
+
+Some other stuff
+'''
+
 # print(fix_detail_switchers(text1))
-# print(fix_detail_switchers(text2))
-# print(fix_detail_switchers(text1 + text2))
 # sys.exit(0)
 
 
