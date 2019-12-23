@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2019-05-21 19:58:01+02:00
+# Last change: 2019-12-21 16:38:57+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -236,7 +236,12 @@ class DB(DB):
             raise SQLException(
                 'names(%s) != values(%s)' % (repr(names), repr(values)))
 
-        kvs = {k: self.convert(decls[k], v) for k, v in zip(names, values)}
+        # dict lookups happen in C code, so we cant use that
+        kvs = {}
+        for k,v in zip(names, values):
+            for key,kval in decls.items():
+                if k == key:
+                    kvs[key] = self.convert(kval, v)
         table.append(kvs)
 
 import ast
@@ -305,7 +310,10 @@ class DB(DB):
 
         for hm in updated:
             for k, v in sets:
-                hm[k] = self.convert(decls[k], v)
+                # we can not do dict lookups because it is implemetned in C.
+                for key, kval in decls.items():
+                    if key == k:
+                        hm[key] = self.convert(kval, v)
                 
         return "%d records were updated" % len(updated)
 
@@ -600,7 +608,7 @@ def make_str_wrapper(fun):
         return self.create(res)
     return proxy
 
-if __name__ == "__main__":
+def informationflow_init_1():
     for name in ['__format__', '__mod__', '__rmod__', '__getitem__', '__add__', '__mul__', '__rmul__',
                  'capitalize', 'casefold', 'center', 'encode',
                  'expandtabs', 'format', 'format_map', 'join', 'ljust', 'lower', 'lstrip', 'replace',
@@ -608,6 +616,15 @@ if __name__ == "__main__":
         fun = getattr(str, name)
         setattr(tstr, name, make_str_wrapper(fun))
 
+if __name__ == "__main__":
+    informationflow_init_1()
+
+
+INITIALIZER_LIST = [informationflow_init_1]
+
+def initialize():
+    for fn in INITIALIZER_LIST:
+        fn()
 
 class tstr(tstr):
     def __radd__(self, s):
@@ -1573,7 +1590,7 @@ import inspect
 
 import types
 
-if __name__ == "__main__":
+def informationflow_init_2():
     ostr_members = [name for name, fn in inspect.getmembers(ostr, callable)
                     if isinstance(fn, types.FunctionType) and fn.__qualname__.startswith('ostr')]
 
@@ -1581,6 +1598,13 @@ if __name__ == "__main__":
         if name not in set(['__class__', '__new__', '__str__', '__init__',
                             '__repr__', '__getattribute__']) | set(ostr_members):
             setattr(ostr, name, make_str_wrapper(fn))
+
+if __name__ == "__main__":
+    informationflow_init_2()
+
+
+if __name__ == "__main__":
+    INITIALIZER_LIST.append(informationflow_init_2)
 
 
 # #### Methods yet to be translated
@@ -1598,13 +1622,20 @@ def make_str_abort_wrapper(fun):
             fun.__name__)
     return proxy
 
-if __name__ == "__main__":
+def informationflow_init_3():
     for name, fn in inspect.getmembers(str, callable):
         # Omitted 'splitlines' as this is needed for formatting output in
         # IPython/Jupyter
         if name in ['__format__', 'format_map', 'format',
                     '__mul__', '__rmul__', 'center', 'zfill', 'decode', 'encode']:
             setattr(ostr, name, make_str_abort_wrapper(fn))
+
+if __name__ == "__main__":
+    informationflow_init_3()
+
+
+if __name__ == "__main__":
+    INITIALIZER_LIST.append(informationflow_init_3)
 
 
 # ### Checking Origins
@@ -2132,10 +2163,10 @@ if __name__ == "__main__":
     assert s.taint == 'SECRET'
 
 
-# #### Part 4: Passing taints from integers to strings
+# #### Part 4: Passing taints from strings to integers
 
 if __name__ == "__main__":
-    print('\n#### Part 4: Passing taints from integers to strings')
+    print('\n#### Part 4: Passing taints from strings to integers')
 
 
 

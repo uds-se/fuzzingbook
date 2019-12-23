@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
-# Last change: 2019-05-18 16:02:48+02:00
+# Last change: 2019-12-21 16:38:57+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -746,7 +746,7 @@ class AFLSmartSchedule(PowerSchedule):
     
     def parsable(self, seed):
         """Returns the substring that is parsable"""
-        table = self.parser.chart_parse(seed.data, parser.start_symbol())
+        table = self.parser.chart_parse(seed.data, self.parser.start_symbol())
         cols = [col for col in table if col.states]
         return seed.data[:len(cols)-1]
     
