@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2019-05-21 19:58:01+02:00
+# Last change: 2019-12-21 16:36:58+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -96,6 +96,10 @@ if __name__ == "__main__":
     print('\n## Manual Input Reduction')
 
 
+
+
+if __name__ == "__main__":
+    failing_input
 
 
 if __name__ == "__main__":
