@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2019-09-09 17:11:40+02:00
+# Last change: 2019-12-21 16:38:57+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -146,7 +146,7 @@ if __name__ == "__main__":
 import z3
 
 if __name__ == "__main__":
-    assert z3.get_version() == (4, 8, 0, 0)
+    assert z3.get_version() >= (4, 8, 6, 0)
     z3.set_option('smt.string_solver', 'z3str3')
     z3.set_option('timeout', 30 * 1000)  # milliseconds
 
@@ -507,11 +507,24 @@ def make_int_binary_wrapper(fname, fun, zfun):
 
     return proxy
 
-if __name__ == "__main__":
+INITIALIZER_LIST = []
+
+def initialize():
+    for fn in INITIALIZER_LIST:
+        fn()
+
+def init_concolic_1():
     for fname in INT_BINARY_OPS:
         fun = getattr(int, fname)
         zfun = getattr(z3.ArithRef, fname)
         setattr(zint, fname, make_int_binary_wrapper(fname, fun, zfun))
+
+if __name__ == "__main__":
+    INITIALIZER_LIST.append(init_concolic_1)
+
+
+if __name__ == "__main__":
+    init_concolic_1()
 
 
 if __name__ == "__main__":
@@ -552,11 +565,18 @@ def make_int_unary_wrapper(fname, fun, zfun):
 
     return proxy
 
-if __name__ == "__main__":
+def init_concolic_2():
     for fname in INT_UNARY_OPS:
         fun = getattr(int, fname)
         zfun = getattr(z3.ArithRef, fname)
         setattr(zint, fname, make_int_unary_wrapper(fname, fun, zfun))
+
+if __name__ == "__main__":
+    INITIALIZER_LIST.append(init_concolic_2)
+
+
+if __name__ == "__main__":
+    init_concolic_2()
 
 
 if __name__ == "__main__":
@@ -690,6 +710,18 @@ if __name__ == "__main__":
     fresh_name()
 
 
+def reset_counter():
+    global COUNTER
+    COUNTER = 0
+
+class ConcolicTracer(ConcolicTracer):
+    def __enter__(self):
+        reset_counter()
+        return self
+
+    def __exit__(self, exc_type, exc_value, tb):
+        return
+
 class ConcolicTracer(ConcolicTracer):
     def concolic(self, args):
         my_args = []
@@ -810,7 +842,7 @@ import tempfile
 
 def zeval_smt(path, cc, log):
     s = cc.smt_expr(True, True, path)
-    
+
     with tempfile.NamedTemporaryFile(mode='w', suffix='.smt') as f:
         f.write(s)
         f.write("\n(check-sat)")
@@ -820,7 +852,7 @@ def zeval_smt(path, cc, log):
         if log:
             print(s, '(check-sat)', '(get-model)', sep='\n')
         output = subprocess.getoutput("z3 " + f.name)
-    
+
     if log:
         print(output)
     o = parse_sexp(output)
@@ -1356,7 +1388,8 @@ class zstr(zstr):
         assert maxsplit == -1  # for now.
         zsep = z3.StringVal(sep)
         zl = z3.Length(zsep)
-        zi = z3.IndexOf(self.z, zsep, z3.IntVal(0))  # zi would be the length of prefix
+        # zi would be the length of prefix
+        zi = z3.IndexOf(self.z, zsep, z3.IntVal(0))
         # Z3Bug: There is a bug in the `z3.IndexOf` method which returns
         # `z3.SeqRef` instead of `z3.ArithRef`. So we need to fix it.
         zi = z3.ArithRef(zi.ast, zi.ctx)
@@ -1399,10 +1432,10 @@ if __name__ == "__main__":
 
 def make_str_abort_wrapper(fun):
     def proxy(*args, **kwargs):
-        raise Exception( '%s Not implemented in `zstr`' % fun.__name__)
+        raise Exception('%s Not implemented in `zstr`' % fun.__name__)
     return proxy
 
-if __name__ == "__main__":
+def init_concolic_3():
     strmembers = inspect.getmembers(zstr, callable)
     zstrmembers = {m[0] for m in strmembers if len(
         m) == 2 and 'zstr' in m[1].__qualname__}
@@ -1434,8 +1467,15 @@ if __name__ == "__main__":
             '__rmul__',
             '__setattr__',
             '__sizeof__',
-            '__str__']:
+                '__str__']:
             setattr(zstr, name, make_str_abort_wrapper(fn))
+
+if __name__ == "__main__":
+    INITIALIZER_LIST.append(init_concolic_3)
+
+
+if __name__ == "__main__":
+    init_concolic_3()
 
 
 # ## Examples
@@ -1666,77 +1706,339 @@ else:
 
 
 if __package__ is None or __package__ == "":
-    from ExpectError import ExpectTimeout
+    from ExpectError import ExpectTimeout, ExpectError
 else:
-    from .ExpectError import ExpectTimeout
+    from .ExpectError import ExpectTimeout, ExpectError
 
 
 import random
 
+class TraceNode:
+    def __init__(self, smt_val, parent, info):
+        # This is the smt that lead to this node
+        self._smt_val = z3.simplify(smt_val) if smt_val is not None else None
+
+        # This is the predicate that this node might perform at a future point
+        self.smt = None
+        self.info = info
+        self.parent = parent
+        self.children = {}
+        self.path = None
+        self.tree = None
+        self._pattern = None
+        self.log = True
+
+    def no(self): return self.children.get(self.tree.no_bit)
+
+    def yes(self): return self.children.get(self.tree.yes_bit)
+
+    def get_children(self): return (self.no(), self.yes())
+
+    def __str__(self):
+        return 'TraceNode[%s]' % ','.join(self.children.keys())
+
+class PlausibleChild:
+    def __init__(self, parent, cond, tree):
+        self.parent = parent
+        self.cond = cond
+        self.tree = tree
+        self._smt_val = None
+
+    def __repr__(self):
+        return 'PlausibleChild[%s]' % (self.parent.pattern() + ':' + self.cond)
+
+class PlausibleChild(PlausibleChild):
+    def smt_val(self):
+        if self._smt_val is not None:
+            return self._smt_val
+        # if the parent has other children, then that child would have updatd the parent's smt
+        # Hence, we can use that child's smt_value's opposite as our value.
+        assert self.parent.smt is not None
+        if self.cond == self.tree.no_bit:
+            self._smt_val = z3.Not(self.parent.smt)
+        else:
+            self._smt_val = self.parent.smt
+        return self._smt_val
+
+    def cc(self):
+        if self.parent.info.get('cc') is not None:
+            return self.parent.info['cc']
+        # if there is a plausible child node, it means that there can
+        # be at most one child.
+        sibilings = list(self.parent.children.values())
+        assert len(sibilings) == 1
+        # We expect at the other child to have cc
+        return sibilings[0].info['cc']
+
+class PlausibleChild(PlausibleChild):
+    def path_expression(self):
+        path_to_root = self.parent.get_path_to_root()
+        assert path_to_root[0]._smt_val is None
+        return [i._smt_val for i in path_to_root[1:]] + [self.smt_val()]
+
+class TraceTree:
+    def __init__(self):
+        self.root = TraceNode(smt_val=None, parent=None, info={'num': 0})
+        self.root.tree = self
+        self.leaves = {}
+        self.no_bit, self.yes_bit = '0', '1'
+
+        pprefix = ':'
+        for bit in [self.no_bit, self.yes_bit]:
+            self.leaves[pprefix + bit] = PlausibleChild(self.root, bit, self)
+        self.completed_paths = {}
+
+class TraceTree(TraceTree):
+    def add_trace(self, tracer, string):
+        last = self.root
+        i = 0
+        for i, elt in enumerate(tracer.path):
+            last = last.add_child(elt=elt, i=i + 1, cc=tracer, string=string)
+        last.add_child(elt=z3.BoolVal(True), i=i + 1, cc=tracer, string=string)
+
+class TraceNode(TraceNode):
+    def bit(self):
+        if self._smt_val is None:
+            return None
+        return self.tree.no_bit if self._smt_val.decl(
+        ).name() == 'not' else self.tree.yes_bit
+
+    def pattern(self):
+        if self._pattern is not None:
+            return self._pattern
+        path = self.get_path_to_root()
+        assert path[0]._smt_val is None
+        assert path[0].parent is None
+
+        self._pattern = ''.join([p.bit() for p in path[1:]])
+        return self._pattern
+
+class TraceNode(TraceNode):
+    def add_child(self, elt, i, cc, string):
+        if elt == z3.BoolVal(True):
+            # No more exploration here. Simply unregister the leaves of *this*
+            # node and possibly register them in completed nodes, and exit
+            for bit in [self.tree.no_bit, self.tree.yes_bit]:
+                child_leaf = self.pattern() + ':' + bit
+                if child_leaf in self.tree.leaves:
+                    del self.tree.leaves[child_leaf]
+            self.tree.completed_paths[self.pattern()] = self
+            return None
+
+        child_node = TraceNode(smt_val=elt,
+                               parent=self,
+                               info={'num': i, 'cc': cc, 'string': string})
+        child_node.tree = self.tree
+
+        # bit represents the path that child took from this node.
+        bit = child_node.bit()
+
+        # first we update our smt decision
+        if bit == self.tree.yes_bit:  # yes, which means the smt can be used as is
+            if self.smt is not None:
+                assert self.smt == child_node._smt_val
+            else:
+                self.smt = child_node._smt_val
+        # no, which means we have to negate it to get the decision.
+        elif bit == self.tree.no_bit:
+            smt_ = z3.simplify(z3.Not(child_node._smt_val))
+            if self.smt is not None:
+                assert smt_ == self.smt
+            else:
+                self.smt = smt_
+        else:
+            assert False
+
+        if bit in self.children:
+            #    if self.log:
+            #print(elt, child_node.bit(), i, string)
+            #print(i,'overwriting', bit,'=>',self.children[bit],'with',child_node)
+            child_node = self.children[bit]
+            #self.children[bit] = child_node
+            #child_node.children = old.children
+        else:
+            self.children[bit] = child_node
+
+        # At this point, we have to unregister any leaves that correspond to this child from tree,
+        # and add the plausible children of this child as leaves to be explored. Note that
+        # if it is the end (z3.True), we do not have any more children.
+        child_leaf = self.pattern() + ':' + bit
+        if child_leaf in self.tree.leaves:
+            del self.tree.leaves[child_leaf]
+
+        pprefix = child_node.pattern() + ':'
+
+        # Plausible children.
+        for bit in [self.tree.no_bit, self.tree.yes_bit]:
+            self.tree.leaves[pprefix +
+                             bit] = PlausibleChild(child_node, bit, self.tree)
+        return child_node
+
+class TraceNode(TraceNode):
+    def get_path_to_root(self):
+        if self.path is not None:
+            return self.path
+        parent_path = []
+        if self.parent is not None:
+            parent_path = self.parent.get_path_to_root()
+        self.path = parent_path + [self]
+        return self.path
+
 class SimpleConcolicFuzzer(Fuzzer):
     def __init__(self):
-        self.ct = []
-        self.seen = set()
-        self.seen_vals = set()
+        self.ct = TraceTree()
         self.max_tries = 1000
         self.last = None
         self.last_idx = None
 
-class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
-    def add_trace(self, tracer):
-        self.ct.append(tracer)
-        self.last = tracer
-        self.last_idx = len(tracer.context[1]) - 1
+if __name__ == "__main__":
+    with ExpectTimeout(2):
+        with ConcolicTracer() as _:
+            _[hang_if_no_space]('ab d')
 
-class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
-    def to_num(self, arr):
-        return int(
-            ''.join(
-                reversed([
-                    '0' if z3.simplify(i).decl().name() == 'not' else '1'
-                    for i in arr
-                ] + ['1'])), 2)
+
+if __name__ == "__main__":
+    _.path
+
 
 if __name__ == "__main__":
     scf = SimpleConcolicFuzzer()
-    a, b = z3.Ints('a b')
-    print(bin(scf.to_num([z3.Not(a == b)])))
-    print(bin(scf.to_num([z3.Not(a == b), a == b])))
-    print(bin(scf.to_num([z3.Not(a == b), a == b, z3.Not(a == b)])))
+    scf.ct.add_trace(_, 'ab d')
+
+
+if __name__ == "__main__":
+    [i._smt_val for i in scf.ct.root.get_children()[0].get_children()[
+        0].get_children()[1].get_path_to_root()]
+
+
+if __name__ == "__main__":
+    for key in scf.ct.leaves:
+        print(key, '\t', scf.ct.leaves[key])
+
+
+if __package__ is None or __package__ == "":
+    from GrammarFuzzer import display_tree
+else:
+    from .GrammarFuzzer import display_tree
+
+
+TREE_NODES = {}
+
+def my_extract_node(tnode, id):
+    key, node, parent = tnode
+    if node is None:
+        # return '? (%s:%s)' % (parent.pattern(), key) , [], ''
+        return '?', [], ''
+    if node.smt is None:
+        return '* %s' % node.info.get('string', ''), [], ''
+
+    no, yes = node.get_children()
+    num = str(node.info.get('num'))
+    children = [('0', no, node), ('1', yes, node)]
+    TREE_NODES[id] = 0
+    return "(%s) %s" % (num, str(node.smt)), children, ''
+
+def my_edge_attr(dot, start_node, stop_node):
+    # the edges are always drawn '0:NO' first.
+    if TREE_NODES[start_node] == 0:
+        color, label = 'red', '0'
+        TREE_NODES[start_node] = 1
+    else:
+        color, label = 'blue', '1'
+        TREE_NODES[start_node] = 2
+    dot.edge(repr(start_node), repr(stop_node), color=color, label=label)
+
+def display_trace_tree(root):
+    TREE_NODES.clear()
+    return display_tree(
+        ('', root, None), extract_node=my_extract_node, edge_attr=my_edge_attr)
+
+if __name__ == "__main__":
+    display_trace_tree(scf.ct.root)
+
+
+if __name__ == "__main__":
+    scf.ct.leaves['00:0']
+
+
+if __name__ == "__main__":
+    scf.ct.leaves['00:0'].path_expression()
+
+
+if __name__ == "__main__":
+    scf.ct.leaves[':1']
+
+
+if __name__ == "__main__":
+    scf.ct.leaves[':1'].path_expression()
+
+
+class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
+    def add_trace(self, trace, s):
+        self.ct.add_trace(trace, s)
+
+    def next_choice(self):
+        #lst = sorted(list(self.ct.leaves.keys()), key=len)
+        c = random.choice(list(self.ct.leaves.keys()))
+        #c = lst[0]
+        return self.ct.leaves[c]
+
+if __name__ == "__main__":
+    scf = SimpleConcolicFuzzer()
+    scf.add_trace(_, 'ab d')
+    node = scf.next_choice()
+
+
+if __name__ == "__main__":
+    node
+
+
+if __name__ == "__main__":
+    node.path_expression()
 
 
 class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
     def get_newpath(self):
-        def get_v(t, v, p):
-            if t == 'String': return z3.String(p) != z3.StringVal(v)
-            elif t == 'Int': return z3.Int(p) != z3.IntVal(int(v))
-            print(repr(t))
-            assert False
-        switch = random.randint(0, self.last_idx)
-        if self.seen:
-            p = list(self.last.fn_args.values())[0]
-            seen = [get_v(t,v,p) for v,t in self.seen_vals]
-        else:
-            seen = []
-        new_path = self.last.path[0:switch] + \
-            [z3.Not(self.last.path[switch])] + seen
-        return self.to_num(new_path), new_path
+        node = self.next_choice()
+        path = node.path_expression()
+        return path, node.cc()
+
+if __name__ == "__main__":
+    scf = SimpleConcolicFuzzer()
+    scf.add_trace(_, 'abcd')
+    path, cc = scf.get_newpath()
+    path
+
+
+# #### Fuzz
+
+if __name__ == "__main__":
+    print('\n#### Fuzz')
+
+
+
 
 class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
     def fuzz(self):
+        if self.ct.root.children == {}:
+            # a random value to generate comparisons. This would be
+            # the initial value around which we explore with concolic
+            # fuzzing.
+            return ' '
         for i in range(self.max_tries):
-            pattern, path = self.get_newpath()
-            if pattern in self.seen:
-                continue
-            self.seen.add(pattern)
-            s, v = zeval_smt(path, self.last, log=False)
+            path, last = self.get_newpath()
+            s, v = zeval_smt(path, last, log=False)
             if s != 'sat':
+                #raise Exception("Unexpected UNSAT")
                 continue
             val = list(v.values())[0]
             elt, typ = val
-            if len(elt) == 2 and elt[0] == '-': # negative numbers are [-, x]
+            if len(elt) == 2 and elt[0] == '-':  # negative numbers are [-, x]
                 elt = '-%s' % elt[1]
-            self.seen_vals.add((elt, typ))
+            # make sure that we do not retry the tried paths
+            # The tracer we add here is incomplete. This gets updated when
+            # the add_trace is called from the concolic fuzzer context.
+            # self.add_trace(ConcolicTracer((last.decls, path)), elt)
             if typ == 'Int':
                 return int(elt)
             elif typ == 'String':
@@ -1745,46 +2047,106 @@ class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
         return None
 
 if __name__ == "__main__":
-    with ExpectTimeout(2):
-        with ConcolicTracer() as _:
-            _[hang_if_no_space]('abcd')
-
-
-if __name__ == "__main__":
     scf = SimpleConcolicFuzzer()
-    scf.add_trace(_)
+    scf.fuzz()
 
 
-if __name__ == "__main__":
-    for i in range(10):
-        v = scf.fuzz()
-        if v is None:
-            break
-        print(v)
+def cgi_decode(s):
+    """Decode the CGI-encoded string `s`:
+       * replace "+" by " "
+       * replace "%xx" by the character with hex number xx.
+       Return the decoded string.  Raise `ValueError` for invalid inputs."""
 
+    # Mapping of hex digits to their integer values
+    hex_values = {
+        '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
+        '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+        'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
+        'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
+    }
 
-if __package__ is None or __package__ == "":
-    from Coverage import cgi_decode
-else:
-    from .Coverage import cgi_decode
-
+    t = ''
+    i = 0
+    while i < len(s):
+        c = s[i]
+        if c == '+':
+            t += ' '
+        elif c == '%':
+            digit_high, digit_low = s[i + 1], s[i + 2]
+            i = i + 2
+            found = 0
+            v = 0
+            for key in hex_values:
+                if key == digit_high:
+                    found = found + 1
+                    v = hex_values[key] * 16
+                    break
+            for key in hex_values:
+                if key == digit_low:
+                    found = found + 1
+                    v = v + hex_values[key]
+                    break
+            if found == 2:
+                if v >= 128:
+                    # z3.StringVal(urllib.parse.unquote('%80')) <-- bug in z3
+                    raise ValueError("Invalid encoding")
+                t = t + chr(v)
+            else:
+                raise ValueError("Invalid encoding")
+        else:
+            t = t + c
+        i = i + 1
+    return t
 
 if __name__ == "__main__":
     with ConcolicTracer() as _:
-        _[cgi_decode]('abcd')
+        _[cgi_decode]('a+c')
 
 
 if __name__ == "__main__":
     scf = SimpleConcolicFuzzer()
-    scf.add_trace(_)
+    scf.add_trace(_, 'a+c')
 
 
 if __name__ == "__main__":
+    display_trace_tree(scf.ct.root)
+
+
+if __name__ == "__main__":
+    v = scf.fuzz()
+    v
+
+
+if __name__ == "__main__":
+    with ExpectError():
+        with ConcolicTracer() as _:
+            _[cgi_decode](v)  
+
+
+if __name__ == "__main__":
+    scf.add_trace(_, v)
+
+
+if __name__ == "__main__":
+    display_trace_tree(scf.ct.root)
+
+
+if __name__ == "__main__":
+    scf = SimpleConcolicFuzzer()
     for i in range(10):
         v = scf.fuzz()
+        print(repr(v))
         if v is None:
-            break
-        print(v)
+            continue
+        with ConcolicTracer() as _:
+            with ExpectError():
+                # z3.StringVal(urllib.parse.unquote('%80')) <-- bug in z3
+                _[cgi_decode](v)
+        scf.add_trace(_, v)
+
+
+if __name__ == "__main__":
+    display_trace_tree(scf.ct.root)
 
 
 # ### ConcolicGrammarFuzzer
@@ -1949,10 +2311,7 @@ def unwrap_substrings(s):
 
 def traverse_z3(p, hm):
     def z3_as_string(v):
-        s = v.as_string()
-        # Z3 bug: Python z3 API returns quoted strings for as_string
-        assert s[0] == '"' and s[-1] == '"'
-        return s[1:-1]
+        return v.as_string()
 
     n = p.decl().name()
     if n == 'not':
@@ -2142,28 +2501,27 @@ if __name__ == "__main__":
 
 
 
-if __package__ is None or __package__ == "":
-    from Coverage import cgi_decode
-else:
-    from .Coverage import cgi_decode
-
-
 if __name__ == "__main__":
     with ConcolicTracer() as _:
-        _[cgi_decode]('abcd')
+        _[cgi_decode]('a%20d')
 
 
 if __name__ == "__main__":
     scf = SimpleConcolicFuzzer()
-    scf.add_trace(_)
+    scf.add_trace(_, 'a%20d')
 
 
 if __name__ == "__main__":
+    scf = SimpleConcolicFuzzer()
     for i in range(10):
         v = scf.fuzz()
         if v is None:
             break
-        print(v)
+        print(repr(v))
+        with ExpectError():
+            with ConcolicTracer() as _:
+                _[cgi_decode](v)
+        scf.add_trace(_, v)
 
 
 if __package__ is None or __package__ == "":
@@ -2401,11 +2759,18 @@ BIT_OPS = [
     '__ror__',
 ]
 
-if __name__ == "__main__":
+def init_concolic_4():
     for fname in BIT_OPS:
         fun = getattr(int, fname)
         zfun = getattr(z3.BitVecRef, fname)
         setattr(zint, fname, make_int_bit_wrapper(fname, fun, zfun))
+
+if __name__ == "__main__":
+    INITIALIZER_LIST.append(init_concolic_4)
+
+
+if __name__ == "__main__":
+    init_concolic_4()
 
 
 class zint(zint):

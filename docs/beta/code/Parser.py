@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2019-05-21 19:58:00+02:00
+# Last change: 2019-12-21 16:38:57+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -575,8 +575,20 @@ def canonical(grammar, letters=False):
         for k, alternatives in grammar.items()
     }
 
+CE_GRAMMAR = canonical(EXPR_GRAMMAR); CE_GRAMMAR
+
+def non_canonical(grammar):
+    new_grammar = {}
+    for k in grammar:
+        rules = grammar[k]
+        new_rules = []
+        for rule in rules:
+            new_rules.append(''.join(rule))
+        new_grammar[k] = new_rules
+    return new_grammar
+
 if __name__ == "__main__":
-    canonical(EXPR_GRAMMAR)
+    non_canonical(CE_GRAMMAR)
 
 
 class Parser(Parser):
@@ -620,7 +632,7 @@ class PEGParser(PEGParser):
                 return at, None
         for rule in self.cgrammar[key]:
             to, res = self.unify_rule(rule, text, at)
-            if res:
+            if res is not None:
                 return (to, (key, res))
         return 0, None
 
@@ -684,7 +696,7 @@ class PEGParser(PEGParser):
                 return at, None
         for rule in self.cgrammar[key]:
             to, res = self.unify_rule(rule, text, at)
-            if res:
+            if res is not None:
                 return (to, (key, res))
         return 0, None
 

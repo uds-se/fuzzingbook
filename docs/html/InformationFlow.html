@@ -12593,7 +12593,12 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
             <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span>
                 <span class="s1">&#39;names(</span><span class="si">%s</span><span class="s1">) != values(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">names</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">values</span><span class="p">)))</span>
 
-        <span class="n">kvs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">decls</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">values</span><span class="p">)}</span>
+        <span class="c1"># dict lookups happen in C code, so we cant use that</span>
+        <span class="n">kvs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">kval</span> <span class="ow">in</span> <span class="n">decls</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                    <span class="n">kvs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">kval</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
         <span class="n">table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kvs</span><span class="p">)</span>
 </pre></div>
 
@@ -12784,7 +12789,10 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
         <span class="k">for</span> <span class="n">hm</span> <span class="ow">in</span> <span class="n">updated</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sets</span><span class="p">:</span>
-                <span class="n">hm</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">decls</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span>
+                <span class="c1"># we can not do dict lookups because it is implemetned in C.</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">kval</span> <span class="ow">in</span> <span class="n">decls</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">k</span><span class="p">:</span>
+                        <span class="n">hm</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">kval</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> records were updated&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">updated</span><span class="p">)</span>
 </pre></div>
@@ -13964,12 +13972,57 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;__format__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__getitem__&#39;</span><span class="p">,</span> <span class="s1">&#39;__add__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mul__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmul__&#39;</span><span class="p">,</span>
-             <span class="s1">&#39;capitalize&#39;</span><span class="p">,</span> <span class="s1">&#39;casefold&#39;</span><span class="p">,</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="s1">&#39;encode&#39;</span><span class="p">,</span>
-             <span class="s1">&#39;expandtabs&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">,</span> <span class="s1">&#39;format_map&#39;</span><span class="p">,</span> <span class="s1">&#39;join&#39;</span><span class="p">,</span> <span class="s1">&#39;ljust&#39;</span><span class="p">,</span> <span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="s1">&#39;lstrip&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">,</span>
-             <span class="s1">&#39;rjust&#39;</span><span class="p">,</span> <span class="s1">&#39;rstrip&#39;</span><span class="p">,</span> <span class="s1">&#39;strip&#39;</span><span class="p">,</span> <span class="s1">&#39;swapcase&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;translate&#39;</span><span class="p">,</span> <span class="s1">&#39;upper&#39;</span><span class="p">]:</span>
-    <span class="n">fun</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="nb">setattr</span><span class="p">(</span><span class="n">tstr</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">make_str_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">informationflow_init_1</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;__format__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__getitem__&#39;</span><span class="p">,</span> <span class="s1">&#39;__add__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mul__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmul__&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;capitalize&#39;</span><span class="p">,</span> <span class="s1">&#39;casefold&#39;</span><span class="p">,</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="s1">&#39;encode&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;expandtabs&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">,</span> <span class="s1">&#39;format_map&#39;</span><span class="p">,</span> <span class="s1">&#39;join&#39;</span><span class="p">,</span> <span class="s1">&#39;ljust&#39;</span><span class="p">,</span> <span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="s1">&#39;lstrip&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;rjust&#39;</span><span class="p">,</span> <span class="s1">&#39;rstrip&#39;</span><span class="p">,</span> <span class="s1">&#39;strip&#39;</span><span class="p">,</span> <span class="s1">&#39;swapcase&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;translate&#39;</span><span class="p">,</span> <span class="s1">&#39;upper&#39;</span><span class="p">]:</span>
+        <span class="n">fun</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">tstr</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">make_str_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">informationflow_init_1</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">INITIALIZER_LIST</span> <span class="o">=</span> <span class="p">[</span><span class="n">informationflow_init_1</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">initialize</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">INITIALIZER_LIST</span><span class="p">:</span>
+        <span class="n">fn</span><span class="p">()</span>
 </pre></div>
 
 </div>
@@ -14356,9 +14409,9 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-79-65a521f9999f&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-82-65a521f9999f&gt;&#34;, line 2, in &lt;module&gt;
     bdb.sql(&#34;select year from INVENTORY&#34;)
-  File &#34;&lt;ipython-input-76-53a654b6cc10&gt;&#34;, line 3, in sql
+  File &#34;&lt;ipython-input-79-53a654b6cc10&gt;&#34;, line 3, in sql
     assert isinstance(s, tstr), &#34;Need a tainted string&#34;
 AssertionError: Need a tainted string (expected)
 </pre>
@@ -14395,9 +14448,9 @@ AssertionError: Need a tainted string (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-80-82c5b2d628ed&gt;&#34;, line 3, in &lt;module&gt;
+  File &#34;&lt;ipython-input-83-82c5b2d628ed&gt;&#34;, line 3, in &lt;module&gt;
     bdb.sql(bad_user_input)
-  File &#34;&lt;ipython-input-76-53a654b6cc10&gt;&#34;, line 4, in sql
+  File &#34;&lt;ipython-input-79-53a654b6cc10&gt;&#34;, line 4, in sql
     assert s.taint == &#39;TRUSTED&#39;, &#34;Need a string with trusted taint&#34;
 AssertionError: Need a string with trusted taint (expected)
 </pre>
@@ -14594,9 +14647,9 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-88-e59f9e5c9d30&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-91-e59f9e5c9d30&gt;&#34;, line 2, in &lt;module&gt;
     bdb.sql(sanitized_input)
-  File &#34;&lt;ipython-input-76-53a654b6cc10&gt;&#34;, line 4, in sql
+  File &#34;&lt;ipython-input-79-53a654b6cc10&gt;&#34;, line 4, in sql
     assert s.taint == &#39;TRUSTED&#39;, &#34;Need a string with trusted taint&#34;
 AssertionError: Need a string with trusted taint (expected)
 </pre>
@@ -15016,9 +15069,9 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-103-e02d8e55c3ba&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-106-e02d8e55c3ba&gt;&#34;, line 2, in &lt;module&gt;
     send_back(reply)
-  File &#34;&lt;ipython-input-102-a105f7cd1cab&gt;&#34;, line 2, in send_back
+  File &#34;&lt;ipython-input-105-a105f7cd1cab&gt;&#34;, line 2, in send_back
     assert not isinstance(s, tstr) and not s.taint == &#39;SECRET&#39;
 AssertionError (expected)
 </pre>
@@ -15029,7 +15082,7 @@ AssertionError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracking-Character-Origins">Tracking Character Origins<a class="anchor-link" href="#Tracking-Character-Origins">&#182;</a></h3><p>Our <code>tstr</code> solution can be help to identify information leaks – but it is by no means complete.  If we actually take the <code>heartbeat()</code> implementation from <a href="Fuzzer.html">the chapter on Fuzzing</a>, we will see that <em>any</em> reply is marked as <code>SECRET</code> – even those not even accessing secret memory:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracking-Character-Origins">Tracking Character Origins<a class="anchor-link" href="#Tracking-Character-Origins">&#182;</a></h3><p>Our <code>tstr</code> solution can help to identify information leaks – but it is by no means complete.  If we actually take the <code>heartbeat()</code> implementation from <a href="Fuzzer.html">the chapter on Fuzzing</a>, we will see that <em>any</em> reply is marked as <code>SECRET</code> – even those not even accessing secret memory:</p>
 </div>
 </div>
 </div>
@@ -15205,7 +15258,7 @@ AssertionError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Distinguishing various untrusted sources may be accomplished by origining each instances as separate instances (called <em>colors</em> in dynamic origin research). You will see an instance of this technique in the chapter on <a href="GrammarMiner.html">Grammar Mining</a>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Distinguishing various untrusted sources may be accomplished by origining each instance as separate instance (called <em>colors</em> in dynamic origin research). You will see an instance of this technique in the chapter on <a href="GrammarMiner.html">Grammar Mining</a>.</p>
 </div>
 </div>
 </div>
@@ -15214,7 +15267,7 @@ AssertionError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>In this section, we carry <em>character level</em> origins. That is, given a fragment that resulted from a portion of the original origined string, one will be able to tell which portion of the input string the fragment was taken from. In essence, each input character index from a origined source gets its own color.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>In this section, we carry <em>character level</em> origins. That is, given a fragment that resulted from a portion of the original origined string, one will be able to tell which portion of the input string the fragment was taken from. In essence, each input character index from an origined source gets its own color.</p>
 </div>
 </div>
 </div>
@@ -15410,7 +15463,7 @@ AssertionError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p><code>str()</code> returns an <code>str</code> instance without origin or taint information:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p><code>str()</code> returns a <code>str</code> instance without origin or taint information:</p>
 </div>
 </div>
 </div>
@@ -17013,13 +17066,42 @@ AssertionError (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ostr_members</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">ostr</span><span class="p">,</span> <span class="n">callable</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__qualname__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;ostr&#39;</span><span class="p">)]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">informationflow_init_2</span><span class="p">():</span>
+    <span class="n">ostr_members</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">ostr</span><span class="p">,</span> <span class="n">callable</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__qualname__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;ostr&#39;</span><span class="p">)]</span>
 
-<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">callable</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;__class__&#39;</span><span class="p">,</span> <span class="s1">&#39;__new__&#39;</span><span class="p">,</span> <span class="s1">&#39;__str__&#39;</span><span class="p">,</span> <span class="s1">&#39;__init__&#39;</span><span class="p">,</span>
-                        <span class="s1">&#39;__repr__&#39;</span><span class="p">,</span> <span class="s1">&#39;__getattribute__&#39;</span><span class="p">])</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">ostr_members</span><span class="p">):</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="n">ostr</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">make_str_wrapper</span><span class="p">(</span><span class="n">fn</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">callable</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;__class__&#39;</span><span class="p">,</span> <span class="s1">&#39;__new__&#39;</span><span class="p">,</span> <span class="s1">&#39;__str__&#39;</span><span class="p">,</span> <span class="s1">&#39;__init__&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;__repr__&#39;</span><span class="p">,</span> <span class="s1">&#39;__getattribute__&#39;</span><span class="p">])</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">ostr_members</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">ostr</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">make_str_wrapper</span><span class="p">(</span><span class="n">fn</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">informationflow_init_2</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">INITIALIZER_LIST</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">informationflow_init_2</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -17069,16 +17151,54 @@ AssertionError (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">callable</span><span class="p">):</span>
-    <span class="c1"># Omitted &#39;splitlines&#39; as this is needed for formatting output in</span>
-    <span class="c1"># IPython/Jupyter</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;__format__&#39;</span><span class="p">,</span> <span class="s1">&#39;format_map&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;__mul__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmul__&#39;</span><span class="p">,</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="s1">&#39;zfill&#39;</span><span class="p">,</span> <span class="s1">&#39;decode&#39;</span><span class="p">,</span> <span class="s1">&#39;encode&#39;</span><span class="p">]:</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="n">ostr</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">make_str_abort_wrapper</span><span class="p">(</span><span class="n">fn</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">informationflow_init_3</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">callable</span><span class="p">):</span>
+        <span class="c1"># Omitted &#39;splitlines&#39; as this is needed for formatting output in</span>
+        <span class="c1"># IPython/Jupyter</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;__format__&#39;</span><span class="p">,</span> <span class="s1">&#39;format_map&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;__mul__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmul__&#39;</span><span class="p">,</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="s1">&#39;zfill&#39;</span><span class="p">,</span> <span class="s1">&#39;decode&#39;</span><span class="p">,</span> <span class="s1">&#39;encode&#39;</span><span class="p">]:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">ostr</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">make_str_abort_wrapper</span><span class="p">(</span><span class="n">fn</span><span class="p">))</span>
 </pre></div>
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">informationflow_init_3</span><span class="p">()</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">INITIALIZER_LIST</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">informationflow_init_3</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>While generating proxy wrappers for string operations can handle most common cases of transmission of information flow, some of the operations involving strings can not be overridden. For example, consider the following.</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -17537,7 +17657,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-203-6cac9e5bbde7&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-210-6cac9e5bbde7&gt;&#34;, line 2, in &lt;module&gt;
     assert s.origin == [ostr.UNKNOWN_ORIGIN] * len(s)
 AssertionError (expected)
 </pre>
@@ -17564,7 +17684,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-204-860ea80b8867&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-211-860ea80b8867&gt;&#34;, line 2, in &lt;module&gt;
     assert all(origin == ostr.UNKNOWN_ORIGIN for origin in s.origin)
 AssertionError (expected)
 </pre>
@@ -17591,7 +17711,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-205-9630f3080c59&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-212-9630f3080c59&gt;&#34;, line 2, in &lt;module&gt;
     assert not any(origin &gt;= SECRET_ORIGIN for origin in s.origin)
 AssertionError (expected)
 </pre>
@@ -17790,7 +17910,7 @@ AssertionError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We use a specially prepared tainted grammar for fuzzing. We mark each individual definition, each individual rule, and each individual token with a separate origin (we chose a token boundary of 10 here, after inspecting the grammar). This allows us to track exactly which parts of the grammar was involved in the operations we are interested in.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We use a specially prepared tainted grammar for fuzzing. We mark each individual definition, each individual rule, and each individual token with a separate origin (we chose a token boundary of 10 here, after inspecting the grammar). This allows us to track exactly which parts of the grammar were involved in the operations we are interested in.</p>
 </div>
 </div>
 </div>
@@ -17857,7 +17977,7 @@ AssertionError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Finally, we need to ensure that the taints are preserved when the tree is converted back to a string. For this, we define the <code>tainted_tree_to_string()</code></p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Finally, we need to ensure that the taints are preserved, when the tree is converted back to a string. For this, we define the <code>tainted_tree_to_string()</code></p>
 </div>
 </div>
 </div>
@@ -18418,7 +18538,7 @@ Tainted[_==(7==(9)!=(---5)==1)==-8]
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-223-56d5157cf575&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-230-56d5157cf575&gt;&#34;, line 2, in &lt;module&gt;
     thello_stripped.origin
 AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected)
 </pre>
@@ -18505,7 +18625,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-225-ad148b54cc0b&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;&lt;ipython-input-232-ad148b54cc0b&gt;&#34;, line 2, in &lt;module&gt;
     &#39;&#39;.join([hello, &#39; &#39;, world]).origin
 AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected)
 </pre>
@@ -18557,7 +18677,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Enforcing-Tainting">Enforcing Tainting<a class="anchor-link" href="#Enforcing-Tainting">&#182;</a></h4><p>Both conversions and implicit information flow are one of several possibilities that taint and origin information get lost.  To address the problem, the best solution is to <em>always assume the worst from untainted strings</em>:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Enforcing-Tainting">Enforcing Tainting<a class="anchor-link" href="#Enforcing-Tainting">&#182;</a></h4><p>Both, conversions and implicit information flow are one of several possibilities how taint and origin information get lost.  To address the problem, the best solution is to <em>always assume the worst from untainted strings</em>:</p>
 <ul>
 <li><p>As it comes to trust, an untainted string should be treated as <em>possibly untrusted</em>, and hence not relied upon unless sanitized.</p>
 </li>
@@ -18574,7 +18694,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><ul>
-<li><p>String-based and character-based taints allow to dynamically track the information flow form input to the internals of a system and back to the output.</p>
+<li><p>String-based and character-based taints allow to dynamically track the information flow from input to the internals of a system and back to the output.</p>
 </li>
 <li><p>Checking taints allows to discover untrusted inputs and information leakage at runtime.</p>
 </li>
@@ -18671,7 +18791,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-4:-Passing-taints-from-integers-to-strings">Part 4: Passing taints from integers to strings<a class="anchor-link" href="#Part-4:-Passing-taints-from-integers-to-strings">&#182;</a></h4><p>Converting a tainted object (with a <code>taint</code> attribute) to an integer should pass that taint:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Part-4:-Passing-taints-from-strings-to-integers">Part 4: Passing taints from strings to integers<a class="anchor-link" href="#Part-4:-Passing-taints-from-strings-to-integers">&#182;</a></h4><p>Converting a tainted object (with a <code>taint</code> attribute) to an integer should pass that taint:</p>
 <div class="highlight"><pre><span></span><span class="n">password</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;1234&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;NOT_EXACTLY_SECRET&#39;</span><span class="p">)</span>
 <span class="n">x</span> <span class="o">=</span> <span class="n">tint</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
 <span class="k">assert</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1234</span>
@@ -18703,7 +18823,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2019-05-21 19:58:01+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2019-12-21 16:38:57+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -18721,7 +18841,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/InformationFlow.html">Tracking Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/InformationFlow.html">https://www.fuzzingbook.org/html/InformationFlow.html</a>.  Retrieved 2019-05-21 19:58:01+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/InformationFlow.html">Tracking Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/InformationFlow.html">https://www.fuzzingbook.org/html/InformationFlow.html</a>.  Retrieved 2019-12-21 16:38:57+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2019:InformationFlow,
@@ -18731,9 +18851,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2019},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/html/InformationFlow.html}},
-    note = {Retrieved 2019-05-21 19:58:01+02:00},
+    note = {Retrieved 2019-12-21 16:38:57+01:00},
     url = {https://www.fuzzingbook.org/html/InformationFlow.html},
-    urldate = {2019-05-21 19:58:01+02:00}
+    urldate = {2019-12-21 16:38:57+01:00}
 }
 </pre>
 </div>

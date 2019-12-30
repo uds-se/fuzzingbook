@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2019-05-21 15:10:49+02:00
+# Last change: 2019-12-23 11:38:21+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -70,11 +70,13 @@ if __name__ == "__main__":
 
 
 import string
-import numpy
 
-from numpy.random import choice
-from numpy.random import shuffle
-from numpy import log
+if __name__ == "__main__":
+    import numpy
+    from numpy.random import choice
+    from numpy.random import shuffle
+    from numpy import log
+
 
 if __name__ == "__main__":
     letters = list(string.ascii_letters[26:])  # upper-case characters

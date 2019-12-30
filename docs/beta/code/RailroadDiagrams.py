@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/RailroadDiagrams.html
-# Last change: 2019-01-04 16:03:17+01:00
+# Last change: 2019-10-19 13:54:52+02:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -62,27 +62,26 @@ class C:
 
     DEFAULT_STYLE = '''\
     svg.railroad-diagram {
-        background-color:hsl(100,100%,100%);
     }
     svg.railroad-diagram path {
         stroke-width:3;
         stroke:black;
-        fill:rgba(0,0,0,0);
+        fill:white;
     }
     svg.railroad-diagram text {
-        font:bold 14px monospace;
+        font:14px "Fira Mono", monospace;
         text-anchor:middle;
     }
     svg.railroad-diagram text.label{
         text-anchor:start;
     }
     svg.railroad-diagram text.comment{
-        font:italic 12px monospace;
+        font:italic 12px "Fira Mono", monospace;
     }
     svg.railroad-diagram rect{
-        stroke-width:3;
+        stroke-width:2;
         stroke:black;
-        fill:hsl(0,62%,82%);
+        fill:mistyrose;
     }
 '''
 

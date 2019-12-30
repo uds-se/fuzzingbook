@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2019-06-21 13:27:31+02:00
+# Last change: 2019-12-21 16:38:57+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -322,7 +322,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    derivation_tree = (START_SYMBOL, [('<vehicle>', [('<model>', [('1997', [])]),
+    derivation_tree = (START_SYMBOL, [('<vehicle>', [('<year>', [('1997', [])]),
                                                      (",van,Ford,E350", [])], [])])
 
 
@@ -331,7 +331,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    derivation_tree = (START_SYMBOL, [('<vehicle>', [('<model>', [('1997', [])]),
+    derivation_tree = (START_SYMBOL, [('<vehicle>', [('<year>', [('1997', [])]),
                                                      (",van,", []),
                                                      ('<company>', [('Ford', [])]),
                                                      (",E350", [])], [])])
@@ -342,7 +342,7 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    derivation_tree = (START_SYMBOL, [('<vehicle>', [('<model>', [('1997', [])]),
+    derivation_tree = (START_SYMBOL, [('<vehicle>', [('<year>', [('1997', [])]),
                                                      (",", []),
                                                      ("<kind>", [('van', [])]),
                                                      (",", []),

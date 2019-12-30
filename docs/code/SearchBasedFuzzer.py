@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2019-05-10 12:09:17+02:00
+# Last change: 2019-12-21 16:40:04+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -736,7 +736,7 @@ if __name__ == "__main__":
     ax.plot(x, y);
 
 
-def get_fitness(x):
+def get_fitness_cgi(x):
     # Reset any distance values from previous executions
     global distances_true, distances_false
     distances_true = {}
@@ -766,27 +766,27 @@ def get_fitness(x):
 
 if __name__ == "__main__":
     # Empty string does not even enter the loop
-    get_fitness("")
+    get_fitness_cgi("")
 
 
 if __name__ == "__main__":
     # String contains no percentage character
-    get_fitness("Hello+Reader")
+    get_fitness_cgi("Hello+Reader")
 
 
 if __name__ == "__main__":
     # String contains a percentage character, but no valid hex char
-    get_fitness("%UU")
+    get_fitness_cgi("%UU")
 
 
 if __name__ == "__main__":
     # String contains a percentage character, but only one valid hex char
-    get_fitness("%AU")
+    get_fitness_cgi("%AU")
 
 
 if __name__ == "__main__":
     # String contains a percentage character and two valid hex chars
-    get_fitness("%AA")
+    get_fitness_cgi("%AA")
 
 
 # ### Hillclimbing Valid Hexadecimal Inputs
@@ -806,13 +806,13 @@ def random_string(l):
 
 def hillclimb_cgi():
     x = random_string(10)
-    fitness = get_fitness(x)
+    fitness = get_fitness_cgi(x)
     print("Initial input: %s at fitness %.4f" % (x, fitness))
 
     while fitness > 0:
         changed = False
         for (nextx) in neighbour_strings(x):
-            new_fitness = get_fitness(nextx)
+            new_fitness = get_fitness_cgi(nextx)
             if new_fitness < fitness:
                 x = nextx
                 fitness = new_fitness
@@ -823,7 +823,7 @@ def hillclimb_cgi():
         # Random restart if necessary
         if not changed:
             x = random_string(10)
-            fitness = get_fitness(x)
+            fitness = get_fitness_cgi(x)
 
     print("Optimum at %s, fitness %.4f" % (x, fitness))
 
@@ -864,7 +864,7 @@ def terminal_repr(s):
 
 def hillclimb_cgi_limited(max_iterations):
     x = random_unicode_string(10)
-    fitness = get_fitness(x)
+    fitness = get_fitness_cgi(x)
     print("Initial input: %s at fitness %.4f" % (terminal_repr(x), fitness))
 
     iteration = 0
@@ -872,7 +872,7 @@ def hillclimb_cgi_limited(max_iterations):
     while fitness > 0 and iteration < max_iterations:
         changed = False
         for (nextx) in unicode_string_neighbours(x):
-            new_fitness = get_fitness(nextx)
+            new_fitness = get_fitness_cgi(nextx)
             if new_fitness < fitness:
                 x = nextx
                 fitness = new_fitness
@@ -888,7 +888,7 @@ def hillclimb_cgi_limited(max_iterations):
         # Random restart if necessary
         if not changed:
             x = random_string(10)
-            fitness = get_fitness(x)
+            fitness = get_fitness_cgi(x)
         iteration += 1
 
     print("Optimum at %s, fitness %.4f" % (terminal_repr(x), fitness))
@@ -912,14 +912,14 @@ def flip_random_character(s):
 
 def randomized_hillclimb():
     x = random_unicode_string(10)
-    fitness = get_fitness(x)
+    fitness = get_fitness_cgi(x)
     print("Initial value: %s at fitness %.4f" %
           (terminal_repr(x), fitness))
 
     iterations = 0
     while fitness > 0:
         mutated = flip_random_character(x)
-        new_fitness = get_fitness(mutated)
+        new_fitness = get_fitness_cgi(mutated)
         if new_fitness <= fitness:
             x = mutated
             fitness = new_fitness
@@ -949,7 +949,7 @@ if __name__ == "__main__":
 
 
 def evaluate_population(population):
-    fitness = [get_fitness(x) for x in population]
+    fitness = [get_fitness_cgi(x) for x in population]
     return list(zip(population, fitness))
 
 if __name__ == "__main__":
@@ -1060,6 +1060,30 @@ def genetic_algorithm():
     print(
         "Best individual: %s, fitness %.10f" %
         (terminal_repr(best_individual), best_fitness))
+
+if __name__ == "__main__":
+    genetic_algorithm()
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
+
+
+
+
+if __name__ == "__main__":
+    hillclimber()
+
+
+if __name__ == "__main__":
+    cgi_decode_instrumented = create_instrumented_function(cgi_decode)
+
+
+if __name__ == "__main__":
+    get_fitness_cgi("Foo")
+
 
 if __name__ == "__main__":
     genetic_algorithm()

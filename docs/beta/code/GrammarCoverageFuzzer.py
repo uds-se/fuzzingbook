@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2019-05-21 19:58:00+02:00
+# Last change: 2019-12-21 22:21:21+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -102,7 +102,7 @@ class TrackingGrammarCoverageFuzzer(GrammarFuzzer):
         return self.covered_expansions
 
 def expansion_key(symbol, expansion):
-    """Convert (symbol, children) into a key.  `children` can be an expansion string or a derivation tree."""
+    """Convert (symbol, expansion) into a key.  `expansion` can be an expansion string or a derivation tree."""
     if isinstance(expansion, tuple):
         expansion = expansion[0]
     if not isinstance(expansion, str):
@@ -732,7 +732,9 @@ if __name__ == "__main__":
     np.corrcoef(xs, ys)
 
 
-from scipy.stats import spearmanr
+if __name__ == "__main__":
+    from scipy.stats import spearmanr
+
 
 if __name__ == "__main__":
     spearmanr(xs, ys)

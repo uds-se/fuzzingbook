@@ -15,7 +15,7 @@ RE_IMPORT_FUZZINGBOOK_UTILS = re.compile(r'^import fuzzingbook_utils.*$', re.MUL
 RE_FROM_FUZZINGBOOK_UTILS = re.compile(r'^from fuzzingbook_utils import .*$', re.MULTILINE)
 
 # Things to import only if main (reduces dependencies)
-RE_IMPORT_IF_MAIN = re.compile(r'^(from|import) (matplotlib|graphviz|mpl_toolkits|numpy|IPython|requests|FTB|Collector|fuzzingbook_utils import YouTubeVideo).*$')
+RE_IMPORT_IF_MAIN = re.compile(r'^(from|import)[ \t]+(matplotlib|graphviz|mpl_toolkits|numpy|scipy|IPython|requests|FTB|Collector|fuzzingbook_utils import YouTubeVideo).*$', re.MULTILINE)
 
 # Strip blank lines
 RE_BLANK_LINES = re.compile(r'^[ \t]*$', re.MULTILINE)

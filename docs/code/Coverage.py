@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2019-05-21 19:57:59+02:00
+# Last change: 2019-12-21 16:38:57+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
