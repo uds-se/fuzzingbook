@@ -107,7 +107,15 @@ def print_content(content, filename=None, lexer=None):
                 lexer = get_lexer_for_filename(filename)
 
         colorful_content = highlight(content, lexer, formatters.TerminalFormatter())
-        print(colorful_content, end="")
+        colorful_content_list = colorful_content.split("\n")
+        no_of_lines = len(colorful_content_list)
+        size_of_lines_nums = len(str(no_of_lines))
+
+        for i in range(no_of_lines):
+            colorful_content_list[i] = ('{0:' + str(size_of_lines_nums) + '}').format(i) + " " + colorful_content_list[i]
+        colorful_content_with_line_no = '\n'.join(colorful_content_list)
+
+        print(colorful_content_with_line_no, end="")
     else:
         print(content, end="")
 
