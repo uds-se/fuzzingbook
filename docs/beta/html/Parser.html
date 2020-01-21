@@ -12865,7 +12865,7 @@ It is an old but reliable model!
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0 valid strings, that is GrammarFuzzer generated 0.000000% valid entries from 1000 inputs
-Total time of 5.927162 seconds
+Total time of 5.508574 seconds
 </pre>
 </div>
 
@@ -16238,6 +16238,14 @@ in two ways as we see below using the <code>A1_GRAMMAR</code></p>
             <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;at &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">cursor</span><span class="p">:]))</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">forest</span><span class="p">]</span>
 
+    <span class="k">def</span> <span class="nf">parse_on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">start_symbol</span><span class="p">):</span>
+        <span class="n">old_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span> <span class="o">=</span> <span class="n">start_symbol</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span> <span class="o">=</span> <span class="n">old_start</span>
+
     <span class="k">def</span> <span class="nf">coalesce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
         <span class="n">last</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="n">new_lst</span> <span class="o">=</span> <span class="p">[]</span>
@@ -16454,7 +16462,102 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We also provide a way to revert a canonical expression.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We also provide a convenience method for easier display of canonical grammars.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">recurse_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+    <span class="n">rules</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">grammar</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="n">old_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">rules</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">rule</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">token</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+                <span class="n">order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+    <span class="n">new</span> <span class="o">=</span> <span class="n">order</span><span class="p">[</span><span class="n">old_len</span><span class="p">:]</span>
+    <span class="k">for</span> <span class="n">ckey</span> <span class="ow">in</span> <span class="n">new</span><span class="p">:</span>
+        <span class="n">recurse_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">ckey</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">show_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="o">=</span><span class="n">START_SYMBOL</span><span class="p">):</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_symbol</span><span class="p">]</span>
+    <span class="n">recurse_grammar</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start_symbol</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">grammar</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">order</span><span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">show_grammar</span><span class="p">(</span><span class="n">CE_GRAMMAR</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{&#39;&lt;start&gt;&#39;: [[&#39;&lt;expr&gt;&#39;]],
+ &#39;&lt;expr&gt;&#39;: [[&#39;&lt;term&gt;&#39;],
+  [&#39;&lt;term&gt;&#39;, &#39; + &#39;, &#39;&lt;expr&gt;&#39;],
+  [&#39;&lt;term&gt;&#39;, &#39; - &#39;, &#39;&lt;expr&gt;&#39;]],
+ &#39;&lt;term&gt;&#39;: [[&#39;&lt;factor&gt;&#39;],
+  [&#39;&lt;factor&gt;&#39;, &#39; * &#39;, &#39;&lt;term&gt;&#39;],
+  [&#39;&lt;factor&gt;&#39;, &#39; / &#39;, &#39;&lt;term&gt;&#39;]],
+ &#39;&lt;factor&gt;&#39;: [[&#39;(&#39;, &#39;&lt;expr&gt;&#39;, &#39;)&#39;],
+  [&#39;+&#39;, &#39;&lt;factor&gt;&#39;],
+  [&#39;-&#39;, &#39;&lt;factor&gt;&#39;],
+  [&#39;&lt;integer&gt;&#39;],
+  [&#39;&lt;integer&gt;&#39;, &#39;.&#39;, &#39;&lt;integer&gt;&#39;]],
+ &#39;&lt;integer&gt;&#39;: [[&#39;&lt;digit&gt;&#39;], [&#39;&lt;digit&gt;&#39;, &#39;&lt;integer&gt;&#39;]],
+ &#39;&lt;digit&gt;&#39;: [[&#39;0&#39;],
+  [&#39;1&#39;],
+  [&#39;2&#39;],
+  [&#39;3&#39;],
+  [&#39;4&#39;],
+  [&#39;5&#39;],
+  [&#39;6&#39;],
+  [&#39;7&#39;],
+  [&#39;8&#39;],
+  [&#39;9&#39;]]}
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We provide a way to revert a canonical expression.</p>
 </div>
 </div>
 </div>
@@ -16531,12 +16634,54 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Parser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">grammar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_symbol&#39;</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tokens&#39;</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coalesce_tokens</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coalesce&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="n">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+        <span class="n">canonical_grammar</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;canonical&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">canonical_grammar</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">non_canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="n">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+        <span class="c1"># we do not require a single rule for the start symbol</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grammar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span><span class="p">,</span> <span class="p">[]))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span><span class="p">[</span><span class="s1">&#39;&lt;&gt;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span><span class="p">]]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We update the <code>prune_tree()</code> to account for the phony start symbol if it was insserted.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Parser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">prune_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;&lt;&gt;&#39;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coalesce_tokens</span><span class="p">:</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[(</span><span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">),</span> <span class="p">[])])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">])</span>
 </pre></div>
 
 </div>
@@ -17103,9 +17248,9 @@ aaaaaaaa
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-72-dec55ebf796e&gt;&#34;, line 4, in &lt;module&gt;
+  File &#34;&lt;ipython-input-76-dec55ebf796e&gt;&#34;, line 4, in &lt;module&gt;
     for tree in peg.parse(s):
-  File &#34;&lt;ipython-input-49-abe75b43d33f&gt;&#34;, line 22, in parse
+  File &#34;&lt;ipython-input-49-7d94df7a71f9&gt;&#34;, line 22, in parse
     raise SyntaxError(&#34;at &#34; + repr(text[cursor:]))
   File &#34;&lt;string&gt;&#34;, line None
 SyntaxError: at &#39;aa&#39; (expected)
@@ -18866,20 +19011,20 @@ d chart[4]
 
 <div class="output_text output_subarea output_execute_result">
 <pre>(&#39;&lt;start&gt;&#39;,
- [[(&lt;__main__.State at 0x11ddc5588&gt;,
+ [[(&lt;__main__.State at 0x116c6abe0&gt;,
     &#39;n&#39;,
-    [&lt;__main__.Column at 0x11ddb2358&gt;,
-     &lt;__main__.Column at 0x11ddb2f28&gt;,
-     &lt;__main__.Column at 0x11ddb2080&gt;,
-     &lt;__main__.Column at 0x11ddb2fd0&gt;,
-     &lt;__main__.Column at 0x11ddb2390&gt;]),
-   (&lt;__main__.State at 0x11ddc58d0&gt;,
+    [&lt;__main__.Column at 0x116c746d8&gt;,
+     &lt;__main__.Column at 0x116c74cc0&gt;,
+     &lt;__main__.Column at 0x116c6a588&gt;,
+     &lt;__main__.Column at 0x116c6a748&gt;,
+     &lt;__main__.Column at 0x116c6a780&gt;]),
+   (&lt;__main__.State at 0x116c6aba8&gt;,
     &#39;n&#39;,
-    [&lt;__main__.Column at 0x11ddb2358&gt;,
-     &lt;__main__.Column at 0x11ddb2f28&gt;,
-     &lt;__main__.Column at 0x11ddb2080&gt;,
-     &lt;__main__.Column at 0x11ddb2fd0&gt;,
-     &lt;__main__.Column at 0x11ddb2390&gt;])]])
+    [&lt;__main__.Column at 0x116c746d8&gt;,
+     &lt;__main__.Column at 0x116c74cc0&gt;,
+     &lt;__main__.Column at 0x116c6a588&gt;,
+     &lt;__main__.Column at 0x116c6a748&gt;,
+     &lt;__main__.Column at 0x116c6a780&gt;])]])
 </pre>
 </div>
 
@@ -20043,7 +20188,7 @@ d chart[4]
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;start&gt;&#39;}
+<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </pre>
 </div>
@@ -21681,7 +21826,7 @@ It should result in the following table:</p>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2019-12-21 16:38:57+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2020-01-21 10:34:21+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -21699,19 +21844,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2019-12-21 16:38:57+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Parser.html">Parsing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/Parser.html">https://www.fuzzingbook.org/beta/html/Parser.html</a>.  Retrieved 2020-01-21 10:34:21+01:00.
 </p>
 <pre>
-@incollection{fuzzingbook2019:Parser,
+@incollection{fuzzingbook2020:Parser,
     author = {Andreas Zeller and Rahul Gopinath and Marcel B{\"o}hme and Gordon Fraser and Christian Holler},
     booktitle = {The Fuzzing Book},
     title = {Parsing Inputs},
-    year = {2019},
+    year = {2020},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Parser.html}},
-    note = {Retrieved 2019-12-21 16:38:57+01:00},
+    note = {Retrieved 2020-01-21 10:34:21+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Parser.html},
-    urldate = {2019-12-21 16:38:57+01:00}
+    urldate = {2020-01-21 10:34:21+01:00}
 }
 </pre>
 </div>

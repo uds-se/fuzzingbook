@@ -11793,7 +11793,264 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/Intro_Testing.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Introduction to Software Testing - The Fuzzing Book" />
-<meta property="og:description" content="Before we get to the central parts of the book, let us introduce essential concepts of software testing.  Why is it necessary to test software at all?  How does one test software?  How can one tell whether a test has been successful?  How does one know if one has tested enough?  In this chapter, let us recall the most important concepts, and at the same time get acquainted with Python and interactive notebooks." />
+<meta property="og:description" content="# Introduction to Software Testing
+
+Before we get to the central parts of the book, let us introduce essential concepts of software testing.  Why is it necessary to test software at all?  How does one test software?  How can one tell whether a test has been successful?  How does one know if one has tested enough?  In this chapter, let us recall the most important concepts, and at the same time get acquainted with Python and interactive notebooks.
+
+This chapter (and this book) is not set to replace a textbook on testing; see the Background at the end for recommended reads.
+
+## Simple Testing
+
+Let&#x27;s start with a simple example.  Your co-worker has been asked to implement a square root function $\sqrt{x}$.  (Let&#x27;s assume for a moment that the environment does  not already have one.)  After studying the Newton–Raphson method, she comes up with the following Python code, claiming that, in fact, this `mysqrt()` function computes square roots.
+
+Your job is now to find out whether this function actually does what it claims to do.
+
+### Understanding Python Programs
+
+If you&#x27;re new to Python, you might first have to understand what the above code does.  We very much recommend the Python tutorial to get an idea on how Python works.  The most important things for you to understand the above code are these three:
+
+1. Python structures programs through indentation, so the function and `while` bodies are defined by being indented;
+2. Python is dynamically typed, meaning that the type of variables like `x`, `approx`, or `guess` is determined at run-time.
+3. Most of Python&#x27;s syntactic features are inspired by other common languages, such as control structures (`while`, `if`), assignments (`=`), or comparisons (`==`, `!=`, `&lt;`).
+
+With that, you can already understand what the above code does: Starting with a `guess` of `x / 2`, it computes better and better approximations in `approx` until the value of `approx` no longer changes.  This is the value that finally is returned.
+
+### Running a Function
+
+To find out whether `mysqrt()` works correctly, we can test it with a few values.  For `x = 4`, for instance, it produces the correct value:
+
+The upper part above `mysqrt(4)` (a so-called cell) is an input to the Python interpreter, which by default evaluates it.  The lower part (`2.0`) is its output.  We can see that `mysqrt(4)` produces the correct value.
+
+The same holds for `x = 2.0`, apparently, too:
+
+### Interacting with Notebooks
+
+If you are reading this in the interactive notebook, you can try out `mysqrt()` with other values as well.  Click on one of the above cells with invocations of `mysqrt()` and change the value – say, to `mysqrt(1)`.  Press `Shift+Enter` (or click on the play symbol) to execute it and see the result.  If you get an error message, go to the above cell with the definition of `mysqrt()` and execute this first.  You can also run all cells at once; see the Notebook menu for details.  (You can actually also change the text by clicking on it, and corect mistaks such as in this sentence.)
+
+Executing a single cell does not execute other cells, so if your cell builds on a definition in another cell that you have not executed yet, you will get an error.  You can select `Run all cells above` from the menu to ensure all definitions are set.
+
+Also keep in mind that, unless overwritten, all definitions are kept across executions.  Occasionally, it thus helps to restart the kernel (i.e. start the Python interpreter from scratch) to get rid of older, superfluous definitions.
+
+### Debugging a Function
+
+To see how `mysqrt()` operates, a simple strategy is to insert `print()` statements in critical places.  You can, for instance, log the value of `approx`, to see how each loop iteration gets closer to the actual value:
+
+Interactive notebooks also allow to launch an interactive debugger – insert a &quot;magic line&quot; `%%debug` at the top of a cell and see what happens.  Unfortunately, interactive debuggers interfere with our dynamic analysis techniques, so we mostly use logging and assertions for debugging.
+
+### Checking a Function
+
+Let&#x27;s get back to testing.  We can read and run the code, but are the above values of `mysqrt(2)` actually correct?  We can easily verify by exploiting that $\sqrt{x}$ squared again has to be $x$, or in other words $\sqrt{x} \times \sqrt{x} = x$.  Let&#x27;s take a look:
+
+Okay, we do have some rounding error, but otherwise, this seems just fine.
+
+What we have done now is that we have tested the above program: We have executed it on a given input and checked its result whether it is correct or not.  Such a test is the bare minimum of quality assurance before a program goes into production.
+
+## Automating Test Execution
+
+So far, we have tested the above program manually, that is, running it by hand and checking its results by hand.  This is a very flexible way of testing, but in the long run, it is rather inefficient:
+
+1. Manually, you can only check a very limited number of executions and their results
+2. After any change to the program, you have to repeat the testing process
+
+This is why it is very useful to automate tests.  One simple way of doing so is to let the computer first do the computation, and then have it check the results.
+
+For instance, this piece of code automatically tests whether $\sqrt{4} = 2$ holds:
+
+The nice thing about this test is that we can run it again and again, thus ensuring that at least the square root of 4 is computed correctly.  But there are still a number of issues, though:
+
+1. We need five lines of code for a single test
+2. We do not care for rounding errors
+3. We only check a single input (and a single result)
+
+Let us address these issues one by one.  First, let&#x27;s make the test a bit more compact.  Almost all programming languages do have a means to automatically check whether a condition holds, and stop execution if it does not.  This is called an assertion, and it is immensely useful for testing.
+
+In Python, the `assert` statement takes a condition, and if the condition is true, nothing happens.  (If everything works as it should, you should not be bothered.)  If the condition evaluates to false, though, `assert` raises an exception, indicating that a test just failed.
+
+In our example, we can use `assert` to easily check whether `mysqrt()` yields the expected result as above:
+
+As you execute this line of code, nothing happens: We just have shown (or asserted) that our implementation indeed produces $\sqrt{4} = 2$.
+
+Remember, though, that floating-point computations may induce rounding errors.  So we cannot simply compare two floating-point values with equality; rather, we would ensure that the absolute difference between them stays below a certain threshold value, typically denoted as $\epsilon$ or ``epsilon``.  This is how we can do it:
+
+We can also introduce a special function for this purpose, and now do more tests for concrete values:
+
+Seems to work, right?  If we know the expected results of a computation, we can use such assertions again and again to ensure our program works correctly.
+
+## Generating Tests
+
+Remember that the property $\sqrt{x} \times \sqrt{x} = x$ universally holds?  We can also explicitly test this with a few values:
+
+Still seems to work, right?  Most importantly, though, $\sqrt{x} \times \sqrt{x} = x$ is something we can very easily test for thousands of values:
+
+How much time does it take to test `mysqrt()` with 100 values?  Let&#x27;s see.
+
+We use our own `Timer` module to measure elapsed time.  To be able to use `Timer`, we first import our own utility module, which allows us to import other notebooks.
+
+10,000 values take about a hundredth of a second, so a single execution of `mysqrt()` takes 1/1000000 second, or about 1 microseconds.
+
+Let&#x27;s repeat this with 10,000 values picked at random.  The Python `random.random()` function returns a random value between 0.0 and 1.0:
+
+Within a second, we have now tested 10,000 random values, and each time, the square root was actually computed correctly.  We can repeat this test with every single change to `mysqrt()`, each time reinforcing our confidence that `mysqrt()` works as it should.  Note, though, that while a random function is unbiased in producing random values, it is unlikely to generate special values that drastically alter program behavior.  We will discuss this later below.
+
+## Run-Time Verification
+
+Instead of writing and running tests for `mysqrt()`, we can also go and integrate the check right into the implementation.  This way, each and every invocation of `mysqrt()` will be automatically checked.
+
+Such an automatic run-time check is very easy to implement:
+
+Now, whenever we compute a root with `mysqrtchecked()`$\dots$
+
+we already know that the result is correct, and will so for every new successful computation.
+
+Automatic run-time checks, as above, assume two things, though:
+
+ One has to be able to formulate such run-time checks.  Having concrete values to check against should always be possible, but formulating desired properties in an abstract fashion can be very complex.  In practice, you need to decide which properties are most crucial, and design appropriate checks for them.  Plus, run-time checks may depend not only on local properties, but on several properties of the program state, which all have to be identified.
+
+ One has to be able to afford such run-time checks.  In the case of `mysqrt()`, the check is not very expensive; but if we have to check, say, a large data structure even after a simple operation, the cost of the check may soon be prohibitive.  In practice, run-time checks will typically be disabled during production, trading reliability for efficiency.  On the other hand, a comprehensive suite of run-time checks is a great way to find errors and quickly debug them; you need to decide how many such capabilities you would still want during production.
+
+## System Input vs Function Input
+
+At this point, we may make `mysqrt()` available to other programmers, who may then embed it in their code.  At some point, it will have to process input that comes from third parties, i.e. is not under control by the programmer.
+
+Let us simulate this system input by assuming a program `sqrtprogram()` whose input is a string under third-party control:
+
+We assume that `sqrtprogram` is a program which accepts system input from the command line, as in
+
+```shell
+$ sqrtprogram 4
+2
+```
+
+We can easily invoke `sqrtprogram()` with some system input:
+
+What&#x27;s the problem?  Well, the problem is that we do not check external inputs for validity.  Try invoking `sqrtprogram(-1)`, for instance.  What happens?
+
+Indeed, if you invoke `mysqrt()` with a negative number, it enters an infinite loop.  For technical reasons, we cannot have infinite loops in this chapter (unless we&#x27;d want the code to run forever); so we use a special `with ExpectTimeOut(1)` construct to interrupt execution after one second.
+
+The above message is an error message, indicating that something went wrong.  It lists the call stack of functions and lines that were active at the time of the error.  The line at the very bottom is the line last executed; the lines above represent function invocations – in our case, up to `mysqrt(x)`.
+
+We don&#x27;t want our code terminating with an exception.  Consequently, when accepting external input, we must ensure that it is properly validated.  We may write, for instance:
+
+and then we can be sure that `mysqrt()` is only invoked according to its specification.
+
+But wait!  What happens if `sqrtprogram()` is not invoked with a number?  Then we would try to convert a non-number string, which would also result in a runtime error:
+
+Here&#x27;s a version which also checks for bad inputs:
+
+We have now seen that at the system level, the program must be able to handle any kind of input gracefully without ever entering an uncontrolled state.  This, of course, is a burden for programmers, who must struggle to make their programs robust for all circumstances.  This burden, however, becomes a benefit when generating software tests: If a program can handle any kind of input (possibly with well-defined error messages), we can also send it any kind of input.  When calling a function with generated values, though, we have to know its precise preconditions.
+
+## The Limits of Testing
+
+Despite best efforts in testing, keep in mind that you are always checking functionality for a finite set of inputs.  Thus, there may always be untested inputs for which the function may still fail.
+
+In the case of `mysqrt()`, for instance, computing $\sqrt{0}$ results in a division by zero:
+
+In our tests so far, we have not checked this condition, meaning that a program which builds on $\sqrt{0} = 0$ will surprisingly fail.  But even if we had set up our random generator to produce inputs in the range of 0–1000000 rather than 1–1000000, the chances of it producing a zero value by chance would still have been one in a million.  If the behavior of a function is radically different for few individual values, plain random testing has few chances to produce these.
+
+We can, of course, fix the function accordingly, documenting the accepted values for `x` and handling the special case `x = 0`:
+
+With this, we can now correctly compute $\sqrt{0} = 0$:
+
+Illegal values now result in an exception:
+
+
+Still, we have to remember that while extensive testing may give us a high confidence into the correctness of a program, it does not provide a guarantee that all future executions will be correct.  Even run-time verification, which checks every result, can only guarantee that if it produces a result, the result will be correct; but there is no guarantee that future executions may not lead to a failing check.  As I am writing this, I believe that `mysqrtfixed(x)` is a correct implementation of $\sqrt{x}$, but I cannot be 100% certain.
+
+With the Newton-Raphson method, we may still have a good chance of actually proving that the implementation is correct: The implementation is simple, the math is well-understood.  Alas, this is only the case for few domains.  If we do not want to go into full-fledged correctness proofs, our best chance with testing is to 
+
+1. Test the program on several, well-chosen inputs; and
+2. Check results extensively and automatically.
+
+This is what we do in the remainder of this course: Devise techniques that help us to thoroughly test a program, as well as techniques that help us checking its state for correctness.  Enjoy!
+
+## Lessons Learned
+
+ The aim of testing is to execute a program such that we find bugs.
+ Test execution, test generation, and checking test results can be automated.
+ Testing is incomplete; it provides no 100% guarantee that the code is free of errors.
+
+## Next Steps
+
+From here, you can move on how to
+
+ use fuzzing to test programs with random inputs
+
+Enjoy the read!
+
+## Background
+
+There is a large number of works on software testing and analysis.
+
+ An all-new modern, comprehensive, and online textbook on testing is &quot;Software Testing: From Theory to Practice&quot; \cite{Aniche2020}, available online.  Much recommended!
+
+ For this book, we are also happy to recommend &quot;Software Testing and Analysis&quot; \cite{Pezze2008} as an introduction to the field; its strong technical focus very well fits our methodology.
+
+ Other important must-reads with a comprehensive approach to software testing, including psychology and organization, include &quot;The Art of Software Testing&quot; \cite{Myers2004} as well as &quot;Software Testing Techniques&quot; \cite{Beizer1990}.
+
+## Exercises
+
+### Exercise 1: Testing Shellsort
+
+Consider the following implementation of a Shellsort function, taking a list of elements and (presumably) sorting it.
+
+A first test indicates that `shellsort()` might actually work:
+
+The implementation uses a list as argument `elems` (which it copies into `sortedelems`) as well as for the fixed list `gaps`.  Lists work like arrays in other languages:
+
+The `range()` function returns an iterable list of elements.  It is often used in conjunction with `for` loops, as in the above implementation.
+
+#### Part 1: Manual Test Cases
+
+Your job is now to thoroughly test `shellsort()` with a variety of inputs.
+
+First, set up `assert` statements with a number of manually written test cases.  Select your test cases such that extreme cases are covered.  Use `==` to compare two lists.
+
+Solution. Here are a few selected test cases:
+
+#### Part 2: Random Inputs
+
+Second, create random lists as arguments to `shellsort()`.   Make use of the following helper predicates to check whether the result is (a) sorted, and (b) a permutation of the original.
+
+Start with a random list generator, using `` as the empty list and `elems.append(x)` to append an element `x` to the list `elems`.  Use the above helper functions to assess the results.  Generate and test 1,000 lists.
+
+Solution. Here&#x27;s a simple random list generator:
+
+Here&#x27;s the test for 1,000 lists:
+
+### Exercise 2: Quadratic Solver
+
+Given an equation $ax^2 + bx + c = 0$, we want to find solutions for $x$ given the values of $a$, $b$, and $c$.  The following code is supposed to do this, using the equation $$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$$
+
+The above implementation is incomplete, though.  You can trigger 
+
+1. a division by zero; and
+2. violate the precondition of `mysqrtfixed()`.
+
+How does one do that, and how can one prevent this?
+
+#### Part 1: Find bug-triggering inputs
+
+For each of the two cases above, identify values for `a`, `b`, `c` that trigger the bug.
+
+Solution.  Here are two inputs that trigger the bugs:
+
+#### Part 2: Fix the problem
+
+Extend the code appropriately such that the cases are handled.  Return `None` for nonexistent values.
+
+Solution. Here is an appropriate extension of `quadraticsolver()` that takes care of all the corner cases:
+
+#### Part 3: Odds and Ends
+
+What are the chances of discovering these conditions with random inputs?  Assuming one can do a billion tests per second, how long would one have to wait on average until a bug gets triggered?
+
+Solution.  Consider the code above.  If we choose the full range of 32-bit integers for `a`, `b`, and `c`, then the first condition alone, both `a` and `b` being zero, has a chance of $p = 1 / (2^{32}  2^{32})$; that is, one in 18.4 quintillions:
+
+If we can do a billion tests per second, how many years would we have to wait?
+
+We see that on average, we&#x27;d have to wait for 584 years.  Clearly, pure random choices are not sufficient as sole testing strategy.
+
+" />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
@@ -11983,6 +12240,15 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h1 id="Introduction-to-Software-Testing">Introduction to Software Testing<a class="anchor-link" href="#Introduction-to-Software-Testing">&#182;</a></h1><p>Before we get to the central parts of the book, let us introduce essential concepts of software testing.  Why is it necessary to test software at all?  How does one test software?  How can one tell whether a test has been successful?  How does one know if one has tested enough?  In this chapter, let us recall the most important concepts, and at the same time get acquainted with Python and interactive notebooks.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>This chapter (and this book) is not set to replace a textbook on testing; see the <a href="#Background">Background</a> at the end for recommended reads.</p>
 </div>
 </div>
 </div>
@@ -12593,7 +12859,7 @@ approx = 3.0000000000393214
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0.06904243399912957
+<pre>0.02211331800208427
 </pre>
 </div>
 
@@ -12652,7 +12918,7 @@ approx = 3.0000000000393214
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0.08346103799703997
+<pre>0.02658488100860268
 </pre>
 </div>
 
@@ -13337,7 +13603,15 @@ AssertionError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>There is a large number of works on software testing and analysis.  For this book, we are happy to recommend "Software Testing and Analysis" [<a href="http://ix.cs.uoregon.edu/~michal/book/">Pezzè <em>et al</em>, 2008.</a>] as an introduction to the field; its strong technical focus very well fits our methodology.  Other important must-reads with a comprehensive approach to software testing, including psychology and organization, include "The Art of Software Testing" [<a href="https://dl.acm.org/citation.cfm?id=983238">Myers <em>et al</em>, 2004.</a>] as well as "Software Testing Techniques" [<a href="https://dl.acm.org/citation.cfm?id=79060">Beizer <em>et al</em>, 1990.</a>].</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>There is a large number of works on software testing and analysis.</p>
+<ul>
+<li><p>An all-new modern, comprehensive, and online textbook on testing is <a href="https://sttp.site">"Software Testing: From Theory to Practice"</a> [<a href="https://sttp.site">Maurício Aniche <em>et al</em>, 2020.</a>], available <a href="https://sttp.site">online</a>.  Much recommended!</p>
+</li>
+<li><p>For this book, we are also happy to recommend "Software Testing and Analysis" [<a href="http://ix.cs.uoregon.edu/~michal/book/">Pezzè <em>et al</em>, 2008.</a>] as an introduction to the field; its strong technical focus very well fits our methodology.</p>
+</li>
+<li><p>Other important must-reads with a comprehensive approach to software testing, including psychology and organization, include "The Art of Software Testing" [<a href="https://dl.acm.org/citation.cfm?id=983238">Myers <em>et al</em>, 2004.</a>] as well as "Software Testing Techniques" [<a href="https://dl.acm.org/citation.cfm?id=79060">Beizer <em>et al</em>, 1990.</a>].</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -13735,7 +14009,7 @@ AssertionError (expected)
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Intro_Testing.ipynb" target=_blank)>Last change: 2019-10-19 14:04:52+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Intro_Testing.ipynb" target=_blank)>Last change: 2020-01-21 10:57:23+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -13753,19 +14027,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Intro_Testing.html">Introduction to Software Testing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/Intro_Testing.html">https://www.fuzzingbook.org/beta/html/Intro_Testing.html</a>.  Retrieved 2019-10-19 14:04:52+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Intro_Testing.html">Introduction to Software Testing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/Intro_Testing.html">https://www.fuzzingbook.org/beta/html/Intro_Testing.html</a>.  Retrieved 2020-01-21 10:57:23+01:00.
 </p>
 <pre>
-@incollection{fuzzingbook2019:Intro_Testing,
+@incollection{fuzzingbook2020:Intro_Testing,
     author = {Andreas Zeller and Rahul Gopinath and Marcel B{\"o}hme and Gordon Fraser and Christian Holler},
     booktitle = {The Fuzzing Book},
     title = {Introduction to Software Testing},
-    year = {2019},
+    year = {2020},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Intro_Testing.html}},
-    note = {Retrieved 2019-10-19 14:04:52+02:00},
+    note = {Retrieved 2020-01-21 10:57:23+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Intro_Testing.html},
-    urldate = {2019-10-19 14:04:52+02:00}
+    urldate = {2020-01-21 10:57:23+01:00}
 }
 </pre>
 </div>
