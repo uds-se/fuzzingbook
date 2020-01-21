@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2019-12-21 16:38:57+01:00
+# Last change: 2020-01-21 10:34:21+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
@@ -503,6 +503,14 @@ class Parser(object):
             raise SyntaxError("at " + repr(text[cursor:]))
         return [self.prune_tree(tree) for tree in forest]
 
+    def parse_on(self, text, start_symbol):
+        old_start = self._start_symbol
+        try:
+            self._start_symbol = start_symbol
+            return self.parse(text)
+        finally:
+            self._start_symbol = old_start
+
     def coalesce(self, children):
         last = ''
         new_lst = []
@@ -577,6 +585,27 @@ def canonical(grammar, letters=False):
 
 CE_GRAMMAR = canonical(EXPR_GRAMMAR); CE_GRAMMAR
 
+def recurse_grammar(grammar, key, order):
+    rules = sorted(grammar[key])
+    old_len = len(order)
+    for rule in rules:
+        for token in rule:
+            if token not in grammar: continue
+            if token not in order:
+                order.append(token)
+    new = order[old_len:]
+    for ckey in new:
+        recurse_grammar(grammar, ckey, order)
+
+def show_grammar(grammar, start_symbol=START_SYMBOL):
+    order = [start_symbol]
+    recurse_grammar(grammar, start_symbol, order)
+    return {k: sorted(grammar[k]) for k in order}
+
+if __name__ == "__main__":
+    show_grammar(CE_GRAMMAR)
+
+
 def non_canonical(grammar):
     new_grammar = {}
     for k in grammar:
@@ -593,12 +622,33 @@ if __name__ == "__main__":
 
 class Parser(Parser):
     def __init__(self, grammar, **kwargs):
-        self._grammar = grammar
         self._start_symbol = kwargs.get('start_symbol', START_SYMBOL)
         self.log = kwargs.get('log', False)
         self.tokens = kwargs.get('tokens', set())
         self.coalesce_tokens = kwargs.get('coalesce', True)
-        self.cgrammar = canonical(grammar)
+        canonical_grammar = kwargs.get('canonical', False)
+        if canonical_grammar:
+            self.cgrammar = dict(grammar)
+            self._grammar = non_canonical(grammar)
+        else:
+            self._grammar = dict(grammar)
+            self.cgrammar = canonical(grammar)
+        # we do not require a single rule for the start symbol
+        if len(grammar.get(self._start_symbol, [])) != 1:
+            self.cgrammar['<>'] = [[self._start_symbol]]
+
+class Parser(Parser):
+    def prune_tree(self, tree):
+        name, children = tree
+        if name == '<>':
+            assert len(children) == 1
+            return self.prune_tree(children[0])
+        if self.coalesce_tokens:
+            children = self.coalesce(children)
+        if name in self.tokens:
+            return (name, [(tree_to_string(tree), [])])
+        else:
+            return (name, [self.prune_tree(c) for c in children])
 
 # ### The Parser
 

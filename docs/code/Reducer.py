@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2019-12-21 16:36:58+01:00
+# Last change: 2020-01-21 11:03:52+01:00
 #
 #!/
 # Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
