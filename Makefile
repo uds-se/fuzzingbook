@@ -854,7 +854,7 @@ DIST_CODE_FILES = \
 	$(DOCS_TARGET)code/__init__.py
 	
 check-fuzzingbook-install:
-	@-$(PYTHON) -c 'import fuzzingbook' 2> /dev/null; \
+	@$(PYTHON) -c 'import fuzzingbook' 2> /dev/null; \
 	if [ $$? = 0 ]; then \
 		echo "Error: Installed fuzzingbook package conflicts with package creation" >&2; \
 		echo "Please uninstall it; e.g. with 'pip uninstall fuzzingbook'." >&2; \
@@ -863,8 +863,17 @@ check-fuzzingbook-install:
 		exit 0; \
 	fi
 
+clean-fuzzingbook-dist:
+	$(RM) -r code/__pycache__
+	$(RM) -r code/fuzzingbook_utils/__pycache__
+	$(RM) -r $(DOCS_TARGET)notebooks/fuzzingbook/__pycache__
+	$(RM) -r $(DOCS_TARGET)notebooks/fuzzingbook_utils/__pycache__
+	$(RM) -r $(DOCS_TARGET)code/fuzzingbook_utils/__pycache__
+	$(RM) -r $(DOCS_TARGET)notebooks/.ipynb_checkpoints
+
 $(DOCS_TARGET)dist/fuzzingbook-code.zip: \
-	$(PYS) $(DIST_CODE_FILES) $(CHAPTERS_MAKEFILE) check-fuzzingbook-install
+	$(PYS) $(DIST_CODE_FILES) $(CHAPTERS_MAKEFILE) \
+	check-fuzzingbook-install clean-fuzzingbook-dist
 	@-mkdir $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)dist/*
 	$(RM) -r $(DOCS_TARGET)fuzzingbook
@@ -882,8 +891,8 @@ $(DOCS_TARGET)dist/fuzzingbook-code.zip: \
 	$(RM) -r $(DOCS_TARGET)code/dist $(DOCS_TARGET)code/*.egg-info
 	@echo "Created code distribution files in $(DOCS_TARGET)dist"
 	
-$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip: $(FULLS) $(CHAPTERS_MAKEFILE)
-	$(RM) -r $(DOCS_TARGET)notebooks/fuzzingbook_utils/__pycache__
+$(DOCS_TARGET)dist/fuzzingbook-notebooks.zip: $(FULLS) $(CHAPTERS_MAKEFILE) \
+	clean-fuzzingbook-dist
 	cd $(DOCS_TARGET); ln -s notebooks fuzzingbook-notebooks
 	cd $(DOCS_TARGET); \
 		$(ZIP) $(ZIP_OPTIONS) fuzzingbook-notebooks.zip fuzzingbook-notebooks
