@@ -3,10 +3,10 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2019-12-23 11:38:21+01:00
+# Last change: 2020-01-21 18:32:26+01:00
 #
 #!/
-# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
