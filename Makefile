@@ -1041,9 +1041,10 @@ docker-stop:
 	docker stop fuzzing-book-instance
 	
 
-## Getting rid of stray processes
+## Getting rid of stray processes and workspaces
 kill:
 	-pkill -HUP -l -f jupyter-lab Firefox.app firefox-bin runserver
+	$(RM) $$HOME/lab/workspaces/*.jupyterlab-workspace
 
 ## Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot *.fls *.fdb_latexmk \
