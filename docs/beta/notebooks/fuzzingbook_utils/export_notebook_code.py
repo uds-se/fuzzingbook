@@ -32,7 +32,7 @@ HEADER = """#!/usr/bin/env python3
 # Last change: {timestamp}
 #
 #!/
-# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the

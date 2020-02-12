@@ -3,10 +3,10 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2020-01-21 10:34:21+01:00
+# Last change: 2020-02-12 13:41:23+01:00
 #
 #!/
-# Copyright (c) 2018-2019 Saarland University, CISPA, authors, and contributors
+# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -507,7 +507,7 @@ class Parser(object):
         old_start = self._start_symbol
         try:
             self._start_symbol = start_symbol
-            return self.parse(text)
+            yield from self.parse(text)
         finally:
             self._start_symbol = old_start
 
@@ -2114,90 +2114,60 @@ if __name__ == "__main__":
 
 
 class IterativeEarleyParser(EarleyParser):
-    def __init__(self, grammar, **kwargs):
-        super().__init__(grammar, **kwargs)
-        self.shuffle = kwargs.get('shuffle_rules', True)
-        
-    def parse_paths(self, named_expr, chart, frm, til):
-        if not named_expr:
-            return []
+    def parse_paths(self, named_expr_, chart, frm, til_):
+        return_paths = []
+        path_build_stack = [(named_expr_, til_, [])]
 
-        paths = []
-        # stack of (expr, index, path) tuples
-        path_build_stack = [(named_expr, til, [])]
-
-        def evaluate_path(path, index, expr):
-            if expr:  # path is still being built
-                path_build_stack.append((expr, index, path))
-            elif index == frm:  # path is complete
-                paths.append(path)
+        def iter_paths(path_prefix, path, start, k, e):
+            x = path_prefix + [(path, k)]
+            if not e:
+                return_paths.extend([x] if start == frm else [])
+            else:
+                path_build_stack.append((e, start, x))
 
         while path_build_stack:
-            expr, chart_index, path = path_build_stack.pop()
-            *expr, symbol = expr
+            named_expr, til, path_prefix = path_build_stack.pop()
+            *expr, var = named_expr
 
-            if symbol in self.cgrammar:
-                for state in chart[chart_index].states:
-                    if state.name == symbol and state.finished():
-                        extended_path = path + [(state, 'n')]
-                        evaluate_path(extended_path, state.s_col.index, expr)
+            starts = None
+            if var not in self.cgrammar:
+                starts = ([(var, til - len(var),
+                        't')] if til > 0 and chart[til].letter == var else [])
+            else:
+                starts = [(s, s.s_col.index, 'n') for s in chart[til].states
+                      if s.finished() and s.name == var]
 
-            elif chart_index > 0 and chart[chart_index].letter == symbol:
-                extended_path = path + [(symbol, 't')]
-                evaluate_path(extended_path, chart_index - len(symbol), expr)
+            for s, start, k in starts:
+                iter_paths(path_prefix, s, start, k, expr)
 
-        return paths
+        return return_paths
 
-class IterativeEarleyParser(EarleyParser):
-    def parse_forest(self, chart, state):
-        if not state.expr:
-            return (state.name, [])
+class IterativeEarleyParser(IterativeEarleyParser):
+    def choose_a_node_to_explore(self, node_paths, level_count):
+        first, *rest = node_paths
+        return first
 
-        outermost_forest = []
-        forest_build_stack = [(state, outermost_forest)]
-
-        while forest_build_stack:
-            st, forest = forest_build_stack.pop()
-            paths = self.parse_paths(st.expr, chart, st.s_col.index,
-                                     st.e_col.index)
-
-            if not paths:
-                continue
-
-            next_path = random.choice(paths) if self.shuffle else paths[0]
-            path_forest = []
-            for symbol_or_state, kind in reversed(next_path):
-                if kind == 'n':
-                    new_forest = []
-                    forest_build_stack.append((symbol_or_state, new_forest))
-                    path_forest.append((symbol_or_state.name, new_forest))
-                else:
-                    path_forest.append((symbol_or_state, []))
-
-            forest.append(path_forest)
-
-        return (state.name, outermost_forest)
-
-class IterativeEarleyParser(EarleyParser):
-    def extract_a_tree(self, forest_node):
-        outermost_tree = []
-        tree_build_stack = [(forest_node, outermost_tree)]
+    def extract_a_tree(self, forest_node_):
+        start_node = (forest_node_[0], [])
+        tree_build_stack = [(forest_node_, start_node[-1], 0)]
 
         while tree_build_stack:
-            node, tree = tree_build_stack.pop()
-            name, node_paths = node
+            forest_node, tree, level_count = tree_build_stack.pop()
+            name, paths = forest_node
 
-            if node_paths:
-                for path in random.choice(node_paths):
-                    new_tree = []
-                    tree_build_stack.append((path, new_tree))
-                    tree.append((path[0], new_tree))
-            else:
+            if not paths:
                 tree.append((name, []))
+            else:
+                new_tree = []
+                current_node = self.choose_a_node_to_explore(paths, level_count)
+                for p in reversed(current_node):
+                    new_forest_node = self.forest(*p)
+                    tree_build_stack.append((new_forest_node, new_tree, level_count + 1))
+                tree.append((name, new_tree))
 
-        return (forest_node[0], outermost_tree)
+        return start_node
 
-class IterativeEarleyParser(EarleyParser):
+class IterativeEarleyParser(IterativeEarleyParser):
     def extract_trees(self, forest):
         yield self.extract_a_tree(forest)
 
