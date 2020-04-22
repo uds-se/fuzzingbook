@@ -94,6 +94,7 @@ APPENDICES_SOURCES = $(APPENDICES:%=$(NOTEBOOKS)/%)
 
 # Where to place the pdf, html, slides
 PDF_TARGET      = pdf/
+NBPDF_TARGET    = nbpdf/
 HTML_TARGET     = html/
 SLIDES_TARGET   = slides/
 CODE_TARGET     = code/
@@ -138,6 +139,7 @@ DOCS = \
 # Various derived files
 TEXS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.tex)
 PDFS      = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%.pdf)
+NBPDFS    = $(SOURCE_FILES:%.ipynb=$(NBPDF_TARGET)%.pdf)
 HTMLS     = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%.html)
 SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
 PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py) \
@@ -156,6 +158,7 @@ DEPENDS   = $(SOURCE_FILES:%.ipynb=$(DEPEND_TARGET)%.makefile)
 CHAPTER_PYS = $(CHAPTERS:%.ipynb=$(CODE_TARGET)%.py)
 
 PDF_FILES     = $(SOURCE_FILES:%.ipynb=$(PDF_TARGET)%_files)
+NBPDF_FILES   = $(SOURCE_FILES:%.ipynb=$(NBPDF_TARGET)%_files)
 HTML_FILES    = $(SOURCE_FILES:%.ipynb=$(HTML_TARGET)%_files)
 SLIDES_FILES  = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%_files)
 
@@ -487,6 +490,8 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	
 HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) utils/post_html.py $(CHAPTERS_MAKEFILE)
 
+
+
 # index.html comes with relative links (html/) such that the beta version gets the beta menu
 $(DOCS_TARGET)index.html: \
 	$(FULL_NOTEBOOKS)/index.ipynb $(HTML_DEPS)
@@ -543,6 +548,7 @@ $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
 	@-$(RM) -fr $(TMPDIR)
 	@$(OPEN) $@
 
+
 # Rules for beta targets
 .FORCE:
 ifndef BETA
@@ -597,6 +603,16 @@ $(WORD_TARGET)%.docx: $(HTML_TARGET)%.html $(WORD_TARGET)pandoc.css
 # Epub comes from the markdown file
 $(EPUB_TARGET)%.epub: $(MARKDOWN_TARGET)%.md
 	cd $(MARKDOWN_TARGET); $(PANDOC) -o ../$@ ../$<
+	
+
+# NBPDF files - generated from HMTL, with embedded notebooks
+# See instructions at https://github.com/betatim/notebook-as-pdf
+HTMLTONBPDF = utils/htmltonbpdf.py
+
+$(NBPDF_TARGET)%.pdf:  $(HTML_TARGET)/%.html $(RENDERED_NOTEBOOKS)/%.ipynb $(HTMLTONBPDF)
+	@test -d $(NBPDF_TARGET) || $(MKDIR) $(NBPDF_TARGET)
+	$(PYTHON) $(HTMLTONBPDF) $${PWD}/$(HTML_TARGET)$(basename $(notdir $<)).html $(RENDERED_NOTEBOOKS)/$(basename $(notdir $<)).ipynb $@
+
 
 # Conversion rules - entire book
 # We create a fuzzingbook/ folder with the chapters ordered by number, 
