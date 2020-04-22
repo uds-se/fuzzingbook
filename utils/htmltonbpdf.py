@@ -9,6 +9,8 @@ python htmltonbpdf.py /PATH/TO/X.html X.ipynb X.pdf
 import argparse
 import asyncio
 import tempfile
+import sys
+import os
 
 # From https://github.com/betatim/notebook-as-pdf
 
@@ -16,20 +18,22 @@ import asyncio
 import json
 import os
 import tempfile
-
 import concurrent.futures
-
 import nbconvert
 
 from pyppeteer import launch
-
 from traitlets import default
-
 import pikepdf
-
 from nbconvert.exporters import Exporter
 
+import re
 
+RE_LOCAL_LINK = re.compile(r'href="([^/:]+).html"')
+
+def fix_html(contents, dirname):
+    # Let local HTML links point to (local?) PDF files instead
+    return RE_LOCAL_LINK.sub(r'href="file://' + dirname + r'/\1.pdf"', contents)
+    
 async def html_to_pdf(html_file, pdf_file):
     """Convert a HTML file to a PDF"""
     browser = await launch(handleSIGINT=False, handleSIGTERM=False, handleSIGHUP=False)
@@ -139,21 +143,29 @@ async def notebook_to_pdf(notebook, pdf_path, config=None, resources=None, **kwa
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument('--fix-links', action='store_true')
     parser.add_argument("html", help="Notebook rendered as HTML")
     parser.add_argument("notebook", help="Notebook source (to be attached)")
     parser.add_argument("pdf", help="Notebook PDF output")
     args = parser.parse_args()
     
-    # print(repr(args.html))
-
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+
+    html_contents = open(args.html, encoding='utf-8').read()
+    if args.fix_links:
+        html_contents = fix_html(html_contents, os.path.dirname(args.pdf))
     
-    with tempfile.NamedTemporaryFile(suffix=".pdf") as f:
-        loop.run_until_complete(html_to_pdf(args.html, f.name))
+    with tempfile.NamedTemporaryFile(suffix=".html",
+                                     dir=os.path.dirname(args.html)) as f_html:
+        f_html.write(html_contents.encode('utf-8'))
+        f_html.flush()
         
-        notebook = {}
-        notebook["file_name"] = args.notebook
-        notebook["contents"] = open(args.notebook, "rb").read()
+        with tempfile.NamedTemporaryFile(suffix=".pdf") as f_pdf:
+            loop.run_until_complete(html_to_pdf(f_html.name, f_pdf.name))
         
-        attach_notebook(f.name, args.pdf, notebook)
+            notebook = {}
+            notebook["file_name"] = args.notebook
+            notebook["contents"] = open(args.notebook, "rb").read()
+        
+            attach_notebook(f_pdf.name, args.pdf, notebook)

@@ -612,7 +612,7 @@ HTMLTONBPDF = utils/htmltonbpdf.py
 
 $(NBPDF_TARGET)%.pdf:  $(HTML_TARGET)/%.html $(RENDERED_NOTEBOOKS)/%.ipynb $(HTMLTONBPDF) $(HTML_TARGET)custom.css
 	@test -d $(NBPDF_TARGET) || $(MKDIR) $(NBPDF_TARGET)
-	$(PYTHON) $(HTMLTONBPDF) $${PWD}/$(HTML_TARGET)$(basename $(notdir $<)).html $(RENDERED_NOTEBOOKS)/$(basename $(notdir $<)).ipynb $@
+	$(PYTHON) $(HTMLTONBPDF) --fix-links $${PWD}/$(HTML_TARGET)$(basename $(notdir $<)).html $(RENDERED_NOTEBOOKS)/$(basename $(notdir $<)).ipynb $${PWD}/$@
 
 
 # Conversion rules - entire book
