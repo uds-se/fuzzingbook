@@ -349,6 +349,7 @@ and more:	word markdown epub
 .PHONY: full-notebooks full fulls rendered-notebooks rendered renders book-pdf book-html
 html:	ipypublish-chapters $(HTMLS)
 pdf:	ipypublish-chapters $(PDFS)
+nbpdf:	ipypublish-chapters $(NBPDFS)
 python code:	$(PYS)
 slides:	$(SLIDES) $(REVEAL_JS)
 word doc docx: $(WORDS)
@@ -609,7 +610,7 @@ $(EPUB_TARGET)%.epub: $(MARKDOWN_TARGET)%.md
 # See instructions at https://github.com/betatim/notebook-as-pdf
 HTMLTONBPDF = utils/htmltonbpdf.py
 
-$(NBPDF_TARGET)%.pdf:  $(HTML_TARGET)/%.html $(RENDERED_NOTEBOOKS)/%.ipynb $(HTMLTONBPDF)
+$(NBPDF_TARGET)%.pdf:  $(HTML_TARGET)/%.html $(RENDERED_NOTEBOOKS)/%.ipynb $(HTMLTONBPDF) $(HTML_TARGET)custom.css
 	@test -d $(NBPDF_TARGET) || $(MKDIR) $(NBPDF_TARGET)
 	$(PYTHON) $(HTMLTONBPDF) $${PWD}/$(HTML_TARGET)$(basename $(notdir $<)).html $(RENDERED_NOTEBOOKS)/$(basename $(notdir $<)).ipynb $@
 

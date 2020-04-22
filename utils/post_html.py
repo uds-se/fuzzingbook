@@ -365,6 +365,11 @@ def highlight_synopsis(text):
     text = (text[:orig_synopsis_start] + text[orig_synopsis_end:])
 
     return text
+    
+# Fix CSS
+def fix_css(text):
+    # Avoid forcing text color to black when printing
+    return text.replace('color: #000 !important;', '')
 
 # Handle Details switchers
 # Cells with <details> or </details> are moved to top level, allowing to
@@ -750,6 +755,9 @@ chapter_contents = \
     
 # Highlight details switchers
 chapter_contents = fix_detail_switchers(chapter_contents)
+
+# Fix CSS
+chapter_contents = fix_css(chapter_contents)
 
 # Handle the (first) synopsis
 chapter_contents = highlight_synopsis(chapter_contents)
