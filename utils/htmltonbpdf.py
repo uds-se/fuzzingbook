@@ -28,11 +28,18 @@ from nbconvert.exporters import Exporter
 
 import re
 
-RE_LOCAL_LINK = re.compile(r'href="([^/:]+).html"')
+RE_HTML_LINK = re.compile(r'href="([^/:]+).html"')
 
-def fix_html(contents, dirname):
+def fix_html(contents):
     # Let local HTML links point to (local?) PDF files instead
-    return RE_LOCAL_LINK.sub(r'href="file://' + dirname + r'/\1.pdf"', contents)
+    return RE_HTML_LINK.sub(r'href="\1.pdf"', contents)
+
+RE_PDF_LINK = re.compile(r'file://[^)]*/([^/]+).html')
+
+def fix_pdf(contents):
+    # Let local HTML links point to (local?) PDF files instead
+    return RE_PDF_LINK.sub(r'href="file:/\1.pdf"', contents)
+
     
 async def html_to_pdf(html_file, pdf_file):
     """Convert a HTML file to a PDF"""
@@ -143,7 +150,9 @@ async def notebook_to_pdf(notebook, pdf_path, config=None, resources=None, **kwa
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--fix-links', action='store_true')
+    parser.add_argument('--fix-html-links', action='store_true')
+    parser.add_argument('--fix-pdf-links', action='store_true')
+    parser.add_argument('--attach', action='store_true')
     parser.add_argument("html", help="Notebook rendered as HTML")
     parser.add_argument("notebook", help="Notebook source (to be attached)")
     parser.add_argument("pdf", help="Notebook PDF output")
@@ -153,8 +162,8 @@ if __name__ == "__main__":
     asyncio.set_event_loop(loop)
 
     html_contents = open(args.html, encoding='utf-8').read()
-    if args.fix_links:
-        html_contents = fix_html(html_contents, os.path.dirname(args.pdf))
+    if args.fix_html_links:
+        html_contents = fix_html(html_contents)
     
     with tempfile.NamedTemporaryFile(suffix=".html",
                                      dir=os.path.dirname(args.html)) as f_html:
@@ -163,9 +172,19 @@ if __name__ == "__main__":
         
         with tempfile.NamedTemporaryFile(suffix=".pdf") as f_pdf:
             loop.run_until_complete(html_to_pdf(f_html.name, f_pdf.name))
+            
+            if args.fix_pdf_links:
+                # Note: This currently does not work; it garbles PDF content
+                pdf_contents = open(f_pdf.name, encoding='latin-1').read()
+                pdf_contents = fix_pdf(pdf_contents)
+                open(f_pdf.name, "wb").write(pdf_contents.encode('latin-1'))
         
-            notebook = {}
-            notebook["file_name"] = args.notebook
-            notebook["contents"] = open(args.notebook, "rb").read()
+            if args.attach:
+                notebook = {}
+                notebook["file_name"] = args.notebook
+                notebook["contents"] = open(args.notebook, "rb").read()
         
-            attach_notebook(f_pdf.name, args.pdf, notebook)
+                attach_notebook(f_pdf.name, args.pdf, notebook)
+            else:
+                # Simply copy
+                open(args.pdf, "wb").write(open(f_pdf.name, "rb").read())
