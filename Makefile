@@ -872,7 +872,9 @@ DIST_CODE_FILES = \
 	$(DOCS_TARGET)code/__init__.py
 	
 check-fuzzingbook-install:
-	@$(PYTHON) -c 'import fuzzingbook' 2> /dev/null; \
+	$(eval TMPDIR := $(shell mktemp -d))
+	@cd $(TMPDIR); \
+	$(PYTHON) -c 'import fuzzingbook' 2> /dev/null; \
 	if [ $$? = 0 ]; then \
 		echo "Error: Installed fuzzingbook package conflicts with package creation" >&2; \
 		echo "Please uninstall it; e.g. with 'pip uninstall fuzzingbook'." >&2; \
