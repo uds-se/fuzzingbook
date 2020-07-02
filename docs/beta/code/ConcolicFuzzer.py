@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2019-12-21 16:38:57+01:00
+# Last change: 2020-06-25 11:32:46+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -856,6 +856,8 @@ def zeval_smt(path, cc, log):
     if log:
         print(output)
     o = parse_sexp(output)
+    if not o:
+        return 'Gave up', None
     kind = o[0]
     if kind == 'unknown':
         return 'Gave up', None
@@ -2432,8 +2434,8 @@ class ConcolicGrammarFuzzer(ConcolicGrammarFuzzer):
     def update_grammar(self, trace):
         self.comparisons = {}
         for p in trace.path:
-            traverse_z3(p, comparisons)
-        alternatives = find_alternatives(self.span_range, comparisons)
+            traverse_z3(p, self.comparisons)
+        alternatives = find_alternatives(self.span_range, self.comparisons)
         if self.log:
             print('Alternatives:', alternatives, 'Span:', self.span_range)
         new_grammar = dict(self.grammar)

@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2019-12-21 16:38:57+01:00
+# Last change: 2020-04-22 12:57:37+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -1940,7 +1940,7 @@ class TaintedScopeTracker(ScopeTracker):
 
 class TaintedScopeTreeMiner(ScopeTreeMiner):
     def string_part_of_value(self, part, value):
-        return str(part.origin).strip('[]') in str(value.origin).strip('[]')
+        return is_fragment(part, value)
     
     def partition(self, part, value):
         begin = value.origin.index(part.origin[0])

@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2020-02-12 13:41:23+01:00
+# Last change: 2020-06-24 16:28:33+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -561,7 +561,22 @@ if __name__ == "__main__":
 
 import re
 
-def canonical(grammar, letters=False):
+def single_char_tokens(grammar):
+    g_ = {}
+    for key in grammar:
+        rules_ = []
+        for rule in grammar[key]:
+            rule_ = []
+            for token in rule:
+                if token in grammar:
+                    rule_.append(token)
+                else:
+                    rule_.extend(token)
+            rules_.append(rule_)
+        g_[key] = rules_
+    return g_
+
+def canonical(grammar):
     def split(expansion):
         if isinstance(expansion, tuple):
             expansion = expansion[0]
@@ -569,17 +584,8 @@ def canonical(grammar, letters=False):
         return [token for token in re.split(
             RE_NONTERMINAL, expansion) if token]
 
-    def tokenize(word):
-        return list(word) if letters else [word]
-
-    def canonical_expr(expression):
-        return [
-            token for word in split(expression)
-            for token in ([word] if word in grammar else tokenize(word))
-        ]
-
     return {
-        k: [canonical_expr(expression) for expression in alternatives]
+        k: [split(expression) for expression in alternatives]
         for k, alternatives in grammar.items()
     }
 
@@ -628,11 +634,11 @@ class Parser(Parser):
         self.coalesce_tokens = kwargs.get('coalesce', True)
         canonical_grammar = kwargs.get('canonical', False)
         if canonical_grammar:
-            self.cgrammar = dict(grammar)
+            self.cgrammar = single_char_tokens(grammar)
             self._grammar = non_canonical(grammar)
         else:
             self._grammar = dict(grammar)
-            self.cgrammar = canonical(grammar)
+            self.cgrammar = single_char_tokens(canonical(grammar))
         # we do not require a single rule for the start symbol
         if len(grammar.get(self._start_symbol, [])) != 1:
             self.cgrammar['<>'] = [[self._start_symbol]]
@@ -956,11 +962,6 @@ if __name__ == "__main__":
 
 
 class EarleyParser(Parser):
-    def __init__(self, grammar, **kwargs):
-        super().__init__(grammar, **kwargs)
-        self.cgrammar = canonical(grammar, letters=True)
-
-class EarleyParser(EarleyParser):
     def chart_parse(self, words, start):
         alt = tuple(*self.cgrammar[start])
         chart = [Column(i, tok) for i, tok in enumerate([None, *words])]
@@ -1279,6 +1280,8 @@ if __name__ == "__main__":
 
 
 
+import itertools as I
+
 class EarleyParser(EarleyParser):
     def extract_trees(self, forest_node):
         name, paths = forest_node
@@ -1287,7 +1290,7 @@ class EarleyParser(EarleyParser):
         results = []
         for path in paths:
             ptrees = [self.extract_trees(self.forest(*p)) for p in path]
-            for p in zip(*ptrees):
+            for p in I.product(*ptrees):
                 yield (name, p) 
 
 if __name__ == "__main__":
@@ -1414,7 +1417,6 @@ if __name__ == "__main__":
 class EarleyParser(EarleyParser):
     def __init__(self, grammar, **kwargs):
         super().__init__(grammar, **kwargs)
-        self.cgrammar = canonical(grammar, letters=True)
         self.epsilon = nullable(self.cgrammar)
 
     def predict(self, col, sym, state):
@@ -1433,7 +1435,7 @@ if __name__ == "__main__":
 DIRECTLY_SELF_REFERRING = {
     '<start>': ['<query>'],
     '<query>': ['select <expr> from a'],
-    "<expr>": [ "<expr>", "a"],
+    "<expr>": ["<expr>", "a"],
 }
 INDIRECTLY_SELF_REFERRING = {
     '<start>': ['<query>'],
@@ -1445,10 +1447,66 @@ INDIRECTLY_SELF_REFERRING = {
 if __name__ == "__main__":
     mystring = 'select a from a'
     for grammar in [DIRECTLY_SELF_REFERRING, INDIRECTLY_SELF_REFERRING]:
-        trees = EarleyParser(grammar).parse(mystring)
-        for tree in trees:
-            assert mystring == tree_to_string(tree)
-            display_tree(tree)
+        forest = EarleyParser(grammar).parse(mystring)
+        print('recognized', mystring)
+        try:
+            for tree in forest:
+                print(tree_to_string(tree))
+        except RecursionError as e:
+             print("Recursion error",e)
+
+
+class LazyExtractor:
+    def __init__(self, parser, text):
+        self.parser = parser
+        cursor, states = parser.parse_prefix(text)
+        start = next((s for s in states if s.finished()), None)
+        if cursor < len(text) or not start:
+            raise SyntaxError("at " + repr(cursor))
+        self.my_forest = parser.parse_forest(parser.table, start)
+
+    def extract_a_node(self, forest_node):
+        name, paths = forest_node
+        if not paths:
+            return ((name, 0, 1), []), (name, [])
+        cur_path, i, l = self.choose_path(paths)
+        child_nodes = []
+        pos_nodes = []
+        for s, kind, chart in cur_path:
+            f = self.parser.forest(s, kind, chart)
+            postree, ntree = self.extract_a_node(f)
+            child_nodes.append(ntree)
+            pos_nodes.append(postree)
+        
+        return ((name, i, l), pos_nodes), (name, child_nodes)
+    
+    def choose_path(self, arr):
+        l = len(arr)
+        i = random.randrange(l)
+        return arr[i], i, l
+    
+    def extract_a_tree(self):
+        pos_tree, parse_tree = self.extract_a_node(self.my_forest)
+        return self.parser.prune_tree(parse_tree)
+
+if __name__ == "__main__":
+    de = LazyExtractor(EarleyParser(DIRECTLY_SELF_REFERRING), mystring)
+
+
+if __name__ == "__main__":
+    for i in range(5):
+        tree = de.extract_a_tree()
+        print(tree_to_string(tree))
+
+
+if __name__ == "__main__":
+    ie = LazyExtractor(EarleyParser(INDIRECTLY_SELF_REFERRING), mystring)
+
+
+if __name__ == "__main__":
+    for i in range(5):
+        tree = ie.extract_a_tree()
+        print(tree_to_string(tree))
 
 
 # ### More Earley Parsing
@@ -1857,8 +1915,6 @@ class LeoParser(LeoParser):
     def __init__(self, grammar, **kwargs):
         super().__init__(grammar, **kwargs)
         self._postdots = {}
-        self.cgrammar = canonical(grammar, letters=True)
-      
 
 class LeoParser(LeoParser):
     def uniq_postdot(self, st_A):

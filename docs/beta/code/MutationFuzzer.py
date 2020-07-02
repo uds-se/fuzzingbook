@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2019-10-29 09:36:33+01:00
+# Last change: 2020-04-15 19:53:24+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
