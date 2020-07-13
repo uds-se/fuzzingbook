@@ -106,10 +106,10 @@ def print_content(content, filename=None, lexer=None, start_line_number=None):
             else:
                 lexer = get_lexer_for_filename(filename)
 
+        colorful_content = highlight(content, lexer, formatters.TerminalFormatter())
         if start_line_number is None:
            print(colorful_content, end="")
            return
-        colorful_content = highlight(content, lexer, formatters.TerminalFormatter())
         colorful_content_list = colorful_content.split("\n")
         no_of_lines = len(colorful_content_list)
         size_of_lines_nums = len(str(no_of_lines))
