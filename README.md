@@ -1,3 +1,5 @@
+[![Run on Repl.it](https://repl.it/badge/github/darkrsw/fuzzingbook)](https://repl.it/github/darkrsw/fuzzingbook)
+
 
 # About this Book
 
