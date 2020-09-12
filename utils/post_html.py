@@ -371,42 +371,36 @@ def fix_css(text):
     # Avoid forcing text color to black when printing
     return text.replace('color: #000 !important;', '')
 
-# Handle Details switchers
-# Cells with <details> or </details> are moved to top level, allowing to
-# switch contents between them on or off
-# note: *? is non-greedy, minimal match
-RE_BEGIN_DETAILS = re.compile(r'''
+# Handle Excursions
+# Cells with "Excursion: <summary>" and "End of Excursion" are translated to 
+# HTML <details> regions
+RE_BEGIN_EXCURSION = re.compile(r'''
 <div[^>]*?>[^<]*?  # four divs
 <div[^>]*?>[^<]*?
 <div[^>]*?>[^<]*?
 <div[^>]*?>[^<]*?
-<p>[^<]*?
-(?P<cell><details>.*?)  # our group
-</p>[^<]*?
+<h[0-9][^<>]*?>Excursion:\s*\s(?P<title>[^\n]*?)(<a [^\n]*?>[^\n]*?</a>)?</h[0-9]>
 </div>[^<]*?      # four closing divs
 </div>[^<]*?
 </div>[^<]*?
 </div>''', re.DOTALL | re.VERBOSE)
 
-RE_END_DETAILS = re.compile(r'''
+RE_END_EXCURSION = re.compile(r'''
 <div[^>]*?>[^<]*?  # four divs
 <div[^>]*?>[^<]*?
 <div[^>]*?>[^<]*?
 <div[^>]*?>[^<]*?
-<p>[^<]*?
-(?P<cell></details>).*?  # our group
-</p>[^<]*?
+<h[0-9][^<>]*?>[eE]nd[^\n]*[eE]xcursion[^\n]*</h[0-9]>
 </div>[^<]*?      # four closing divs
 </div>[^<]*?
 </div>[^<]*?
 </div>''', re.DOTALL | re.VERBOSE)
 
-def fix_detail_switchers(text):
-    text = text.replace('&lt;details&gt;',  '<details>')
-    text = text.replace('&lt;/details&gt;', '</details>')
-
-    text = RE_BEGIN_DETAILS.sub(r'\g<cell>', text)
-    text = RE_END_DETAILS.sub(r'\g<cell>', text)
+def add_excursion_switchers(text):
+    text = RE_BEGIN_EXCURSION.sub(
+        r'<details>\n<summary>\g<title></summary>', text)
+    text = RE_END_EXCURSION.sub(
+        '</details>', text)
     return text
     
 text1 = '''
@@ -415,8 +409,15 @@ Some stuff to begin with
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p><details>
-    <summary>How does this work?</summary></p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Excursion:-Implementing-display_tree()">Excursion: Implementing <code>display_tree()</code><a class="anchor-link" href="#Excursion:-Implementing-display_tree()">&#182;</a></h4></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We use the <code>dot</code> drawing program from the <code>graphviz</code> package algorithmically, traversing the above structure.  (Unless you're deeply interested in tree visualization, you can directly skip to the example below.)</p>
 </div>
 </div>
 </div>
@@ -425,9 +426,7 @@ Some stuff to begin with
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-Some more stuff
-</div>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="End-of-Excursion">End of Excursion<a class="anchor-link" href="#End-of-Excursion">&#182;</a></h4></div>
 </div>
 </div>
 </div>
@@ -435,16 +434,26 @@ Some more stuff
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>&lt;/details&gt;</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Excursion:-Implementing-display_tree()">Excursion: Implementing <code>display_tree()</code> again<a class="anchor-link" href="#Excursion:-Implementing-display_tree()">&#182;</a></h4></div>
 </div>
 </div>
 </div>
+
+Some standard stuff
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="End-of-Excursion">End of Excursion<a class="anchor-link" href="#End-of-Excursion">&#182;</a></h4></div>
 </div>
+</div>
+</div>
+
 
 Some other stuff
 '''
 
-# print(fix_detail_switchers(text1))
+# print(add_excursion_switchers(text1))
 # sys.exit(0)
 
 
@@ -754,7 +763,7 @@ chapter_contents = \
     chapter_contents.replace("__AUTHORS_BIBTEX__", authors_bibtex)
     
 # Highlight details switchers
-chapter_contents = fix_detail_switchers(chapter_contents)
+chapter_contents = add_excursion_switchers(chapter_contents)
 
 # Fix CSS
 chapter_contents = fix_css(chapter_contents)
