@@ -75,7 +75,8 @@ NOTEBOOKS = notebooks
 # Derived versions including HTML, SVG, and text output cells (for Web)
 FULL_NOTEBOOKS = full_notebooks
 
-# Derived versions including PNG and text output cells (for LaTeX and PDF)
+# Derived versions including PNG and text output cells,
+# but without excursions (for LaTeX and PDF)
 RENDERED_NOTEBOOKS = rendered
 
 
@@ -425,6 +426,7 @@ help:
 ADD_METADATA = utils/add_metadata.py
 NBAUTOSLIDE = utils/nbautoslide.py
 NBSYNOPSIS = utils/nbsynopsis.py
+NBSHORTEN = utils/nbshorten.py
 
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS)
 	$(EXECUTE_NOTEBOOK) $<
@@ -432,11 +434,12 @@ $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 	$(PYTHON) $(NBSYNOPSIS) --update $@
 	
-$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS) $(NOTEBOOKS)/fuzzingbook_utils/__init__.py
+$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS) $(NBSHORTEN) $(NOTEBOOKS)/fuzzingbook_utils/__init__.py
 	$(RENDER_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 	RENDER_HTML=1 $(PYTHON) $(NBSYNOPSIS) --update $@
+	$(PYTHON) $(NBSHORTEN) --link-to "$(SITE)/html/" --in-place $@
 
 $(FULL_NOTEBOOKS)/fuzzingbook_utils:
 	$(MKDIR) $(FULL_NOTEBOOKS)/fuzzingbook_utils
@@ -539,10 +542,11 @@ $(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
 	@-test -L $(HTML_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(HTML_TARGET)
 	@$(OPEN) $@
 
-$(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB)
+$(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(NBSHORTEN)
 	@test -d $(SLIDES_TARGET) || $(MKDIR) $(SLIDES_TARGET)
 	$(eval TMPDIR := $(shell mktemp -d))
 	sed 's/\.ipynb)/\.slides\.html)/g' $< > $(TMPDIR)/$(notdir $<)
+	$(PYTHON) $(NBSHORTEN) --skip-slides --in-place $(TMPDIR)/$(notdir $<)
 	$(CONVERT_TO_SLIDES) $(TMPDIR)/$(notdir $<)
 	@cd $(SLIDES_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@-test -L $(HTML_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(HTML_TARGET)
