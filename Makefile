@@ -472,16 +472,18 @@ $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@-test -L $(PDF_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(PDF_TARGET)
 	cd $(PDF_TARGET) && $(LATEXMK) $(LATEXMK_OPTS) $*
 	@cd $(PDF_TARGET) && $(RM) $*.aux $*.bbl $*.blg $*.log $*.out $*.toc $*.frm $*.lof $*.lot $*.fls $*.fdb_latexmk $*.xdv
-	@cd $(PDF_TARGET) && $(RM) -r $*_files
 	@echo Created $@
 	@$(OPEN) $@
 endif
 
-$(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_METADATA)
+POST_TEX = utils/post_tex
+
+$(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_METADATA) $(POST_TEX)
 	$(eval TMPDIR := $(shell mktemp -d))
 	$(PYTHON) $(ADD_METADATA) --titlepage $< > $(TMPDIR)/$(notdir $<)
 	cp -pr $(NOTEBOOKS)/PICS fuzzingbook.* $(TMPDIR)
 	$(CONVERT_TO_TEX) $(TMPDIR)/$(notdir $<)
+	$(POST_TEX) $@ > $@~ && mv $@~ $@
 	@-$(RM) -fr $(TMPDIR)
 	@cd $(PDF_TARGET) && $(RM) $*.nbpub.log
 
@@ -491,7 +493,7 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--ready-chapters="$(READY_SOURCES)" \
 	--todo-chapters="$(TODO_SOURCES)" \
 	--new-chapters="$(NEW_SOURCES)" \
-	
+
 HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) utils/post_html.py $(CHAPTERS_MAKEFILE)
 
 
@@ -636,6 +638,7 @@ $(PDF_TARGET)$(BOOK).tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFI
 	done
 	ln -s ../$(BIB) $(BOOK)
 	$(NBPUBLISH) -f latex_ipypublish_book --outpath $(PDF_TARGET) $(BOOK)
+	$(POST_TEX) $@ > $@~ && mv $@~ $@
 	$(RM) -r $(BOOK)
 	cd $(PDF_TARGET) && $(RM) $(BOOK).nbpub.log
 	@echo Created $@
@@ -669,6 +672,7 @@ $(PDF_TARGET)$(BOOK).tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFI
 	done
 	cd book; $(BOOKBOOK_LATEX)
 	mv book/combined.tex $@
+	$(POST_TEX) $@ > $@~ && mv $@~ $@
 	$(RM) -r book
 	@echo Created $@
 
