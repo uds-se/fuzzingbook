@@ -144,6 +144,16 @@ and then make use of the following features.
 
     return synopsis
     
+def skip_cell(cell):
+    # Don't include in slides
+    if 'metadata' not in cell:
+        cell['metadata'] = {}
+    if 'slideshow' not in cell.metadata:
+        cell.metadata['slideshow'] = {}
+    if 'slide_type' not in cell.metadata.slideshow:
+        cell.metadata.slideshow['slide_type'] = 'skip'
+    return cell
+    
 def update_synopsis(notebook_name, synopsis):
     notebook_path = notebook_name
 
@@ -157,10 +167,12 @@ def update_synopsis(notebook_name, synopsis):
             if cell.source == synopsis:
                 return
             cell.source = synopsis
+            cell = skip_cell(cell)
             break
         elif cell.source.startswith("## "):
             # Insert cell before
             new_cell = nbformat.v4.new_markdown_cell(source=synopsis)
+            new_cell = skip_cell(new_cell)
             notebook.cells = (notebook.cells[:i] + 
                                 [new_cell] + notebook.cells[i:])
             break
@@ -172,8 +184,6 @@ def update_synopsis(notebook_name, synopsis):
         f.write(nbformat.writes(notebook))
         
     print("Updated " + notebook_path)
-        
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
