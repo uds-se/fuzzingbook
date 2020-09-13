@@ -476,6 +476,9 @@ $(PDF_TARGET)%.pdf:	$(PDF_TARGET)%.tex $(BIB)
 	@$(OPEN) $@
 endif
 
+# Keep the .tex files
+.PRECIOUS: $(PDF_TARGET)%.tex
+
 POST_TEX = utils/post_tex
 
 $(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_METADATA) $(POST_TEX)
