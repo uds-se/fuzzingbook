@@ -379,7 +379,7 @@ RE_BEGIN_EXCURSION = re.compile(r'''
 <div[^>]*?>[^<]*?
 <div[^>]*?>[^<]*?
 <div[^>]*?>[^<]*?
-<h[0-9][^<>]*?>Excursion:\s*\s(?P<title>[^\n]*?)(<a [^\n]*?>[^\n]*?</a>)?</h[0-9]>
+<h[0-9][^<>]*?>Excursion:\s*\s(?P<title>[^\n]*?)(<a [^\n]*?href="(?P<anchor>[^"]*?)"[^\n]*?>[^\n]*?</a>)?</h[0-9]>
 </div>[^<]*?      # four closing divs
 </div>[^<]*?
 </div>[^<]*?
@@ -398,7 +398,7 @@ RE_END_EXCURSION = re.compile(r'''
 
 def add_excursion_switchers(text):
     text = RE_BEGIN_EXCURSION.sub(
-        r'<details>\n<summary>\g<title></summary>', text)
+        r'<details>\n<summary><a class="summary-anchor" href="\g<anchor>">\g<title></a></summary>', text)
     text = RE_END_EXCURSION.sub(
         '</details>', text)
     return text
