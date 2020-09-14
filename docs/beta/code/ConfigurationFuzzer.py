@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2019-05-21 19:58:02+02:00
+# Last change: 2020-09-13 17:58:41+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -239,7 +239,8 @@ class OptionGrammarMiner(OptionGrammarMiner):
         }
         self.current_group = self.OPTION_SYMBOL
 
-        old_trace = sys.settrace(self.traceit)
+        old_trace = sys.gettrace()
+        sys.settrace(self.traceit)
         try:
             self.function()
         except ParseInterrupt:

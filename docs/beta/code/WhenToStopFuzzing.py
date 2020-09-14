@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2020-01-21 18:32:26+01:00
+# Last change: 2020-09-12 11:45:58+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -801,6 +801,7 @@ if __name__ == "__main__":
     f0 = hat_S - Sn
 
     for m in range(trials - time):
+        assert (time * f0 + f1) != 0 , 'time:%s f0:%s f1:%s' % (time, f0,f1)
         prediction_ts.append(Sn + f0 * (1 - (1 - f1 / (time * f0 + f1)) ** m))
 
 

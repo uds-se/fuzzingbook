@@ -13109,9 +13109,15 @@ ul.typeahead-list  > li > a.pull-right {
 
     </style>
 <style type="text/css">
-    /* CSS stylesheet for fuzzingbook */
-/* This is applied both for the HTML version as well as for the Jupyter Notebook version */
-/* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
+    /* 
+    CSS stylesheet for fuzzingbook
+
+    This is used both for the HTML version 
+    as well as for the Jupyter Notebook version.
+
+    To apply this on local Jupyter notebook sessions, copy it to
+    `~/.jupyter/custom/custom.css'
+*/
 
 /* Loading fonts in Jupyter */
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Open+Sans|Source+Code+Pro);
@@ -13137,18 +13143,18 @@ code, kbd, pre, samp {
 /* Font sizes */
 /* We use somewhat smaller fonts for small devices and print */
 
-p, li {
+p, li. summary {
 	font-size: 16px;
 	line-height: 26px;
 }
 @media only screen and (max-width: 600px) {
-    p, li {
+    p, li, summary {
     	font-size: 14px;
     	line-height: 24px;
     }
 }
 @media print {
-    p, li {
+    p, li, summary {
     	font-size: 12px;
     	line-height: 18px;
     }
@@ -13213,10 +13219,11 @@ h3 {
 }
 
 /* More sections */
-h4, h5, h6 {
+h4, h5 {
 	font-size: 20px!important;
     font-weight: normal!important;
 }
+
 
 /* Small screens */
 @media only screen and (max-width: 600px) {
@@ -13224,7 +13231,7 @@ h4, h5, h6 {
     h1 { font-size: 32px!important; }
     h2 { font-size: 26px!important; }
     h3 { font-size: 22px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 18px!important; }
     };
 }
@@ -13234,7 +13241,7 @@ h4, h5, h6 {
     h1 { font-size: 26px!important; }
     h2 { font-size: 22px!important; }
     h3 { font-size: 18px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 14px!important; }
     };
 }
@@ -13323,9 +13330,10 @@ h1, h2, h3 {
     color: #B03A2E!important;
 }
 
-h4, h5 {
+h4, h5, h6, summary {
     color: black;
 }
+
 
 /* And links also come in shades of red */
 a:link { /* unvisited link */
@@ -13382,15 +13390,39 @@ a:active {
 
 
 /* Details */
+/* See https://stackoverflow.com/questions/38213329/how-to-add-css3-transition-with-html5-details-summary-tag-reveal?noredirect=1&lq=1 */
+/* TODO: Closing details is not animated yet; not sure whether this is possible in CSS - AZ*/
+
 details[open] summary ~ * {
-  animation: sweep .5s ease-in-out;
+  animation: sweep-in .5s ease-in-out;
+}
+details:not([open]) summary ~ * {
+  animation: sweep-out .5s ease-in-out;
 }
 
-@keyframes sweep {
+@keyframes sweep-in {
   0%    {opacity: 0; margin-top: -30px}
   100%  {opacity: 1; margin-top: 0px}
 }
 
+@keyframes sweep-out {
+  0%    {opacity: 1; margin-top: 0px}
+  100%  {opacity: 0; margin-top: -30px}
+}
+
+details {
+    border-style: dashed;
+    border-color: gray;
+    border-width: 1px;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+summary {
+    outline: none !important;
+}
 
 
 
@@ -13888,45 +13920,6 @@ a.anchor-link {
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Grammar-Coverage">Grammar Coverage<a class="anchor-link" href="#Grammar-Coverage">&#182;</a></h1><p><a href="GrammarFuzzer.slides.html">Producing inputs from grammars</a> gives all possible expansions of a rule the same likelihood.  For producing a comprehensive test suite, however, it makes more sense to maximize <em>variety</em> – for instance, by not repeating the same expansions over and over again.  In this chapter, we explore how to systematically <em>cover</em> elements of a grammar such that we maximize variety and do not miss out individual elements.</p>
-
-</div>
-</div>
-</div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
-
-<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.GrammarCoverageFuzzer</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
-</pre></div>
-<p>and then make use of the following features.</p>
-<p>This chapter introduces <code>GrammarCoverageFuzzer</code>, an efficient grammar fuzzer extending <code>GrammarFuzzer</code> from the <a href="GrammarFuzzer.slides.html">chapter on efficient grammar fuzzing</a>.  It strives to cover all expansions at least once.  In the following example, for instance, all digits in the area code are different, as are the digits in the line number:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">Grammars</span> <span class="kn">import</span> <span class="n">US_PHONE_GRAMMAR</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">phone_fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">phone_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-<span class="s1">&#39;(521)383-0695&#39;</span>
-</pre></div>
-<p>After fuzzing, the <code>expansion_coverage()</code> method returns a mapping of grammar expansions covered.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">phone_fuzzer</span><span class="o">.</span><span class="n">expansion_coverage</span><span class="p">()</span>
-<span class="p">{</span><span class="s1">&#39;&lt;area&gt; -&gt; &lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;digit&gt; -&gt; 0&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;digit&gt; -&gt; 1&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;digit&gt; -&gt; 2&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;digit&gt; -&gt; 3&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;digit&gt; -&gt; 5&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;digit&gt; -&gt; 6&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;digit&gt; -&gt; 8&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;digit&gt; -&gt; 9&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;exchange&gt; -&gt; &lt;lead-digit&gt;&lt;digit&gt;&lt;digit&gt;&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;lead-digit&gt; -&gt; 3&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;lead-digit&gt; -&gt; 5&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;line&gt; -&gt; &lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&lt;digit&gt;&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;phone-number&gt; -&gt; (&lt;area&gt;)&lt;exchange&gt;-&lt;line&gt;&#39;</span><span class="p">,</span>
- <span class="s1">&#39;&lt;start&gt; -&gt; &lt;phone-number&gt;&#39;</span><span class="p">}</span>
-</pre></div>
-<p>Subsequent calls to <code>fuzz()</code> will go for further coverage (i.e., covering the other area code digits, for example); a call to <code>reset()</code> clears the recored coverage, starting anew.</p>
-<p>Since such coverage in inputs also yields higher code coverage, <code>GrammarCoverageFuzzer</code> is a recommended extension to <code>GrammarFuzzer</code>.</p>
 
 </div>
 </div>

@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2020-06-24 16:28:33+02:00
+# Last change: 2020-09-13 17:58:39+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -1456,7 +1456,15 @@ if __name__ == "__main__":
              print("Recursion error",e)
 
 
-class LazyExtractor:
+# ### Tree Extractor
+
+if __name__ == "__main__":
+    print('\n### Tree Extractor')
+
+
+
+
+class SimpleExtractor:
     def __init__(self, parser, text):
         self.parser = parser
         cursor, states = parser.parse_prefix(text)
@@ -1490,7 +1498,7 @@ class LazyExtractor:
         return self.parser.prune_tree(parse_tree)
 
 if __name__ == "__main__":
-    de = LazyExtractor(EarleyParser(DIRECTLY_SELF_REFERRING), mystring)
+    de = SimpleExtractor(EarleyParser(DIRECTLY_SELF_REFERRING), mystring)
 
 
 if __name__ == "__main__":
@@ -1500,13 +1508,123 @@ if __name__ == "__main__":
 
 
 if __name__ == "__main__":
-    ie = LazyExtractor(EarleyParser(INDIRECTLY_SELF_REFERRING), mystring)
+    ie = SimpleExtractor(EarleyParser(INDIRECTLY_SELF_REFERRING), mystring)
 
 
 if __name__ == "__main__":
     for i in range(5):
         tree = ie.extract_a_tree()
         print(tree_to_string(tree))
+
+
+class ChoiceNode:
+    def __init__(self, parent, total):
+        self._p, self._chosen = parent, 0
+        self._total, self.next = total, None
+
+    def chosen(self):
+        assert not self.finished()
+        return self._chosen
+
+    def __str__(self):
+        return '%d(%s/%s %s)' % (self._i, str(self._chosen),
+                                 str(self._total), str(self.next))
+    def __repr__(self):
+        return repr((self._i, self._chosen, self._total))
+
+    def increment(self):
+        # as soon as we increment, next becomes invalid
+        self.next = None
+        self._chosen += 1
+        if self.finished():
+            if self._p is None:
+                return None
+            return self._p.increment()
+        return self
+    
+    def finished(self):
+        return self._chosen >= self._total
+
+class EnhancedExtractor(SimpleExtractor):
+    def __init__(self, parser, text):
+        super().__init__(parser, text)
+        self.choices = choices = ChoiceNode(None, 1)
+
+class EnhancedExtractor(EnhancedExtractor):
+    def choose_path(self, arr, choices):
+        arr_len = len(arr)
+        if choices.next is not None:
+            if choices.next.finished():
+                return None, None, None, choices.next
+        else:
+            choices.next = ChoiceNode(choices, arr_len)
+        next_choice = choices.next.chosen()
+        choices = choices.next
+        return arr[next_choice], next_choice, arr_len, choices
+
+class EnhancedExtractor(EnhancedExtractor):
+    def extract_a_node(self, forest_node, seen, choices):
+        name, paths = forest_node
+        if not paths:
+            return (name, []), choices
+
+        cur_path, _i, _l, new_choices = self.choose_path(paths, choices)
+        if cur_path is None:
+            return None, new_choices
+        child_nodes = []
+        for s, kind, chart in cur_path:
+            if kind == 't':
+                child_nodes.append((s, []))
+                continue
+            nid = (s.name, s.s_col.index, s.e_col.index)
+            if nid in seen:
+                return None, new_choices
+            f = self.parser.forest(s, kind, chart)
+            ntree, newer_choices = self.extract_a_node(f, seen | {nid}, new_choices)
+            if ntree is None:
+                return None, newer_choices
+            child_nodes.append(ntree)
+            new_choices = newer_choices
+        return (name, child_nodes), new_choices
+
+class EnhancedExtractor(EnhancedExtractor):
+    def extract_a_tree(self):
+        while not self.choices.finished():
+            parse_tree, choices = self.extract_a_node(self.my_forest, set(), self.choices)
+            choices.increment()
+            if parse_tree is not None:
+                return self.parser.prune_tree(parse_tree)
+        return None
+
+if __name__ == "__main__":
+    ee = EnhancedExtractor(EarleyParser(INDIRECTLY_SELF_REFERRING), mystring)
+
+
+if __name__ == "__main__":
+    i = 0
+    while True:
+        i += 1
+        t = ee.extract_a_tree()
+        if t is None: break
+        print(i, t)
+        s = tree_to_string(t)
+        assert s == mystring
+
+
+if __name__ == "__main__":
+    istring = '1+2+3+4'
+    ee = EnhancedExtractor(EarleyParser(A1_GRAMMAR), istring)
+
+
+if __name__ == "__main__":
+    i = 0
+    while True:
+        i += 1
+        t = ee.extract_a_tree()
+        if t is None: break
+        print(i, t)
+        s = tree_to_string(t)
+        assert s == istring
 
 
 # ### More Earley Parsing

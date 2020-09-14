@@ -13109,9 +13109,15 @@ ul.typeahead-list  > li > a.pull-right {
 
     </style>
 <style type="text/css">
-    /* CSS stylesheet for fuzzingbook */
-/* This is applied both for the HTML version as well as for the Jupyter Notebook version */
-/* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
+    /* 
+    CSS stylesheet for fuzzingbook
+
+    This is used both for the HTML version 
+    as well as for the Jupyter Notebook version.
+
+    To apply this on local Jupyter notebook sessions, copy it to
+    `~/.jupyter/custom/custom.css'
+*/
 
 /* Loading fonts in Jupyter */
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Open+Sans|Source+Code+Pro);
@@ -13137,18 +13143,18 @@ code, kbd, pre, samp {
 /* Font sizes */
 /* We use somewhat smaller fonts for small devices and print */
 
-p, li {
+p, li. summary {
 	font-size: 16px;
 	line-height: 26px;
 }
 @media only screen and (max-width: 600px) {
-    p, li {
+    p, li, summary {
     	font-size: 14px;
     	line-height: 24px;
     }
 }
 @media print {
-    p, li {
+    p, li, summary {
     	font-size: 12px;
     	line-height: 18px;
     }
@@ -13213,10 +13219,11 @@ h3 {
 }
 
 /* More sections */
-h4, h5, h6 {
+h4, h5 {
 	font-size: 20px!important;
     font-weight: normal!important;
 }
+
 
 /* Small screens */
 @media only screen and (max-width: 600px) {
@@ -13224,7 +13231,7 @@ h4, h5, h6 {
     h1 { font-size: 32px!important; }
     h2 { font-size: 26px!important; }
     h3 { font-size: 22px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 18px!important; }
     };
 }
@@ -13234,7 +13241,7 @@ h4, h5, h6 {
     h1 { font-size: 26px!important; }
     h2 { font-size: 22px!important; }
     h3 { font-size: 18px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 14px!important; }
     };
 }
@@ -13323,9 +13330,10 @@ h1, h2, h3 {
     color: #B03A2E!important;
 }
 
-h4, h5 {
+h4, h5, h6, summary {
     color: black;
 }
+
 
 /* And links also come in shades of red */
 a:link { /* unvisited link */
@@ -13382,15 +13390,39 @@ a:active {
 
 
 /* Details */
+/* See https://stackoverflow.com/questions/38213329/how-to-add-css3-transition-with-html5-details-summary-tag-reveal?noredirect=1&lq=1 */
+/* TODO: Closing details is not animated yet; not sure whether this is possible in CSS - AZ*/
+
 details[open] summary ~ * {
-  animation: sweep .5s ease-in-out;
+  animation: sweep-in .5s ease-in-out;
+}
+details:not([open]) summary ~ * {
+  animation: sweep-out .5s ease-in-out;
 }
 
-@keyframes sweep {
+@keyframes sweep-in {
   0%    {opacity: 0; margin-top: -30px}
   100%  {opacity: 1; margin-top: 0px}
 }
 
+@keyframes sweep-out {
+  0%    {opacity: 1; margin-top: 0px}
+  100%  {opacity: 0; margin-top: -30px}
+}
+
+details {
+    border-style: dashed;
+    border-color: gray;
+    border-width: 1px;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+summary {
+    outline: none !important;
+}
 
 
 
@@ -13888,52 +13920,6 @@ a.anchor-link {
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Fuzzing-APIs">Fuzzing APIs<a class="anchor-link" href="#Fuzzing-APIs">&#182;</a></h1><p>So far, we have always generated <em>system input</em>, i.e. data that the program as a whole obtains via its input channels.  However, we can also generate inputs that go directly into individual functions, gaining flexibility and speed in the process.  In this chapter, we explore the use of grammars to synthesize code for function calls, which allows you to generate <em>program code that very efficiently invokes functions directly.</em></p>
-
-</div>
-</div>
-</div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
-
-<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.APIFuzzer</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
-</pre></div>
-<p>and then make use of the following features.</p>
-<p>This chapter provides grammars grammar constructors that are useful for generating function calls.</p>
-<ul>
-<li><code>INT_GRAMMAR</code>, <code>FLOAT_GRAMMAR</code>, <code>ASCII_STRING_GRAMMAR</code> produce integers, floats, and strings, respectively.</li>
-<li><code>int_grammar_with_range(start, end)</code> produces an integer grammar with values <code>N</code> such that <code>start &lt;= N &lt;= end</code>.</li>
-<li><code>float_grammar_with_range(start, end)</code> produces a floating-number grammar with values <code>N</code> such that <code>start &lt;= N &lt;= end</code>.</li>
-</ul>
-<p>The grammars are <a href="ProbabilisticGrammarFuzzer.slides.html">probabilistic</a> and make use of <a href="GeneratorGrammarFuzzer.slides.html">generators</a>, so use <code>ProbabilisticGeneratorGrammarFuzzer</code> as a producer.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">GeneratorGrammarFuzzer</span> <span class="kn">import</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">int_grammar</span> <span class="o">=</span> <span class="n">int_grammar_with_range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">int_grammar</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
-<span class="p">[</span><span class="s1">&#39;172&#39;</span><span class="p">,</span> <span class="s1">&#39;102&#39;</span><span class="p">,</span> <span class="s1">&#39;127&#39;</span><span class="p">,</span> <span class="s1">&#39;119&#39;</span><span class="p">,</span> <span class="s1">&#39;167&#39;</span><span class="p">,</span> <span class="s1">&#39;186&#39;</span><span class="p">,</span> <span class="s1">&#39;133&#39;</span><span class="p">,</span> <span class="s1">&#39;155&#39;</span><span class="p">,</span> <span class="s1">&#39;111&#39;</span><span class="p">,</span> <span class="s1">&#39;111&#39;</span><span class="p">]</span>
-</pre></div>
-<p>Such values can be immediately used for testing function calls:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;sqrt(&quot;</span> <span class="o">+</span> <span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
-<span class="mf">13.45362404707371</span>
-</pre></div>
-<p>These grammars can also be composed to form more complex grammars:</p>
-<ul>
-<li><code>list_grammar(object_grammar)</code> returns a grammar that produces lists of objects as defined by <code>object_grammar</code>.</li>
-</ul>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">int_list_grammar</span> <span class="o">=</span> <span class="n">list_grammar</span><span class="p">(</span><span class="n">int_grammar</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">int_list_grammar</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
-<span class="p">[</span><span class="s1">&#39;[194, 118, 169, 164, 169, 190, 172, 144, 174]&#39;</span><span class="p">,</span>
- <span class="s1">&#39;[109, 127, 185, 155]&#39;</span><span class="p">,</span>
- <span class="s1">&#39;[146, 103, 114, 185, 119, 148, 169, 167, 161]&#39;</span><span class="p">,</span>
- <span class="s1">&#39;[]&#39;</span><span class="p">,</span>
- <span class="s1">&#39;[138, 123, 147, 112, 139, 190, 114, 112]&#39;</span><span class="p">]</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;len(&quot;</span> <span class="o">+</span> <span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
-<span class="mi">2</span>
-</pre></div>
 
 </div>
 </div>

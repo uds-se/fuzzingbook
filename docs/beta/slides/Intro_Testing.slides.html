@@ -13109,9 +13109,15 @@ ul.typeahead-list  > li > a.pull-right {
 
     </style>
 <style type="text/css">
-    /* CSS stylesheet for fuzzingbook */
-/* This is applied both for the HTML version as well as for the Jupyter Notebook version */
-/* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
+    /* 
+    CSS stylesheet for fuzzingbook
+
+    This is used both for the HTML version 
+    as well as for the Jupyter Notebook version.
+
+    To apply this on local Jupyter notebook sessions, copy it to
+    `~/.jupyter/custom/custom.css'
+*/
 
 /* Loading fonts in Jupyter */
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Open+Sans|Source+Code+Pro);
@@ -13134,19 +13140,23 @@ code, kbd, pre, samp {
   font-family: 'Fira Mono', 'Source Code Pro', monospace;
 }
 
-
-
 /* Font sizes */
-/* We use somewhat smaller fonts for small devices */
+/* We use somewhat smaller fonts for small devices and print */
 
-p, li {
+p, li. summary {
 	font-size: 16px;
 	line-height: 26px;
 }
 @media only screen and (max-width: 600px) {
-    p, li {
+    p, li, summary {
     	font-size: 14px;
     	line-height: 24px;
+    }
+}
+@media print {
+    p, li, summary {
+    	font-size: 12px;
+    	line-height: 18px;
     }
 }
 
@@ -13167,6 +13177,16 @@ code, kbd, pre, samp {
     .CodeMirror pre {
       font-size: 12px;
       line-height: 18px;
+    }
+}
+@media print {
+    code, kbd, pre, samp {
+      font-size: 10px !important;
+      line-height: 14px;
+    }
+    .CodeMirror pre {
+      font-size: 10px !important;
+      line-height: 14px;
     }
 }
 
@@ -13199,10 +13219,11 @@ h3 {
 }
 
 /* More sections */
-h4, h5, h6 {
+h4, h5 {
 	font-size: 20px!important;
     font-weight: normal!important;
 }
+
 
 /* Small screens */
 @media only screen and (max-width: 600px) {
@@ -13210,8 +13231,18 @@ h4, h5, h6 {
     h1 { font-size: 32px!important; }
     h2 { font-size: 26px!important; }
     h3 { font-size: 22px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 18px!important; }
+    };
+}
+/* Print */
+@media print {
+    section > h1 { font-size: 32px!important; }
+    h1 { font-size: 26px!important; }
+    h2 { font-size: 22px!important; }
+    h3 { font-size: 18px!important; }
+    h4, h5, h6, summary {
+        { font-size: 14px!important; }
     };
 }
 
@@ -13267,10 +13298,18 @@ h4, h5, h6 {
 body {
     background-color: #F0F0F0;
 }
+/* But not when it's print */
+@media print {
+    background-color: white;
+}
 
 .container {
     background-color: #F8F8F8!important;    
 }
+@media print {
+    background-color: white!important;
+}
+
 
 .input_area, .output_area {
     background-color: white!important;    
@@ -13288,12 +13327,13 @@ body {
 
 /* Headers are dark red, too */
 h1, h2, h3 {
-    color: #B03A2E;
+    color: #B03A2E!important;
 }
 
-h4, h5 {
+h4, h5, h6, summary {
     color: black;
 }
+
 
 /* And links also come in shades of red */
 a:link { /* unvisited link */
@@ -13332,6 +13372,12 @@ a:active {
     line-height: 16px;
     margin-top: 1cm;
 }
+@media print {
+    .imprint {
+    	font-size: 9px;
+        line-height: 12px;
+    }
+}
 
 /* Synopsis */
 .synopsis {
@@ -13344,15 +13390,39 @@ a:active {
 
 
 /* Details */
+/* See https://stackoverflow.com/questions/38213329/how-to-add-css3-transition-with-html5-details-summary-tag-reveal?noredirect=1&lq=1 */
+/* TODO: Closing details is not animated yet; not sure whether this is possible in CSS - AZ*/
+
 details[open] summary ~ * {
-  animation: sweep .5s ease-in-out;
+  animation: sweep-in .5s ease-in-out;
+}
+details:not([open]) summary ~ * {
+  animation: sweep-out .5s ease-in-out;
 }
 
-@keyframes sweep {
+@keyframes sweep-in {
   0%    {opacity: 0; margin-top: -30px}
   100%  {opacity: 1; margin-top: 0px}
 }
 
+@keyframes sweep-out {
+  0%    {opacity: 1; margin-top: 0px}
+  100%  {opacity: 0; margin-top: -30px}
+}
+
+details {
+    border-style: dashed;
+    border-color: gray;
+    border-width: 1px;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+summary {
+    outline: none !important;
+}
 
 
 
@@ -13360,6 +13430,13 @@ details[open] summary ~ * {
 .solution_link {
 	/* font-size: 12px; */
     font-style: italic;
+}
+@media print {
+    .solution_link {
+    	font-size: 9px;
+        line-height: 12px;
+        font-style: italic;
+    }
 }
 
 
@@ -13422,6 +13499,10 @@ a.import {
     color: blue;
 }
 
+a.import[href]:after {
+    content: "" !important;  /* Avoid adding links for imports */
+}
+
 a.import:visited {
     color: darkblue;
 }
@@ -13463,6 +13544,7 @@ article {
   }
 }
 
+
 /* CSS Menu */
 #cssmenu,
 #cssmenu ul,
@@ -13489,6 +13571,7 @@ article {
   margin: 0;
   padding: 0;
 }
+
 #cssmenu > ul,
 #cssmenu > ol {
   list-style: inside none;
@@ -13687,6 +13770,19 @@ article {
   border-top: 5px solid #ffffff;
 }
 
+/* On print, do not show the menu */
+@media print {
+    #cssmenu {
+        height: 0px;
+        display: none;
+    }
+    #cssmenu > ul {
+        display: none;
+    }
+    #cssmenu > ol {
+        display: none;
+    }
+}
 
     </style>
 
@@ -14445,7 +14541,7 @@ approx = 3.0000000000393214
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0.02211331800208427
+<pre>0.021423322999908123
 </pre>
 </div>
 </div>
@@ -14509,7 +14605,7 @@ approx = 3.0000000000393214
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0.02658488100860268
+<pre>0.026015060999270645
 </pre>
 </div>
 </div>
@@ -14766,10 +14862,10 @@ approx = 3.0000000000393214
     sqrt_program(&#34;-1&#34;)
   File &#34;&lt;ipython-input-22-53e8ec8bb3ca&gt;&#34;, line 3, in sqrt_program
     print(&#39;The root of&#39;, x, &#39;is&#39;, my_sqrt(x))
-  File &#34;&lt;ipython-input-1-47185ad159a1&gt;&#34;, line 7, in my_sqrt
-    guess = (approx + x / approx) / 2
-  File &#34;&lt;ipython-input-1-47185ad159a1&gt;&#34;, line 7, in my_sqrt
-    guess = (approx + x / approx) / 2
+  File &#34;&lt;ipython-input-1-47185ad159a1&gt;&#34;, line 6, in my_sqrt
+    approx = guess
+  File &#34;&lt;ipython-input-1-47185ad159a1&gt;&#34;, line 6, in my_sqrt
+    approx = guess
   File &#34;ExpectError.ipynb&#34;, line 59, in check_time
 TimeoutError (expected)
 </pre>

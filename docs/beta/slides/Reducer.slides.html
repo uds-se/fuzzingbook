@@ -13109,9 +13109,15 @@ ul.typeahead-list  > li > a.pull-right {
 
     </style>
 <style type="text/css">
-    /* CSS stylesheet for fuzzingbook */
-/* This is applied both for the HTML version as well as for the Jupyter Notebook version */
-/* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
+    /* 
+    CSS stylesheet for fuzzingbook
+
+    This is used both for the HTML version 
+    as well as for the Jupyter Notebook version.
+
+    To apply this on local Jupyter notebook sessions, copy it to
+    `~/.jupyter/custom/custom.css'
+*/
 
 /* Loading fonts in Jupyter */
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Open+Sans|Source+Code+Pro);
@@ -13137,18 +13143,18 @@ code, kbd, pre, samp {
 /* Font sizes */
 /* We use somewhat smaller fonts for small devices and print */
 
-p, li {
+p, li. summary {
 	font-size: 16px;
 	line-height: 26px;
 }
 @media only screen and (max-width: 600px) {
-    p, li {
+    p, li, summary {
     	font-size: 14px;
     	line-height: 24px;
     }
 }
 @media print {
-    p, li {
+    p, li, summary {
     	font-size: 12px;
     	line-height: 18px;
     }
@@ -13213,10 +13219,11 @@ h3 {
 }
 
 /* More sections */
-h4, h5, h6 {
+h4, h5 {
 	font-size: 20px!important;
     font-weight: normal!important;
 }
+
 
 /* Small screens */
 @media only screen and (max-width: 600px) {
@@ -13224,7 +13231,7 @@ h4, h5, h6 {
     h1 { font-size: 32px!important; }
     h2 { font-size: 26px!important; }
     h3 { font-size: 22px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 18px!important; }
     };
 }
@@ -13234,7 +13241,7 @@ h4, h5, h6 {
     h1 { font-size: 26px!important; }
     h2 { font-size: 22px!important; }
     h3 { font-size: 18px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 14px!important; }
     };
 }
@@ -13323,9 +13330,10 @@ h1, h2, h3 {
     color: #B03A2E!important;
 }
 
-h4, h5 {
+h4, h5, h6, summary {
     color: black;
 }
+
 
 /* And links also come in shades of red */
 a:link { /* unvisited link */
@@ -13382,15 +13390,39 @@ a:active {
 
 
 /* Details */
+/* See https://stackoverflow.com/questions/38213329/how-to-add-css3-transition-with-html5-details-summary-tag-reveal?noredirect=1&lq=1 */
+/* TODO: Closing details is not animated yet; not sure whether this is possible in CSS - AZ*/
+
 details[open] summary ~ * {
-  animation: sweep .5s ease-in-out;
+  animation: sweep-in .5s ease-in-out;
+}
+details:not([open]) summary ~ * {
+  animation: sweep-out .5s ease-in-out;
 }
 
-@keyframes sweep {
+@keyframes sweep-in {
   0%    {opacity: 0; margin-top: -30px}
   100%  {opacity: 1; margin-top: 0px}
 }
 
+@keyframes sweep-out {
+  0%    {opacity: 1; margin-top: 0px}
+  100%  {opacity: 0; margin-top: -30px}
+}
+
+details {
+    border-style: dashed;
+    border-color: gray;
+    border-width: 1px;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+summary {
+    outline: none !important;
+}
 
 
 
@@ -13901,49 +13933,6 @@ a.anchor-link {
 <li>As reduction is typically used together with fuzzing, reading the <a href="Fuzzer.slides.html">chapter on basic fuzzing</a> is a good idea.</li>
 <li>The later grammar-based techniques require knowledge on <a href="GrammarFuzzer.slides.html">derivation trees</a> and <a href="Parser.slides.html">parsing</a>.</li>
 </ul>
-
-</div>
-</div>
-</div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
-
-<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.Reducer</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
-</pre></div>
-<p>and then make use of the following features.</p>
-<p>A <em>reducer</em> takes a failure-inducing input and reduces it to the minimum that still reproduces the failure.  This chapter provides <code>Reducer</code> classes that implement such reducers.</p>
-<p>Here is a simple example: An arithmetic expression causes an error in the Python interpreter:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="err">!</span><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;x = 1 + 2 * 3 / 0&#39;</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-<span class="ne">ZeroDivisionError</span><span class="p">:</span> <span class="n">division</span> <span class="n">by</span> <span class="n">zero</span>
-</pre></div>
-<p>Can we reduce this input to a minimum?  To use a <code>Reducer</code>, one first has to build a <code>Runner</code> whose outcome is <code>FAIL</code> if the precise error occurs.  We therefore build a <code>ZeroDivisionRunner</code> whose <code>run()</code> method will specifically return a <code>FAIL</code> outcome if a <code>ZeroDivisionError</code> occurs.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">Fuzzer</span> <span class="kn">import</span> <span class="n">ProgramRunner</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="k">class</span> <span class="nc">ZeroDivisionRunner</span><span class="p">(</span><span class="n">ProgramRunner</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="s2">&quot;&quot;&quot;Make outcome &#39;FAIL&#39; if ZeroDivisionError occurs&quot;&quot;&quot;</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;ZeroDivisionError&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-<span class="o">&gt;&gt;&gt;</span>             <span class="n">outcome</span> <span class="o">=</span> <span class="s1">&#39;FAIL&#39;</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span>
-</pre></div>
-<p>If we feed this expression into a <code>ZeroDivisionRunner</code>, it will produce an outcome of <code>FAIL</code> as designed.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">python_input</span> <span class="o">=</span> <span class="s2">&quot;x = 1 + 2 * 3 / 0&quot;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">python_runner</span> <span class="o">=</span> <span class="n">ZeroDivisionRunner</span><span class="p">(</span><span class="s2">&quot;python&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="n">python_runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">python_input</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">outcome</span>
-<span class="s1">&#39;FAIL&#39;</span>
-</pre></div>
-<p>Delta Debugging is a simple and robust reduction algorithm.  We can tie a <code>DeltaDebuggingReducer</code> to this runner, and have it determine the substring that causes the <code>python</code> program to fail:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">dd</span> <span class="o">=</span> <span class="n">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">python_runner</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">dd</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">python_input</span><span class="p">)</span>
-<span class="s1">&#39;3/0&#39;</span>
-</pre></div>
-<p>The input is reduced to the maximum: We get the essence of the division by zero.</p>
 
 </div>
 </div>
@@ -18050,7 +18039,7 @@ Test #3 &#39;3&#39; 1 PASS
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.3379851040081121</pre>
+<pre>0.1703679150014068</pre>
 </div>
 
 </div>
@@ -18157,7 +18146,7 @@ Test #3 &#39;3&#39; 1 PASS
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>8.394316638994496</pre>
+<pre>4.759356030001072</pre>
 </div>
 
 </div>

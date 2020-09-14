@@ -95,7 +95,7 @@ def print_file(filename, lexer=None):
     content = open(filename, "rb").read().decode('utf-8')
     print_content(content, filename, lexer)
 
-def print_content(content, filename=None, lexer=None):
+def print_content(content, filename=None, lexer=None, start_line_number=None):
     from pygments import highlight, lexers, formatters
     from pygments.lexers import get_lexer_for_filename, guess_lexer
 
@@ -107,7 +107,18 @@ def print_content(content, filename=None, lexer=None):
                 lexer = get_lexer_for_filename(filename)
 
         colorful_content = highlight(content, lexer, formatters.TerminalFormatter())
-        print(colorful_content, end="")
+        if start_line_number is None:
+           print(colorful_content, end="")
+           return
+        colorful_content_list = colorful_content.split("\n")
+        no_of_lines = len(colorful_content_list)
+        size_of_lines_nums = len(str(no_of_lines))
+
+        for i in range(start_line_number, start_line_number + no_of_lines):
+            colorful_content_list[i] = ('{0:' + str(size_of_lines_nums) + '}').format(i) + " " + colorful_content_list[i]
+        colorful_content_with_line_no = '\n'.join(colorful_content_list)
+
+        print(colorful_content_with_line_no, end="")
     else:
         print(content, end="")
 

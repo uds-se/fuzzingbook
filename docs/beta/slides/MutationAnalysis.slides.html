@@ -13109,9 +13109,15 @@ ul.typeahead-list  > li > a.pull-right {
 
     </style>
 <style type="text/css">
-    /* CSS stylesheet for fuzzingbook */
-/* This is applied both for the HTML version as well as for the Jupyter Notebook version */
-/* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
+    /* 
+    CSS stylesheet for fuzzingbook
+
+    This is used both for the HTML version 
+    as well as for the Jupyter Notebook version.
+
+    To apply this on local Jupyter notebook sessions, copy it to
+    `~/.jupyter/custom/custom.css'
+*/
 
 /* Loading fonts in Jupyter */
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Open+Sans|Source+Code+Pro);
@@ -13134,19 +13140,23 @@ code, kbd, pre, samp {
   font-family: 'Fira Mono', 'Source Code Pro', monospace;
 }
 
-
-
 /* Font sizes */
-/* We use somewhat smaller fonts for small devices */
+/* We use somewhat smaller fonts for small devices and print */
 
-p, li {
+p, li. summary {
 	font-size: 16px;
 	line-height: 26px;
 }
 @media only screen and (max-width: 600px) {
-    p, li {
+    p, li, summary {
     	font-size: 14px;
     	line-height: 24px;
+    }
+}
+@media print {
+    p, li, summary {
+    	font-size: 12px;
+    	line-height: 18px;
     }
 }
 
@@ -13167,6 +13177,16 @@ code, kbd, pre, samp {
     .CodeMirror pre {
       font-size: 12px;
       line-height: 18px;
+    }
+}
+@media print {
+    code, kbd, pre, samp {
+      font-size: 10px !important;
+      line-height: 14px;
+    }
+    .CodeMirror pre {
+      font-size: 10px !important;
+      line-height: 14px;
     }
 }
 
@@ -13199,10 +13219,11 @@ h3 {
 }
 
 /* More sections */
-h4, h5, h6 {
+h4, h5 {
 	font-size: 20px!important;
     font-weight: normal!important;
 }
+
 
 /* Small screens */
 @media only screen and (max-width: 600px) {
@@ -13210,8 +13231,18 @@ h4, h5, h6 {
     h1 { font-size: 32px!important; }
     h2 { font-size: 26px!important; }
     h3 { font-size: 22px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 18px!important; }
+    };
+}
+/* Print */
+@media print {
+    section > h1 { font-size: 32px!important; }
+    h1 { font-size: 26px!important; }
+    h2 { font-size: 22px!important; }
+    h3 { font-size: 18px!important; }
+    h4, h5, h6, summary {
+        { font-size: 14px!important; }
     };
 }
 
@@ -13267,10 +13298,18 @@ h4, h5, h6 {
 body {
     background-color: #F0F0F0;
 }
+/* But not when it's print */
+@media print {
+    background-color: white;
+}
 
 .container {
     background-color: #F8F8F8!important;    
 }
+@media print {
+    background-color: white!important;
+}
+
 
 .input_area, .output_area {
     background-color: white!important;    
@@ -13288,12 +13327,13 @@ body {
 
 /* Headers are dark red, too */
 h1, h2, h3 {
-    color: #B03A2E;
+    color: #B03A2E!important;
 }
 
-h4, h5 {
+h4, h5, h6, summary {
     color: black;
 }
+
 
 /* And links also come in shades of red */
 a:link { /* unvisited link */
@@ -13332,6 +13372,12 @@ a:active {
     line-height: 16px;
     margin-top: 1cm;
 }
+@media print {
+    .imprint {
+    	font-size: 9px;
+        line-height: 12px;
+    }
+}
 
 /* Synopsis */
 .synopsis {
@@ -13344,15 +13390,39 @@ a:active {
 
 
 /* Details */
+/* See https://stackoverflow.com/questions/38213329/how-to-add-css3-transition-with-html5-details-summary-tag-reveal?noredirect=1&lq=1 */
+/* TODO: Closing details is not animated yet; not sure whether this is possible in CSS - AZ*/
+
 details[open] summary ~ * {
-  animation: sweep .5s ease-in-out;
+  animation: sweep-in .5s ease-in-out;
+}
+details:not([open]) summary ~ * {
+  animation: sweep-out .5s ease-in-out;
 }
 
-@keyframes sweep {
+@keyframes sweep-in {
   0%    {opacity: 0; margin-top: -30px}
   100%  {opacity: 1; margin-top: 0px}
 }
 
+@keyframes sweep-out {
+  0%    {opacity: 1; margin-top: 0px}
+  100%  {opacity: 0; margin-top: -30px}
+}
+
+details {
+    border-style: dashed;
+    border-color: gray;
+    border-width: 1px;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+summary {
+    outline: none !important;
+}
 
 
 
@@ -13360,6 +13430,13 @@ details[open] summary ~ * {
 .solution_link {
 	/* font-size: 12px; */
     font-style: italic;
+}
+@media print {
+    .solution_link {
+    	font-size: 9px;
+        line-height: 12px;
+        font-style: italic;
+    }
 }
 
 
@@ -13422,6 +13499,10 @@ a.import {
     color: blue;
 }
 
+a.import[href]:after {
+    content: "" !important;  /* Avoid adding links for imports */
+}
+
 a.import:visited {
     color: darkblue;
 }
@@ -13463,6 +13544,7 @@ article {
   }
 }
 
+
 /* CSS Menu */
 #cssmenu,
 #cssmenu ul,
@@ -13489,6 +13571,7 @@ article {
   margin: 0;
   padding: 0;
 }
+
 #cssmenu > ul,
 #cssmenu > ol {
   list-style: inside none;
@@ -13687,6 +13770,19 @@ article {
   border-top: 5px solid #ffffff;
 }
 
+/* On print, do not show the menu */
+@media print {
+    #cssmenu {
+        height: 0px;
+        display: none;
+    }
+    #cssmenu > ul {
+        display: none;
+    }
+    #cssmenu > ol {
+        display: none;
+    }
+}
 
     </style>
 
@@ -13823,7 +13919,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Mutation-Analysis">Mutation Analysis<a class="anchor-link" href="#Mutation-Analysis">&#182;</a></h1><p>In the <a href="Coverage.slides.html">chapter on coverage</a>, we showed how one identify which parts of the program are executed by a program, and hence get a sense of the effectiveness of a set of test cases in covering the program structure.  However, coverage alone may not be the best measure for the effectiveness of a test, as one can have great coverage without ever checking a result for correctness.  In this chapter, we introduce another means for assessing the effectiveness of a test suite: After injecting <em>mutations</em> – <em>artificial faults</em> – into the code, we check whether a test suite can detect these artificial faults.  The idea is that if it fails to detect such mutations, it will also miss real bugs.</p>
+<h1 id="Mutation-Analysis">Mutation Analysis<a class="anchor-link" href="#Mutation-Analysis">&#182;</a></h1><p>In the <a href="Coverage.slides.html">chapter on coverage</a>, we showed how one can identify which parts of the program are executed by a program, and hence get a sense of the effectiveness of a set of test cases in covering the program structure.  However, coverage alone may not be the best measure for the effectiveness of a test, as one can have great coverage without ever checking a result for correctness.  In this chapter, we introduce another means for assessing the effectiveness of a test suite: After injecting <em>mutations</em> – <em>artificial faults</em> – into the code, we check whether a test suite can detect these artificial faults.  The idea is that if it fails to detect such mutations, it will also miss real bugs.</p>
 
 </div>
 </div>
@@ -13836,139 +13932,6 @@ a.anchor-link {
 <li>You need some understanding of how a program is executed.</li>
 <li>You should have read <a href="Coverage.slides.html">the chapter on coverage</a>.</li>
 </ul>
-
-</div>
-</div>
-</div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
-
-<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.MutationAnalysis</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
-</pre></div>
-<p>and then make use of the following features.</p>
-<p>This chapter introduces two methods of running <em>mutation analysis</em> on subject programs. The first class <code>MuFunctionAnalyzer</code> targets individual functions. Given a function <code>gcd</code> and two test cases evaluate, one can run mutation analysis on the test cases as follows:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">mutant</span> <span class="ow">in</span> <span class="n">MuFunctionAnalyzer</span><span class="p">(</span><span class="n">gcd</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="k">with</span> <span class="n">mutant</span><span class="p">:</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">assert</span> <span class="n">gcd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Minimal&quot;</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">assert</span> <span class="n">gcd</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Mirror&quot;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">mutant</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">score</span><span class="p">()</span>
-<span class="o">-&gt;</span>  <span class="n">gcd_1</span>
-<span class="o">&lt;-</span>  <span class="n">gcd_1</span>
-
-<span class="o">-&gt;</span>  <span class="n">gcd_2</span>
-<span class="o">&lt;-</span>  <span class="n">gcd_2</span>
-
-<span class="o">-&gt;</span>  <span class="n">gcd_3</span>
-<span class="o">&lt;-</span>  <span class="n">gcd_3</span>
-
-<span class="o">-&gt;</span>  <span class="n">gcd_4</span>
-<span class="o">&lt;-</span>  <span class="n">gcd_4</span>
-<span class="n">Detected</span> <span class="n">gcd_4</span> <span class="o">&lt;</span><span class="k">class</span> <span class="err">&#39;</span><span class="nc">AssertionError</span><span class="s1">&#39;&gt; Minimal</span>
-
-
-<span class="mf">0.25</span>
-</pre></div>
-<p>The second class <code>MuProgramAnalyzer</code> targets standalone programs with test suites. Given a program <code>gcd</code> whose source code is provided in <code>gcd_src</code> and the test suite is provided by <code>TestGCD</code>, one can evaluate the mutation score of <code>TestGCD</code> as follows:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">class</span> <span class="nc">TestGCD</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="k">def</span> <span class="nf">test_simple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="o">&gt;&gt;&gt;</span> 
-<span class="o">&gt;&gt;&gt;</span>     <span class="k">def</span> <span class="nf">test_mirror</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">mutant</span> <span class="ow">in</span> <span class="n">MuProgramAnalyzer</span><span class="p">(</span><span class="s1">&#39;gcd&#39;</span><span class="p">,</span> <span class="n">gcd_src</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="n">mutant</span><span class="p">[</span><span class="n">test_module</span><span class="p">]</span><span class="o">.</span><span class="n">runTest</span><span class="p">(</span><span class="s1">&#39;TestGCD&#39;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">mutant</span><span class="o">.</span><span class="n">pm</span><span class="o">.</span><span class="n">score</span><span class="p">()</span>
-<span class="o">======================================================================</span>
-<span class="n">FAIL</span><span class="p">:</span> <span class="n">test_simple</span> <span class="p">(</span><span class="n">__main__</span><span class="o">.</span><span class="n">TestGCD</span><span class="p">)</span>
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-99-9157b5e48dd8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="n">test_simple</span>
-    <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="ne">AssertionError</span>
-
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Ran</span> <span class="mi">1</span> <span class="n">test</span> <span class="ow">in</span> <span class="mf">0.001</span><span class="n">s</span>
-
-<span class="n">FAILED</span> <span class="p">(</span><span class="n">failures</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="o">======================================================================</span>
-<span class="n">FAIL</span><span class="p">:</span> <span class="n">test_simple</span> <span class="p">(</span><span class="n">__main__</span><span class="o">.</span><span class="n">TestGCD</span><span class="p">)</span>
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-99-9157b5e48dd8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="n">test_simple</span>
-    <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="ne">AssertionError</span>
-
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Ran</span> <span class="mi">1</span> <span class="n">test</span> <span class="ow">in</span> <span class="mf">0.001</span><span class="n">s</span>
-
-<span class="n">FAILED</span> <span class="p">(</span><span class="n">failures</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="o">======================================================================</span>
-<span class="n">FAIL</span><span class="p">:</span> <span class="n">test_simple</span> <span class="p">(</span><span class="n">__main__</span><span class="o">.</span><span class="n">TestGCD</span><span class="p">)</span>
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-99-9157b5e48dd8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="n">test_simple</span>
-    <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="ne">AssertionError</span>
-
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Ran</span> <span class="mi">1</span> <span class="n">test</span> <span class="ow">in</span> <span class="mf">0.001</span><span class="n">s</span>
-
-<span class="n">FAILED</span> <span class="p">(</span><span class="n">failures</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="o">======================================================================</span>
-<span class="n">FAIL</span><span class="p">:</span> <span class="n">test_simple</span> <span class="p">(</span><span class="n">__main__</span><span class="o">.</span><span class="n">TestGCD</span><span class="p">)</span>
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-99-9157b5e48dd8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="n">test_simple</span>
-    <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="ne">AssertionError</span>
-
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Ran</span> <span class="mi">1</span> <span class="n">test</span> <span class="ow">in</span> <span class="mf">0.001</span><span class="n">s</span>
-
-<span class="n">FAILED</span> <span class="p">(</span><span class="n">failures</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="o">======================================================================</span>
-<span class="n">FAIL</span><span class="p">:</span> <span class="n">test_simple</span> <span class="p">(</span><span class="n">__main__</span><span class="o">.</span><span class="n">TestGCD</span><span class="p">)</span>
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-99-9157b5e48dd8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="n">test_simple</span>
-    <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="ne">AssertionError</span>
-
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Ran</span> <span class="mi">1</span> <span class="n">test</span> <span class="ow">in</span> <span class="mf">0.001</span><span class="n">s</span>
-
-<span class="n">FAILED</span> <span class="p">(</span><span class="n">failures</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="o">======================================================================</span>
-<span class="n">FAIL</span><span class="p">:</span> <span class="n">test_simple</span> <span class="p">(</span><span class="n">__main__</span><span class="o">.</span><span class="n">TestGCD</span><span class="p">)</span>
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-99-9157b5e48dd8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="n">test_simple</span>
-    <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="ne">AssertionError</span>
-
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Ran</span> <span class="mi">1</span> <span class="n">test</span> <span class="ow">in</span> <span class="mf">0.001</span><span class="n">s</span>
-
-<span class="n">FAILED</span> <span class="p">(</span><span class="n">failures</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="o">======================================================================</span>
-<span class="n">FAIL</span><span class="p">:</span> <span class="n">test_simple</span> <span class="p">(</span><span class="n">__main__</span><span class="o">.</span><span class="n">TestGCD</span><span class="p">)</span>
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-99-9157b5e48dd8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="n">test_simple</span>
-    <span class="k">assert</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-<span class="ne">AssertionError</span>
-
-<span class="o">----------------------------------------------------------------------</span>
-<span class="n">Ran</span> <span class="mi">1</span> <span class="n">test</span> <span class="ow">in</span> <span class="mf">0.001</span><span class="n">s</span>
-
-<span class="n">FAILED</span> <span class="p">(</span><span class="n">failures</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-<span class="mf">1.0</span>
-</pre></div>
-<p>The mutation score thus obtained is a better indicator of the quality of a given test suite than pure coverage.</p>
 
 </div>
 </div>
@@ -14033,7 +13996,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This is indeed, not an optimal state of affairs. How can we verify that our tests are actually useful? One alternative (hinted in the chapter on coverage) is to inject bugs into the program, and evaluate the effectiveness of test suites in catching these injected bugs. However, that that introduces another problem. How do we produce these bugs in the first place? Any manual effort is likely to be biased by the preconceptions of the developer as to where the bugs are likely to occur, and what effect it would have. Further, writing good bugs is likely to take a significant amount of time, for a very indirect benefit. Hence such a solution is not sufficient.</p>
+<p>This is indeed, not an optimal state of affairs. How can we verify that our tests are actually useful? One alternative (hinted in the chapter on coverage) is to inject bugs into the program, and evaluate the effectiveness of test suites in catching these injected bugs. However, that introduces another problem. How do we produce these bugs in the first place? Any manual effort is likely to be biased by the preconceptions of the developer as to where the bugs are likely to occur, and what effect it would have. Further, writing good bugs is likely to take a significant amount of time, for a very indirect benefit. Hence such a solution is not sufficient.</p>
 
 </div>
 </div>
@@ -14049,7 +14012,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The insight from Mutation Analysis is to consider the probability of insertion of a bug from the perspective of a programmer. If one assumes that the attention received by each program element in the program is sufficiently similar, one can further assume that each token in the program have a similar probability of being incorrectly transcribed. Of course, the programmer will correct any mistakes that gets detected by the compilers (or other static analysis tools). So the set of valid tokens different from the original that make it past the compilation stage is considered to be its possible set of <em>mutations</em> that represent the <em>probable faults</em> in the program. A test suite is then judged by its capability to detect (and hence prevent) such mutations. The proportion of such mutants detected over all <em>valid</em> mutants produced is taken as the mutation score. In this chapter, we see how one can implement Mutation Analysis in Python programs. The mutation score obtained represents the ability of any program analysis tools to prevent faults, and can be used to judge static test suites, test generators such as fuzzers, and also static and symbolic execution frameworks.</p>
+<p>The insight from Mutation Analysis is to consider the probability of insertion of a bug from the perspective of a programmer. If one assumes that the attention received by each program element in the program is sufficiently similar, one can further assume that each token in the program has a similar probability of being incorrectly transcribed. Of course, the programmer will correct any mistakes that gets detected by the compilers (or other static analysis tools). So the set of valid tokens different from the original that make it past the compilation stage is considered to be its possible set of <em>mutations</em> that represent the <em>probable faults</em> in the program. A test suite is then judged by its capability to detect (and hence prevent) such mutations. The proportion of such mutants detected over all <em>valid</em> mutants produced is taken as the mutation score. In this chapter, we see how one can implement Mutation Analysis in Python programs. The mutation score obtained represents the ability of any program analysis tools to prevent faults, and can be used to judge static test suites, test generators such as fuzzers, and also static and symbolic execution frameworks.</p>
 
 </div>
 </div>
@@ -14350,7 +14313,7 @@ The problem here is that coverage is unable to evaluate the <em>quality</em> of 
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Injecting-Artificial-Faults">Injecting Artificial Faults<a class="anchor-link" href="#Injecting-Artificial-Faults">&#182;</a></h2><p>Notice that in the <a href="Coverage.slides.html">chapter on coverage</a>, coverage was presented as a <em>proxy</em> for the likelihood of a test suite to uncover bugs. What if actually try to evaluate the likelihood of a test suite to uncover bugs? All we need is to inject bugs into the program, one at a time, and count the number of such bugs that our test suite detects. The frequency of detection will provide us with the actual likelihood of the test suite to uncover bugs. This technique is called <em>fault injection</em>. Here is an example for <em>fault injection</em>.</p>
+<h2 id="Injecting-Artificial-Faults">Injecting Artificial Faults<a class="anchor-link" href="#Injecting-Artificial-Faults">&#182;</a></h2><p>Notice that in the <a href="Coverage.slides.html">chapter on coverage</a>, coverage was presented as a <em>proxy</em> for the likelihood of a test suite to uncover bugs. What if we actually try to evaluate the likelihood of a test suite to uncover bugs? All we need is to inject bugs into the program, one at a time, and count the number of such bugs that our test suite detects. The frequency of detection will provide us with the actual likelihood of the test suite to uncover bugs. This technique is called <em>fault injection</em>. Here is an example for <em>fault injection</em>.</p>
 
 </div>
 </div>
@@ -14468,7 +14431,9 @@ AssertionError (expected)
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Mutation Analysis provides an alternative to a curated set of faults. The key insight is that, if one assumes that the programmer understands the program in question, the majority of errors made are very likely small transcription errors (a small number of tokens). A compiler will likely catch most of these errors. Hence, the majority of residual faults in a program is likely to be due to small (single token) variations at certain points in the structure of the program from the correct program (This particular assumption is called the <em>Competent Programmer Hypothesis</em> or the <em>Finite Neighborhood Hypothesis</em>). What about the larger faults composed of multiple changes to the program? The key insight here is that, for a significant majority of such faults, test cases that can detect a single change in isolation is very likely to detect the larger composite fault that contains it. (This assumption is called the <em>Coupling Effect</em>.) How can we use these assumptions in practice? The idea is to simply generate <em>all</em> possible <em>valid</em> variants of the program that differs from the original by a small change (such as a single token change) (Such variants are called <em>mutants</em>). Next, the given test suite is applied to each variant thus generated. Any mutant detected by the test suite is said to have been <em>killed</em> by the test suite. The effectiveness of a test suite is given by the proportion of mutants killed to the valid mutants generated.</p>
+<p>Mutation Analysis provides an alternative to a curated set of faults. The key insight is that, if one assumes that the programmer understands the program in question, the majority of errors made are very likely small transcription errors (a small number of tokens). A compiler will likely catch most of these errors. Hence, the majority of residual faults in a program is likely to be due to small (single token) variations at certain points in the structure of the program from the correct program (This particular assumption is called the <em>Competent Programmer Hypothesis</em> or the <em>Finite Neighborhood Hypothesis</em>).</p>
+<p>What about the larger faults composed of multiple smaller faults? The key insight here is that, for a majority of such complex faults, test cases that detect a single smaller fault in isolation is very likely to detect the larger complex fault that contains it. (This assumption is called the <em>Coupling Effect</em>.)</p>
+<p>How can we use these assumptions in practice? The idea is to simply generate <em>all</em> possible <em>valid</em> variants of the program that differs from the original by a small change (such as a single token change) (Such variants are called <em>mutants</em>). Next, the given test suite is applied to each variant thus generated. Any mutant detected by the test suite is said to have been <em>killed</em> by the test suite. The effectiveness of a test suite is given by the proportion of mutants killed to the valid mutants generated.</p>
 
 </div>
 </div>
@@ -14616,7 +14581,7 @@ AssertionError (expected)
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>What does this AST look like?  The helper functions <code>astor.dump_tree()</code> (textual output) and <code>showast.show_ast()</code> (graphical output with <a href="https://github.com/hchasestevens/show_ast">showast</a>) allow us to inspect the structure of the tree.  We see that the function starts as a <code>FunctionDef</code> with name and arguments, followed by a body, which is a list of statements of type <code>Expr</code> (the docstring), type <code>Assign</code> (assignments), <code>While</code> (while loop with its own body), and finally <code>Return</code>.</p>
+<p>What does this AST look like?  The helper functions <code>astor.dump_tree()</code> (textual output) and <code>showast.show_ast()</code> (graphical output with <a href="https://github.com/hchasestevens/show_ast">showast</a>) allow us to inspect the structure of the tree.  We see that the function starts as a <code>FunctionDef</code> with name and arguments, followed by a body, which is a list of statements; in this case, the body contains only an <code>If</code>, which itself contains other nodes of type <code>If</code>, <code>Compare</code>, <code>Name</code>, <code>Str</code>, and <code>Return</code>.</p>
 
 </div>
 </div>
@@ -15372,7 +15337,7 @@ AssertionError (expected)
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="A-Simple-Mutator-for-Functions">A Simple Mutator for Functions<a class="anchor-link" href="#A-Simple-Mutator-for-Functions">&#182;</a></h2><p>Let us now go and mutate the <code>triangle()</code> program. A simple way to produce valid mutated version of this program is to replace some of its statements by <code>pass</code>.</p>
-<p>The <code>MuFunctionAnalyzer</code> is the main class responsible for mutation analysis of the test suite. It accepts the function to be tested. It normalizes the source code given by parsing and unparsing it once, using the functions discussed above. This is required to ensure that later <code>diff</code>s between the original and mutant is not derailed by differences in whitespace comments etc.</p>
+<p>The <code>MuFunctionAnalyzer</code> is the main class responsible for mutation analysis of the test suite. It accepts the function to be tested. It normalizes the source code given by parsing and unparsing it once, using the functions discussed above. This is required to ensure that later <code>diff</code>s between the original and mutant are not derailed by differences in whitespace, comments, etc.</p>
 
 </div>
 </div>
@@ -15889,7 +15854,7 @@ triangle_5
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In this <code>diff</code> output, Lines prefixed with <code>+</code> are added, whereas lines prefixed with <code>-</code> are deleted.  We see that each of the five mutants indeed replaces a return statement with a <code>pass</code> statement.</p>
+<p>In this <code>diff</code> output, lines prefixed with <code>+</code> are added, whereas lines prefixed with <code>-</code> are deleted.  We see that each of the five mutants indeed replaces a return statement with a <code>pass</code> statement.</p>
 
 </div>
 </div>
@@ -16019,7 +15984,7 @@ triangle_5
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The mutation score – the ratio of mutants detected by the test suite - is computed by <code>score()</code>.  A score of 1.0 means that all mutants were discoverd; a score of 0.1 means that only 10% of mutants were detected.</p>
+<p>The mutation score – the ratio of mutants detected by the test suite - is computed by <code>score()</code>.  A score of 1.0 means that all mutants were discovered; a score of 0.1 means that only 10% of mutants were detected.</p>
 
 </div>
 </div>
@@ -16689,7 +16654,7 @@ Detected gcd_7 &lt;class &#39;AssertionError&#39;&gt; Minimal
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The <code>MuProgramAnalyzer</code> is the main class responsible for mutation analysis of the test suite. It accepts the name of the module to be tested, and its source code. It normalizes the source code given by parsing and unparsing it once. This is required to ensure that later <code>diff</code>s between the original and mutant is not derailed by differences in whitespace comments etc.</p>
+<p>The <code>MuProgramAnalyzer</code> is the main class responsible for mutation analysis of the test suite. It accepts the name of the module to be tested, and its source code. It normalizes the source code given by parsing and unparsing it once. This is required to ensure that later <code>diff</code>s between the original and mutant are not derailed by differences in whitespace, comments, etc.</p>
 
 </div>
 </div>
@@ -16717,15 +16682,15 @@ Detected gcd_7 &lt;class &#39;AssertionError&#39;&gt; Minimal
 </div>
 </div>
 
-</div></section><section>
+</div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The <code>Mutator</code> provides the base class for implementing individual mutations. It accepts a list of locations to mutate. It assumes that the method <code>mutable_visit()</code> is invoked on all nodes of interest as determined by the subclass. When the <code>Mutator</code> is invoked without a list of locations to mutate, it simply loops through all possible mutation points and retains a count in <code>self.count</code>. If it is invoked with a specific list of locations to mutate, the <code>mutable_visit()</code> method calls the <code>mutation_visit()</code> which performs the mutation on the node. Note that a single location can produce multiple mutations. (Hence the hashmap).</p>
+<p>We now extend the <code>Mutator</code> class.</p>
 
 </div>
 </div>
-</div></section><section>
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[71]:</div>
@@ -17501,7 +17466,7 @@ Ran 2 tests in 0.000s
 
 OK
 ----------------------------------------------------------------------
-Ran 2 tests in 0.000s
+Ran 2 tests in 0.001s
 
 OK
 ----------------------------------------------------------------------

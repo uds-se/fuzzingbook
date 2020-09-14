@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2019-12-21 16:38:57+01:00
+# Last change: 2020-09-13 20:00:39+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 # 
 # import matplotlib.pyplot as plt
 # plt.scatter(xs, ys)
-# plt.title('Time required for generating an output')
+# plt.title('Time required for generating an output');
 
 # ## Derivation Trees
 
@@ -212,6 +212,14 @@ if __name__ == "__main__":
                          )])
 
 
+# #### Excursion: Implementing `display_tree()`
+
+if __name__ == "__main__":
+    print('\n#### Excursion: Implementing `display_tree()`')
+
+
+
+
 if __name__ == "__main__":
     from graphviz import Digraph
 
@@ -277,8 +285,24 @@ def display_tree(derivation_tree,
         print(dot)
     return dot
 
+# #### End of Excursion
+
+if __name__ == "__main__":
+    print('\n#### End of Excursion')
+
+
+
+
 if __name__ == "__main__":
     display_tree(derivation_tree)
+
+
+# #### Excursion: Source code and example for `display_annotated_tree()`
+
+if __name__ == "__main__":
+    print('\n#### Excursion: Source code and example for `display_annotated_tree()`')
+
+
 
 
 def display_annotated_tree(tree, a_nodes, a_edges, log=False):
@@ -306,6 +330,14 @@ def display_annotated_tree(tree, a_nodes, a_edges, log=False):
 
 if __name__ == "__main__":
     display_annotated_tree(derivation_tree, {3: 'plus'}, {(1, 3): 'op'}, log=False)
+
+
+# #### End of Excursion
+
+if __name__ == "__main__":
+    print('\n#### End of Excursion')
+
+
 
 
 def all_terminals(tree):
@@ -366,7 +398,15 @@ class GrammarFuzzer(Fuzzer):
         self.max_nonterminals = max_nonterminals
         self.disp = disp
         self.log = log
-        self.check_grammar()
+        self.check_grammar()  # Invokes is_valid_grammar()
+
+# #### Excursion: `check_grammar()` implementation
+
+if __name__ == "__main__":
+    print('\n#### Excursion: `check_grammar()` implementation')
+
+
+
 
 class GrammarFuzzer(GrammarFuzzer):
     def check_grammar(self):
@@ -378,6 +418,14 @@ class GrammarFuzzer(GrammarFuzzer):
 
     def supported_opts(self):
         return set()
+
+# #### End of Excursion
+
+if __name__ == "__main__":
+    print('\n#### End of Excursion')
+
+
+
 
 class GrammarFuzzer(GrammarFuzzer):
     def init_tree(self):
@@ -419,6 +467,14 @@ class GrammarFuzzer(GrammarFuzzer):
     def expansion_to_children(self, expansion):
         return expansion_to_children(expansion)
 
+# #### Excursion: `expand_node_randomly()` implementation
+
+if __name__ == "__main__":
+    print('\n#### Excursion: `expand_node_randomly()` implementation')
+
+
+
+
 import random
 
 class GrammarFuzzer(GrammarFuzzer):
@@ -457,6 +513,14 @@ class GrammarFuzzer(GrammarFuzzer):
     def process_chosen_children(self, chosen_children, expansion):
         """Process children after selection.  By default, does nothing."""
         return chosen_children
+
+# #### End of Excursion
+
+if __name__ == "__main__":
+    print('\n#### End of Excursion')
+
+
+
 
 if __name__ == "__main__":
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
@@ -506,6 +570,14 @@ if __name__ == "__main__":
     f.any_possible_expansions(derivation_tree)
 
 
+# #### Excursion: `expand_tree_once()` implementation
+
+if __name__ == "__main__":
+    print('\n#### Excursion: `expand_tree_once()` implementation')
+
+
+
+
 class GrammarFuzzer(GrammarFuzzer):
     def choose_tree_expansion(self, tree, children):
         """Return index of subtree in `children` to be selected for expansion.  Defaults to random."""
@@ -536,6 +608,14 @@ class GrammarFuzzer(GrammarFuzzer):
             self.expand_tree_once(expandable_children[child_to_be_expanded])
 
         return tree
+
+# #### End of Excursion
+
+if __name__ == "__main__":
+    print('\n#### End of Excursion')
+
+
+
 
 if __name__ == "__main__":
     derivation_tree = ("<start>",
@@ -592,6 +672,14 @@ if __name__ == "__main__":
     assert f.symbol_cost("<expr>") == 5
 
 
+# #### Excursion: `expand_node_by_cost()` implementation
+
+if __name__ == "__main__":
+    print('\n#### Excursion: `expand_node_by_cost()` implementation')
+
+
+
+
 class GrammarFuzzer(GrammarFuzzer):
     def expand_node_by_cost(self, node, choose=min):
         (symbol, children) = node
@@ -623,6 +711,14 @@ class GrammarFuzzer(GrammarFuzzer):
 
         # Return with a new list
         return (symbol, chosen_children)
+
+# #### End of Excursion
+
+if __name__ == "__main__":
+    print('\n#### End of Excursion')
+
+
+
 
 class GrammarFuzzer(GrammarFuzzer):
     def expand_node_min_cost(self, node):
@@ -726,6 +822,14 @@ if __name__ == "__main__":
 
 
 
+# #### Excursion: Implementation of three-phase `expand_tree()`
+
+if __name__ == "__main__":
+    print('\n#### Excursion: Implementation of three-phase `expand_tree()`')
+
+
+
+
 class GrammarFuzzer(GrammarFuzzer):
     def log_tree(self, tree):
         """Output a tree if self.log is set; if self.display is also set, show the tree structure"""
@@ -760,20 +864,34 @@ class GrammarFuzzer(GrammarFuzzer):
 
         return tree
 
+# #### End of Excursion
+
 if __name__ == "__main__":
-    derivation_tree = ("<start>",
+    print('\n#### End of Excursion')
+
+
+
+
+if __name__ == "__main__":
+    initial_derivation_tree = ("<start>",
                        [("<expr>",
                          [("<expr>", None),
                           (" + ", []),
                              ("<term>", None)]
                          )])
 
+
+if __name__ == "__main__":
+    display_tree(initial_derivation_tree)
+
+
+if __name__ == "__main__":
     f = GrammarFuzzer(
         EXPR_GRAMMAR,
         min_nonterminals=3,
         max_nonterminals=5,
         log=True)
-    derivation_tree = f.expand_tree(derivation_tree)
+    derivation_tree = f.expand_tree(initial_derivation_tree)
 
 
 if __name__ == "__main__":
@@ -860,7 +978,7 @@ if __name__ == "__main__":
 # 
 # import matplotlib.pyplot as plt
 # plt.scatter(xs, ys)
-# plt.title('Time required for generating an output')
+# plt.title('Time required for generating an output');
 
 if __name__ == "__main__":
     f = GrammarFuzzer(expr_grammar, max_nonterminals=10)

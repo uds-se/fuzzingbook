@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2020-01-21 11:03:22+01:00
+# Last change: 2020-09-13 20:27:23+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors

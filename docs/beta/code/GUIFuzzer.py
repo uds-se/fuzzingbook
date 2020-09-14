@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2020-01-21 11:03:38+01:00
+# Last change: 2020-09-13 17:58:41+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -715,6 +715,9 @@ else:
 
 
 def fsm_diagram(grammar, start_symbol=START_SYMBOL):
+    from graphviz import Digraph
+    from IPython.display import display
+    
     def left_align(label):
         return dot_escape(label.replace('\n', r'\l')).replace(r'\\l', '\\l')
 

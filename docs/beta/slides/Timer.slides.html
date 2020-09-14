@@ -13109,9 +13109,15 @@ ul.typeahead-list  > li > a.pull-right {
 
     </style>
 <style type="text/css">
-    /* CSS stylesheet for fuzzingbook */
-/* This is applied both for the HTML version as well as for the Jupyter Notebook version */
-/* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
+    /* 
+    CSS stylesheet for fuzzingbook
+
+    This is used both for the HTML version 
+    as well as for the Jupyter Notebook version.
+
+    To apply this on local Jupyter notebook sessions, copy it to
+    `~/.jupyter/custom/custom.css'
+*/
 
 /* Loading fonts in Jupyter */
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Open+Sans|Source+Code+Pro);
@@ -13134,19 +13140,23 @@ code, kbd, pre, samp {
   font-family: 'Fira Mono', 'Source Code Pro', monospace;
 }
 
-
-
 /* Font sizes */
-/* We use somewhat smaller fonts for small devices */
+/* We use somewhat smaller fonts for small devices and print */
 
-p, li {
+p, li. summary {
 	font-size: 16px;
 	line-height: 26px;
 }
 @media only screen and (max-width: 600px) {
-    p, li {
+    p, li, summary {
     	font-size: 14px;
     	line-height: 24px;
+    }
+}
+@media print {
+    p, li, summary {
+    	font-size: 12px;
+    	line-height: 18px;
     }
 }
 
@@ -13167,6 +13177,16 @@ code, kbd, pre, samp {
     .CodeMirror pre {
       font-size: 12px;
       line-height: 18px;
+    }
+}
+@media print {
+    code, kbd, pre, samp {
+      font-size: 10px !important;
+      line-height: 14px;
+    }
+    .CodeMirror pre {
+      font-size: 10px !important;
+      line-height: 14px;
     }
 }
 
@@ -13199,10 +13219,11 @@ h3 {
 }
 
 /* More sections */
-h4, h5, h6 {
+h4, h5 {
 	font-size: 20px!important;
     font-weight: normal!important;
 }
+
 
 /* Small screens */
 @media only screen and (max-width: 600px) {
@@ -13210,8 +13231,18 @@ h4, h5, h6 {
     h1 { font-size: 32px!important; }
     h2 { font-size: 26px!important; }
     h3 { font-size: 22px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 18px!important; }
+    };
+}
+/* Print */
+@media print {
+    section > h1 { font-size: 32px!important; }
+    h1 { font-size: 26px!important; }
+    h2 { font-size: 22px!important; }
+    h3 { font-size: 18px!important; }
+    h4, h5, h6, summary {
+        { font-size: 14px!important; }
     };
 }
 
@@ -13267,10 +13298,18 @@ h4, h5, h6 {
 body {
     background-color: #F0F0F0;
 }
+/* But not when it's print */
+@media print {
+    background-color: white;
+}
 
 .container {
     background-color: #F8F8F8!important;    
 }
+@media print {
+    background-color: white!important;
+}
+
 
 .input_area, .output_area {
     background-color: white!important;    
@@ -13288,12 +13327,13 @@ body {
 
 /* Headers are dark red, too */
 h1, h2, h3 {
-    color: #B03A2E;
+    color: #B03A2E!important;
 }
 
-h4, h5 {
+h4, h5, h6, summary {
     color: black;
 }
+
 
 /* And links also come in shades of red */
 a:link { /* unvisited link */
@@ -13332,6 +13372,12 @@ a:active {
     line-height: 16px;
     margin-top: 1cm;
 }
+@media print {
+    .imprint {
+    	font-size: 9px;
+        line-height: 12px;
+    }
+}
 
 /* Synopsis */
 .synopsis {
@@ -13344,15 +13390,39 @@ a:active {
 
 
 /* Details */
+/* See https://stackoverflow.com/questions/38213329/how-to-add-css3-transition-with-html5-details-summary-tag-reveal?noredirect=1&lq=1 */
+/* TODO: Closing details is not animated yet; not sure whether this is possible in CSS - AZ*/
+
 details[open] summary ~ * {
-  animation: sweep .5s ease-in-out;
+  animation: sweep-in .5s ease-in-out;
+}
+details:not([open]) summary ~ * {
+  animation: sweep-out .5s ease-in-out;
 }
 
-@keyframes sweep {
+@keyframes sweep-in {
   0%    {opacity: 0; margin-top: -30px}
   100%  {opacity: 1; margin-top: 0px}
 }
 
+@keyframes sweep-out {
+  0%    {opacity: 1; margin-top: 0px}
+  100%  {opacity: 0; margin-top: -30px}
+}
+
+details {
+    border-style: dashed;
+    border-color: gray;
+    border-width: 1px;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+summary {
+    outline: none !important;
+}
 
 
 
@@ -13360,6 +13430,13 @@ details[open] summary ~ * {
 .solution_link {
 	/* font-size: 12px; */
     font-style: italic;
+}
+@media print {
+    .solution_link {
+    	font-size: 9px;
+        line-height: 12px;
+        font-style: italic;
+    }
 }
 
 
@@ -13422,6 +13499,10 @@ a.import {
     color: blue;
 }
 
+a.import[href]:after {
+    content: "" !important;  /* Avoid adding links for imports */
+}
+
 a.import:visited {
     color: darkblue;
 }
@@ -13463,6 +13544,7 @@ article {
   }
 }
 
+
 /* CSS Menu */
 #cssmenu,
 #cssmenu ul,
@@ -13489,6 +13571,7 @@ article {
   margin: 0;
   padding: 0;
 }
+
 #cssmenu > ul,
 #cssmenu > ol {
   list-style: inside none;
@@ -13687,6 +13770,19 @@ article {
   border-top: 5px solid #ffffff;
 }
 
+/* On print, do not show the menu */
+@media print {
+    #cssmenu {
+        height: 0px;
+        display: none;
+    }
+    #cssmenu > ul {
+        display: none;
+    }
+    #cssmenu > ol {
+        display: none;
+    }
+}
 
     </style>
 
@@ -13857,7 +13953,7 @@ a.anchor-link {
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">Timer</span><span class="p">()</span> <span class="k">as</span> <span class="n">t</span><span class="p">:</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="n">some_long_running_function</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">t</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">()</span>
-<span class="mf">0.04130863600585144</span>
+<span class="mf">0.04621056800169754</span>
 </pre></div>
 
 </div>
@@ -13968,7 +14064,7 @@ a.anchor-link {
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Stopping total time:
-0.04219970799749717
+0.04293583700018644
 </pre>
 </div>
 </div>
@@ -14003,16 +14099,16 @@ a.anchor-link {
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Stopping time in between:
-2.6420020731166005e-06
-2.31890007853508e-05
-3.151000419165939e-05
-3.8803002098575234e-05
-4.568599979393184e-05
-8.259800961241126e-05
-0.00010635700891725719
-0.0001350899983663112
-0.00015377200907096267
-0.00017481899703852832
+3.0289993446785957e-06
+2.3204998797154985e-05
+3.1612999009666964e-05
+3.868199928547256e-05
+4.562599860946648e-05
+9.488999967288692e-05
+0.00013333499919099268
+0.00020857100025750697
+0.00022358000023814384
+0.0002617149984871503
 </pre>
 </div>
 </div>
@@ -14063,7 +14159,7 @@ a.anchor-link {
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.04130863600585144</pre>
+<pre>0.04621056800169754</pre>
 </div>
 
 </div>

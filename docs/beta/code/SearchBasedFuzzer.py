@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2019-12-21 16:40:04+01:00
+# Last change: 2020-09-13 17:58:38+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Search-Based Fuzzing')
+
+
+
+
+# ## Synopsis
+
+if __name__ == "__main__":
+    print('\n## Synopsis')
 
 
 
@@ -481,9 +489,9 @@ def neighbour_strings(x):
     n = []
     for pos in range(len(x)):
         c = ord(x[pos])
-        if c < 127:
+        if c < 126:
             n += [x[:pos] + chr(c + 1) + x[pos + 1:]]
-        if c > 20:
+        if c > 32:
             n += [x[:pos] + chr(c - 1) + x[pos + 1:]]
     return n
 

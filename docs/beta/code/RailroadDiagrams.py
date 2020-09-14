@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/RailroadDiagrams.html
-# Last change: 2019-10-19 13:54:52+02:00
+# Last change: 2020-09-13 20:23:22+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -32,6 +32,14 @@
 
 if __name__ == "__main__":
     print('# Railroad Diagrams')
+
+
+
+
+# ## Excursion: Railroad diagrams implementation
+
+if __name__ == "__main__":
+    print('\n## Excursion: Railroad diagrams implementation')
 
 
 
@@ -1267,3 +1275,11 @@ def show_diagram(graph, log=False):
         d.writeSvg(f.write)
         mysvg = f.getvalue()
         return mysvg
+
+# ## End of Excursion
+
+if __name__ == "__main__":
+    print('\n## End of Excursion')
+
+
+

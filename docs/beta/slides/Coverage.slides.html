@@ -13109,9 +13109,15 @@ ul.typeahead-list  > li > a.pull-right {
 
     </style>
 <style type="text/css">
-    /* CSS stylesheet for fuzzingbook */
-/* This is applied both for the HTML version as well as for the Jupyter Notebook version */
-/* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
+    /* 
+    CSS stylesheet for fuzzingbook
+
+    This is used both for the HTML version 
+    as well as for the Jupyter Notebook version.
+
+    To apply this on local Jupyter notebook sessions, copy it to
+    `~/.jupyter/custom/custom.css'
+*/
 
 /* Loading fonts in Jupyter */
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Open+Sans|Source+Code+Pro);
@@ -13137,18 +13143,18 @@ code, kbd, pre, samp {
 /* Font sizes */
 /* We use somewhat smaller fonts for small devices and print */
 
-p, li {
+p, li. summary {
 	font-size: 16px;
 	line-height: 26px;
 }
 @media only screen and (max-width: 600px) {
-    p, li {
+    p, li, summary {
     	font-size: 14px;
     	line-height: 24px;
     }
 }
 @media print {
-    p, li {
+    p, li, summary {
     	font-size: 12px;
     	line-height: 18px;
     }
@@ -13213,10 +13219,11 @@ h3 {
 }
 
 /* More sections */
-h4, h5, h6 {
+h4, h5 {
 	font-size: 20px!important;
     font-weight: normal!important;
 }
+
 
 /* Small screens */
 @media only screen and (max-width: 600px) {
@@ -13224,7 +13231,7 @@ h4, h5, h6 {
     h1 { font-size: 32px!important; }
     h2 { font-size: 26px!important; }
     h3 { font-size: 22px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 18px!important; }
     };
 }
@@ -13234,7 +13241,7 @@ h4, h5, h6 {
     h1 { font-size: 26px!important; }
     h2 { font-size: 22px!important; }
     h3 { font-size: 18px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 14px!important; }
     };
 }
@@ -13323,9 +13330,10 @@ h1, h2, h3 {
     color: #B03A2E!important;
 }
 
-h4, h5 {
+h4, h5, h6, summary {
     color: black;
 }
+
 
 /* And links also come in shades of red */
 a:link { /* unvisited link */
@@ -13382,15 +13390,39 @@ a:active {
 
 
 /* Details */
+/* See https://stackoverflow.com/questions/38213329/how-to-add-css3-transition-with-html5-details-summary-tag-reveal?noredirect=1&lq=1 */
+/* TODO: Closing details is not animated yet; not sure whether this is possible in CSS - AZ*/
+
 details[open] summary ~ * {
-  animation: sweep .5s ease-in-out;
+  animation: sweep-in .5s ease-in-out;
+}
+details:not([open]) summary ~ * {
+  animation: sweep-out .5s ease-in-out;
 }
 
-@keyframes sweep {
+@keyframes sweep-in {
   0%    {opacity: 0; margin-top: -30px}
   100%  {opacity: 1; margin-top: 0px}
 }
 
+@keyframes sweep-out {
+  0%    {opacity: 1; margin-top: 0px}
+  100%  {opacity: 0; margin-top: -30px}
+}
+
+details {
+    border-style: dashed;
+    border-color: gray;
+    border-width: 1px;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+summary {
+    outline: none !important;
+}
 
 
 
@@ -13888,31 +13920,6 @@ a.anchor-link {
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="Code-Coverage">Code Coverage<a class="anchor-link" href="#Code-Coverage">&#182;</a></h1><p>In the <a href="Fuzzer.slides.html">previous chapter</a>, we introduced <em>basic fuzzing</em> – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a <em>proxy for the likelihood of a test to uncover a bug.</em>  In this chapter, we introduce the concept of <em>code coverage</em>, measuring which parts of a program are actually executed during a test run.  Measuring such coverage is also crucial for test generators that attempt to cover as much code as possible.</p>
-
-</div>
-</div>
-</div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
-
-<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.Coverage</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
-</pre></div>
-<p>and then make use of the following features.</p>
-<p>This chapter introduces a <code>Coverage</code> class allowing you to measure coverage for Python programs.  Its typical usage is in conjunction with a <code>with</code> clause:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="n">cgi_decode</span><span class="p">(</span><span class="s2">&quot;a+b&quot;</span><span class="p">)</span>
-</pre></div>
-<p>The <code>trace()</code> method returns the coverage as a list of locations covered.  Each location comes as a pair (<code>function name</code>, <code>line</code>).</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">cov</span><span class="o">.</span><span class="n">trace</span><span class="p">())</span>
-<span class="p">[(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">17</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">18</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">19</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">17</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">18</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">19</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">17</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">18</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">19</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">17</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;__exit__&#39;</span><span class="p">,</span> <span class="mi">25</span><span class="p">)]</span>
-</pre></div>
-<p>The <code>coverage()</code> method returns the set of locations executed at least once:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">())</span>
-<span class="p">{(</span><span class="s1">&#39;__exit__&#39;</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">32</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">19</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">18</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">17</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cgi_decode&#39;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)}</span>
-</pre></div>
 
 </div>
 </div>
@@ -14727,7 +14734,7 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{(&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 16)}
+<pre>{(&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 16), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 32)}
 </pre>
 </div>
 </div>
@@ -15784,11 +15791,11 @@ cgi_decode.c:creating &#39;cgi_decode.c.gcov&#39;
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[(&#39;cgi_decode.c&#39;, 26),
- (&#39;cgi_decode.c&#39;, 52),
+<pre>[(&#39;cgi_decode.c&#39;, 29),
  (&#39;cgi_decode.c&#39;, 15),
+ (&#39;cgi_decode.c&#39;, 17),
  (&#39;cgi_decode.c&#39;, 48),
- (&#39;cgi_decode.c&#39;, 17)]</pre>
+ (&#39;cgi_decode.c&#39;, 26)]</pre>
 </div>
 
 </div>
@@ -16037,7 +16044,7 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{(&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 16)}
+<pre>{(&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 16), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 32)}
 </pre>
 </div>
 </div>
@@ -16557,7 +16564,7 @@ IndexError: string index out of range (expected)
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{((&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)), ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25)), ((&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)), ((&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32)), ((&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21)), ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12)), ((&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 15)), ((&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10)), ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18))}
+<pre>{((&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20)), ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25)), ((&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)), ((&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32)), ((&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21)), ((&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12)), ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 15)), ((&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11)), ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17))}
 </pre>
 </div>
 </div>

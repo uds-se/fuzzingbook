@@ -13109,9 +13109,15 @@ ul.typeahead-list  > li > a.pull-right {
 
     </style>
 <style type="text/css">
-    /* CSS stylesheet for fuzzingbook */
-/* This is applied both for the HTML version as well as for the Jupyter Notebook version */
-/* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
+    /* 
+    CSS stylesheet for fuzzingbook
+
+    This is used both for the HTML version 
+    as well as for the Jupyter Notebook version.
+
+    To apply this on local Jupyter notebook sessions, copy it to
+    `~/.jupyter/custom/custom.css'
+*/
 
 /* Loading fonts in Jupyter */
 @import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Open+Sans|Source+Code+Pro);
@@ -13137,18 +13143,18 @@ code, kbd, pre, samp {
 /* Font sizes */
 /* We use somewhat smaller fonts for small devices and print */
 
-p, li {
+p, li. summary {
 	font-size: 16px;
 	line-height: 26px;
 }
 @media only screen and (max-width: 600px) {
-    p, li {
+    p, li, summary {
     	font-size: 14px;
     	line-height: 24px;
     }
 }
 @media print {
-    p, li {
+    p, li, summary {
     	font-size: 12px;
     	line-height: 18px;
     }
@@ -13213,10 +13219,11 @@ h3 {
 }
 
 /* More sections */
-h4, h5, h6 {
+h4, h5 {
 	font-size: 20px!important;
     font-weight: normal!important;
 }
+
 
 /* Small screens */
 @media only screen and (max-width: 600px) {
@@ -13224,7 +13231,7 @@ h4, h5, h6 {
     h1 { font-size: 32px!important; }
     h2 { font-size: 26px!important; }
     h3 { font-size: 22px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 18px!important; }
     };
 }
@@ -13234,7 +13241,7 @@ h4, h5, h6 {
     h1 { font-size: 26px!important; }
     h2 { font-size: 22px!important; }
     h3 { font-size: 18px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 14px!important; }
     };
 }
@@ -13323,9 +13330,10 @@ h1, h2, h3 {
     color: #B03A2E!important;
 }
 
-h4, h5 {
+h4, h5, h6, summary {
     color: black;
 }
+
 
 /* And links also come in shades of red */
 a:link { /* unvisited link */
@@ -13382,15 +13390,39 @@ a:active {
 
 
 /* Details */
+/* See https://stackoverflow.com/questions/38213329/how-to-add-css3-transition-with-html5-details-summary-tag-reveal?noredirect=1&lq=1 */
+/* TODO: Closing details is not animated yet; not sure whether this is possible in CSS - AZ*/
+
 details[open] summary ~ * {
-  animation: sweep .5s ease-in-out;
+  animation: sweep-in .5s ease-in-out;
+}
+details:not([open]) summary ~ * {
+  animation: sweep-out .5s ease-in-out;
 }
 
-@keyframes sweep {
+@keyframes sweep-in {
   0%    {opacity: 0; margin-top: -30px}
   100%  {opacity: 1; margin-top: 0px}
 }
 
+@keyframes sweep-out {
+  0%    {opacity: 1; margin-top: 0px}
+  100%  {opacity: 0; margin-top: -30px}
+}
+
+details {
+    border-style: dashed;
+    border-color: gray;
+    border-width: 1px;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+}
+
+summary {
+    outline: none !important;
+}
 
 
 
@@ -13901,35 +13933,6 @@ strings) can later be recombined using the same grammar to produce new strings.<
 </div>
 </div>
 </aside><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
-
-<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.Parser</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
-</pre></div>
-<p>and then make use of the following features.</p>
-<p>This chapter introduces <code>Parser</code> classes, parsing a string into a <em>derivation tree</em> as introduced in the <a href="GrammarFuzzer.slides.html">chapter on efficient grammar fuzzing</a>.  Two important parser classes are provided:</p>
-<ul>
-<li><a href="#Parsing-Expression-Grammars">Parsing Expression Grammar parsers</a> (<code>PEGParser</code>), which are very efficient, but limited to specific grammar structure; and</li>
-<li><a href="#Parsing-Context-Free-Grammars">Earley parsers</a> (<code>EarleyParser</code>), which accept any kind of context-free grammars.</li>
-</ul>
-<p>Using any of these is fairly easy, though.  First, instantiate them with a grammar:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">Grammars</span> <span class="kn">import</span> <span class="n">US_PHONE_GRAMMAR</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">us_phone_parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span>
-</pre></div>
-<p>Then, use the <code>parse()</code> method to retrieve a list of possible derivation trees:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">trees</span> <span class="o">=</span> <span class="n">us_phone_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;(555)987-6543&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">tree</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">trees</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-</pre></div>
-<p><img src="PICS/Parser-synopsis-1.svg" alt=""></p>
-<p>These derivation trees can then be used for test generation, notably for mutating and recombining existing inputs.</p>
-
-</div>
-</div>
-</div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -14719,7 +14722,7 @@ It is an old but reliable model!
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0 valid strings, that is GrammarFuzzer generated 0.000000% valid entries from 1000 inputs
-Total time of 10.337474 seconds
+Total time of 23.725902 seconds
 </pre>
 </div>
 </div>
@@ -21138,20 +21141,20 @@ d chart[4]
 
 <div class="output_text output_subarea output_execute_result">
 <pre>(&#39;&lt;start&gt;&#39;,
- [[(&lt;__main__.State at 0x7f933bf39940&gt;,
+ [[(&lt;__main__.State at 0x7fda99cbb5c0&gt;,
     &#39;n&#39;,
-    [&lt;__main__.Column at 0x7f933befcb00&gt;,
-     &lt;__main__.Column at 0x7f933befc4a8&gt;,
-     &lt;__main__.Column at 0x7f933befc550&gt;,
-     &lt;__main__.Column at 0x7f933bf39c18&gt;,
-     &lt;__main__.Column at 0x7f933bf394e0&gt;]),
-   (&lt;__main__.State at 0x7f933bf39ef0&gt;,
+    [&lt;__main__.Column at 0x7fda99c7d550&gt;,
+     &lt;__main__.Column at 0x7fda99ca9f60&gt;,
+     &lt;__main__.Column at 0x7fda99cbb278&gt;,
+     &lt;__main__.Column at 0x7fda99cbbf60&gt;,
+     &lt;__main__.Column at 0x7fda99cbb0f0&gt;]),
+   (&lt;__main__.State at 0x7fda99d10748&gt;,
     &#39;n&#39;,
-    [&lt;__main__.Column at 0x7f933befcb00&gt;,
-     &lt;__main__.Column at 0x7f933befc4a8&gt;,
-     &lt;__main__.Column at 0x7f933befc550&gt;,
-     &lt;__main__.Column at 0x7f933bf39c18&gt;,
-     &lt;__main__.Column at 0x7f933bf394e0&gt;])]])</pre>
+    [&lt;__main__.Column at 0x7fda99c7d550&gt;,
+     &lt;__main__.Column at 0x7fda99ca9f60&gt;,
+     &lt;__main__.Column at 0x7fda99cbb278&gt;,
+     &lt;__main__.Column at 0x7fda99cbbf60&gt;,
+     &lt;__main__.Column at 0x7fda99cbb0f0&gt;])]])</pre>
 </div>
 
 </div>
@@ -22228,8 +22231,8 @@ d chart[4]
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;A&gt;&#39;}
-E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
+<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;S&gt;&#39;}
+E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </pre>
 </div>
 </div>
@@ -22362,17 +22365,32 @@ Recursion error maximum recursion depth exceeded in comparison
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Why do we get recursion error here? The reason is that, our implementation of <code>extract_trees()</code> is eager. That is, it attempts to extract <em>all</em> inner parse trees before it can construct the outer parse tree. When there is a self reference, this results in recursion. Here is a lazy extractor that avoids this problem. The idea here is that we randomly and lazily choose a node to expand, which avoids the infinite recursion.</p>
+<p>Why do we get recursion error here? The reason is that, our implementation of <code>extract_trees()</code> is eager. That is, it attempts to extract <em>all</em> inner parse trees before it can construct the outer parse tree. When there is a self reference, this results in recursion. Here is a simple extractor that avoids this problem. The idea here is that we randomly and lazily choose a node to expand, which avoids the infinite recursion.</p>
 
 </div>
 </div>
 </div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Tree-Extractor">Tree Extractor<a class="anchor-link" href="#Tree-Extractor">&#182;</a></h3>
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As you saw above, one of the problems with attempting to extract all trees is that the parse forest can consist of an infinite number of trees. So, here, we solve that problem by extracting one tree at a time.</p>
+
+</div>
+</div>
+</div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[140]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LazyExtractor</span><span class="p">:</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleExtractor</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
         <span class="n">cursor</span><span class="p">,</span> <span class="n">states</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_prefix</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
@@ -22424,7 +22442,7 @@ Recursion error maximum recursion depth exceeded in comparison
 <div class="prompt input_prompt">In&nbsp;[141]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">de</span> <span class="o">=</span> <span class="n">LazyExtractor</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">DIRECTLY_SELF_REFERRING</span><span class="p">),</span> <span class="n">mystring</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">de</span> <span class="o">=</span> <span class="n">SimpleExtractor</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">DIRECTLY_SELF_REFERRING</span><span class="p">),</span> <span class="n">mystring</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -22482,7 +22500,7 @@ select a from a
 <div class="prompt input_prompt">In&nbsp;[143]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ie</span> <span class="o">=</span> <span class="n">LazyExtractor</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">INDIRECTLY_SELF_REFERRING</span><span class="p">),</span> <span class="n">mystring</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ie</span> <span class="o">=</span> <span class="n">SimpleExtractor</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">INDIRECTLY_SELF_REFERRING</span><span class="p">),</span> <span class="n">mystring</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -22526,15 +22544,309 @@ select a from a
 </div>
 </div>
 
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that the <code>SimpleExtractor</code> gives no guarantee of the uniqueness of the returned trees. This can however be fixed by keeping track of the particular nodes that were expanded from <code>pos_tree</code> variable, and hence, avoiding exploration of the same paths.</p>
+<p>For implementing this, we extract the random stream passing into the <code>SimpleExtractor</code>, and use it to control which nodes are explored. Different exploration paths can then form a tree of nodes.</p>
+
+</div>
+</div>
 </div><div class="fragment">
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Note that the <code>LazyExtractor</code> gives no guarantee of the uniqueness of the returned trees. This can however be fixed by keeping track of the particular nodes that were expanded from <code>pos_tree</code> variable, and hence, avoiding exploration of the same paths.</p>
+<p>We start with the node definition for a single choice. The <code>self._chosen</code> is the current choice made, <code>self.next</code> holds the next choice done using <code>self._chosen</code>. The <code>self.total</code> holds the total number of choices that one can have in this node.</p>
 
 </div>
 </div>
 </div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[145]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ChoiceNode</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">total</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span> <span class="o">=</span> <span class="n">parent</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span> <span class="o">=</span> <span class="n">total</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">chosen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">(</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_i</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span><span class="p">),</span>
+                                 <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">increment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># as soon as we increment, next becomes invalid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">increment</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+    
+    <span class="k">def</span> <span class="nf">finished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now we come to the enhanced <code>EnhancedExtractor()</code>.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[146]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EnhancedExtractor</span><span class="p">(</span><span class="n">SimpleExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span> <span class="o">=</span> <span class="n">ChoiceNode</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>First we define <code>choose_path()</code> that given an array and a choice node, returns the element in array corresponding to the next choice node if it exists, or produces a new choice nodes, and returns that element.</p>
+
+</div>
+</div>
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[147]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EnhancedExtractor</span><span class="p">(</span><span class="n">EnhancedExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">choose_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">choices</span><span class="p">):</span>
+        <span class="n">arr_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">choices</span><span class="o">.</span><span class="n">next</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">choices</span><span class="o">.</span><span class="n">next</span><span class="o">.</span><span class="n">finished</span><span class="p">():</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">choices</span><span class="o">.</span><span class="n">next</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">choices</span><span class="o">.</span><span class="n">next</span> <span class="o">=</span> <span class="n">ChoiceNode</span><span class="p">(</span><span class="n">choices</span><span class="p">,</span> <span class="n">arr_len</span><span class="p">)</span>
+        <span class="n">next_choice</span> <span class="o">=</span> <span class="n">choices</span><span class="o">.</span><span class="n">next</span><span class="o">.</span><span class="n">chosen</span><span class="p">()</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span><span class="o">.</span><span class="n">next</span>
+        <span class="k">return</span> <span class="n">arr</span><span class="p">[</span><span class="n">next_choice</span><span class="p">],</span> <span class="n">next_choice</span><span class="p">,</span> <span class="n">arr_len</span><span class="p">,</span> <span class="n">choices</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We define <code>extract_a_node()</code> here. While extracting, we have a choice. Should we allow infinite forests, or should we have a finite number of trees with no direct recursion? A direct recursion is when there exists a parent node with the same nonterminal that parsed the same span. We choose here not to extract such trees. They can be added back after parsing.</p>
+<p>This is a recursive procedure that inspects a node, extracts the path required to complete that node. A single path (corresponding to a nonterminal) may again be composed of a sequence of smaller paths. Such paths are again extracted using another call to <code>extract_a_node()</code> recursively.</p>
+<p>What happens when we hit on one of the node recursions we want to avoid? In that case, we return the current choice node, which bubbles up to <code>extract_a_tree()</code>. That procedure increments the last choice, which in turn increments up the parents until we reach a choice node that still has options to explore.</p>
+<p>What if we hit the end of choices for a particular choice node(i.e, we have exhausted paths that can be taken from a node)? In this case also, we return the current choice node, which bubbles up to <code>extract_a_tree()</code>.
+That procedure increments the last choice, which bubbles up to the next choice that has some unexplored paths.</p>
+
+</div>
+</div>
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[148]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EnhancedExtractor</span><span class="p">(</span><span class="n">EnhancedExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_a_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forest_node</span><span class="p">,</span> <span class="n">seen</span><span class="p">,</span> <span class="n">choices</span><span class="p">):</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">paths</span> <span class="o">=</span> <span class="n">forest_node</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">choices</span>
+
+        <span class="n">cur_path</span><span class="p">,</span> <span class="n">_i</span><span class="p">,</span> <span class="n">_l</span><span class="p">,</span> <span class="n">new_choices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_path</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">choices</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cur_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_choices</span>
+        <span class="n">child_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">chart</span> <span class="ow">in</span> <span class="n">cur_path</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span>
+                <span class="n">child_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="p">[]))</span>
+                <span class="k">continue</span>
+            <span class="n">nid</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">s_col</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">e_col</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_choices</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">forest</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">chart</span><span class="p">)</span>
+            <span class="n">ntree</span><span class="p">,</span> <span class="n">newer_choices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_a_node</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">seen</span> <span class="o">|</span> <span class="p">{</span><span class="n">nid</span><span class="p">},</span> <span class="n">new_choices</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ntree</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">newer_choices</span>
+            <span class="n">child_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ntree</span><span class="p">)</span>
+            <span class="n">new_choices</span> <span class="o">=</span> <span class="n">newer_choices</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">child_nodes</span><span class="p">),</span> <span class="n">new_choices</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>extract_a_tree()</code> is a depth first extractor of a single tree. It tries to extract a tree, and if the extraction returns <code>None</code>, it means that a particular choice was exhausted, or we hit on a recursion. In that case, we increment the choice, and explore a new path.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[149]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EnhancedExtractor</span><span class="p">(</span><span class="n">EnhancedExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_a_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="o">.</span><span class="n">finished</span><span class="p">():</span>
+            <span class="n">parse_tree</span><span class="p">,</span> <span class="n">choices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_a_node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">my_forest</span><span class="p">,</span> <span class="nb">set</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">)</span>
+            <span class="n">choices</span><span class="o">.</span><span class="n">increment</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">parse_tree</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">parse_tree</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that the <code>EnhancedExtractor</code> only extracts nodes that are not directly recursive. That is, if it finds a node with a nonterminal that covers the same span as that of a parent node with the same nonterminal, it skips the node.</p>
+
+</div>
+</div>
+</div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[150]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ee</span> <span class="o">=</span> <span class="n">EnhancedExtractor</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">INDIRECTLY_SELF_REFERRING</span><span class="p">),</span> <span class="n">mystring</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></div><div class="fragment">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[151]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ee</span><span class="o">.</span><span class="n">extract_a_tree</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">break</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">tree_to_string</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s</span> <span class="o">==</span> <span class="n">mystring</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>1 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;query&gt;&#39;, [(&#39;select &#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;a&#39;, [])]), (&#39; from a&#39;, [])])])
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[152]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">istring</span> <span class="o">=</span> <span class="s1">&#39;1+2+3+4&#39;</span>
+<span class="n">ee</span> <span class="o">=</span> <span class="n">EnhancedExtractor</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">A1_GRAMMAR</span><span class="p">),</span> <span class="n">istring</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div></section><section>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[153]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ee</span><span class="o">.</span><span class="n">extract_a_tree</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">break</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">tree_to_string</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s</span> <span class="o">==</span> <span class="n">istring</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>1 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;1&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;2&#39;, [])])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;3&#39;, [])])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;4&#39;, [])])])])])])
+2 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;1&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;2&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;3&#39;, [])])])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;4&#39;, [])])])])])])
+3 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;1&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;2&#39;, [])])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;3&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;4&#39;, [])])])])])])])
+4 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;1&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;2&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;3&#39;, [])])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;4&#39;, [])])])])])])])
+5 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;1&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;2&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;3&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;4&#39;, [])])])])])])])])
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div></section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -22553,7 +22865,7 @@ select a from a
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[145]:</div>
+<div class="prompt input_prompt">In&nbsp;[154]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">prod_line_grammar</span><span class="p">(</span><span class="n">nonterminals</span><span class="p">,</span> <span class="n">terminals</span><span class="p">):</span>
@@ -22584,7 +22896,7 @@ select a from a
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[146]:</div>
+<div class="prompt input_prompt">In&nbsp;[155]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">syntax_diagram</span><span class="p">(</span><span class="n">prod_line_grammar</span><span class="p">([</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">]))</span>
@@ -23051,7 +23363,7 @@ select a from a
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[147]:</div>
+<div class="prompt input_prompt">In&nbsp;[156]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_rule</span><span class="p">(</span><span class="n">nonterminals</span><span class="p">,</span> <span class="n">terminals</span><span class="p">,</span> <span class="n">num_alts</span><span class="p">):</span>
@@ -23070,7 +23382,7 @@ select a from a
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[148]:</div>
+<div class="prompt input_prompt">In&nbsp;[157]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">make_rule</span><span class="p">([</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;C&quot;</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">],</span> <span class="mi">3</span><span class="p">)</span>
@@ -23086,7 +23398,7 @@ select a from a
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[148]:</div>
+    <div class="prompt output_prompt">Out[157]:</div>
 
 
 
@@ -23103,7 +23415,7 @@ select a from a
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[150]:</div>
+<div class="prompt input_prompt">In&nbsp;[159]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_grammar</span><span class="p">(</span><span class="n">num_symbols</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_alts</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
@@ -23134,7 +23446,7 @@ select a from a
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[151]:</div>
+<div class="prompt input_prompt">In&nbsp;[160]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">make_grammar</span><span class="p">()</span>
@@ -23150,7 +23462,7 @@ select a from a
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[151]:</div>
+    <div class="prompt output_prompt">Out[160]:</div>
 
 
 
@@ -23178,7 +23490,7 @@ select a from a
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[152]:</div>
+<div class="prompt input_prompt">In&nbsp;[161]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
@@ -23278,7 +23590,7 @@ The ALL(*) (used by ANTLR) on the other hand is a grammar representation that us
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[154]:</div>
+<div class="prompt input_prompt">In&nbsp;[163]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">us_phone_parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">US_PHONE_GRAMMAR</span><span class="p">)</span>
@@ -23299,7 +23611,7 @@ The ALL(*) (used by ANTLR) on the other hand is a grammar representation that us
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[155]:</div>
+<div class="prompt input_prompt">In&nbsp;[164]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">trees</span> <span class="o">=</span> <span class="n">us_phone_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;(555)987-6543&quot;</span><span class="p">)</span>
@@ -23317,7 +23629,7 @@ The ALL(*) (used by ANTLR) on the other hand is a grammar representation that us
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[155]:</div>
+    <div class="prompt output_prompt">Out[164]:</div>
 
 
 
@@ -23686,7 +23998,7 @@ The ALL(*) (used by ANTLR) on the other hand is a grammar representation that us
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[156]:</div>
+<div class="prompt input_prompt">In&nbsp;[165]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PackratParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
@@ -23729,7 +24041,7 @@ The ALL(*) (used by ANTLR) on the other hand is a grammar representation that us
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[157]:</div>
+<div class="prompt input_prompt">In&nbsp;[166]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s2">&quot;1 + (2 * 3)&quot;</span>
@@ -23764,7 +24076,7 @@ The ALL(*) (used by ANTLR) on the other hand is a grammar representation that us
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[158]:</div>
+<div class="prompt input_prompt">In&nbsp;[167]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;aaaaaa&#39;</span>
@@ -23862,7 +24174,7 @@ in further and further earlier columns (as shown below):</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[165]:</div>
+<div class="prompt input_prompt">In&nbsp;[174]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LeoParser</span><span class="p">(</span><span class="n">LeoParser</span><span class="p">):</span>
@@ -23896,7 +24208,7 @@ in further and further earlier columns (as shown below):</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[174]:</div>
+<div class="prompt input_prompt">In&nbsp;[183]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">LeoParser</span><span class="p">(</span><span class="n">RR_GRAMMAR4</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring4</span><span class="p">)</span>
@@ -23964,7 +24276,7 @@ c chart[9]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[181]:</div>
+<div class="prompt input_prompt">In&nbsp;[190]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">LeoParser</span><span class="p">(</span><span class="n">LR_GRAMMAR</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">)</span>
@@ -24031,7 +24343,7 @@ a chart[6]
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[188]:</div>
+<div class="prompt input_prompt">In&nbsp;[197]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LeoParser</span><span class="p">(</span><span class="n">LeoParser</span><span class="p">):</span>
@@ -24050,7 +24362,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[190]:</div>
+<div class="prompt input_prompt">In&nbsp;[199]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LeoParser</span><span class="p">(</span><span class="n">LeoParser</span><span class="p">):</span>
@@ -24073,7 +24385,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[191]:</div>
+<div class="prompt input_prompt">In&nbsp;[200]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LeoParser</span><span class="p">(</span><span class="n">LeoParser</span><span class="p">):</span>
@@ -24106,7 +24418,7 @@ a chart[6]
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[204]:</div>
+<div class="prompt input_prompt">In&nbsp;[213]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">RECURSION_GRAMMAR</span> <span class="o">=</span> <span class="p">{</span>
@@ -24132,7 +24444,7 @@ a chart[6]
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[206]:</div>
+<div class="prompt input_prompt">In&nbsp;[215]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectTimeout</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -24210,7 +24522,7 @@ a chart[6]
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[219]:</div>
+<div class="prompt input_prompt">In&nbsp;[228]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">firstset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">nullable</span><span class="p">):</span>
@@ -24235,7 +24547,7 @@ a chart[6]
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[220]:</div>
+<div class="prompt input_prompt">In&nbsp;[229]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">first_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">nullable</span><span class="p">):</span>
@@ -24254,7 +24566,7 @@ a chart[6]
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[221]:</div>
+<div class="prompt input_prompt">In&nbsp;[230]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@fixpoint</span>
@@ -24272,7 +24584,7 @@ a chart[6]
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[222]:</div>
+<div class="prompt input_prompt">In&nbsp;[231]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">firstset</span><span class="p">(</span><span class="n">canonical</span><span class="p">(</span><span class="n">A1_GRAMMAR</span><span class="p">),</span> <span class="n">EPSILON</span><span class="p">)</span>
@@ -24288,24 +24600,24 @@ a chart[6]
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[222]:</div>
+    <div class="prompt output_prompt">Out[231]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;7&#39;: {&#39;7&#39;},
- &#39;+&#39;: {&#39;+&#39;},
- &#39;2&#39;: {&#39;2&#39;},
- &#39;-&#39;: {&#39;-&#39;},
- &#39;8&#39;: {&#39;8&#39;},
- &#39;1&#39;: {&#39;1&#39;},
+<pre>{&#39;9&#39;: {&#39;9&#39;},
  &#39;0&#39;: {&#39;0&#39;},
- &#39;3&#39;: {&#39;3&#39;},
  &#39;4&#39;: {&#39;4&#39;},
+ &#39;8&#39;: {&#39;8&#39;},
+ &#39;7&#39;: {&#39;7&#39;},
+ &#39;1&#39;: {&#39;1&#39;},
  &#39;6&#39;: {&#39;6&#39;},
  &#39;5&#39;: {&#39;5&#39;},
- &#39;9&#39;: {&#39;9&#39;},
+ &#39;+&#39;: {&#39;+&#39;},
+ &#39;3&#39;: {&#39;3&#39;},
+ &#39;-&#39;: {&#39;-&#39;},
+ &#39;2&#39;: {&#39;2&#39;},
  &#39;&lt;start&gt;&#39;: {&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
  &#39;&lt;expr&gt;&#39;: {&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
  &#39;&lt;integer&gt;&#39;: {&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;, &#39;9&#39;},
@@ -24328,7 +24640,7 @@ a chart[6]
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[223]:</div>
+<div class="prompt input_prompt">In&nbsp;[232]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">EOF</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\0</span><span class="s1">&#39;</span>
@@ -24341,7 +24653,7 @@ a chart[6]
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[224]:</div>
+<div class="prompt input_prompt">In&nbsp;[233]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">followset</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
@@ -24368,7 +24680,7 @@ a chart[6]
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[225]:</div>
+<div class="prompt input_prompt">In&nbsp;[234]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@fixpoint</span>
@@ -24391,7 +24703,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[226]:</div>
+<div class="prompt input_prompt">In&nbsp;[235]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">followset</span><span class="p">(</span><span class="n">canonical</span><span class="p">(</span><span class="n">A1_GRAMMAR</span><span class="p">),</span> <span class="n">START_SYMBOL</span><span class="p">)</span>
@@ -24407,7 +24719,7 @@ a chart[6]
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[226]:</div>
+    <div class="prompt output_prompt">Out[235]:</div>
 
 
 
@@ -24571,7 +24883,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[229]:</div>
+<div class="prompt input_prompt">In&nbsp;[238]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LL1Parser</span><span class="p">(</span><span class="n">LL1Parser</span><span class="p">):</span>
@@ -24608,7 +24920,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[230]:</div>
+<div class="prompt input_prompt">In&nbsp;[239]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ll1parser</span> <span class="o">=</span> <span class="n">LL1Parser</span><span class="p">(</span><span class="n">A2_GRAMMAR</span><span class="p">)</span>
@@ -24655,7 +24967,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[231]:</div>
+<div class="prompt input_prompt">In&nbsp;[240]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LL1Parser</span><span class="p">(</span><span class="n">LL1Parser</span><span class="p">):</span>
@@ -24706,7 +25018,7 @@ a chart[6]
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[232]:</div>
+<div class="prompt input_prompt">In&nbsp;[241]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">ll1parser</span> <span class="o">=</span> <span class="n">LL1Parser</span><span class="p">(</span><span class="n">A2_GRAMMAR</span><span class="p">)</span>
@@ -24724,7 +25036,7 @@ a chart[6]
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[232]:</div>
+    <div class="prompt output_prompt">Out[241]:</div>
 
 
 

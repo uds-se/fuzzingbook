@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2020-04-15 18:42:03+02:00
+# Last change: 2020-09-12 11:45:58+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -200,9 +200,11 @@ def crashme (s):
                 if len(s) > 3 and s[3] == '!':
                     raise Exception()
 
-crashme_runner = FunctionCoverageRunner(crashme)
-crashme_runner.run("good")
-list(crashme_runner.coverage())
+if __name__ == "__main__":
+    crashme_runner = FunctionCoverageRunner(crashme)
+    crashme_runner.run("good")
+    list(crashme_runner.coverage())
+
 
 # ## Blackbox, Greybox, and Boosted Greybox Fuzzing
 
@@ -491,10 +493,10 @@ if __name__ == "__main__":
     plt.ylabel('lines covered');
 
 
-# ### Complex Example: XMLParser
+# ### Complex Example: HTMLParser
 
 if __name__ == "__main__":
-    print('\n### Complex Example: XMLParser')
+    print('\n### Complex Example: HTMLParser')
 
 
 
