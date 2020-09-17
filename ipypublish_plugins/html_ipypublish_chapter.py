@@ -45,6 +45,9 @@ fuzzingbook_tpl_dict = {
 <meta property="og:description" content="__DESCRIPTION__" />
 <meta property="og:image" content="__BOOKIMAGE__" />
 
+{# Do not collect Twitter data #}
+<meta name="twitter:dnt" content="on">
+
 {# Favicons #}
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
 <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-touch-icon.png">
