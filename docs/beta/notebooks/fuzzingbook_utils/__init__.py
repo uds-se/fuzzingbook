@@ -32,9 +32,22 @@ def rich_output():
 # Wrapper for YouTubeVideo
 if have_ipython:
     import IPython.display
-    class YouTubeVideo(IPython.display.YouTubeVideo):
-        def __init__(self, video_id, **kwargs):
-            super().__init__(video_id, width=640, height=360, **kwargs)
+
+    class YouTubeVideo(IPython.display.IFrame):
+        """Replacement for iPython.YoutubeVideo, with different width/height and no cookies for YouTube"""
+        def __init__(self, id, width=640, height=360, **kwargs):
+            self.id=id
+            src = "https://www.youtube-nocookie.com/embed/{0}".format(id)
+            super(YouTubeVideo, self).__init__(src, width, height, **kwargs)
+    
+        def _repr_jpeg_(self):
+            # Deferred import
+            from urllib.request import urlopen
+
+            try:
+                return urlopen("https://img.youtube.com/vi/{id}/hqdefault.jpg".format(id=self.id)).read()
+            except IOError:
+                return None        
 else:
     # Placeholder for imports
     class YouTubeVideo(object):

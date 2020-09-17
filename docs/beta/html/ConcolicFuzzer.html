@@ -11796,6 +11796,8 @@ MathJax.Hub.Config({
 <meta property="og:description" content="We have previously seen how one can use dynamic taints to produce more intelligent test cases than simply looking for program crashes. We have also seen how one can use the taints to update the grammar, and hence focus more on the dangerous methods. While taints are helpful, uninterpreted strings is only one of the attack vectors. Can we say anything more about the properties of variables at any point in the execution? For example, can we say for sure that a function will always receive the buffers with the correct length? Concolic execution offers a solution.The idea of concolic execution over a function is as follows: We start with a sample input for the function, and execute the function under trace. At each point the execution passes through a conditional, we save the conditional encountered in the form of relations between symbolic variables.(A symbolic variable can be thought of as a sort of placeholder for the real variable, sort of like the x in solving for x in Algebra. The symbolic variables can be used to specify relations without actually solving them.)With concolic execution, one can collect the constraints that an execution path encounters, and use it to answer questions about the program behavior at any point we prefer along the program execution path. We can further use concolic execution to enhance fuzzing.In this chapter, we explore in depth how to execute a Python function concolically, and how concolic execution can be used to enhance fuzzing.Prerequisites You should have read the chapter on coverage. You should have read the chapter on information flow. A familiarity with the basic idea of SMT solvers would be useful.We first set up our infrastructure so that we can make use of previously defined functions." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
+<meta name="twitter:dnt" content="on">
+
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
 <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-touch-icon.png">
 
@@ -12068,9 +12070,11 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <span class="s1">&#39; &#39;</span>
 <span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 <span class="s1">&#39;++</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;+++</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00+</span><span class="se">\\</span><span class="s1">x00+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00++</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;++</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;++</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00c</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 
 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
   <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-287-2a3454213b54&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
@@ -12089,47 +12093,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
 
-<span class="s1">&#39;+++%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-287-2a3454213b54&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-33-635d2b1b13c2&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-241-630ee123bed8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
-<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-
-<span class="s1">&#39;++%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-287-2a3454213b54&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-33-635d2b1b13c2&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-241-630ee123bed8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
-<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-
-<span class="s1">&#39;+++%1</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;++%</span><span class="se">\\</span><span class="s1">x004</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-287-2a3454213b54&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-33-635d2b1b13c2&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-241-630ee123bed8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
-<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-287-2a3454213b54&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-33-635d2b1b13c2&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;ipython-input-241-630ee123bed8&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
-<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="s1">&#39;++</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 </pre></div>
 <p>The <code>SimpleConcolicFuzzer</code> simply explores all paths near the original path traversed by the sample input. It uses a simple mechanism to explore the paths that are near the paths that it knows about, and other than code paths, knows nothing about the input.
 The <code>ConcolicGrammarFuzzer</code> on the other hand, knows about the input grammar, and can collect feedback from the subject under fuzzing. It can lift some of the constraints encountered to the grammar, enabling deeper fuzzing. It is used as follows:</p>
@@ -12148,35 +12113,35 @@ The <code>ConcolicGrammarFuzzer</code> on the other hand, knows about the input 
 <span class="o">&gt;&gt;&gt;</span>                 <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>         <span class="n">cgf</span><span class="o">.</span><span class="n">update_grammar</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>         <span class="k">print</span><span class="p">()</span>
-<span class="n">select</span> <span class="n">m07h</span><span class="p">,</span><span class="n">c</span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="o">-</span><span class="n">E</span><span class="o">/</span><span class="n">m</span><span class="o">/</span><span class="n">G</span><span class="o">*</span><span class="p">:,:,</span><span class="n">G</span><span class="o">&lt;</span><span class="n">X</span> <span class="kn">from</span> <span class="nn"><a href="HZzKx.html" class="import" target="_blank">HZzKx</a></span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;HZzKx&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">select</span> <span class="n">g</span><span class="o">-</span><span class="n">S</span> <span class="kn">from</span> <span class="nn"><a href="YEN.html" class="import" target="_blank">YEN</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="nn"><a href="Q.html" class="import" target="_blank">Q</a></span><span class="o">&gt;</span><span class="n">_</span><span class="o">*</span><span class="n">a</span><span class="o">!=</span><span class="n">f</span><span class="o">!=</span><span class="n">Z</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;YEN&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">delete</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/months.html" class="import" target="_blank">months</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="p">(</span><span class="o">.-</span><span class="n">a</span><span class="o">&lt;</span><span class="n">k</span><span class="o">+</span><span class="n">b</span><span class="o">&gt;</span><span class="n">L</span><span class="o">*</span><span class="n">r</span><span class="o">-</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="n">C</span><span class="o">/</span><span class="p">(</span><span class="n">l</span><span class="p">))</span><span class="o">==</span><span class="mi">2</span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(.-a&lt;k+b&gt;L*r-(i)+C/(l))==2&#39;</span><span class="p">)</span>
+<span class="n">update</span> <span class="n">DE0</span> <span class="nb">set</span> <span class="n">G</span><span class="o">=</span><span class="n">_1</span><span class="p">,</span><span class="n">E</span><span class="o">=</span><span class="n">a</span> <span class="n">where</span> <span class="n">A</span><span class="o">&gt;</span><span class="n">d</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;DE0&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">select</span> <span class="mi">89</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/o5.html" class="import" target="_blank">o5</a></span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;o5&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">update</span> <span class="n">eHv</span> <span class="nb">set</span> <span class="n">I</span><span class="o">=</span><span class="n">V</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="n">t</span> <span class="n">where</span> <span class="p">(</span><span class="mf">8.1</span><span class="p">)</span><span class="o">&lt;</span><span class="n">M</span><span class="o">/</span><span class="n">C</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;eHv&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">select</span> <span class="n">_z</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/vehicles.html" class="import" target="_blank">vehicles</a></span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(_z)&#39;</span><span class="p">)</span>
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn"><a href="SbW918206519.html" class="import" target="_blank">SbW918206519</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="o">-</span><span class="mf">6.0</span><span class="o">==</span><span class="n">A</span><span class="o">!=</span><span class="n">X</span><span class="o">&gt;</span><span class="n">a</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;SbW918206519&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">delete</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/months.html" class="import" target="_blank">months</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="nn"><a href="U.html" class="import" target="_blank">U</a></span><span class="o">/</span><span class="n">S</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">Q</span><span class="o">&gt;</span><span class="n">z</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="o">&gt;</span><span class="p">(</span><span class="n">d7</span><span class="o">!=</span><span class="p">(</span><span class="n">P</span><span class="p">))</span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;U/S*p*Q&gt;z(c)&gt;(d7!=(P))&#39;</span><span class="p">)</span>
+<span class="n">select</span> <span class="p">:</span><span class="mi">6</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/vehicles.html" class="import" target="_blank">vehicles</a></span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(:6)&#39;</span><span class="p">)</span>
 
-<span class="n">update</span> <span class="n">vehicles</span> <span class="nb">set</span> <span class="n">g</span><span class="o">=</span><span class="n">j8</span> <span class="n">where</span> <span class="n">i</span><span class="o">+</span><span class="n">_</span><span class="o">+</span><span class="n">V</span><span class="o">&gt;</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">q</span><span class="p">))</span><span class="o">/</span><span class="n">D</span><span class="o">/</span><span class="n">e</span><span class="o">+</span><span class="n">t</span><span class="o">-</span><span class="n">_</span>
-<span class="n">Column</span> <span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">select</span> <span class="p">(</span><span class="o">.</span><span class="p">((</span><span class="n">V</span><span class="p">),</span><span class="n">t</span><span class="p">,</span><span class="o">.</span><span class="p">))</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/vehicles.html" class="import" target="_blank">vehicles</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="p">:</span><span class="o">&gt;</span><span class="n">M</span><span class="o">+</span><span class="n">J</span><span class="o">==</span><span class="n">Ug</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(:&gt;M+J==Ug)&#39;</span><span class="p">)</span>
 
-<span class="n">delete</span> <span class="kn">from</span> <span class="nn"><a href="DA.html" class="import" target="_blank">DA</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="nn"><a href="SJ.html" class="import" target="_blank">SJ</a></span><span class="p">(</span><span class="n">A</span><span class="o">!=</span><span class="n">Q</span><span class="p">,</span><span class="n">k</span><span class="p">)</span><span class="o">!=</span><span class="p">(</span><span class="n">A8</span><span class="p">(</span><span class="n">K</span><span class="p">)</span><span class="o">&lt;</span><span class="n">d</span><span class="o">+</span><span class="n">g</span><span class="o">/</span><span class="n">H</span><span class="o">+</span><span class="n">Z</span><span class="p">)</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;DA&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">select</span> <span class="n">g</span><span class="p">,</span><span class="n">m</span><span class="o">&gt;</span><span class="n">z</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/v0D8.html" class="import" target="_blank">v0D8</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="nn"><a href="https://docs.python.org/3/library/e.html" class="import" target="_blank">e</a></span><span class="o">==</span><span class="n">J</span><span class="o">!=</span><span class="p">((</span><span class="n">f</span><span class="p">))</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;v0D8&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">select</span> <span class="n">y</span><span class="o">==</span><span class="n">r</span><span class="o">==</span><span class="n">y</span><span class="o">-</span><span class="n">Z</span> <span class="kn">from</span> <span class="nn"><a href="O8.html" class="import" target="_blank">O8</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="p">:</span><span class="o">&lt;</span><span class="n">n</span><span class="o">-</span><span class="n">z</span><span class="o">+</span><span class="n">o</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;O8&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/vehicles.html" class="import" target="_blank">vehicles</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="nn"><a href="S.html" class="import" target="_blank">S</a></span><span class="o">*</span><span class="n">P</span><span class="o">+</span><span class="n">_</span><span class="o">+</span><span class="n">G</span><span class="o">-</span><span class="n">m</span><span class="o">/</span><span class="n">B</span><span class="o">+</span><span class="n">H</span><span class="o">-</span><span class="n">mm6</span><span class="p">((</span><span class="n">g</span><span class="o">&lt;</span><span class="n">n</span><span class="p">))</span><span class="o">&gt;</span><span class="n">I</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;S*P+_+G-m/B+H-mm6((g&lt;n))&gt;I&#39;</span><span class="p">)</span>
 
-<span class="n">select</span> <span class="p">(</span><span class="n">L</span><span class="p">)</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/months.html" class="import" target="_blank">months</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="nn"><a href="https://docs.python.org/3/library/z.html" class="import" target="_blank">z</a></span><span class="o">*</span><span class="n">g</span><span class="o">/</span><span class="n">Z</span><span class="o">/</span><span class="n">x</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">-</span><span class="n">l</span><span class="o">&gt;</span><span class="n">E</span><span class="o">/</span><span class="n">H</span><span class="o">/</span><span class="n">r</span><span class="o">/</span><span class="n">f</span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(z*g/Z/x(k)-l&gt;E/H/r/f)&#39;</span><span class="p">)</span>
+<span class="n">insert</span> <span class="n">into</span> <span class="n">months</span> <span class="p">(</span><span class="n">Dr</span><span class="o">.</span><span class="n">F</span><span class="p">)</span> <span class="n">values</span> <span class="p">(</span><span class="s1">&#39;&amp;&#39;</span><span class="p">)</span>
+<span class="n">Column</span> <span class="p">(</span><span class="s1">&#39;Dr.F&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">select</span> <span class="o">-</span><span class="mf">6.3</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/vehicles.html" class="import" target="_blank">vehicles</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="nn"><a href="J.html" class="import" target="_blank">J</a></span><span class="o">&gt;</span><span class="n">s</span><span class="o">-</span><span class="n">m</span><span class="o">+</span><span class="n">a</span><span class="o">/</span><span class="n">F</span><span class="o">-</span><span class="n">B</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">b</span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(J&gt;s-m+a/F-B*x*b)&#39;</span><span class="p">)</span>
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/vehicles.html" class="import" target="_blank">vehicles</a></span> <span class="nn"><a href="https://docs.python.org/3/library/where.html" class="import" target="_blank">where</a></span> <span class="p">(</span><span class="o">-</span><span class="mi">0</span><span class="p">)</span><span class="o">&lt;</span><span class="n">j</span><span class="o">*</span><span class="n">e</span><span class="o">-</span><span class="n">K</span><span class="o">*</span><span class="n">u</span><span class="o">/</span><span class="n">V</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">B</span><span class="o">/</span><span class="p">:</span><span class="o">+</span><span class="n">K</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(-0)&lt;j*e-K*u/V*S*B/:+K&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -20589,6 +20554,7 @@ $$</p>
 &#39;+\\x00&#39;
 &#39;++\\x00&#39;
 &#39;+%\\x00&#39;
+&#39;+%D\\x00&#39;
 </pre>
 </div>
 
@@ -20613,25 +20579,7 @@ Traceback (most recent call last):
   File &#34;&lt;ipython-input-241-630ee123bed8&gt;&#34;, line 42, in cgi_decode
     raise ValueError(&#34;Invalid encoding&#34;)
 ValueError: Invalid encoding (expected)
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>&#39;+%D\\x00&#39;
-&#39;+%DD\\x00&#39;
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
+Traceback (most recent call last):
   File &#34;&lt;ipython-input-249-716a83f3d4b0&gt;&#34;, line 10, in &lt;module&gt;
     _[cgi_decode](v)
   File &#34;&lt;ipython-input-33-635d2b1b13c2&gt;&#34;, line 3, in __call__
@@ -20639,14 +20587,6 @@ ValueError: Invalid encoding (expected)
   File &#34;&lt;ipython-input-241-630ee123bed8&gt;&#34;, line 39, in cgi_decode
     raise ValueError(&#34;Invalid encoding&#34;)
 ValueError: Invalid encoding (expected)
-Traceback (most recent call last):
-  File &#34;&lt;ipython-input-249-716a83f3d4b0&gt;&#34;, line 10, in &lt;module&gt;
-    _[cgi_decode](v)
-  File &#34;&lt;ipython-input-33-635d2b1b13c2&gt;&#34;, line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File &#34;&lt;ipython-input-241-630ee123bed8&gt;&#34;, line 42, in cgi_decode
-    raise ValueError(&#34;Invalid encoding&#34;)
-ValueError: Invalid encoding (expected)
 </pre>
 </div>
 
@@ -20655,8 +20595,11 @@ ValueError: Invalid encoding (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>&#39;+%4\\x00&#39;
+<pre>&#39;+%DD\\x00&#39;
+&#39;+%4\\x00&#39;
 &#39;+%DE\\x00&#39;
+&#39;+++\\x00&#39;
+&#39;+%C\\x00&#39;
 </pre>
 </div>
 
@@ -20666,6 +20609,14 @@ ValueError: Invalid encoding (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
+  File &#34;&lt;ipython-input-249-716a83f3d4b0&gt;&#34;, line 10, in &lt;module&gt;
+    _[cgi_decode](v)
+  File &#34;&lt;ipython-input-33-635d2b1b13c2&gt;&#34;, line 3, in __call__
+    self.result = self.fn(*self.concolic(args))
+  File &#34;&lt;ipython-input-241-630ee123bed8&gt;&#34;, line 42, in cgi_decode
+    raise ValueError(&#34;Invalid encoding&#34;)
+ValueError: Invalid encoding (expected)
+Traceback (most recent call last):
   File &#34;&lt;ipython-input-249-716a83f3d4b0&gt;&#34;, line 10, in &lt;module&gt;
     _[cgi_decode](v)
   File &#34;&lt;ipython-input-33-635d2b1b13c2&gt;&#34;, line 3, in __call__
@@ -20681,16 +20632,6 @@ Traceback (most recent call last):
   File &#34;&lt;ipython-input-241-630ee123bed8&gt;&#34;, line 42, in cgi_decode
     raise ValueError(&#34;Invalid encoding&#34;)
 ValueError: Invalid encoding (expected)
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>&#39;+++\\x00&#39;
-&#39;+%C\\x00&#39;
 </pre>
 </div>
 
@@ -25262,20 +25203,20 @@ Invalid WHERE (&#39;(_,l&lt;P!=u!=x,495,w(l)*U-x(T))&#39;)
 insert into months (PZe) values (&#39;&amp;&#39;,9)
 Column (&#39;PZe&#39;) was not found
 
-update months set name=n,month=YRr,month=a where (I-w(n))==Ll71
-Invalid WHERE (&#39;((I-w(n))==Ll71)&#39;)
+update months set name=eI,p=wUr,name=q where (i/U)==M71
+Column (&#39;p&#39;) was not found
 
-select ZSEj,i-q-U&lt;hT(o)==-1,(z0),((((((k)))))),g!=l,x==G from vehicles
-Invalid WHERE (&#39;(ZSEj,i-q-U&lt;hT(o)==-1,(z0),((((((k)))))),g!=l,x==G)&#39;)
+insert into g39yi (name) values (7,-2)
+Table (&#39;g39yi&#39;) was not found
 
-select K+n(A)-:+n+E/j*T-A*v from months
-Invalid WHERE (&#39;(K+n(A)-:+n+E/j*T-A*v)&#39;)
+select ((X8)) from vehicles
+Invalid WHERE (&#39;(((X8)))&#39;)
 
-select A,r+Y(J)*K&lt;l-_*P*z/g,0 from months
-Invalid WHERE (&#39;(A,r+Y(J)*K&lt;l-_*P*z/g,0)&#39;)
+insert into GB (name,name) values (551954.9,&#39;w&#39;,4.4)
+Table (&#39;GB&#39;) was not found
 
-select (q-i-e&lt;j),b from G where -52!=Y==6
-Table (&#39;G&#39;) was not found
+select 26,j-E-O-k&gt;.z(M,T)!=n,(R1),: from z0N
+Table (&#39;z0N&#39;) was not found
 </pre>
 </div>
 
@@ -26121,8 +26062,8 @@ unknown
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
-The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConcolicFuzzer.ipynb" target=_blank)>Last change: 2020-09-12 11:45:58+02:00</a> &bull; 
+The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConcolicFuzzer.ipynb" target=_blank)>Last change: 2020-09-15 17:09:30+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
 </p>
@@ -26140,7 +26081,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">Concolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html</a>.  Retrieved 2020-09-12 11:45:58+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">Concolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html</a>.  Retrieved 2020-09-15 17:09:30+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2020:ConcolicFuzzer,
@@ -26150,9 +26091,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2020},
     publisher = {Saarland University},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html}},
-    note = {Retrieved 2020-09-12 11:45:58+02:00},
+    note = {Retrieved 2020-09-15 17:09:30+02:00},
     url = {https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html},
-    urldate = {2020-09-12 11:45:58+02:00}
+    urldate = {2020-09-15 17:09:30+02:00}
 }
 </pre>
 </div>

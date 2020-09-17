@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
-# Last change: 2020-01-21 10:57:23+01:00
+# Last change: 2020-09-15 17:09:30+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
