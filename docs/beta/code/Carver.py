@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2019-05-21 19:58:03+02:00
+# Last change: 2020-09-27 19:14:05+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -36,11 +36,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import bookutils
 
 if __package__ is None or __package__ == "":
     import APIFuzzer

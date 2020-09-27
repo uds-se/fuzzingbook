@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2020-09-15 17:09:30+02:00
+# Last change: 2020-09-27 19:14:06+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -52,11 +52,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import bookutils
 
 if __package__ is None or __package__ == "":
     from Grammars import EXPR_GRAMMAR, is_valid_grammar, is_nonterminal, extend_grammar
@@ -542,11 +538,7 @@ if __name__ == "__main__":
 
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import HTML
-else:
-    from .fuzzingbook_utils import HTML
-
+from bookutils import HTML
 
 if __name__ == "__main__":
     HTML("<strong>A bold text</strong>")
@@ -881,11 +873,7 @@ else:
     from .ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer  # minor dependency
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import inheritance_conflicts
-else:
-    from .fuzzingbook_utils import inheritance_conflicts
-
+from bookutils import inheritance_conflicts
 
 if __name__ == "__main__":
     inheritance_conflicts(ProbabilisticGrammarFuzzer, GeneratorGrammarFuzzer)

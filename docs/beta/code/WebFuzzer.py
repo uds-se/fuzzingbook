@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2020-09-15 17:11:45+02:00
+# Last change: 2020-09-27 19:14:06+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -65,11 +65,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import bookutils
 
 FUZZINGBOOK_SWAG = {
     "tshirt": "One FuzzingBook T-Shirt",
@@ -120,11 +116,7 @@ if __name__ == "__main__":
     from IPython.display import display
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import HTML
-else:
-    from .fuzzingbook_utils import HTML
-
+from bookutils import HTML
 
 if __name__ == "__main__":
     HTML(HTML_ORDER_FORM)
@@ -451,11 +443,7 @@ if __name__ == "__main__":
     HTTPD_MESSAGE_QUEUE.put("I am one more message")
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import rich_output, terminal_escape
-else:
-    from .fuzzingbook_utils import rich_output, terminal_escape
-
+from bookutils import rich_output, terminal_escape
 
 def display_httpd_message(message):
     if rich_output():

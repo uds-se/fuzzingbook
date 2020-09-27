@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2020-09-15 17:09:30+02:00
+# Last change: 2020-09-27 19:14:06+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -60,11 +60,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import bookutils
 
 if __package__ is None or __package__ == "":
     from WebFuzzer import init_db, start_httpd, webbrowser, print_httpd_messages, print_url, ORDERS_DB
@@ -87,11 +83,7 @@ if __name__ == "__main__":
     from IPython.display import display, Image
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import HTML, rich_output
-else:
-    from .fuzzingbook_utils import HTML, rich_output
-
+from bookutils import HTML, rich_output
 
 if __name__ == "__main__":
     HTML(webbrowser(httpd_url))
@@ -708,11 +700,7 @@ if __name__ == "__main__":
 
 from collections import deque
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import unicode_escape
-else:
-    from .fuzzingbook_utils import unicode_escape
-
+from bookutils import unicode_escape
 
 def fsm_diagram(grammar, start_symbol=START_SYMBOL):
     from graphviz import Digraph
@@ -1126,11 +1114,7 @@ else:
     from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import inheritance_conflicts
-else:
-    from .fuzzingbook_utils import inheritance_conflicts
-
+from bookutils import inheritance_conflicts
 
 if __name__ == "__main__":
     inheritance_conflicts(GUIFuzzer, GrammarCoverageFuzzer)

@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2020-09-15 17:09:30+02:00
+# Last change: 2020-09-27 19:14:05+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -93,11 +93,7 @@ if __name__ == "__main__":
     process_numbers(["--sum", "1", "2", "3"])
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import bookutils
 
 if __package__ is None or __package__ == "":
     from ExpectError import ExpectError

@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2020-09-15 17:09:30+02:00
+# Last change: 2020-09-27 19:14:06+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -161,11 +161,7 @@ if __name__ == "__main__":
     cgi_decode_code = inspect.getsource(cgi_decode)
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import print_content, print_file
-else:
-    from .fuzzingbook_utils import print_content, print_file
-
+from bookutils import print_content, print_file
 
 if __name__ == "__main__":
     print_content(cgi_decode_code[:300] + "...", ".py")
@@ -268,11 +264,7 @@ if __name__ == "__main__":
     cov_plus.coverage() - cov_standard.coverage()
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import bookutils
 
 if __name__ == "__main__":
     with Coverage() as cov_max:
@@ -479,11 +471,7 @@ if __name__ == "__main__":
         f.write(cgi_c_code)
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import print_file
-else:
-    from .fuzzingbook_utils import print_file
-
+from bookutils import print_file
 
 if __name__ == "__main__":
     print_file("cgi_decode.c")

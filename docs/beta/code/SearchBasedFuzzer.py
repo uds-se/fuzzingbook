@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2020-09-15 17:09:30+02:00
+# Last change: 2020-09-27 19:14:06+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -60,11 +60,7 @@ if __name__ == "__main__":
 
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import bookutils
 
 if __package__ is None or __package__ == "":
     import Fuzzer
@@ -72,11 +68,7 @@ else:
     from . import Fuzzer
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import unicode_escape, terminal_escape
-else:
-    from .fuzzingbook_utils import unicode_escape, terminal_escape
-
+from bookutils import unicode_escape, terminal_escape
 
 def test_me(x, y):
     if x == 2 * (y + 1):
@@ -663,11 +655,7 @@ import inspect
 import ast
 import astor
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import print_content
-else:
-    from .fuzzingbook_utils import print_content
-
+from bookutils import print_content
 
 if __name__ == "__main__":
     source = inspect.getsource(cgi_decode)

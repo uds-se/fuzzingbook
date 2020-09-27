@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/MutationAnalysis.html
-# Last change: 2020-09-15 17:09:30+02:00
+# Last change: 2020-09-27 19:14:06+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -107,11 +107,7 @@ if __name__ == "__main__":
     strong_oracle(triangle)
 
 
-if __name__ == "__main__":
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
+import bookutils
 
 if __package__ is None or __package__ == "":
     from Coverage import Coverage
@@ -214,11 +210,7 @@ if __name__ == "__main__":
     triangle_source
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import print_content
-else:
-    from .fuzzingbook_utils import print_content
-
+from bookutils import print_content
 
 if __name__ == "__main__":
     print_content(triangle_source, '.py')
@@ -232,11 +224,7 @@ if __name__ == "__main__":
     print(astor.dump_tree(triangle_ast))
 
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import rich_output
-else:
-    from .fuzzingbook_utils import rich_output
-
+from bookutils import rich_output
 
 if __name__ == "__main__":
     if rich_output():
