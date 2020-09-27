@@ -12,10 +12,10 @@ SOURCE_FILES = \
 	$(EXTRAS)
 
 # The bibliography file
-BIB = $(PROJECT).bib
+BIB = fuzzingbook.bib
 
 # The utilities folder
-UTILS = $(PROJECT)_utils
+UTILS = bookutils
 
 # The utilities in $(UTILS)
 UTILITY_FILES = \
@@ -913,7 +913,7 @@ $(DOCS_TARGET)slides/%: $(SLIDES_TARGET)%
 .PHONY: publish-notebooks publish-notebooks-setup
 publish-notebooks: full-notebooks publish-notebooks-setup \
 	$(DOCS_TARGET)notebooks/custom.css \
-	$(DOCS_TARGET)notebooks/$(PROJECT).bib \
+	$(DOCS_TARGET)notebooks/$(BIB) \
 	$(DOCS_TARGET)notebooks/LICENSE.md \
 	$(DOCS_TARGET)notebooks/README.md \
 	$(DOCS:%=$(DOCS_TARGET)notebooks/%.ipynb) \

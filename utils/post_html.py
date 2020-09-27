@@ -320,9 +320,8 @@ def add_links_to_imports(contents):
     imports = re.findall(RE_IMPORT, contents)
     for module in imports:
         link = None
-        if (module.startswith(project + "_utils") or  
-             module.startswith("bookutils")):
-            link = "https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils"
+        if module.startswith("bookutils"):
+            link = "https://github.com/uds-se/fuzzingbook/tree/master/notebooks/bookutils"
         elif module == "requests":
             link = "http://docs.python-requests.org/en/master/"
         elif module.startswith("IPython"):
