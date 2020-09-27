@@ -441,7 +441,7 @@ POST_TEX = utils/post_tex
 $(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_METADATA) $(POST_TEX)
 	$(eval TMPDIR := $(shell mktemp -d))
 	$(PYTHON) $(ADD_METADATA) --titlepage $< > $(TMPDIR)/$(notdir $<)
-	cp -pr $(NOTEBOOKS)/PICS $(PROJECT).* $(TMPDIR)
+	cp -pr $(NOTEBOOKS)/PICS $(BIB) $(TMPDIR)
 	$(CONVERT_TO_TEX) $(TMPDIR)/$(notdir $<)
 	$(POST_TEX) $@ > $@~ && mv $@~ $@
 	@-$(RM) -fr $(TMPDIR)
