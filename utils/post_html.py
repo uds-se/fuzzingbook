@@ -133,12 +133,12 @@ site_citation_template = r"""
 __AUTHORS__: "<a href="__SITE_HTML__">__BOOKTITLE__</a>".  Retrieved __DATE__.
 </p>
 <pre>
-@incollection{__PROJECT__:__YEAR__:__CHAPTER__,
+@incollection{__BIBTEX_KEY__:__CHAPTER__,
     author = {__AUTHORS_BIBTEX__},
     booktitle = {__BOOKTITLE__},
     title = {__BOOKTITLE__},
     year = {__YEAR__},
-    publisher = {Saarland University},
+    publisher = {CISPA},
     howpublished = {\url{__SITE_HTML__}},
     note = {Retrieved __DATE__},
     url = {__SITE_HTML__},
@@ -156,12 +156,12 @@ chapter_citation_template = r"""
 __AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__ (eds.), "<a href="__SITE_HTML__">__BOOKTITLE__</a>", <a href="__CHAPTER_HTML__">__CHAPTER_HTML__</a>.  Retrieved __DATE__.
 </p>
 <pre>
-@incollection{__PROJECT__:__YEAR__:__CHAPTER__,
+@incollection{__BIBTEX_KEY__:__CHAPTER__,
     author = {__AUTHORS_BIBTEX__},
     booktitle = {__BOOKTITLE__},
     title = {__CHAPTER_TITLE__},
     year = {__YEAR__},
-    publisher = {Saarland University},
+    publisher = {CISPA},
     howpublished = {\url{__CHAPTER_HTML__}},
     note = {Retrieved __DATE__},
     url = {__CHAPTER_HTML__},
@@ -757,7 +757,8 @@ chapter_contents = chapter_contents \
     .replace("__SHARE_FACEBOOK__", share_facebook) \
     .replace("__SHARE_MAIL__", share_mail) \
     .replace("__DATE__", notebook_modification_datetime) \
-    .replace("__YEAR__", notebook_modification_year)
+    .replace("__YEAR__", notebook_modification_year) \
+    .replace("__BIBTEX_KEY__", project + notebook_modification_year) \
 
 # Add links to imports
 chapter_contents = add_links_to_imports(chapter_contents)
