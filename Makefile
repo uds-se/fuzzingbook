@@ -309,7 +309,7 @@ html:	ipypublish-chapters $(HTMLS)
 pdf:	ipypublish-chapters $(PDFS)
 nbpdf:	ipypublish-chapters $(NBPDFS)
 python code:	$(PYS)
-slides:	$(SLIDES) $(REVEAL_JS)
+slides:	$(REVEAL_JS) $(SLIDES) 
 word doc docx: $(WORDS)
 md markdown: $(MARKDOWNS)
 epub: $(EPUBS)
@@ -538,9 +538,12 @@ endif
 
 
 # Reconstructing the reveal.js dir
-$(REVEAL_JS):
-	git submodule update --init
-
+.PHONY: reveal.js
+$(REVEAL_JS) reveal.js: .FORCE
+	@echo "Updating $@"
+	@-test -d "$@" || (cd $(SLIDES_TARGET); \
+		git submodule add https://github.com/hakimel/reveal.js.git)
+	@git submodule update --remote
 
 $(CODE_TARGET)setup.py: $(CODE_TARGET)setup.py.in
 	cat $< > $@
@@ -918,7 +921,7 @@ publish-notebooks: full-notebooks publish-notebooks-setup \
 	$(DOCS_TARGET)notebooks/README.md \
 	$(DOCS:%=$(DOCS_TARGET)notebooks/%.ipynb) \
 	$(UTILITY_FILES:%=$(DOCS_TARGET)notebooks/$(UTILS)/%)
-	
+
 publish-notebooks-setup:
 	@test -d $(DOCS_TARGET) \
 		|| $(MKDIR) $(DOCS_TARGET)
