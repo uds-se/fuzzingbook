@@ -1,11 +1,13 @@
 # Fuzzingbook Makefile
 # This file defines the chapter files to be included
 
+# Name of the project
+PROJECT = fuzzingbook
+
 # Chapter(s) to be marked as "new" in menu
-NEW_CHAPTERS = Tours.ipynb
+NEW_CHAPTERS = 
 
 # Chapters to include in the book, in this order
-
 INTRO_PART = \
 	01_Intro.ipynb \
 	Tours.ipynb \
@@ -36,7 +38,7 @@ SYNTACTICAL_PART = \
 	Reducer.ipynb
 SYNTACTICAL_PART_READY =
 SYNTACTICAL_PART_TODO = 
-	
+
 SEMANTICAL_PART = \
 	04_Semantical_Fuzzing.ipynb \
 	GrammarMiner.ipynb \
@@ -81,3 +83,50 @@ EXTRAS = \
 	Guide_for_Authors.ipynb \
 	Template.ipynb \
 	404.ipynb
+
+# These chapters will show up in the "public" version
+PUBLIC_CHAPTERS = \
+	$(INTRO_PART) \
+	$(LEXICAL_PART) \
+	$(SYNTACTICAL_PART) \
+	$(SEMANTICAL_PART) \
+	$(DOMAINS_PART) \
+	$(MANAGEMENT_PART)
+
+# These chapters will show up in the "beta" version
+CHAPTERS = \
+	$(INTRO_PART) \
+	$(INTRO_PART_READY) \
+	$(INTRO_PART_TODO) \
+	$(LEXICAL_PART) \
+	$(LEXICAL_PART_READY) \
+	$(LEXICAL_PART_TODO) \
+	$(SYNTACTICAL_PART) \
+	$(SYNTACTICAL_PART_READY) \
+	$(SYNTACTICAL_PART_TODO) \
+	$(SEMANTICAL_PART) \
+	$(SEMANTICAL_PART_READY) \
+	$(SEMANTICAL_PART_TODO) \
+	$(DOMAINS_PART) \
+	$(DOMAINS_PART_READY) \
+	$(DOMAINS_PART_TODO) \
+	$(MANAGEMENT_PART) \
+	$(MANAGEMENT_PART_READY) \
+	$(MANAGEMENT_PART_TODO)
+
+READY_CHAPTERS = \
+	$(INTRO_PART_READY) \
+	$(LEXICAL_PART_READY) \
+	$(SYNTACTICAL_PART_READY) \
+	$(SEMANTICAL_PART_READY) \
+	$(DOMAINS_PART_READY) \
+	$(MANAGEMENT_PART_READY)
+
+TODO_CHAPTERS = \
+	$(INTRO_PART_TODO) \
+	$(LEXICAL_PART_TODO) \
+	$(SYNTACTICAL_PART_TODO) \
+	$(SEMANTICAL_PART_TODO) \
+	$(DOMAINS_PART_TODO) \
+	$(MANAGEMENT_PART_TODO)
+

@@ -34,17 +34,17 @@ def notebook_synopsis(notebook_name):
     for cell in notebook.cells:
         if not first_synopsis and cell.source.startswith(SYNOPSIS_TITLE):
             in_synopsis = True
-            synopsis = SYNOPSIS_TITLE + """
+            synopsis = SYNOPSIS_TITLE + f"""
 <!-- Automatically generated. Do not edit. -->
 
 To [use the code provided in this chapter](Importing.ipynb), write
 
 ```python
->>> from fuzzingbook.%s import <identifier>
+>>> from {args.project}.{notebook_basename} import <identifier>
 ```
 
 and then make use of the following features.
-""" % notebook_basename
+"""
             synopsis += cell.source[len(SYNOPSIS_TITLE):] + "\n\n"
             continue
         elif cell.source.startswith("## "):
@@ -187,6 +187,7 @@ def update_synopsis(notebook_name, synopsis):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--project", help="project name", default="fuzzingbook")
     parser.add_argument("--update", action='store_true', 
                         help="Update synopis section")
     parser.add_argument("notebooks", nargs='*', help="notebooks to extract/update synopsis for")

@@ -21,15 +21,40 @@ try:
     have_nbformat = True
 except:
     have_nbformat = False
-    
 
+# Process arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("--home", help="omit links to notebook, code, and slides", action='store_true')
+parser.add_argument("--include-ready", help="include ready chapters", action='store_true')
+parser.add_argument("--include-todo", help="include work-in-progress chapters", action='store_true')
+parser.add_argument("--project", help="project name", default="fuzzingbook")
+parser.add_argument("--menu-prefix", help="prefix to html files in menu")
+parser.add_argument("--public-chapters", help="List of public chapters")
+parser.add_argument("--ready-chapters", help="List of ready chapters")
+parser.add_argument("--todo-chapters", help="List of work-in-progress chapters")
+parser.add_argument("--new-chapters", help="List of new chapters")
+parser.add_argument("chapter", nargs=1)
+args = parser.parse_args()
 
-# Some fixed strings
-booktitle = "The Fuzzing Book"
-authors = "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler"
-site_html = "https://www.fuzzingbook.org/"
-github_html = "https://github.com/uds-se/fuzzingbook/"
-notebook_html = "https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/"
+# Some fixed strings    
+project = args.project
+
+if project == "fuzzingbook":
+    booktitle = "The Fuzzing Book"
+    authors = "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler"
+    twitter = "@FuzzingBook"
+elif project == "debuggingbook":
+    booktitle = "The Debugging Book"
+    authors = "Andreas Zeller"
+    twitter = "@DebugBook"
+else:
+    booktitle = "The Unknown Book"
+    authors = "Nobody"
+    twitter = "@Nobody"
+
+site_html = f"https://www.{project}.org/"
+github_html = f"https://github.com/uds-se/{project}/"
+notebook_html = f"https://mybinder.org/v2/gh/uds-se/{project}/master?filepath=docs/"
 
 # Menus
 # For icons, see https://fontawesome.com/cheatsheet
@@ -74,8 +99,8 @@ site_header_template = menu_start + r"""
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
      <ul>
      <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit Notebooks</a></li>
-     <li><a href="__SITE_HTML__dist/fuzzingbook-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
-     <li><a href="__SITE_HTML__dist/fuzzingbook-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
+     <li><a href="__SITE_HTML__dist/__PROJECT__-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
+     <li><a href="__SITE_HTML__dist/__PROJECT__-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
      <li><a href="__GITHUB_HTML__" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
      <li><a href="html/ReleaseNotes.html" target="_blank"><i class="fa fa-fw fa-calendar"></i> Release Notes</a></li>
      </ul>
@@ -90,8 +115,8 @@ chapter_header_template = menu_start + r"""
      <li><a href="__SITE_HTML__slides/__CHAPTER__.slides.html" target="_blank"><i class="fa fa-fw fa-video-camera"></i> View Slides</a></li>
      <li><a href="__SITE_HTML__code/__CHAPTER__.py"><i class="fa fa-fw fa-download"></i> Download Code (.py)</a></li>
      <li><a href="__SITE_HTML__notebooks/__CHAPTER__.ipynb"><i class="fa fa-fw fa-download"></i> Download Notebook (.ipynb)</a></li>
-     <li><a href="__SITE_HTML__dist/fuzzingbook-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
-     <li><a href="__SITE_HTML__dist/fuzzingbook-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
+     <li><a href="__SITE_HTML__dist/__PROJECT__-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
+     <li><a href="__SITE_HTML__dist/__PROJECT__-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
      <li><a href="__GITHUB_HTML__" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
      <li><a href="ReleaseNotes.html" target="_blank"><i class="fa fa-fw fa-calendar"></i> Release Notes</a></li>
      </ul>
@@ -108,7 +133,7 @@ site_citation_template = r"""
 __AUTHORS__: "<a href="__SITE_HTML__">__BOOKTITLE__</a>".  Retrieved __DATE__.
 </p>
 <pre>
-@incollection{fuzzingbook__YEAR__:__CHAPTER__,
+@incollection{__PROJECT__:__YEAR__:__CHAPTER__,
     author = {__AUTHORS_BIBTEX__},
     booktitle = {__BOOKTITLE__},
     title = {__BOOKTITLE__},
@@ -131,7 +156,7 @@ chapter_citation_template = r"""
 __AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__ (eds.), "<a href="__SITE_HTML__">__BOOKTITLE__</a>", <a href="__CHAPTER_HTML__">__CHAPTER_HTML__</a>.  Retrieved __DATE__.
 </p>
 <pre>
-@incollection{fuzzingbook__YEAR__:__CHAPTER__,
+@incollection{__PROJECT__:__YEAR__:__CHAPTER__,
     author = {__AUTHORS_BIBTEX__},
     booktitle = {__BOOKTITLE__},
     title = {__CHAPTER_TITLE__},
@@ -151,7 +176,7 @@ common_footer_template = r"""
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
-The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
+The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/__PROJECT__/blob/master/LICENSE.md#mit-license">MIT License</a>.
 <a href="__GITHUB_HTML__commits/master/notebooks/__CHAPTER__.ipynb" target=_blank)>Last change: __DATE__</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
@@ -249,7 +274,7 @@ authors_bibtex = bibtex_escape(authors).replace(", and ", " and ").replace(", ",
 
 
 # The other way round
-# Use "grep '\\' fuzzingbook.bib" to see accents currently in use
+# Use "grep '\\' BIBFILE" to see accents currently in use
 def bibtex_unescape(contents):
     """Fix TeX escapes introduced by BibTeX"""
     tex_unescape_table = {
@@ -295,7 +320,8 @@ def add_links_to_imports(contents):
     imports = re.findall(RE_IMPORT, contents)
     for module in imports:
         link = None
-        if module.startswith("fuzzingbook_utils"):
+        if (module.startswith(project + "_utils") or  
+             module.startswith("bookutils")):
             link = "https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils"
         elif module == "requests":
             link = "http://docs.python-requests.org/en/master/"
@@ -305,7 +331,7 @@ def add_links_to_imports(contents):
         elif module.startswith("selenium"):
             # Point to Selenium doc
             link = "https://selenium-python.readthedocs.io/"
-        elif module.startswith("fuzzingbook"):
+        elif module.startswith(project):
             # Point to notebook
             link = module[module.find('.') + 1:] + '.html'
         elif module[0].islower():
@@ -457,18 +483,6 @@ Some other stuff
 # sys.exit(0)
 
 
-# Process arguments
-parser = argparse.ArgumentParser()
-parser.add_argument("--home", help="omit links to notebook, code, and slides", action='store_true')
-parser.add_argument("--include-ready", help="include ready chapters", action='store_true')
-parser.add_argument("--include-todo", help="include work-in-progress chapters", action='store_true')
-parser.add_argument("--menu-prefix", help="prefix to html files in menu")
-parser.add_argument("--public-chapters", help="List of public chapters")
-parser.add_argument("--ready-chapters", help="List of ready chapters")
-parser.add_argument("--todo-chapters", help="List of work-in-progress chapters")
-parser.add_argument("--new-chapters", help="List of new chapters")
-parser.add_argument("chapter", nargs=1)
-args = parser.parse_args()
 
 # Get template elements
 chapter_html_file = args.chapter[0]
@@ -686,11 +700,11 @@ end_of_exercise = '''
 
 if args.home:
     share_message = (r'I just read "' + booktitle 
-        + r'" (@FuzzingBook) at ' + site_html)
+        + rf'" ({twitter}) at ' + site_html)
     share_title = booktitle
 else:
     share_message = (r'I just read "' + chapter_title 
-        + r'" (part of @FuzzingBook) at ' + chapter_html)
+        + rf'" (part of {twitter}) at ' + chapter_html)
     share_title = chapter_title
 
 share_twitter = "https://twitter.com/intent/tweet?text=" + cgi_escape(share_message)
@@ -722,6 +736,7 @@ chapter_contents = chapter_contents \
     .replace("<__STRUCTURED_ALL_CHAPTERS_MENU__>", structured_all_chapters_menu) \
     .replace("<__ALL_SECTIONS_MENU__>", all_sections_menu) \
     .replace("<__END_OF_EXERCISE__>", end_of_exercise) \
+    .replace("__PROJECT__", project) \
     .replace("__PAGE_TITLE__", page_title) \
     .replace("__BOOKTITLE_BETA__", booktitle_beta) \
     .replace("__BOOKTITLE__", booktitle) \
@@ -755,7 +770,7 @@ else:
     chapter_contents = re.sub(r'<a (xlink:href|href)="([a-zA-Z0-9_]*)\.ipynb', 
         r'<a \1="\2.html', chapter_contents)
 
-# Recode TeX accents imported from fuzzingbook.bib
+# Recode TeX accents imported from .bib
 chapter_contents = bibtex_unescape(chapter_contents)
 
 # Expand BibTeX authors at the end, because Marcel needs his Umlaut encoded
