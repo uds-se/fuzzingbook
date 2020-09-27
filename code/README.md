@@ -1,6 +1,6 @@
-# Code for "Generating Software Tests"
+# Code for "The Fuzzing Book"
 
-This folder holds the code from "Generating Software Tests".  This book addresses the problem of software bugs by automating software testing, specifically by _generating tests automatically_. Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing. They now are mature enough to be assembled in a book - even with executable code.
+This folder holds the code from "The Fuzzing Book".  This book addresses the problem of software bugs by automating software testing, specifically by _generating tests automatically_. Recent years have seen the development of novel techniques that lead to dramatic improvements in test generation and software testing. They now are mature enough to be assembled in a book - even with executable code.
 
 For details (and all of the book!), see the web site: https://www.fuzzingbook.org/
 
@@ -32,7 +32,7 @@ Enjoy!
 
 ## License
 
-Copyright (c) 2018 Saarland University, CISPA, authors, and contributors
+Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
