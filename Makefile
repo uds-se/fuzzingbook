@@ -540,7 +540,6 @@ endif
 # Reconstructing the reveal.js dir
 .PHONY: reveal.js
 $(REVEAL_JS) reveal.js: .FORCE
-	@echo "Updating $@"
 	@-test -d "$@" || (cd $(SLIDES_TARGET); \
 		git submodule add https://github.com/hakimel/reveal.js.git)
 	@git submodule update --remote
@@ -902,8 +901,10 @@ $(DOCS_TARGET)dist/$(PROJECT)-notebooks.zip: $(FULLS) $(CHAPTERS_MAKEFILE) \
 .PHONY: publish-slides publish-slides-setup
 publish-slides: slides publish-slides-setup \
 	$(PUBLIC_CHAPTERS:%.ipynb=$(DOCS_TARGET)slides/%.slides.html) \
-	$(APPENDICES:%.ipynb=$(DOCS_TARGET)slides/%.slides.html)
-	
+	$(APPENDICES:%.ipynb=$(DOCS_TARGET)slides/%.slides.html) \
+	$(DOCS_TARGET)slides/reveal.js
+	@-rm -fr $(DOCS_TARGET)slides/.git
+
 publish-slides-setup:
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)slides || $(MKDIR) $(DOCS_TARGET)slides
