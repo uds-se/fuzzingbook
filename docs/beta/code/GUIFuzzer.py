@@ -60,7 +60,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     from WebFuzzer import init_db, start_httpd, webbrowser, print_httpd_messages, print_url, ORDERS_DB
@@ -83,7 +87,11 @@ if __name__ == "__main__":
     from IPython.display import display, Image
 
 
-from bookutils import HTML, rich_output
+if __package__ is None or __package__ == "":
+    from bookutils import HTML, rich_output
+else:
+    from .bookutils import HTML, rich_output
+
 
 if __name__ == "__main__":
     HTML(webbrowser(httpd_url))
@@ -700,7 +708,11 @@ if __name__ == "__main__":
 
 from collections import deque
 
-from bookutils import unicode_escape
+if __package__ is None or __package__ == "":
+    from bookutils import unicode_escape
+else:
+    from .bookutils import unicode_escape
+
 
 def fsm_diagram(grammar, start_symbol=START_SYMBOL):
     from graphviz import Digraph
@@ -1114,7 +1126,11 @@ else:
     from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
 
 
-from bookutils import inheritance_conflicts
+if __package__ is None or __package__ == "":
+    from bookutils import inheritance_conflicts
+else:
+    from .bookutils import inheritance_conflicts
+
 
 if __name__ == "__main__":
     inheritance_conflicts(GUIFuzzer, GrammarCoverageFuzzer)

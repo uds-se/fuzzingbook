@@ -44,7 +44,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 import re
 import io

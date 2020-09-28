@@ -52,7 +52,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     from Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL

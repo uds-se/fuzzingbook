@@ -93,7 +93,11 @@ if __name__ == "__main__":
     process_numbers(["--sum", "1", "2", "3"])
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     from ExpectError import ExpectError

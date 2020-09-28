@@ -161,7 +161,11 @@ if __name__ == "__main__":
     cgi_decode_code = inspect.getsource(cgi_decode)
 
 
-from bookutils import print_content, print_file
+if __package__ is None or __package__ == "":
+    from bookutils import print_content, print_file
+else:
+    from .bookutils import print_content, print_file
+
 
 if __name__ == "__main__":
     print_content(cgi_decode_code[:300] + "...", ".py")
@@ -264,7 +268,11 @@ if __name__ == "__main__":
     cov_plus.coverage() - cov_standard.coverage()
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __name__ == "__main__":
     with Coverage() as cov_max:
@@ -471,7 +479,11 @@ if __name__ == "__main__":
         f.write(cgi_c_code)
 
 
-from bookutils import print_file
+if __package__ is None or __package__ == "":
+    from bookutils import print_file
+else:
+    from .bookutils import print_file
+
 
 if __name__ == "__main__":
     print_file("cgi_decode.c")

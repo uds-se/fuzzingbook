@@ -36,7 +36,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     import Fuzzer
@@ -165,7 +169,11 @@ if __name__ == "__main__":
 
 from pygments.lexers.configs import IniLexer
 
-from bookutils import print_file
+if __package__ is None or __package__ == "":
+    from bookutils import print_file
+else:
+    from .bookutils import print_file
+
 
 if __name__ == "__main__":
     print_file(conf, lexer=IniLexer())
@@ -225,7 +233,11 @@ if __name__ == "__main__":
     from IPython.display import display, Image
 
 
-from bookutils import HTML, rich_output
+if __package__ is None or __package__ == "":
+    from bookutils import HTML, rich_output
+else:
+    from .bookutils import HTML, rich_output
+
 
 if __package__ is None or __package__ == "":
     from GUIFuzzer import start_webdriver  # minor dependency
@@ -287,7 +299,11 @@ if __name__ == "__main__":
     os.system('(cd simply-buggy && make)')
 
 
-from bookutils import print_file
+if __package__ is None or __package__ == "":
+    from bookutils import print_file
+else:
+    from .bookutils import print_file
+
 
 if __name__ == "__main__":
     print_file("simply-buggy/simple-crash.cpp")

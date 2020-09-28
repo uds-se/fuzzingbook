@@ -107,7 +107,11 @@ if __name__ == "__main__":
     strong_oracle(triangle)
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     from Coverage import Coverage
@@ -210,7 +214,11 @@ if __name__ == "__main__":
     triangle_source
 
 
-from bookutils import print_content
+if __package__ is None or __package__ == "":
+    from bookutils import print_content
+else:
+    from .bookutils import print_content
+
 
 if __name__ == "__main__":
     print_content(triangle_source, '.py')
@@ -224,7 +232,11 @@ if __name__ == "__main__":
     print(astor.dump_tree(triangle_ast))
 
 
-from bookutils import rich_output
+if __package__ is None or __package__ == "":
+    from bookutils import rich_output
+else:
+    from .bookutils import rich_output
+
 
 if __name__ == "__main__":
     if rich_output():

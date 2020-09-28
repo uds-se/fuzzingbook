@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
-# Last change: 2020-09-27 19:14:06+02:00
+# Last change: 2020-09-28 11:35:03+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -52,7 +52,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 import traceback
 import sys
@@ -215,4 +219,12 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     with ExpectTimeout(5):
         long_running_test()
+
+
+# ## Lessons Learned
+
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
 

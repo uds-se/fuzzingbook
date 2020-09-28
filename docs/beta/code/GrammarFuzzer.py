@@ -52,9 +52,17 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
 
-from bookutils import unicode_escape
+
+if __package__ is None or __package__ == "":
+    from bookutils import unicode_escape
+else:
+    from .bookutils import unicode_escape
+
 
 if __package__ is None or __package__ == "":
     from Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer, is_valid_grammar, exp_string, exp_opts

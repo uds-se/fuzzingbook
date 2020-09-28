@@ -52,7 +52,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     from Grammars import EXPR_GRAMMAR, is_valid_grammar, is_nonterminal, extend_grammar
@@ -538,7 +542,11 @@ if __name__ == "__main__":
 
 
 
-from bookutils import HTML
+if __package__ is None or __package__ == "":
+    from bookutils import HTML
+else:
+    from .bookutils import HTML
+
 
 if __name__ == "__main__":
     HTML("<strong>A bold text</strong>")
@@ -873,7 +881,11 @@ else:
     from .ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer  # minor dependency
 
 
-from bookutils import inheritance_conflicts
+if __package__ is None or __package__ == "":
+    from bookutils import inheritance_conflicts
+else:
+    from .bookutils import inheritance_conflicts
+
 
 if __name__ == "__main__":
     inheritance_conflicts(ProbabilisticGrammarFuzzer, GeneratorGrammarFuzzer)

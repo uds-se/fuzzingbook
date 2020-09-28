@@ -36,7 +36,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     import Coverage
@@ -81,7 +85,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 def my_sqrt(x):
     """Computes the square root of x, using the Newton-Raphson method"""
@@ -174,7 +182,11 @@ if __name__ == "__main__":
     f.flush()
 
 
-from bookutils import print_file
+if __package__ is None or __package__ == "":
+    from bookutils import print_file
+else:
+    from .bookutils import print_file
+
 
 if __name__ == "__main__":
     print_file(f.name)
@@ -400,7 +412,11 @@ if __name__ == "__main__":
     my_sqrt_source
 
 
-from bookutils import print_content
+if __package__ is None or __package__ == "":
+    from bookutils import print_content
+else:
+    from .bookutils import print_content
+
 
 if __name__ == "__main__":
     print_content(my_sqrt_source, '.py')
@@ -414,7 +430,11 @@ if __name__ == "__main__":
     print(astor.dump_tree(my_sqrt_ast))
 
 
-from bookutils import rich_output
+if __package__ is None or __package__ == "":
+    from bookutils import rich_output
+else:
+    from .bookutils import rich_output
+
 
 if __name__ == "__main__":
     if rich_output():

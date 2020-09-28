@@ -11,11 +11,11 @@ from import_notebooks import RE_CODE
 
 # Things to ignore in exported Python code
 RE_IGNORE = re.compile(r'^get_ipython().*|^%.*')
-RE_IMPORT_FUZZINGBOOK_UTILS = re.compile(r'^import fuzzingbook_utils.*$', re.MULTILINE)
-RE_FROM_FUZZINGBOOK_UTILS = re.compile(r'^from fuzzingbook_utils import .*$', re.MULTILINE)
+RE_IMPORT_BOOKUTILS = re.compile(r'^import bookutils.*$', re.MULTILINE)
+RE_FROM_BOOKUTILS = re.compile(r'^from bookutils import .*$', re.MULTILINE)
 
 # Things to import only if main (reduces dependencies)
-RE_IMPORT_IF_MAIN = re.compile(r'^(from|import)[ \t]+(matplotlib|graphviz|mpl_toolkits|numpy|scipy|IPython|requests|FTB|Collector|fuzzingbook_utils import YouTubeVideo).*$', re.MULTILINE)
+RE_IMPORT_IF_MAIN = re.compile(r'^(from|import)[ \t]+(matplotlib|graphviz|mpl_toolkits|numpy|scipy|IPython|requests|FTB|Collector|bookutils import YouTubeVideo).*$', re.MULTILINE)
 
 # Strip blank lines
 RE_BLANK_LINES = re.compile(r'^[ \t]*$', re.MULTILINE)
@@ -55,7 +55,7 @@ HEADER = """#!/usr/bin/env python3
 
 """
 
-# Replacement for "import fuzzingbook_utils"
+# Replacement for "import bookutils"
 SET_FIXED_SEED = r"""# We use the same fixed seed as the notebook to ensure consistency
 import random
 random.seed(2001)"""
@@ -83,14 +83,14 @@ def fix_imports(code):
         # FuzzManager imports
         return code
 
-    code = re.sub(r"^from *([A-Z].*|fuzzingbook_utils.*)$",
+    code = re.sub(r"^from *([A-Z].*|bookutils.*)$",
 r'''if __package__ is None or __package__ == "":
     from \1
 else:
     from .\1
 ''', code, flags=re.MULTILINE)
 
-    code = re.sub(r"^import *([A-Z].*|fuzzingbook_utils.*)$",
+    code = re.sub(r"^import *([A-Z].*|bookutils.*)$",
 r'''if __package__ is None or __package__ == "":
     import \1
 else:
@@ -150,13 +150,13 @@ def export_notebook_code(notebook_name, path=None):
                 code = "import os\nos.system(" + repr(code[1:]) + ")"
                 bang = True
 
-            if RE_IMPORT_FUZZINGBOOK_UTILS.match(code):
-                # Don't import all of fuzzingbook_utils (requires nbformat & Ipython)
+            if RE_IMPORT_BOOKUTILS.match(code):
+                # Don't import all of bookutils (requires nbformat & Ipython)
                 print_if_main(SET_FIXED_SEED)
             elif RE_IMPORT_IF_MAIN.match(code):
                 print_if_main(code)
-            elif RE_FROM_FUZZINGBOOK_UTILS.match(code):
-                # This would be "from fuzzingbook_utils import HTML"
+            elif RE_FROM_BOOKUTILS.match(code):
+                # This would be "from bookutils import HTML"
                 # print ("Code: ", repr(code))
                 code = fix_imports(code)
                 print_utf8("\n" + code + "\n")

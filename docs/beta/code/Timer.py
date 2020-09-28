@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Timer.html
-# Last change: 2020-09-27 19:14:06+02:00
+# Last change: 2020-09-28 11:34:28+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -52,7 +52,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 import time
 
@@ -112,4 +116,12 @@ if __name__ == "__main__":
     with Timer() as t:
         some_long_running_function()
     t.elapsed_time()
+
+
+# ## Lessons Learned
+
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
 

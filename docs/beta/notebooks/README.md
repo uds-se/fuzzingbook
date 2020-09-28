@@ -6,7 +6,7 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 
 
 ```python
-from fuzzingbook_utils import YouTubeVideo
+from bookutils import YouTubeVideo
 YouTubeVideo("w4u5gCgPlmg")
 ```
 

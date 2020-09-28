@@ -65,7 +65,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 FUZZINGBOOK_SWAG = {
     "tshirt": "One FuzzingBook T-Shirt",
@@ -116,7 +120,11 @@ if __name__ == "__main__":
     from IPython.display import display
 
 
-from bookutils import HTML
+if __package__ is None or __package__ == "":
+    from bookutils import HTML
+else:
+    from .bookutils import HTML
+
 
 if __name__ == "__main__":
     HTML(HTML_ORDER_FORM)
@@ -443,7 +451,11 @@ if __name__ == "__main__":
     HTTPD_MESSAGE_QUEUE.put("I am one more message")
 
 
-from bookutils import rich_output, terminal_escape
+if __package__ is None or __package__ == "":
+    from bookutils import rich_output, terminal_escape
+else:
+    from .bookutils import rich_output, terminal_escape
+
 
 def display_httpd_message(message):
     if rich_output():

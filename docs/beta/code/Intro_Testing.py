@@ -174,7 +174,11 @@ if __name__ == "__main__":
         assertEquals(my_sqrt(n) * my_sqrt(n), n)
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     from Timer import Timer

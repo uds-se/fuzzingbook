@@ -105,7 +105,11 @@ if __name__ == "__main__":
 
 
 
-import bookutils
+if __name__ == "__main__":
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
 
 if __package__ is None or __package__ == "":
     from GrammarFuzzer import GrammarFuzzer, all_terminals, display_tree
@@ -1024,7 +1028,11 @@ if __name__ == "__main__":
 
 
 
-from bookutils import inheritance_conflicts
+if __package__ is None or __package__ == "":
+    from bookutils import inheritance_conflicts
+else:
+    from .bookutils import inheritance_conflicts
+
 
 if __name__ == "__main__":
     inheritance_conflicts(GrammarCoverageFuzzer, ProbabilisticGrammarFuzzer)
