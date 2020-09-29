@@ -1,13 +1,10 @@
+# Bookutils
+
 # Define the contents of this file as a package
 __all__ = ["PrettyTable", "YouTubeVideo",
-           "print_file", "HTML",
-           "unicode_escape", "terminal_escape", "extract_class_definition"]
-
-
-# Compatibility hack: Make "fuzzingbook_utils" an alias for "bookutils"
-import sys
-sys.modules['fuzzingbook_utils'] = sys.modules[__name__]
-
+           "print_file", "print_content", "HTML",
+           "unicode_escape", "terminal_escape", 
+           "inheritance_conflicts", "extract_class_definition"]
 
 # Setup loader such that workbooks can be imported directly
 try:
