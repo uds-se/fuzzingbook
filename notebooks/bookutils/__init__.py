@@ -4,6 +4,11 @@ __all__ = ["PrettyTable", "YouTubeVideo",
            "unicode_escape", "terminal_escape", "extract_class_definition"]
 
 
+# Compatibility hack: Make "fuzzingbook_utils" an alias for "bookutils"
+import sys
+sys.modules['fuzzingbook_utils'] = sys.modules[__name__]
+
+
 # Setup loader such that workbooks can be imported directly
 try:
     import IPython
@@ -13,7 +18,7 @@ except:
 
 if have_ipython:
     from . import import_notebooks
-
+    
 # Set fixed seed
 from . import set_fixed_seed
 set_fixed_seed.set_fixed_seed()
