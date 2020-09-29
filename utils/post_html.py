@@ -46,7 +46,7 @@ if project == "fuzzingbook":
 elif project == "debuggingbook":
     booktitle = "The Debugging Book"
     authors = "Andreas Zeller"
-    twitter = "@DebugBook"
+    twitter = "@Debugging_Book"
 else:
     booktitle = "The Unknown Book"
     authors = "Nobody"
