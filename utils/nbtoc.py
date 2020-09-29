@@ -41,8 +41,11 @@ def notebook_toc_entry(notebook_name, prefix, path=None):
 
     return prefix + " [" + notebook_title + "](" + notebook_base + ")\n"
     
-def notebook_toc(public_chapters, appendices):
-    title = "# The Fuzzing Book"
+def notebook_toc(public_chapters, appendices, booktitle):
+    if booktitle:
+        booktitle = "# " + booktitle
+    else:
+        booktitle = ""
 
     chapter_toc = "## [Table of Contents](index.ipynb)\n\n"
     counter = 1
@@ -68,7 +71,7 @@ This sitemap shows possible paths through the book chapters.  An arrow $A \right
 
     toc_notebook = nbformat.v4.new_notebook(
         cells=[
-            nbformat.v4.new_markdown_cell(source=title),
+            nbformat.v4.new_markdown_cell(source=booktitle),
             nbformat.v4.new_markdown_cell(source=sitemap),
             nbformat.v4.new_code_cell(source=sitemap_code_1),
             nbformat.v4.new_code_cell(source=sitemap_code_2),
@@ -118,10 +121,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--chapters", help="List of public chapters")
     parser.add_argument("--appendices", help="List of appendices")
+    parser.add_argument("--title", help="Book title", default="")
     args = parser.parse_args()
 
     public_chapters = args.chapters.split()
     appendices = args.appendices.split()
     
-    toc_notebook = notebook_toc(public_chapters, appendices)
+    toc_notebook = notebook_toc(public_chapters, appendices, args.title)
     sys.stdout.buffer.write(nbformat.writes(toc_notebook).encode("utf-8"))

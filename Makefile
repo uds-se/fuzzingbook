@@ -450,10 +450,13 @@ $(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(AD
 
 POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--project="$(PROJECT)" \
+	--title="$(BOOKTITLE)" \
+	--authors="$(AUTHORS)" \
+	--twitter="$(TWITTER)" \
 	--public-chapters="$(CHAPTER_SOURCES) $(APPENDICES_SOURCES)" \
 	--ready-chapters="$(READY_SOURCES)" \
 	--todo-chapters="$(TODO_SOURCES)" \
-	--new-chapters="$(NEW_SOURCES)" \
+	--new-chapters="$(NEW_SOURCES)"
 
 HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) utils/post_html.py $(CHAPTERS_MAKEFILE)
 
@@ -960,6 +963,7 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
 	$(SITEMAP_SVG)
 	$(RM) $@
 	$(PYTHON) utils/nbtoc.py \
+		--title="$(BOOKTITLE)" \
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
 		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
 	$(EXECUTE_NOTEBOOK) $@ && mv $(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb $@
@@ -1045,7 +1049,7 @@ docker-stop:
 ## Getting rid of stray processes and workspaces
 kill:
 	-pkill -HUP -l -f jupyter-lab Firefox.app firefox-bin runserver
-	$(RM) $$HOME/lab/workspaces/*.jupyterlab-workspace
+	$(RM) $$HOME/.jupyter/lab/workspaces/*.jupyterlab-workspace
 
 ## Cleanup
 AUX = *.aux *.bbl *.blg *.log *.out *.toc *.frm *.lof *.lot *.fls *.fdb_latexmk \

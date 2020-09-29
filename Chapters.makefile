@@ -4,6 +4,11 @@
 # Name of the project
 PROJECT = fuzzingbook
 
+# Some metadata
+BOOKTITLE = The Fuzzing Book
+AUTHORS = Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler
+TWITTER = @FuzzingBook
+
 # Chapter(s) to be marked as "new" in menu
 NEW_CHAPTERS = 
 

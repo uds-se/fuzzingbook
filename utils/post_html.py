@@ -28,6 +28,9 @@ parser.add_argument("--home", help="omit links to notebook, code, and slides", a
 parser.add_argument("--include-ready", help="include ready chapters", action='store_true')
 parser.add_argument("--include-todo", help="include work-in-progress chapters", action='store_true')
 parser.add_argument("--project", help="project name", default="fuzzingbook")
+parser.add_argument("--title", help="book title", default="The Fuzzing Book")
+parser.add_argument("--authors", help="list of authors", default="A. Zeller et al.")
+parser.add_argument("--twitter", help="twitter handle", default="@FuzzingBook")
 parser.add_argument("--menu-prefix", help="prefix to html files in menu")
 parser.add_argument("--public-chapters", help="List of public chapters")
 parser.add_argument("--ready-chapters", help="List of ready chapters")
@@ -38,19 +41,9 @@ args = parser.parse_args()
 
 # Some fixed strings    
 project = args.project
-
-if project == "fuzzingbook":
-    booktitle = "The Fuzzing Book"
-    authors = "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler"
-    twitter = "@FuzzingBook"
-elif project == "debuggingbook":
-    booktitle = "The Debugging Book"
-    authors = "Andreas Zeller"
-    twitter = "@Debugging_Book"
-else:
-    booktitle = "The Unknown Book"
-    authors = "Nobody"
-    twitter = "@Nobody"
+booktitle = args.title
+authors = args.authors
+twitter = args.twitter
 
 site_html = f"https://www.{project}.org/"
 github_html = f"https://github.com/uds-se/{project}/"
