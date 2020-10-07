@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2020-01-21 11:03:22+01:00
+# Last change: 2020-09-27 19:14:06+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -121,9 +121,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import HTML
+    from bookutils import HTML
 else:
-    from .fuzzingbook_utils import HTML
+    from .bookutils import HTML
 
 
 if __name__ == "__main__":
@@ -452,9 +452,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import rich_output, terminal_escape
+    from bookutils import rich_output, terminal_escape
 else:
-    from .fuzzingbook_utils import rich_output, terminal_escape
+    from .bookutils import rich_output, terminal_escape
 
 
 def display_httpd_message(message):

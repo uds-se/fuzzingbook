@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2020-01-21 11:03:38+01:00
+# Last change: 2020-09-27 19:14:06+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -88,9 +88,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import HTML, rich_output
+    from bookutils import HTML, rich_output
 else:
-    from .fuzzingbook_utils import HTML, rich_output
+    from .bookutils import HTML, rich_output
 
 
 if __name__ == "__main__":
@@ -709,12 +709,15 @@ if __name__ == "__main__":
 from collections import deque
 
 if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import unicode_escape
+    from bookutils import unicode_escape
 else:
-    from .fuzzingbook_utils import unicode_escape
+    from .bookutils import unicode_escape
 
 
 def fsm_diagram(grammar, start_symbol=START_SYMBOL):
+    from graphviz import Digraph
+    from IPython.display import display
+    
     def left_align(label):
         return dot_escape(label.replace('\n', r'\l')).replace(r'\\l', '\\l')
 
@@ -1124,9 +1127,9 @@ else:
 
 
 if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import inheritance_conflicts
+    from bookutils import inheritance_conflicts
 else:
-    from .fuzzingbook_utils import inheritance_conflicts
+    from .bookutils import inheritance_conflicts
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2020-04-15 19:05:31+02:00
+# Last change: 2020-09-27 19:14:06+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -339,9 +339,9 @@ if __name__ == "__main__":
 
 
 if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import print_file
+    from bookutils import print_file
 else:
-    from .fuzzingbook_utils import print_file
+    from .bookutils import print_file
 
 
 if __name__ == "__main__":

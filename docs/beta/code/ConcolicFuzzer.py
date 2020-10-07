@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2020-06-25 11:32:46+02:00
+# Last change: 2020-09-27 19:14:05+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -851,7 +851,7 @@ def zeval_smt(path, cc, log):
 
         if log:
             print(s, '(check-sat)', '(get-model)', sep='\n')
-        output = subprocess.getoutput("z3 " + f.name)
+        output = subprocess.getoutput("z3 -t:60 " + f.name)
 
     if log:
         print(output)

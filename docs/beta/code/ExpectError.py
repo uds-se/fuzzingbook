@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
-# Last change: 2019-05-19 19:01:14+02:00
+# Last change: 2020-09-28 11:35:03+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -219,4 +219,12 @@ if __name__ == "__main__":
 if __name__ == "__main__":
     with ExpectTimeout(5):
         long_running_test()
+
+
+# ## Lessons Learned
+
+if __name__ == "__main__":
+    print('\n## Lessons Learned')
+
+
 

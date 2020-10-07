@@ -11796,6 +11796,8 @@ MathJax.Hub.Config({
 <meta property="og:description" content="So far, the grammars we have seen have been mostly specified manually – that is, you (or the person knowing the input format) had to design and write a grammar in the first place.  While the grammars we have seen so far have been rather simple, creating a grammar for complex inputs can involve quite some effort.  In this chapter, we therefore introduce techniques that automatically mine grammars from programs – by executing the programs and observing how they process which parts of the input.  In conjunction with a grammar fuzzer, this allows us to 1. take a program, 2. extract its input grammar, and 3. fuzz it with high efficiency and effectiveness, using the concepts in this book.Prerequisites You should have read the chapter on grammars. The chapter on configuration fuzzing introduces grammar mining for configuration options, as well as observing variables and values during execution. We use the tracer from the chapter on coverage. The concept of parsing from the chapter on parsers is also useful." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
+<meta name="twitter:dnt" content="on">
+
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
 <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-touch-icon.png">
 
@@ -11869,7 +11871,7 @@ MathJax.Hub.Config({
 <li><a href="https://www.fuzzingbook.org/beta/html/00_Table_of_Contents.html"><i class="fa fa-fw fa-sitemap"></i></span> Sitemap</a></li>
 <li class="has-sub"><a href="01_Intro.html" class="chapters"><span class="part_number">I</span> Whetting Your Appetite <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
-<li><a href="Tours.html">Tours through the Book <strong class="new_chapter">&bull;</strong></a></li>
+<li><a href="Tours.html">Tours through the Book</a></li>
 <li><a href="Intro_Testing.html">Introduction to Software Testing</a></li>
 </ul><li class="has-sub"><a href="02_Lexical_Fuzzing.html" class="chapters"><span class="part_number">II</span> Lexical Fuzzing <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
@@ -12044,12 +12046,12 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <span class="o">&gt;&gt;&gt;</span> <span class="n">grammar</span>
 <span class="p">{</span><span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;urlsplit@394:url&gt;&#39;</span><span class="p">],</span>
  <span class="s1">&#39;&lt;urlsplit@394:url&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;__new__@12:scheme&gt;:&lt;_splitnetloc@386:url&gt;&#39;</span><span class="p">],</span>
- <span class="s1">&#39;&lt;__new__@12:scheme&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;__new__@12:scheme&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;https&#39;</span><span class="p">,</span> <span class="s1">&#39;http&#39;</span><span class="p">],</span>
+ <span class="s1">&#39;&lt;__new__@12:scheme&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;__new__@12:scheme&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;http&#39;</span><span class="p">,</span> <span class="s1">&#39;https&#39;</span><span class="p">],</span>
  <span class="s1">&#39;&lt;_splitnetloc@386:url&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;//&lt;__new__@12:netloc&gt;/&#39;</span><span class="p">,</span>
   <span class="s1">&#39;//&lt;__new__@12:netloc&gt;&lt;urlsplit@415:url&gt;&#39;</span><span class="p">],</span>
- <span class="s1">&#39;&lt;__new__@12:netloc&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;__new__@12:netloc&gt;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;&lt;__new__@12:netloc&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;user:pass@www.google.com:80&#39;</span><span class="p">,</span>
   <span class="s1">&#39;www.fuzzingbook.org&#39;</span><span class="p">,</span>
-  <span class="s1">&#39;user:pass@www.google.com:80&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;&lt;__new__@12:netloc&gt;&#39;</span><span class="p">,</span>
   <span class="s1">&#39;www.cispa.saarland:80&#39;</span><span class="p">],</span>
  <span class="s1">&#39;&lt;urlsplit@415:url&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;/#&lt;__new__@12:fragment&gt;&#39;</span><span class="p">,</span>
   <span class="s1">&#39;&lt;urlsplit@420:url&gt;#&lt;__new__@12:fragment&gt;&#39;</span><span class="p">],</span>
@@ -12062,11 +12064,11 @@ The grammar can be immediately used for fuzzing, producing arbitrary combination
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="GrammarCoverageFuzzer.html" class="import" target="_blank">GrammarCoverageFuzzer</a></span> <span class="kn">import</span> <span class="n">GrammarCoverageFuzzer</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">GrammarCoverageFuzzer</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
-<span class="p">[</span><span class="s1">&#39;http://user:pass@www.google.com:80/?q=path#News&#39;</span><span class="p">,</span>
- <span class="s1">&#39;https://www.fuzzingbook.org/&#39;</span><span class="p">,</span>
- <span class="s1">&#39;http://www.cispa.saarland:80/#ref&#39;</span><span class="p">,</span>
- <span class="s1">&#39;http://user:pass@www.google.com:80/?q=path#News&#39;</span><span class="p">,</span>
- <span class="s1">&#39;https://user:pass@www.google.com:80/#News&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="s1">&#39;https://www.fuzzingbook.org/?q=path#News&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;http://user:pass@www.google.com:80/&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;https://www.cispa.saarland:80/#ref&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;https://www.cispa.saarland:80/#News&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;http://www.fuzzingbook.org/?q=path#News&#39;</span><span class="p">]</span>
 </pre></div>
 <p>Being able to automatically extract a grammar and to use this grammar for fuzzing makes for very effective test generation with a minimum of manual work.</p>
 </div>
@@ -12091,7 +12093,7 @@ The grammar can be immediately used for fuzzing, producing arbitrary combination
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils" class="import" target="_blank">fuzzingbook_utils</a></span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook/tree/master/notebooks/bookutils" class="import" target="_blank">bookutils</a></span>
 </pre></div>
 
 </div>
@@ -16039,10 +16041,10 @@ year = &#39;1999&#39;
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M159.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h8.5"/><path d="M131.0 31h8.5"/><g class="terminal">
-<path d="M68.5 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="68.5" y="20"/><text x="99.75" y="35">Chevy</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><g class="terminal">
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="50"/><text x="99.75" y="65">Mercury</text></g></g><path d="M139.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="20"/><text x="99.75" y="35">Mercury</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h8.5"/><path d="M131.0 61h8.5"/><g class="terminal">
+<path d="M68.5 61h0.0"/><path d="M131.0 61h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="68.5" y="50"/><text x="99.75" y="65">Chevy</text></g></g><path d="M139.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
 <path d="M60.0 91h12.75"/><path d="M126.75 91h12.75"/><g class="terminal">
 <path d="M72.75 91h0.0"/><path d="M126.75 91h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="72.75" y="80"/><text x="99.75" y="95">Ford</text></g></g><path d="M139.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
@@ -16094,10 +16096,10 @@ year = &#39;1999&#39;
 <path d="M40 61h0.0"/><path d="M159.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
 <path d="M60.0 31h12.75"/><path d="M126.75 31h12.75"/><g class="terminal">
 <path d="M72.75 31h0.0"/><path d="M126.75 31h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="72.75" y="20"/><text x="99.75" y="35">E350</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h4.25"/><path d="M135.25 61h4.25"/><g class="terminal">
-<path d="M64.25 61h0.0"/><path d="M135.25 61h0.0"/><rect height="22" rx="10" ry="10" width="71.0" x="64.25" y="50"/><text x="99.75" y="65">Cougar</text></g></g><path d="M139.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 91h0.0"/><path d="M139.5 91h0.0"/><g class="terminal">
-<path d="M60.0 91h0.0"/><path d="M139.5 91h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="80"/><text x="99.75" y="95">Venture</text></g></g><path d="M139.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="50"/><text x="99.75" y="65">Venture</text></g></g><path d="M139.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h4.25"/><path d="M135.25 91h4.25"/><g class="terminal">
+<path d="M64.25 91h0.0"/><path d="M135.25 91h0.0"/><rect height="22" rx="10" ry="10" width="71.0" x="64.25" y="80"/><text x="99.75" y="95">Cougar</text></g></g><path d="M139.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -16218,8 +16220,8 @@ year = &#39;1999&#39;
  &#39;&lt;vehicle&gt;&#39;: [&#39;&lt;year&gt;,&lt;kind&gt;,&lt;company&gt;,&lt;model&gt;&#39;],
  &#39;&lt;year&gt;&#39;: [&#39;1997&#39;, &#39;2000&#39;, &#39;1999&#39;],
  &#39;&lt;kind&gt;&#39;: [&#39;car&#39;, &#39;van&#39;],
- &#39;&lt;company&gt;&#39;: [&#39;Chevy&#39;, &#39;Mercury&#39;, &#39;Ford&#39;],
- &#39;&lt;model&gt;&#39;: [&#39;E350&#39;, &#39;Cougar&#39;, &#39;Venture&#39;]}
+ &#39;&lt;company&gt;&#39;: [&#39;Mercury&#39;, &#39;Chevy&#39;, &#39;Ford&#39;],
+ &#39;&lt;model&gt;&#39;: [&#39;E350&#39;, &#39;Venture&#39;, &#39;Cougar&#39;]}
 </pre>
 </div>
 
@@ -16496,24 +16498,24 @@ http://www.fuzzingbook.org/#News
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M603.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h165.0"/><path d="M418.5 31h165.0"/><g class="non-terminal">
-<path d="M225.0 31h0.0"/><path d="M296.0 31h0.0"/><rect height="22" width="71.0" x="225.0" y="20"/><text x="260.5" y="35">scheme</text></g><path d="M296.0 31h10"/><path d="M306.0 31h10"/><g class="terminal">
-<path d="M316.0 31h0.0"/><path d="M344.5 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="316.0" y="20"/><text x="330.25" y="35">:</text></g><path d="M344.5 31h10"/><path d="M354.5 31h10"/><g class="non-terminal">
-<path d="M364.5 31h0.0"/><path d="M418.5 31h0.0"/><rect height="22" width="54.0" x="364.5" y="20"/><text x="391.5" y="35">rest</text></g></g><path d="M583.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h65.5"/><path d="M518.0 61h65.5"/><g class="non-terminal">
-<path d="M125.5 61h0.0"/><path d="M196.5 61h0.0"/><rect height="22" width="71.0" x="125.5" y="50"/><text x="161.0" y="65">scheme</text></g><path d="M196.5 61h10"/><path d="M206.5 61h10"/><g class="terminal">
-<path d="M216.5 61h0.0"/><path d="M262.0 61h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="216.5" y="50"/><text x="239.25" y="65">://</text></g><path d="M262.0 61h10"/><path d="M272.0 61h10"/><g class="non-terminal">
-<path d="M282.0 61h0.0"/><path d="M353.0 61h0.0"/><rect height="22" width="71.0" x="282.0" y="50"/><text x="317.5" y="65">netloc</text></g><path d="M353.0 61h10"/><path d="M363.0 61h10"/><g class="terminal">
-<path d="M373.0 61h0.0"/><path d="M410.0 61h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="373.0" y="50"/><text x="391.5" y="65">/#</text></g><path d="M410.0 61h10"/><path d="M420.0 61h10"/><g class="non-terminal">
-<path d="M430.0 61h0.0"/><path d="M518.0 61h0.0"/><rect height="22" width="88.0" x="430.0" y="50"/><text x="474.0" y="65">fragment</text></g></g><path d="M583.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 91h0.0"/><path d="M583.5 91h0.0"/><g class="non-terminal">
-<path d="M60.0 91h0.0"/><path d="M131.0 91h0.0"/><rect height="22" width="71.0" x="60.0" y="80"/><text x="95.5" y="95">scheme</text></g><path d="M131.0 91h10"/><path d="M141.0 91h10"/><g class="terminal">
-<path d="M151.0 91h0.0"/><path d="M196.5 91h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="151.0" y="80"/><text x="173.75" y="95">://</text></g><path d="M196.5 91h10"/><path d="M206.5 91h10"/><g class="non-terminal">
-<path d="M216.5 91h0.0"/><path d="M287.5 91h0.0"/><rect height="22" width="71.0" x="216.5" y="80"/><text x="252.0" y="95">netloc</text></g><path d="M287.5 91h10"/><path d="M297.5 91h10"/><g class="terminal">
-<path d="M307.5 91h0.0"/><path d="M344.5 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="307.5" y="80"/><text x="326.0" y="95">/?</text></g><path d="M344.5 91h10"/><path d="M354.5 91h10"/><g class="non-terminal">
-<path d="M364.5 91h0.0"/><path d="M427.0 91h0.0"/><rect height="22" width="62.5" x="364.5" y="80"/><text x="395.75" y="95">query</text></g><path d="M427.0 91h10"/><path d="M437.0 91h10"/><g class="terminal">
-<path d="M447.0 91h0.0"/><path d="M475.5 91h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="447.0" y="80"/><text x="461.25" y="95">#</text></g><path d="M475.5 91h10"/><path d="M485.5 91h10"/><g class="non-terminal">
-<path d="M495.5 91h0.0"/><path d="M583.5 91h0.0"/><rect height="22" width="88.0" x="495.5" y="80"/><text x="539.5" y="95">fragment</text></g></g><path d="M583.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 603.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 31h0.0"/><path d="M583.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" width="71.0" x="60.0" y="20"/><text x="95.5" y="35">scheme</text></g><path d="M131.0 31h10"/><path d="M141.0 31h10"/><g class="terminal">
+<path d="M151.0 31h0.0"/><path d="M196.5 31h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="151.0" y="20"/><text x="173.75" y="35">://</text></g><path d="M196.5 31h10"/><path d="M206.5 31h10"/><g class="non-terminal">
+<path d="M216.5 31h0.0"/><path d="M287.5 31h0.0"/><rect height="22" width="71.0" x="216.5" y="20"/><text x="252.0" y="35">netloc</text></g><path d="M287.5 31h10"/><path d="M297.5 31h10"/><g class="terminal">
+<path d="M307.5 31h0.0"/><path d="M344.5 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="307.5" y="20"/><text x="326.0" y="35">/?</text></g><path d="M344.5 31h10"/><path d="M354.5 31h10"/><g class="non-terminal">
+<path d="M364.5 31h0.0"/><path d="M427.0 31h0.0"/><rect height="22" width="62.5" x="364.5" y="20"/><text x="395.75" y="35">query</text></g><path d="M427.0 31h10"/><path d="M437.0 31h10"/><g class="terminal">
+<path d="M447.0 31h0.0"/><path d="M475.5 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="447.0" y="20"/><text x="461.25" y="35">#</text></g><path d="M475.5 31h10"/><path d="M485.5 31h10"/><g class="non-terminal">
+<path d="M495.5 31h0.0"/><path d="M583.5 31h0.0"/><rect height="22" width="88.0" x="495.5" y="20"/><text x="539.5" y="35">fragment</text></g></g><path d="M583.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h165.0"/><path d="M418.5 61h165.0"/><g class="non-terminal">
+<path d="M225.0 61h0.0"/><path d="M296.0 61h0.0"/><rect height="22" width="71.0" x="225.0" y="50"/><text x="260.5" y="65">scheme</text></g><path d="M296.0 61h10"/><path d="M306.0 61h10"/><g class="terminal">
+<path d="M316.0 61h0.0"/><path d="M344.5 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="316.0" y="50"/><text x="330.25" y="65">:</text></g><path d="M344.5 61h10"/><path d="M354.5 61h10"/><g class="non-terminal">
+<path d="M364.5 61h0.0"/><path d="M418.5 61h0.0"/><rect height="22" width="54.0" x="364.5" y="50"/><text x="391.5" y="65">rest</text></g></g><path d="M583.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h65.5"/><path d="M518.0 91h65.5"/><g class="non-terminal">
+<path d="M125.5 91h0.0"/><path d="M196.5 91h0.0"/><rect height="22" width="71.0" x="125.5" y="80"/><text x="161.0" y="95">scheme</text></g><path d="M196.5 91h10"/><path d="M206.5 91h10"/><g class="terminal">
+<path d="M216.5 91h0.0"/><path d="M262.0 91h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="216.5" y="80"/><text x="239.25" y="95">://</text></g><path d="M262.0 91h10"/><path d="M272.0 91h10"/><g class="non-terminal">
+<path d="M282.0 91h0.0"/><path d="M353.0 91h0.0"/><rect height="22" width="71.0" x="282.0" y="80"/><text x="317.5" y="95">netloc</text></g><path d="M353.0 91h10"/><path d="M363.0 91h10"/><g class="terminal">
+<path d="M373.0 91h0.0"/><path d="M410.0 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="373.0" y="80"/><text x="391.5" y="95">/#</text></g><path d="M410.0 91h10"/><path d="M420.0 91h10"/><g class="non-terminal">
+<path d="M430.0 91h0.0"/><path d="M518.0 91h0.0"/><rect height="22" width="88.0" x="430.0" y="80"/><text x="474.0" y="95">fragment</text></g></g><path d="M583.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 603.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -16561,10 +16563,10 @@ http://www.fuzzingbook.org/#News
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M142.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><g class="terminal">
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="20"/><text x="91.25" y="35">https</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h4.25"/><path d="M118.25 61h4.25"/><g class="terminal">
-<path d="M64.25 61h0.0"/><path d="M118.25 61h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="64.25" y="50"/><text x="91.25" y="65">http</text></g></g><path d="M122.5 61h20"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 31h4.25"/><path d="M118.25 31h4.25"/><g class="terminal">
+<path d="M64.25 31h0.0"/><path d="M118.25 31h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="64.25" y="20"/><text x="91.25" y="35">http</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M122.5 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M122.5 61h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="50"/><text x="91.25" y="65">https</text></g></g><path d="M122.5 61h20"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -16820,16 +16822,16 @@ http://www.fuzzingbook.org/#News
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>1999,car,Chevy,E350
-2000,car,Mercury,Cougar
-1999,van,Chevy,Venture
-1997,car,Ford,Venture
-2000,car,Chevy,E350
-2000,car,Chevy,Cougar
-1999,car,Mercury,E350
-1999,car,Mercury,E350
-1999,car,Chevy,Cougar
-1997,car,Mercury,E350
+<pre>1999,car,Mercury,E350
+2000,car,Chevy,Venture
+1999,van,Mercury,Cougar
+1997,car,Ford,Cougar
+2000,car,Mercury,E350
+2000,car,Mercury,Venture
+1999,car,Chevy,E350
+1999,car,Chevy,E350
+1999,car,Mercury,Venture
+1997,car,Chevy,E350
 </pre>
 </div>
 
@@ -16863,16 +16865,16 @@ http://www.fuzzingbook.org/#News
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>http://user:pass@www.google.com:80/#News
-http://www.cispa.saarland:80/?q=path#News
-http://www.fuzzingbook.org/?q=path#News
-https://www.cispa.saarland:80/?q=path#ref
+<pre>https://user:pass@www.google.com:80/
+https://www.fuzzingbook.org/?q=path#News
+http://www.cispa.saarland:80/
 https://www.cispa.saarland:80/#News
+http://www.cispa.saarland:80/
+http://www.fuzzingbook.org/#ref
+http://www.fuzzingbook.org/?q=path#ref
+http://www.fuzzingbook.org/?q=path#News
 http://user:pass@www.google.com:80/
-https://user:pass@www.google.com:80/
-http://user:pass@www.google.com:80/
-https://user:pass@www.google.com:80/#News
-http://www.fuzzingbook.org/
+http://user:pass@www.google.com:80/?q=path#News
 </pre>
 </div>
 
@@ -17051,26 +17053,26 @@ http://www.fuzzingbook.org/
 </style><g>
 <path d="M20 81v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 91h0.0"/><path d="M603.5 91h0.0"/><path d="M40.0 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 61h196.5"/><path d="M387.0 61h196.5"/><g class="terminal">
-<path d="M256.5 61h0.0"/><path d="M387.0 61h0.0"/><rect height="22" rx="10" ry="10" width="130.5" x="256.5" y="50"/><text x="321.75" y="65">/releases/5.8</text></g></g><path d="M583.5 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h165.0"/><path d="M418.5 31h165.0"/><g class="non-terminal">
-<path d="M225.0 31h0.0"/><path d="M296.0 31h0.0"/><rect height="22" width="71.0" x="225.0" y="20"/><text x="260.5" y="35">scheme</text></g><path d="M296.0 31h10"/><path d="M306.0 31h10"/><g class="terminal">
-<path d="M316.0 31h0.0"/><path d="M344.5 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="316.0" y="20"/><text x="330.25" y="35">:</text></g><path d="M344.5 31h10"/><path d="M354.5 31h10"/><g class="non-terminal">
-<path d="M364.5 31h0.0"/><path d="M418.5 31h0.0"/><rect height="22" width="54.0" x="364.5" y="20"/><text x="391.5" y="35">rest</text></g></g><path d="M583.5 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M40.0 91h20"/><g>
-<path d="M60.0 91h65.5"/><path d="M518.0 91h65.5"/><g class="non-terminal">
-<path d="M125.5 91h0.0"/><path d="M196.5 91h0.0"/><rect height="22" width="71.0" x="125.5" y="80"/><text x="161.0" y="95">scheme</text></g><path d="M196.5 91h10"/><path d="M206.5 91h10"/><g class="terminal">
-<path d="M216.5 91h0.0"/><path d="M262.0 91h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="216.5" y="80"/><text x="239.25" y="95">://</text></g><path d="M262.0 91h10"/><path d="M272.0 91h10"/><g class="non-terminal">
-<path d="M282.0 91h0.0"/><path d="M353.0 91h0.0"/><rect height="22" width="71.0" x="282.0" y="80"/><text x="317.5" y="95">netloc</text></g><path d="M353.0 91h10"/><path d="M363.0 91h10"/><g class="terminal">
-<path d="M373.0 91h0.0"/><path d="M410.0 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="373.0" y="80"/><text x="391.5" y="95">/#</text></g><path d="M410.0 91h10"/><path d="M420.0 91h10"/><g class="non-terminal">
-<path d="M430.0 91h0.0"/><path d="M518.0 91h0.0"/><rect height="22" width="88.0" x="430.0" y="80"/><text x="474.0" y="95">fragment</text></g></g><path d="M583.5 91h20"/><path d="M40.0 91a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 121h0.0"/><path d="M583.5 121h0.0"/><g class="non-terminal">
-<path d="M60.0 121h0.0"/><path d="M131.0 121h0.0"/><rect height="22" width="71.0" x="60.0" y="110"/><text x="95.5" y="125">scheme</text></g><path d="M131.0 121h10"/><path d="M141.0 121h10"/><g class="terminal">
-<path d="M151.0 121h0.0"/><path d="M196.5 121h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="151.0" y="110"/><text x="173.75" y="125">://</text></g><path d="M196.5 121h10"/><path d="M206.5 121h10"/><g class="non-terminal">
-<path d="M216.5 121h0.0"/><path d="M287.5 121h0.0"/><rect height="22" width="71.0" x="216.5" y="110"/><text x="252.0" y="125">netloc</text></g><path d="M287.5 121h10"/><path d="M297.5 121h10"/><g class="terminal">
-<path d="M307.5 121h0.0"/><path d="M344.5 121h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="307.5" y="110"/><text x="326.0" y="125">/?</text></g><path d="M344.5 121h10"/><path d="M354.5 121h10"/><g class="non-terminal">
-<path d="M364.5 121h0.0"/><path d="M427.0 121h0.0"/><rect height="22" width="62.5" x="364.5" y="110"/><text x="395.75" y="125">query</text></g><path d="M427.0 121h10"/><path d="M437.0 121h10"/><g class="terminal">
-<path d="M447.0 121h0.0"/><path d="M475.5 121h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="447.0" y="110"/><text x="461.25" y="125">#</text></g><path d="M475.5 121h10"/><path d="M485.5 121h10"/><g class="non-terminal">
-<path d="M495.5 121h0.0"/><path d="M583.5 121h0.0"/><rect height="22" width="88.0" x="495.5" y="110"/><text x="539.5" y="125">fragment</text></g></g><path d="M583.5 121a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 603.5 91 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 61h0.0"/><path d="M583.5 61h0.0"/><g class="non-terminal">
+<path d="M60.0 61h0.0"/><path d="M131.0 61h0.0"/><rect height="22" width="71.0" x="60.0" y="50"/><text x="95.5" y="65">scheme</text></g><path d="M131.0 61h10"/><path d="M141.0 61h10"/><g class="terminal">
+<path d="M151.0 61h0.0"/><path d="M196.5 61h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="151.0" y="50"/><text x="173.75" y="65">://</text></g><path d="M196.5 61h10"/><path d="M206.5 61h10"/><g class="non-terminal">
+<path d="M216.5 61h0.0"/><path d="M287.5 61h0.0"/><rect height="22" width="71.0" x="216.5" y="50"/><text x="252.0" y="65">netloc</text></g><path d="M287.5 61h10"/><path d="M297.5 61h10"/><g class="terminal">
+<path d="M307.5 61h0.0"/><path d="M344.5 61h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="307.5" y="50"/><text x="326.0" y="65">/?</text></g><path d="M344.5 61h10"/><path d="M354.5 61h10"/><g class="non-terminal">
+<path d="M364.5 61h0.0"/><path d="M427.0 61h0.0"/><rect height="22" width="62.5" x="364.5" y="50"/><text x="395.75" y="65">query</text></g><path d="M427.0 61h10"/><path d="M437.0 61h10"/><g class="terminal">
+<path d="M447.0 61h0.0"/><path d="M475.5 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="447.0" y="50"/><text x="461.25" y="65">#</text></g><path d="M475.5 61h10"/><path d="M485.5 61h10"/><g class="non-terminal">
+<path d="M495.5 61h0.0"/><path d="M583.5 61h0.0"/><rect height="22" width="88.0" x="495.5" y="50"/><text x="539.5" y="65">fragment</text></g></g><path d="M583.5 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h196.5"/><path d="M387.0 31h196.5"/><g class="terminal">
+<path d="M256.5 31h0.0"/><path d="M387.0 31h0.0"/><rect height="22" rx="10" ry="10" width="130.5" x="256.5" y="20"/><text x="321.75" y="35">/releases/5.8</text></g></g><path d="M583.5 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M40.0 91h20"/><g>
+<path d="M60.0 91h165.0"/><path d="M418.5 91h165.0"/><g class="non-terminal">
+<path d="M225.0 91h0.0"/><path d="M296.0 91h0.0"/><rect height="22" width="71.0" x="225.0" y="80"/><text x="260.5" y="95">scheme</text></g><path d="M296.0 91h10"/><path d="M306.0 91h10"/><g class="terminal">
+<path d="M316.0 91h0.0"/><path d="M344.5 91h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="316.0" y="80"/><text x="330.25" y="95">:</text></g><path d="M344.5 91h10"/><path d="M354.5 91h10"/><g class="non-terminal">
+<path d="M364.5 91h0.0"/><path d="M418.5 91h0.0"/><rect height="22" width="54.0" x="364.5" y="80"/><text x="391.5" y="95">rest</text></g></g><path d="M583.5 91h20"/><path d="M40.0 91a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 121h65.5"/><path d="M518.0 121h65.5"/><g class="non-terminal">
+<path d="M125.5 121h0.0"/><path d="M196.5 121h0.0"/><rect height="22" width="71.0" x="125.5" y="110"/><text x="161.0" y="125">scheme</text></g><path d="M196.5 121h10"/><path d="M206.5 121h10"/><g class="terminal">
+<path d="M216.5 121h0.0"/><path d="M262.0 121h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="216.5" y="110"/><text x="239.25" y="125">://</text></g><path d="M262.0 121h10"/><path d="M272.0 121h10"/><g class="non-terminal">
+<path d="M282.0 121h0.0"/><path d="M353.0 121h0.0"/><rect height="22" width="71.0" x="282.0" y="110"/><text x="317.5" y="125">netloc</text></g><path d="M353.0 121h10"/><path d="M363.0 121h10"/><g class="terminal">
+<path d="M373.0 121h0.0"/><path d="M410.0 121h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="373.0" y="110"/><text x="391.5" y="125">/#</text></g><path d="M410.0 121h10"/><path d="M420.0 121h10"/><g class="non-terminal">
+<path d="M430.0 121h0.0"/><path d="M518.0 121h0.0"/><rect height="22" width="88.0" x="430.0" y="110"/><text x="474.0" y="125">fragment</text></g></g><path d="M583.5 121a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 603.5 91 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -17118,12 +17120,12 @@ http://www.fuzzingbook.org/
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M142.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><g class="terminal">
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="20"/><text x="91.25" y="35">https</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 31h4.25"/><path d="M118.25 31h4.25"/><g class="terminal">
+<path d="M64.25 31h0.0"/><path d="M118.25 31h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="64.25" y="20"/><text x="91.25" y="35">http</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
 <path d="M60.0 61h8.5"/><path d="M114.0 61h8.5"/><g class="terminal">
 <path d="M68.5 61h0.0"/><path d="M114.0 61h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="68.5" y="50"/><text x="91.25" y="65">ftp</text></g></g><path d="M122.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 91h4.25"/><path d="M118.25 91h4.25"/><g class="terminal">
-<path d="M64.25 91h0.0"/><path d="M118.25 91h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="64.25" y="80"/><text x="91.25" y="95">http</text></g></g><path d="M122.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 91h0.0"/><path d="M122.5 91h0.0"/><g class="terminal">
+<path d="M60.0 91h0.0"/><path d="M122.5 91h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="80"/><text x="91.25" y="95">https</text></g></g><path d="M122.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -17171,12 +17173,12 @@ http://www.fuzzingbook.org/
 </style><g>
 <path d="M20 81v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 91h0.0"/><path d="M329.5 91h0.0"/><path d="M40.0 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 61h34.0"/><path d="M275.5 61h34.0"/><g class="terminal">
-<path d="M94.0 61h0.0"/><path d="M275.5 61h0.0"/><rect height="22" rx="10" ry="10" width="181.5" x="94.0" y="50"/><text x="184.75" y="65">www.fuzzingbook.org</text></g></g><path d="M309.5 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><g class="terminal">
-<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><rect height="22" rx="10" ry="10" width="249.5" x="60.0" y="20"/><text x="184.75" y="35">user:pass@www.google.com:80</text></g></g><path d="M309.5 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M40.0 91h20"/><g>
-<path d="M60.0 91h68.0"/><path d="M241.5 91h68.0"/><g class="terminal">
-<path d="M128.0 91h0.0"/><path d="M241.5 91h0.0"/><rect height="22" rx="10" ry="10" width="113.5" x="128.0" y="80"/><text x="184.75" y="95">freebsd.org</text></g></g><path d="M309.5 91h20"/><path d="M40.0 91a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 61h0.0"/><path d="M309.5 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M309.5 61h0.0"/><rect height="22" rx="10" ry="10" width="249.5" x="60.0" y="50"/><text x="184.75" y="65">user:pass@www.google.com:80</text></g></g><path d="M309.5 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h68.0"/><path d="M241.5 31h68.0"/><g class="terminal">
+<path d="M128.0 31h0.0"/><path d="M241.5 31h0.0"/><rect height="22" rx="10" ry="10" width="113.5" x="128.0" y="20"/><text x="184.75" y="35">freebsd.org</text></g></g><path d="M309.5 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M40.0 91h20"/><g>
+<path d="M60.0 91h34.0"/><path d="M275.5 91h34.0"/><g class="terminal">
+<path d="M94.0 91h0.0"/><path d="M275.5 91h0.0"/><rect height="22" rx="10" ry="10" width="181.5" x="94.0" y="80"/><text x="184.75" y="95">www.fuzzingbook.org</text></g></g><path d="M309.5 91h20"/><path d="M40.0 91a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
 <path d="M60.0 121h25.5"/><path d="M284.0 121h25.5"/><g class="terminal">
 <path d="M85.5 121h0.0"/><path d="M284.0 121h0.0"/><rect height="22" rx="10" ry="10" width="198.5" x="85.5" y="110"/><text x="184.75" y="125">www.cispa.saarland:80</text></g></g><path d="M309.5 121a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 329.5 91 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
@@ -19982,10 +19984,10 @@ url@369 = &#39;/releases/5.8&#39;
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M142.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><g class="terminal">
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="20"/><text x="91.25" y="35">https</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h8.5"/><path d="M114.0 61h8.5"/><g class="terminal">
-<path d="M68.5 61h0.0"/><path d="M114.0 61h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="68.5" y="50"/><text x="91.25" y="65">ftp</text></g></g><path d="M122.5 61h20"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 31h8.5"/><path d="M114.0 31h8.5"/><g class="terminal">
+<path d="M68.5 31h0.0"/><path d="M114.0 31h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="68.5" y="20"/><text x="91.25" y="35">ftp</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M122.5 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M122.5 61h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="50"/><text x="91.25" y="65">https</text></g></g><path d="M122.5 61h20"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -20082,14 +20084,14 @@ url@369 = &#39;/releases/5.8&#39;
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M341.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h25.5"/><path d="M296.0 31h25.5"/><g class="terminal">
-<path d="M85.5 31h0.0"/><path d="M122.5 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="85.5" y="20"/><text x="104.0" y="35">//</text></g><path d="M122.5 31h10"/><path d="M132.5 31h10"/><g class="non-terminal">
-<path d="M142.5 31h0.0"/><path d="M247.5 31h0.0"/><rect height="22" width="105.0" x="142.5" y="20"/><text x="195.0" y="35">netloc@438</text></g><path d="M247.5 31h10"/><path d="M257.5 31h10"/><g class="terminal">
-<path d="M267.5 31h0.0"/><path d="M296.0 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="267.5" y="20"/><text x="281.75" y="35">/</text></g></g><path d="M321.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M321.5 61h0.0"/><g class="terminal">
-<path d="M60.0 61h0.0"/><path d="M97.0 61h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="50"/><text x="78.5" y="65">//</text></g><path d="M97.0 61h10"/><path d="M107.0 61h10"/><g class="non-terminal">
-<path d="M117.0 61h0.0"/><path d="M222.0 61h0.0"/><rect height="22" width="105.0" x="117.0" y="50"/><text x="169.5" y="65">netloc@438</text></g><path d="M222.0 61h10"/><path d="M232.0 61h10"/><g class="non-terminal">
-<path d="M242.0 61h0.0"/><path d="M321.5 61h0.0"/><rect height="22" width="79.5" x="242.0" y="50"/><text x="281.75" y="65">url@438</text></g></g><path d="M321.5 61h20"/></g><path d="M 341.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 31h0.0"/><path d="M321.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M97.0 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="20"/><text x="78.5" y="35">//</text></g><path d="M97.0 31h10"/><path d="M107.0 31h10"/><g class="non-terminal">
+<path d="M117.0 31h0.0"/><path d="M222.0 31h0.0"/><rect height="22" width="105.0" x="117.0" y="20"/><text x="169.5" y="35">netloc@438</text></g><path d="M222.0 31h10"/><path d="M232.0 31h10"/><g class="non-terminal">
+<path d="M242.0 31h0.0"/><path d="M321.5 31h0.0"/><rect height="22" width="79.5" x="242.0" y="20"/><text x="281.75" y="35">url@438</text></g></g><path d="M321.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h25.5"/><path d="M296.0 61h25.5"/><g class="terminal">
+<path d="M85.5 61h0.0"/><path d="M122.5 61h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="85.5" y="50"/><text x="104.0" y="65">//</text></g><path d="M122.5 61h10"/><path d="M132.5 61h10"/><g class="non-terminal">
+<path d="M142.5 61h0.0"/><path d="M247.5 61h0.0"/><rect height="22" width="105.0" x="142.5" y="50"/><text x="195.0" y="65">netloc@438</text></g><path d="M247.5 61h10"/><path d="M257.5 61h10"/><g class="terminal">
+<path d="M267.5 61h0.0"/><path d="M296.0 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="267.5" y="50"/><text x="281.75" y="65">/</text></g></g><path d="M321.5 61h20"/></g><path d="M 341.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -20272,16 +20274,16 @@ url@369 = &#39;/releases/5.8&#39;
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>ftp://freebsd.org/
-http://www.fuzzingbook.org/#ref
-https://www.cispa.saarland:80/releases/5.8
+<pre>http://user:pass@www.google.com:80/#ref
+ftp://www.cispa.saarland:80/releases/5.8
 http://user:pass@www.google.com:80/?q=path#News
-http://www.fuzzingbook.org/?q=path#News
+https://www.cispa.saarland:80/
+http://www.fuzzingbook.org/#News
+http://user:pass@www.google.com:80/#ref
 ftp://www.cispa.saarland:80/
-http://user:pass@www.google.com:80/?q=path#ref
-https://www.cispa.saarland:80/releases/5.8
-https://www.cispa.saarland:80/releases/5.8
-http://user:pass@www.google.com:80/?q=path#News
+https://freebsd.org/
+ftp://www.cispa.saarland:80/
+https://freebsd.org/
 </pre>
 </div>
 
@@ -20582,10 +20584,10 @@ http://user:pass@www.google.com:80/?q=path#News
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M159.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h8.5"/><path d="M131.0 31h8.5"/><g class="terminal">
-<path d="M68.5 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="68.5" y="20"/><text x="99.75" y="35">Chevy</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><g class="terminal">
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="50"/><text x="99.75" y="65">Mercury</text></g></g><path d="M139.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="20"/><text x="99.75" y="35">Mercury</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h8.5"/><path d="M131.0 61h8.5"/><g class="terminal">
+<path d="M68.5 61h0.0"/><path d="M131.0 61h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="68.5" y="50"/><text x="99.75" y="65">Chevy</text></g></g><path d="M139.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
 <path d="M60.0 91h12.75"/><path d="M126.75 91h12.75"/><g class="terminal">
 <path d="M72.75 91h0.0"/><path d="M126.75 91h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="72.75" y="80"/><text x="99.75" y="95">Ford</text></g></g><path d="M139.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
@@ -20637,10 +20639,10 @@ http://user:pass@www.google.com:80/?q=path#News
 <path d="M40 61h0.0"/><path d="M159.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
 <path d="M60.0 31h12.75"/><path d="M126.75 31h12.75"/><g class="terminal">
 <path d="M72.75 31h0.0"/><path d="M126.75 31h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="72.75" y="20"/><text x="99.75" y="35">E350</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h4.25"/><path d="M135.25 61h4.25"/><g class="terminal">
-<path d="M64.25 61h0.0"/><path d="M135.25 61h0.0"/><rect height="22" rx="10" ry="10" width="71.0" x="64.25" y="50"/><text x="99.75" y="65">Cougar</text></g></g><path d="M139.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 91h0.0"/><path d="M139.5 91h0.0"/><g class="terminal">
-<path d="M60.0 91h0.0"/><path d="M139.5 91h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="80"/><text x="99.75" y="95">Venture</text></g></g><path d="M139.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="50"/><text x="99.75" y="65">Venture</text></g></g><path d="M139.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h4.25"/><path d="M135.25 91h4.25"/><g class="terminal">
+<path d="M64.25 91h0.0"/><path d="M135.25 91h0.0"/><rect height="22" rx="10" ry="10" width="71.0" x="64.25" y="80"/><text x="99.75" y="95">Cougar</text></g></g><path d="M139.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -20674,16 +20676,16 @@ http://user:pass@www.google.com:80/?q=path#News
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>1997,car,Chevy,Venture
+<pre>1997,car,Mercury,Cougar
+1997,car,Ford,E350
+2000,car,Ford,Cougar
+2000,car,Chevy,E350
+1997,van,Ford,E350
 1997,van,Ford,E350
 2000,van,Ford,E350
 2000,van,Ford,E350
-2000,car,Chevy,E350
-2000,car,Ford,Cougar
-2000,van,Ford,Cougar
-1997,van,Chevy,E350
-2000,van,Mercury,Cougar
-2000,van,Chevy,E350
+2000,car,Mercury,E350
+2000,car,Ford,Venture
 </pre>
 </div>
 
@@ -23876,9 +23878,9 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M287.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
 <path d="M60.0 31h0.0"/><path d="M267.0 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M267.0 31h0.0"/><rect height="22" width="207.0" x="60.0" y="20"/><text x="163.5" y="35">process_car@29:company</text></g></g><path d="M267.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M267.0 31h0.0"/><rect height="22" width="207.0" x="60.0" y="20"/><text x="163.5" y="35">process_van@20:company</text></g></g><path d="M267.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
 <path d="M60.0 61h0.0"/><path d="M267.0 61h0.0"/><g class="non-terminal">
-<path d="M60.0 61h0.0"/><path d="M267.0 61h0.0"/><rect height="22" width="207.0" x="60.0" y="50"/><text x="163.5" y="65">process_van@20:company</text></g></g><path d="M267.0 61h20"/></g><path d="M 287.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 61h0.0"/><path d="M267.0 61h0.0"/><rect height="22" width="207.0" x="60.0" y="50"/><text x="163.5" y="65">process_car@29:company</text></g></g><path d="M267.0 61h20"/></g><path d="M 287.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -23976,9 +23978,9 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M270.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
 <path d="M60.0 31h0.0"/><path d="M250.0 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M250.0 31h0.0"/><rect height="22" width="190.0" x="60.0" y="20"/><text x="155.0" y="35">process_van@20:model</text></g></g><path d="M250.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M250.0 31h0.0"/><rect height="22" width="190.0" x="60.0" y="20"/><text x="155.0" y="35">process_car@29:model</text></g></g><path d="M250.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
 <path d="M60.0 61h0.0"/><path d="M250.0 61h0.0"/><g class="non-terminal">
-<path d="M60.0 61h0.0"/><path d="M250.0 61h0.0"/><rect height="22" width="190.0" x="60.0" y="50"/><text x="155.0" y="65">process_car@29:model</text></g></g><path d="M250.0 61h20"/></g><path d="M 270.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 61h0.0"/><path d="M250.0 61h0.0"/><rect height="22" width="190.0" x="60.0" y="50"/><text x="155.0" y="65">process_van@20:model</text></g></g><path d="M250.0 61h20"/></g><path d="M 270.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -24126,10 +24128,10 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M159.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h8.5"/><path d="M131.0 31h8.5"/><g class="terminal">
-<path d="M68.5 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="68.5" y="20"/><text x="99.75" y="35">Chevy</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><g class="terminal">
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="50"/><text x="99.75" y="65">Mercury</text></g></g><path d="M139.5 61h20"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="20"/><text x="99.75" y="35">Mercury</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h8.5"/><path d="M131.0 61h8.5"/><g class="terminal">
+<path d="M68.5 61h0.0"/><path d="M131.0 61h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="68.5" y="50"/><text x="99.75" y="65">Chevy</text></g></g><path d="M139.5 61h20"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -24177,10 +24179,10 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M159.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h4.25"/><path d="M135.25 31h4.25"/><g class="terminal">
-<path d="M64.25 31h0.0"/><path d="M135.25 31h0.0"/><rect height="22" rx="10" ry="10" width="71.0" x="64.25" y="20"/><text x="99.75" y="35">Cougar</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><g class="terminal">
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="50"/><text x="99.75" y="65">Venture</text></g></g><path d="M139.5 61h20"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="20"/><text x="99.75" y="35">Venture</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h4.25"/><path d="M135.25 61h4.25"/><g class="terminal">
+<path d="M64.25 61h0.0"/><path d="M135.25 61h0.0"/><rect height="22" rx="10" ry="10" width="71.0" x="64.25" y="50"/><text x="99.75" y="65">Cougar</text></g></g><path d="M139.5 61h20"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -24352,14 +24354,14 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M494.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h4.25"/><path d="M470.25 31h4.25"/><g class="non-terminal">
-<path d="M64.25 31h0.0"/><path d="M245.75 31h0.0"/><rect height="22" width="181.5" x="64.25" y="20"/><text x="155.0" y="35">urlsplit@412:scheme</text></g><path d="M245.75 31h10"/><path d="M255.75 31h10"/><g class="terminal">
-<path d="M265.75 31h0.0"/><path d="M294.25 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="265.75" y="20"/><text x="280.0" y="35">:</text></g><path d="M294.25 31h10"/><path d="M304.25 31h10"/><g class="non-terminal">
-<path d="M314.25 31h0.0"/><path d="M470.25 31h0.0"/><rect height="22" width="156.0" x="314.25" y="20"/><text x="392.25" y="35">urlsplit@413:url</text></g></g><path d="M474.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M474.5 61h0.0"/><g class="non-terminal">
-<path d="M60.0 61h0.0"/><path d="M241.5 61h0.0"/><rect height="22" width="181.5" x="60.0" y="50"/><text x="150.75" y="65">urlsplit@435:scheme</text></g><path d="M241.5 61h10"/><path d="M251.5 61h10"/><g class="terminal">
-<path d="M261.5 61h0.0"/><path d="M290.0 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="261.5" y="50"/><text x="275.75" y="65">:</text></g><path d="M290.0 61h10"/><path d="M300.0 61h10"/><g class="non-terminal">
-<path d="M310.0 61h0.0"/><path d="M474.5 61h0.0"/><rect height="22" width="164.5" x="310.0" y="50"/><text x="392.25" y="65">urlsplit@432:rest</text></g></g><path d="M474.5 61h20"/></g><path d="M 494.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 31h0.0"/><path d="M474.5 31h0.0"/><g class="non-terminal">
+<path d="M60.0 31h0.0"/><path d="M241.5 31h0.0"/><rect height="22" width="181.5" x="60.0" y="20"/><text x="150.75" y="35">urlsplit@435:scheme</text></g><path d="M241.5 31h10"/><path d="M251.5 31h10"/><g class="terminal">
+<path d="M261.5 31h0.0"/><path d="M290.0 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="261.5" y="20"/><text x="275.75" y="35">:</text></g><path d="M290.0 31h10"/><path d="M300.0 31h10"/><g class="non-terminal">
+<path d="M310.0 31h0.0"/><path d="M474.5 31h0.0"/><rect height="22" width="164.5" x="310.0" y="20"/><text x="392.25" y="35">urlsplit@432:rest</text></g></g><path d="M474.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h4.25"/><path d="M470.25 61h4.25"/><g class="non-terminal">
+<path d="M64.25 61h0.0"/><path d="M245.75 61h0.0"/><rect height="22" width="181.5" x="64.25" y="50"/><text x="155.0" y="65">urlsplit@412:scheme</text></g><path d="M245.75 61h10"/><path d="M255.75 61h10"/><g class="terminal">
+<path d="M265.75 61h0.0"/><path d="M294.25 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="265.75" y="50"/><text x="280.0" y="65">:</text></g><path d="M294.25 61h10"/><path d="M304.25 61h10"/><g class="non-terminal">
+<path d="M314.25 61h0.0"/><path d="M470.25 61h0.0"/><rect height="22" width="156.0" x="314.25" y="50"/><text x="392.25" y="65">urlsplit@413:url</text></g></g><path d="M474.5 61h20"/></g><path d="M 494.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -24456,12 +24458,12 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M142.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><g class="terminal">
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="20"/><text x="91.25" y="35">https</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 31h4.25"/><path d="M118.25 31h4.25"/><g class="terminal">
+<path d="M64.25 31h0.0"/><path d="M118.25 31h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="64.25" y="20"/><text x="91.25" y="35">http</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
 <path d="M60.0 61h8.5"/><path d="M114.0 61h8.5"/><g class="terminal">
 <path d="M68.5 61h0.0"/><path d="M114.0 61h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="68.5" y="50"/><text x="91.25" y="65">ftp</text></g></g><path d="M122.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 91h4.25"/><path d="M118.25 91h4.25"/><g class="terminal">
-<path d="M64.25 91h0.0"/><path d="M118.25 91h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="64.25" y="80"/><text x="91.25" y="95">http</text></g></g><path d="M122.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 91h0.0"/><path d="M122.5 91h0.0"/><g class="terminal">
+<path d="M60.0 91h0.0"/><path d="M122.5 91h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="80"/><text x="91.25" y="95">https</text></g></g><path d="M122.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -24558,18 +24560,18 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M494.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M474.5 31h0.0"/><g class="terminal">
-<path d="M60.0 31h0.0"/><path d="M97.0 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="20"/><text x="78.5" y="35">//</text></g><path d="M97.0 31h10"/><path d="M107.0 31h10"/><g class="non-terminal">
-<path d="M117.0 31h0.0"/><path d="M298.5 31h0.0"/><rect height="22" width="181.5" x="117.0" y="20"/><text x="207.75" y="35">urlsplit@438:netloc</text></g><path d="M298.5 31h10"/><path d="M308.5 31h10"/><g class="non-terminal">
-<path d="M318.5 31h0.0"/><path d="M474.5 31h0.0"/><rect height="22" width="156.0" x="318.5" y="20"/><text x="396.5" y="35">urlsplit@438:url</text></g></g><path d="M474.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 31h63.75"/><path d="M410.75 31h63.75"/><g class="terminal">
+<path d="M123.75 31h0.0"/><path d="M160.75 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="123.75" y="20"/><text x="142.25" y="35">//</text></g><path d="M160.75 31h10"/><path d="M170.75 31h10"/><g class="non-terminal">
+<path d="M180.75 31h0.0"/><path d="M362.25 31h0.0"/><rect height="22" width="181.5" x="180.75" y="20"/><text x="271.5" y="35">urlsplit@438:netloc</text></g><path d="M362.25 31h10"/><path d="M372.25 31h10"/><g class="terminal">
+<path d="M382.25 31h0.0"/><path d="M410.75 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="382.25" y="20"/><text x="396.5" y="35">/</text></g></g><path d="M474.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
 <path d="M60.0 61h0.0"/><path d="M474.5 61h0.0"/><g class="terminal">
 <path d="M60.0 61h0.0"/><path d="M97.0 61h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="50"/><text x="78.5" y="65">//</text></g><path d="M97.0 61h10"/><path d="M107.0 61h10"/><g class="non-terminal">
 <path d="M117.0 61h0.0"/><path d="M298.5 61h0.0"/><rect height="22" width="181.5" x="117.0" y="50"/><text x="207.75" y="65">urlsplit@415:netloc</text></g><path d="M298.5 61h10"/><path d="M308.5 61h10"/><g class="non-terminal">
 <path d="M318.5 61h0.0"/><path d="M474.5 61h0.0"/><rect height="22" width="156.0" x="318.5" y="50"/><text x="396.5" y="65">urlsplit@415:url</text></g></g><path d="M474.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 91h63.75"/><path d="M410.75 91h63.75"/><g class="terminal">
-<path d="M123.75 91h0.0"/><path d="M160.75 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="123.75" y="80"/><text x="142.25" y="95">//</text></g><path d="M160.75 91h10"/><path d="M170.75 91h10"/><g class="non-terminal">
-<path d="M180.75 91h0.0"/><path d="M362.25 91h0.0"/><rect height="22" width="181.5" x="180.75" y="80"/><text x="271.5" y="95">urlsplit@438:netloc</text></g><path d="M362.25 91h10"/><path d="M372.25 91h10"/><g class="terminal">
-<path d="M382.25 91h0.0"/><path d="M410.75 91h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="382.25" y="80"/><text x="396.5" y="95">/</text></g></g><path d="M474.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 494.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 91h0.0"/><path d="M474.5 91h0.0"/><g class="terminal">
+<path d="M60.0 91h0.0"/><path d="M97.0 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="80"/><text x="78.5" y="95">//</text></g><path d="M97.0 91h10"/><path d="M107.0 91h10"/><g class="non-terminal">
+<path d="M117.0 91h0.0"/><path d="M298.5 91h0.0"/><rect height="22" width="181.5" x="117.0" y="80"/><text x="207.75" y="95">urlsplit@438:netloc</text></g><path d="M298.5 91h10"/><path d="M308.5 91h10"/><g class="non-terminal">
+<path d="M318.5 91h0.0"/><path d="M474.5 91h0.0"/><rect height="22" width="156.0" x="318.5" y="80"/><text x="396.5" y="95">urlsplit@438:url</text></g></g><path d="M474.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 494.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -24666,12 +24668,12 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 </style><g>
 <path d="M20 81v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 91h0.0"/><path d="M329.5 91h0.0"/><path d="M40.0 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 61h34.0"/><path d="M275.5 61h34.0"/><g class="terminal">
-<path d="M94.0 61h0.0"/><path d="M275.5 61h0.0"/><rect height="22" rx="10" ry="10" width="181.5" x="94.0" y="50"/><text x="184.75" y="65">www.fuzzingbook.org</text></g></g><path d="M309.5 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><g class="terminal">
-<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><rect height="22" rx="10" ry="10" width="249.5" x="60.0" y="20"/><text x="184.75" y="35">user:pass@www.google.com:80</text></g></g><path d="M309.5 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M40.0 91h20"/><g>
-<path d="M60.0 91h68.0"/><path d="M241.5 91h68.0"/><g class="terminal">
-<path d="M128.0 91h0.0"/><path d="M241.5 91h0.0"/><rect height="22" rx="10" ry="10" width="113.5" x="128.0" y="80"/><text x="184.75" y="95">freebsd.org</text></g></g><path d="M309.5 91h20"/><path d="M40.0 91a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 61h0.0"/><path d="M309.5 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M309.5 61h0.0"/><rect height="22" rx="10" ry="10" width="249.5" x="60.0" y="50"/><text x="184.75" y="65">user:pass@www.google.com:80</text></g></g><path d="M309.5 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h68.0"/><path d="M241.5 31h68.0"/><g class="terminal">
+<path d="M128.0 31h0.0"/><path d="M241.5 31h0.0"/><rect height="22" rx="10" ry="10" width="113.5" x="128.0" y="20"/><text x="184.75" y="35">freebsd.org</text></g></g><path d="M309.5 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M40.0 91h20"/><g>
+<path d="M60.0 91h34.0"/><path d="M275.5 91h34.0"/><g class="terminal">
+<path d="M94.0 91h0.0"/><path d="M275.5 91h0.0"/><rect height="22" rx="10" ry="10" width="181.5" x="94.0" y="80"/><text x="184.75" y="95">www.fuzzingbook.org</text></g></g><path d="M309.5 91h20"/><path d="M40.0 91a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
 <path d="M60.0 121h25.5"/><path d="M284.0 121h25.5"/><g class="terminal">
 <path d="M85.5 121h0.0"/><path d="M284.0 121h0.0"/><rect height="22" rx="10" ry="10" width="198.5" x="85.5" y="110"/><text x="184.75" y="125">www.cispa.saarland:80</text></g></g><path d="M309.5 121a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 329.5 91 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
@@ -25748,9 +25750,9 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M287.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
 <path d="M60.0 31h0.0"/><path d="M267.0 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M267.0 31h0.0"/><rect height="22" width="207.0" x="60.0" y="20"/><text x="163.5" y="35">process_car@29:company</text></g></g><path d="M267.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M267.0 31h0.0"/><rect height="22" width="207.0" x="60.0" y="20"/><text x="163.5" y="35">process_van@20:company</text></g></g><path d="M267.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
 <path d="M60.0 61h0.0"/><path d="M267.0 61h0.0"/><g class="non-terminal">
-<path d="M60.0 61h0.0"/><path d="M267.0 61h0.0"/><rect height="22" width="207.0" x="60.0" y="50"/><text x="163.5" y="65">process_van@20:company</text></g></g><path d="M267.0 61h20"/></g><path d="M 287.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 61h0.0"/><path d="M267.0 61h0.0"/><rect height="22" width="207.0" x="60.0" y="50"/><text x="163.5" y="65">process_car@29:company</text></g></g><path d="M267.0 61h20"/></g><path d="M 287.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -25848,9 +25850,9 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M270.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
 <path d="M60.0 31h0.0"/><path d="M250.0 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M250.0 31h0.0"/><rect height="22" width="190.0" x="60.0" y="20"/><text x="155.0" y="35">process_van@20:model</text></g></g><path d="M250.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M250.0 31h0.0"/><rect height="22" width="190.0" x="60.0" y="20"/><text x="155.0" y="35">process_car@29:model</text></g></g><path d="M250.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
 <path d="M60.0 61h0.0"/><path d="M250.0 61h0.0"/><g class="non-terminal">
-<path d="M60.0 61h0.0"/><path d="M250.0 61h0.0"/><rect height="22" width="190.0" x="60.0" y="50"/><text x="155.0" y="65">process_car@29:model</text></g></g><path d="M250.0 61h20"/></g><path d="M 270.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 61h0.0"/><path d="M250.0 61h0.0"/><rect height="22" width="190.0" x="60.0" y="50"/><text x="155.0" y="65">process_van@20:model</text></g></g><path d="M250.0 61h20"/></g><path d="M 270.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -25998,10 +26000,10 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M159.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h8.5"/><path d="M131.0 31h8.5"/><g class="terminal">
-<path d="M68.5 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="68.5" y="20"/><text x="99.75" y="35">Chevy</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><g class="terminal">
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="50"/><text x="99.75" y="65">Mercury</text></g></g><path d="M139.5 61h20"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="20"/><text x="99.75" y="35">Mercury</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h8.5"/><path d="M131.0 61h8.5"/><g class="terminal">
+<path d="M68.5 61h0.0"/><path d="M131.0 61h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="68.5" y="50"/><text x="99.75" y="65">Chevy</text></g></g><path d="M139.5 61h20"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -26293,12 +26295,12 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M142.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><g class="terminal">
-<path d="M60.0 31h0.0"/><path d="M122.5 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="20"/><text x="91.25" y="35">https</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h8.5"/><path d="M114.0 61h8.5"/><g class="terminal">
-<path d="M68.5 61h0.0"/><path d="M114.0 61h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="68.5" y="50"/><text x="91.25" y="65">ftp</text></g></g><path d="M122.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 91h4.25"/><path d="M118.25 91h4.25"/><g class="terminal">
-<path d="M64.25 91h0.0"/><path d="M118.25 91h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="64.25" y="80"/><text x="91.25" y="95">http</text></g></g><path d="M122.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 31h4.25"/><path d="M118.25 31h4.25"/><g class="terminal">
+<path d="M64.25 31h0.0"/><path d="M118.25 31h0.0"/><rect height="22" rx="10" ry="10" width="54.0" x="64.25" y="20"/><text x="91.25" y="35">http</text></g></g><path d="M122.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h0.0"/><path d="M122.5 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M122.5 61h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="60.0" y="50"/><text x="91.25" y="65">https</text></g></g><path d="M122.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 91h8.5"/><path d="M114.0 91h8.5"/><g class="terminal">
+<path d="M68.5 91h0.0"/><path d="M114.0 91h0.0"/><rect height="22" rx="10" ry="10" width="45.5" x="68.5" y="80"/><text x="91.25" y="95">ftp</text></g></g><path d="M122.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 142.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -26346,18 +26348,18 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M494.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h63.75"/><path d="M410.75 31h63.75"/><g class="terminal">
-<path d="M123.75 31h0.0"/><path d="M160.75 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="123.75" y="20"/><text x="142.25" y="35">//</text></g><path d="M160.75 31h10"/><path d="M170.75 31h10"/><g class="non-terminal">
-<path d="M180.75 31h0.0"/><path d="M362.25 31h0.0"/><rect height="22" width="181.5" x="180.75" y="20"/><text x="271.5" y="35">urlparse@369:netloc</text></g><path d="M362.25 31h10"/><path d="M372.25 31h10"/><g class="terminal">
-<path d="M382.25 31h0.0"/><path d="M410.75 31h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="382.25" y="20"/><text x="396.5" y="35">/</text></g></g><path d="M474.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M474.5 61h0.0"/><g class="terminal">
-<path d="M60.0 61h0.0"/><path d="M97.0 61h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="50"/><text x="78.5" y="65">//</text></g><path d="M97.0 61h10"/><path d="M107.0 61h10"/><g class="non-terminal">
-<path d="M117.0 61h0.0"/><path d="M298.5 61h0.0"/><rect height="22" width="181.5" x="117.0" y="50"/><text x="207.75" y="65">urlparse@369:netloc</text></g><path d="M298.5 61h10"/><path d="M308.5 61h10"/><g class="non-terminal">
-<path d="M318.5 61h0.0"/><path d="M474.5 61h0.0"/><rect height="22" width="156.0" x="318.5" y="50"/><text x="396.5" y="65">urlparse@369:url</text></g></g><path d="M474.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 31h0.0"/><path d="M474.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M97.0 31h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="20"/><text x="78.5" y="35">//</text></g><path d="M97.0 31h10"/><path d="M107.0 31h10"/><g class="non-terminal">
+<path d="M117.0 31h0.0"/><path d="M298.5 31h0.0"/><rect height="22" width="181.5" x="117.0" y="20"/><text x="207.75" y="35">urlparse@369:netloc</text></g><path d="M298.5 31h10"/><path d="M308.5 31h10"/><g class="non-terminal">
+<path d="M318.5 31h0.0"/><path d="M474.5 31h0.0"/><rect height="22" width="156.0" x="318.5" y="20"/><text x="396.5" y="35">urlsplit@415:url</text></g></g><path d="M474.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h63.75"/><path d="M410.75 61h63.75"/><g class="terminal">
+<path d="M123.75 61h0.0"/><path d="M160.75 61h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="123.75" y="50"/><text x="142.25" y="65">//</text></g><path d="M160.75 61h10"/><path d="M170.75 61h10"/><g class="non-terminal">
+<path d="M180.75 61h0.0"/><path d="M362.25 61h0.0"/><rect height="22" width="181.5" x="180.75" y="50"/><text x="271.5" y="65">urlparse@369:netloc</text></g><path d="M362.25 61h10"/><path d="M372.25 61h10"/><g class="terminal">
+<path d="M382.25 61h0.0"/><path d="M410.75 61h0.0"/><rect height="22" rx="10" ry="10" width="28.5" x="382.25" y="50"/><text x="396.5" y="65">/</text></g></g><path d="M474.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
 <path d="M60.0 91h0.0"/><path d="M474.5 91h0.0"/><g class="terminal">
 <path d="M60.0 91h0.0"/><path d="M97.0 91h0.0"/><rect height="22" rx="10" ry="10" width="37.0" x="60.0" y="80"/><text x="78.5" y="95">//</text></g><path d="M97.0 91h10"/><path d="M107.0 91h10"/><g class="non-terminal">
 <path d="M117.0 91h0.0"/><path d="M298.5 91h0.0"/><rect height="22" width="181.5" x="117.0" y="80"/><text x="207.75" y="95">urlparse@369:netloc</text></g><path d="M298.5 91h10"/><path d="M308.5 91h10"/><g class="non-terminal">
-<path d="M318.5 91h0.0"/><path d="M474.5 91h0.0"/><rect height="22" width="156.0" x="318.5" y="80"/><text x="396.5" y="95">urlsplit@415:url</text></g></g><path d="M474.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 494.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M318.5 91h0.0"/><path d="M474.5 91h0.0"/><rect height="22" width="156.0" x="318.5" y="80"/><text x="396.5" y="95">urlparse@369:url</text></g></g><path d="M474.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 494.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -26405,12 +26407,12 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 </style><g>
 <path d="M20 81v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 91h0.0"/><path d="M329.5 91h0.0"/><path d="M40.0 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 61h34.0"/><path d="M275.5 61h34.0"/><g class="terminal">
-<path d="M94.0 61h0.0"/><path d="M275.5 61h0.0"/><rect height="22" rx="10" ry="10" width="181.5" x="94.0" y="50"/><text x="184.75" y="65">www.fuzzingbook.org</text></g></g><path d="M309.5 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><g class="terminal">
-<path d="M60.0 31h0.0"/><path d="M309.5 31h0.0"/><rect height="22" rx="10" ry="10" width="249.5" x="60.0" y="20"/><text x="184.75" y="35">user:pass@www.google.com:80</text></g></g><path d="M309.5 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M40.0 91h20"/><g>
-<path d="M60.0 91h68.0"/><path d="M241.5 91h68.0"/><g class="terminal">
-<path d="M128.0 91h0.0"/><path d="M241.5 91h0.0"/><rect height="22" rx="10" ry="10" width="113.5" x="128.0" y="80"/><text x="184.75" y="95">freebsd.org</text></g></g><path d="M309.5 91h20"/><path d="M40.0 91a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
+<path d="M60.0 61h0.0"/><path d="M309.5 61h0.0"/><g class="terminal">
+<path d="M60.0 61h0.0"/><path d="M309.5 61h0.0"/><rect height="22" rx="10" ry="10" width="249.5" x="60.0" y="50"/><text x="184.75" y="65">user:pass@www.google.com:80</text></g></g><path d="M309.5 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 91a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"/><g>
+<path d="M60.0 31h68.0"/><path d="M241.5 31h68.0"/><g class="terminal">
+<path d="M128.0 31h0.0"/><path d="M241.5 31h0.0"/><rect height="22" rx="10" ry="10" width="113.5" x="128.0" y="20"/><text x="184.75" y="35">freebsd.org</text></g></g><path d="M309.5 31a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"/><path d="M40.0 91h20"/><g>
+<path d="M60.0 91h34.0"/><path d="M275.5 91h34.0"/><g class="terminal">
+<path d="M94.0 91h0.0"/><path d="M275.5 91h0.0"/><rect height="22" rx="10" ry="10" width="181.5" x="94.0" y="80"/><text x="184.75" y="95">www.fuzzingbook.org</text></g></g><path d="M309.5 91h20"/><path d="M40.0 91a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
 <path d="M60.0 121h25.5"/><path d="M284.0 121h25.5"/><g class="terminal">
 <path d="M85.5 121h0.0"/><path d="M284.0 121h0.0"/><rect height="22" rx="10" ry="10" width="198.5" x="85.5" y="110"/><text x="184.75" y="125">www.cispa.saarland:80</text></g></g><path d="M309.5 121a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 329.5 91 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
@@ -26690,16 +26692,16 @@ process_car[7]:year@29 = (&#39;1999&#39;, (&#39;process_car&#39;, 7))
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>https://freebsd.org/releases/5.8
-http://freebsd.org/
-https://freebsd.org/
-https://freebsd.org/#ref
-ftp://freebsd.org/
-http://www.fuzzingbook.org/releases/5.8
-https://www.fuzzingbook.org/
-https://www.fuzzingbook.org/releases/5.8
-http://www.fuzzingbook.org/
-ftp://freebsd.org/
+<pre>https://www.fuzzingbook.org/
+http://www.cispa.saarland:80/?q=path#ref
+https://user:pass@www.google.com:80/releases/5.8
+ftp://user:pass@www.google.com:80/
+ftp://www.fuzzingbook.org/#ref
+https://www.cispa.saarland:80/
+https://www.fuzzingbook.org/#ref
+https://www.cispa.saarland:80/releases/5.8
+https://user:pass@www.google.com:80/?q=path#ref
+ftp://user:pass@www.google.com:80/?q=path#ref
 </pre>
 </div>
 
@@ -27086,9 +27088,9 @@ ftp://freebsd.org/
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M287.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
 <path d="M60.0 31h0.0"/><path d="M267.0 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M267.0 31h0.0"/><rect height="22" width="207.0" x="60.0" y="20"/><text x="163.5" y="35">process_car@29:company</text></g></g><path d="M267.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M267.0 31h0.0"/><rect height="22" width="207.0" x="60.0" y="20"/><text x="163.5" y="35">process_van@20:company</text></g></g><path d="M267.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
 <path d="M60.0 61h0.0"/><path d="M267.0 61h0.0"/><g class="non-terminal">
-<path d="M60.0 61h0.0"/><path d="M267.0 61h0.0"/><rect height="22" width="207.0" x="60.0" y="50"/><text x="163.5" y="65">process_van@20:company</text></g></g><path d="M267.0 61h20"/></g><path d="M 287.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 61h0.0"/><path d="M267.0 61h0.0"/><rect height="22" width="207.0" x="60.0" y="50"/><text x="163.5" y="65">process_car@29:company</text></g></g><path d="M267.0 61h20"/></g><path d="M 287.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -27186,9 +27188,9 @@ ftp://freebsd.org/
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M270.0 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
 <path d="M60.0 31h0.0"/><path d="M250.0 31h0.0"/><g class="non-terminal">
-<path d="M60.0 31h0.0"/><path d="M250.0 31h0.0"/><rect height="22" width="190.0" x="60.0" y="20"/><text x="155.0" y="35">process_van@20:model</text></g></g><path d="M250.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 31h0.0"/><path d="M250.0 31h0.0"/><rect height="22" width="190.0" x="60.0" y="20"/><text x="155.0" y="35">process_car@29:model</text></g></g><path d="M250.0 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
 <path d="M60.0 61h0.0"/><path d="M250.0 61h0.0"/><g class="non-terminal">
-<path d="M60.0 61h0.0"/><path d="M250.0 61h0.0"/><rect height="22" width="190.0" x="60.0" y="50"/><text x="155.0" y="65">process_car@29:model</text></g></g><path d="M250.0 61h20"/></g><path d="M 270.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 61h0.0"/><path d="M250.0 61h0.0"/><rect height="22" width="190.0" x="60.0" y="50"/><text x="155.0" y="65">process_van@20:model</text></g></g><path d="M250.0 61h20"/></g><path d="M 270.0 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -27336,10 +27338,10 @@ ftp://freebsd.org/
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M159.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h8.5"/><path d="M131.0 31h8.5"/><g class="terminal">
-<path d="M68.5 31h0.0"/><path d="M131.0 31h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="68.5" y="20"/><text x="99.75" y="35">Chevy</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><g class="terminal">
-<path d="M60.0 61h0.0"/><path d="M139.5 61h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="50"/><text x="99.75" y="65">Mercury</text></g></g><path d="M139.5 61h20"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><g class="terminal">
+<path d="M60.0 31h0.0"/><path d="M139.5 31h0.0"/><rect height="22" rx="10" ry="10" width="79.5" x="60.0" y="20"/><text x="99.75" y="35">Mercury</text></g></g><path d="M139.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 61h8.5"/><path d="M131.0 61h8.5"/><g class="terminal">
+<path d="M68.5 61h0.0"/><path d="M131.0 61h0.0"/><rect height="22" rx="10" ry="10" width="62.5" x="68.5" y="50"/><text x="99.75" y="65">Chevy</text></g></g><path d="M139.5 61h20"/></g><path d="M 159.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -27415,36 +27417,36 @@ ftp://freebsd.org/
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>2000,car,Chevy,E350
-1997,car,Ford,Venture
-1997,van,Mercury,E350
-1999,car,Mercury,E350
-1997,van,Ford,Cougar
-1999,van,Chevy,Venture
-2000,car,Ford,E350
-2000,van,Ford,Venture
-1997,van,Chevy,Venture
-1997,van,Mercury,Venture
-1997,van,Ford,E350
-1999,van,Chevy,E350
+<pre>1999,van,Ford,E350
+2000,van,Chevy,Cougar
+1997,car,Ford,Cougar
+1999,car,Ford,Venture
+2000,van,Chevy,E350
 2000,car,Chevy,Venture
-1997,van,Ford,E350
-1999,van,Ford,E350
-1997,van,Chevy,E350
-1997,car,Ford,Venture
 2000,van,Ford,E350
 1997,car,Ford,E350
-1999,car,Ford,Venture
-1997,car,Ford,E350
+2000,van,Ford,Venture
 1997,car,Ford,Venture
-2000,van,Ford,Cougar
-1999,car,Ford,Venture
-1997,car,Chevy,Venture
-1999,car,Mercury,E350
-2000,car,Ford,E350
-1999,car,Ford,Cougar
-1999,car,Ford,E350
+1997,car,Ford,E350
+1999,van,Chevy,E350
+1997,van,Ford,E350
+1997,car,Mercury,Cougar
+1997,van,Ford,Cougar
 1997,car,Ford,Cougar
+1997,van,Ford,E350
+1997,van,Chevy,Cougar
+1997,van,Ford,Cougar
+1999,car,Ford,E350
+2000,van,Mercury,E350
+2000,van,Chevy,Cougar
+1999,van,Ford,E350
+1997,car,Chevy,E350
+2000,car,Ford,Venture
+1997,van,Chevy,Venture
+1999,van,Ford,Cougar
+1997,car,Ford,E350
+1997,car,Mercury,Venture
+1997,car,Chevy,E350
 </pre>
 </div>
 
@@ -27821,12 +27823,12 @@ ftp://freebsd.org/
 </style><g>
 <path d="M20 51v20m10 -20v20m-10 -10h20"/></g><g>
 <path d="M40 61h0.0"/><path d="M295.5 61h0.0"/><path d="M40.0 61a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/><g>
-<path d="M60.0 31h21.25"/><path d="M254.25 31h21.25"/><g class="terminal">
-<path d="M81.25 31h0.0"/><path d="M254.25 31h0.0"/><rect height="22" rx="10" ry="10" width="173.0" x="81.25" y="20"/><text x="167.75" y="35">1997,van,Ford,E350</text></g></g><path d="M275.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
+<path d="M60.0 31h4.25"/><path d="M271.25 31h4.25"/><g class="terminal">
+<path d="M64.25 31h0.0"/><path d="M271.25 31h0.0"/><rect height="22" rx="10" ry="10" width="207.0" x="64.25" y="20"/><text x="167.75" y="35">1999,car,Chevy,Venture</text></g></g><path d="M275.5 31a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><path d="M40.0 61h20"/><g>
 <path d="M60.0 61h0.0"/><path d="M275.5 61h0.0"/><g class="terminal">
 <path d="M60.0 61h0.0"/><path d="M275.5 61h0.0"/><rect height="22" rx="10" ry="10" width="215.5" x="60.0" y="50"/><text x="167.75" y="65">2000,car,Mercury,Cougar</text></g></g><path d="M275.5 61h20"/><path d="M40.0 61a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"/><g>
-<path d="M60.0 91h4.25"/><path d="M271.25 91h4.25"/><g class="terminal">
-<path d="M64.25 91h0.0"/><path d="M271.25 91h0.0"/><rect height="22" rx="10" ry="10" width="207.0" x="64.25" y="80"/><text x="167.75" y="95">1999,car,Chevy,Venture</text></g></g><path d="M275.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 295.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
+<path d="M60.0 91h21.25"/><path d="M254.25 91h21.25"/><g class="terminal">
+<path d="M81.25 91h0.0"/><path d="M254.25 91h0.0"/><rect height="22" rx="10" ry="10" width="173.0" x="81.25" y="80"/><text x="167.75" y="95">1997,van,Ford,E350</text></g></g><path d="M275.5 91a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"/></g><path d="M 295.5 61 h 20 m -10 -10 v 20 m 10 -20 v 20"/></g></svg>
 
 </div>
 
@@ -27870,10 +27872,10 @@ ftp://freebsd.org/
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
-The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarMiner.ipynb" target=_blank)>Last change: 2020-04-22 12:57:37+02:00</a> &bull; 
+The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GrammarMiner.ipynb" target=_blank)>Last change: 2020-09-27 19:14:06+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
-<a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
+<a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
 
 <iframe src="http://fuzzingbook.cispa.saarland/rVBkxhK1wuOrGfGe1HZL/Mining Input Grammars" style="width:0;height:0;border:0; border:none;"></iframe>
@@ -27889,7 +27891,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">Mining Input Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">https://www.fuzzingbook.org/beta/html/GrammarMiner.html</a>.  Retrieved 2020-04-22 12:57:37+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">Mining Input Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/GrammarMiner.html">https://www.fuzzingbook.org/beta/html/GrammarMiner.html</a>.  Retrieved 2020-09-27 19:14:06+02:00.
 </p>
 <pre>
 @incollection{fuzzingbook2020:GrammarMiner,
@@ -27897,11 +27899,11 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     booktitle = {The Fuzzing Book},
     title = {Mining Input Grammars},
     year = {2020},
-    publisher = {Saarland University},
+    publisher = {CISPA},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/GrammarMiner.html}},
-    note = {Retrieved 2020-04-22 12:57:37+02:00},
+    note = {Retrieved 2020-09-27 19:14:06+02:00},
     url = {https://www.fuzzingbook.org/beta/html/GrammarMiner.html},
-    urldate = {2020-04-22 12:57:37+02:00}
+    urldate = {2020-09-27 19:14:06+02:00}
 }
 </pre>
 </div>

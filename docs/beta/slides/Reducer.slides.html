@@ -13109,17 +13109,23 @@ ul.typeahead-list  > li > a.pull-right {
 
     </style>
 <style type="text/css">
-    /* CSS stylesheet for fuzzingbook */
-/* This is applied both for the HTML version as well as for the Jupyter Notebook version */
-/* To apply this on local Jupyter notebook sessions, copy it to ~/.jupyter/custom/custom.css */
+    /* 
+    CSS stylesheet for fuzzingbook + debuggingbook
+
+    This is used both for the HTML version 
+    as well as for the Jupyter Notebook version.
+
+    To apply this on local Jupyter notebook sessions, copy it to
+    ~/.jupyter/custom/custom.css
+*/
 
 /* Loading fonts in Jupyter */
-@import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Patua+One|Open+Sans|Source+Code+Pro);
+@import url(https://fonts.googleapis.com/css?family=Fira+Mono:400,500,700|Raleway:300|Open+Sans|Source+Code+Pro); /* DebuggingBook */
 
 
 /* Fonts */
 h1, h2, h3, h4, h5 {
-	font-family: 'Patua One', Helvetica, Arial, sans-serif;
+	font-family: 'Raleway', Helvetica, Arial, sans-serif; /* DebuggingBook */
 }
 
 body {
@@ -13137,18 +13143,18 @@ code, kbd, pre, samp {
 /* Font sizes */
 /* We use somewhat smaller fonts for small devices and print */
 
-p, li {
+p, li, summary {
 	font-size: 16px;
 	line-height: 26px;
 }
 @media only screen and (max-width: 600px) {
-    p, li {
+    p, li, summary {
     	font-size: 14px;
     	line-height: 24px;
     }
 }
 @media print {
-    p, li {
+    p, li, summary {
     	font-size: 12px;
     	line-height: 18px;
     }
@@ -13213,10 +13219,11 @@ h3 {
 }
 
 /* More sections */
-h4, h5, h6 {
+h4, h5 {
 	font-size: 20px!important;
     font-weight: normal!important;
 }
+
 
 /* Small screens */
 @media only screen and (max-width: 600px) {
@@ -13224,7 +13231,7 @@ h4, h5, h6 {
     h1 { font-size: 32px!important; }
     h2 { font-size: 26px!important; }
     h3 { font-size: 22px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 18px!important; }
     };
 }
@@ -13234,7 +13241,7 @@ h4, h5, h6 {
     h1 { font-size: 26px!important; }
     h2 { font-size: 22px!important; }
     h3 { font-size: 18px!important; }
-    h4, h5, h6 {
+    h4, h5, h6, summary {
         { font-size: 14px!important; }
     };
 }
@@ -13265,22 +13272,20 @@ h4, h5, h6 {
 /* Jupyter Table of Contents */
 /* See https://github.com/ipython-contrib/jupyter_contrib_nbextensions/blob/master/src/jupyter_contrib_nbextensions/nbextensions/toc2/main.css */
 #toc-wrapper .toc-item-num {
-    font-family: 'Patua One', Helvetica, Arial, sans-serif!important;
-    /* font-family: 'Open Sans', sans-serif!important; */
+    font-family: 'Raleway', Helvetica, Arial, sans-serif!important; /* DebuggingBook */
 }
 
 #toc-wrapper li > span:hover {
-  background-color: #F1948A!important;
+  background-color: plum!important;  /* DebuggingBook */
 }
 .toc-item li { 
     font-size: 14px!important; 
-    /* font-family: 'Patua One', Helvetica, Arial, sans-serif!important; */
     font-weight: normal!important;
 }
 #toc-wrapper .header {
   font-size: 20px!important;
-  color: #B03A2E;
-  font-family: 'Patua One', Helvetica, Arial, sans-serif;
+  color: purple; /* DebuggingBook */
+  font-family: 'Raleway', Helvetica, Arial, sans-serif; /* DebuggingBook */
   font-weight: normal!important;
 }
 
@@ -13318,34 +13323,35 @@ body {
     color: #B03A2E!important;
 }
 
-/* Headers are dark red, too */
+/* Headers are purple */
 h1, h2, h3 {
-    color: #B03A2E!important;
+    color: purple!important; /* Debuggingbook */
 }
 
-h4, h5 {
+h4, h5, h6, summary {
     color: black;
 }
 
-/* And links also come in shades of red */
+
+/* And links also come in shades of purple */ /* Debuggingbook */
 a:link { /* unvisited link */
-    color: #A93226;
+    color: purple;
     /* text-decoration: none!important; */
 }
 
 a:visited {
-    color: #A93226;
+    color: purple;
     /* text-decoration: none!important; */
 }
 
 a:hover, a:focus {
-    color: #F1948A;
+    color: fuchsia;
     /* text-decoration: none!important; */
     /* font-weight: bolder!important; */
 }
 
 a:active {
-    color: red;
+    color: magenta;
     /* text-decoration: none!important; */
 }
 
@@ -13382,15 +13388,40 @@ a:active {
 
 
 /* Details */
+/* See https://stackoverflow.com/questions/38213329/how-to-add-css3-transition-with-html5-details-summary-tag-reveal?noredirect=1&lq=1 */
+/* TODO: Closing details is not animated yet; not sure whether this is possible in CSS - AZ*/
+
 details[open] summary ~ * {
-  animation: sweep .5s ease-in-out;
+  animation: sweep-in .5s ease-in-out;
+}
+details:not([open]) summary ~ * {
+  animation: sweep-out .5s ease-in-out;
 }
 
-@keyframes sweep {
+@keyframes sweep-in {
   0%    {opacity: 0; margin-top: -30px}
   100%  {opacity: 1; margin-top: 0px}
 }
 
+@keyframes sweep-out {
+  0%    {opacity: 1; margin-top: 0px}
+  100%  {opacity: 0; margin-top: -30px}
+}
+
+details {
+    border-style: dashed;
+    border-color: gray;
+    border-width: 1px;
+    padding-top: 0px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 5px;
+    outline: none !important;
+}
+
+summary {
+    outline: none !important;
+}
 
 
 
@@ -13532,7 +13563,7 @@ article {
   border: 1px solid;
   /* border-radius: 5px; */
   width: 100%;
-  border-color: #660000;
+  border-color: purple; /* Debuggingbook */
   position: fixed;
   z-index: 5000;
   transition: opacity 1s;
@@ -13586,7 +13617,7 @@ article {
   font-weight: 700;
   font-size: 13px;
   font-family: Arial, Helvetica, sans-serif;
-  border-right: 1px solid #660000;
+  border-right: 1px solid purple; /* Debuggingbook */
   color: #ffffff;
   padding: 12px 20px;
 }
@@ -13603,7 +13634,7 @@ article {
   bottom: -1px;
   right: -2px;
   z-index: 5010;
-  border-color: #cc0000;
+  border-color: purple; /* Debuggingbook */
 }
 #cssmenu ul li.has-sub:hover > a:after,
 #cssmenu ol li.has-sub:hover > a:after {
@@ -13715,7 +13746,7 @@ article {
 #cssmenu,
 #cssmenu ul ul > li:hover > a,
 #cssmenu ul ul li a:hover {
-  background: #bb0000;
+  background: purple; /* DebuggingBook */
   /*
   background: -moz-linear-gradient(top, #cc0000 0%, #990000 100%);
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #cc0000), color-stop(100%, #990000));
@@ -13726,12 +13757,12 @@ article {
   */
 }
 #cssmenu > ul > li > a:hover {
-  background: #bb0000;
+  background: purple; /* DebuggingBook */
   color: #ffffff;
 }
 #cssmenu ul ul a:hover,
 #cssmenu ul ol a:hover {
-  background: #bb0000;
+  background: purple; /* DebuggingBook */
   color: #ffffff;
 }
 #cssmenu > ul > li.has-sub > a:hover:before {
@@ -13908,49 +13939,6 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
-
-<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.Reducer</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
-</pre></div>
-<p>and then make use of the following features.</p>
-<p>A <em>reducer</em> takes a failure-inducing input and reduces it to the minimum that still reproduces the failure.  This chapter provides <code>Reducer</code> classes that implement such reducers.</p>
-<p>Here is a simple example: An arithmetic expression causes an error in the Python interpreter:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="err">!</span><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s1">&#39;x = 1 + 2 * 3 / 0&#39;</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;&lt;string&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-<span class="ne">ZeroDivisionError</span><span class="p">:</span> <span class="n">division</span> <span class="n">by</span> <span class="n">zero</span>
-</pre></div>
-<p>Can we reduce this input to a minimum?  To use a <code>Reducer</code>, one first has to build a <code>Runner</code> whose outcome is <code>FAIL</code> if the precise error occurs.  We therefore build a <code>ZeroDivisionRunner</code> whose <code>run()</code> method will specifically return a <code>FAIL</code> outcome if a <code>ZeroDivisionError</code> occurs.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">Fuzzer</span> <span class="kn">import</span> <span class="n">ProgramRunner</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="k">class</span> <span class="nc">ZeroDivisionRunner</span><span class="p">(</span><span class="n">ProgramRunner</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="s2">&quot;&quot;&quot;Make outcome &#39;FAIL&#39; if ZeroDivisionError occurs&quot;&quot;&quot;</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;ZeroDivisionError&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-<span class="o">&gt;&gt;&gt;</span>             <span class="n">outcome</span> <span class="o">=</span> <span class="s1">&#39;FAIL&#39;</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span>
-</pre></div>
-<p>If we feed this expression into a <code>ZeroDivisionRunner</code>, it will produce an outcome of <code>FAIL</code> as designed.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">python_input</span> <span class="o">=</span> <span class="s2">&quot;x = 1 + 2 * 3 / 0&quot;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">python_runner</span> <span class="o">=</span> <span class="n">ZeroDivisionRunner</span><span class="p">(</span><span class="s2">&quot;python&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="n">python_runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">python_input</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">outcome</span>
-<span class="s1">&#39;FAIL&#39;</span>
-</pre></div>
-<p>Delta Debugging is a simple and robust reduction algorithm.  We can tie a <code>DeltaDebuggingReducer</code> to this runner, and have it determine the substring that causes the <code>python</code> program to fail:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">dd</span> <span class="o">=</span> <span class="n">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">python_runner</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">dd</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">python_input</span><span class="p">)</span>
-<span class="s1">&#39;3/0&#39;</span>
-</pre></div>
-<p>The input is reduced to the maximum: We get the essence of the division by zero.</p>
-
-</div>
-</div>
-</div></section></section><section><section>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Why-Reducing?">Why Reducing?<a class="anchor-link" href="#Why-Reducing?">&#182;</a></h2><p>At this point, we have seen a number of test generation techniques that all in some form produce inputs in order to trigger failures.  If they are successful – that is, the program actually fails – we must find out why the failure occurred and how to fix it.</p>
 
 </div>
@@ -13959,7 +13947,7 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Here's an example of such a situation.  We have a class <code>MysteryRunner</code> class with a <code>run()</code> method that – given its code – can occasionally fail.  But under which circumstances does this actually happen?  We have deliberately obscured the exact condition in order to make this non-obvious.</p>
+<p>Here's an example of such a situation.  We have a class <code>MysteryRunner</code> with a <code>run()</code> method that – given its code – can occasionally fail.  But under which circumstances does this actually happen?  We have deliberately obscured the exact condition in order to make this non-obvious.</p>
 
 </div>
 </div>
@@ -14480,7 +14468,7 @@ the first quarter, the second quarter, and so on.</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>However, this is comething we happily let a computer do for us.  We first introduce a <code>Reducer</code> class as an abstract superclass for all kinds of reducers.  The <code>test()</code> methods runs a single test (with logging, if so wanted); the <code>reduce()</code> method will eventually reduce an input to the minimum.</p>
+<p>However, this is something we happily let a computer do for us.  We first introduce a <code>Reducer</code> class as an abstract superclass for all kinds of reducers.  The <code>test()</code> method runs a single test (with logging, if wanted); the <code>reduce()</code> method will eventually reduce an input to the minimum.</p>
 
 </div>
 </div>
@@ -14610,7 +14598,7 @@ the first quarter, the second quarter, and so on.</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>To see how the <code>DeltaDebuggingReducer</code> works, let us run it on our failing input.  With each step, we see how the remaining input gets smaller and smaller, until only three characters remain:</p>
+<p>To see how the <code>DeltaDebuggingReducer</code> works, let us run it on our failing input.  With each step, we see how the remaining input gets smaller and smaller, until only two characters remain:</p>
 
 </div>
 </div>
@@ -15810,7 +15798,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <pre><code>&lt;term&gt; ::= &lt;term&gt; * &lt;factor&gt;
 
 </code></pre>
-<p>Lat us replace this with the alternative expansion:</p>
+<p>Let us replace this with the alternative expansion:</p>
 
 <pre><code>&lt;term&gt; ::= &lt;factor&gt;</code></pre>
 
@@ -16552,7 +16540,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Finding-Subtrees">Finding Subtrees<a class="anchor-link" href="#Finding-Subtrees">&#182;</a></h4><p>The method <code>subtrees_with_symbol()</code> returns all subtrees in the given tree whose root is equal to the given symbol.  If <code>ignore_root</code> is set (default), then the root node of <code>tree</code> is not compared against.  (The <code>depth</code> parameter will be discussed below.)</p>
+<h4 id="Finding-Subtrees">Finding Subtrees<a class="anchor-link" href="#Finding-Subtrees">&#182;</a></h4><p>The method <code>subtrees_with_symbol()</code> returns all subtrees in the given tree which's root is equal to the given symbol.  If <code>ignore_root</code> is set (default), then the root node of <code>tree</code> is not compared against.  (The <code>depth</code> parameter will be discussed below.)</p>
 
 </div>
 </div>
@@ -16804,7 +16792,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Here's <em>all</em> combinations for <code>&lt;term&gt;</code>:</p>
+<p>Here are <em>all</em> combinations for <code>&lt;term&gt;</code>:</p>
 
 </div>
 </div>
@@ -17312,7 +17300,7 @@ Test #5 &#39;(3)&#39; 3 FAIL
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Even if five steps already are good, we can still do better.  If we look at the log, above, we see that after test <code>#2</code>, where the input (tree) is reduced to <code>2 * 3</code>, our <code>GrammarReducer</code> first tries to replace the tree with <code>2</code> and <code>3</code>, which are the alternate <code>&lt;term&gt;</code> subtrees.  This may work, of course; but if there are many possible subtrees, our strategy will spend quite some time trying one after the other.</p>
+<p>Even if five steps are already good, we can still do better.  If we look at the log above, we see that after test <code>#2</code>, where the input (tree) is reduced to <code>2 * 3</code>, our <code>GrammarReducer</code> first tries to replace the tree with <code>2</code> and <code>3</code>, which are the alternate <code>&lt;term&gt;</code> subtrees.  This may work, of course; but if there are many possible subtrees, our strategy will spend quite some time trying one after the other.</p>
 
 </div>
 </div>
@@ -18050,7 +18038,7 @@ Test #3 &#39;3&#39; 1 PASS
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.3379851040081121</pre>
+<pre>0.17127747599988652</pre>
 </div>
 
 </div>
@@ -18157,7 +18145,7 @@ Test #3 &#39;3&#39; 1 PASS
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>8.394316638994496</pre>
+<pre>4.495460246998846</pre>
 </div>
 
 </div>
