@@ -387,13 +387,13 @@ NBSHORTEN = utils/nbshorten.py
 
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS)
 	$(EXECUTE_NOTEBOOK) $<
-	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $@
 	
 $(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS) $(NBSHORTEN) $(NOTEBOOKS)/$(UTILS)/__init__.py
 	$(RENDER_NOTEBOOK) $<
-	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 	RENDER_HTML=1 $(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $@
 	$(PYTHON) $(NBSHORTEN) --link-to "$(SITE)/html/" --in-place $@
@@ -440,7 +440,7 @@ POST_TEX = utils/post_tex
 
 $(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_METADATA) $(POST_TEX)
 	$(eval TMPDIR := $(shell mktemp -d))
-	$(PYTHON) $(ADD_METADATA) --titlepage $< > $(TMPDIR)/$(notdir $<)
+	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) --titlepage $< > $(TMPDIR)/$(notdir $<)
 	cp -pr $(NOTEBOOKS)/PICS $(BIB) $(TMPDIR)
 	$(CONVERT_TO_TEX) $(TMPDIR)/$(notdir $<)
 	$(POST_TEX) $@ > $@~ && mv $@~ $@
@@ -765,7 +765,7 @@ check check-all: check-import check-package check-code check-style check-crossre
 metadata: $(ADD_METADATA)
 	@for notebook in $(SOURCES); do \
 		echo "Adding metadata to $$notebook...\c"; \
-		$(PYTHON) $(ADD_METADATA) $$notebook > $$notebook~ || exit 1; \
+		$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $$notebook > $$notebook~ || exit 1; \
 		if diff $$notebook $$notebook~; then \
 			echo "unchanged."; \
 		else \
@@ -967,7 +967,7 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
 		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
 	$(EXECUTE_NOTEBOOK) $@ && mv $(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb $@
-	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(JUPYTER) trust $@
 	@$(OPEN) $@
 

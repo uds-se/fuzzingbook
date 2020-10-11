@@ -4,7 +4,7 @@
 """
 usage:
 
-python add-metadata.py [--titlepage] A.ipynb > A'.ipynb
+python add-metadata.py [--project PROJECT] [--titlepage] A.ipynb > A'.ipynb
 """
 
 import io
@@ -35,7 +35,7 @@ def get_title(notebook):
 
 
 
-def add_document_metadata(notebook, titlepage):
+def add_document_metadata(notebook, project, titlepage):
     """Add document metadata"""
     # No cell toolbar for published notebooks
     if 'celltoolbar' in notebook.metadata:
@@ -50,11 +50,18 @@ def add_document_metadata(notebook, titlepage):
     if titlepage:
         # Add title
         chapter_title = get_title(notebook)
-        notebook.metadata['ipub']['titlepage'] = {
-            "author": "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler",
-            "title": chapter_title,
-            "subtitle": 'A Chapter of "The Fuzzing Book"'
-        }
+        if project == 'fuzzingbook':
+            notebook.metadata['ipub']['titlepage'] = {
+                "author": "Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler",
+                "title": chapter_title,
+                "subtitle": 'A Chapter of "The Fuzzing Book"'
+            }
+        elif project == 'debuggingbook':
+            notebook.metadata['ipub']['titlepage'] = {
+                "author": "Andreas Zeller",
+                "title": chapter_title,
+                "subtitle": 'A Chapter of "The Debugging Book"'
+            }
 
     # Add table of contents
     notebook.metadata['toc'] = {
@@ -98,12 +105,12 @@ def add_solution_metadata(notebook):
                 
 
 
-def add_metadata(filename, titlepage):
+def add_metadata(filename, project, titlepage):
     # Read in
     with io.open(filename, 'r', encoding='utf-8') as f:
         notebook = nbformat.read(f, as_version=4)
 
-    add_document_metadata(notebook, titlepage)
+    add_document_metadata(notebook, project, titlepage)
     add_solution_metadata(notebook)
 
     # Write out
@@ -114,16 +121,25 @@ def add_metadata(filename, titlepage):
 
     
 if __name__ == '__main__':
-    if sys.argv[1] == "--titlepage":
+    args = sys.argv[1:]
+    
+    if args[0] == "--project":
+        project = args[1]
+        args = args[2:]
+    else:
+        project = 'fuzzingbook'
+
+    if args[0] == "--titlepage":
         titlepage = True
-        notebooks = sys.argv[2:]
+        args = args[1:]
     else:
         titlepage = False
-        notebooks = sys.argv[1:]
+        
+    notebooks = args
 
     if not notebooks:
         print(__doc__, file=sys.stderr)
         sys.exit(1)
     
     for notebook in notebooks:
-        add_metadata(notebook, titlepage)
+        add_metadata(notebook, project, titlepage)
