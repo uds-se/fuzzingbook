@@ -40,10 +40,10 @@ title.tplx_dict['document_predoc'] = r"""
 
 % Copyright
 \vfill
-\textbf{Generating Software Tests}, by Andreas Zeller, Rahul Gopinath,
+\textbf{The Fuzzing Book}, by Andreas Zeller, Rahul Gopinath,
 Marcel Böhme, Gordon Fraser, and Christian Holler.
 
-Copyright © 2018 by the authors; all rights reserved.
+Copyright © 2018--2020 by the authors; all rights reserved.
 
 % Make sure the preface has section 0
 \setcounter{section}{-1}
