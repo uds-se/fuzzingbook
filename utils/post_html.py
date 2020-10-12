@@ -349,17 +349,17 @@ RE_DISPLAY = re.compile(r'''
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">(quiz|display)</span>.*?
+<div class=" highlight hl-ipython3"><pre><span></span>(<span class="n">(quiz|display)</span>|<span class="c1">#\s*[iI]gnore[^<]*</span>).*?
 </div>
 </div></div>
 </div>
 </div>
 ''', re.DOTALL)
 
-def remove_display_cells(text):
+def remove_ignored_code(text):
     return RE_DISPLAY.sub('', text)
 
-assert remove_display_cells('''
+assert remove_ignored_code('''
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -791,7 +791,7 @@ chapter_contents = chapter_contents \
     .replace("__BIBTEX_KEY__", project + notebook_modification_year)
 
 # Remove code cells that only display graphics
-chapter_contents = remove_display_cells(chapter_contents)
+chapter_contents = remove_ignored_code(chapter_contents)
 
 # Add links to imports
 chapter_contents = add_links_to_imports(chapter_contents)
