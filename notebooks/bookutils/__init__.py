@@ -4,7 +4,8 @@
 __all__ = ["PrettyTable", "YouTubeVideo",
            "print_file", "print_content", "HTML",
            "unicode_escape", "terminal_escape", 
-           "inheritance_conflicts", "extract_class_definition"]
+           "inheritance_conflicts", "extract_class_definition",
+           "quiz"]
 
 # Setup loader such that workbooks can be imported directly
 try:
@@ -203,6 +204,138 @@ def HTML(data=None, url=None, filename=None, png=False, headless=True, zoom=2.0)
     # Render URL as PNG
     firefox.get(url)
     return Image(firefox.get_screenshot_as_png())
+    
+    
+# Quizzes
+# Usage: quiz('Which of these is not a fruit?', 
+#             ['apple', 'banana', 'pear', 'tomato'], '27 / 9')
+import uuid
+
+def nbquiz(question, options, correct_answer, title='Quiz'):
+    import ipywidgets as widgets
+
+    if isinstance(correct_answer, str):
+        correct_answer = int(eval(correct_answer))
+  
+    radio_options = [(words, i) for i, words in enumerate(options)]
+    alternatives = widgets.RadioButtons(
+        options = radio_options,
+        description = '',
+        disabled = False
+    )
+
+    title_out =  widgets.HTML(value=f'<h2>{title}</h2><strong>{question}</strong>')
+
+    check = widgets.Button()
+    
+    def clear_selection(change):
+        check.description = 'Submit'
+        
+    clear_selection(None)
+
+    def check_selection(change):
+        answer = int(alternatives.value) + 1
+
+        if answer == correct_answer:
+            check.description = 'Correct!'
+        else:
+            check.description = 'Incorrect!'
+        return
+    
+    check.on_click(check_selection)
+    alternatives.observe(clear_selection, names='value')
+    
+    return widgets.VBox([title_out, alternatives, check])
+
+def jsquiz(question, options, correct_answer, title='Quiz'):
+    if isinstance(correct_answer, str):
+        correct_answer = int(eval(correct_answer))
+
+    quiz_id = uuid.uuid1()
+    
+    script = '''
+    <script>
+    function answer(quiz_id) {
+        for (i = 1; i < 100; i++) {
+            if (document.getElementById(quiz_id + "-" + i.toString()).checked)
+                return i.toString();
+        }
+        return ""; /* Nothing checked */
+    }
+    function check_selection(quiz_id, correct_answer) {
+        given_answer = answer(quiz_id)
+        if (given_answer == correct_answer) {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-" + given_answer + "-label").style.fontWeight = "bold"
+        }
+        else {
+            document.getElementById(quiz_id + "-submit").value = "Incorrect!";
+            document.getElementById(quiz_id + "-" + given_answer + "-label").style.textDecoration = "line-through";
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+    }
+    </script>
+    '''
+    
+    menu = "".join(f'''
+        <input type="radio" name="{quiz_id}" id="{quiz_id}-{i + 1}" onclick="clear_selection('{quiz_id}')">
+        <label id="{quiz_id}-{i + 1}-label" for="{quiz_id}-{i + 1}">{option}</label><br>
+    ''' for (i, option) in enumerate(options))
+
+    html = f'''
+    {script}
+    <h2>{title}</h2>
+    <strong>{question}</strong><br/>
+    {menu}
+    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', '{correct_answer}')">
+    '''
+    return HTML(html)
+
+def htmlquiz(question, options, correct_answer, title='Quiz'):
+    menu = "".join(f'''
+    <li> {option} </li>
+    ''' for (i, option) in enumerate(options))
+    
+    html = f'''
+    <h2>{title}</h2>
+    <strong>{question}</strong><br/>
+    <ol>
+    {menu}
+    </ol>
+    <small>(Hint: {correct_answer})</small>
+    '''
+    return HTML(html)
+    
+def textquiz(question, options, correct_answer, title='Quiz'):
+    menu = "".join(f'''
+    {i}. {option}''' for (i, option) in enumerate(options))
+    
+    text = f'''{title}: {question}
+    {menu}
+
+(Hint: {correct_answer})
+    '''
+    print(text)
+    
+def quiz(question, options, correct_answer, title='Quiz'):
+    """Display a quiz. 
+    `question` is a question string to be asked.
+    `options` is a list of strings with possible answers.
+    `correct_answer` is the number (1..) of the correct answer. If given as a string (say, "2 + 2"), the string is displayed as hint and evaluated (to 4) for the correct answer.
+    `title` is the title to be displayed.
+    """
+
+    if 'RENDER_HTML' in os.environ:
+        return htmlquiz(question, options, correct_answer, title)
+
+    if have_ipython:
+        return jsquiz(question, options, correct_answer, title)
+        
+    return textquiz(question, options, correct_answer, title)
+
+        
 
 import atexit
 @atexit.register
