@@ -323,27 +323,29 @@ def jsquiz(question, options, correct_answer, title='Quiz'):
     
     if multiple_choice:
         input_type = "checkbox"
+        instructions = "Check all that apply."
     else:
         input_type = "radio"
+        instructions = "Pick a choice."
         
     menu = "".join(f'''
-        <div class="quiz_option">
         <input type="{input_type}" name="{quiz_id}" id="{quiz_id}-{i + 1}" onclick="clear_selection('{quiz_id}')">
         <label id="{quiz_id}-{i + 1}-label" for="{quiz_id}-{i + 1}">{option}</label><br>
-        </div>
     ''' for (i, option) in enumerate(options))
-
+    
     html = f'''
     {script}
     <div class="quiz">
     <h3 class="quiz_title">{title}</h3>
     <p>
-    <strong class="quiz_question">{question}</strong>
+    <div class="quiz_question">{question}</div>
     </p>
     <p>
+    <div class="quiz_options" title="{instructions}">
     {menu}
-    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', {correct_ans}, {int(multiple_choice)})">
+    </div>
     </p>
+    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', {correct_ans}, {int(multiple_choice)})">
     </div>
     '''
     return HTML(html)
