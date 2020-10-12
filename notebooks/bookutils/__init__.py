@@ -4,8 +4,7 @@
 __all__ = ["PrettyTable", "YouTubeVideo",
            "print_file", "print_content", "HTML",
            "unicode_escape", "terminal_escape", 
-           "inheritance_conflicts", "extract_class_definition",
-           "quiz"]
+           "inheritance_conflicts", "extract_class_definition", "quiz"]
 
 # Setup loader such that workbooks can be imported directly
 try:
@@ -211,6 +210,8 @@ def HTML(data=None, url=None, filename=None, png=False, headless=True, zoom=2.0)
 #             ['apple', 'banana', 'pear', 'tomato'], '27 / 9')
 import uuid
 
+# Widget quizzes. No support for multiple-choice quizzes.
+# Currently unused in favor of jsquiz(), below.
 def nbquiz(question, options, correct_answer, title='Quiz'):
     import ipywidgets as widgets
 
@@ -224,7 +225,7 @@ def nbquiz(question, options, correct_answer, title='Quiz'):
         disabled = False
     )
 
-    title_out =  widgets.HTML(value=f'<h2>{title}</h2><strong>{question}</strong>')
+    title_out =  widgets.HTML(value=f'<h4>{title}</h4><strong>{question}</strong>')
 
     check = widgets.Button()
     
@@ -247,30 +248,71 @@ def nbquiz(question, options, correct_answer, title='Quiz'):
     
     return widgets.VBox([title_out, alternatives, check])
 
+# JavaScript quizzes.
 def jsquiz(question, options, correct_answer, title='Quiz'):
-    if isinstance(correct_answer, str):
-        correct_answer = int(eval(correct_answer))
+    if isinstance(correct_answer, list):
+        answer_list = correct_answer
+        multiple_choice = True
+    else:
+        answer_list = [correct_answer]
+        multiple_choice = False
+
+    # Encode answer into binary
+    correct_ans = 0
+    for elem in answer_list:
+        if isinstance(elem, str):
+            elem = eval(elem)
+        correct_ans = correct_ans | (1 << int(elem))
 
     quiz_id = uuid.uuid1()
-    
+
     script = '''
     <script>
     function answer(quiz_id) {
-        for (i = 1; i < 100; i++) {
-            if (document.getElementById(quiz_id + "-" + i.toString()).checked)
-                return i.toString();
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
         }
-        return ""; /* Nothing checked */
+        return ans;
     }
-    function check_selection(quiz_id, correct_answer) {
-        given_answer = answer(quiz_id)
-        if (given_answer == correct_answer) {
+    function check_selection(quiz_id, correct_answer, multiple_choice) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
             document.getElementById(quiz_id + "-submit").value = "Correct!";
-            document.getElementById(quiz_id + "-" + given_answer + "-label").style.fontWeight = "bold"
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+    
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
         }
-        else {
+        else 
+        {
             document.getElementById(quiz_id + "-submit").value = "Incorrect!";
-            document.getElementById(quiz_id + "-" + given_answer + "-label").style.textDecoration = "line-through";
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
         }
     }
     function clear_selection(quiz_id) {
@@ -279,20 +321,34 @@ def jsquiz(question, options, correct_answer, title='Quiz'):
     </script>
     '''
     
+    if multiple_choice:
+        input_type = "checkbox"
+    else:
+        input_type = "radio"
+        
     menu = "".join(f'''
-        <input type="radio" name="{quiz_id}" id="{quiz_id}-{i + 1}" onclick="clear_selection('{quiz_id}')">
+        <div class="quiz_option">
+        <input type="{input_type}" name="{quiz_id}" id="{quiz_id}-{i + 1}" onclick="clear_selection('{quiz_id}')">
         <label id="{quiz_id}-{i + 1}-label" for="{quiz_id}-{i + 1}">{option}</label><br>
+        </div>
     ''' for (i, option) in enumerate(options))
 
     html = f'''
     {script}
-    <h2>{title}</h2>
-    <strong>{question}</strong><br/>
+    <div class="quiz">
+    <h3 class="quiz_title">{title}</h3>
+    <p>
+    <strong class="quiz_question">{question}</strong>
+    </p>
+    <p>
     {menu}
-    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', '{correct_answer}')">
+    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', {correct_ans}, {int(multiple_choice)})">
+    </p>
+    </div>
     '''
     return HTML(html)
 
+# HTML quizzes. Not interactive.
 def htmlquiz(question, options, correct_answer, title='Quiz'):
     menu = "".join(f'''
     <li> {option} </li>
@@ -307,7 +363,8 @@ def htmlquiz(question, options, correct_answer, title='Quiz'):
     <small>(Hint: {correct_answer})</small>
     '''
     return HTML(html)
-    
+
+# Text quizzes. Not interactive.
 def textquiz(question, options, correct_answer, title='Quiz'):
     menu = "".join(f'''
     {i}. {option}''' for (i, option) in enumerate(options))
@@ -318,12 +375,17 @@ def textquiz(question, options, correct_answer, title='Quiz'):
 (Hint: {correct_answer})
     '''
     print(text)
-    
+
+# Entry point for all of the above.
 def quiz(question, options, correct_answer, title='Quiz'):
     """Display a quiz. 
     `question` is a question string to be asked.
     `options` is a list of strings with possible answers.
-    `correct_answer` is the number (1..) of the correct answer. If given as a string (say, "2 + 2"), the string is displayed as hint and evaluated (to 4) for the correct answer.
+    `correct_answer` is either
+      * a single correct answer (number 1..) -> radio buttons will be shown; or
+      * a ist of correct answers -> multiple checkboxes will be shown.
+    Correct answers can also come as strings containing expressions;
+      these will be displayed as is and evaluated for the correct values.
     `title` is the title to be displayed.
     """
 
@@ -334,9 +396,9 @@ def quiz(question, options, correct_answer, title='Quiz'):
         return jsquiz(question, options, correct_answer, title)
         
     return textquiz(question, options, correct_answer, title)
-
         
 
+# Make sure we quit Firefox when done
 import atexit
 @atexit.register
 def quit_webdriver():
