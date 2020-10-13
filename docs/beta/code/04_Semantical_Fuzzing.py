@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/04_Semantical_Fuzzing.html
-# Last change: 2019-05-18 15:43:14+02:00
+# Last change: 2020-10-13 15:12:21+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors

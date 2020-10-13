@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/06_Managing_Fuzzing.html
-# Last change: 2019-03-11 10:57:49+01:00
+# Last change: 2020-10-13 15:12:25+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
