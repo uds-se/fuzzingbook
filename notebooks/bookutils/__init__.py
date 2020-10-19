@@ -300,7 +300,7 @@ def jsquiz(question, options, correct_answer, title='Quiz'):
         }
         else 
         {
-            document.getElementById(quiz_id + "-submit").value = "Incorrect!";
+            document.getElementById(quiz_id + "-submit").value = "Try again";
             if (!multiple_choice) {
                 for (i = 1;; i++) {
                     checkbox = document.getElementById(quiz_id + "-" + i.toString());
