@@ -417,7 +417,10 @@ def input(prompt):
         pass
     
     if given_input:
-        display(HTML(f"<pre>{prompt}<b>{given_input}</b></pre>"))
+        if rich_output():
+            display(HTML(f"<samp>{prompt}<b>{given_input}</b></samp>"))
+        else:
+            print(f"{prompt} {given_input}")
         return given_input
     
     return original_input(prompt)
