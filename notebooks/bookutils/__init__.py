@@ -398,7 +398,33 @@ def quiz(question, options, correct_answer, title='Quiz'):
         return jsquiz(question, options, correct_answer, title)
         
     return textquiz(question, options, correct_answer, title)
-        
+
+
+
+# Interactive inputs. We simulate them by assigning to the global variable INPUTS.
+
+INPUTS = []
+
+original_input = input
+
+def input(prompt):
+    given_input = None
+    try:
+        global INPUTS
+        given_input = INPUTS[0]
+        INPUTS = INPUTS[1:]
+    except:
+        pass
+    
+    if given_input:
+        display(HTML(f"<pre>{prompt}<b>{given_input}</b></pre>"))
+        return given_input
+    
+    return original_input(prompt)
+    
+def next_inputs(list):
+    global INPUTS
+    INPUTS += list
 
 # Make sure we quit Firefox when done
 import atexit
