@@ -465,6 +465,7 @@ BIBER = biber
 checkbib: $(BIB)
 	$(BIBER) --tool --validate-datamodel $(BIB)
 	$(RM) fuzzingbook_bibertool.bib
+	$(PYTHON) -c 'import bibtexparser; bibtexparser.load(open("$(BIB)"))'
 
 
 # index.html comes with relative links (html/) such that the beta version gets the beta menu
