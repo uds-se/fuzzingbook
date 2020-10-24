@@ -736,7 +736,7 @@ check-import check-imports: code
 	
 # Same as above, but using Python standard packages only; import should work too
 check-standard-imports: code
-	PYTHONPATH= $(MAKE) check-imports
+	# PYTHONPATH= $(MAKE) check-imports
 
 check-package check-packages: code
 	@echo "#!/usr/bin/env $(PYTHON)" > import_packages.py
