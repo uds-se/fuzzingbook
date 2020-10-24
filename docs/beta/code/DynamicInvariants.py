@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2020-10-13 15:12:23+02:00
+# Last change: 2020-10-24 12:13:00+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
