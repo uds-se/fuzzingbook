@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/PrototypingWithPython.html
-# Last change: 2020-10-24 12:24:40+02:00
+# Last change: 2020-10-24 12:48:53+02:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -302,6 +302,22 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     print('\n## Background')
+
+
+
+
+# ## Exercises
+
+if __name__ == "__main__":
+    print('\n## Exercises')
+
+
+
+
+# ### Exercise 1: Features! Features!
+
+if __name__ == "__main__":
+    print('\n### Exercise 1: Features! Features!')
 
 
 
