@@ -462,7 +462,7 @@ HTML_DEPS = $(BIB) $(SHARED)$(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py $(CHA
 
 # Check bib
 BIBER = biber
-checkbib: $(BIB)
+checkbib check-bib: $(BIB)
 	$(BIBER) --tool --validate-datamodel $(BIB)
 	$(RM) fuzzingbook_bibertool.bib
 	$(PYTHON) -c 'import bibtexparser; bibtexparser.load(open("$(BIB)"))'
