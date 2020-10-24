@@ -460,6 +460,12 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 HTML_DEPS = $(BIB) $(SHARED)$(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py $(CHAPTERS_MAKEFILE)
 
 
+# Check bib
+BIBER = biber
+checkbib: $(BIB)
+	$(BIBER) --tool --validate-datamodel $(BIB)
+	$(RM) fuzzingbook_bibertool.bib
+
 
 # index.html comes with relative links (html/) such that the beta version gets the beta menu
 $(DOCS_TARGET)index.html: \
