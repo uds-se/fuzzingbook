@@ -74,6 +74,7 @@ MANAGEMENT_PART_TODO =
 # Appendices for the book
 APPENDICES = \
 	99_Appendices.ipynb \
+	PrototypingWithPython.ipynb \
 	ExpectError.ipynb \
 	Timer.ipynb \
 	ControlFlow.ipynb \
