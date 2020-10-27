@@ -11793,7 +11793,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/beta/html/PrototypingWithPython.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Prototyping with Python - The Fuzzing Book" />
-<meta property="og:description" content="This is the manuscript of Andreas Zeller&#x27;s keynote&quot;Coding Effective Testing Tools Within Minutes&quot; at the TAIC PART 2020 conference.In this book, we use Python to implement automated testing techniques, and also as the language for most of our test subjects.  Why Python?  The short answer is&gt; Python made us amazingly productive.  Most techniques in this book took 2-3 days to implement.  This is about 10-20 times faster than for &quot;classic&quot; languages like C or Java.A factor of 10–20 in productivity is enormous, almost ridiculous.  Why is that so, and which consequences does this have for research and teaching?" />
+<meta property="og:description" content="This is the manuscript of Andreas Zeller&#x27;s keynote&quot;Coding Effective Testing Tools Within Minutes&quot; at the TAIC PART 2020 conference.In our Fuzzing Book, we use Python to implement automated testing techniques, and also as the language for most of our test subjects.  Why Python?  The short answer is&gt; Python made us amazingly productive.  Most techniques in this book took 2-3 days to implement.  This is about 10-20 times faster than for &quot;classic&quot; languages like C or Java.A factor of 10–20 in productivity is enormous, almost ridiculous.  Why is that so, and which consequences does this have for research and teaching?In this essay, we will explore some of the reasons, prototyping a symbolic test generator from scratch. This normally would be considered a very difficult task, taking months to build. Yet, developing the code in this chapter took less than two hours – and explaining it takes less than 20 minutes." />
 <meta property="og:image" content="https://www.fuzzingbook.org/beta/html/PICS/wordcloud.png" />
 
 <meta name="twitter:dnt" content="on">
@@ -11923,13 +11923,16 @@ MathJax.Hub.Config({
      <li class="has-sub"><a href="#"><span title="Prototyping with Python"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Prototyping with Python</span></a>
            <ul><li class="has-sub"><a href="#Python-is-Easy">&nbsp;&bull;&nbsp;&nbsp; Python is Easy</a>
 </li><li class="has-sub"><a href="#Fuzzing-is-as-Easy-as-Always">&nbsp;&bull;&nbsp;&nbsp; Fuzzing is as Easy as Always</a>
-</li><li class="has-sub"><a href="#Dynamic-Analysis-in-Python-is-Extremely-Easy">&nbsp;&bull;&nbsp;&nbsp; Dynamic Analysis in Python is Extremely Easy</a>
-</li><li class="has-sub"><a href="#Static-Analysis-in-Python-can-be-Easy">&nbsp;&bull;&nbsp;&nbsp; Static Analysis in Python can be Easy</a>
-</li><li class="has-sub"><a href="#There's-a-Python-interface-for-Everything">&nbsp;&bull;&nbsp;&nbsp; There's a Python interface for Everything</a>
+</li><li class="has-sub"><a href="#Dynamic-Analysis-in-Python:-So-Easy-it-Hurts">&nbsp;&bull;&nbsp;&nbsp; Dynamic Analysis in Python: So Easy it Hurts</a>
+</li><li class="has-sub"><a href="#Static-Analysis-in-Python:-Still-Easy">&nbsp;&bull;&nbsp;&nbsp; Static Analysis in Python: Still Easy</a>
+</li><li class="has-sub"><a href="#Symbolic-Reasoning-in-Python:-There's-a-Package-for-That">&nbsp;&bull;&nbsp;&nbsp; Symbolic Reasoning in Python: There's a Package for That</a>
+</li><li class="has-sub"><a href="#A-Symbolic-Test-Generator">&nbsp;&bull;&nbsp;&nbsp; A Symbolic Test Generator</a>
 </li><li class="has-sub"><a href="#Things-that-will-not-work">&nbsp;&bull;&nbsp;&nbsp; Things that will not work</a>
 <ul><li class="has-sub"><a href="#(No)-Type-Checking">(No) Type Checking</a>
 </li><li class="has-sub"><a href="#(No)-Program-Proofs">(No) Program Proofs</a>
-</ul></li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
+</ul></li><li class="has-sub"><a href="#The-Virtues-of-Prototyping">&nbsp;&bull;&nbsp;&nbsp; The Virtues of Prototyping</a>
+</li><li class="has-sub"><a href="#Try-it-out!">&nbsp;&bull;&nbsp;&nbsp; Try it out!</a>
+</li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps"><i class="fa fa-fw fa-arrows"></i> Next Steps</a>
 </li><li class="has-sub"><a href="#Background"><i class="fa fa-fw fa-mortar-board"></i> Background</a>
 </li><li class="has-sub"><a href="#Exercises"><i class="fa fa-fw fa-edit"></i> Exercises</a>
@@ -11991,13 +11994,45 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>In this book, we use Python to implement automated testing techniques, and also as the language for most of our test subjects.  Why Python?  The short answer is</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>In our <a href="index.html">Fuzzing Book</a>, we use Python to implement automated testing techniques, and also as the language for most of our test subjects.  Why Python?  The short answer is</p>
 <blockquote><p>Python made us amazingly <em>productive</em>.  Most techniques in this book took <strong>2-3 days</strong> to implement.  This is about <strong>10-20 times faster</strong> than for "classic" languages like C or Java.</p>
 </blockquote>
 <p>A factor of 10–20 in productivity is enormous, almost ridiculous.  Why is that so, and which consequences does this have for research and teaching?</p>
+<p>In this essay, we will explore some of the reasons, prototyping a <em>symbolic test generator</em> from scratch. This normally would be considered a very difficult task, taking months to build. Yet, developing the code in this chapter took less than two hours – and explaining it takes less than 20 minutes.</p>
 </div>
 </div>
 </div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook/tree/master/notebooks/bookutils" class="import" target="_blank">bookutils</a></span> <span class="k">import</span> <span class="n">YouTubeVideo</span>
+<span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;IAreRIID9lM&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+        <iframe
+            width="640"
+            height="360"
+            src="https://www.youtube-nocookie.com/embed/IAreRIID9lM"
+            frameborder="0"
+            allowfullscreen
+        ></iframe>
+
+</div>
+
 </div>
 
 <div class="input_markdown">
@@ -12012,7 +12047,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>As an example, take the (in)famous triangle program, which classifies a triangle of lengths $a$, $b$, $c$ into one of three categories.  It reads like pseudocode; yet, we can easily execute it.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>As an example, take the (in)famous <em>triangle</em> program, which classifies a triangle of lengths $a$, $b$, $c$ into one of three categories.  It reads like pseudocode; yet, we can easily execute it.</p>
 </div>
 </div>
 </div>
@@ -12140,16 +12175,16 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>triangle(9, 5, 3) = &#39;scalene&#39;
-triangle(7, 4, 6) = &#39;scalene&#39;
-triangle(2, 3, 2) = &#39;isosceles #3&#39;
-triangle(6, 2, 5) = &#39;scalene&#39;
-triangle(3, 3, 8) = &#39;isosceles #1&#39;
-triangle(9, 7, 2) = &#39;scalene&#39;
-triangle(6, 1, 2) = &#39;scalene&#39;
-triangle(6, 3, 7) = &#39;scalene&#39;
-triangle(5, 9, 7) = &#39;scalene&#39;
-triangle(5, 5, 5) = &#39;equilateral&#39;
+<pre>triangle(1, 6, 1) = &#39;isosceles #3&#39;
+triangle(2, 1, 3) = &#39;scalene&#39;
+triangle(1, 5, 8) = &#39;scalene&#39;
+triangle(3, 2, 7) = &#39;scalene&#39;
+triangle(2, 6, 3) = &#39;scalene&#39;
+triangle(7, 8, 6) = &#39;scalene&#39;
+triangle(5, 7, 7) = &#39;isosceles #2&#39;
+triangle(3, 8, 7) = &#39;scalene&#39;
+triangle(5, 1, 8) = &#39;scalene&#39;
+triangle(8, 4, 8) = &#39;isosceles #3&#39;
 </pre>
 </div>
 
@@ -12167,7 +12202,7 @@ triangle(5, 5, 5) = &#39;equilateral&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Dynamic-Analysis-in-Python-is-Extremely-Easy">Dynamic Analysis in Python is Extremely Easy<a class="anchor-link" href="#Dynamic-Analysis-in-Python-is-Extremely-Easy">&#182;</a></h2><p>Dynamic analysis is the ability to track what is happening during program execution.  The Python <code>settrace()</code> mechanism allows you to track all code lines, all variables, all values, as the program executes – and all this in a handful of lines of code.  Our <code>Coverage</code> class from <a href="Coverage.html">the chapter on coverage</a> shows how to capture a trace of all lines executed in five lines of code; such a trace easily converts into sets of lines or branches executed.  With two more lines, you can easily track all functions, arguments, variable values, too – see for instance our <a href="DynamicInvariants">chapter on dynamic invariants</a>.  And you can even access the source code of individual functions (and print it out, too!)  All this takes 10, maybe 20 minutes to implement.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Dynamic-Analysis-in-Python:-So-Easy-it-Hurts">Dynamic Analysis in Python: So Easy it Hurts<a class="anchor-link" href="#Dynamic-Analysis-in-Python:-So-Easy-it-Hurts">&#182;</a></h2><p>Dynamic analysis is the ability to track what is happening during program execution.  The Python <code>settrace()</code> mechanism allows you to track all code lines, all variables, all values, as the program executes – and all this in a handful of lines of code.  Our <code>Coverage</code> class from <a href="Coverage.html">the chapter on coverage</a> shows how to capture a trace of all lines executed in five lines of code; such a trace easily converts into sets of lines or branches executed.  With two more lines, you can easily track all functions, arguments, variable values, too – see for instance our <a href="DynamicInvariants">chapter on dynamic invariants</a>.  And you can even access the source code of individual functions (and print it out, too!)  All this takes 10, maybe 20 minutes to implement.</p>
 </div>
 </div>
 </div>
@@ -12297,7 +12332,7 @@ triangle:6             return &#39;isosceles #1&#39;       (c = 1, b = 2, a = 2)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Static-Analysis-in-Python-can-be-Easy">Static Analysis in Python can be Easy<a class="anchor-link" href="#Static-Analysis-in-Python-can-be-Easy">&#182;</a></h2><p>Static analysis refers to the ability to analyze <em>program code</em> without actually executing it. Statically analyzing Python code to deduce any property can be a nightmare, because the language is so highly dynamic. (More on that below.)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Static-Analysis-in-Python:-Still-Easy">Static Analysis in Python: Still Easy<a class="anchor-link" href="#Static-Analysis-in-Python:-Still-Easy">&#182;</a></h2><p>Static analysis refers to the ability to analyze <em>program code</em> without actually executing it. Statically analyzing Python code to deduce any property can be a nightmare, because the language is so highly dynamic. (More on that below.)</p>
 <p>If your static analysis does not have to be <em>sound</em>, – for instance, because you only use it to <em>support</em> and <em>guide</em> another technique such as  testing – then a static analysis in Python can be very simple.  The <code>ast</code> module allows you to turn any Python function into an abstract syntax tree (AST), which you then can traverse as you like.  Here's the AST for our <code>triangle()</code> function:</p>
 </div>
 </div>
@@ -13056,7 +13091,7 @@ triangle:6             return &#39;isosceles #1&#39;       (c = 1, b = 2, a = 2)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="There's-a-Python-interface-for-Everything">There's a Python interface for Everything<a class="anchor-link" href="#There's-a-Python-interface-for-Everything">&#182;</a></h2><p>Let's get back to testing.  We have shown how to extract conditions from code.  To reach a particular location in the <code>triangle()</code> function, one needs to find a solution for the <em>path conditions</em> leading to that branch.  To reach the last line in <code>triangle()</code> (the <code>'scalene'</code> branch), we have to find a solution for 
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Symbolic-Reasoning-in-Python:-There's-a-Package-for-That">Symbolic Reasoning in Python: There's a Package for That<a class="anchor-link" href="#Symbolic-Reasoning-in-Python:-There's-a-Package-for-That">&#182;</a></h2><p>Let's get back to testing.  We have shown how to extract conditions from code.  To reach a particular location in the <code>triangle()</code> function, one needs to find a solution for the <em>path conditions</em> leading to that branch.  To reach the last line in <code>triangle()</code> (the <code>'scalene'</code> branch), we have to find a solution for 
 $$a \ne b \land b \ne c \land a \ne c$$</p>
 <p>We can make use of a <em>constraint</em> solver for this, such as Microsoft's <a href="https://github.com/Z3Prover/z3"><em>Z3</em> solver</a>:</p>
 </div>
@@ -13199,7 +13234,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let us find all conditions we need to solve, by exploring all paths in the tree. We turn these paths to Z3 format right away:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Symbolic-Test-Generator">A Symbolic Test Generator<a class="anchor-link" href="#A-Symbolic-Test-Generator">&#182;</a></h2><p>With what we have seen, we can now build a <em>symbolic test generator</em> – a tool that attempts to systematically create test inputs that cover all paths.  Let us find all conditions we need to solve, by exploring all paths in the tree. We turn these paths to Z3 format right away:</p>
 </div>
 </div>
 </div>
@@ -13358,7 +13393,8 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Things-that-will-not-work">Things that will not work<a class="anchor-link" href="#Things-that-will-not-work">&#182;</a></h2><p>Python has a reputation for being hard to analyze statically, and this is true; its dynamic nature makes it hard for traditional static analysis to exclude specific behaviors.</p>
-<p>We see Python as a great language for prototyping automated testing and dynamic analysis techniques, and as a good language to illustrate <em>lightweight</em> static and symbolic analysis techniques that would be used as <em>guidance</em> and <em>support</em> for other techniques (say, for generating software tests).  But if you want to <em>prove</em> specific properties (or the absence thereof) by static analysis of code only, Python is a challenge, to say the least; and there are areas for which we would definitely <em>warn</em> against using it.</p>
+<p>We see Python as a great language for prototyping automated testing and dynamic analysis techniques, and as a good language to illustrate <em>lightweight</em> static and symbolic analysis techniques that would be used to <em>guide</em> and <em>support</em> other techniques (say, generating software tests).</p>
+<p>But if you want to <em>prove</em> specific properties (or the absence thereof) by static analysis of code only, Python is a challenge, to say the least; and there are areas for which we would definitely <em>warn</em> against using it.</p>
 </div>
 </div>
 </div>
@@ -13391,7 +13427,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Most real-world Python code will not be annotated with types, though.  While you can also <em>retrofit them</em>, as discussed in <a href="DynamicInvariants.html">our chapter on dynamic invariants</a>, Python simply is not a good domain to illustrate type checking. If you want to show the beauty and usefulness of type checking, use a strongly typed language like Java or Haskell.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Most real-world Python code will not be annotated with types, though.  While you can also <em>retrofit them</em>, as discussed in <a href="DynamicInvariants.html">our chapter on dynamic invariants</a>, Python simply is not a good domain to illustrate type checking. If you want to show the beauty and usefulness of type checking, use a strongly typed language like Java, ML, or Haskell.</p>
 </div>
 </div>
 </div>
@@ -13454,7 +13490,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Such properties make symbolic reasoning on code (including static analysis and type checking) much harder, if not outright impossible.  If you need lightweight static and symbolic analysis techniques as <em>guidance</em> for other techniques (say, as test generation), then imprecision may not hurt much; but if you want to derive <em>guarantees</em> from your code, do not use Python as test subject; again, strongly statically typed languages like Java and Haskell (or some very restricted toy language) are much better grounds for experimentation.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Such properties make symbolic reasoning on code (including static analysis and type checking) much harder, if not outright impossible.  If you need lightweight static and symbolic analysis techniques to <em>guide</em> other techniques (say, test generation), then imprecision may not hurt much. But if you want to derive <em>guarantees</em> from your code, do not use Python as test subject; again, strongly statically typed languages like Java/ML/Haskell (or some very restricted toy language) are much better grounds for experimentation.</p>
 </div>
 </div>
 </div>
@@ -13472,18 +13508,16 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><p>Python is a great language for prototyping testing and debugging tools:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="The-Virtues-of-Prototyping">The Virtues of Prototyping<a class="anchor-link" href="#The-Virtues-of-Prototyping">&#182;</a></h2><p>One neat thing about prototyping (with Python or whatever) is that it allows you to fully focus on your <em>approach</em>, rather than on the infrastructure. Very obviously, this is useful for <em>teaching</em> – you can use examples as the ones above in a lecture to very quickly communicate essential techniques of program analysis and test generation.</p>
+<p>But prototyping has more advantages. A Jupyter Notebook (like this one) documents how you developed your approach, together with examples, experiments, and rationales – and still focusing on the essentials. If you write a tool the "classical" way, you will eventually deliver thousands of lines of code that do everything under the sun, but only once you have implemented everything will you know whether things actually work. This is a huge risk, and if you still have to change things, you will have to refactor things again and again. Furthermore, for anyone who will work on that code later, it will take days, if not weeks, to re-extract the basic idea of the approach, as it will be buried under loads and loads of infrastructure and refactorings.</p>
+<p>Our consequence at this point is that we now implement new ideas <em>twice</em>:</p>
 <ul>
-<li>In Python, dynamic analysis and static analysis are extremely easy to implement.</li>
-<li>Python provides an enormous infrastructure for parsing, handling programs as trees, and constraint solving.</li>
-<li>These can make you develop new techniques within <em>hours</em> instead of weeks.</li>
+<li><p>First, we implement things as a notebook (as this one), experimenting with various approaches and parameters until we get them right.</p>
+</li>
+<li><p>Only once we have the approach right, and if we have confidence that it works, we reimplement it in a tool that works on large scale programs. This can still take weeks to months, but at least we know we are on a good path.</p>
+</li>
 </ul>
-<p>Python is <em>not</em> a great domain for pure symbolic code analysis, though.</p>
-<ul>
-<li>There is little to no static typing</li>
-<li>The language is highly dynamic with little to no static guarantees</li>
-</ul>
-<p>However, even a potentially <em>unsound</em> symbolic analysis can still guide test generation – and this again is very easy to build.</p>
+<p>Incidentally, it may well be that the original notebooks will have a longer life, as they are simpler, better documented, and capture the gist of our novel idea. And this is how several of the notebooks in this book came to be.</p>
 </div>
 </div>
 </div>
@@ -13492,12 +13526,54 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>If you want to see how we use Python for implementing</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Try-it-out!">Try it out!<a class="anchor-link" href="#Try-it-out!">&#182;</a></h2><p>All the code examples above can be run by you – and changed as you like! From the Web page, the easiest way is to go to "Resources $\rightarrow$ Edit as Notebook", and you can experiment with the original Jupyter Notebook right within your browser. (Use <code>Shift</code> + <code>Return</code> to execute code.)</p>
+<p>From the "Resources" menu, you can also download the Python code (.py) to run it within a Python environment, or download the notebook (.ipynb) to run it within Jupyter – and again, change them as you like. If you want to run this code on your own machine, you will need the following packages:</p>
+
+<pre><code>pip install astor
+pip install showast
+pip install z3-solver</code></pre>
+<p>Enjoy!</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><p><strong>Python</strong> is a great language for prototyping testing and debugging tools:</p>
 <ul>
-<li><a href="MutationFuzzer.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
-<li><a href="Grammars.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
-<li><a href="Reducer.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
+<li>In Python, dynamic analysis and static analysis are extremely easy to implement.</li>
+<li>Python provides an enormous infrastructure for parsing, handling programs as trees, and constraint solving.</li>
+<li>These can make you develop new techniques within <em>hours</em> instead of weeks.</li>
 </ul>
+<p>Python is <em>not</em> recommended as a domain for pure symbolic code analysis, though.</p>
+<ul>
+<li>There is little to no static typing</li>
+<li>The language is highly dynamic with little to no static guarantees</li>
+</ul>
+<p>However, even a potentially <em>unsound</em> symbolic analysis can still guide test generation – and this again is very easy to build.</p>
+<p><strong>Jupyter Noteboooks</strong> (using Python or other languages) are great for <em>prototyping</em>:</p>
+<ul>
+<li>Notebooks document the gist of your approach, including examples and experiments.</li>
+<li>This is great for teaching, communication, and even documentation.</li>
+<li>Doing experiments on prototypes early reduces risks for later large-scale implementations.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>If you want to see more examples of us using Python for prototyping – have a look at <a href="index.html">this book</a>! Specifically,</p>
+<ul>
+<li>see how we develop <a href="Fuzzer.html">fuzzers</a> step by step;</li>
+<li>see how we use <a href="Coverage.html">dynamic analysis to check coverage</a>; or</li>
+<li>see how we analyze Python code for <a href="ConcolicFuzzer.html">concolic</a> and <a href="SymbolicFuzzer.html">symbolic</a> and fuzzing.</li>
+</ul>
+<p>There's lots to learn – enjoy the read!</p>
 </div>
 </div>
 </div>
@@ -13531,7 +13607,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <li>Loops.</li>
 <li>Function calls.</li>
 </ul>
-<p>The more of these you implement, the closer you will get to a full-fledged symbolic test generator for Python. But at some point, your prototype may not be a prototype anymore. Find a good moment when it is time to switch from a prototypical to a production tool.</p>
+<p>The more of these you implement, the closer you will get to a full-fledged symbolic test generator for Python. But at some point, <em>your prototype may not be a prototype anymore</em>, and then, Python may no longer be the best language to use. Find a good moment when it is time to switch from a prototypical to a production tool.</p>
 </div>
 </div>
 </div>
@@ -13543,7 +13619,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/PrototypingWithPython.ipynb" target=_blank)>Last change: 2020-10-24 12:48:53+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/PrototypingWithPython.ipynb" target=_blank)>Last change: 2020-10-27 10:48:21+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -13561,7 +13637,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/PrototypingWithPython.html">Prototyping with Python</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/PrototypingWithPython.html">https://www.fuzzingbook.org/beta/html/PrototypingWithPython.html</a>.  Retrieved 2020-10-24 12:48:53+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/PrototypingWithPython.html">Prototyping with Python</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/PrototypingWithPython.html">https://www.fuzzingbook.org/beta/html/PrototypingWithPython.html</a>.  Retrieved 2020-10-27 10:48:21+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2020:PrototypingWithPython,
@@ -13571,9 +13647,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2020},
     publisher = {CISPA},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/PrototypingWithPython.html}},
-    note = {Retrieved 2020-10-24 12:48:53+02:00},
+    note = {Retrieved 2020-10-27 10:48:21+01:00},
     url = {https://www.fuzzingbook.org/beta/html/PrototypingWithPython.html},
-    urldate = {2020-10-24 12:48:53+02:00}
+    urldate = {2020-10-27 10:48:21+01:00}
 }
 </pre>
 </div>

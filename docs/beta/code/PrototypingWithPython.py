@@ -3,7 +3,7 @@
 
 # This material is part of "The Fuzzing Book".
 # Web site: https://www.fuzzingbook.org/html/PrototypingWithPython.html
-# Last change: 2020-10-24 12:48:53+02:00
+# Last change: 2020-10-27 10:48:21+01:00
 #
 #!/
 # Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
@@ -34,6 +34,11 @@ if __name__ == "__main__":
     print('# Prototyping with Python')
 
 
+
+
+if __name__ == "__main__":
+    from bookutils import YouTubeVideo
+    YouTubeVideo("IAreRIID9lM")
 
 
 # ## Python is Easy
@@ -83,10 +88,10 @@ if __name__ == "__main__":
         print(f"triangle({a}, {b}, {c}) = {repr(t)}")
 
 
-# ## Dynamic Analysis in Python is Extremely Easy
+# ## Dynamic Analysis in Python: So Easy it Hurts
 
 if __name__ == "__main__":
-    print('\n## Dynamic Analysis in Python is Extremely Easy')
+    print('\n## Dynamic Analysis in Python: So Easy it Hurts')
 
 
 
@@ -117,10 +122,10 @@ if __name__ == "__main__":
     triangle_traced()
 
 
-# ## Static Analysis in Python can be Easy
+# ## Static Analysis in Python: Still Easy
 
 if __name__ == "__main__":
-    print('\n## Static Analysis in Python can be Easy')
+    print('\n## Static Analysis in Python: Still Easy')
 
 
 
@@ -167,10 +172,10 @@ if __name__ == "__main__":
     collect_conditions(triangle_ast)
 
 
-# ## There's a Python interface for Everything
+# ## Symbolic Reasoning in Python: There's a Package for That
 
 if __name__ == "__main__":
-    print("\n## There's a Python interface for Everything")
+    print("\n## Symbolic Reasoning in Python: There's a Package for That")
 
 
 
@@ -197,6 +202,14 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
     triangle(m[a].as_long(), m[b].as_long(), m[c].as_long())
+
+
+# ## A Symbolic Test Generator
+
+if __name__ == "__main__":
+    print('\n## A Symbolic Test Generator')
+
+
 
 
 def collect_path_conditions(tree):
@@ -280,6 +293,22 @@ if __name__ == "__main__":
         del x
 
     # Does x exist at this point?
+
+
+# ## The Virtues of Prototyping
+
+if __name__ == "__main__":
+    print('\n## The Virtues of Prototyping')
+
+
+
+
+# ## Try it out!
+
+if __name__ == "__main__":
+    print('\n## Try it out!')
+
+
 
 
 # ## Lessons Learned

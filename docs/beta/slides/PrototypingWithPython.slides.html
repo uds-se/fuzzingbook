@@ -13892,10 +13892,11 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In this book, we use Python to implement automated testing techniques, and also as the language for most of our test subjects.  Why Python?  The short answer is</p>
+<p>In our <a href="index.slides.html">Fuzzing Book</a>, we use Python to implement automated testing techniques, and also as the language for most of our test subjects.  Why Python?  The short answer is</p>
 <blockquote><p>Python made us amazingly <em>productive</em>.  Most techniques in this book took <strong>2-3 days</strong> to implement.  This is about <strong>10-20 times faster</strong> than for "classic" languages like C or Java.</p>
 </blockquote>
 <p>A factor of 10–20 in productivity is enormous, almost ridiculous.  Why is that so, and which consequences does this have for research and teaching?</p>
+<p>In this essay, we will explore some of the reasons, prototyping a <em>symbolic test generator</em> from scratch. This normally would be considered a very difficult task, taking months to build. Yet, developing the code in this chapter took less than two hours – and explaining it takes less than 20 minutes.</p>
 
 </div>
 </div>
@@ -13911,14 +13912,14 @@ a.anchor-link {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>As an example, take the (in)famous triangle program, which classifies a triangle of lengths $a$, $b$, $c$ into one of three categories.  It reads like pseudocode; yet, we can easily execute it.</p>
+<p>As an example, take the (in)famous <em>triangle</em> program, which classifies a triangle of lengths $a$, $b$, $c$ into one of three categories.  It reads like pseudocode; yet, we can easily execute it.</p>
 
 </div>
 </div>
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">triangle</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
@@ -13952,7 +13953,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">triangle</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
@@ -13968,7 +13969,7 @@ a.anchor-link {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[2]:</div>
+    <div class="prompt output_prompt">Out[3]:</div>
 
 
 
@@ -14008,7 +14009,7 @@ a.anchor-link {
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
@@ -14034,16 +14035,16 @@ a.anchor-link {
 
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>triangle(9, 5, 3) = &#39;scalene&#39;
-triangle(7, 4, 6) = &#39;scalene&#39;
-triangle(2, 3, 2) = &#39;isosceles #3&#39;
-triangle(6, 2, 5) = &#39;scalene&#39;
-triangle(3, 3, 8) = &#39;isosceles #1&#39;
-triangle(9, 7, 2) = &#39;scalene&#39;
-triangle(6, 1, 2) = &#39;scalene&#39;
-triangle(6, 3, 7) = &#39;scalene&#39;
-triangle(5, 9, 7) = &#39;scalene&#39;
-triangle(5, 5, 5) = &#39;equilateral&#39;
+<pre>triangle(1, 6, 1) = &#39;isosceles #3&#39;
+triangle(2, 1, 3) = &#39;scalene&#39;
+triangle(1, 5, 8) = &#39;scalene&#39;
+triangle(3, 2, 7) = &#39;scalene&#39;
+triangle(2, 6, 3) = &#39;scalene&#39;
+triangle(7, 8, 6) = &#39;scalene&#39;
+triangle(5, 7, 7) = &#39;isosceles #2&#39;
+triangle(3, 8, 7) = &#39;scalene&#39;
+triangle(5, 1, 8) = &#39;scalene&#39;
+triangle(8, 4, 8) = &#39;isosceles #3&#39;
 </pre>
 </div>
 </div>
@@ -14063,7 +14064,7 @@ triangle(5, 5, 5) = &#39;equilateral&#39;
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Dynamic-Analysis-in-Python-is-Extremely-Easy">Dynamic Analysis in Python is Extremely Easy<a class="anchor-link" href="#Dynamic-Analysis-in-Python-is-Extremely-Easy">&#182;</a></h2><p>Dynamic analysis is the ability to track what is happening during program execution.  The Python <code>settrace()</code> mechanism allows you to track all code lines, all variables, all values, as the program executes – and all this in a handful of lines of code.  Our <code>Coverage</code> class from <a href="Coverage.slides.html">the chapter on coverage</a> shows how to capture a trace of all lines executed in five lines of code; such a trace easily converts into sets of lines or branches executed.  With two more lines, you can easily track all functions, arguments, variable values, too – see for instance our <a href="DynamicInvariants">chapter on dynamic invariants</a>.  And you can even access the source code of individual functions (and print it out, too!)  All this takes 10, maybe 20 minutes to implement.</p>
+<h2 id="Dynamic-Analysis-in-Python:-So-Easy-it-Hurts">Dynamic Analysis in Python: So Easy it Hurts<a class="anchor-link" href="#Dynamic-Analysis-in-Python:-So-Easy-it-Hurts">&#182;</a></h2><p>Dynamic analysis is the ability to track what is happening during program execution.  The Python <code>settrace()</code> mechanism allows you to track all code lines, all variables, all values, as the program executes – and all this in a handful of lines of code.  Our <code>Coverage</code> class from <a href="Coverage.slides.html">the chapter on coverage</a> shows how to capture a trace of all lines executed in five lines of code; such a trace easily converts into sets of lines or branches executed.  With two more lines, you can easily track all functions, arguments, variable values, too – see for instance our <a href="DynamicInvariants">chapter on dynamic invariants</a>.  And you can even access the source code of individual functions (and print it out, too!)  All this takes 10, maybe 20 minutes to implement.</p>
 
 </div>
 </div>
@@ -14078,7 +14079,7 @@ triangle(5, 5, 5) = &#39;equilateral&#39;
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
@@ -14111,7 +14112,7 @@ triangle(5, 5, 5) = &#39;equilateral&#39;
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">triangle_traced</span><span class="p">():</span>
@@ -14127,7 +14128,7 @@ triangle(5, 5, 5) = &#39;equilateral&#39;
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">triangle_traced</span><span class="p">()</span>
@@ -14179,7 +14180,7 @@ triangle:6             return &#39;isosceles #1&#39;       (c = 1, b = 2, a = 2)
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Static-Analysis-in-Python-can-be-Easy">Static Analysis in Python can be Easy<a class="anchor-link" href="#Static-Analysis-in-Python-can-be-Easy">&#182;</a></h2><p>Static analysis refers to the ability to analyze <em>program code</em> without actually executing it. Statically analyzing Python code to deduce any property can be a nightmare, because the language is so highly dynamic. (More on that below.)</p>
+<h2 id="Static-Analysis-in-Python:-Still-Easy">Static Analysis in Python: Still Easy<a class="anchor-link" href="#Static-Analysis-in-Python:-Still-Easy">&#182;</a></h2><p>Static analysis refers to the ability to analyze <em>program code</em> without actually executing it. Statically analyzing Python code to deduce any property can be a nightmare, because the language is so highly dynamic. (More on that below.)</p>
 <p>If your static analysis does not have to be <em>sound</em>, – for instance, because you only use it to <em>support</em> and <em>guide</em> another technique such as  testing – then a static analysis in Python can be very simple.  The <code>ast</code> module allows you to turn any Python function into an abstract syntax tree (AST), which you then can traverse as you like.  Here's the AST for our <code>triangle()</code> function:</p>
 
 </div>
@@ -14187,7 +14188,7 @@ triangle:6             return &#39;isosceles #1&#39;       (c = 1, b = 2, a = 2)
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">if</span> <span class="n">rich_output</span><span class="p">():</span>
@@ -14205,7 +14206,7 @@ triangle:6             return &#39;isosceles #1&#39;       (c = 1, b = 2, a = 2)
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">triangle_source</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">triangle</span><span class="p">)</span>
@@ -14847,7 +14848,7 @@ triangle:6             return &#39;isosceles #1&#39;       (c = 1, b = 2, a = 2)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">collect_conditions</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
@@ -14880,7 +14881,7 @@ triangle:6             return &#39;isosceles #1&#39;       (c = 1, b = 2, a = 2)
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">collect_conditions</span><span class="p">(</span><span class="n">triangle_ast</span><span class="p">)</span>
@@ -14896,7 +14897,7 @@ triangle:6             return &#39;isosceles #1&#39;       (c = 1, b = 2, a = 2)
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[14]:</div>
+    <div class="prompt output_prompt">Out[15]:</div>
 
 
 
@@ -14922,7 +14923,7 @@ triangle:6             return &#39;isosceles #1&#39;       (c = 1, b = 2, a = 2)
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="There's-a-Python-interface-for-Everything">There's a Python interface for Everything<a class="anchor-link" href="#There's-a-Python-interface-for-Everything">&#182;</a></h2><p>Let's get back to testing.  We have shown how to extract conditions from code.  To reach a particular location in the <code>triangle()</code> function, one needs to find a solution for the <em>path conditions</em> leading to that branch.  To reach the last line in <code>triangle()</code> (the <code>'scalene'</code> branch), we have to find a solution for 
+<h2 id="Symbolic-Reasoning-in-Python:-There's-a-Package-for-That">Symbolic Reasoning in Python: There's a Package for That<a class="anchor-link" href="#Symbolic-Reasoning-in-Python:-There's-a-Package-for-That">&#182;</a></h2><p>Let's get back to testing.  We have shown how to extract conditions from code.  To reach a particular location in the <code>triangle()</code> function, one needs to find a solution for the <em>path conditions</em> leading to that branch.  To reach the last line in <code>triangle()</code> (the <code>'scalene'</code> branch), we have to find a solution for 
 $$a \ne b \land b \ne c \land a \ne c$$</p>
 <p>We can make use of a <em>constraint</em> solver for this, such as Microsoft's <a href="https://github.com/Z3Prover/z3"><em>Z3</em> solver</a>:</p>
 
@@ -14939,7 +14940,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
@@ -14954,7 +14955,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">Solver</span><span class="p">()</span>
@@ -14973,7 +14974,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[17]:</div>
+    <div class="prompt output_prompt">Out[18]:</div>
 
 
 
@@ -14997,7 +14998,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div></div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
@@ -15014,7 +15015,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[18]:</div>
+    <div class="prompt output_prompt">Out[19]:</div>
 
 
 
@@ -15038,7 +15039,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">triangle</span><span class="p">(</span><span class="n">m</span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">as_long</span><span class="p">(),</span> <span class="n">m</span><span class="p">[</span><span class="n">b</span><span class="p">]</span><span class="o">.</span><span class="n">as_long</span><span class="p">(),</span> <span class="n">m</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">as_long</span><span class="p">())</span>
@@ -15054,7 +15055,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[19]:</div>
+    <div class="prompt output_prompt">Out[20]:</div>
 
 
 
@@ -15068,18 +15069,18 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div></div></section></section><section><section>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Let us find all conditions we need to solve, by exploring all paths in the tree. We turn these paths to Z3 format right away:</p>
+<h2 id="A-Symbolic-Test-Generator">A Symbolic Test Generator<a class="anchor-link" href="#A-Symbolic-Test-Generator">&#182;</a></h2><p>With what we have seen, we can now build a <em>symbolic test generator</em> – a tool that attempts to systematically create test inputs that cover all paths.  Let us find all conditions we need to solve, by exploring all paths in the tree. We turn these paths to Z3 format right away:</p>
 
 </div>
 </div>
-</div></div></section><section>
+</div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">collect_path_conditions</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
@@ -15116,7 +15117,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">path_conditions</span> <span class="o">=</span> <span class="n">collect_path_conditions</span><span class="p">(</span><span class="n">triangle_ast</span><span class="p">)</span>
@@ -15133,7 +15134,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[21]:</div>
+    <div class="prompt output_prompt">Out[22]:</div>
 
 
 
@@ -15162,7 +15163,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">path_condition</span> <span class="ow">in</span> <span class="n">path_conditions</span><span class="p">:</span>
@@ -15242,7 +15243,8 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Things-that-will-not-work">Things that will not work<a class="anchor-link" href="#Things-that-will-not-work">&#182;</a></h2><p>Python has a reputation for being hard to analyze statically, and this is true; its dynamic nature makes it hard for traditional static analysis to exclude specific behaviors.</p>
-<p>We see Python as a great language for prototyping automated testing and dynamic analysis techniques, and as a good language to illustrate <em>lightweight</em> static and symbolic analysis techniques that would be used as <em>guidance</em> and <em>support</em> for other techniques (say, for generating software tests).  But if you want to <em>prove</em> specific properties (or the absence thereof) by static analysis of code only, Python is a challenge, to say the least; and there are areas for which we would definitely <em>warn</em> against using it.</p>
+<p>We see Python as a great language for prototyping automated testing and dynamic analysis techniques, and as a good language to illustrate <em>lightweight</em> static and symbolic analysis techniques that would be used to <em>guide</em> and <em>support</em> other techniques (say, generating software tests).</p>
+<p>But if you want to <em>prove</em> specific properties (or the absence thereof) by static analysis of code only, Python is a challenge, to say the least; and there are areas for which we would definitely <em>warn</em> against using it.</p>
 
 </div>
 </div>
@@ -15257,7 +15259,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">typed_triangle</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -15272,7 +15274,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Most real-world Python code will not be annotated with types, though.  While you can also <em>retrofit them</em>, as discussed in <a href="DynamicInvariants.slides.html">our chapter on dynamic invariants</a>, Python simply is not a good domain to illustrate type checking. If you want to show the beauty and usefulness of type checking, use a strongly typed language like Java or Haskell.</p>
+<p>Most real-world Python code will not be annotated with types, though.  While you can also <em>retrofit them</em>, as discussed in <a href="DynamicInvariants.slides.html">our chapter on dynamic invariants</a>, Python simply is not a good domain to illustrate type checking. If you want to show the beauty and usefulness of type checking, use a strongly typed language like Java, ML, or Haskell.</p>
 
 </div>
 </div>
@@ -15287,7 +15289,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div><div class="fragment">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="mi">42</span>
@@ -15309,7 +15311,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 </div></div></section><section>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span>
@@ -15330,7 +15332,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Such properties make symbolic reasoning on code (including static analysis and type checking) much harder, if not outright impossible.  If you need lightweight static and symbolic analysis techniques as <em>guidance</em> for other techniques (say, as test generation), then imprecision may not hurt much; but if you want to derive <em>guarantees</em> from your code, do not use Python as test subject; again, strongly statically typed languages like Java and Haskell (or some very restricted toy language) are much better grounds for experimentation.</p>
+<p>Such properties make symbolic reasoning on code (including static analysis and type checking) much harder, if not outright impossible.  If you need lightweight static and symbolic analysis techniques to <em>guide</em> other techniques (say, test generation), then imprecision may not hurt much. But if you want to derive <em>guarantees</em> from your code, do not use Python as test subject; again, strongly statically typed languages like Java/ML/Haskell (or some very restricted toy language) are much better grounds for experimentation.</p>
 
 </div>
 </div>
@@ -15346,18 +15348,16 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><p>Python is a great language for prototyping testing and debugging tools:</p>
+<h2 id="The-Virtues-of-Prototyping">The Virtues of Prototyping<a class="anchor-link" href="#The-Virtues-of-Prototyping">&#182;</a></h2><p>One neat thing about prototyping (with Python or whatever) is that it allows you to fully focus on your <em>approach</em>, rather than on the infrastructure. Very obviously, this is useful for <em>teaching</em> – you can use examples as the ones above in a lecture to very quickly communicate essential techniques of program analysis and test generation.</p>
+<p>But prototyping has more advantages. A Jupyter Notebook (like this one) documents how you developed your approach, together with examples, experiments, and rationales – and still focusing on the essentials. If you write a tool the "classical" way, you will eventually deliver thousands of lines of code that do everything under the sun, but only once you have implemented everything will you know whether things actually work. This is a huge risk, and if you still have to change things, you will have to refactor things again and again. Furthermore, for anyone who will work on that code later, it will take days, if not weeks, to re-extract the basic idea of the approach, as it will be buried under loads and loads of infrastructure and refactorings.</p>
+<p>Our consequence at this point is that we now implement new ideas <em>twice</em>:</p>
 <ul>
-<li>In Python, dynamic analysis and static analysis are extremely easy to implement.</li>
-<li>Python provides an enormous infrastructure for parsing, handling programs as trees, and constraint solving.</li>
-<li>These can make you develop new techniques within <em>hours</em> instead of weeks.</li>
+<li><p>First, we implement things as a notebook (as this one), experimenting with various approaches and parameters until we get them right.</p>
+</li>
+<li><p>Only once we have the approach right, and if we have confidence that it works, we reimplement it in a tool that works on large scale programs. This can still take weeks to months, but at least we know we are on a good path.</p>
+</li>
 </ul>
-<p>Python is <em>not</em> a great domain for pure symbolic code analysis, though.</p>
-<ul>
-<li>There is little to no static typing</li>
-<li>The language is highly dynamic with little to no static guarantees</li>
-</ul>
-<p>However, even a potentially <em>unsound</em> symbolic analysis can still guide test generation – and this again is very easy to build.</p>
+<p>Incidentally, it may well be that the original notebooks will have a longer life, as they are simpler, better documented, and capture the gist of our novel idea. And this is how several of the notebooks in this book came to be.</p>
 
 </div>
 </div>
@@ -15365,12 +15365,52 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>If you want to see how we use Python for implementing</p>
+<h2 id="Try-it-out!">Try it out!<a class="anchor-link" href="#Try-it-out!">&#182;</a></h2><p>All the code examples above can be run by you – and changed as you like! From the Web page, the easiest way is to go to "Resources $\rightarrow$ Edit as Notebook", and you can experiment with the original Jupyter Notebook right within your browser. (Use <code>Shift</code> + <code>Return</code> to execute code.)</p>
+<p>From the "Resources" menu, you can also download the Python code (.py) to run it within a Python environment, or download the notebook (.slides.html) to run it within Jupyter – and again, change them as you like. If you want to run this code on your own machine, you will need the following packages:</p>
+
+<pre><code>pip install astor
+pip install showast
+pip install z3-solver</code></pre>
+<p>Enjoy!</p>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Lessons-Learned">Lessons Learned<a class="anchor-link" href="#Lessons-Learned">&#182;</a></h2><p><strong>Python</strong> is a great language for prototyping testing and debugging tools:</p>
 <ul>
-<li><a href="MutationFuzzer.slides.html">use <em>mutations</em> on existing inputs to get more valid inputs</a></li>
-<li><a href="Grammars.slides.html">use <em>grammars</em> (i.e., a specification of the input format) to get even more valid inputs</a></li>
-<li><a href="Reducer.slides.html">reduce <em>failing inputs</em> for efficient debugging</a></li>
+<li>In Python, dynamic analysis and static analysis are extremely easy to implement.</li>
+<li>Python provides an enormous infrastructure for parsing, handling programs as trees, and constraint solving.</li>
+<li>These can make you develop new techniques within <em>hours</em> instead of weeks.</li>
 </ul>
+<p>Python is <em>not</em> recommended as a domain for pure symbolic code analysis, though.</p>
+<ul>
+<li>There is little to no static typing</li>
+<li>The language is highly dynamic with little to no static guarantees</li>
+</ul>
+<p>However, even a potentially <em>unsound</em> symbolic analysis can still guide test generation – and this again is very easy to build.</p>
+<p><strong>Jupyter Noteboooks</strong> (using Python or other languages) are great for <em>prototyping</em>:</p>
+<ul>
+<li>Notebooks document the gist of your approach, including examples and experiments.</li>
+<li>This is great for teaching, communication, and even documentation.</li>
+<li>Doing experiments on prototypes early reduces risks for later large-scale implementations.</li>
+</ul>
+
+</div>
+</div>
+</div></section></section><section><section>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Next-Steps">Next Steps<a class="anchor-link" href="#Next-Steps">&#182;</a></h2><p>If you want to see more examples of us using Python for prototyping – have a look at <a href="index.slides.html">this book</a>! Specifically,</p>
+<ul>
+<li>see how we develop <a href="Fuzzer.slides.html">fuzzers</a> step by step;</li>
+<li>see how we use <a href="Coverage.slides.html">dynamic analysis to check coverage</a>; or</li>
+<li>see how we analyze Python code for <a href="ConcolicFuzzer.slides.html">concolic</a> and <a href="SymbolicFuzzer.slides.html">symbolic</a> and fuzzing.</li>
+</ul>
+<p>There's lots to learn – enjoy the read!</p>
 
 </div>
 </div>
@@ -15401,7 +15441,7 @@ $$a \ne b \land b \ne c \land a \ne c$$</p>
 <li>Loops.</li>
 <li>Function calls.</li>
 </ul>
-<p>The more of these you implement, the closer you will get to a full-fledged symbolic test generator for Python. But at some point, your prototype may not be a prototype anymore. Find a good moment when it is time to switch from a prototypical to a production tool.</p>
+<p>The more of these you implement, the closer you will get to a full-fledged symbolic test generator for Python. But at some point, <em>your prototype may not be a prototype anymore</em>, and then, Python may no longer be the best language to use. Find a good moment when it is time to switch from a prototypical to a production tool.</p>
 
 </div>
 </div>
