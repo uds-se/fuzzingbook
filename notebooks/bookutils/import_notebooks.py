@@ -78,7 +78,7 @@ class NotebookLoader(object):
         try:
             for code in source:
                 parsed = ast.parse(code, filename=path, mode='exec')
-                ast.increment_lineno(parsed, n=lno)
+                ast.increment_lineno(parsed, n=lno - 1)
                 exec(compile(parsed, path, 'exec'), mod.__dict__)
                 lno += len(code.split('\n'))
             self.lines[fullname] = '\n'.join(source)

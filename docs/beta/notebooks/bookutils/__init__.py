@@ -300,7 +300,7 @@ def jsquiz(question, options, correct_answer, title='Quiz'):
         }
         else 
         {
-            document.getElementById(quiz_id + "-submit").value = "Incorrect!";
+            document.getElementById(quiz_id + "-submit").value = "Try again";
             if (!multiple_choice) {
                 for (i = 1;; i++) {
                     checkbox = document.getElementById(quiz_id + "-" + i.toString());
@@ -398,7 +398,36 @@ def quiz(question, options, correct_answer, title='Quiz'):
         return jsquiz(question, options, correct_answer, title)
         
     return textquiz(question, options, correct_answer, title)
-        
+
+
+
+# Interactive inputs. We simulate them by assigning to the global variable INPUTS.
+
+INPUTS = []
+
+original_input = input
+
+def input(prompt):
+    given_input = None
+    try:
+        global INPUTS
+        given_input = INPUTS[0]
+        INPUTS = INPUTS[1:]
+    except:
+        pass
+    
+    if given_input:
+        if rich_output():
+            display(HTML(f"<samp>{prompt}<b>{given_input}</b></samp>"))
+        else:
+            print(f"{prompt} {given_input}")
+        return given_input
+    
+    return original_input(prompt)
+    
+def next_inputs(list):
+    global INPUTS
+    INPUTS += list
 
 # Make sure we quit Firefox when done
 import atexit

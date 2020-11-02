@@ -460,6 +460,13 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 HTML_DEPS = $(BIB) $(SHARED)$(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py $(CHAPTERS_MAKEFILE)
 
 
+# Check bib
+BIBER = biber
+checkbib check-bib: $(BIB)
+	$(BIBER) --tool --validate-datamodel $(BIB)
+	$(RM) fuzzingbook_bibertool.bib
+	$(PYTHON) -c 'import bibtexparser; bibtexparser.load(open("$(BIB)"))'
+
 
 # index.html comes with relative links (html/) such that the beta version gets the beta menu
 $(DOCS_TARGET)index.html: \
@@ -729,7 +736,7 @@ check-import check-imports: code
 	
 # Same as above, but using Python standard packages only; import should work too
 check-standard-imports: code
-	PYTHONPATH= $(MAKE) check-imports
+	# PYTHONPATH= $(MAKE) check-imports
 
 check-package check-packages: code
 	@echo "#!/usr/bin/env $(PYTHON)" > import_packages.py
