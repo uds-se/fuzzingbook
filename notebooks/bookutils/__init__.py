@@ -122,18 +122,17 @@ def print_content(content, filename=None, lexer=None, start_line_number=None):
                 lexer = get_lexer_for_filename(filename)
 
         colorful_content = highlight(content, lexer, formatters.TerminalFormatter())
-        if start_line_number is None:
-           print(colorful_content, end="")
-           return
-        colorful_content_list = colorful_content.strip().split("\n")
+        content = colorful_content
+    if start_line_number is None:
+        print(content, end="")
+    else:
+        colorful_content_list = content.strip().split("\n")
         no_of_lines = len(colorful_content_list)
         size_of_lines_nums = len(str(start_line_number + no_of_lines))
         for i, line in enumerate(colorful_content_list):
             colorful_content_list[i] = ('{0:' + str(size_of_lines_nums) + '}:').format(i + start_line_number) + " " + line
         colorful_content_with_line_no = '\n'.join(colorful_content_list)
         print(colorful_content_with_line_no, end="")
-    else:
-        print(content, end="")
 
 
 # Escaping unicode characters into ASCII for user-facing strings
