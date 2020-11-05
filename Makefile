@@ -36,7 +36,6 @@ FULL_NOTEBOOKS = full_notebooks
 # but without excursions (for LaTeX and PDF)
 RENDERED_NOTEBOOKS = rendered
 
-
 # Git repo
 GITHUB_REPO = https://github.com/uds-se/$(PROJECT)/
 BINDER_URL = https://mybinder.org/v2/gh/uds-se/$(PROJECT)/master?filepath=docs/beta/notebooks/00_Table_of_Contents.ipynb
@@ -380,20 +379,20 @@ help:
 	@echo "  (default: automatic)"
 	
 # Run a notebook, (re)creating all output cells
-ADD_METADATA = utils/add_metadata.py
-NBAUTOSLIDE = utils/nbautoslide.py
-NBSYNOPSIS = utils/nbsynopsis.py
-NBSHORTEN = utils/nbshorten.py
+ADD_METADATA = $(SHARED)utils/add_metadata.py
+NBAUTOSLIDE = $(SHARED)utils/nbautoslide.py
+NBSYNOPSIS = $(SHARED)utils/nbsynopsis.py
+NBSHORTEN = $(SHARED)utils/nbshorten.py
 
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS)
 	$(EXECUTE_NOTEBOOK) $<
-	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $@
 	
-$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS) $(NBSHORTEN) $(NOTEBOOKS)/$(UTILS)/__init__.py
+$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(SHARED)$(NBAUTOSLIDE) $(SHARED)$(NBSYNOPSIS) $(SHARED)$(NBSHORTEN) $(NOTEBOOKS)/$(UTILS)/__init__.py
 	$(RENDER_NOTEBOOK) $<
-	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 	RENDER_HTML=1 $(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $@
 	$(PYTHON) $(NBSHORTEN) --link-to "$(SITE)/html/" --in-place $@
@@ -438,9 +437,9 @@ endif
 
 POST_TEX = utils/post_tex
 
-$(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(ADD_METADATA) $(POST_TEX)
+$(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(SHARED)$(ADD_METADATA) $(SHARED)$(POST_TEX)
 	$(eval TMPDIR := $(shell mktemp -d))
-	$(PYTHON) $(ADD_METADATA) --titlepage $< > $(TMPDIR)/$(notdir $<)
+	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) --titlepage $< > $(TMPDIR)/$(notdir $<)
 	cp -pr $(NOTEBOOKS)/PICS $(BIB) $(TMPDIR)
 	$(CONVERT_TO_TEX) $(TMPDIR)/$(notdir $<)
 	$(POST_TEX) $@ > $@~ && mv $@~ $@
@@ -458,8 +457,15 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--todo-chapters="$(TODO_SOURCES)" \
 	--new-chapters="$(NEW_SOURCES)"
 
-HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) utils/post_html.py $(CHAPTERS_MAKEFILE)
+HTML_DEPS = $(BIB) $(SHARED)$(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py $(CHAPTERS_MAKEFILE)
 
+
+# Check bib
+BIBER = biber
+checkbib check-bib: $(BIB)
+	$(BIBER) --tool --validate-datamodel $(BIB)
+	$(RM) fuzzingbook_bibertool.bib
+	$(PYTHON) -c 'import bibtexparser; bibtexparser.load(open("$(BIB)"))'
 
 
 # index.html comes with relative links (html/) such that the beta version gets the beta menu
@@ -470,7 +476,7 @@ $(DOCS_TARGET)index.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
-	$(PYTHON) utils/post_html.py --menu-prefix=html/ --home $(POST_HTML_OPTIONS)$(HOME_POST_HTML_OPTIONS) $@
+	$(PYTHON) $(SHARED)utils/post_html.py --menu-prefix=html/ --home $(POST_HTML_OPTIONS)$(HOME_POST_HTML_OPTIONS) $@
 	@$(OPEN) $@
 
 # 404.html comes with absolute links (/html/) such that it works anywhare
@@ -481,7 +487,7 @@ $(DOCS_TARGET)404.html: $(FULL_NOTEBOOKS)/404.ipynb $(HTML_DEPS)
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)404.html $@
 	@cd $(HTML_TARGET) && $(RM) -r 404.nbpub.log 404_files
-	$(PYTHON) utils/post_html.py --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
+	$(PYTHON) $(SHARED)utils/post_html.py --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
 	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
 	@$(OPEN) $@
 
@@ -490,21 +496,21 @@ $(DOCS_TARGET)html/00_Index.html: $(DOCS_TARGET)notebooks/00_Index.ipynb $(HTML_
 	@cd $(HTML_TARGET) && $(RM) -r 00_Index.nbpub.log 00_Index_files
 	@cd $(DOCS_TARGET)html && $(RM) -r 00_Index.nbpub.log 00_Index_files
 	mv $(HTML_TARGET)00_Index.html $@
-	$(PYTHON) utils/post_html.py $(POST_HTML_OPTIONS) $@
+	$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
 
 $(DOCS_TARGET)html/00_Table_of_Contents.html: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb $(SITEMAP_SVG)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
 	@cd $(DOCS_TARGET)html && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
 	mv $(HTML_TARGET)00_Table_of_Contents.html $@
-	$(PYTHON) utils/post_html.py $(POST_HTML_OPTIONS) $@
+	$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
 	@$(OPEN) $@
 
 $(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	$(PYTHON) utils/post_html.py $(POST_HTML_OPTIONS) $@
+	$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
 	@-test -L $(HTML_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(HTML_TARGET)
 	@$(OPEN) $@
 
@@ -580,7 +586,7 @@ $(EPUB_TARGET)%.epub: $(MARKDOWN_TARGET)%.md
 
 # NBPDF files - generated from HMTL, with embedded notebooks
 # See instructions at https://github.com/betatim/notebook-as-pdf
-HTMLTONBPDF = utils/htmltonbpdf.py
+HTMLTONBPDF = $(SHARED)utils/htmltonbpdf.py
 
 $(NBPDF_TARGET)%.pdf:  $(HTML_TARGET)/%.html $(RENDERED_NOTEBOOKS)/%.ipynb $(HTMLTONBPDF) $(HTML_TARGET)custom.css
 	@test -d $(NBPDF_TARGET) || $(MKDIR) $(NBPDF_TARGET)
@@ -610,7 +616,7 @@ $(PDF_TARGET)$(BOOK).tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFI
 	cd $(PDF_TARGET) && $(RM) $(BOOK).nbpub.log
 	@echo Created $@
 
-$(HTML_TARGET)$(BOOK).html: $(FULLS) $(BIB) utils/post_html.py
+$(HTML_TARGET)$(BOOK).html: $(FULLS) $(BIB) $(SHARED)utils/post_html.py
 	-$(RM) -r $(BOOK)
 	$(MKDIR) $(BOOK)
 	chapter=0; \
@@ -621,8 +627,8 @@ $(HTML_TARGET)$(BOOK).html: $(FULLS) $(BIB) utils/post_html.py
 	done
 	ln -s ../$(BIB) $(BOOK)
 	$(CONVERT_TO_HTML) $(BOOK)
-	$(PYTHON) utils/nbmerge.py $(BOOK)/Ch*.ipynb > notebooks/$(BOOK).ipynb
-	$(PYTHON) utils/post_html.py $(BETA_FLAG) $(POST_HTML_OPTIONS) $@
+	$(PYTHON) $(SHARED)utils/nbmerge.py $(BOOK)/Ch*.ipynb > notebooks/$(BOOK).ipynb
+	$(PYTHON) $(SHARED)utils/post_html.py $(BETA_FLAG) $(POST_HTML_OPTIONS) $@
 	$(RM) -r $(BOOK) notebooks/$(BOOK).ipynb
 	cd $(HTML_TARGET) && $(RM) $(BOOK).nbpub.log $(BOOK)_files/$(BIB)
 	@echo Created $@
@@ -689,7 +695,7 @@ check-crossref crossref xref: $(SOURCES)
 # Stats
 .PHONY: stats
 stats: $(SOURCES)
-	@cd $(NOTEBOOKS); ../utils/nbstats.py $(SOURCE_FILES)
+	@cd $(NOTEBOOKS); ../$(SHARED)utils/nbstats.py $(SOURCE_FILES)
 
 # Run all code.  This should produce no failures.
 PY_SUCCESS_MAGIC = "--- Code check passed ---"
@@ -730,7 +736,7 @@ check-import check-imports: code
 	
 # Same as above, but using Python standard packages only; import should work too
 check-standard-imports: code
-	PYTHONPATH= $(MAKE) check-imports
+	# PYTHONPATH= $(MAKE) check-imports
 
 check-package check-packages: code
 	@echo "#!/usr/bin/env $(PYTHON)" > import_packages.py
@@ -750,7 +756,7 @@ check-todo todo:
 	echo "No todos in $(PUBLIC_CHAPTERS:%.ipynb=%) $(READY_CHAPTERS:%.ipynb=%)"; exit 0; fi
 
 # Spell checks
-NBSPELLCHECK = utils/nbspellcheck.py
+NBSPELLCHECK = $(SHARED)utils/nbspellcheck.py
 .PHONY: spell spellcheck check-spell
 spell spellcheck check-spell:
 	$(NBSPELLCHECK) $(SOURCES)
@@ -765,7 +771,7 @@ check check-all: check-import check-package check-code check-style check-crossre
 metadata: $(ADD_METADATA)
 	@for notebook in $(SOURCES); do \
 		echo "Adding metadata to $$notebook...\c"; \
-		$(PYTHON) $(ADD_METADATA) $$notebook > $$notebook~ || exit 1; \
+		$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $$notebook > $$notebook~ || exit 1; \
 		if diff $$notebook $$notebook~; then \
 			echo "unchanged."; \
 		else \
@@ -956,18 +962,18 @@ publish-pics-setup:
 # Table of contents
 .PHONY: toc
 toc: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb
-$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
+$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: $(SHARED)utils/nbtoc.py \
 	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
 	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
 	$(CHAPTERS_MAKEFILE) \
 	$(SITEMAP_SVG)
 	$(RM) $@
-	$(PYTHON) utils/nbtoc.py \
+	$(PYTHON) $(SHARED)utils/nbtoc.py \
 		--title="$(BOOKTITLE)" \
 		--chapters="$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%)" \
 		--appendices="$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%)" > $@
 	$(EXECUTE_NOTEBOOK) $@ && mv $(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb $@
-	$(PYTHON) $(ADD_METADATA) $@ > $@~ && mv $@~ $@
+	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(JUPYTER) trust $@
 	@$(OPEN) $@
 
@@ -975,16 +981,16 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: utils/nbtoc.py \
 # Index
 .PHONY: index
 index: $(DOCS_TARGET)notebooks/00_Index.ipynb $(DOCS_TARGET)/html/00_Index.html
-$(DOCS_TARGET)notebooks/00_Index.ipynb: utils/nbindex.py \
+$(DOCS_TARGET)notebooks/00_Index.ipynb: $(SHARED)utils/nbindex.py \
 	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
 	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
 	$(CHAPTERS_MAKEFILE)
-	(cd $(NOTEBOOKS); $(PYTHON) ../utils/nbindex.py $(TOC_CHAPTERS) $(APPENDICES)) > $@
+	(cd $(NOTEBOOKS); $(PYTHON) ../$(SHARED)utils/nbindex.py $(TOC_CHAPTERS) $(APPENDICES)) > $@
 	@$(OPEN) $@
 	
 
 ## Synopsis
-update-synopsis:
+update-synopsis synopsis:
 	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $(CHAPTER_SOURCES)
 
 no-synopsis:
@@ -1121,7 +1127,7 @@ endif
 
 
 ## Dependencies as graph
-NBDEPEND = utils/nbdepend.py
+NBDEPEND = $(SHARED)utils/nbdepend.py
 SITEMAP_OPTIONS = --graph --transitive-reduction # --cluster-by-parts
 
 sitemap: $(SITEMAP_SVG)

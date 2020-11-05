@@ -1,4 +1,3 @@
-
 # About this Book
 
 __Welcome to "The Fuzzing Book"!__ 
@@ -14,14 +13,14 @@ YouTubeVideo("w4u5gCgPlmg")
 
 
 
-        <iframe
-            width="640"
-            height="360"
-            src="https://www.youtube-nocookie.com/embed/w4u5gCgPlmg"
-            frameborder="0"
-            allowfullscreen
-        ></iframe>
-        
+<iframe
+    width="640"
+    height="360"
+    src="https://www.youtube-nocookie.com/embed/w4u5gCgPlmg"
+    frameborder="0"
+    allowfullscreen
+></iframe>
+
 
 
 

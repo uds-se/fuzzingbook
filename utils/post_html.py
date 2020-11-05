@@ -341,6 +341,44 @@ def add_links_to_imports(contents):
 
     return contents
 
+# Remove cells that only contain a quiz() or a display() call. Keep the output.
+RE_DISPLAY = re.compile(r'''
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span>(<span class="n">(quiz|display)</span>|<span class="c1">#\s*[iI]gnore[^<]*</span>).*?
+</div>
+</div></div>
+</div>
+</div>
+''', re.DOTALL)
+
+def remove_ignored_code(text):
+    return RE_DISPLAY.sub('', text)
+
+assert remove_ignored_code('''
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">quiz</span><span class="p">(</span><span class="s2">&quot;From the difference between success and failure, we can already devise some observations about what&#39;s wrong with the output.  Which of these can we turn into general hypotheses?&quot;</span><span class="p">,</span>
+    <span class="p">[</span><span class="s2">&quot;Double quotes are stripped from the tagged input.&quot;</span><span class="p">,</span> 
+     <span class="s2">&quot;Tags in double quotes are not stripped.&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;The tag &#39;&amp;lt;b&amp;gt;&#39; is always stripped from the input.&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;Four-letter words are stripped.&quot;</span><span class="p">],</span> <span class="p">[</span><span class="mi">298</span> <span class="o">%</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">1234</span> <span class="o">%</span> <span class="mi">616</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+''') == ''
+
 
 # Sharing
 def cgi_escape(text):
@@ -750,7 +788,10 @@ chapter_contents = chapter_contents \
     .replace("__SHARE_MAIL__", share_mail) \
     .replace("__DATE__", notebook_modification_datetime) \
     .replace("__YEAR__", notebook_modification_year) \
-    .replace("__BIBTEX_KEY__", project + notebook_modification_year) \
+    .replace("__BIBTEX_KEY__", project + notebook_modification_year)
+
+# Remove code cells that only display graphics
+chapter_contents = remove_ignored_code(chapter_contents)
 
 # Add links to imports
 chapter_contents = add_links_to_imports(chapter_contents)

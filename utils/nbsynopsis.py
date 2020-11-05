@@ -53,7 +53,10 @@ and then make use of the following features.
 
         if in_synopsis:
             if cell.cell_type == 'code':
-                synopsis += "```python\n>>> " + cell.source.replace('\n', '\n>>> ') + "\n```\n"
+                if cell.source.startswith("# ignore"):
+                    pass
+                else:
+                    synopsis += "```python\n>>> " + cell.source.replace('\n', '\n>>> ') + "\n```\n"
                 output_text = ''
                 for output in cell.outputs:
                     text = None
@@ -88,9 +91,9 @@ and then make use of the following features.
                             os.system('convert -density 300 ' + svg_filename + ' ' + png_filename)
                             if 'RENDER_HTML' in os.environ:
                                 # Render all HTML and SVG into PNG
-                                text = "![](" + 'PICS/' + png_basename + ')'
+                                text = "![](" + 'PICS/' + png_basename + ')\n'
                             else:
-                                text = "![](" + 'PICS/' + svg_basename + ')'
+                                text = "![](" + 'PICS/' + svg_basename + ')\n'
 
                     # PNG output
                     if text is None:
@@ -113,7 +116,7 @@ and then make use of the following features.
                             print("Creating", png_filename)
                             with open(png_filename, "wb") as f:
                                 f.write(base64.b64decode(png, validate=True))
-                            text = "![](" + 'PICS/' + png_basename + ')'
+                            text = "![](" + 'PICS/' + png_basename + ')\n'
 
                     # Text output
                     if text is None:
@@ -121,16 +124,23 @@ and then make use of the following features.
                             text = output.text
                         except AttributeError:
                             pass
+                    
+                    # HTML output
+                    if text is None:
+                        try:
+                            text = "```\n" + output.data['text/html'] + "\n```\n"
+                        except KeyError:
+                            pass
 
                     # Data output
                     if text is None:
                         try:
-                            text = output.data['text/plain']
+                            text = output.data['text/plain'] + '\n'
                         except KeyError:
                             pass
                     
                     if text is not None:
-                        output_text += text + '\n'
+                        output_text += text
 
                 if output_text:
                     if output_text.startswith('![]'):

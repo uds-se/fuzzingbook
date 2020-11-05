@@ -40,10 +40,10 @@ title.tplx_dict['document_predoc'] = r"""
 
 % Copyright
 \vfill
-A chapter of \textbf{Generating Software Tests}, by Andreas Zeller, Rahul Gopinath,
+A chapter of \textbf{The Fuzzing Book}, by Andreas Zeller, Rahul Gopinath,
 Marcel Böhme, Gordon Fraser, and Christian Holler.
 
-Copyright © 2018 by the authors; all rights reserved.
+Copyright © 2018--2020 by the authors; all rights reserved.
 """
 
 # Use 11pt
