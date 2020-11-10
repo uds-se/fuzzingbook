@@ -121,8 +121,11 @@ def print_content(content, filename=None, lexer=None, start_line_number=None):
             else:
                 lexer = get_lexer_for_filename(filename)
 
-        colorful_content = highlight(content, lexer, formatters.TerminalFormatter())
+        colorful_content = highlight(
+            content, lexer,
+            formatters.TerminalFormatter())
         content = colorful_content.strip()
+
     if start_line_number is None:
         print(content, end="")
     else:
@@ -130,7 +133,7 @@ def print_content(content, filename=None, lexer=None, start_line_number=None):
         no_of_lines = len(content_list)
         size_of_lines_nums = len(str(start_line_number + no_of_lines))
         for i, line in enumerate(content_list):
-            content_list[i] = ('{0:' + str(size_of_lines_nums) + '}:').format(i + start_line_number) + " " + line
+            content_list[i] = ('{0:' + str(size_of_lines_nums) + '} ').format(i + start_line_number) + " " + line
         content_with_line_no = '\n'.join(content_list)
         print(content_with_line_no, end="")
 
