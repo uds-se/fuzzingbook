@@ -457,16 +457,25 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--todo-chapters="$(TODO_SOURCES)" \
 	--new-chapters="$(NEW_SOURCES)"
 
-HTML_DEPS = $(BIB) $(SHARED)$(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py $(CHAPTERS_MAKEFILE)
+HTML_DEPS = $(BIB) $(SHARED)$(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py $(CHAPTERS_MAKEFILE) check-bib-ascii check-bib-python
 
 
 # Check bib
 BIBER = biber
-checkbib check-bib: $(BIB)
-	$(BIBER) --tool --validate-datamodel $(BIB)
-	$(RM) fuzzingbook_bibertool.bib
-	$(PYTHON) -c 'import bibtexparser; bibtexparser.load(open("$(BIB)"))'
-
+checkbib check-bib: $(BIB) check-bib-ascii check-bib-python check-bib-biber
+	@echo "Check completed; $(BIB) is ok"
+check-bib-ascii: $(BIB)
+	@echo "Checking $(BIB) for 7-bit ASCII encoding"
+	@if grep -Hn '[^[:print:]]' fuzzingbook.bib; then false; fi
+check-bib-python: $(BIB)
+	@echo "Checking $(BIB) for Python usage with bibtexparser"
+	@$(PYTHON) -c 'import bibtexparser; bibtexparser.load(open("$(BIB)"))'
+check-bib-biber: $(BIB)
+	@echo "Checking $(BIB) for LaTeX usage with Biber"
+	@$(BIBER) --tool --validate-datamodel $(BIB)
+	@$(RM) fuzzingbook_bibertool.bib
+.PHONY: checkbib check-bib check-bib-ascii check-bib-python check-bib-biber
+	
 
 # index.html comes with relative links (html/) such that the beta version gets the beta menu
 $(DOCS_TARGET)index.html: \
