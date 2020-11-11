@@ -199,7 +199,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--project", help="project name", default="fuzzingbook")
     parser.add_argument("--update", action='store_true', 
-                        help="Update synopis section")
+                        help="Update synopsis section")
     parser.add_argument("notebooks", nargs='*', help="notebooks to extract/update synopsis for")
     args = parser.parse_args()
 
