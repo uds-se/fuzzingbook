@@ -10,7 +10,7 @@ import nbformat
 from import_notebooks import RE_CODE
 
 # Things to ignore in exported Python code
-RE_IGNORE = re.compile(r'^get_ipython().*|^%.*|# [Ii]gnore.*')
+RE_IGNORE = re.compile(r'^get_ipython().*|^%.*')
 RE_IMPORT_BOOKUTILS = re.compile(r'^import bookutils.*$', re.MULTILINE)
 RE_FROM_BOOKUTILS = re.compile(r'^from bookutils import .*$', re.MULTILINE)
 
