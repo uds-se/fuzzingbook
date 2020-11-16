@@ -1137,10 +1137,10 @@ endif
 
 ## Dependencies as graph
 NBDEPEND = $(SHARED)utils/nbdepend.py
-SITEMAP_OPTIONS = --graph --transitive-reduction # --cluster-by-parts
+SITEMAP_OPTIONS = --graph --transitive-reduction --project $(PROJECT) # --cluster-by-parts
 
 sitemap: $(SITEMAP_SVG)
-$(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND)
+$(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND) $(CHAPTERS_MAKEFILE)
 	$(PYTHON) $(NBDEPEND) $(SITEMAP_OPTIONS) $(CHAPTER_SOURCES) > $@~ && mv $@~ $@
 	@$(OPEN) $@
 

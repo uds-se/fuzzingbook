@@ -77,15 +77,22 @@ def get_text_contents(notebook):
 
    
 def draw_notebook_dependencies(notebooks, 
-    format='svg', transitive_reduction=True, clusters=True):
+    format='svg', transitive_reduction=True, clusters=True, project='fuzzingbook'):
     dot = Digraph(comment="Notebook dependencies")
     # dot.attr(size='20,30', rank='max')
+    
+    if project == 'debuggingbook':
+        fontname = 'Raleway'
+        fontcolor = 'purple'
+    else:
+        fontname = 'Patua One'
+        fontcolor = '#B03A2E'
     
     node_attrs = {
         'shape': 'note',  # note, plain, none
         'style': 'filled',
-        'fontname': 'Patua One',
-        'fontcolor': '#B03A2E',
+        'fontname': fontname,
+        'fontcolor': fontcolor,
         'fillcolor': 'white'
     }
     cluster = None
@@ -93,7 +100,7 @@ def draw_notebook_dependencies(notebooks,
     cluster_attrs = {
         'shape': 'plain',  # note, plain, none
         'style': 'filled',
-        'fontname': 'Patua One',
+        'fontname': fontname,
         'fontcolor': 'black',
         'color': '#F0F0F0',
     }
@@ -110,7 +117,7 @@ def draw_notebook_dependencies(notebooks,
 
                 cluster = Digraph(name='cluster_' + basename)
                 cluster.node(basename, label=title, URL='%s.ipynb' % basename,
-                tooltip=basename, shape='plain', fontname='Patua One')
+                tooltip=basename, shape='plain', fontname=fontname)
             
             elif cluster is not None:
                 cluster.node(basename)
@@ -148,12 +155,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--graph", action='store_true', help="Produce graph")
     parser.add_argument("--graph-format", action='store', default='svg', help="Graph format (gv, pdf, svg, ...)")
+    parser.add_argument("--project", action='store', help="Project name")
     parser.add_argument("--transitive-reduction", action='store_true', help="Use transitive reduction")
     parser.add_argument("--cluster-by-parts", action='store_true', help="Cluster by parts")
     parser.add_argument("notebooks", nargs='*', help="notebooks to determine dependencies from")
     args = parser.parse_args()
 
     if args.graph:
-        draw_notebook_dependencies(args.notebooks, args.graph_format, args.transitive_reduction, args.cluster_by_parts)
+        draw_notebook_dependencies(args.notebooks, args.graph_format, args.transitive_reduction, args.cluster_by_parts, args.project)
     else:
         print_notebook_dependencies(args.notebooks)
