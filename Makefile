@@ -457,23 +457,33 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--todo-chapters="$(TODO_SOURCES)" \
 	--new-chapters="$(NEW_SOURCES)"
 
-HTML_DEPS = $(BIB) $(SHARED)$(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py $(CHAPTERS_MAKEFILE) check-bib-ascii check-bib-python
-
+HTML_DEPS = $(BIB) $(SHARED)$(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py $(CHAPTERS_MAKEFILE) $(BIBCHECK)
 
 # Check bib
 BIBER = biber
-checkbib check-bib: $(BIB) check-bib-ascii check-bib-python check-bib-biber
+BIBCHECK = .$(BIB).ascii .$(BIB).python .$(BIB).biber 
+checkbib check-bib: $(BIBCHECK)
 	@echo "Check completed; $(BIB) is ok"
-check-bib-ascii: $(BIB)
+
+check-bib-ascii: .$(BIB).ascii
+.$(BIB).ascii: $(BIB)
 	@echo "Checking $(BIB) for 7-bit ASCII encoding"
 	@if grep -Hn '[^[:print:]]' fuzzingbook.bib; then false; fi
-check-bib-python: $(BIB)
+	@touch $@
+
+check-bib-python: .$(BIB).python
+.$(BIB).python: $(BIB)
 	@echo "Checking $(BIB) for Python usage with bibtexparser"
 	@$(PYTHON) -c 'import bibtexparser; bibtexparser.load(open("$(BIB)"))'
-check-bib-biber: $(BIB)
+	@touch $@
+
+check-bib-biber: .$(BIB).biber
+.$(BIB).biber: $(BIB)
 	@echo "Checking $(BIB) for LaTeX usage with Biber"
 	@$(BIBER) --tool --validate-datamodel $(BIB)
 	@$(RM) fuzzingbook_bibertool.bib
+	@touch .$(BIB).biber
+
 .PHONY: checkbib check-bib check-bib-ascii check-bib-python check-bib-biber
 	
 
@@ -806,9 +816,10 @@ README.md: $(MARKDOWN_TARGET)index.md Makefile
 
 .PHONY: publish
 publish: run docs
-	git add $(DOCS_TARGET)* binder/postBuild README.md
+	git add $(DOCS_TARGET)* binder/postBuild README.md \
+		 $(NOTEBOOKS)/PICS/*-synopsis-*
 	-git status
-	-git commit -m "Doc update" $(DOCS_TARGET) binder README.md
+	-git commit -m "Doc update" 
 	@echo "Now use 'make push' to place docs on website and trigger a mybinder update"
 
 # Add/update HTML code in Web pages
@@ -1140,15 +1151,15 @@ NBDEPEND = $(SHARED)utils/nbdepend.py
 SITEMAP_OPTIONS = --graph --transitive-reduction --project $(PROJECT) # --cluster-by-parts
 
 sitemap: $(SITEMAP_SVG)
-$(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND) $(CHAPTERS_MAKEFILE)
+$(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND)
 	$(PYTHON) $(NBDEPEND) $(SITEMAP_OPTIONS) $(CHAPTER_SOURCES) > $@~ && mv $@~ $@
 	@$(OPEN) $@
 
-$(FULL_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVH)	
-$(RENDERED_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVH)	
+$(FULL_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVG)	
+$(RENDERED_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVG)	
 
-$(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVH)	
-$(RENDERED_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVH)	
+$(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG)	
+$(RENDERED_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG)	
 
 
 ## Dependencies - should come at the very end
