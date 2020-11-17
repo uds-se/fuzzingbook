@@ -430,9 +430,10 @@ def input(prompt):
     
     return original_input(prompt)
     
-def next_inputs(list):
+def next_inputs(list=[]):
     global INPUTS
     INPUTS += list
+    return INPUTS
 
 # Make sure we quit Firefox when done
 import atexit
