@@ -76,14 +76,13 @@ endif
 
 # Files to appear in the table of contents
 ifndef BETA
-TOC_CHAPTERS := $(PUBLIC_CHAPTERS)
-TOC_APPENDICES = $(APPENDICES)
 CHAPTER_SOURCES := $(PUBLIC_CHAPTERS:%=$(NOTEBOOKS)/%)
 endif
 ifdef BETA
-TOC_CHAPTERS := $(CHAPTERS)
-TOC_APPENDICES = $(APPENDICES)
+PUBLIC_CHAPTERS := $(CHAPTERS)
 endif
+TOC_CHAPTERS := $(PUBLIC_CHAPTERS)
+TOC_APPENDICES = $(APPENDICES)
 
 # Files to appear on the Web page
 DOCS = \
@@ -831,7 +830,7 @@ publish-html: html publish-html-setup \
 	$(DOCS_TARGET)html/favicon \
 	$(DOCS:%=$(DOCS_TARGET)html/%.html) \
 	$(DOCS:%=$(DOCS_TARGET)html/%_files)
-	
+
 publish-html-setup:
 	@test -d $(DOCS_TARGET) || $(MKDIR) $(DOCS_TARGET)
 	@test -d $(DOCS_TARGET)html || $(MKDIR) $(DOCS_TARGET)html
