@@ -118,18 +118,29 @@ and then make use of the following features.
                                 f.write(base64.b64decode(png, validate=True))
                             text = "![](" + 'PICS/' + png_basename + ')\n'
 
-                    # Text output
+                    # Markdown output
                     if text is None:
                         try:
-                            text = output.text
+                            text = "```\n" + output.data['text/markdown'] + "\n```\n"
+                        except KeyError:
+                            pass
                         except AttributeError:
                             pass
-                    
+
                     # HTML output
                     if text is None:
                         try:
                             text = "```\n" + output.data['text/html'] + "\n```\n"
                         except KeyError:
+                            pass
+                        except AttributeError:
+                            pass
+
+                    # Text output
+                    if text is None:
+                        try:
+                            text = output.text
+                        except AttributeError:
                             pass
 
                     # Data output
@@ -151,6 +162,7 @@ and then make use of the following features.
                 synopsis += cell.source + "\n\n"
     
     synopsis = synopsis.replace("```\n```python\n", "")
+    synopsis = synopsis.replace("```\n```\n", "")
 
     return synopsis
     
