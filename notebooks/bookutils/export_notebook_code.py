@@ -147,7 +147,7 @@ def export_notebook_code(notebook_name, path=None):
             
             bang = False
             if code.startswith('!'):
-                code = "import os\nos.system(" + repr(code[1:]) + ")"
+                code = "import os\nos.system(f" + repr(code[1:]) + ")"
                 bang = True
 
             if RE_IMPORT_BOOKUTILS.match(code):
