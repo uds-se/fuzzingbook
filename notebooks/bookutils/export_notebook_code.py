@@ -79,7 +79,7 @@ def fix_imports(code):
         # IPython
         return code
 
-    if code.find("Collector") >= 0 or code.find("FTB") >= 0:
+    if code.find(r"\bCollector\b") >= 0 or code.find(r"\bFTB\b") >= 0:
         # FuzzManager imports
         return code
 
