@@ -65,7 +65,24 @@ def is_all_comments(code):
     return executable_code == ""
 
 def prefix_code(code, prefix):
-    return prefix + code.replace('\n', '\n' + prefix)
+    out = prefix
+    quote = ''
+
+    for i, c in enumerate(code):
+        if c == '\n' and quote == '':  # do not indent quotes
+            out += '\n' + prefix
+        else:
+            out += c
+        
+        if i < len(code) - 3:
+            next_three = code[i:i+3]
+            if quote == '' and (next_three == '""""' or next_three == "'''"):
+                quote = next_three  # start of quote
+            elif next_three == quote:
+                quote = ""  # end of quote
+
+    return out
+
     
 def indent_code(code):
     lines = prefix_code(code, "    ")
