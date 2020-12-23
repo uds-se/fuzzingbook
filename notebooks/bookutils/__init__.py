@@ -109,7 +109,7 @@ def print_content(content, filename=None, lexer=None, start_line_number=None):
         colorful_content = highlight(
             content, lexer,
             formatters.TerminalFormatter())
-        content = colorful_content.strip()
+        content = colorful_content.rstrip()
 
     if start_line_number is None:
         print(content, end="")
