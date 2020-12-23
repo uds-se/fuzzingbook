@@ -17,6 +17,11 @@ import base64
 
 SYNOPSIS_TITLE = "## Synopsis"
 
+RXTERM = re.compile('\x1b' + r'\[[^a-zA-Z]*[a-zA-Z]')
+def unterm(text):
+    """Remove terminal escape commands such as <ESC>[34m"""
+    return RXTERM.sub('', text)
+
 def notebook_synopsis(notebook_name):
     notebook_path = notebook_name
 
@@ -139,14 +144,14 @@ and then make use of the following features.
                     # Text output
                     if text is None:
                         try:
-                            text = output.text
+                            text = unterm(output.text)
                         except AttributeError:
                             pass
 
                     # Data output
                     if text is None:
                         try:
-                            text = output.data['text/plain'] + '\n'
+                            text = unterm(output.data['text/plain'] + '\n')
                         except KeyError:
                             pass
                     
