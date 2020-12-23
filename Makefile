@@ -39,6 +39,7 @@ RENDERED_NOTEBOOKS = rendered
 # Git repo
 GITHUB_REPO = https://github.com/uds-se/$(PROJECT)/
 BINDER_URL = https://mybinder.org/v2/gh/uds-se/$(PROJECT)/master?filepath=docs/beta/notebooks/00_Table_of_Contents.ipynb
+PROJECT_URL = https://beta.$(PROJECT).org
 
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
@@ -480,7 +481,7 @@ check-bib-biber: .$(BIB).biber
 .$(BIB).biber: $(BIB)
 	@echo "Checking $(BIB) for LaTeX usage with Biber"
 	@$(BIBER) --tool --validate-datamodel $(BIB)
-	@$(RM) fuzzingbook_bibertool.bib
+	@$(RM) fuzzingbook_bibertool.bib fuzzingbook.bib.blg
 	@touch .$(BIB).biber
 
 .PHONY: checkbib check-bib check-bib-ascii check-bib-python check-bib-biber
@@ -1044,6 +1045,7 @@ binder: .FORCE
 push: .FORCE
 	git push
 	open $(BINDER_URL)
+	open $(PROJECT_URL)
 
 # Debugging binder
 # This is the same system as mybinder uses, but should be easier to debug
