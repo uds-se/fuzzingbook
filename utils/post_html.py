@@ -216,10 +216,15 @@ def get_sections(notebook):
 
     sections = [match.replace(r'\n', '') for match in matches]
     # print("Sections", repr(sections).encode('utf-8'))
-
+    
     # Filter out second synopsis section
     if '## Synopsis' in sections:
         sections = ['## Synopsis'] + [sec for sec in sections if sec != '## Synopsis']
+    
+    # Filter out "End of Excursion" titles
+    sections = [sec for sec in sections 
+        if sec != '## End of Excursion' and sec != '### End of Excursion']
+
     return sections
 
     
