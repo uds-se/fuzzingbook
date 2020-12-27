@@ -94,11 +94,16 @@ and then make use of the following features.
                                 f.write(svg)
                             print("Creating", png_filename)
                             os.system('convert -density 300 ' + svg_filename + ' ' + png_filename)
+                            
                             if 'RENDER_HTML' in os.environ:
                                 # Render all HTML and SVG into PNG
-                                text = "![](" + 'PICS/' + png_basename + ')\n'
+                                pics_name = png_basename
                             else:
-                                text = "![](" + 'PICS/' + svg_basename + ')\n'
+                                pics_name = svg_basename
+
+                            text = ("```\n" + 
+                            '![](' +  'PICS/' + pics_name + ')\n' +
+                            '```\n')
 
                     # PNG output
                     if text is None:
@@ -121,7 +126,7 @@ and then make use of the following features.
                             print("Creating", png_filename)
                             with open(png_filename, "wb") as f:
                                 f.write(base64.b64decode(png, validate=True))
-                            text = "![](" + 'PICS/' + png_basename + ')\n'
+                            text = "```\n![](" + 'PICS/' + png_basename + ')\n```\n'
 
                     # Markdown output
                     if text is None:
