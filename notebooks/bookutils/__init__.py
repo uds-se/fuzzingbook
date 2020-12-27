@@ -215,22 +215,31 @@ def HTML(data=None, url=None, filename=None, png=False, headless=True, zoom=2.0)
 #             ['apple', 'banana', 'pear', 'tomato'], '27 / 9')
 import uuid
 
+import markdown
+def quiztext(text):
+    md_text = markdown.markdown(text)
+    if md_text.startswith('<p>'):
+        md_text = md_text[len('<p>'):]
+    if md_text.endswith('</p>'):
+        md_text = md_text[:-len('</p>')]
+    return md_text
+
 # Widget quizzes. No support for multiple-choice quizzes.
 # Currently unused in favor of jsquiz(), below.
-def nbquiz(question, options, correct_answer, title='Quiz'):
+def nbquiz(question, options, correct_answer, title='Quiz', debug=False):
     import ipywidgets as widgets
 
     if isinstance(correct_answer, str):
         correct_answer = int(eval(correct_answer))
   
-    radio_options = [(words, i) for i, words in enumerate(options)]
+    radio_options = [(quiztext(words), i) for i, words in enumerate(options)]
     alternatives = widgets.RadioButtons(
         options = radio_options,
         description = '',
         disabled = False
     )
 
-    title_out =  widgets.HTML(value=f'<h4>{title}</h4><strong>{question}</strong>')
+    title_out =  widgets.HTML(value=f'<h4>{quiztext(title)}</h4><strong>{quiztext(question)}</strong>')
 
     check = widgets.Button()
     
@@ -254,13 +263,14 @@ def nbquiz(question, options, correct_answer, title='Quiz'):
     return widgets.VBox([title_out, alternatives, check])
 
 # JavaScript quizzes.
-def jsquiz(question, options, correct_answer, title='Quiz'):
-    if isinstance(correct_answer, list):
-        answer_list = correct_answer
+def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
+    if isinstance(correct_answer, list) or isinstance(correct_answer, set):
+        answer_list = list(correct_answer)
         multiple_choice = True
     else:
         answer_list = [correct_answer]
         multiple_choice = False
+        
 
     # Encode answer into binary
     correct_ans = 0
@@ -335,18 +345,18 @@ def jsquiz(question, options, correct_answer, title='Quiz'):
         
     menu = "".join(f'''
         <input type="{input_type}" name="{quiz_id}" id="{quiz_id}-{i + 1}" onclick="clear_selection('{quiz_id}')">
-        <label id="{quiz_id}-{i + 1}-label" for="{quiz_id}-{i + 1}">{option}</label><br>
+        <label id="{quiz_id}-{i + 1}-label" for="{quiz_id}-{i + 1}">{quiztext(option)}</label><br>
     ''' for (i, option) in enumerate(options))
     
     html = f'''
     {script}
     <div class="quiz">
-    <h3 class="quiz_title">{title}</h3>
+    <h3 class="quiz_title">{quiztext(title)}</h3>
     <p>
-    <div class="quiz_question">{question}</div>
+    <div class="quiz_question">{quiztext(question)}</div>
     </p>
     <p>
-    <div class="quiz_options" title="{instructions}">
+    <div class="quiz_options" title="{quiztext(instructions)}">
     {menu}
     </div>
     </p>
@@ -358,16 +368,16 @@ def jsquiz(question, options, correct_answer, title='Quiz'):
 # HTML quizzes. Not interactive.
 def htmlquiz(question, options, correct_answer, title='Quiz'):
     menu = "".join(f'''
-    <li> {option} </li>
+    <li> {quiztext(option)} </li>
     ''' for (i, option) in enumerate(options))
     
     html = f'''
-    <h2>{title}</h2>
-    <strong>{question}</strong><br/>
+    <h2>{quiztext(title)}</h2>
+    <strong>{quiztext(question)}</strong><br/>
     <ol>
-    {menu}
+    {quiztext(menu)}
     </ol>
-    <small>(Hint: {correct_answer})</small>
+    <small>(Hint: {quiztext(correct_answer)})</small>
     '''
     return HTML(html)
 
@@ -384,7 +394,7 @@ def textquiz(question, options, correct_answer, title='Quiz'):
     print(text)
 
 # Entry point for all of the above.
-def quiz(question, options, correct_answer, title='Quiz'):
+def quiz(question, options, correct_answer, **kwargs):
     """Display a quiz. 
     `question` is a question string to be asked.
     `options` is a list of strings with possible answers.
@@ -397,12 +407,12 @@ def quiz(question, options, correct_answer, title='Quiz'):
     """
 
     if 'RENDER_HTML' in os.environ:
-        return htmlquiz(question, options, correct_answer, title)
+        return htmlquiz(question, options, correct_answer, **kwargs)
 
     if have_ipython:
-        return jsquiz(question, options, correct_answer, title)
+        return jsquiz(question, options, correct_answer, **kwargs)
         
-    return textquiz(question, options, correct_answer, title)
+    return textquiz(question, options, correct_answer, **kwargs)
 
 
 
