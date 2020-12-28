@@ -836,6 +836,7 @@ publish-html-setup:
 	@test -d $(DOCS_TARGET)html || $(MKDIR) $(DOCS_TARGET)html
 	
 $(DOCS_TARGET)html/%: $(HTML_TARGET)%
+	$(RM) -r $@
 	cp -pr $< $@
 
 # Add/update Python code on Web pages
