@@ -432,6 +432,24 @@ def fix_css(text):
     # Avoid forcing text color to black when printing
     return text.replace('color: #000 !important;', '')
 
+
+# Inline SVG graphics
+RE_IMG_SVG = re.compile(r'<img src="([^"]*.svg)"[^>]*>')
+
+def inline_svg_graphics(text, chapter_html_file):
+    while True:
+        match = RE_IMG_SVG.search(text)
+        if not match:
+            break
+        
+        src = match.group(1)
+        svg_file = os.path.join(os.path.dirname(chapter_html_file), src)
+        svg_data = open(svg_file).read()
+        text = text[:match.start()] + svg_data + text[match.end():]
+
+    return text
+
+
 # Handle Excursions
 # Cells with "Excursion: <summary>" and "End of Excursion" are translated to 
 # HTML <details> regions
@@ -800,6 +818,9 @@ chapter_contents = remove_ignored_code(chapter_contents)
 
 # Add links to imports
 chapter_contents = add_links_to_imports(chapter_contents)
+
+# Inline SVG graphics (preserving style and tooltips)
+chapter_contents = inline_svg_graphics(chapter_contents, chapter_html_file)
 
 # Fix simple .ipynb links within text and XML
 if args.home:
