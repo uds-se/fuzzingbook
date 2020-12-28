@@ -433,8 +433,8 @@ def fix_css(text):
     return text.replace('color: #000 !important;', '')
 
 
-# Inline SVG graphics
-RE_IMG_SVG = re.compile(r'<img src="([^"]*.svg)"[^>]*>')
+# Inline our SVG graphics
+RE_IMG_SVG = re.compile(r'<img src="(PICS/[^"]*.svg)"[^>]*>')
 
 def inline_svg_graphics(text, chapter_html_file):
     while True:
