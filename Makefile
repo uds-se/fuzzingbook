@@ -718,9 +718,8 @@ stats: $(SOURCES)
 
 # Run all code.  This should produce no failures.
 PY_SUCCESS_MAGIC = "--- Code check passed ---"
-PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py.out)
-# PYS_OUT = $(PUBLIC_SOURCES:%.ipynb=$(CODE_TARGET)%.py.out)
-$(CODE_TARGET)%.py.out:	$(CODE_TARGET)%.py
+PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET).%.py.out)
+$(CODE_TARGET).%.py.out:	$(CODE_TARGET)%.py
 	@echo Running $<...
 	@if $(PYTHON) $< > $@ 2>&1; then \
 		echo $(PY_SUCCESS_MAGIC) >> $@; \
@@ -1128,7 +1127,7 @@ realclean: clean
 	cd $(PDF_TARGET); $(RM) *.pdf
 	cd $(HTML_TARGET); $(RM) *.html; $(RM) -r *_files
 	cd $(SLIDES_TARGET); $(RM) *.html
-	cd $(CODE_TARGET); $(RM) *.py *.py.out
+	cd $(CODE_TARGET); $(RM) *.py *.py.out .*.py.out
 	cd $(WORD_TARGET); $(RM) *.docx
 	cd $(MARKDOWN_TARGET); $(RM) *.md
 	@echo "All old files deleted"
@@ -1181,7 +1180,7 @@ $(DEPEND_TARGET)%.makefile: $(NOTEBOOKS)/%.ipynb
 		echo ''; \
 		echo '$$''(RENDERED_NOTEBOOKS)/$(notdir $<):' $$notebooks; \
 		echo ''; \
-		echo '$$''(CODE_TARGET)$(notdir $(<:%.ipynb=%.py.out)):' $$imports; \
+		echo '$$''(CODE_TARGET)$(notdir $(<:%.ipynb=.%.py.out)):' $$imports; \
 	) > $@
 
 
