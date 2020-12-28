@@ -171,8 +171,9 @@ and then make use of the following features.
             else:
                 synopsis += cell.source + "\n\n"
     
-    synopsis = synopsis.replace("```\n```python\n", "")
-    synopsis = synopsis.replace("```\n```\n", "")
+    synopsis = synopsis.replace("```python\n```\n", "\n")
+    synopsis = synopsis.replace("```\n```python\n", "\n")
+    synopsis = synopsis.replace("```\n```\n", "\n")
 
     return synopsis
     
