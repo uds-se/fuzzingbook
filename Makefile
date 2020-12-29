@@ -384,17 +384,21 @@ NBAUTOSLIDE = $(SHARED)utils/nbautoslide.py
 NBSYNOPSIS = $(SHARED)utils/nbsynopsis.py
 NBSHORTEN = $(SHARED)utils/nbshorten.py
 
+COMMIT_SYNOPSIS = git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
+
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS)
 	$(EXECUTE_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $@
+	$(COMMIT_SYNOPSIS)
 	
 $(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(SHARED)$(NBAUTOSLIDE) $(SHARED)$(NBSYNOPSIS) $(SHARED)$(NBSHORTEN) $(NOTEBOOKS)/$(UTILS)/__init__.py
 	$(RENDER_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
 	RENDER_HTML=1 $(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $@
+	$(COMMIT_SYNOPSIS)
 	$(PYTHON) $(NBSHORTEN) --link-to "$(SITE)/html/" --in-place $@
 
 $(FULL_NOTEBOOKS)/$(UTILS):
@@ -1008,10 +1012,10 @@ $(DOCS_TARGET)notebooks/00_Index.ipynb: $(SHARED)utils/nbindex.py \
 	(cd $(NOTEBOOKS); $(PYTHON) ../$(SHARED)utils/nbindex.py $(TOC_CHAPTERS) $(APPENDICES)) > $@
 	@$(OPEN) $@
 	
-
 ## Synopsis
 update-synopsis synopsis:
-	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $(CHAPTER_SOURCES)
+	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $(CHAPTERS:%=$(NOTEBOOKS)/%)
+	git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
 
 no-synopsis:
 	@echo Chapters without synopsis:
