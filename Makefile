@@ -1015,7 +1015,7 @@ $(DOCS_TARGET)notebooks/00_Index.ipynb: $(SHARED)utils/nbindex.py \
 ## Synopsis
 update-synopsis synopsis:
 	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $(CHAPTERS:%=$(NOTEBOOKS)/%)
-	git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
+	-git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
 
 no-synopsis:
 	@echo Chapters without synopsis:
