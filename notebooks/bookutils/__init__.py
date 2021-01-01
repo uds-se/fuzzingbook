@@ -3,6 +3,7 @@
 # Define the contents of this file as a package
 __all__ = ["PrettyTable", "YouTubeVideo",
            "print_file", "print_content", "HTML",
+           "show_ast",
            "unicode_escape", "terminal_escape", 
            "inheritance_conflicts", "extract_class_definition", "quiz"]
 
@@ -142,6 +143,14 @@ def getsourcelines(function):
     content = colorful_content.strip()
     return [line + '\n' for line in content.split('\n')], starting_line_number
 
+# Showing ASTs
+def show_ast(tree):
+    if rich_output():
+        import showast  # We can import showast only when in a notebook
+        return showast.show_ast(tree)
+    else:
+        import ast  # Textual alternative
+        print(ast.dump(tree))
 
 # Escaping unicode characters into ASCII for user-facing strings
 def unicode_escape(s, error="backslashreplace"):
