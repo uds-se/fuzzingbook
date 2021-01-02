@@ -129,6 +129,8 @@ def index_markdown():
     s = ""
     
     for entry in entries:
+        if not index_key(entry):
+            continue
         entry_letter = index_key(entry)[0]
         if entry_letter != current_letter:
             if s != "":
