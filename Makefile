@@ -384,7 +384,7 @@ NBAUTOSLIDE = $(SHARED)utils/nbautoslide.py
 NBSYNOPSIS = $(SHARED)utils/nbsynopsis.py
 NBSHORTEN = $(SHARED)utils/nbshorten.py
 
-COMMIT_SYNOPSIS = git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
+COMMIT_SYNOPSIS = -git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
 
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS)
 	$(EXECUTE_NOTEBOOK) $<
@@ -1015,7 +1015,7 @@ $(DOCS_TARGET)notebooks/00_Index.ipynb: $(SHARED)utils/nbindex.py \
 ## Synopsis
 update-synopsis synopsis:
 	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $(CHAPTERS:%=$(NOTEBOOKS)/%)
-	-git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
+	$(COMMIT_SYNOPSIS)
 
 no-synopsis:
 	@echo Chapters without synopsis:
