@@ -82,10 +82,10 @@ def draw_notebook_dependencies(notebooks,
     # dot.attr(size='20,30', rank='max')
     
     if project == 'debuggingbook':
-        fontname = 'Raleway'
-        fontcolor = 'purple'
+        fontname = 'Raleway, Helvetica, Arial, sans-serif'
+        fontcolor = '#6A0DAD'
     else:
-        fontname = 'Patua One'
+        fontname = 'Patua One, Helvetica, sans-serif'
         fontcolor = '#B03A2E'
     
     node_attrs = {
