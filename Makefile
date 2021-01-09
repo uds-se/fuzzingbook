@@ -276,10 +276,11 @@ CONVERT_TO_WORD = $(PANDOC)
 CONVERT_TO_MARKDOWN = $(NBCONVERT) --to markdown --output-dir=$(MARKDOWN_TARGET)
 
 # Run
-# WhenToStopFuzzing needs about 120 seconds to render
-EXECUTE_TIMEOUT = 140
-EXECUTE_OPTIONS = --ExecutePreprocessor.timeout=$(EXECUTE_TIMEOUT)
-EXECUTE_NOTEBOOK = $(NBCONVERT) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(FULL_NOTEBOOKS)
+# fuzzingbook/WhenToStopFuzzing needs about 120 seconds to render
+# debuggingbook/Tracing may need up to 10 minutes
+EXECUTE_TIMEOUT ?= 140
+EXECUTE_OPTIONS ?= --ExecutePreprocessor.timeout=$(EXECUTE_TIMEOUT)
+EXECUTE_NOTEBOOK = $(TIME) $(NBCONVERT) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(FULL_NOTEBOOKS)
 
 # Render
 RENDER_NOTEBOOK = RENDER_HTML=1 $(NBCONVERT) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(RENDERED_NOTEBOOKS)
