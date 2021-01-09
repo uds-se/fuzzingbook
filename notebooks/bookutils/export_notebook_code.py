@@ -64,16 +64,8 @@ def is_all_comments(code):
     executable_code = re.sub(RE_COMMENTS, '', code).strip()
     return executable_code == ""
 
-# This doesn't work
 def is_triple_quote(s):
-    return s == '""""' or s == "'''"
-
-# But this does
-def is_triple_quote(s):
-    return len(s) == 3 \
-        and ord(s[0]) in [ord('"'), ord("'")] \
-        and s[0] == s[1] \
-        and s[1] == s[2]
+    return s == '"""' or s == "'''"
 
 def prefix_code(code, prefix):
     out = prefix
@@ -98,29 +90,6 @@ def prefix_code(code, prefix):
 def indent_code(code):
     lines = prefix_code(code, "    ")
     return re.sub(RE_BLANK_LINES, '', lines)
-
-code = '''
-some_c_source = """
-#include <stdio.h>
-
-int foo(int x) {
-    return x;
-}
-
-struct bar {
-    int x, y;
-}
-
-int main(int argc, char *argv[]) {
-    return foo(argc);
-}
-
-"""
-some_c_mapping = elem_mapping(some_c_source, log=True)
-'''
-assert '\n#include' in indent_code(code)
-
-
 
 
 def fix_imports(code):
