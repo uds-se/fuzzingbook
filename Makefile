@@ -588,7 +588,7 @@ $(CODE_TARGET)__init__.py: $(CODE_TARGET)__init__.py.in
 # ensuring we import a .py and not the .ipynb file
 $(CODE_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 	@test -d $(CODE_TARGET) || $(MKDIR) $(CODE_TARGET)
-	$(CONVERT_TO_PYTHON) $< > $@~ && mv $@~ $@
+	$(CONVERT_TO_PYTHON) --project $(PROJECT) $< > $@~ && mv $@~ $@
 	# $(AUTOPEP8) $(AUTOPEP8_OPTIONS) $@
 	-chmod +x $@
 

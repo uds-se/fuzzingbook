@@ -27,12 +27,12 @@ RE_COMMENTS = re.compile(r'^#.*$', re.MULTILINE)
 HEADER = """#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
-# Web site: https://www.fuzzingbook.org/html/{module}.html
+# This material is part of "{title}".
+# Web site: https://www.{project}.org/html/{module}.html
 # Last change: {timestamp}
 #
 #!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2018-2021 CISPA, Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -135,9 +135,14 @@ def print_if_main(code):
     print_utf8('\nif __name__ == "__main__":\n')
     print_utf8(indent_code(code) + "\n\n")
 
-def export_notebook_code(notebook_name, path=None):
+def export_notebook_code(notebook_name, project="fuzzingbook", path=None):
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
     notebook_path = notebook_name
+
+    if project == "debuggingbook":
+        title = "The Debugging Book"
+    else:
+        title = "The Fuzzing Book"
 
     # load the notebook
     with io.open(notebook_path, 'r', encoding='utf-8') as f:
@@ -151,7 +156,10 @@ def export_notebook_code(notebook_name, path=None):
         .astimezone().isoformat(sep=' ', timespec='seconds')
     module = os.path.splitext(os.path.basename(notebook_name))[0]
 
-    header = HEADER.format(module=module, timestamp=timestamp)
+    header = HEADER.format(module=module, 
+                           timestamp=timestamp,
+                           project=project,
+                           title=title)
     print_utf8(header)
     sep = ''
 
@@ -204,5 +212,14 @@ def export_notebook_code(notebook_name, path=None):
                 pass
 
 if __name__ == "__main__":
-    for notebook in sys.argv[1:]:
-        export_notebook_code(notebook)
+    args = sys.argv
+    project = 'fuzzingbook'
+
+    if len(args) > 2 and args[1] == '--project':
+        project = args[2]
+        args = args[3:]
+    else:
+        args = args[1:]
+        
+    for notebook in args:
+        export_notebook_code(notebook, project=project)
