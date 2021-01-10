@@ -16,6 +16,21 @@ import ast
 # i.e. definitions of functions, classes, UPPERCASE_VARIABLES, and imports
 RE_CODE = re.compile(r"^(def |class |@|[A-Z0-9_]* = |import |from )")
 
+def do_import(code):
+    """Return True if code is to be exported"""
+    while code.startswith('#') or code.startswith('\n'):
+        # Skip leading comments
+        code = code[code.find('\n') + 1:]
+
+    return RE_CODE.match(code)
+    
+assert do_import("def foo():\n    pass")
+assert do_import("# ignore\ndef foo():\n    pass")
+assert do_import("# ignore\nclass Bar:\n    pass")
+assert do_import("XYZ = 123")
+assert not do_import("xyz = 123")
+assert not do_import("foo()")
+
 def find_notebook(fullname, path=None):
     """find a notebook, given its fully qualified name and an optional path
 
@@ -71,7 +86,7 @@ class NotebookLoader(object):
 
         codecells = [self.shell.input_transformer_manager.transform_cell(cell.source)
                               for cell in nb.cells if cell.cell_type == 'code']
-        source = [code for code in codecells if RE_CODE.match(code)]
+        source = [code for code in codecells if do_import(code)]
 
         lno = 1
 
