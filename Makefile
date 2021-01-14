@@ -819,7 +819,8 @@ README.md: $(MARKDOWN_TARGET)index.md Makefile
 	sed 's!(\([_a-zA-Z0-9]*\).ipynb)!($(SITE)/html/\1.html)!g'> $@
 
 .PHONY: publish
-publish: run docs
+publish: run quick-publish
+quick-publish: docs
 	git add $(DOCS_TARGET)* binder/postBuild README.md \
 		 $(NOTEBOOKS)/PICS/*-synopsis-*
 	-git status
