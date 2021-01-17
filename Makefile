@@ -737,6 +737,12 @@ $(CODE_TARGET).%.py.out:	$(CODE_TARGET)%.py
 		exit 1; \
 	fi
 
+# No need to check if Tracking.py works; it's not run by users anyway
+$(CODE_TARGET).Tracking.py.out:	$(CODE_TARGET)Tracking.py
+	@echo Skipping $<...
+	echo $(PY_SUCCESS_MAGIC) > $@
+
+
 .PHONY: check-code
 check-code: code $(PYS_OUT)
 	@files_with_errors=$$(grep --files-without-match -- $(PY_SUCCESS_MAGIC) $(PYS_OUT)); \
