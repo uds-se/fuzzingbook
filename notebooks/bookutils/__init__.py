@@ -92,9 +92,9 @@ def extract_class_definition(cls, log=False):
     return '\n'.join(buf)
 
 # Printing files with syntax highlighting
-def print_file(filename, lexer=None):
+def print_file(filename, **kwargs):
     content = open(filename, "rb").read().decode('utf-8')
-    print_content(content, filename, lexer)
+    print_content(content, filename, **kwargs)
 
 def print_content(content, filename=None, lexer=None, start_line_number=None):
     from pygments import highlight, lexers, formatters
