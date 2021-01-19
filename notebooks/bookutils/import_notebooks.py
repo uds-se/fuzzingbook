@@ -14,7 +14,7 @@ import ast
 # To avoid re-running notebook computations during import,
 # we only import code cells that match this regular expression
 # i.e. definitions of functions, classes, UPPERCASE_VARIABLES, and imports
-RE_CODE = re.compile(r"^(def |class |@|[A-Z0-9_]* = |import |from )")
+RE_CODE = re.compile(r"^(def |class |@|[A-Z0-9_]+ [-+*/]?= |import |from )")
 
 def do_import(code):
     """Return True if code is to be exported"""
