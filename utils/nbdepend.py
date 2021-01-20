@@ -65,7 +65,10 @@ def get_title(notebook):
     
 def format_title(title):
     """Break title into two lines if too long"""
-    return textwrap.fill(title, break_long_words=False, width=20)
+    title = textwrap.fill(title, break_long_words=False, width=20)
+    title = title.replace(" of\n", "\nof ")
+    title = title.replace("Failure\nOrigins", "\nFailure Origins")
+    return title
 
 def get_text_contents(notebook):
     with io.open(notebook, 'r', encoding='utf-8') as f:
