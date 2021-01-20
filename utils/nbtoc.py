@@ -30,6 +30,9 @@ def get_title(notebook):
     contents = get_text_contents(notebook)
     match = re.search(r'^# (.*)', contents, re.MULTILINE)
     title = match.group(1).replace(r'\n', '')
+    if title.startswith('['):
+        title = title[1:title.find(']')]
+
     # print("Title", title.encode('utf-8'))
     return title
 

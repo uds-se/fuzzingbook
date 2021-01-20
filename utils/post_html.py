@@ -622,6 +622,9 @@ for section in sections:
     depth = section.count('#')
     while section.startswith('#') or section.startswith(' '):
         section = section[1:]
+        
+    if section.startswith('['):
+        section = section[1:section.find(']')]
 
     if depth == current_depth:
         all_sections_menu += '</li>'
