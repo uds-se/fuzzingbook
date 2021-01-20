@@ -13,6 +13,7 @@ from IPython.core.interactiveshell import InteractiveShell
 
 import nbformat
 import argparse
+import textwrap
 
 from graphviz import Digraph, Source
 
@@ -61,6 +62,10 @@ def get_title(notebook):
     title = match.group(1).replace(r'\n', '')
     # print("Title", title.encode('utf-8'))
     return title
+    
+def format_title(title):
+    """Break title into two lines if too long"""
+    return textwrap.fill(title, break_long_words=False, width=20)
 
 def get_text_contents(notebook):
     with io.open(notebook, 'r', encoding='utf-8') as f:
@@ -74,7 +79,6 @@ def get_text_contents(notebook):
     # print("Contents of", notebook, ": ", repr(contents[:100]))
 
     return contents
-
    
 def draw_notebook_dependencies(notebooks, 
     format='svg', transitive_reduction=True, clusters=True, project='fuzzingbook'):
@@ -116,9 +120,10 @@ def draw_notebook_dependencies(notebooks,
                     dot.subgraph(cluster)
 
                 cluster = Digraph(name='cluster_' + basename)
-                cluster.node(basename, label=title, URL='%s.ipynb' % basename,
-                tooltip=basename, shape='plain', fontname=fontname)
-            
+                cluster.node(basename, label=format_title(title),
+                            URL='%s.ipynb' % basename,
+                            tooltip=basename, shape='plain', fontname=fontname)
+
             elif cluster is not None:
                 cluster.node(basename)
 
@@ -128,9 +133,9 @@ def draw_notebook_dependencies(notebooks,
             if module_file in notebooks:
                 module_title = get_title(module_file)
                 dot.node(basename, URL='%s.ipynb' % basename, 
-                    label=title, tooltip=basename, **node_attrs)
+                    label=format_title(title), tooltip=basename, **node_attrs)
                 dot.node(module, URL='%s.ipynb' % module, 
-                    label=module_title, tooltip=module, **node_attrs)
+                    label=format_title(module_title), tooltip=module, **node_attrs)
                 dot.edge(module, basename)
                 
     if cluster is not None:
