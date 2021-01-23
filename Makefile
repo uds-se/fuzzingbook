@@ -294,7 +294,7 @@ ZIP_OPTIONS = -r
 # Short targets
 # Default target is "chapters", as that's what you'd typically like to recreate after a change
 .PHONY: chapters default
-chapters default: html code
+chapters default: html code test-code test-imports test-packages
 
 # The book is recreated after any change to any source
 .PHONY: book all and more
@@ -726,7 +726,7 @@ PY_SUCCESS_MAGIC = "--- Code check passed ---"
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET).%.py.out)
 $(CODE_TARGET).%.py.out:	$(CODE_TARGET)%.py
 	@echo Running $<...
-	@if $(PYTHON) $< > $@ 2>&1; then \
+	@if $(PYTHON) -W error $< > $@ 2>&1; then \
 		echo $(PY_SUCCESS_MAGIC) >> $@; \
 		exit 0; \
 	else \
@@ -742,9 +742,11 @@ $(CODE_TARGET).Tracking.py.out:	$(CODE_TARGET)Tracking.py
 	@echo Skipping $<...
 	echo $(PY_SUCCESS_MAGIC) > $@
 
+.PHONY: test-code
+test-code: code $(PYS_OUT)
 
 .PHONY: check-code
-check-code: code $(PYS_OUT)
+check-code: test-code
 	@files_with_errors=$$(grep --files-without-match -- $(PY_SUCCESS_MAGIC) $(PYS_OUT)); \
 	if [ -z "$$files_with_errors" ]; then \
 		echo "All code checks passed."; \
@@ -755,24 +757,39 @@ check-code: code $(PYS_OUT)
 
 # Import all code.  This should produce no output (or error messages).
 IMPORTS = $(subst .ipynb,,$(CHAPTERS) $(APPENDICES))
+IMPORTS_OUT = $(CODE_TARGET).import_all.py.out
+
+.PHONY: test-import test-imports
+test-import test-imports: code $(IMPORTS_OUT)
+
 .PHONY: check-import check-imports
-check-import check-imports: code
+check-import check-imports: test-imports
+	@echo "All import checks passed."
+
+$(IMPORTS_OUT): $(PYS)
 	@echo "#!/usr/bin/env $(PYTHON)" > $(CODE_TARGET)import_all.py
 	@(for file in $(IMPORTS); do echo import $$file; done) | grep -v '^import [0-9][0-9]' >> $(CODE_TARGET)import_all.py
-	cd $(CODE_TARGET); $(PYTHON) import_all.py 2>&1 | tee import_all.py.out
-	@test ! -s $(CODE_TARGET)import_all.py.out && echo "All import checks passed."
-	@$(RM) $(CODE_TARGET)import_all.py*
+	(cd $(CODE_TARGET); $(PYTHON) import_all.py 2>&1) | tee $@
+	@$(RM) $(CODE_TARGET)import_all.py
+	@test ! -s $@
 	
 # Same as above, but using Python standard packages only; import should work too
 check-standard-imports: code
 	# PYTHONPATH= $(MAKE) check-imports
 
-check-package check-packages: code
+PACKAGES_OUT = $(CODE_TARGET).import_packages.py.out
+.PHONY: test-packages
+test-packages: $(PACKAGES_OUT)
+
+check-package check-packages: test-packages
+	@echo "Package check passed."
+
+$(PACKAGES_OUT): $(PYS)
 	@echo "#!/usr/bin/env $(PYTHON)" > import_packages.py
 	@(for file in $(IMPORTS); do echo import code.$$file; done) | grep -v '^import code.[0-9][0-9]' >> import_packages.py
-	$(PYTHON) import_packages.py 2>&1 | tee import_packages.py.out
-	@test ! -s import_packages.py.out && echo "Package check passed."
-	@$(RM) import_packages.py*
+	$(PYTHON) import_packages.py 2>&1 | tee $@
+	@$(RM) import_packages.py
+	@test ! -s $@
 
 
 .PHONY: run
