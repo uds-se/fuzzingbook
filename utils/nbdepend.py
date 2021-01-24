@@ -6,7 +6,7 @@ usage:
 python nbdepend.py A.ipynb B.ipynb C.ipynb > Makefile_deps
 """
 
-import io, os, sys, types, re
+import io, os, types, re
 
 from IPython import get_ipython
 from IPython.core.interactiveshell import InteractiveShell
@@ -14,6 +14,10 @@ from IPython.core.interactiveshell import InteractiveShell
 import nbformat
 import argparse
 import textwrap
+import warnings
+
+import markdown
+from bs4 import BeautifulSoup
 
 from graphviz import Digraph, Source
 
@@ -56,13 +60,26 @@ def get_title(notebook):
     contents = get_text_contents(notebook)
     match = re.search(r'^# (.*)', contents, re.MULTILINE)
     if match is None:
-        print(notebook + ": no title", file=sys.stderr)
+        warnings.warn(notebook + ": no title")
         return notebook
 
     title = match.group(1).replace(r'\n', '')
     # print("Title", title.encode('utf-8'))
     return title
+
+def get_intro(notebook):
+    """Return the first paragraph from a notebook file"""
+    intro = get_text_contents(notebook).strip()
+    while intro.startswith('#'):
+        intro = intro[intro.index('\n') + 1:]
+    intro = intro[:intro.find('\n\n')]
+    return intro
     
+def markdown_to_text(s):
+    """Convert Markdown to plain text"""
+    html = markdown.markdown(s)
+    return "".join(BeautifulSoup(html, features='lxml').findAll(text=True)).strip()
+
 def format_title(title):
     """Break title into two lines if too long"""
     title = textwrap.fill(title, break_long_words=False, width=20)
@@ -116,6 +133,9 @@ def draw_notebook_dependencies(notebooks,
         dirname = os.path.dirname(notebook_name)
         basename = os.path.splitext(os.path.basename(notebook_name))[0]
         title = get_title(notebook_name)
+        intro = markdown_to_text(get_intro(notebook_name))
+        tooltip = f'{title} ({basename})\n\n{intro}'
+
         if clusters:
             if title.startswith("Part"):
                 if cluster is not None:
@@ -133,12 +153,16 @@ def draw_notebook_dependencies(notebooks,
         for module in notebook_dependencies(notebook_name,
                  include_minor_dependencies=False):
             module_file = os.path.join(dirname, module + ".ipynb")
+
             if module_file in notebooks:
                 module_title = get_title(module_file)
+                module_intro = markdown_to_text(get_intro(module_file))
+                module_tooltip = f'{module_title} ({module})\n\n{module_intro}'
+
                 dot.node(basename, URL='%s.ipynb' % basename, 
-                    label=format_title(title), tooltip=basename, **node_attrs)
+                    label=format_title(title), tooltip=tooltip, **node_attrs)
                 dot.node(module, URL='%s.ipynb' % module, 
-                    label=format_title(module_title), tooltip=module, **node_attrs)
+                    label=format_title(module_title), tooltip=module_tooltip, **node_attrs)
                 dot.edge(module, basename)
                 
     if cluster is not None:

@@ -11,6 +11,10 @@ import io, os, sys, types, re
 import nbformat
 import argparse
 
+import markdown
+from bs4 import BeautifulSoup
+import html
+
 
 def get_text_contents(notebook):
     with io.open(notebook, 'r', encoding='utf-8') as f:
@@ -35,15 +39,37 @@ def get_title(notebook):
 
     # print("Title", title.encode('utf-8'))
     return title
+    
+def get_intro(notebook):
+    """Return the first paragraph from a notebook file"""
+    intro = get_text_contents(notebook).strip()
+    while intro.startswith('#'):
+        intro = intro[intro.index('\n') + 1:]
+    intro = intro[:intro.find('\n\n')]
+    return intro
+    
+def markdown_to_text(s):
+    """Convert Markdown to plain text"""
+    html = markdown.markdown(s)
+    return "".join(BeautifulSoup(html, features='lxml').findAll(text=True)).strip()
+    
+def text_to_tooltip(s):
+    """Convert plain text to tooltip"""
+    return html.escape(s).replace('\n', '&#10;')
 
-def notebook_toc_entry(notebook_name, prefix, path=None):
+def notebook_toc_entry(notebook_name, prefix, path=None, tooltips=True):
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
     notebook_path = notebook_name
     notebook_title = get_title(notebook_path)
-    notebook_base = os.path.basename(notebook_path)
+    notebook_base = os.path.splitext(os.path.basename(notebook_name))[0]
+    notebook_intro = markdown_to_text(get_intro(notebook_path))
+    notebook_tooltip = text_to_tooltip(f'{notebook_title} ({notebook_base})\n\n{notebook_intro}')
 
-    return prefix + " [" + notebook_title + "](" + notebook_base + ")\n"
-    
+    if tooltips:
+        return f'{prefix} <a href="{notebook_base}" title="{notebook_tooltip}">{notebook_title}</a>\n'
+    else:
+        return f'{prefix} [{notebook_title}]({notebook_base})'
+
 def notebook_toc(public_chapters, appendices, booktitle):
     if booktitle:
         booktitle = "# " + booktitle
@@ -67,7 +93,8 @@ def notebook_toc(public_chapters, appendices, booktitle):
     #     appendix_toc += notebook_toc_entry(notebook, "*")
         
     sitemap = r"""## Sitemap
-This sitemap shows possible paths through the book chapters.  An arrow $A \rightarrow B$ means that chapter $A$ is a prerequisite for chapter $B$."""
+While the chapters of this book can be read one after the other, there are many possible paths through the book. In this graph, an arrow $A \rightarrow B$ means that chapter $A$ is a prerequisite for chapter $B$. You can pick arbitrary paths in this graph to get to the topics that interest you most:
+"""
 
     sitemap_code_1 = "# ignore\nfrom IPython.display import SVG"
     sitemap_code_2 = "# ignore\nSVG(filename='PICS/Sitemap.svg')"
