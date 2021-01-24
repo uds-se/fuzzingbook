@@ -61,14 +61,15 @@ def notebook_toc_entry(notebook_name, prefix, path=None, tooltips=True):
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
     notebook_path = notebook_name
     notebook_title = get_title(notebook_path)
-    notebook_base = os.path.splitext(os.path.basename(notebook_name))[0]
+    notebook_basename = os.path.basename(notebook_name)
+    notebook_base = os.path.splitext(notebook_basename)[0]
     notebook_intro = markdown_to_text(get_intro(notebook_path))
     notebook_tooltip = text_to_tooltip(f'{notebook_title} ({notebook_base})\n\n{notebook_intro}')
 
     if tooltips:
-        return f'{prefix} <a href="{notebook_base}" title="{notebook_tooltip}">{notebook_title}</a>\n'
+        return f'{prefix} <a href="{notebook_basename}" title="{notebook_tooltip}">{notebook_title}</a>\n'
     else:
-        return f'{prefix} [{notebook_title}]({notebook_base})'
+        return f'{prefix} [{notebook_title}]({notebook_basename})'
 
 def notebook_toc(public_chapters, appendices, booktitle):
     if booktitle:
