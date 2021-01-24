@@ -479,13 +479,13 @@ check-bib-ascii: .$(BIB).ascii
 check-bib-python: .$(BIB).python
 .$(BIB).python: $(BIB)
 	@echo "Checking $(BIB) for Python usage with bibtexparser"
-	@$(PYTHON) -c 'import bibtexparser; bibtexparser.load(open("$(BIB)"))'
+	@$(PYTHON) -W -c 'import bibtexparser; fd = open("$(BIB)"); bibtexparser.load(fd); fd.close()'
 	@touch $@
 
 check-bib-biber: .$(BIB).biber
 .$(BIB).biber: $(BIB)
 	@echo "Checking $(BIB) for LaTeX usage with Biber"
-	@$(BIBER) --tool --validate-datamodel $(BIB)
+	@$(BIBER) --tool --validate-datamodel --quiet $(BIB)
 	@$(RM) fuzzingbook_bibertool.bib fuzzingbook.bib.blg
 	@touch .$(BIB).biber
 
