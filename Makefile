@@ -740,7 +740,7 @@ $(CODE_TARGET).%.py.out:	$(CODE_TARGET)%.py
 # No need to check if Tracking.py works; it's not run by users anyway
 $(CODE_TARGET).Tracking.py.out:	$(CODE_TARGET)Tracking.py
 	@echo Skipping $<...
-	echo $(PY_SUCCESS_MAGIC) > $@
+	@echo $(PY_SUCCESS_MAGIC) > $@
 
 .PHONY: test-code
 test-code: code $(PYS_OUT)
