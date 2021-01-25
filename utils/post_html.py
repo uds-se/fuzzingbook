@@ -126,12 +126,11 @@ site_citation_template = r"""
 __AUTHORS__: "<a href="__SITE_HTML__">__BOOKTITLE__</a>".  Retrieved __DATE__.
 </p>
 <pre>
-@incollection{__BIBTEX_KEY__:__CHAPTER__,
+@book{__BIBTEX_KEY__,
     author = {__AUTHORS_BIBTEX__},
-    booktitle = {__BOOKTITLE__},
     title = {__BOOKTITLE__},
     year = {__YEAR__},
-    publisher = {CISPA},
+    publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{__SITE_HTML__}},
     note = {Retrieved __DATE__},
     url = {__SITE_HTML__},
@@ -146,7 +145,7 @@ chapter_citation_template = r"""
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-__AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__ (eds.), "<a href="__SITE_HTML__">__BOOKTITLE__</a>", <a href="__CHAPTER_HTML__">__CHAPTER_HTML__</a>.  Retrieved __DATE__.
+__AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__, "<a href="__SITE_HTML__">__BOOKTITLE__</a>", <a href="__CHAPTER_HTML__">__CHAPTER_HTML__</a>.  Retrieved __DATE__.
 </p>
 <pre>
 @incollection{__BIBTEX_KEY__:__CHAPTER__,
@@ -154,7 +153,7 @@ __AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__
     booktitle = {__BOOKTITLE__},
     title = {__CHAPTER_TITLE__},
     year = {__YEAR__},
-    publisher = {CISPA},
+    publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{__CHAPTER_HTML__}},
     note = {Retrieved __DATE__},
     url = {__CHAPTER_HTML__},
