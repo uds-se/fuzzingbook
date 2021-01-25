@@ -275,25 +275,33 @@ def nbquiz(question, options, correct_answer, title='Quiz', debug=False):
 
 # JavaScript quizzes.
 def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
+    hint = ""
+    if isinstance(correct_answer, str):
+        hint = correct_answer
+        correct_answer = eval(correct_answer)
+
     if isinstance(correct_answer, list) or isinstance(correct_answer, set):
         answer_list = list(correct_answer)
         multiple_choice = True
     else:
         answer_list = [correct_answer]
         multiple_choice = False
-        
 
     # Encode answer into binary
     correct_ans = 0
     for elem in answer_list:
         if isinstance(elem, str):
             elem = eval(elem)
+
         correct_ans = correct_ans | (1 << int(elem))
 
     quiz_id = uuid.uuid1()
+    answers = 'answers_' + str(quiz_id).replace('-', '')
 
     script = '''
     <script>
+    var {answers} = 0;
+
     function answer(quiz_id) {
         ans = 0;
         for (i = 1;; i++) {
@@ -305,11 +313,13 @@ def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
         }
         return ans;
     }
-    function check_selection(quiz_id, correct_answer, multiple_choice) {
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
         given_answer = answer(quiz_id);
         if (given_answer == correct_answer)
         {
             document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
             for (i = 1;; i++) {
                 checkbox = document.getElementById(quiz_id + "-" + i.toString());
                 label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
@@ -327,6 +337,13 @@ def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
         else 
         {
             document.getElementById(quiz_id + "-submit").value = "Try again";
+            
+            {answers}++;
+            if ({answers} >= 3 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: " + hint + ")";
+            }
+
             if (!multiple_choice) {
                 for (i = 1;; i++) {
                     checkbox = document.getElementById(quiz_id + "-" + i.toString());
@@ -343,9 +360,12 @@ def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
     }
     function clear_selection(quiz_id) {
         document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
     }
     </script>
     '''
+    
+    script = script.replace('{answers}', answers)
     
     if multiple_choice:
         input_type = "checkbox"
@@ -371,7 +391,8 @@ def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
     {menu}
     </div>
     </p>
-    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', {correct_ans}, {int(multiple_choice)})">
+    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', {correct_ans}, {int(multiple_choice)}, '{hint}')">
+    <span class="quiz_hint" id="{quiz_id}-hint"></span>
     </div>
     '''
     return HTML(html)
