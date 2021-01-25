@@ -238,11 +238,11 @@ def quiztext(text):
 
 # Widget quizzes. No support for multiple-choice quizzes.
 # Currently unused in favor of jsquiz(), below.
-def nbquiz(question, options, correct_answer, title='Quiz', debug=False):
+def nbquiz(question, options, correct_answer, globals, title='Quiz', debug=False):
     import ipywidgets as widgets
 
     if isinstance(correct_answer, str):
-        correct_answer = int(eval(correct_answer))
+        correct_answer = int(eval(correct_answer, globals))
   
     radio_options = [(quiztext(words), i) for i, words in enumerate(options)]
     alternatives = widgets.RadioButtons(
@@ -275,11 +275,12 @@ def nbquiz(question, options, correct_answer, title='Quiz', debug=False):
     return widgets.VBox([title_out, alternatives, check])
 
 # JavaScript quizzes.
-def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
+def jsquiz(question, options, correct_answer, globals, 
+           title='Quiz', debug=True):
     hint = ""
     if isinstance(correct_answer, str):
         hint = correct_answer
-        correct_answer = eval(correct_answer)
+        correct_answer = eval(correct_answer, globals)
 
     if isinstance(correct_answer, list) or isinstance(correct_answer, set):
         answer_list = list(correct_answer)
@@ -292,7 +293,7 @@ def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
     correct_ans = 0
     for elem in answer_list:
         if isinstance(elem, str):
-            elem = eval(elem)
+            elem = eval(elem, globals)
 
         correct_ans = correct_ans | (1 << int(elem))
 
@@ -340,9 +341,9 @@ def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
             document.getElementById(quiz_id + "-submit").value = "Try again";
             
             {answers}++;
-            if ({answers} >= 3 && hint.length > 0) {
+            if ({answers} >= 2 && hint.length > 0) {
                 document.getElementById(quiz_id + "-hint").innerHTML = 
-                    "&nbsp;&nbsp;(Hint: " + hint + ")";
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
             }
 
             if (!multiple_choice) {
@@ -427,7 +428,7 @@ def textquiz(question, options, correct_answer, title='Quiz'):
     print(text)
 
 # Entry point for all of the above.
-def quiz(question, options, correct_answer, **kwargs):
+def quiz(question, options, correct_answer, globals=None, **kwargs):
     """Display a quiz. 
     `question` is a question string to be asked.
     `options` is a list of strings with possible answers.
@@ -438,14 +439,17 @@ def quiz(question, options, correct_answer, **kwargs):
       these will be displayed as is and evaluated for the correct values.
     `title` is the title to be displayed.
     """
+    
+    if globals is None:
+        globals = {}
 
     if 'RENDER_HTML' in os.environ:
-        return htmlquiz(question, options, correct_answer, **kwargs)
+        return htmlquiz(question, options, correct_answer, globals, **kwargs)
 
     if have_ipython:
-        return jsquiz(question, options, correct_answer, **kwargs)
+        return jsquiz(question, options, correct_answer, globals, **kwargs)
         
-    return textquiz(question, options, correct_answer, **kwargs)
+    return textquiz(question, options, correct_answer, globals, **kwargs)
 
 
 
