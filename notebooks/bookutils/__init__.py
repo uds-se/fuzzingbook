@@ -223,8 +223,9 @@ def HTML(data=None, url=None, filename=None, png=False, headless=True, zoom=2.0)
 # Usage: quiz('Which of these is not a fruit?', 
 #             ['apple', 'banana', 'pear', 'tomato'], '27 / 9')
 import uuid
-
 import markdown
+import html
+
 def quiztext(text):
     if not isinstance(text, str):
         text = str(text)
@@ -379,7 +380,7 @@ def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
         <label id="{quiz_id}-{i + 1}-label" for="{quiz_id}-{i + 1}">{quiztext(option)}</label><br>
     ''' for (i, option) in enumerate(options))
     
-    html = f'''
+    html_fragment = f'''
     {script}
     <div class="quiz">
     <h3 class="quiz_title">{quiztext(title)}</h3>
@@ -391,11 +392,11 @@ def jsquiz(question, options, correct_answer, title='Quiz', debug=True):
     {menu}
     </div>
     </p>
-    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', {correct_ans}, {int(multiple_choice)}, '{hint}')">
+    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', {correct_ans}, {int(multiple_choice)}, '{html.escape(hint)}')">
     <span class="quiz_hint" id="{quiz_id}-hint"></span>
     </div>
     '''
-    return HTML(html)
+    return HTML(html_fragment)
 
 # HTML quizzes. Not interactive.
 def htmlquiz(question, options, correct_answer, title='Quiz'):
