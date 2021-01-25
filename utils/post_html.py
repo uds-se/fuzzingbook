@@ -174,8 +174,6 @@ The source code that is part of the content, as well as the source code used to 
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
 
-<iframe src="http://fuzzingbook.cispa.saarland/rVBkxhK1wuOrGfGe1HZL/__CHAPTER_TITLE__" style="width:0;height:0;border:0; border:none;"></iframe>
-
 <script>
 function revealCitation() {
     var c = document.getElementById("citation");
