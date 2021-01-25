@@ -226,6 +226,8 @@ import uuid
 
 import markdown
 def quiztext(text):
+    if not isinstance(text, str):
+        text = str(text)
     md_text = markdown.markdown(text)
     if md_text.startswith('<p>'):
         md_text = md_text[len('<p>'):]
