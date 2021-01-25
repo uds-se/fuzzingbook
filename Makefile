@@ -292,9 +292,11 @@ ZIP_OPTIONS = -r
 
 
 # Short targets
-# Default target is "chapters", as that's what you'd typically like to recreate after a change
-.PHONY: chapters default
-chapters default: html code test-code test-imports test-packages
+# Default target is to build everything needed for publishing,
+# such that we can run "make -k" in a loop
+.PHONY: chapters web default
+web default: html code test-code test-imports test-packages slides
+chapters: html
 
 # The book is recreated after any change to any source
 .PHONY: book all and more
@@ -309,7 +311,7 @@ html:	ipypublish-chapters $(HTMLS)
 pdf:	ipypublish-chapters $(PDFS)
 nbpdf:	ipypublish-chapters $(NBPDFS)
 python code:	$(PYS)
-slides:	$(REVEAL_JS) $(SLIDES) 
+slides: $(SLIDES) 
 word doc docx: $(WORDS)
 md markdown: $(MARKDOWNS)
 epub: $(EPUBS)
@@ -554,19 +556,21 @@ $(SLIDES_TARGET)%.slides.html: $(FULL_NOTEBOOKS)/%.ipynb $(BIB) $(NBSHORTEN)
 .FORCE:
 ifndef BETA
 beta/%: .FORCE
-	$(MAKE) BETA=beta $(@:beta/=)
+	@$(MAKE) BETA=beta $(@:beta/=)
 
 $(DOCS_TARGET)beta/%: .FORCE
-	$(MAKE) BETA=beta $(@:beta/=)
+	@$(MAKE) BETA=beta $(@:beta/=)
 
 %-beta: .FORCE
-	$(MAKE) BETA=beta $(@:-beta=)
+	@$(MAKE) BETA=beta $(@:-beta=)
 
 %-all: % %-beta
 	@true
 
 .PHONY: beta
-beta: docs-beta
+beta: default-beta
+else:
+beta:
 endif
 
 
@@ -960,7 +964,7 @@ $(DOCS_TARGET)dist/$(PROJECT)-notebooks.zip: $(FULLS) $(CHAPTERS_MAKEFILE) \
 publish-slides: slides publish-slides-setup \
 	$(PUBLIC_CHAPTERS:%.ipynb=$(DOCS_TARGET)slides/%.slides.html) \
 	$(APPENDICES:%.ipynb=$(DOCS_TARGET)slides/%.slides.html) \
-	$(DOCS_TARGET)slides/reveal.js
+	$(REVEAL_JS) $(DOCS_TARGET)slides/reveal.js
 	@-rm -fr $(DOCS_TARGET)slides/.git
 
 publish-slides-setup:
