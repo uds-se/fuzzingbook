@@ -15,6 +15,7 @@ import re
 import sys
 import io
 import html
+import urllib
 
 try:
     import nbformat
@@ -311,7 +312,7 @@ assert bibtex_unescape(r"P{\`e}zze") == 'Pèzze'
 RE_IMPORT = re.compile(r'<span class="nn">([^<]+)</span>')
 
 # Add links to imports
-def add_links_to_imports(contents):
+def add_links_to_imports(contents, html_file):
     imports = re.findall(RE_IMPORT, contents)
     for module in imports:
         link = None
@@ -328,14 +329,49 @@ def add_links_to_imports(contents):
         elif module.startswith(project):
             # Point to notebook
             link = module[module.find('.') + 1:] + '.html'
+        elif module in ['astor', 'pydriller', 'ipywidgets', 'graphviz']:
+            link = f'https://{module}.readthedocs.io/'
+        elif module in ['enforce', 'showast']:
+            link = f'https://pypi.org/project/{module}/'
+        elif module == 'magic':
+            link = 'https://pypi.org/project/python-magic/'
+        elif module == 'diff_match_patch':
+            link = 'https://github.com/google/diff-match-patch'
+        elif module == 'easyplotly':
+            link = 'https://mwouts.github.io/easyplotly/'
+        elif module == 'numpy':
+            link = 'https://numpy.org/'
+        elif module.startswith('matplotlib'):
+            link = 'https://matplotlib.org/'
+        elif module.startswith('plotly'):
+            link = 'https://plotly.com/python/'
+        elif module.startswith('sklearn'):
+            link = 'https://scikit-learn.org/'
+        elif module in ['ep', 'go', 'plt', 'np']:
+            link = None  # aliases
         elif module[0].islower():
             # Point to Python doc
             link = "https://docs.python.org/3/library/" + module + ".html"
         else:
             # Point to notebook
             link = module + '.html'
+            
+        # print(f'{module} -> ', repr(link))
+   
+        if link and link.startswith('http'):
+            # Check whether link exists
+            try:
+                urllib.request.urlopen(link)
+            except urllib.request.HTTPError as exc:
+                if exc.code == 403:
+                    # We get this when accessing readthedocs.io
+                    pass
+                else:
+                    print(f"{html_file}: Missing link for {repr(module)}: {exc}",
+                          file=sys.stderr)
+                    link = None
 
-        if link is not None:
+        if link:
             contents = contents.replace(r'<span class="nn">' + module + r'</span>',
                 r'<span class="nn"><a href="' + link 
                 + r'" class="import" target="_blank">' 
@@ -817,7 +853,7 @@ chapter_contents = chapter_contents \
 chapter_contents = remove_ignored_code(chapter_contents)
 
 # Add links to imports
-chapter_contents = add_links_to_imports(chapter_contents)
+chapter_contents = add_links_to_imports(chapter_contents, chapter_html_file)
 
 # Inline SVG graphics (preserving style and tooltips)
 chapter_contents = inline_svg_graphics(chapter_contents, chapter_html_file)
