@@ -151,6 +151,7 @@ BOOKBOOK_HTML  ?= $(PYTHON) -m bookbook.html
 
 # The nbconvert alternative (okay for chapters; doesn't work for book; no citations)
 NBCONVERT ?= $(JUPYTER) nbconvert
+NBCONVERT_OPTIONS ?= --log-level=WARN
 
 # Notebook merger
 NBMERGE = $(PYTHON) utils/nbmerge.py
@@ -218,8 +219,8 @@ BOOK = $(PROJECT)
 
 ifeq ($(PUBLISH),bookbook)
 # Use bookbook
-CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(HTML_TARGET)
-CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template $(PROJECT).tplx --output-dir=$(PDF_TARGET)
+CONVERT_TO_HTML   = $(NBCONVERT) $(NBCONVERT_OPTIONS) --to html --output-dir=$(HTML_TARGET)
+CONVERT_TO_TEX    = $(NBCONVERT) $(NBCONVERT_OPTIONS) --to latex --template $(PROJECT).tplx --output-dir=$(PDF_TARGET)
 BOOK_TEX    = $(PDF_TARGET)$(BOOK).tex
 BOOK_PDF    = $(PDF_TARGET)$(BOOK).pdf
 BOOK_HTML   = $(HTML_TARGET)$(BOOK).html
@@ -243,9 +244,9 @@ PUBLISH_PLUGINS = \
 	ipypublish_plugins/latex_ipypublish_chapter.py
 else
 # Use standard Jupyter tools
-CONVERT_TO_HTML   = $(NBCONVERT) --to html --output-dir=$(HTML_TARGET)
-CONVERT_TO_TEX    = $(NBCONVERT) --to latex --template $(PROJECT).tplx --output-dir=$(PDF_TARGET)
-# CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
+CONVERT_TO_HTML   = $(NBCONVERT) $(NBCONVERT_OPTIONS) --to html --output-dir=$(HTML_TARGET)
+CONVERT_TO_TEX    = $(NBCONVERT) $(NBCONVERT_OPTIONS) --to latex --template $(PROJECT).tplx --output-dir=$(PDF_TARGET)
+# CONVERT_TO_SLIDES = $(NBCONVERT) $(NBCONVERT_OPTIONS) --to slides --output-dir=$(SLIDES_TARGET)
 BOOK_TEX   = 
 BOOK_PDF   = 
 BOOK_HTML  = 
@@ -261,11 +262,11 @@ EXPORT_NOTEBOOK_CODE = $(NOTEBOOKS)/$(UTILS)/export_notebook_code.py
 CONVERT_TO_PYTHON = $(PYTHON) $(EXPORT_NOTEBOOK_CODE)
 
 # This would be the Jupyter alternative
-# CONVERT_TO_PYTHON = $(NBCONVERT) --to python --output-dir=$(CODE_TARGET)
+# CONVERT_TO_PYTHON = $(NBCONVERT) $(NBCONVERT_OPTIONS) --to python --output-dir=$(CODE_TARGET)
 
 # For slides, we use the standard Jupyter tools
 # Main reason: Jupyter has a neat interface to control slides/sub-slides/etc
-CONVERT_TO_SLIDES = $(NBCONVERT) --to slides --output-dir=$(SLIDES_TARGET)
+CONVERT_TO_SLIDES = $(NBCONVERT) $(NBCONVERT_OPTIONS) --to slides --output-dir=$(SLIDES_TARGET)
 REVEAL_JS = $(SLIDES_TARGET)reveal.js
 
 # For Word .docx files, we start from the HTML version
@@ -274,17 +275,17 @@ CONVERT_TO_WORD = $(PANDOC)
 # For Markdown .md files, we use markdown
 # Note: adding --run re-executes all code
 # CONVERT_TO_MARKDOWN = $(NOTEDOWN) --to markdown
-CONVERT_TO_MARKDOWN = $(NBCONVERT) --to markdown --output-dir=$(MARKDOWN_TARGET)
+CONVERT_TO_MARKDOWN = $(NBCONVERT) $(NBCONVERT_OPTIONS) --to markdown --output-dir=$(MARKDOWN_TARGET)
 
 # Run
 # fuzzingbook/WhenToStopFuzzing needs about 120 seconds to render
 # debuggingbook/Tracing may need up to 10 minutes
 EXECUTE_TIMEOUT ?= 140
 EXECUTE_OPTIONS ?= --ExecutePreprocessor.timeout=$(EXECUTE_TIMEOUT)
-EXECUTE_NOTEBOOK = $(TIME) $(NBCONVERT) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(FULL_NOTEBOOKS)
+EXECUTE_NOTEBOOK = $(TIME) $(NBCONVERT) $(NBCONVERT_OPTIONS) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(FULL_NOTEBOOKS)
 
 # Render
-RENDER_NOTEBOOK = RENDER_HTML=1 $(NBCONVERT) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(RENDERED_NOTEBOOKS)
+RENDER_NOTEBOOK = RENDER_HTML=1 $(NBCONVERT) $(NBCONVERT_OPTIONS) $(EXECUTE_OPTIONS) --to notebook --execute --output-dir=$(RENDERED_NOTEBOOKS)
 
 
 # Zip
