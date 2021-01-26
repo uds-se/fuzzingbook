@@ -142,6 +142,7 @@ JUPYTER ?= jupyter
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
 NBPUBLISH ?= nbpublish
+NBPUBLISH_OPTIONS ?= -log warning
 
 # The bookbook tool (okay for chapters and books; but no citations yet)
 # https://github.com/takluyver/bookbook
@@ -228,9 +229,9 @@ PUBLISH_PLUGINS =
 else
 ifeq ($(PUBLISH),nbpublish)
 # Use nbpublish
-CONVERT_TO_HTML   = $(NBPUBLISH) -f html_ipypublish_chapter --outpath $(HTML_TARGET)
-CONVERT_TO_TEX    = $(NBPUBLISH) -f latex_ipypublish_chapter --outpath $(PDF_TARGET)
-# CONVERT_TO_SLIDES = $(NBPUBLISH) -f slides_ipypublish_all --outpath $(SLIDES_TARGET)
+CONVERT_TO_HTML   = $(NBPUBLISH) $(NBPUBLISH_OPTIONS) -f html_ipypublish_chapter --outpath $(HTML_TARGET)
+CONVERT_TO_TEX    = $(NBPUBLISH) $(NBPUBLISH_OPTIONS) -f latex_ipypublish_chapter --outpath $(PDF_TARGET)
+# CONVERT_TO_SLIDES = $(NBPUBLISH) $(NBPUBLISH_OPTIONS) -f slides_ipypublish_all --outpath $(SLIDES_TARGET)
 BOOK_TEX    = $(PDF_TARGET)$(BOOK).tex
 BOOK_PDF    = $(PDF_TARGET)$(BOOK).pdf
 BOOK_HTML   = $(HTML_TARGET)$(BOOK).html
@@ -638,7 +639,7 @@ $(PDF_TARGET)$(BOOK).tex: $(RENDERS) $(BIB) $(PUBLISH_PLUGINS) $(CHAPTERS_MAKEFI
 		chapter=$$(expr $$chapter + 1); \
 	done
 	ln -s ../$(BIB) $(BOOK)
-	$(NBPUBLISH) -f latex_ipypublish_book --outpath $(PDF_TARGET) $(BOOK)
+	$(NBPUBLISH) $(NBPUBLISH_OPTIONS) -f latex_ipypublish_book --outpath $(PDF_TARGET) $(BOOK)
 	$(POST_TEX) $@ > $@~ && mv $@~ $@
 	$(RM) -r $(BOOK)
 	cd $(PDF_TARGET) && $(RM) $(BOOK).nbpub.log
