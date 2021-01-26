@@ -298,11 +298,10 @@ def jsquiz(question, options, correct_answer, globals,
         correct_ans = correct_ans | (1 << int(elem))
 
     quiz_id = uuid.uuid1()
-    answers = 'answers_' + str(quiz_id).replace('-', '')
 
     script = '''
     <script>
-    var {answers} = 0;
+    var bad_answers = new Map();
 
     function answer(quiz_id) {
         ans = 0;
@@ -340,8 +339,14 @@ def jsquiz(question, options, correct_answer, globals,
         {
             document.getElementById(quiz_id + "-submit").value = "Try again";
             
-            {answers}++;
-            if ({answers} >= 2 && hint.length > 0) {
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
                 document.getElementById(quiz_id + "-hint").innerHTML = 
                     "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
             }
@@ -366,8 +371,6 @@ def jsquiz(question, options, correct_answer, globals,
     }
     </script>
     '''
-    
-    script = script.replace('{answers}', answers)
     
     if multiple_choice:
         input_type = "checkbox"
