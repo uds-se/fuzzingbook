@@ -1,11 +1,14 @@
 # Bookutils
 
 # Define the contents of this file as a package
-__all__ = ["PrettyTable", "YouTubeVideo",
-           "print_file", "print_content", "HTML",
-           "show_ast",
-           "unicode_escape", "terminal_escape", 
-           "inheritance_conflicts", "extract_class_definition", "quiz"]
+__all__ = [
+    "PrettyTable", "YouTubeVideo",
+    "print_file", "print_content", "HTML",
+    "show_ast", "input", "next_inputs"
+    "unicode_escape", "terminal_escape", 
+    "inheritance_conflicts", "extract_class_definition",
+    "quiz"
+]
 
 # Setup loader such that workbooks can be imported directly
 try:
