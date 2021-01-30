@@ -329,6 +329,11 @@ def add_links_to_imports(contents, html_file):
         elif module.startswith(project):
             # Point to notebook
             link = module[module.find('.') + 1:] + '.html'
+        elif (module.startswith('debuggingbook') or
+              module.startswith('fuzzingbook')):
+            base = module[:module.find('.')]
+            submodule = module[module.find('.') + 1:]
+            link = f"https://www.{base}.org/html/{submodule}.html"
         elif module in ['astor', 'pydriller', 'ipywidgets', 'graphviz']:
             link = f'https://{module}.readthedocs.io/'
         elif module in ['enforce', 'showast']:
@@ -367,7 +372,7 @@ def add_links_to_imports(contents, html_file):
                     # We get this when accessing readthedocs.io
                     pass
                 else:
-                    print(f"{html_file}: Missing link for {repr(module)}: {exc}",
+                    print(f"{html_file}: Cannot find link {link} for {repr(module)}: {exc}",
                           file=sys.stderr)
                     link = None
 
