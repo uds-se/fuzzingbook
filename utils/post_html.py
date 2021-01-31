@@ -329,6 +329,8 @@ def add_links_to_imports(contents, html_file):
         elif module.startswith(project):
             # Point to notebook
             link = module[module.find('.') + 1:] + '.html'
+        elif module in ['debuggingbook', 'fuzzingbook']:
+            link = f"https://www.{module}.org/"
         elif (module.startswith('debuggingbook') or
               module.startswith('fuzzingbook')):
             base = module[:module.find('.')]
@@ -367,7 +369,7 @@ def add_links_to_imports(contents, html_file):
             # Check whether link exists
             try:
                 urllib.request.urlopen(link)
-            except urllib.request.HTTPError as exc:
+            except urllib.error.HTTPError as exc:
                 if exc.code == 403:
                     # We get this when accessing readthedocs.io
                     pass
@@ -375,6 +377,10 @@ def add_links_to_imports(contents, html_file):
                     print(f"{html_file}: Cannot find link {link} for {repr(module)}: {exc}",
                           file=sys.stderr)
                     link = None
+            except urllib.error.URLError as exc:
+                print(f"{html_file}: Cannot open {link} for {repr(module)}: {exc}",
+                          file=sys.stderr)
+                link = None
 
         if link:
             contents = contents.replace(r'<span class="nn">' + module + r'</span>',
