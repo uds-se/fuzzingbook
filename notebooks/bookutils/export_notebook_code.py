@@ -2,6 +2,7 @@
 
 import io, os, sys, types, re
 import datetime
+from typing import Dict
 
 # from IPython import get_ipython
 # from IPython.core.interactiveshell import InteractiveShell
@@ -125,14 +126,15 @@ def fix_imports(code):
                   r'from .\1', code, flags=re.MULTILINE)
 
     code = re.sub(r"^import *([A-Z].*|bookutils.*)$",
-                  r'# import \1', code, flags=re.MULTILINE)
+                  r'from . import \1', code, flags=re.MULTILINE)
 
     return code
     
-class_renamings = {}
+class_renamings: Dict[str, int] = {}
 
-RE_SUBCLASS_SELF = re.compile(r'class ([A-Z].*)\(\1\):')
-def fix_extend_class(code):
+RE_SUBCLASS_SELF = re.compile(r'class ([A-Z].*)\(\1')
+def fix_subclass_self(code):
+    
     match = RE_SUBCLASS_SELF.search(code)
     if match:
         class_name = match.group(1)
@@ -145,19 +147,24 @@ def fix_extend_class(code):
             
         new_class_name = f'{class_name}_{class_renamings[class_name]}'
             
-        code = code.replace(f'class {class_name}({class_name}):',
-                            f'class {new_class_name}({old_class_name}):')
-        code += f'\n\n{class_name} = {new_class_name}  # type: ignore'
-    else:
-        for class_name in class_renamings:
-            new_class_name = f'{class_name}_{class_renamings[class_name]}'
-            code = re.sub(fr"\b{class_name}\b", new_class_name,
-                          code, flags=re.MULTILINE)
-            
+        code = code.replace(f'class {class_name}({class_name}',
+                            f'class __NEW_CLASS__(__OLD_CLASS__')
+        code += f'\n\n__CLASS__ = __NEW_CLASS__  # type: ignore'
+
+    # for cls_name in class_renamings:
+    #     new_cls_name = f'{cls_name}_{class_renamings[cls_name]}'
+    #     code = re.sub(fr"\b{cls_name}\b", new_cls_name,
+    #                   code, flags=re.MULTILINE)
+
+    if match:
+        code = code.replace('__NEW_CLASS__', new_class_name)
+        code = code.replace('__OLD_CLASS__', old_class_name)
+        code = code.replace('__CLASS__', class_name)
+
     return code
     
 def fix_code(code):
-    return fix_extend_class(code)
+    return fix_subclass_self(code)
 
 def first_line(text):
     index = text.find('\n')
