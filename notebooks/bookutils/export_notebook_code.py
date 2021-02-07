@@ -27,7 +27,7 @@ RE_COMMENTS = re.compile(r'^#.*$', re.MULTILINE)
 HEADER = """#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "{title}".
+# This material is part of "{booktitle}".
 # Web site: https://www.{project}.org/html/{module}.html
 # Last change: {timestamp}
 #
@@ -53,6 +53,24 @@ HEADER = """#!/usr/bin/env python3
 # CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+# This file is generated automatically.
+# It can be executed as a script, running all experiments:
+#
+#     $ python {module}.py
+#
+# or imported as a package, providing classes, functions, and constants:
+#
+#     >>> import {project}.{module}
+#
+# For details, source, and documentation, see "{booktitle}" chapter at 
+# https://www.{project}.org/html/{module}.html
+
+
+# Allow to use 'from . import <module>' when run as script (see PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = '{project}'
 
 """
 
@@ -91,7 +109,6 @@ def indent_code(code):
     lines = prefix_code(code, "    ")
     return re.sub(RE_BLANK_LINES, '', lines)
 
-
 def fix_imports(code):
     # For proper packaging, we must import our modules from the local dir
     # Our modules all start with an upper-case letter
@@ -105,17 +122,11 @@ def fix_imports(code):
         return code
 
     code = re.sub(r"^from *([A-Z].*|bookutils.*)$",
-r'''if __package__:
-    from .\1
-else:
-    from \1
+r'''from .\1
 ''', code, flags=re.MULTILINE)
 
     code = re.sub(r"^import *([A-Z].*|bookutils.*)$",
-r'''if __package__:
-    from . import \1
-else:
-    import \1
+r'''from . import \1
 ''', code, flags=re.MULTILINE)
 
     return code
@@ -133,20 +144,25 @@ def print_utf8(s):
 def decode_title(s):
     # We have non-breaking spaces in some titles
     return s.replace('\xa0', ' ')
+    
+def split_title(s):
+    """Split a title into hashes and text"""
+    list = s.split(' ', 1)
+    return list[0], list[1]
 
 def print_if_main(code):
     # Run code only if run as main file
-    print_utf8('\nif __name__ == "__main__":\n')
+    print_utf8("\nif __name__ == '__main__':\n")
     print_utf8(indent_code(code) + "\n\n")
-
+    
 def export_notebook_code(notebook_name, project="fuzzingbook", path=None):
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
     notebook_path = notebook_name
 
     if project == "debuggingbook":
-        title = "The Debugging Book"
+        booktitle = "The Debugging Book"
     else:
-        title = "The Fuzzing Book"
+        booktitle = "The Fuzzing Book"
 
     # load the notebook
     with io.open(notebook_path, 'r', encoding='utf-8') as f:
@@ -163,7 +179,7 @@ def export_notebook_code(notebook_name, project="fuzzingbook", path=None):
     header = HEADER.format(module=module, 
                            timestamp=timestamp,
                            project=project,
-                           title=title)
+                           booktitle=booktitle)
     print_utf8(header)
     sep = ''
 
@@ -215,15 +231,22 @@ def export_notebook_code(notebook_name, project="fuzzingbook", path=None):
             if contents.startswith('#'):
                 # Header
                 line = first_line(contents)
-                print_utf8("\n" + prefix_code(decode_title(line), "# ") + "\n")
-                print_if_main("print(" + repr(sep + decode_title(line)) + ")\n\n")
+                decoded_title = decode_title(line)
+                hashes, text = split_title(decoded_title)
+                underline = '=' if hashes == '#' else '-'
+                print_utf8("\n")
+                print_utf8(prefix_code(decoded_title, "") + "\n")
+                if len(hashes) <= 2:
+                    print_utf8('#' * len(hashes) + ' ' + 
+                               underline * len(text) + '\n')
+                print_if_main("print(" + repr(sep + decoded_title) + ")\n\n")
                 sep = '\n'
             else:
                 # We don't include contents, as they fall under a different license
                 # print_utf8("\n" + prefix_code(contents, "# ") + "\n")
                 pass
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     args = sys.argv
     project = 'fuzzingbook'
 

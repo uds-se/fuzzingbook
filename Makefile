@@ -773,10 +773,10 @@ check-import check-imports: test-imports
 	@echo "All import checks passed."
 
 $(IMPORTS_OUT): $(PYS)
-	@echo "#!/usr/bin/env $(PYTHON)" > $(CODE_TARGET)import_all.py
-	@(for file in $(IMPORTS); do echo import $$file; done) | grep -v '^import [0-9][0-9]' >> $(CODE_TARGET)import_all.py
-	(cd $(CODE_TARGET); $(PYTHON) import_all.py 2>&1) | tee $@
-	@$(RM) $(CODE_TARGET)import_all.py
+	@echo "#!/usr/bin/env $(PYTHON)" > import_all.py
+	@(for file in $(IMPORTS); do echo import code.$$file; done) | grep -v '^.*[0-9][0-9]_.*' >> import_all.py
+	$(PYTHON) import_all.py 2>&1 | tee $@
+	@$(RM) import_all.py
 	@test ! -s $@
 	
 # Same as above, but using Python standard packages only; import should work too
