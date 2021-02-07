@@ -799,9 +799,9 @@ $(PACKAGES_OUT): $(PYS)
 
 
 # Static checks (in progess)
-MYPY = mypy --config-file mypy.ini
+MYPY = mypy --allow-redefinition
 check-types: code
-	$(MYPY) --config-file $(CODE_TARGET)mypy.ini $(NOTEBOOKS)/bookutils $(CODE_TARGET)/[A-Z]*.py
+	$(MYPY) --config-file $(CODE_TARGET)mypy.ini $(NOTEBOOKS)/bookutils $(CHAPTER_PYS)
 
 
 .PHONY: run
