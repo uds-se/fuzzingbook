@@ -121,15 +121,23 @@ def fix_imports(code):
         # FuzzManager imports
         return code
 
-    code = re.sub(r"^from *([A-Z].*|bookutils.*)$",
-r'''from .\1
-''', code, flags=re.MULTILINE)
+    code = re.sub(r"^from *([A-Z].*|bookutils.*)$", 
+                  r'from .\1', code, flags=re.MULTILINE)
 
     code = re.sub(r"^import *([A-Z].*|bookutils.*)$",
-r'''from . import \1
-''', code, flags=re.MULTILINE)
+                  r'# import \1', code, flags=re.MULTILINE)
 
     return code
+
+RE_EXTEND_CLASS = r'(class ([A-Z].*)\(\2\)):'
+def fix_extend_class(code):
+    code = re.sub(RE_EXTEND_CLASS, 
+                  r'\1  # type: ignore',
+                  code, flags=re.MULTILINE)
+    return code
+    
+def fix_code(code):
+    return fix_extend_class(code)
 
 def first_line(text):
     index = text.find('\n')
@@ -207,6 +215,7 @@ def export_notebook_code(notebook_name, project="fuzzingbook", path=None):
                 # Don't import all of bookutils (requires nbformat & Ipython)
                 print_if_main(SET_FIXED_SEED)
             elif RE_IMPORT_IF_MAIN.match(code):
+                code = fix_imports(code)
                 print_if_main(code)
             elif RE_FROM_BOOKUTILS.match(code):
                 # This would be "from bookutils import HTML"
@@ -217,13 +226,16 @@ def export_notebook_code(notebook_name, project="fuzzingbook", path=None):
                 # Code to ignore - comment out
                 print_utf8("\n" + prefix_code(code, "# ") + "\n")
             elif RE_CODE.match(code) and not bang:
-                # imports and defs
+                # imports, classes, and defs
                 code = fix_imports(code)
+                code = fix_code(code)
                 print_utf8("\n" + code + "\n")
             elif is_all_comments(code):
                 # Only comments
                 print_utf8("\n" + code + "\n")
             else:
+                # Regular code
+                code = fix_code(code)
                 print_if_main(code)
         else:
             # Anything else
