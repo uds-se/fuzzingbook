@@ -800,8 +800,8 @@ $(PACKAGES_OUT): $(PYS)
 
 # Static checks (in progess)
 MYPY = mypy --config-file mypy.ini
-check-types:
-	cd $(CODE_TARGET); $(MYPY) --config-file mypy.ini bookutils
+check-types: code
+	$(MYPY) --config-file $(CODE_TARGET)mypy.ini $(NOTEBOOKS)/bookutils $(CODE_TARGET)/[A-Z]*.py
 
 
 .PHONY: run
