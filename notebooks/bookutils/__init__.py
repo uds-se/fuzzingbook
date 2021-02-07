@@ -1,5 +1,8 @@
 # Bookutils
 
+from typing import Any, Dict, List, Set, Optional, Union, Tuple, Type
+
+
 # Define the contents of this file as a package
 __all__ = [
     "PrettyTable", "YouTubeVideo",
@@ -7,7 +10,7 @@ __all__ = [
     "show_ast", "input", "next_inputs"
     "unicode_escape", "terminal_escape", 
     "inheritance_conflicts", "extract_class_definition",
-    "quiz"
+    "quiz", "import_notebooks", "set_fixed_seed"
 ]
 
 # Setup loader such that workbooks can be imported directly
@@ -18,7 +21,7 @@ except:
     have_ipython = False
 
 if have_ipython:
-    from . import import_notebooks
+    from . import import_notebooks  # type: ignore
     
 # Set fixed seed
 from . import set_fixed_seed
@@ -26,13 +29,8 @@ set_fixed_seed.set_fixed_seed()
 
 
 # Check for rich output
-try:
-    _rich_output = get_ipython().__class__.__name__
-except NameError:
-    _rich_output = False
-
-def rich_output():
-    return _rich_output
+def rich_output() -> bool:
+    return 'get_ipython' in globals()
 
 
 # Wrapper for YouTubeVideo
@@ -52,54 +50,25 @@ def YouTubeVideo(id, width=640, height=360):
 # Multiple inheritance is a tricky thing.  If you have two classes $A'$ and $A''$ which both inherit from $A$, the same method $m()$ of $A$ may be overloaded in both $A'$ and $A''$.  If one now inherits from _both_ $A'$ and $A''$, and calls $m()$, which of the $m()$ implementations should be called?  Python "resolves" this conflict by simply invoking the one $m()$ method in the class one inherits from first.
 # To avoid such conflicts, one can check whether the order in which one inherits makes a difference.  So try this method to compare the attributes with each other; if they refer to different code, you have to resolve the conflict.
 
-from inspect import getattr_static, getsource
+from inspect import getattr_static
 
-def inheritance_conflicts(c1, c2):
+def inheritance_conflicts(c1: Type[object], c2: Type[object]) -> List[str]:
     """Return attributes defined differently in classes c1 and c2"""
-    class c1c2(c1, c2):
+    class c1c2(c1, c2):  # type: ignore
         pass
 
-    class c2c1(c2, c1):
+    class c2c1(c2, c1):  # type: ignore
         pass
 
     return [attr for attr in dir(c1c2) if getattr_static(
         c1c2, attr) != getattr_static(c2c1, attr)]
 
-
-# Given a class, extract the final definitions of all methods defined so far.
-
-def extract_class_definition(cls, log=False):
-    eldest = [c for c in cls.mro()
-                if c.__name__ == cls.__name__ and
-                   cls.__name__ not in {i.__name__ for i in c.__bases__}]
-    n_parents = sum([[j.__name__ for j in i.__bases__] for i in eldest], [])
-    s_parents = '(%s)' % ', '.join(set(n_parents)) if n_parents else ''
-    buf = ["class %s%s:" % (cls.__name__, s_parents)]
-    seen = set()
-    i = 0
-    for curcls in cls.mro():
-        i += 1
-        if log: print('Parent: %d' % i, curcls.__name__)
-        if curcls.__name__ != cls.__name__: continue
-        for fn_name in dir(curcls):
-            if log: print('\t:', fn_name)
-            if fn_name in seen: continue
-            if fn_name == '__new__':
-                continue
-            fn = curcls.__dict__.get(fn_name)
-            if fn is None:
-                continue
-            if ('function' in str(type(fn))):
-                seen.add(fn_name)
-                buf.append(getsource(fn))
-    return '\n'.join(buf)
-
 # Printing files with syntax highlighting
-def print_file(filename, **kwargs):
+def print_file(filename: str, **kwargs) -> None:
     content = open(filename, "rb").read().decode('utf-8')
     print_content(content, filename, **kwargs)
 
-def print_content(content, filename=None, lexer=None, start_line_number=None):
+def print_content(content: str, filename: Optional[str] = None, lexer: Optional[Any] = None, start_line_number: Optional[int] = None) -> None:
     from pygments import highlight, lexers, formatters
     from pygments.lexers import get_lexer_for_filename, guess_lexer
 
@@ -126,7 +95,7 @@ def print_content(content, filename=None, lexer=None, start_line_number=None):
         content_with_line_no = '\n'.join(content_list)
         print(content_with_line_no, end="")
 
-def getsourcelines(function):
+def getsourcelines(function: Any) -> Tuple[List[str], int]:
     """A replacement for inspect.getsourcelines(), but with syntax highlighting"""
     import inspect
     
@@ -146,17 +115,20 @@ def getsourcelines(function):
     content = colorful_content.strip()
     return [line + '\n' for line in content.split('\n')], starting_line_number
 
+from ast import AST
+
 # Showing ASTs
-def show_ast(tree):
+def show_ast(tree: AST) -> Optional[Any]:
     if rich_output():
         import showast  # We can import showast only when in a notebook
         return showast.show_ast(tree)
     else:
-        import ast  # Textual alternative
+        import ast  # Textual alternative111
         print(ast.dump(tree))
+        return None
 
 # Escaping unicode characters into ASCII for user-facing strings
-def unicode_escape(s, error="backslashreplace"):
+def unicode_escape(s: str, error="backslashreplace") -> str:
     def ascii_chr(byte):
         if 0 <= byte <= 127:
             return chr(byte)
@@ -166,7 +138,7 @@ def unicode_escape(s, error="backslashreplace"):
     return "".join(map(ascii_chr, bytes))
 
 # Same, but escaping unicode only if output is not a terminal
-def terminal_escape(s):
+def terminal_escape(s: str) -> str:
     if rich_output():
         return s
     return unicode_escape(s)
@@ -179,7 +151,13 @@ def terminal_escape(s):
 import os
 firefox = None
 
-def HTML(data=None, url=None, filename=None, png=False, headless=True, zoom=2.0):
+def HTML(data: Optional[str] = None, 
+         url: Optional[str] = None, 
+         filename: Optional[str] = None, 
+         png: bool = False,
+         headless: bool = True,
+         zoom: float = 2.0):
+
     if not png and not 'RENDER_HTML' in os.environ:
         # Standard behavior
         import IPython.core.display
@@ -229,7 +207,7 @@ import uuid
 import markdown
 import html
 
-def quiztext(text):
+def quiztext(text: Union[str, object]) -> str:
     if not isinstance(text, str):
         text = str(text)
     md_text = markdown.markdown(text)
@@ -241,7 +219,9 @@ def quiztext(text):
 
 # Widget quizzes. No support for multiple-choice quizzes.
 # Currently unused in favor of jsquiz(), below.
-def nbquiz(question, options, correct_answer, globals, title='Quiz', debug=False):
+def nbquiz(question: str, options: List[str], correct_answer: int, 
+    globals: Optional[Dict[str, Any]], 
+    title: str = 'Quiz', debug: bool = False)-> object:
     import ipywidgets as widgets
 
     if isinstance(correct_answer, str):
@@ -278,19 +258,27 @@ def nbquiz(question, options, correct_answer, globals, title='Quiz', debug=False
     return widgets.VBox([title_out, alternatives, check])
 
 # JavaScript quizzes.
-def jsquiz(question, options, correct_answer, globals, 
-           title='Quiz', debug=True):
+def jsquiz(question: str, 
+           options: List[str], 
+           correct_answer: Union[str, int, List[int], Set[int]], 
+           globals: Dict[str, Any], 
+           title='Quiz', 
+           debug=True) -> IPython.core.display.HTML:
+
     hint = ""
     if isinstance(correct_answer, str):
         hint = correct_answer
         correct_answer = eval(correct_answer, globals)
 
+    answer_list: List[int] = []
     if isinstance(correct_answer, list) or isinstance(correct_answer, set):
         answer_list = list(correct_answer)
         multiple_choice = True
-    else:
+    elif isinstance(correct_answer, int):
         answer_list = [correct_answer]
         multiple_choice = False
+    else:
+        raise TypeError("Expected string, int, [int...], or {int...}")
 
     # Encode answer into binary
     correct_ans = 0
@@ -406,7 +394,12 @@ def jsquiz(question, options, correct_answer, globals,
     return HTML(html_fragment)
 
 # HTML quizzes. Not interactive.
-def htmlquiz(question, options, correct_answer, title='Quiz'):
+def htmlquiz(question: str, 
+             options: List[str], 
+             correct_answer: Any, 
+             globals: Optional[Dict[str, Any]] = None,
+             title: str = 'Quiz') -> IPython.core.display.HTML:
+    
     menu = "".join(f'''
     <li> {quiztext(option)} </li>
     ''' for (i, option) in enumerate(options))
@@ -422,7 +415,7 @@ def htmlquiz(question, options, correct_answer, title='Quiz'):
     return HTML(html)
 
 # Text quizzes. Not interactive.
-def textquiz(question, options, correct_answer, title='Quiz'):
+def textquiz(question: str, options: List[str], correct_answer: Any, globals: Optional[Dict[str, Any]] = None, title: str = 'Quiz') -> None:
     menu = "".join(f'''
     {i}. {option}''' for (i, option) in enumerate(options))
     
@@ -434,7 +427,9 @@ def textquiz(question, options, correct_answer, title='Quiz'):
     print(text)
 
 # Entry point for all of the above.
-def quiz(question, options, correct_answer, globals=None, **kwargs):
+def quiz(question: str, options: List[str], 
+         correct_answer: Union[str, int, List[int]],
+         globals: Optional[Dict[str, Any]] = None, **kwargs) -> Any:
     """Display a quiz. 
     `question` is a question string to be asked.
     `options` is a list of strings with possible answers.
@@ -461,11 +456,11 @@ def quiz(question, options, correct_answer, globals=None, **kwargs):
 
 # Interactive inputs. We simulate them by assigning to the global variable INPUTS.
 
-INPUTS = []
+INPUTS: List[str] = []
 
 original_input = input
 
-def input(prompt):
+def input(prompt: str) -> str:
     given_input = None
     try:
         global INPUTS
@@ -476,6 +471,7 @@ def input(prompt):
     
     if given_input:
         if rich_output():
+            from IPython.display import display
             display(HTML(f"<samp>{prompt}<b>{given_input}</b></samp>"))
         else:
             print(f"{prompt} {given_input}")
@@ -483,7 +479,7 @@ def input(prompt):
     
     return original_input(prompt)
     
-def next_inputs(list=[]):
+def next_inputs(list: List[str] = []) -> List[str]:
     global INPUTS
     INPUTS += list
     return INPUTS
@@ -491,6 +487,6 @@ def next_inputs(list=[]):
 # Make sure we quit Firefox when done
 import atexit
 @atexit.register
-def quit_webdriver():
+def quit_webdriver() -> None:
     if firefox is not None:
         firefox.quit()
