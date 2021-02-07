@@ -7,7 +7,7 @@ import datetime
 # from IPython.core.interactiveshell import InteractiveShell
 
 import nbformat
-from import_notebooks import RE_CODE
+from import_notebooks import RE_CODE  # type: ignore
 
 # Things to ignore in exported Python code
 RE_IGNORE = re.compile(r'^get_ipython().*|^%.*')
@@ -105,17 +105,17 @@ def fix_imports(code):
         return code
 
     code = re.sub(r"^from *([A-Z].*|bookutils.*)$",
-r'''if __package__ is None or __package__ == "":
-    from \1
-else:
+r'''if __package__:
     from .\1
+else:
+    from \1
 ''', code, flags=re.MULTILINE)
 
     code = re.sub(r"^import *([A-Z].*|bookutils.*)$",
-r'''if __package__ is None or __package__ == "":
-    import \1
-else:
+r'''if __package__:
     from . import \1
+else:
+    import \1
 ''', code, flags=re.MULTILINE)
 
     return code
