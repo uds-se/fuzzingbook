@@ -274,11 +274,11 @@ def jsquiz(question: str,
     if isinstance(correct_answer, list) or isinstance(correct_answer, set):
         answer_list = list(correct_answer)
         multiple_choice = True
-    elif isinstance(correct_answer, int):
-        answer_list = [correct_answer]
+    elif isinstance(correct_answer, int) or isinstance(correct_answer, float):
+        answer_list = [int(correct_answer)]
         multiple_choice = False
     else:
-        raise TypeError("Expected string, int, [int...], or {int...}")
+        raise TypeError("correct_answer must be list, set, int, or float")
 
     # Encode answer into binary
     correct_ans = 0
