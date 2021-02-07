@@ -8,6 +8,8 @@ import io, os, sys, types, re
 from IPython import get_ipython
 from nbformat import read
 from IPython.core.interactiveshell import InteractiveShell
+from importlib.abc import MetaPathFinder
+
 import linecache
 import ast
 
@@ -108,7 +110,7 @@ class NotebookLoader(object):
                                     fullname)
         return mod
 
-class NotebookFinder(object):
+class NotebookFinder(MetaPathFinder):
     """Module finder that locates Jupyter Notebooks"""
     def __init__(self):
         self.loaders = {}
