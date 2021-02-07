@@ -798,6 +798,12 @@ $(PACKAGES_OUT): $(PYS)
 	@test ! -s $@
 
 
+# Static checks (in progess)
+MYPY = mypy --config-file mypy.ini
+check-types:
+	cd $(CODE_TARGET); $(MYPY) --config-file mypy.ini bookutils
+
+
 .PHONY: run
 run: check-imports check-standard-imports check-package check-code
 
