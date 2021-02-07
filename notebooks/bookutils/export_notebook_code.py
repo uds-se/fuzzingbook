@@ -128,12 +128,32 @@ def fix_imports(code):
                   r'# import \1', code, flags=re.MULTILINE)
 
     return code
+    
+class_renamings = {}
 
-RE_EXTEND_CLASS = r'(class ([A-Z].*)\(\2\)):'
+RE_SUBCLASS_SELF = re.compile(r'class ([A-Z].*)\(\1\):')
 def fix_extend_class(code):
-    code = re.sub(RE_EXTEND_CLASS, 
-                  r'\1  # type: ignore',
-                  code, flags=re.MULTILINE)
+    match = RE_SUBCLASS_SELF.search(code)
+    if match:
+        class_name = match.group(1)
+        if class_name in class_renamings:
+            old_class_name = f'{class_name}_{class_renamings[class_name]}'
+            class_renamings[class_name] += 1
+        else:
+            old_class_name = class_name
+            class_renamings[class_name] = 1
+            
+        new_class_name = f'{class_name}_{class_renamings[class_name]}'
+            
+        code = code.replace(f'class {class_name}({class_name}):',
+                            f'class {new_class_name}({old_class_name}):')
+        code += f'\n\n{class_name} = {new_class_name}  # type: ignore'
+    else:
+        for class_name in class_renamings:
+            new_class_name = f'{class_name}_{class_renamings[class_name]}'
+            code = re.sub(fr"\b{class_name}\b", new_class_name,
+                          code, flags=re.MULTILINE)
+            
     return code
     
 def fix_code(code):
@@ -148,7 +168,7 @@ def first_line(text):
 
 def print_utf8(s):
     sys.stdout.buffer.write(s.encode('utf-8'))
-    
+
 def decode_title(s):
     # We have non-breaking spaces in some titles
     return s.replace('\xa0', ' ')
