@@ -4,6 +4,8 @@ import io, os, sys, types, re
 import datetime
 from typing import Dict
 
+from bs4 import BeautifulSoup
+
 
 # from IPython import get_ipython
 # from IPython.core.interactiveshell import InteractiveShell
@@ -61,13 +63,18 @@ HEADER = """#!/usr/bin/env python3
 r'''
 {booktitle} - {title}
 
-This file can be executed as a script, running all experiments:
+This file can be _executed_ as a script, running all experiments:
 
     $ python {module}.py
 
-or imported as a package, providing classes, functions, and constants:
+or _imported_ as a package, providing classes, functions, and constants:
 
     >>> from {project}.{module} import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.{project}.org/html/{module}.html
+
 {synopsis}
 For more details, source, and documentation, see
 "{booktitle} - {title}"
@@ -93,6 +100,7 @@ def fix_synopsis(s):
     s = s.replace('```', '')
     s = s[s.find(".\n\n") + 3:]
     s = re.sub(RE_PIC, '\n', s, flags=re.MULTILINE)
+    s = BeautifulSoup(s, "lxml").text
     return s
 
 def is_all_comments(code):
