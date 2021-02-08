@@ -589,13 +589,14 @@ $(CODE_TARGET)setup.py: $(CODE_TARGET)setup.py.in
 	cat $< > $@
 	chmod +x $@
 
-$(CODE_TARGET)__init__.py: $(CODE_TARGET)__init__.py.in
+$(CODE_TARGET)__init__.py: $(CODE_TARGET)__init__.py.in $(CHAPTERS_MAKEFILE)
 	cat $< > $@
+	(for module in $(IMPORTS); do echo from . import $$module; done) | grep -v '^.*[0-9][0-9]_.*' >> $@
 	chmod +x $@
 
 # For code, we comment out fuzzingbook/debuggingbook imports, 
 # ensuring we import a .py and not the .ipynb file
-$(CODE_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
+$(CODE_TARGET)%.py: $(FULL_NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 	@test -d $(CODE_TARGET) || $(MKDIR) $(CODE_TARGET)
 	$(CONVERT_TO_PYTHON) --project $(PROJECT) $< > $@~ && mv $@~ $@
 	# $(AUTOPEP8) $(AUTOPEP8_OPTIONS) $@
@@ -781,7 +782,7 @@ check-import check-imports: test-imports
 
 $(IMPORTS_OUT): $(PYS)
 	@echo "#!/usr/bin/env $(PYTHON)" > import_all.py
-	@(for file in $(IMPORTS); do echo import code.$$file; done) | grep -v '^.*[0-9][0-9]_.*' >> import_all.py
+	@(for module in $(IMPORTS); do echo import code.$$module; done) | grep -v '^.*[0-9][0-9]_.*' >> import_all.py
 	$(PYTHON) import_all.py 2>&1 | tee $@
 	@$(RM) import_all.py
 	@test ! -s $@
@@ -799,7 +800,7 @@ check-package check-packages: test-packages
 
 $(PACKAGES_OUT): $(PYS)
 	@echo "#!/usr/bin/env $(PYTHON)" > import_packages.py
-	@(for file in $(IMPORTS); do echo import code.$$file; done) | grep -v '^import code.[0-9][0-9]' >> import_packages.py
+	@(for module in $(IMPORTS); do echo import code.$$module; done) | grep -v '^import code.[0-9][0-9]' >> import_packages.py
 	$(PYTHON) import_packages.py 2>&1 | tee $@
 	@$(RM) import_packages.py
 	@test ! -s $@
@@ -808,8 +809,15 @@ $(PACKAGES_OUT): $(PYS)
 # Static checks (in progess)
 MYPY = mypy 
 check-types: $(MYPYS)
-	$(MYPY) --config-file $(MYPY_TARGET)mypy.ini $(NOTEBOOKS)/bookutils $(MYPYS)
-
+	$(MYPY) --config-file $(MYPY_TARGET)mypy.ini $(NOTEBOOKS)/$(UTILS) $(MYPYS)
+	
+# Monkey typing (in progress)
+MONKEYTYPE = monkeytype
+monkeytype: $(CHAPTER_PYS)
+	for py in $(CHAPTER_PYS); do \
+		echo $$py; \
+		$(MONKEYTYPE) run $$py; \
+	done
 
 .PHONY: run
 run: check-imports check-standard-imports check-package check-code
@@ -952,6 +960,7 @@ $(DOCS_TARGET)dist/$(PROJECT)-code.zip: \
 	mv $(DOCS_TARGET)$(PROJECT)/$(PROJECT)/README.md $(DOCS_TARGET)$(PROJECT)
 	cd $(DOCS_TARGET)$(PROJECT); PYTHONPATH= $(PYTHON) ./setup.py sdist
 	mv $(DOCS_TARGET)$(PROJECT)/dist/* $(DOCS_TARGET)dist
+	# mv $(DOCS_TARGET)$(PROJECT)/*.egg-info $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)$(PROJECT)/*.egg-info
 	$(RM) -r $(DOCS_TARGET)$(PROJECT)/dist $(DOCS_TARGET)$(PROJECT)/build
 	cd $(DOCS_TARGET); $(ZIP) $(ZIP_OPTIONS) $(PROJECT)-code.zip $(PROJECT)

@@ -4,6 +4,7 @@ import io, os, sys, types, re
 import datetime
 from typing import Dict
 
+
 # from IPython import get_ipython
 # from IPython.core.interactiveshell import InteractiveShell
 
@@ -31,10 +32,9 @@ RE_COMMENTS = re.compile(r'^#.*$', re.MULTILINE)
 HEADER = """#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "{booktitle}".
+# "{title}" - a chapter of "{booktitle}"
 # Web site: https://www.{project}.org/html/{module}.html
 # Last change: {timestamp}
-#
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -58,21 +58,24 @@ HEADER = """#!/usr/bin/env python3
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+'''
+{booktitle} - {title}
 
-# This file is generated automatically.
-# It can be executed as a script, running all experiments:
-#
-#     $ python {module}.py
-#
-# or imported as a package, providing classes, functions, and constants:
-#
-#     >>> import {project}.{module}
-#
-# For details, source, and documentation, see "{booktitle}" chapter at 
-# https://www.{project}.org/html/{module}.html
+This file can be executed as a script, running all experiments:
+
+    $ python {module}.py
+
+or imported as a package, providing classes, functions, and constants:
+
+    >>> from {project}.{module} import <identifier>
+{synopsis}
+For more details, source, and documentation, see
+"{booktitle} - {title}"
+at https://www.{project}.org/html/{module}.html
+'''
 
 
-# Allow to use 'from . import <module>' when run as script (see PEP 366)
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
 if __name__ == '__main__' and __package__ is None:
     __package__ = '{project}'
 
@@ -82,6 +85,15 @@ if __name__ == '__main__' and __package__ is None:
 SET_FIXED_SEED = r"""# We use the same fixed seed as the notebook to ensure consistency
 import random
 random.seed(2001)"""
+
+RE_PIC = r'(\n)+![[].*(\n)+'
+
+def fix_synopsis(s):
+    s = s.replace('```python\n', '')
+    s = s.replace('```', '')
+    s = s[s.find(".\n\n") + 3:]
+    s = re.sub(RE_PIC, '\n', s, flags=re.MULTILINE)
+    return s
 
 def is_all_comments(code):
     executable_code = re.sub(RE_COMMENTS, '', code).strip()
@@ -196,14 +208,43 @@ def split_title(s):
 def print_if_main(code):
     # Run code only if run as main file
     if mypy:
-        print_utf8(code + '\n\n')
+        print_utf8(code + '\n')
     else:
         print_utf8("\nif __name__ == '__main__':\n")
-        print_utf8(indent_code(code) + "\n\n")
+        print_utf8(indent_code(code) + "\n")
+        
+def get_notebook_synopsis(notebook_name, path=None):
+    notebook_path = notebook_name
+
+    title = None
+    synopsis = ""
+
+    # load the notebook
+    with io.open(notebook_path, 'r', encoding='utf-8') as f:
+        notebook = nbformat.read(f, 4)
+    
+    for cell in notebook.cells:
+        if cell.cell_type != 'markdown':
+            continue
+
+        contents = cell.source
+        if not title and contents.startswith('# '):
+            lines = contents.splitlines()
+            _, title = split_title(lines[0])
+
+        if not synopsis and contents.startswith('## Synopsis'):
+            synopsis = contents
+            
+        if title and synopsis:
+            break
+            
+    return title, fix_synopsis(synopsis)
     
 def export_notebook_code(notebook_name, project="fuzzingbook", path=None):
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
     notebook_path = notebook_name
+    
+    title, synopsis = get_notebook_synopsis(notebook_name, path)
 
     if project == "debuggingbook":
         booktitle = "The Debugging Book"
@@ -225,7 +266,10 @@ def export_notebook_code(notebook_name, project="fuzzingbook", path=None):
     header = HEADER.format(module=module, 
                            timestamp=timestamp,
                            project=project,
-                           booktitle=booktitle)
+                           booktitle=booktitle,
+                           title=title,
+                           synopsis=synopsis)
+
     print_utf8(header)
     sep = ''
 
