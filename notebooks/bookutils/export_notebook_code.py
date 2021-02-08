@@ -58,7 +58,7 @@ HEADER = """#!/usr/bin/env python3
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-'''
+r'''
 {booktitle} - {title}
 
 This file can be executed as a script, running all experiments:
