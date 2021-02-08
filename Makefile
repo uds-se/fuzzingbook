@@ -56,6 +56,7 @@ NBPDF_TARGET    = nbpdf/
 HTML_TARGET     = html/
 SLIDES_TARGET   = slides/
 CODE_TARGET     = code/
+MYPY_TARGET     = mypy/
 MARKDOWN_TARGET = markdown/
 WORD_TARGET     = word/
 EPUB_TARGET     = epub/
@@ -102,6 +103,7 @@ SLIDES    = $(SOURCE_FILES:%.ipynb=$(SLIDES_TARGET)%.slides.html)
 PYS       = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET)%.py) \
 				$(CODE_TARGET)setup.py \
 				$(CODE_TARGET)__init__.py
+MYPYS     = $(SOURCE_FILES:%.ipynb=$(MYPY_TARGET)%.py)
 WORDS     = $(SOURCE_FILES:%.ipynb=$(WORD_TARGET)%.docx)
 MARKDOWNS = $(SOURCE_FILES:%.ipynb=$(MARKDOWN_TARGET)%.md)
 EPUBS     = $(SOURCE_FILES:%.ipynb=$(EPUB_TARGET)%.epub)
@@ -599,6 +601,11 @@ $(CODE_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 	# $(AUTOPEP8) $(AUTOPEP8_OPTIONS) $@
 	-chmod +x $@
 
+$(MYPY_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
+	@test -d $(MYPY_TARGET) || $(MKDIR) $(MYPY_TARGET)
+	$(CONVERT_TO_PYTHON) --project $(PROJECT) --mypy $< > $@~ && mv $@~ $@
+	# $(AUTOPEP8) $(AUTOPEP8_OPTIONS) $@
+	-chmod +x $@
 
 # Markdown
 $(MARKDOWN_TARGET)%.md:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB)
@@ -799,9 +806,9 @@ $(PACKAGES_OUT): $(PYS)
 
 
 # Static checks (in progess)
-MYPY = mypy --allow-redefinition
-check-types: code
-	$(MYPY) --config-file $(CODE_TARGET)mypy.ini $(NOTEBOOKS)/bookutils $(CHAPTER_PYS)
+MYPY = mypy 
+check-types: $(MYPYS)
+	$(MYPY) --config-file $(MYPY_TARGET)mypy.ini $(NOTEBOOKS)/bookutils $(MYPYS)
 
 
 .PHONY: run

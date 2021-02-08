@@ -10,6 +10,9 @@ from typing import Dict
 import nbformat
 from import_notebooks import RE_CODE  # type: ignore
 
+# If True, create mypy-friendly code
+mypy = False
+
 # Things to ignore in exported Python code
 RE_IGNORE = re.compile(r'^get_ipython().*|^%.*')
 RE_IMPORT_BOOKUTILS = re.compile(r'^import bookutils.*$', re.MULTILINE)
@@ -113,6 +116,9 @@ def indent_code(code):
 def fix_imports(code):
     # For proper packaging, we must import our modules from the local dir
     # Our modules all start with an upper-case letter
+    
+    if mypy:
+        return code
 
     if code.startswith("from IPython"):
         # IPython
@@ -134,7 +140,9 @@ class_renamings: Dict[str, int] = {}
 
 RE_SUBCLASS_SELF = re.compile(r'class ([A-Z].*)\(\1')
 def fix_subclass_self(code):
-    
+    if not mypy:
+        return code
+        
     match = RE_SUBCLASS_SELF.search(code)
     if match:
         class_name = match.group(1)
@@ -151,10 +159,10 @@ def fix_subclass_self(code):
                             f'class __NEW_CLASS__(__OLD_CLASS__')
         code += f'\n\n__CLASS__ = __NEW_CLASS__  # type: ignore'
 
-    # for cls_name in class_renamings:
-    #     new_cls_name = f'{cls_name}_{class_renamings[cls_name]}'
-    #     code = re.sub(fr"\b{cls_name}\b", new_cls_name,
-    #                   code, flags=re.MULTILINE)
+    for cls_name in class_renamings:
+        new_cls_name = f'{cls_name}_{class_renamings[cls_name]}'
+        code = re.sub(fr"\b{cls_name}\b", new_cls_name,
+                      code, flags=re.MULTILINE)
 
     if match:
         code = code.replace('__NEW_CLASS__', new_class_name)
@@ -187,8 +195,11 @@ def split_title(s):
 
 def print_if_main(code):
     # Run code only if run as main file
-    print_utf8("\nif __name__ == '__main__':\n")
-    print_utf8(indent_code(code) + "\n\n")
+    if mypy:
+        print_utf8(code + '\n\n')
+    else:
+        print_utf8("\nif __name__ == '__main__':\n")
+        print_utf8(indent_code(code) + "\n\n")
     
 def export_notebook_code(notebook_name, project="fuzzingbook", path=None):
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
@@ -294,6 +305,12 @@ if __name__ == '__main__':
         args = args[3:]
     else:
         args = args[1:]
-        
+    
+    if len(args) > 1 and args[0] == '--mypy':
+        mypy = True
+        args = args[1:]
+    else:
+        mypy = False
+
     for notebook in args:
         export_notebook_code(notebook, project=project)
