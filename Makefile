@@ -1276,7 +1276,9 @@ $(DEPEND_TARGET)%.makefile: $(NOTEBOOKS)/%.ipynb
 		echo ''; \
 		echo '$$''(RENDERED_NOTEBOOKS)/$(notdir $<):' $$notebooks; \
 		echo ''; \
-		echo '$$''(CODE_TARGET)$(notdir $(<:%.ipynb=.%.py.out)):' $$imports; \
+		echo '$$''(CODE_TARGET).$(notdir $(<:%.ipynb=.%.py.out)):' $$imports; \
+		echo ''; \
+		echo '$$''(MYPY_TARGET).$(notdir $(<:%.ipynb=.%.py.out)):' $$imports; \
 	) > $@
 
 
