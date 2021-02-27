@@ -2,10 +2,9 @@
 
 import io, os, sys, types, re
 import datetime
-from typing import Dict
+from typing import Dict, Optional, List, Any, Tuple
 
 from bs4 import BeautifulSoup  # type: ignore
-
 
 # from IPython import get_ipython
 # from IPython.core.interactiveshell import InteractiveShell
@@ -95,7 +94,7 @@ random.seed(2001)"""
 
 RE_PIC = r'(\n)+![[].*(\n)+'
 
-def fix_synopsis(s):
+def fix_synopsis(s: str) -> str:
     s = s.replace('```python\n', '')
     s = s.replace('```', '')
     s = s[s.find(".\n\n") + 3:]
@@ -103,14 +102,14 @@ def fix_synopsis(s):
     s = BeautifulSoup(s, "lxml").text
     return s
 
-def is_all_comments(code):
+def is_all_comments(code: str) -> bool:
     executable_code = re.sub(RE_COMMENTS, '', code).strip()
     return executable_code == ""
 
-def is_triple_quote(s):
+def is_triple_quote(s: str) -> bool:
     return s == '"""' or s == "'''"
 
-def prefix_code(code, prefix):
+def prefix_code(code: str, prefix: str) -> str:
     out = prefix
     quote = ''
 
@@ -129,11 +128,11 @@ def prefix_code(code, prefix):
 
     return out
 
-def indent_code(code):
+def indent_code(code: str) -> str:
     lines = prefix_code(code, "    ")
     return re.sub(RE_BLANK_LINES, '', lines)
 
-def fix_imports(code):
+def fix_imports(code: str) -> str:
     # For proper packaging, we must import our modules from the local dir
     # Our modules all start with an upper-case letter
     
@@ -159,7 +158,7 @@ def fix_imports(code):
 class_renamings: Dict[str, int] = {}
 
 RE_SUBCLASS_SELF = re.compile(r'class ([A-Z].*)\(\1')
-def fix_subclass_self(code):
+def fix_subclass_self(code: str) -> str:
     if not mypy:
         return code
         
@@ -191,29 +190,29 @@ def fix_subclass_self(code):
 
     return code
     
-def fix_code(code):
+def fix_code(code: str) -> str:
     return fix_subclass_self(code)
 
-def first_line(text):
+def first_line(text: str) -> str:
     index = text.find('\n')
     if index >= 0:
         return text[:index]
     else:
         return text
 
-def print_utf8(s):
+def print_utf8(s: str) -> None:
     sys.stdout.buffer.write(s.encode('utf-8'))
 
-def decode_title(s):
+def decode_title(s: str) -> str:
     # We have non-breaking spaces in some titles
     return s.replace('\xa0', ' ')
     
-def split_title(s):
+def split_title(s: str) -> Tuple[str, str]:
     """Split a title into hashes and text"""
     list = s.split(' ', 1)
     return list[0], list[1]
 
-def print_if_main(code):
+def print_if_main(code: str) -> None:
     # Run code only if run as main file
     if mypy:
         print_utf8(code + '\n')
@@ -221,7 +220,8 @@ def print_if_main(code):
         print_utf8("\nif __name__ == '__main__':\n")
         print_utf8(indent_code(code) + "\n")
         
-def get_notebook_synopsis(notebook_name, path=None):
+def get_notebook_synopsis(notebook_name: str, 
+                          path: Optional[List[str]] = None) -> Tuple[Optional[str], str]:
     notebook_path = notebook_name
 
     title = None
@@ -248,7 +248,9 @@ def get_notebook_synopsis(notebook_name, path=None):
             
     return title, fix_synopsis(synopsis)
     
-def export_notebook_code(notebook_name, project="fuzzingbook", path=None):
+def export_notebook_code(notebook_name: str, 
+                         project: str = "fuzzingbook",
+                         path: Optional[List[str]] = None) -> None:
     # notebook_path = import_notebooks.find_notebook(notebook_name, path)
     notebook_path = notebook_name
     

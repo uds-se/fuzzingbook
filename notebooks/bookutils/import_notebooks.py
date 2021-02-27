@@ -13,19 +13,21 @@ from importlib.abc import MetaPathFinder
 import linecache
 import ast
 
+from typing import Optional, List, Any, Dict
+
 # To avoid re-running notebook computations during import,
 # we only import code cells that match this regular expression
 # i.e. definitions of functions, classes, UPPERCASE_VARIABLES, and imports
 RE_CODE = re.compile(r"^(def |class |@|[A-Z][A-Z0-9_]+ [-+*/]?= |[A-Z][A-Z0-9_]+\.|import |from )")
 
-def do_import(code):
+def do_import(code: str) -> bool:
     """Return True if code is to be exported"""
     while code.startswith('#') or code.startswith('\n'):
         # Skip leading comments
         code = code[code.find('\n') + 1:]
 
-    return RE_CODE.match(code)
-    
+    return RE_CODE.match(code) is not None
+
 assert do_import("def foo():\n    pass")
 assert do_import("# ignore\ndef foo():\n    pass")
 assert do_import("# ignore\nclass Bar:\n    pass")
@@ -33,7 +35,7 @@ assert do_import("XYZ = 123")
 assert not do_import("xyz = 123")
 assert not do_import("foo()")
 
-def find_notebook(fullname, path=None):
+def find_notebook(fullname: str, path: Optional[List[str]] = None) -> Optional[str]:
     """find a notebook, given its fully qualified name and an optional path
 
     This turns "foo.bar" into "foo/bar.ipynb"
@@ -52,24 +54,27 @@ def find_notebook(fullname, path=None):
         if os.path.isfile(nb_path):
             return nb_path
 
-class NotebookLoader(object):
+    return None
+
+class NotebookLoader:
     """Module Loader for Jupyter Notebooks"""
-    def __init__(self, path=None):
+    def __init__(self, path: Optional[List[str]] = None) -> None:
         self.shell = InteractiveShell.instance()
         self.path = path
-        self.lines = {}
+        self.lines: Dict[str, str] = {}
 
-    def load_module(self, fullname):
+    def load_module(self, fullname: str) -> types.ModuleType:
         self.lines[fullname] = ''
         """import a notebook as a module"""
         path = find_notebook(fullname, self.path)
+        if path is None:
+            raise FileNotFoundError(f"Can't find {fullname}")
 
         # print ("importing Jupyter notebook from %s" % path)
 
         # load the notebook object
         with io.open(path, 'r', encoding='utf-8') as f:
             nb = read(f, 4)
-
 
         # create the module and add it to sys.modules
         # if name in sys.modules:
@@ -84,7 +89,6 @@ class NotebookLoader(object):
         # actually affect the notebook module's ns
         save_user_ns = self.shell.user_ns
         self.shell.user_ns = mod.__dict__
-
 
         codecells = [self.shell.input_transformer_manager.transform_cell(cell.source)
                               for cell in nb.cells if cell.cell_type == 'code']
@@ -105,17 +109,17 @@ class NotebookLoader(object):
         finally:
             self.shell.user_ns = save_user_ns
             data = self.lines[fullname]
-            linecache.cache[path] = (len(data), None,
+            linecache.cache[path] = (len(data), None,   # type: ignore
                                     [line+'\n' for line in data.splitlines()],
                                     fullname)
         return mod
 
 class NotebookFinder(MetaPathFinder):
     """Module finder that locates Jupyter Notebooks"""
-    def __init__(self):
-        self.loaders = {}
+    def __init__(self) -> None:
+        self.loaders: Dict[Any, Any] = {}
 
-    def find_module(self, fullname, path=None):
+    def find_module(self, fullname: str, path: Any = None) -> Any:
         nb_path = find_notebook(fullname, path)
         if not nb_path:
             return

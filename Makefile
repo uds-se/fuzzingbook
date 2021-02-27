@@ -808,9 +808,9 @@ $(PACKAGES_OUT): $(PYS)
 
 # Static type checking
 MYPY = mypy 
-MYPYS = $(SOURCE_FILES:%.ipynb=$(MYPY_TARGET)%.py)
+# MYPYS = $(SOURCE_FILES:%.ipynb=$(MYPY_TARGET)%.py)
 MYPYS_OUT = $(SOURCE_FILES:%.ipynb=$(MYPY_TARGET).%.py.out)
-$(MYPY_TARGET).%.py.out: $(MYPY_TARGET)%.py
+$(MYPY_TARGET).%.py.out: $(MYPY_TARGET)%.py $(MYPY_TARGET)/mypy.ini
 	@echo Type-checking $<...
 	@if $(MYPY) --config-file $(MYPY_TARGET)/mypy.ini $< > $@ 2>&1; then \
 		echo $(PY_SUCCESS_MAGIC) >> $@; \
@@ -837,7 +837,7 @@ $(UTILS_MYPY_OUT): $(UTILITY_FILES:%=$(NOTEBOOKS)/$(UTILS)/%)
 		exit 1; \
 	fi
 
-test-types: $(MYPYS) $(MYPYS_OUT) $(UTILS_MYPY_OUT)
+test-types: $(UTILS_MYPY_OUT) $(MYPYS_OUT)
 
 check-types: test-types
 	@files_with_errors=$$(grep --files-without-match -- $(PY_SUCCESS_MAGIC) $(MYPYS_OUT) $(UTILS_MYPY_OUT)); \
@@ -1267,6 +1267,7 @@ $(DEPEND_TARGET)%.makefile: $(NOTEBOOKS)/%.ipynb
 		if [ -f $(NOTEBOOKS)/$$import.ipynb ]; then \
 			notebooks="$$notebooks $$""(NOTEBOOKS)/$$import.ipynb"; \
 			imports="$$imports $$""(CODE_TARGET)$$import.py"; \
+			mypys="$$mypys $$""(MYPY_TARGET)$$import.py"; \
 		fi; \
 	done; \
 	( \
@@ -1278,7 +1279,7 @@ $(DEPEND_TARGET)%.makefile: $(NOTEBOOKS)/%.ipynb
 		echo ''; \
 		echo '$$''(CODE_TARGET).$(notdir $(<:%.ipynb=.%.py.out)):' $$imports; \
 		echo ''; \
-		echo '$$''(MYPY_TARGET).$(notdir $(<:%.ipynb=.%.py.out)):' $$imports; \
+		echo '$$''(MYPY_TARGET).$(notdir $(<:%.ipynb=.%.py.out)):' $$mypys; \
 	) > $@
 
 

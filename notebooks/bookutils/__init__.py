@@ -34,7 +34,7 @@ def rich_output() -> bool:
 
 
 # Wrapper for YouTubeVideo
-def YouTubeVideo(id, width=640, height=360):
+def YouTubeVideo(id: str, width: int = 640, height: int = 360) -> Any:
     """Replacement for IPython.YoutubeVideo, 
     with different width/height and no cookies for YouTube"""
     if have_ipython:
@@ -64,7 +64,7 @@ def inheritance_conflicts(c1: Type[object], c2: Type[object]) -> List[str]:
         c1c2, attr) != getattr_static(c2c1, attr)]
 
 # Printing files with syntax highlighting
-def print_file(filename: str, **kwargs) -> None:
+def print_file(filename: str, **kwargs: Any) -> None:
     content = open(filename, "rb").read().decode('utf-8')
     print_content(content, filename, **kwargs)
 
@@ -128,8 +128,8 @@ def show_ast(tree: AST) -> Optional[Any]:
         return None
 
 # Escaping unicode characters into ASCII for user-facing strings
-def unicode_escape(s: str, error="backslashreplace") -> str:
-    def ascii_chr(byte):
+def unicode_escape(s: str, error: str = 'backslashreplace') -> str:
+    def ascii_chr(byte: int) -> str:
         if 0 <= byte <= 127:
             return chr(byte)
         return r"\x%02x" % byte
@@ -156,7 +156,7 @@ def HTML(data: Optional[str] = None,
          filename: Optional[str] = None, 
          png: bool = False,
          headless: bool = True,
-         zoom: float = 2.0):
+         zoom: float = 2.0) -> Any:
 
     if not png and not 'RENDER_HTML' in os.environ:
         # Standard behavior
@@ -238,12 +238,12 @@ def nbquiz(question: str, options: List[str], correct_answer: int,
 
     check = widgets.Button()
     
-    def clear_selection(change):
+    def clear_selection(change: Any) -> None:
         check.description = 'Submit'
         
     clear_selection(None)
 
-    def check_selection(change):
+    def check_selection(change: Any) -> None:
         answer = int(alternatives.value) + 1
 
         if answer == correct_answer:
@@ -262,8 +262,8 @@ def jsquiz(question: str,
            options: List[str], 
            correct_answer: Union[str, int, List[int], Set[int]], 
            globals: Dict[str, Any], 
-           title='Quiz', 
-           debug=True) -> IPython.core.display.HTML:
+           title: str = "Quiz", 
+           debug: bool = True) -> IPython.core.display.HTML:
 
     hint = ""
     if isinstance(correct_answer, str):
@@ -429,7 +429,7 @@ def textquiz(question: str, options: List[str], correct_answer: Any, globals: Op
 # Entry point for all of the above.
 def quiz(question: str, options: List[str], 
          correct_answer: Union[str, int, List[int]],
-         globals: Optional[Dict[str, Any]] = None, **kwargs) -> Any:
+         globals: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     """Display a quiz. 
     `question` is a question string to be asked.
     `options` is a list of strings with possible answers.
