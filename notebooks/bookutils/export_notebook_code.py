@@ -4,7 +4,7 @@ import io, os, sys, types, re
 import datetime
 from typing import Dict
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore
 
 
 # from IPython import get_ipython
