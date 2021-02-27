@@ -806,10 +806,47 @@ $(PACKAGES_OUT): $(PYS)
 	@test ! -s $@
 
 
-# Static checks (in progess)
+# Static type checking
 MYPY = mypy 
-check-types: $(MYPYS)
-	$(MYPY) --config-file $(MYPY_TARGET)mypy.ini $(NOTEBOOKS)/$(UTILS) $(MYPYS)
+MYPYS = $(SOURCE_FILES:%.ipynb=$(MYPY_TARGET)%.py)
+MYPYS_OUT = $(SOURCE_FILES:%.ipynb=$(MYPY_TARGET).%.py.out)
+$(MYPY_TARGET).%.py.out: $(MYPY_TARGET)%.py
+	@echo Type-checking $<...
+	@if $(MYPY) --config-file $(MYPY_TARGET)/mypy.ini $< > $@ 2>&1; then \
+		echo $(PY_SUCCESS_MAGIC) >> $@; \
+		exit 0; \
+	else \
+		echo "Error type checking $<" >> $@; \
+		tail $@; \
+		touch -r $< $@; \
+		touch -A -010000 $@; \
+		exit 1; \
+	fi
+
+UTILS_MYPY_OUT = $(MYPY_TARGET).$(UTILS).py.out
+$(UTILS_MYPY_OUT): $(UTILITY_FILES:%=$(NOTEBOOKS)/$(UTILS)/%)
+	@echo Type-checking $(NOTEBOOKS)/$(UTILS)...
+	@if $(MYPY) --config-file $(MYPY_TARGET)/mypy.ini $(NOTEBOOKS)/$(UTILS) > $@ 2>&1; then \
+		echo $(PY_SUCCESS_MAGIC) >> $@; \
+		exit 0; \
+	else \
+		echo "Error type checking $<" >> $@; \
+		tail $@; \
+		touch -r $< $@; \
+		touch -A -010000 $@; \
+		exit 1; \
+	fi
+
+test-types: $(MYPYS) $(MYPYS_OUT) $(UTILS_MYPY_OUT)
+
+check-types: test-types
+	@files_with_errors=$$(grep --files-without-match -- $(PY_SUCCESS_MAGIC) $(MYPYS_OUT) $(UTILS_MYPY_OUT)); \
+	if [ -z "$$files_with_errors" ]; then \
+		echo "All type checks passed."; \
+	else \
+		echo "Check these files for errors: $$files_with_errors"; \
+		exit 1; \
+	fi
 	
 # Monkey typing (in progress)
 MONKEYTYPE = monkeytype
@@ -1186,6 +1223,7 @@ realclean: clean
 	cd $(HTML_TARGET); $(RM) *.html; $(RM) -r *_files
 	cd $(SLIDES_TARGET); $(RM) *.html
 	cd $(CODE_TARGET); $(RM) *.py *.py.out .*.py.out
+	cd $(MYPY_TARGET); $(RM) *.py *.py.out .*.py.out
 	cd $(WORD_TARGET); $(RM) *.docx
 	cd $(MARKDOWN_TARGET); $(RM) *.md
 	@echo "All old files deleted"
