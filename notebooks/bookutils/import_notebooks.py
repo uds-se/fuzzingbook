@@ -17,8 +17,13 @@ from typing import Optional, List, Any, Dict
 
 # To avoid re-running notebook computations during import,
 # we only import code cells that match this regular expression
-# i.e. definitions of functions, classes, UPPERCASE_VARIABLES, and imports
-RE_CODE = re.compile(r"^(def |class |@|[A-Z][A-Z0-9_]+ [-+*/]?= |[A-Z][A-Z0-9_]+\.|import |from )")
+# i.e. definitions of 
+# * functions: `def func()`
+# * classes: `class X:`
+# * constants: `UPPERCASE_VARIABLES`
+# * types: `TypeVariables`, and
+# * imports: `import foo`
+RE_CODE = re.compile(r"^(def |class |@|[A-Z][A-Za-z0-9_]+ [-+*/]?= |[A-Z][A-Za-z0-9_]+[.:]|import |from )")
 
 def do_import(code: str) -> bool:
     """Return True if code is to be exported"""

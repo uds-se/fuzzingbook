@@ -30,8 +30,13 @@ set_fixed_seed.set_fixed_seed()
 
 # Check for rich output
 def rich_output() -> bool:
-    return 'get_ipython' in globals()
+    try:
+        get_ipython()  # type: ignore
+        rich = True
+    except NameError:
+        rich = False
 
+    return rich
 
 # Wrapper for YouTubeVideo
 def YouTubeVideo(id: str, width: int = 640, height: int = 360) -> Any:
