@@ -33,6 +33,7 @@ parser.add_argument("--title", help="book title", default="The Fuzzing Book")
 parser.add_argument("--authors", help="list of authors", default="A. Zeller et al.")
 parser.add_argument("--twitter", help="twitter handle", default="@FuzzingBook")
 parser.add_argument("--menu-prefix", help="prefix to html files in menu")
+parser.add_argument("--all-chapters", help="List of all chapters")
 parser.add_argument("--public-chapters", help="List of public chapters")
 parser.add_argument("--ready-chapters", help="List of ready chapters")
 parser.add_argument("--todo-chapters", help="List of work-in-progress chapters")
@@ -603,6 +604,11 @@ if args.public_chapters is not None:
 else:
     public_chapters = []
 
+if args.all_chapters is not None:
+    all_chapters = args.all_chapters.split()
+else:
+    all_chapters = []
+
 if args.include_ready and args.ready_chapters is not None:
     ready_chapters = args.ready_chapters.split()
 else:
@@ -615,7 +621,6 @@ else:
     
 new_chapters = args.new_chapters.split()
 beta_chapters = ready_chapters + todo_chapters
-all_chapters = public_chapters # + beta_chapters
 include_beta = args.include_ready or args.include_todo
 
 new_suffix = ' <strong class="new_chapter">&bull;</strong>'
@@ -735,11 +740,16 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
     basename = os.path.splitext(os.path.basename(menu_ipynb_file))[0]
     structured_title = '' # '<span class="chnum">' + repr(counter + 1) + '</span> '
     title = ""
+    
+    is_public = menu_ipynb_file in public_chapters
 
     if menu_ipynb_file == chapter_ipynb_file:
         link_class = ' class="this_page"'
+    elif not is_public:
+        link_class = ' class="not_public"'
     else:
         link_class = ''
+
     file_title = get_title(menu_ipynb_file)
     
     if menu_ipynb_file in new_chapters:
@@ -785,12 +795,16 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
         structured_all_chapters_menu += ' <i class="fa fa-fw fa-caret-right"></i></a>\n<ul>\n'
         in_sublist = True
     else:
+        # New chapter
+        menu_link = menu_html_file if is_public else "#"
+        
         structured_item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
-            (menu_html_file, link_class, structured_title, beta_indicator)
+            (menu_link, link_class, structured_title, beta_indicator)
+
         structured_all_chapters_menu += structured_item
-    
+
         item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
-            (menu_html_file, link_class, title, beta_indicator)
+            (menu_link, link_class, title, beta_indicator)
         all_chapters_menu += item
     
 if in_sublist:

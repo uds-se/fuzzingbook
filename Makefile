@@ -44,6 +44,7 @@ PROJECT_URL = https://beta.$(PROJECT).org
 # Sources in the notebooks folder
 SOURCES = $(SOURCE_FILES:%=$(NOTEBOOKS)/%)
 CHAPTER_SOURCES = $(CHAPTERS:%=$(NOTEBOOKS)/%)
+ALL_CHAPTER_SOURCES = $(CHAPTERS:%=$(NOTEBOOKS)/%)
 PUBLIC_SOURCES = $(PUBLIC_CHAPTERS:%=$(NOTEBOOKS)/%)
 READY_SOURCES = $(READY_CHAPTERS:%=$(NOTEBOOKS)/%)
 TODO_SOURCES = $(TODO_CHAPTERS:%=$(NOTEBOOKS)/%)
@@ -463,6 +464,7 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--title="$(BOOKTITLE)" \
 	--authors="$(AUTHORS)" \
 	--twitter="$(TWITTER)" \
+	--all-chapters="$(ALL_CHAPTER_SOURCES) $(APPENDICES_SOURCES)" \
 	--public-chapters="$(CHAPTER_SOURCES) $(APPENDICES_SOURCES)" \
 	--ready-chapters="$(READY_SOURCES)" \
 	--todo-chapters="$(TODO_SOURCES)" \
