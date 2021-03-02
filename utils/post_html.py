@@ -390,8 +390,9 @@ def add_links_to_imports(contents, html_file):
 
     return contents
 
-# Remove cells that only contain a quiz() or a display() call. Keep the output.
-RE_DISPLAY = re.compile(r'''
+# Remove cells that start with `# ignore` or only contain 
+# a quiz() or a display() call. Keep the output.
+RE_IGNORE = re.compile(r'''
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -406,7 +407,7 @@ RE_DISPLAY = re.compile(r'''
 ''', re.DOTALL)
 
 def remove_ignored_code(text):
-    return RE_DISPLAY.sub('', text)
+    return RE_IGNORE.sub('', text)
 
 assert remove_ignored_code('''
 <div class="input_code">
@@ -427,6 +428,12 @@ assert remove_ignored_code('''
 </div>
 </div>
 ''') == ''
+
+
+# Remove `# type: ignore` comments
+RE_TYPE_IGNORE = re.compile(r'  <span class="c1"># type: ignore</span>')
+def remove_type_ignore(text):
+    return RE_TYPE_IGNORE.sub('', text)
 
 
 # Sharing
@@ -860,8 +867,11 @@ chapter_contents = chapter_contents \
     .replace("__YEAR__", notebook_modification_year) \
     .replace("__BIBTEX_KEY__", project + notebook_modification_year)
 
-# Remove code cells that only display graphics
+# Remove code cells that only display graphics or start with `#ignore`
 chapter_contents = remove_ignored_code(chapter_contents)
+
+# Remove `# type: ignore` comments
+chapter_contents = remove_type_ignore(chapter_contents)
 
 # Add links to imports
 chapter_contents = add_links_to_imports(chapter_contents, chapter_html_file)
