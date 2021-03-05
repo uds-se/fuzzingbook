@@ -156,27 +156,40 @@ def fix_imports(code: str) -> str:
     return code
     
 class_renamings: Dict[str, int] = {}
+current_class: Optional[str] = None
 
 RE_SUBCLASS = re.compile(r'^class ([A-Z][^(:]*)[(:]')
+RE_SUBCLASS_SELF = re.compile(r'^class ([A-Z].*)\(\1\):$', flags=re.MULTILINE)
+
 def fix_subclass_self(code: str) -> str:
     if not mypy:
         return code
-        
+
     match = RE_SUBCLASS.search(code)
     if match:
         class_name = match.group(1)
-        if class_name in class_renamings:
+        
+        global current_class
+        if class_name == current_class:
+            # Add body to current class definition
+            old_class_name = class_name
+            code = RE_SUBCLASS_SELF.sub('', code)
+        elif class_name in class_renamings:
             old_class_name = f'{class_name}_{class_renamings[class_name]}'
             class_renamings[class_name] += 1
         else:
             old_class_name = class_name
             class_renamings[class_name] = 1
-            
+
         new_class_name = f'{class_name}_{class_renamings[class_name]}'
             
         code = code.replace(f'class {class_name}({class_name}',
                             f'class __NEW_CLASS__(__OLD_CLASS__')
-        # code += f'\n\n__CLASS__ = __NEW_CLASS__  # type: ignore'
+        current_class = class_name
+
+    else:
+        # No match
+        current_class = None
 
     for cls_name in class_renamings:
         new_cls_name = f'{cls_name}_{class_renamings[cls_name]}'
@@ -215,7 +228,7 @@ def split_title(s: str) -> Tuple[str, str]:
 def print_if_main(code: str) -> None:
     # Run code only if run as main file
     if mypy:
-        print_utf8(code + '\n')
+        print_utf8('\n' + code + '\n')
     else:
         print_utf8("\nif __name__ == '__main__':\n")
         print_utf8(indent_code(code) + "\n")
@@ -332,7 +345,9 @@ def export_notebook_code(notebook_name: str,
         else:
             # Anything else
             contents = cell.source
-            if contents.startswith('#'):
+            if mypy:
+                pass
+            elif contents.startswith('#'):
                 # Header
                 line = first_line(contents)
                 decoded_title = decode_title(line)
