@@ -157,12 +157,12 @@ def fix_imports(code: str) -> str:
     
 class_renamings: Dict[str, int] = {}
 
-RE_SUBCLASS_SELF = re.compile(r'class ([A-Z].*)\(\1')
+RE_SUBCLASS = re.compile(r'^class ([A-Z][^(:]*)[(:]')
 def fix_subclass_self(code: str) -> str:
     if not mypy:
         return code
         
-    match = RE_SUBCLASS_SELF.search(code)
+    match = RE_SUBCLASS.search(code)
     if match:
         class_name = match.group(1)
         if class_name in class_renamings:
@@ -176,7 +176,7 @@ def fix_subclass_self(code: str) -> str:
             
         code = code.replace(f'class {class_name}({class_name}',
                             f'class __NEW_CLASS__(__OLD_CLASS__')
-        code += f'\n\n__CLASS__ = __NEW_CLASS__  # type: ignore'
+        # code += f'\n\n__CLASS__ = __NEW_CLASS__  # type: ignore'
 
     for cls_name in class_renamings:
         new_cls_name = f'{cls_name}_{class_renamings[cls_name]}'
@@ -349,6 +349,11 @@ def export_notebook_code(notebook_name: str,
                 # We don't include contents, as they fall under a different license
                 # print_utf8("\n" + prefix_code(contents, "# ") + "\n")
                 pass
+                
+    if mypy:
+        print_utf8('\n# Original class names\n')
+        for class_name in class_renamings:
+            print_utf8(f'{class_name} = {class_name}_{class_renamings[class_name]}\n')
 
 if __name__ == '__main__':
     args = sys.argv
