@@ -1253,9 +1253,11 @@ $(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND)
 	$(PYTHON) $(NBDEPEND) $(SITEMAP_OPTIONS) $(CHAPTER_SOURCES) > $@~ && mv $@~ $@
 	@$(OPEN) $@
 
+$(HTML_TARGET)/Tours.html: $(SITEMAP_SVG)
 $(FULL_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVG)	
 $(RENDERED_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVG)	
 
+$(HTML_TARGET)/00_Table_of_Contents.html: $(SITEMAP_SVG)
 $(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG)	
 $(RENDERED_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG)	
 
