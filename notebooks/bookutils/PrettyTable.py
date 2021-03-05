@@ -7,7 +7,9 @@ class PrettyTable(list):
         the form [[1,2,3],[4,5,6]], and renders HTML and LaTeX Table in 
         IPython Notebook. For LaTeX export two styles can be chosen."""
     
-    def __init__(self, initlist: List[Any]=[], extra_header: Optional[str] = None, print_latex_longtable: bool = True) -> None:
+    def __init__(self, initlist: List[List[Any]] = [],
+                 extra_header: List[str] = None,
+                 print_latex_longtable: bool = True) -> None:
         self.print_latex_longtable = print_latex_longtable
         if extra_header is not None:
             if len(initlist[0]) != len(extra_header):
