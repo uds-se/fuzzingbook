@@ -300,7 +300,7 @@ ZIP_OPTIONS = -r
 # Default target is to build everything needed for publishing,
 # such that we can run "make -k" in a loop
 .PHONY: chapters web default
-web default: html code test-code test-imports test-packages slides
+web default: html code test-code test-imports test-packages test-types slides
 chapters: html
 
 # The book is recreated after any change to any source
@@ -849,17 +849,9 @@ check-types: test-types
 		echo "Check these files for errors: $$files_with_errors"; \
 		exit 1; \
 	fi
-	
-# Monkey typing (in progress)
-MONKEYTYPE = monkeytype
-monkeytype: $(CHAPTER_PYS)
-	for py in $(CHAPTER_PYS); do \
-		echo $$py; \
-		$(MONKEYTYPE) run $$py; \
-	done
 
 .PHONY: run
-run: check-imports check-standard-imports check-package check-code
+run: check-imports check-standard-imports check-package check-code check-types
 
 # Todo checks
 check-todo todo:
