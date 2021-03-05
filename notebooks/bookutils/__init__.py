@@ -226,7 +226,7 @@ def quiztext(text: Union[str, object]) -> str:
 # Currently unused in favor of jsquiz(), below.
 def nbquiz(question: str, options: List[str], correct_answer: int, 
     globals: Optional[Dict[str, Any]], 
-    title: str = 'Quiz', debug: bool = False)-> object:
+    title: str = 'Quiz', debug: bool = False) -> object:
     import ipywidgets as widgets
 
     if isinstance(correct_answer, str):
@@ -261,6 +261,9 @@ def nbquiz(question: str, options: List[str], correct_answer: int,
     alternatives.observe(clear_selection, names='value')
     
     return widgets.VBox([title_out, alternatives, check])
+    
+def escape_quotes(s: str) -> str:
+    return html.escape(s.replace("'", r"\'"))
 
 # JavaScript quizzes.
 def jsquiz(question: str, 
@@ -392,7 +395,7 @@ def jsquiz(question: str,
     {menu}
     </div>
     </p>
-    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', {correct_ans}, {int(multiple_choice)}, '{html.escape(hint)}')">
+    <input id="{quiz_id}-submit" type="submit" value="Submit" onclick="check_selection('{quiz_id}', {correct_ans}, {int(multiple_choice)}, '{escape_quotes(hint)}')">
     <span class="quiz_hint" id="{quiz_id}-hint"></span>
     </div>
     '''
