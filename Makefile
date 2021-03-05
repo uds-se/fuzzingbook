@@ -851,7 +851,7 @@ check-types: test-types
 	fi
 
 .PHONY: run
-run: check-imports check-standard-imports check-package check-code check-types
+run: check-imports check-standard-imports check-package check-types check-code
 
 # Todo checks
 check-todo todo:
