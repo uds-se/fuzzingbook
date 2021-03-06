@@ -717,8 +717,8 @@ is_todo_chapter = include_beta and chapter_ipynb_file in todo_chapters
 is_ready_chapter = include_beta and chapter_ipynb_file in ready_chapters
 if is_todo_chapter:
     chapter_title_beta += " " + todo_suffix
-if is_ready_chapter:
-    chapter_title_beta += " " + ready_suffix
+# if is_ready_chapter:
+#     chapter_title_beta += " " + ready_suffix
 
 if args.home:
     link_class = ' class="this_page"'
@@ -778,8 +778,8 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
     structured_title += file_title
 
     beta_indicator = ''
-    if menu_ipynb_file in ready_chapters:
-        beta_indicator = "&nbsp;" + ready_suffix
+    # if menu_ipynb_file in ready_chapters:
+    #     beta_indicator = "&nbsp;" + ready_suffix
     if menu_ipynb_file in todo_chapters:
         beta_indicator = "&nbsp;" + todo_suffix
     menu_html_file = menu_prefix + basename + ".html"
