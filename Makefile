@@ -855,7 +855,7 @@ run: check-imports check-standard-imports check-package check-types check-code
 
 # Todo checks
 check-todo todo:
-	@grep '\\todo' $(PUBLIC_SOURCES) $(READY_SOURCES); \
+	@grep '\\todo' $(ALL_CHAPTER_SOURCES); \
 	if [ $$? = 0 ]; then exit 1; else \
 	echo "No todos in $(PUBLIC_CHAPTERS:%.ipynb=%) $(READY_CHAPTERS:%.ipynb=%)"; exit 0; fi
 
