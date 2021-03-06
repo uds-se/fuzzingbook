@@ -607,8 +607,6 @@ $(CODE_TARGET)%.py: $(FULL_NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 $(MYPY_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 	@test -d $(MYPY_TARGET) || $(MKDIR) $(MYPY_TARGET)
 	$(CONVERT_TO_PYTHON) --project $(PROJECT) --mypy $< > $@~ && mv $@~ $@
-	# $(AUTOPEP8) $(AUTOPEP8_OPTIONS) $@
-	-chmod +x $@
 
 # Markdown
 $(MARKDOWN_TARGET)%.md:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB)
@@ -839,7 +837,8 @@ $(UTILS_MYPY_OUT): $(UTILITY_FILES:%=$(NOTEBOOKS)/$(UTILS)/%)
 		exit 1; \
 	fi
 
-test-types: $(UTILS_MYPY_OUT) $(MYPYS_OUT)
+test-types: $(SOURCE_FILES:%.ipynb=$(MYPY_TARGET)%.py) \
+	$(UTILS_MYPY_OUT) $(MYPYS_OUT)
 
 check-types: test-types
 	@files_with_errors=$$(grep --files-without-match -- $(PY_SUCCESS_MAGIC) $(MYPYS_OUT) $(UTILS_MYPY_OUT)); \
@@ -1098,12 +1097,12 @@ $(DOCS_TARGET)notebooks/00_Index.ipynb: $(SHARED)utils/nbindex.py \
 	
 ## Synopsis
 update-synopsis synopsis:
-	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $(CHAPTERS:%=$(NOTEBOOKS)/%)
+	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $(ALL_CHAPTER_SOURCES)
 	$(COMMIT_SYNOPSIS)
 
 no-synopsis:
 	@echo Chapters without synopsis:
-	@grep -L '## Synopsis' $(CHAPTER_SOURCES) | grep -v '[0-9]'
+	@grep -L '## Synopsis' $(ALL_CHAPTER_SOURCES) | grep -v '[0-9]'
 
 
 ## Python packages
