@@ -868,7 +868,7 @@ spell spellcheck check-spell:
 
 # All checks
 .PHONY: check check-all
-check check-all: check-import check-package check-code check-style check-crossref check-todo
+check check-all: check-import check-package check-types check-code check-style check-crossref check-todo
 	
 # Add notebook metadata (add table of contents, bib reference, etc.)
 .PHONY: metadata
