@@ -1026,6 +1026,7 @@ publish-slides-setup:
 	@test -d $(DOCS_TARGET)slides || $(MKDIR) $(DOCS_TARGET)slides
 
 $(DOCS_TARGET)slides/%: $(SLIDES_TARGET)%
+	-rm -fr $@
 	cp -pr $< $@
 
 
