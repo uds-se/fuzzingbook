@@ -1139,7 +1139,7 @@ shared:
 	if [ -d ../$(SHARED_FOLLOWER) ]; then \
 		$(RM) -r ../$(SHARED_FOLLOWER)/$(SHARED); \
 		cp -pr ../$(SHARED_LEADER)/$(SHARED) ../$(SHARED_FOLLOWER)/$(SHARED); \
-		chmod -R -r ../$(SHARED_FOLLOWER)/$(SHARED); \
+		chmod -R -w ../$(SHARED_FOLLOWER)/$(SHARED); \
 		cd ../$(SHARED_FOLLOWER); \
 		git commit -m "Update from debuggingbook" notebooks/shared; \
 	fi
