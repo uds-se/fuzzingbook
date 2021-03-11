@@ -29,6 +29,9 @@ UTILITY_FILES = \
 # Where the notebooks are
 NOTEBOOKS = notebooks
 
+# Where the shared files are
+SHARED = notebooks/shared/
+
 # Derived versions including HTML, SVG, and text output cells (for Web)
 FULL_NOTEBOOKS = full_notebooks
 
@@ -1129,12 +1132,15 @@ binder: .FORCE
 	open $(BINDER_URL)
 
 # Sync the 'shared' folder from debuggingbook (leader) to fuzzingbook (follower)
+SHARED_LEADER = debuggingbook
+SHARED_FOLLOWER = fuzzingbook
 .PHONY: shared
 shared:
-	if [ -d ../fuzzingbook ]; then \
-		$(RM) -r ../fuzzingbook/notebooks/shared; \
-		cp -pr ../debuggingbook/notebooks/shared ../fuzzingbook/notebooks/shared; \
-		cd ../fuzzingbook; \
+	if [ -d ../$(SHARED_FOLLOWER) ]; then \
+		$(RM) -r ../$(SHARED_FOLLOWER)/$(SHARED); \
+		cp -pr ../$(SHARED_LEADER)/$(SHARED) ../$(SHARED_FOLLOWER)/$(SHARED); \
+		chmod -R -r ../$(SHARED_FOLLOWER)/$(SHARED); \
+		cd ../$(SHARED_FOLLOWER); \
 		git commit -m "Update from debuggingbook" notebooks/shared; \
 	fi
 
