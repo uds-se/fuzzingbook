@@ -2,6 +2,7 @@
 
 from typing import Any, Dict, List, Set, Optional, Union, Tuple, Type
 import sys
+import os
 
 # Define the contents of this file as a package
 __all__ = [
@@ -10,8 +11,7 @@ __all__ = [
     "show_ast", "input", "next_inputs",
     "unicode_escape", "terminal_escape", 
     "inheritance_conflicts", "extract_class_definition",
-    "quiz", "import_notebooks", "export_notebooks", 
-    "re_code", "set_fixed_seed"
+    "quiz", "import_notebooks", "re_code", "set_fixed_seed"
 ]
 
 # Setup loader such that workbooks can be imported directly
@@ -20,9 +20,13 @@ try:
     have_ipython = True
 except:
     have_ipython = False
+    
+if "CI" in os.environ:
+    # Do not load notebooks during CI
+    have_ipython = False
 
 if have_ipython:
-    from .import_notebooks import NotebookFinder
+    from .import_notebooks import NotebookFinder  # type: ignore
     sys.meta_path.append(NotebookFinder())
     
 # Set fixed seed

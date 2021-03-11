@@ -22,7 +22,6 @@ UTILITY_FILES = \
 	__init__.py \
 	PrettyTable.py \
 	README.md \
-	export_notebook_code.py \
 	import_notebooks.py \
 	set_fixed_seed.py
 
@@ -264,8 +263,8 @@ endif
 
 # For Python, we use our own script that takes care of distinguishing 
 # main (script) code from definitions to be imported
-EXPORT_NOTEBOOK_CODE = $(SHARED)$(UTILS)/export_notebook_code.py 
-CONVERT_TO_PYTHON = $(PYTHON) -m notebooks.bookutils.export_notebook_code
+CONVERT_TO_PYTHON = PYTHONPATH=notebooks:$$PYTHONPATH \
+	$(PYTHON) $(EXPORT_NOTEBOOK_CODE)
 
 # This would be the Jupyter alternative
 # CONVERT_TO_PYTHON = $(NBCONVERT) $(NBCONVERT_OPTIONS) --to python --output-dir=$(CODE_TARGET)
@@ -394,6 +393,7 @@ ADD_METADATA = $(SHARED)utils/add_metadata.py
 NBAUTOSLIDE = $(SHARED)utils/nbautoslide.py
 NBSYNOPSIS = $(SHARED)utils/nbsynopsis.py
 NBSHORTEN = $(SHARED)utils/nbshorten.py
+EXPORT_NOTEBOOK_CODE = $(SHARED)utils/export_notebook_code.py 
 
 COMMIT_SYNOPSIS = -git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
 
