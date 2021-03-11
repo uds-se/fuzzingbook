@@ -1137,7 +1137,7 @@ SHARED_FOLLOWER = fuzzingbook
 .PHONY: shared
 shared:
 	if [ -d ../$(SHARED_FOLLOWER) ]; then \
-		chmod +w ../$(SHARED_FOLLOWER)/$(SHARED); \
+		chmod -R +w ../$(SHARED_FOLLOWER)/$(SHARED); \
 		$(RM) -r ../$(SHARED_FOLLOWER)/$(SHARED); \
 		cp -pr ../$(SHARED_LEADER)/$(SHARED) ../$(SHARED_FOLLOWER)/$(SHARED); \
 		chmod -R -w ../$(SHARED_FOLLOWER)/$(SHARED); \
