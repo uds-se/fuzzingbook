@@ -10,6 +10,8 @@ from bs4 import BeautifulSoup  # type: ignore
 # from IPython.core.interactiveshell import InteractiveShell
 
 import nbformat
+
+sys.path.append('.')
 from import_notebooks import RE_CODE  # type: ignore
 
 # If True, create mypy-friendly code
