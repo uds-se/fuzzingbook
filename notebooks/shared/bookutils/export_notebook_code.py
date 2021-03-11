@@ -11,10 +11,6 @@ from bs4 import BeautifulSoup  # type: ignore
 
 import nbformat
 
-# This is needed for GitHub actions
-sys.path.append('notebooks/bookutils')
-sys.path.append('bookutils')
-
 from import_notebooks import RE_CODE  # type: ignore
 
 # If True, create mypy-friendly code

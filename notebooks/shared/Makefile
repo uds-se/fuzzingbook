@@ -264,7 +264,7 @@ endif
 
 # For Python, we use our own script that takes care of distinguishing 
 # main (script) code from definitions to be imported
-EXPORT_NOTEBOOK_CODE = $(NOTEBOOKS)/$(UTILS)/export_notebook_code.py 
+EXPORT_NOTEBOOK_CODE = $(SHARED)/$(UTILS)/export_notebook_code.py 
 CONVERT_TO_PYTHON = $(PYTHON) $(EXPORT_NOTEBOOK_CODE)
 
 # This would be the Jupyter alternative
@@ -404,7 +404,7 @@ $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD
 	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $@
 	$(COMMIT_SYNOPSIS)
 	
-$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(SHARED)$(NBAUTOSLIDE) $(SHARED)$(NBSYNOPSIS) $(SHARED)$(NBSHORTEN) $(NOTEBOOKS)/$(UTILS)/__init__.py
+$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(SHARED)$(NBAUTOSLIDE) $(SHARED)$(NBSYNOPSIS) $(SHARED)$(NBSHORTEN) $(SHARED)/$(UTILS)/__init__.py
 	$(RENDER_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
@@ -415,7 +415,7 @@ $(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $
 $(FULL_NOTEBOOKS)/$(UTILS):
 	$(MKDIR) $(FULL_NOTEBOOKS)/$(UTILS)
 
-$(FULL_NOTEBOOKS)/$(UTILS)/%: $(NOTEBOOKS)/$(UTILS)/%
+$(FULL_NOTEBOOKS)/$(UTILS)/%: $(SHARED)/$(UTILS)/%
 	@test -d $(FULL_NOTEBOOKS)/$(UTILS) || \
 		$(MKDIR) $(FULL_NOTEBOOKS)/$(UTILS)
 	cp -pr $< $@
@@ -827,9 +827,9 @@ $(MYPY_TARGET).%.py.out: $(MYPY_TARGET)%.py $(MYPY_TARGET)/mypy.ini
 	fi
 
 UTILS_MYPY_OUT = $(MYPY_TARGET).$(UTILS).py.out
-$(UTILS_MYPY_OUT): $(UTILITY_FILES:%=$(NOTEBOOKS)/$(UTILS)/%)
-	@echo Type-checking $(NOTEBOOKS)/$(UTILS)...
-	@if $(MYPY) --config-file $(MYPY_TARGET)/mypy.ini $(NOTEBOOKS)/$(UTILS) > $@ 2>&1; then \
+$(UTILS_MYPY_OUT): $(UTILITY_FILES:%=$(SHARED)/$(UTILS)/%)
+	@echo Type-checking $(SHARED)/$(UTILS)...
+	@if $(MYPY) --config-file $(MYPY_TARGET)/mypy.ini $(SHARED)/$(UTILS) > $@ 2>&1; then \
 		echo $(PY_SUCCESS_MAGIC) >> $@; \
 		exit 0; \
 	else \
