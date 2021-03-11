@@ -1137,11 +1137,12 @@ SHARED_FOLLOWER = fuzzingbook
 .PHONY: shared
 shared:
 	if [ -d ../$(SHARED_FOLLOWER) ]; then \
+		chmod +w ../$(SHARED_FOLLOWER)/$(SHARED); \
 		$(RM) -r ../$(SHARED_FOLLOWER)/$(SHARED); \
 		cp -pr ../$(SHARED_LEADER)/$(SHARED) ../$(SHARED_FOLLOWER)/$(SHARED); \
 		chmod -R -w ../$(SHARED_FOLLOWER)/$(SHARED); \
 		cd ../$(SHARED_FOLLOWER); \
-		git commit -m "Update from debuggingbook" notebooks/shared; \
+		git commit -m "Update from $(SHARED_LEADER)" notebooks/shared; \
 	fi
 
 # After a git push, we want binder to update; "make push" does this
