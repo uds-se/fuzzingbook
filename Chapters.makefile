@@ -9,6 +9,9 @@ BOOKTITLE = The Fuzzing Book
 AUTHORS = Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler
 TWITTER = @FuzzingBook
 
+# Where the shared files are
+SHARED = notebooks/shared/
+
 # Chapter(s) to be marked as "new" in menu
 NEW_CHAPTERS = 
 

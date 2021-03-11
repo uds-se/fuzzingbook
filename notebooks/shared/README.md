@@ -1,0 +1,1 @@
+This folder contains files shared between the fuzzingbook and debuggingbook projects.
