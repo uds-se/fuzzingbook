@@ -11,6 +11,11 @@ from bs4 import BeautifulSoup  # type: ignore
 
 import nbformat
 
+# import from same dir as this one
+# From https://stackoverflow.com/questions/24722212/python-cant-find-module-in-the-same-folder
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
+
 from import_notebooks import RE_CODE  # type: ignore
 
 # If True, create mypy-friendly code
