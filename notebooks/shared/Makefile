@@ -1128,9 +1128,19 @@ binder/postBuild: binder/postBuild.template $(HTML_TARGET)custom.css
 binder: .FORCE
 	open $(BINDER_URL)
 
+# Sync the 'shared' folder from debuggingbook (leader) to fuzzingbook (follower)
+.PHONY: shared
+shared:
+	if [ -d ../fuzzingbook ]; then \
+		$(RM) -r ../fuzzingbook/notebooks/shared; \
+		cp -pr ../debuggingbook/notebooks/shared ../fuzzingbook/notebooks/shared; \
+		cd ../fuzzingbook; \
+		git commit -m "Update from debuggingbook" notebooks/shared; \
+	fi
+
 # After a git push, we want binder to update; "make push" does this
 .PHONY: push
-push: .FORCE
+push: .FORCE shared
 	git push
 	open $(BINDER_URL)
 	open $(PROJECT_URL)
