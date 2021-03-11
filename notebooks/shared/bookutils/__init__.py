@@ -1,7 +1,7 @@
 # Bookutils
 
 from typing import Any, Dict, List, Set, Optional, Union, Tuple, Type
-
+import sys
 
 # Define the contents of this file as a package
 __all__ = [
@@ -22,12 +22,12 @@ except:
     have_ipython = False
 
 if have_ipython:
-    from . import import_notebooks  # type: ignore
-    
+    from .import_notebooks import NotebookFinder
+    sys.meta_path.append(NotebookFinder())
     
 # Set fixed seed
-from . import set_fixed_seed
-set_fixed_seed.set_fixed_seed()
+from .set_fixed_seed import set_fixed_seed
+set_fixed_seed()
 
 
 # Check for rich output
