@@ -269,7 +269,6 @@ def get_notebook_synopsis(notebook_name: str,
 def export_notebook_code(notebook_name: str, 
                          project: str = "fuzzingbook",
                          path: Optional[List[str]] = None) -> None:
-    # notebook_path = import_notebooks.find_notebook(notebook_name, path)
     notebook_path = notebook_name
     
     title, synopsis = get_notebook_synopsis(notebook_name, path)
