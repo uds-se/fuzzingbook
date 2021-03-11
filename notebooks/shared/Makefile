@@ -1266,10 +1266,12 @@ $(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND)
 $(HTML_TARGET)/Tours.html: $(SITEMAP_SVG)
 $(FULL_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVG)	
 $(RENDERED_NOTEBOOKS)/Tours.ipynb: $(SITEMAP_SVG)	
+# $(CODE_TARGET)/Tours.py: $(SITEMAP_SVG)
 
 $(HTML_TARGET)/00_Table_of_Contents.html: $(SITEMAP_SVG)
 $(FULL_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG)	
 $(RENDERED_NOTEBOOKS)/00_Table_of_Contents.ipynb: $(SITEMAP_SVG)	
+# $(CODE_TARGET)/00_Table_of_Contents.py: $(SITEMAP_SVG)
 
 
 ## Dependencies - should come at the very end
