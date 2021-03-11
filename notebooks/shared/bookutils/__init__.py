@@ -7,10 +7,11 @@ from typing import Any, Dict, List, Set, Optional, Union, Tuple, Type
 __all__ = [
     "PrettyTable", "YouTubeVideo",
     "print_file", "print_content", "HTML",
-    "show_ast", "input", "next_inputs"
+    "show_ast", "input", "next_inputs",
     "unicode_escape", "terminal_escape", 
     "inheritance_conflicts", "extract_class_definition",
-    "quiz", "import_notebooks", "set_fixed_seed"
+    "quiz", "import_notebooks", "export_notebooks", 
+    "re_code", "set_fixed_seed"
 ]
 
 # Setup loader such that workbooks can be imported directly
@@ -22,6 +23,7 @@ except:
 
 if have_ipython:
     from . import import_notebooks  # type: ignore
+    
     
 # Set fixed seed
 from . import set_fixed_seed
@@ -271,7 +273,7 @@ def jsquiz(question: str,
            correct_answer: Union[str, int, List[int], Set[int]], 
            globals: Dict[str, Any], 
            title: str = "Quiz", 
-           debug: bool = True) -> IPython.core.display.HTML:
+           debug: bool = True) -> Any:  # should be IPython.core.display
 
     hint = ""
     if isinstance(correct_answer, str):
@@ -406,7 +408,7 @@ def htmlquiz(question: str,
              options: List[str], 
              correct_answer: Any, 
              globals: Optional[Dict[str, Any]] = None,
-             title: str = 'Quiz') -> IPython.core.display.HTML:
+             title: str = 'Quiz') -> Any:  # should be IPython.core.display.HTML
     
     menu = "".join(f'''
     <li> {quiztext(option)} </li>

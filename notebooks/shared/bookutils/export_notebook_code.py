@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'bookutils'
+
+from .re_code import RE_CODE
+
 import io, os, sys, types, re
 import datetime
 from typing import Dict, Optional, List, Any, Tuple
@@ -10,13 +16,6 @@ from bs4 import BeautifulSoup  # type: ignore
 # from IPython.core.interactiveshell import InteractiveShell
 
 import nbformat
-
-# import from same dir as this one
-# From https://stackoverflow.com/questions/24722212/python-cant-find-module-in-the-same-folder
-file_dir = os.path.dirname(__file__)
-sys.path.append(file_dir)
-
-from import_notebooks import RE_CODE  # type: ignore
 
 # If True, create mypy-friendly code
 mypy = False
