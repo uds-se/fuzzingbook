@@ -134,4 +134,4 @@ class NotebookFinder(MetaPathFinder):
             self.loaders[key] = NotebookLoader(path)
         return self.loaders[key]
 
-# sys.meta_path.append(NotebookFinder())
+sys.meta_path.append(NotebookFinder())

@@ -146,7 +146,7 @@ JUPYTER ?= jupyter
 
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
-NBPUBLISH ?= nbpublish
+NBPUBLISH ?= $(SHARED)/ipypublish/bin/nbpublish
 NBPUBLISH_OPTIONS ?= -log warning
 
 # The bookbook tool (okay for chapters and books; but no citations yet)
@@ -498,7 +498,7 @@ check-bib-python: .$(BIB).python
 check-bib-biber: .$(BIB).biber
 .$(BIB).biber: $(BIB)
 	@echo "Checking $(BIB) for LaTeX usage with Biber"
-	@$(BIBER) --tool --validate-datamodel --quiet $(BIB)
+	@if which $(BIBER); then $(BIBER) --tool --validate-datamodel --quiet $(BIB); else :; fi
 	@$(RM) fuzzingbook_bibertool.bib fuzzingbook.bib.blg
 	@touch .$(BIB).biber
 
