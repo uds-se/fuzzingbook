@@ -61,19 +61,24 @@ def YouTubeVideo(id: str, width: int = 640, height: int = 360) -> Any:
     with different width/height and no cookies for YouTube
     """
     if 'RENDER_HTML' in os.environ:
+        # For README.md (GitHub) and PDFs:
+        # Just include a (static) picture, with a link to the actual video
         import IPython.core.display
         proj = project()
-        
         return IPython.core.display.Markdown(f'''
 <a href="https://www.youtube-nocookie.com/embed/{id}" target="_blank">
 <img src="https://www.{proj}.org/html/PICS/youtube.png" width={width}>
 </a>
         ''')
+
     elif have_ipython:
+        # For Jupyter: integrate a YouTube iframe
         from IPython.display import IFrame
         src = f"https://www.youtube-nocookie.com/embed/{id}"
         return IFrame(src, width, height)
+
     else:
+        # For code: just pass
         pass
 
 
