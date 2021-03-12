@@ -396,7 +396,12 @@ NBSYNOPSIS = $(SHARED)utils/nbsynopsis.py
 NBSHORTEN = $(SHARED)utils/nbshorten.py
 EXPORT_NOTEBOOK_CODE = $(SHARED)utils/export_notebook_code.py 
 
+# Commit new synopsis pics after a change (not during CI)
+ifeq ($(origin CI),environment)
+COMMIT_SYNOPSIS =
+else
 COMMIT_SYNOPSIS = -git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
+endif
 
 # These two notebooks can't be run under CI, so we simply copy them instead
 ifeq ($(origin CI),environment)
