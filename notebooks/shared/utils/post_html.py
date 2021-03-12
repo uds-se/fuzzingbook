@@ -337,8 +337,9 @@ def add_links_to_imports(contents, html_file):
             base = module[:module.find('.')]
             submodule = module[module.find('.') + 1:]
             link = f"https://www.{base}.org/html/{submodule}.html"
-        elif module in ['astor', 'pydriller', 'ipywidgets', 'graphviz']:
-            link = f'https://{module}.readthedocs.io/'
+        elif any(module.startswith(prefix) for prefix in ['astor', 'pydriller', 'ipywidgets', 'graphviz']):
+            base = module[:module.find('.')]
+            link = f'https://{base}.readthedocs.io/'
         elif module in ['enforce', 'showast']:
             link = f'https://pypi.org/project/{module}/'
         elif module == 'magic':
