@@ -146,8 +146,14 @@ JUPYTER ?= jupyter
 
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
+ifeq ($(origin CI),environment)
+# Under CI, use the supplied nbpublish
 NBPUBLISH ?= \
 	PYTHONPATH=ipypublish:$$PYTHONPATH $(PYTHON) ipypublish/bin/nbpublish
+else
+# We use our nbpublish
+NBPUBLISH ?= nbpublish
+endif
 NBPUBLISH_OPTIONS ?= -log warning
 
 # The bookbook tool (okay for chapters and books; but no citations yet)
