@@ -15,11 +15,15 @@ import ast
 
 from typing import Optional, List, Any, Dict
 
-# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
-# if __name__ == '__main__' and __package__ is None:
-#     __package__ = 'bookutils'
-
-from .re_code import RE_CODE
+# To avoid re-running notebook computations during import,
+# we only import code cells that match this regular expression
+# i.e. definitions of 
+# * functions: `def func()`
+# * classes: `class X:`
+# * constants: `UPPERCASE_VARIABLES`
+# * types: `TypeVariables`, and
+# * imports: `import foo`
+RE_CODE = re.compile(r"^(def |class |@|[A-Z][A-Za-z0-9_]+ [-+*/]?= |[A-Z][A-Za-z0-9_]+[.:]|import |from )")
 
 def do_import(code: str) -> bool:
     """Return True if code is to be exported"""
