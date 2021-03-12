@@ -981,7 +981,7 @@ $(DOCS_TARGET)code/%: $(CODE_TARGET)%
 	cp -pr $< $@
 
 .PHONY: dist publish-dist
-dist publish-dist: check-import check-package check-code publish-code toc \
+dist publish-dist: publish-code toc \
 	$(DOCS_TARGET)dist/$(PROJECT)-code.zip \
 	$(DOCS_TARGET)dist/$(PROJECT)-notebooks.zip
 
