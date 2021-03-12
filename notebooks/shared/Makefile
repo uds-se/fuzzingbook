@@ -407,7 +407,6 @@ $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD
 $(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb \
 	$(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) \
 	$(NBSYNOPSIS) $(NBSHORTEN) $(SHARED)$(UTILS)/__init__.py
-	:
 	$(RENDER_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
@@ -916,10 +915,12 @@ docs: publish-notebooks publish-index publish-html publish-code publish-dist \
 
 # github does not like script and iframe tags;
 # links to notebooks need to get adapted
-README.md: $(MARKDOWN_TARGET)index.md Makefile
+README.md: $(MARKDOWN_TARGET)index.md Makefile BADGES.md
 	sed 's!<script.*</script>!!g' $< | \
 	sed '/<iframe.*/,/.*<\/iframe>/d' | \
-	sed 's!(\([_a-zA-Z0-9]*\).ipynb)!($(SITE)/html/\1.html)!g'> $@
+	sed 's!(\([_a-zA-Z0-9]*\).ipynb)!($(SITE)/html/\1.html)!g'> $@~
+	cat BADGES.md $@~ > $@
+	$(RM) $@~
 
 .PHONY: publish
 publish: run quick-publish
