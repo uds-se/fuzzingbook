@@ -404,7 +404,10 @@ $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD
 	$(PYTHON) $(NBSYNOPSIS) --project $(PROJECT) --update $@
 	$(COMMIT_SYNOPSIS)
 	
-$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(SHARED)$(NBAUTOSLIDE) $(SHARED)$(NBSYNOPSIS) $(SHARED)$(NBSHORTEN) $(SHARED)$(UTILS)/__init__.py
+$(RENDERED_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb \
+	$(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) \
+	$(NBSYNOPSIS) $(NBSHORTEN) $(SHARED)$(UTILS)/__init__.py
+	:
 	$(RENDER_NOTEBOOK) $<
 	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) $@ > $@~ && mv $@~ $@
 	$(PYTHON) $(NBAUTOSLIDE) --in-place $@
@@ -628,7 +631,8 @@ $(MYPY_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 
 # Markdown
 $(MARKDOWN_TARGET)%.md:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB)
-	$(RM) -r $(MARKDOWN_TARGET)$(basename $(notdir $<)).md $(MARKDOWN_TARGET)$(basename $(notdir $<))_files
+	$(RM) -r $(MARKDOWN_TARGET)$(basename $(notdir $<)).md \
+		$(MARKDOWN_TARGET)$(basename $(notdir $<))_files
 	$(CONVERT_TO_MARKDOWN) $<
 
 # For word, we convert from the HTML file
@@ -910,10 +914,11 @@ docs: publish-notebooks publish-index publish-html publish-code publish-dist \
 	$(DOCS_TARGET)index.html $(DOCS_TARGET)404.html README.md binder/postBuild
 	@echo "Now use 'make publish-all' to commit changes to docs."
 
-# github does not like script tags;
+# github does not like script and iframe tags;
 # links to notebooks need to get adapted
 README.md: $(MARKDOWN_TARGET)index.md Makefile
 	sed 's!<script.*</script>!!g' $< | \
+	sed '/<iframe.*/,/.*<\/iframe>/d' | \
 	sed 's!(\([_a-zA-Z0-9]*\).ipynb)!($(SITE)/html/\1.html)!g'> $@
 
 .PHONY: publish

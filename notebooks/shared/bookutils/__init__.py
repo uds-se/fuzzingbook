@@ -46,9 +46,18 @@ def rich_output() -> bool:
 
 # Wrapper for YouTubeVideo
 def YouTubeVideo(id: str, width: int = 640, height: int = 360) -> Any:
-    """Replacement for IPython.YoutubeVideo, 
-    with different width/height and no cookies for YouTube"""
-    if have_ipython:
+    """
+    Replacement for IPython.YoutubeVideo, 
+    with different width/height and no cookies for YouTube
+    """
+    if 'RENDER_HTML' in os.environ:
+        import IPython.core.display
+        return IPython.core.display.Markdown(f'''
+        <a href="https://www.youtube-nocookie.com/embed/{id}" target="_blank">
+        ![YouTube video](PICS/youtube.png)
+        </a>
+        ''')
+    elif have_ipython:
         from IPython.display import IFrame
         src = f"https://www.youtube-nocookie.com/embed/{id}"
         return IFrame(src, width, height)
