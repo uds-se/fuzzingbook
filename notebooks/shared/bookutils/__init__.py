@@ -53,9 +53,9 @@ def YouTubeVideo(id: str, width: int = 640, height: int = 360) -> Any:
     if 'RENDER_HTML' in os.environ:
         import IPython.core.display
         return IPython.core.display.Markdown(f'''
-        <a href="https://www.youtube-nocookie.com/embed/{id}" target="_blank">
-        ![YouTube video](PICS/youtube.png)
-        </a>
+<a href="https://www.youtube-nocookie.com/embed/{id}" target="_blank">
+<img src="https://www.debuggingbook.org/html/PICS/youtube.png" width={width}>
+</a>
         ''')
     elif have_ipython:
         from IPython.display import IFrame
