@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from bookutils.re_code import RE_CODE
-
 import io, os, sys, types, re
 import datetime
 from typing import Dict, Optional, List, Any, Tuple
@@ -20,6 +18,19 @@ mypy = False
 RE_IGNORE = re.compile(r'^get_ipython().*|^%.*')
 RE_IMPORT_BOOKUTILS = re.compile(r'^import bookutils.*$', re.MULTILINE)
 RE_FROM_BOOKUTILS = re.compile(r'^from bookutils import .*$', re.MULTILINE)
+
+# To avoid re-running notebook computations during import,
+# we only export code cells that match this regular expression
+# i.e. definitions of 
+# * functions: `def func()`
+# * classes: `class X:`
+# * constants: `UPPERCASE_VARIABLES`
+# * types: `TypeVariables`, and
+# * imports: `import foo`
+#
+# PLEASE NOTE: if you change this, also change the corresponding 
+# definition in bookutils/import_notebooks.py
+RE_CODE = re.compile(r"^(def |class |@|[A-Z][A-Za-z0-9_]+ [-+*/]?= |[A-Z][A-Za-z0-9_]+[.:]|import |from )")
 
 # Things to import only if main (reduces dependencies)
 RE_IMPORT_IF_MAIN = re.compile(r'^(from|import)[ \t]+(matplotlib|mpl_toolkits|numpy|scipy|IPython|requests|FTB|Collector|bookutils import YouTubeVideo).*$', re.MULTILINE)

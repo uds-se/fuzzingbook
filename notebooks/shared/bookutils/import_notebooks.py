@@ -23,6 +23,9 @@ from typing import Optional, List, Any, Dict
 # * constants: `UPPERCASE_VARIABLES`
 # * types: `TypeVariables`, and
 # * imports: `import foo`
+#
+# PLEASE NOTE: if you change this, also change the corresponding 
+# definition in utils/export_notebook_code.py
 RE_CODE = re.compile(r"^(def |class |@|[A-Z][A-Za-z0-9_]+ [-+*/]?= |[A-Z][A-Za-z0-9_]+[.:]|import |from )")
 
 def do_import(code: str) -> bool:
