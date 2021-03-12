@@ -94,7 +94,7 @@ def notebook_toc(public_chapters, appendices, booktitle):
     #     appendix_toc += notebook_toc_entry(notebook, "*")
         
     sitemap = r"""## Sitemap
-While the chapters of this book can be read one after the other, there are many possible paths through the book. In this graph, an arrow $A \rightarrow B$ means that chapter $A$ is a prerequisite for chapter $B$. You can pick arbitrary paths in this graph to get to the topics that interest you most:
+While the chapters of this book can be read one after the other, there are many possible paths through the book. In this graph, an arrow _A_ → _B_ means that chapter _A_ is a prerequisite for chapter _B_. You can pick arbitrary paths in this graph to get to the topics that interest you most:
 """
 
     sitemap_code_1 = "# ignore\nfrom IPython.display import SVG"
