@@ -10,6 +10,7 @@
 &nbsp;
 [![License: MIT (Code), CC BY-NC-SA (Book)](https://img.shields.io/badge/License-MIT_(Code),_CC_BY--NC--SA_4.0_(Book)-blue.svg)](https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md)
 
+
 # About this Book
 
 __Welcome to "The Fuzzing Book"!__ 
