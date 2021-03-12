@@ -599,23 +599,27 @@ $(CODE_TARGET)__init__.py: $(CODE_TARGET)__init__.py.in $(CHAPTERS_MAKEFILE)
 	(for module in $(IMPORTS); do echo from . import $$module; done) | grep -v '^.*[0-9][0-9]_.*' >> $@
 	chmod +x $@
 
+# For code, we use our own exporter
+
 # In our CI environment, CI=true is set
 ifeq ($(origin CI),environment)
-	# CI mode: Create code from local notebooks,
-	# such that we don't have to execute the notebooks
-	CODE_SOURCE=$(NOTEBOOKS)
-else
-	# Normal mode: Create code from full notebooks,
-	# such that we get the full outputs in the synopsis
-	CODE_SOURCE=$(FULL_NOTEBOOKS)
-endif
-
-# For code, we use our own exporter
-$(CODE_TARGET)%.py: $(CODE_SOURCE)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
+# CI mode: Create code from local notebooks,
+# such that we don't have to execute the notebooks
+$(CODE_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 	@test -d $(CODE_TARGET) || $(MKDIR) $(CODE_TARGET)
 	$(CONVERT_TO_PYTHON) --project $(PROJECT) $< > $@~ && mv $@~ $@
 	# $(AUTOPEP8) $(AUTOPEP8_OPTIONS) $@
 	-chmod +x $@
+else
+# Normal mode: Create code from full notebooks,
+# such that we get the full outputs in the synopsis
+$(CODE_TARGET)%.py: $(FULL_NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
+	@test -d $(CODE_TARGET) || $(MKDIR) $(CODE_TARGET)
+	$(CONVERT_TO_PYTHON) --project $(PROJECT) $< > $@~ && mv $@~ $@
+	# $(AUTOPEP8) $(AUTOPEP8_OPTIONS) $@
+	-chmod +x $@
+endif
+
 
 # mypy stuff always comes directly from notebooks
 $(MYPY_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
