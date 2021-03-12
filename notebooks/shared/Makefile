@@ -146,7 +146,8 @@ JUPYTER ?= jupyter
 
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
-NBPUBLISH ?= $(SHARED)/ipypublish/bin/nbpublish
+NBPUBLISH ?= \
+	PYTHONPATH=ipypublish:$$PYTHONPATH $(PYTHON) ipypublish/bin/nbpublish
 NBPUBLISH_OPTIONS ?= -log warning
 
 # The bookbook tool (okay for chapters and books; but no citations yet)
@@ -313,7 +314,7 @@ and more:	word markdown epub
 
 # Individual targets
 .PHONY: html pdf python code slides word doc docx md markdown epub
-.PHONY: full-notebooks full fulls rendered-notebooks rendered renders book-pdf book-html
+.PHONY: full-notebooks check-notebooks full fulls rendered-notebooks rendered renders book-pdf book-html
 html:	ipypublish-chapters $(HTMLS)
 pdf:	ipypublish-chapters $(PDFS)
 nbpdf:	ipypublish-chapters $(NBPDFS)
@@ -322,7 +323,7 @@ slides: $(SLIDES)
 word doc docx: $(WORDS)
 md markdown: $(MARKDOWNS)
 epub: $(EPUBS)
-full-notebooks full fulls: $(FULLS)
+full-notebooks check-notebooks full fulls: $(FULLS)
 rendered-notebooks rendered renders: $(RENDERS)
 
 book-pdf $(PROJECT)-pdf:  ipypublish-book $(BOOK_PDF)
@@ -396,6 +397,14 @@ NBSHORTEN = $(SHARED)utils/nbshorten.py
 EXPORT_NOTEBOOK_CODE = $(SHARED)utils/export_notebook_code.py 
 
 COMMIT_SYNOPSIS = -git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
+
+# These two notebooks can't be run under CI, so we simply copy them instead
+ifeq ($(origin CI),environment)
+$(FULL_NOTEBOOKS)/Tracking.ipynb: $(NOTEBOOKS)/Tracking.ipynb
+	cp -pr $< $@
+$(FULL_NOTEBOOKS)/ChangeCounter.ipynb: $(NOTEBOOKS)/ChangeCounter.ipynb
+	cp -pr $< $@
+endif
 
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS)
 	$(EXECUTE_NOTEBOOK) $<
