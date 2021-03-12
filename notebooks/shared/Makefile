@@ -146,14 +146,8 @@ JUPYTER ?= jupyter
 
 # The nbpublish tool (preferred; https://github.com/chrisjsewell/ipypublish)
 # (see nbpublish -h for details)
-ifeq ($(origin CI),environment)
-# Under CI, use the supplied nbpublish
 NBPUBLISH ?= \
-	PYTHONPATH=ipypublish:$$PYTHONPATH $(PYTHON) ipypublish/bin/nbpublish
-else
-# We use our nbpublish
-NBPUBLISH ?= nbpublish
-endif
+	PYTHONPATH=$(SHARED) $(PYTHON) $(SHARED)bin/nbpublish
 NBPUBLISH_OPTIONS ?= -log warning
 
 # The bookbook tool (okay for chapters and books; but no citations yet)
@@ -490,7 +484,8 @@ POST_HTML_OPTIONS = $(BETA_FLAG) \
 	--todo-chapters="$(TODO_SOURCES)" \
 	--new-chapters="$(NEW_SOURCES)"
 
-HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py $(CHAPTERS_MAKEFILE) $(BIBCHECK)
+HTML_DEPS = $(BIB) $(PUBLISH_PLUGINS) $(SHARED)utils/post_html.py \
+	$(CHAPTERS_MAKEFILE) $(BIBCHECK)
 
 # Check bib
 BIBER = biber
@@ -528,7 +523,7 @@ $(DOCS_TARGET)index.html: \
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)index.html $@
 	@cd $(HTML_TARGET) && $(RM) -r index.nbpub.log index_files
-	$(PYTHON) $(SHARED)utils/post_html.py --menu-prefix=html/ --home $(POST_HTML_OPTIONS)$(HOME_POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(SHARED)utils/post_html.py --menu-prefix=html/ --home $(POST_HTML_OPTIONS)$(HOME_POST_HTML_OPTIONS) $@
 	@$(OPEN) $@
 
 # 404.html comes with absolute links (/html/) such that it works anywhare
@@ -539,30 +534,33 @@ $(DOCS_TARGET)404.html: $(FULL_NOTEBOOKS)/404.ipynb $(HTML_DEPS)
 	$(CONVERT_TO_HTML) $<
 	mv $(HTML_TARGET)404.html $@
 	@cd $(HTML_TARGET) && $(RM) -r 404.nbpub.log 404_files
-	$(PYTHON) $(SHARED)utils/post_html.py --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(SHARED)utils/post_html.py --menu-prefix=/html/ --home $(POST_HTML_OPTIONS) $@
 	(echo '---'; echo 'permalink: /404.html'; echo '---'; cat $@) > $@~ && mv $@~ $@
 	@$(OPEN) $@
 
-$(DOCS_TARGET)html/00_Index.html: $(DOCS_TARGET)notebooks/00_Index.ipynb $(HTML_DEPS)
+$(DOCS_TARGET)html/00_Index.html: \
+	$(DOCS_TARGET)notebooks/00_Index.ipynb $(HTML_DEPS)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) -r 00_Index.nbpub.log 00_Index_files
 	@cd $(DOCS_TARGET)html && $(RM) -r 00_Index.nbpub.log 00_Index_files
 	mv $(HTML_TARGET)00_Index.html $@
-	$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
 
-$(DOCS_TARGET)html/00_Table_of_Contents.html: $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb $(SITEMAP_SVG)
+$(DOCS_TARGET)html/00_Table_of_Contents.html: \
+	$(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb \
+	$(SITEMAP_SVG) $(HTML_DEPS)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
 	@cd $(DOCS_TARGET)html && $(RM) -r 00_Table_of_Contents.nbpub.log 00_Table_of_Contents_files
 	mv $(HTML_TARGET)00_Table_of_Contents.html $@
-	$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
 	@$(OPEN) $@
 
 $(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
 	@test -d $(HTML_TARGET) || $(MKDIR) $(HTML_TARGET)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
-	$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
 	@-test -L $(HTML_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(HTML_TARGET)
 	@$(OPEN) $@
 
@@ -702,7 +700,7 @@ $(HTML_TARGET)$(BOOK).html: $(FULLS) $(BIB) $(SHARED)utils/post_html.py
 	ln -s ../$(BIB) $(BOOK)
 	$(CONVERT_TO_HTML) $(BOOK)
 	$(PYTHON) $(SHARED)utils/nbmerge.py $(BOOK)/Ch*.ipynb > notebooks/$(BOOK).ipynb
-	$(PYTHON) $(SHARED)utils/post_html.py $(BETA_FLAG) $(POST_HTML_OPTIONS) $@
+	@$(PYTHON) $(SHARED)utils/post_html.py $(BETA_FLAG) $(POST_HTML_OPTIONS) $@
 	$(RM) -r $(BOOK) notebooks/$(BOOK).ipynb
 	cd $(HTML_TARGET) && $(RM) $(BOOK).nbpub.log $(BOOK)_files/$(BIB)
 	@echo Created $@

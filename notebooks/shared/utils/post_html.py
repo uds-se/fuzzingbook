@@ -843,7 +843,7 @@ else:
 # sys.exit(0)
 
 # Read it in
-print("Reading", chapter_html_file)
+print("post_html.py: Reading", chapter_html_file)
 chapter_contents = open(chapter_html_file, encoding="utf-8").read()
 
 # Replacement orgy
@@ -939,5 +939,5 @@ if beta_warning is not None:
     chapter_contents = chapter_contents.replace("</h1>", "</h1>" + beta_warning)
 
 # And write it out again
-print("Writing", chapter_html_file)
+print("post_html.py: Writing", chapter_html_file)
 open(chapter_html_file, mode="w", encoding="utf-8").write(chapter_contents)
