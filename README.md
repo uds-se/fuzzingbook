@@ -26,7 +26,7 @@ YouTubeVideo("w4u5gCgPlmg")
 
 
 <a href="https://www.youtube-nocookie.com/embed/w4u5gCgPlmg" target="_blank">
-<img src="https://www.debuggingbook.org/html/PICS/youtube.png" width=640>
+<img src="https://www.fuzzingbook.org/html/PICS/youtube.png" width=640>
 </a>
         
 
