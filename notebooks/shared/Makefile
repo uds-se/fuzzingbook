@@ -400,15 +400,16 @@ EXPORT_NOTEBOOK_CODE = $(SHARED)utils/export_notebook_code.py
 ifeq ($(origin CI),environment)
 COMMIT_SYNOPSIS =
 else
-COMMIT_SYNOPSIS = -git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
+# COMMIT_SYNOPSIS = -git commit -m "Update synopsis" $(NOTEBOOKS)/PICS/*synopsis*
+COMMIT_SYNOPSIS =
 endif
 
-# These two notebooks can't be run under CI, so we simply copy them instead
+# These notebooks can't be run under CI, so we simply copy them instead
 ifeq ($(origin CI),environment)
 $(FULL_NOTEBOOKS)/Tracking.ipynb: $(NOTEBOOKS)/Tracking.ipynb
 	cp -pr $< $@
-$(FULL_NOTEBOOKS)/ChangeCounter.ipynb: $(NOTEBOOKS)/ChangeCounter.ipynb
-	cp -pr $< $@
+# $(FULL_NOTEBOOKS)/ChangeCounter.ipynb: $(NOTEBOOKS)/ChangeCounter.ipynb
+# 	cp -pr $< $@
 endif
 
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS)
@@ -642,6 +643,7 @@ endif
 
 
 # mypy stuff always comes directly from notebooks
+mypy: $(MYPYS)
 $(MYPY_TARGET)%.py: $(NOTEBOOKS)/%.ipynb $(EXPORT_NOTEBOOK_CODE)
 	@test -d $(MYPY_TARGET) || $(MKDIR) $(MYPY_TARGET)
 	$(CONVERT_TO_PYTHON) --project $(PROJECT) --mypy $< > $@~ && mv $@~ $@
