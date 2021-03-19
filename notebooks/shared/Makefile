@@ -567,7 +567,7 @@ $(HTML_TARGET)%.html: $(FULL_NOTEBOOKS)/%.ipynb $(HTML_DEPS)
 	$(CONVERT_TO_HTML) $<
 	@cd $(HTML_TARGET) && $(RM) $*.nbpub.log $*_files/$(BIB)
 	@$(PYTHON) $(SHARED)utils/post_html.py $(POST_HTML_OPTIONS) $@
-	@if grep -i 'unresolved citation' $@; then false; fi
+	@if grep -i '\[unresolved citation' $@; then false; fi
 	@-test -L $(HTML_TARGET)PICS || ln -s ../$(NOTEBOOKS)/PICS $(HTML_TARGET)
 	@$(OPEN) $@
 
