@@ -352,12 +352,12 @@ def add_links_to_imports(contents, html_file):
     for module in imports:
         link = None
         if module.startswith("bookutils"):
-            link = "https://github.com/uds-se/fuzzingbook/tree/master/notebooks/bookutils"
+            link = f"{github_html}/tree/master/notebooks/shared/bookutils"
         elif module == "requests":
             link = "http://docs.python-requests.org/en/master/"
         elif module.startswith("IPython"):
             # Point to IPython doc
-            link = "https://ipython.readthedocs.io/en/stable/api/generated/" + module + ".html"
+            link = f"https://ipython.readthedocs.io/en/stable/api/generated/{module}.html"
         elif module.startswith("selenium"):
             # Point to Selenium doc
             link = "https://selenium-python.readthedocs.io/"
