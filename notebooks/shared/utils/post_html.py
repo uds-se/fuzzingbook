@@ -400,16 +400,16 @@ def add_links_to_imports(contents, html_file):
             link = module + '.html'
             
         # print(f'{module} -> ', repr(link))
-   
-        if link and link.startswith('http'):
-            if link_exists(link):
+
+        if link:
+            if link.startswith('http') and not link_exists(link):
+                print(f"{html_file}: Cannot find link {link} for {repr(module)}",
+                      file=sys.stderr)
+            else:
                 contents = contents.replace(r'<span class="nn">' + module + r'</span>',
                     r'<span class="nn"><a href="' + link 
                     + r'" class="import" target="_blank">' 
                     + module + r"</a>" + r'</span>')
-            else:
-                print(f"{html_file}: Cannot find link {link} for {repr(module)}",
-                      file=sys.stderr)
 
     return contents
 
