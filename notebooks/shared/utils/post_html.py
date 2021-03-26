@@ -16,6 +16,7 @@ import sys
 import io
 import html
 import urllib
+import shelve
 
 try:
     import nbformat
@@ -26,6 +27,7 @@ except:
 # Process arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("--home", help="omit links to notebook, code, and slides", action='store_true')
+parser.add_argument("--clear-link-cache", help="Clear link cache", action='store_true')
 parser.add_argument("--include-ready", help="include ready chapters", action='store_true')
 parser.add_argument("--include-todo", help="include work-in-progress chapters", action='store_true')
 parser.add_argument("--project", help="project name", default="fuzzingbook")
@@ -307,6 +309,38 @@ def bibtex_unescape(contents):
 assert bibtex_unescape(r"B{\"o}hme") == 'Böhme'
 assert bibtex_unescape(r"P{\`e}zze") == 'Pèzze'
 
+LINKS_DB = 'links'
+links_db = shelve.open(LINKS_DB)
+if args.clear_link_cache:
+    for link in links_db.keys():
+        del links_db[link]
+
+def link_exists(link):
+    """Return True if http/https `link` exists"""
+
+    if link in links_db:
+        # Seen before
+        return True
+        
+    try:
+        urllib.request.urlopen(link)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 403:
+            # We get this when accessing readthedocs.io
+            pass
+        else:
+            print(f"Cannot open {link}: {exc}", file=sys.stderr)
+            link = None
+    except urllib.error.URLError as exc:
+        print(f"Cannot open {link}: {exc}", file=sys.stderr)
+        link = None
+    
+    if not link:
+        return False
+
+    links_db[link] = True
+    return True
+
 
 
 # Imports are in <span class="nn">NAME</span>
@@ -368,27 +402,14 @@ def add_links_to_imports(contents, html_file):
         # print(f'{module} -> ', repr(link))
    
         if link and link.startswith('http'):
-            # Check whether link exists
-            try:
-                urllib.request.urlopen(link)
-            except urllib.error.HTTPError as exc:
-                if exc.code == 403:
-                    # We get this when accessing readthedocs.io
-                    pass
-                else:
-                    print(f"{html_file}: Cannot find link {link} for {repr(module)}: {exc}",
-                          file=sys.stderr)
-                    link = None
-            except urllib.error.URLError as exc:
-                print(f"{html_file}: Cannot open {link} for {repr(module)}: {exc}",
-                          file=sys.stderr)
-                link = None
-
-        if link:
-            contents = contents.replace(r'<span class="nn">' + module + r'</span>',
-                r'<span class="nn"><a href="' + link 
-                + r'" class="import" target="_blank">' 
-                + module + r"</a>" + r'</span>')
+            if link_exists(link):
+                contents = contents.replace(r'<span class="nn">' + module + r'</span>',
+                    r'<span class="nn"><a href="' + link 
+                    + r'" class="import" target="_blank">' 
+                    + module + r"</a>" + r'</span>')
+            else:
+                print(f"{html_file}: Cannot find link {link} for {repr(module)}",
+                      file=sys.stderr)
 
     return contents
 
@@ -941,3 +962,5 @@ if beta_warning is not None:
 # And write it out again
 print("post_html.py: Writing", chapter_html_file)
 open(chapter_html_file, mode="w", encoding="utf-8").write(chapter_contents)
+
+links_db.close()
