@@ -141,6 +141,14 @@ LATEX ?= latexmk
 # Python
 PYTHON ?= python3
 
+# Python warning level
+# Turn warnings into errors unless we're in C
+ifeq ($(origin CI),environment)
+PYTHON_WARNLEVEL =
+else
+PYTHON_WARNLEVEL = -W error
+endif
+
 # Jupyter
 JUPYTER ?= jupyter
 
@@ -782,7 +790,7 @@ PY_SUCCESS_MAGIC = "--- Code check passed ---"
 PYS_OUT = $(SOURCE_FILES:%.ipynb=$(CODE_TARGET).%.py.out)
 $(CODE_TARGET).%.py.out:	$(CODE_TARGET)%.py
 	@echo Running $<...
-	@if $(PYTHON) -W error $< > $@ 2>&1; then \
+	@if $(PYTHON) $(PYTHON_WARNLEVEL) $< > $@ 2>&1; then \
 		echo $(PY_SUCCESS_MAGIC) >> $@; \
 		exit 0; \
 	else \
