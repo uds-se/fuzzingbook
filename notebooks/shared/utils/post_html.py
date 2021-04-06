@@ -413,7 +413,7 @@ def add_links_to_imports(contents, html_file):
 
     return contents
 
-# Remove cells that start with `# ignore` or only contain 
+# Remove cells that start with `# ignore`, or only contain 
 # a quiz() or a display() call. Keep the output.
 RE_IGNORE = re.compile(r'''
 <div class="input_code">
