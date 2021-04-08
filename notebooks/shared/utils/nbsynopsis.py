@@ -87,14 +87,9 @@ and then make use of the following features.
                     text = None
 
                     # SVG output
-                    if text is None:
-                        svg = None
-                        try:
-                            svg = output.data['image/svg+xml']
-                        except KeyError:
-                            pass
-                        except AttributeError:
-                            pass
+                    if (text is None and hasattr(output, 'data') and
+                        'image/svg+xml' in output.data):
+                        svg = output.data['image/svg+xml']
                         if svg is not None:
                             svg_basename = (notebook_basename +
                                 '-synopsis-' + repr(img_count) + '.svg')
@@ -127,14 +122,9 @@ and then make use of the following features.
                             '```\n')
 
                     # PNG output
-                    if text is None:
-                        png = None
-                        try:
-                            png = output.data['image/png']
-                        except KeyError:
-                            pass
-                        except AttributeError:
-                            pass
+                    if (text is None and hasattr(output, 'data') and
+                        'image/png' in output.data):
+                        png = output.data['image/png']
                         if png is not None:
                             png_basename = (notebook_basename +
                                 '-synopsis-' + repr(img_count) + '.png')
@@ -149,38 +139,25 @@ and then make use of the following features.
                                 f.write(base64.b64decode(png, validate=True))
                             text = "```\n![](" + 'PICS/' + png_basename + ')\n```\n'
 
-                    # Markdown output
-                    if text is None:
-                        try:
-                            text = "```\n" + output.data['text/markdown'] + "\n```\n"
-                        except KeyError:
-                            pass
-                        except AttributeError:
-                            pass
-
                     # HTML output
-                    if text is None:
-                        try:
-                            text = "```\n" + output.data['text/html'] + "\n```\n"
-                        except KeyError:
-                            pass
-                        except AttributeError:
-                            pass
+                    if (text is None and hasattr(output, 'data') and
+                        'text/html' in output.data):
+                        text = "```\n" + output.data['text/html'] + "\n```\n"
+
+                    # Markdown output
+                    if (text is None and hasattr(output, 'data') and
+                       'text/markdown' in output.data):
+                        text = "```\n" + output.data['text/markdown'] + "\n```\n"
 
                     # Text output
-                    if text is None:
-                        try:
-                            text = unterm(output.text)
-                        except AttributeError:
-                            pass
+                    if text is None and hasattr(output, 'text'):
+                        text = unterm(output.text) + "\n"
 
                     # Data output
-                    if text is None:
-                        try:
-                            text = unterm(output.data['text/plain'] + '\n')
-                        except KeyError:
-                            pass
-                    
+                    if (text is None and hasattr(output, 'data') and
+                        'text/plain' in output.data):
+                        text = unterm(output.data['text/plain'] + '\n')
+
                     if text is not None:
                         output_text += text
 
@@ -192,9 +169,9 @@ and then make use of the following features.
             else:
                 synopsis += cell.source + "\n\n"
     
-    synopsis = synopsis.replace("```python\n```\n", "\n")
-    synopsis = synopsis.replace("```\n```python\n", "\n")
-    synopsis = synopsis.replace("```\n```\n", "\n")
+    synopsis = synopsis.replace("```python\n```\n", "")
+    synopsis = synopsis.replace("```\n```python\n", "")
+    synopsis = synopsis.replace("```\n```\n", "")
 
     return synopsis
     
