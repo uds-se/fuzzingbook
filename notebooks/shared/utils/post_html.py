@@ -392,12 +392,14 @@ def add_links_to_imports(contents, html_file):
             link = 'https://scikit-learn.org/'
         elif module in ['ep', 'go', 'plt', 'np']:
             link = None  # aliases
+        elif module == 'cProfile':
+            link = 'https://docs.python.org/3/library/profile.html'
         elif module[0].islower():
             # Point to Python doc
-            link = "https://docs.python.org/3/library/" + module + ".html"
+            link = f'https://docs.python.org/3/library/{module}.html'
         else:
-            # Point to notebook
-            link = module + '.html'
+            # Point to (local) notebook
+            link = f'{module}.html'
             
         # print(f'{module} -> ', repr(link))
 
