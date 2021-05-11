@@ -1310,7 +1310,7 @@ NBDEPEND = $(SHARED)utils/nbdepend.py
 SITEMAP_OPTIONS = --graph --transitive-reduction --project $(PROJECT) # --cluster-by-parts
 
 sitemap: $(SITEMAP_SVG)
-	@echo open sitemap at $(SITEMAP_SVG)
+	open $(SITEMAP_SVG)
 
 $(SITEMAP_SVG): $(CHAPTER_SOURCES) $(NBDEPEND)
 	$(PYTHON) $(NBDEPEND) $(SITEMAP_OPTIONS) $(CHAPTER_SOURCES) > $@~ && mv $@~ $@
