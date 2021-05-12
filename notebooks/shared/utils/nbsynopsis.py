@@ -171,7 +171,7 @@ and then make use of the following features.
     
     synopsis = synopsis.replace("```python\n```\n", "")
     synopsis = synopsis.replace("```\n```python\n", "")
-    synopsis = synopsis.replace("```\n```\n", "")
+    synopsis = synopsis.replace("```\n```", "")
 
     return synopsis
     
