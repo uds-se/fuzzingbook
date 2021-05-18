@@ -415,7 +415,7 @@ def add_links_to_imports(contents, html_file):
 
     return contents
 
-# Remove cells that start with `# ignore`, or only contain 
+# Remove cells that start with `# ignore`, `# docassert`, or only contain 
 # a quiz() or a display() call. Keep the output.
 RE_IGNORE = re.compile(r'''
 <div class="input_code">
@@ -424,7 +424,7 @@ RE_IGNORE = re.compile(r'''
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span>(<span class="n">(quiz|display)</span>|<span class="c1">#\s*[iI]gnore[^<]*</span>).*?
+<div class=" highlight hl-ipython3"><pre><span></span>(<span class="n">(quiz|display)</span>|<span class="c1">#\s*(ignore|docassert)[^<]*</span>).*?
 </div>
 </div></div>
 </div>

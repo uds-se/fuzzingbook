@@ -80,6 +80,8 @@ and then make use of the following features.
             if cell.cell_type == 'code':
                 if cell.source.startswith("# ignore"):
                     pass
+                elif cell.source.startswith("# docassert"):
+                    pass
                 else:
                     synopsis += "```python\n>>> " + cell.source.replace('\n', '\n>>> ') + "\n```\n"
                 output_text = ''

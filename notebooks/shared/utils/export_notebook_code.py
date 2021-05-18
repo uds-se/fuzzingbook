@@ -15,7 +15,8 @@ import nbformat
 mypy = False
 
 # Things to ignore in exported Python code
-RE_IGNORE = re.compile(r'^get_ipython().*|^%.*')
+RE_IGNORE = re.compile(r'^get_ipython().*|^%.*', re.DOTALL)
+RE_DOCASSERT = re.compile(r'^#\s*docassert.*', re.DOTALL)
 RE_IMPORT_BOOKUTILS = re.compile(r'^import bookutils.*$', re.MULTILINE)
 RE_FROM_BOOKUTILS = re.compile(r'^from bookutils import .*$', re.MULTILINE)
 
@@ -310,6 +311,10 @@ def export_notebook_code(notebook_name: str,
     for cell in notebook.cells:
         if cell.cell_type == 'code':
             code = cell.source
+            
+            if RE_DOCASSERT.match(code):
+                # Assertion as part of documentation - skip
+                continue
                 
             while code.startswith('#') or code.startswith('\n'):
                 # Skip leading comments
