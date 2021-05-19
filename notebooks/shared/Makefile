@@ -626,7 +626,7 @@ $(CODE_TARGET)setup.py: $(CODE_TARGET)setup.py.in
 
 $(CODE_TARGET)__init__.py: $(CODE_TARGET)__init__.py.in $(CHAPTERS_MAKEFILE)
 	cat $< > $@
-	(for module in $(IMPORTS); do echo from . import $$module; done) | grep -v '^.*[0-9][0-9]_.*' >> $@
+	(for module in $(IMPORTS); do echo "# from . import $$module"; done) | grep -v '^.*[0-9][0-9]_.*' >> $@
 	chmod +x $@
 
 # For code, we use our own exporter
