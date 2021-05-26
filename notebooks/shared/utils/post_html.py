@@ -98,7 +98,7 @@ site_header_template = menu_start + r"""
      <li><a href="__CHAPTER_NOTEBOOK_IPYNB__" target="_blank" class="edit_as_notebook"><i class="fa fa-fw fa-edit"></i> Edit Notebooks</a></li>
      <li><a href="__SITE_HTML__dist/__PROJECT__-code.zip"><i class="fa fa-fw fa-cube"></i> All Code (.zip)</a></li>
      <li><a href="__SITE_HTML__dist/__PROJECT__-notebooks.zip"><i class="fa fa-fw fa-cube"></i> All Notebooks (.zip)</a></li>
-     <li><a href="__GITHUB_HTML__" target="_blank"><i class="fa fa-fw fa-github"></i> Project Page</a></li>
+     <li><a href="__GITHUB_HTML__" target="_blank"><i class="fa fa-fw fa-github"></i> GitHub Repo</a></li>
      <li><a href="html/ReleaseNotes.html" target="_blank"><i class="fa fa-fw fa-calendar"></i> Release Notes</a></li>
      </ul>
      </li>
