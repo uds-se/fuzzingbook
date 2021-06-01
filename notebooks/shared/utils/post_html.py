@@ -323,7 +323,7 @@ def link_exists(link):
         return True
         
     try:
-        urllib.request.urlopen(link)
+        urllib.request.urlopen(link, timeout=5)
     except urllib.error.HTTPError as exc:
         if exc.code == 403:
             # We get this when accessing readthedocs.io
@@ -334,7 +334,10 @@ def link_exists(link):
     except urllib.error.URLError as exc:
         print(f"Cannot open {link}: {exc}", file=sys.stderr)
         link = None
-    
+    except UnicodeError as exc:
+        # We get this when accessing readthedocs.io
+        pass
+
     if not link:
         return False
 
@@ -371,9 +374,16 @@ def add_links_to_imports(contents, html_file):
             base = module[:module.find('.')]
             submodule = module[module.find('.') + 1:]
             link = f"https://www.{base}.org/html/{submodule}.html"
-        elif any(module.startswith(prefix) for prefix in ['astor', 'pydriller', 'ipywidgets', 'graphviz']):
-            base = module[:module.find('.')]
-            link = f'https://{base}.readthedocs.io/'
+        elif module.startswith('astor'):
+            link = f'https://astor.readthedocs.io/'
+        elif module.startswith('pydriller'):
+            link = f'https://pydriller.readthedocs.io/'
+        elif module.startswith('ipywidgets'):
+            link = f'https://ipywidgets.readthedocs.io/'
+        elif module.startswith('graphviz'):
+            link = f'https://graphviz.readthedocs.io/'
+        elif module in ['git', 'git.exc']:
+            link = f'https://gitpython.readthedocs.io/'
         elif module in ['enforce', 'showast']:
             link = f'https://pypi.org/project/{module}/'
         elif module == 'magic':
