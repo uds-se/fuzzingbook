@@ -860,9 +860,9 @@ $(PACKAGES_OUT): $(PYS)
 MYPY = mypy 
 # MYPYS = $(SOURCE_FILES:%.ipynb=$(MYPY_TARGET)%.py)
 MYPYS_OUT = $(SOURCE_FILES:%.ipynb=$(MYPY_TARGET).%.py.out)
-$(MYPY_TARGET).%.py.out: $(MYPY_TARGET)%.py $(MYPY_TARGET)/mypy.ini
+$(MYPY_TARGET).%.py.out: $(MYPY_TARGET)%.py $(MYPY_TARGET)mypy.ini
 	@echo Type-checking $<...
-	@if $(MYPY) --config-file $(MYPY_TARGET)/mypy.ini $< > $@ 2>&1; then \
+	@if $(MYPY) --config-file $(MYPY_TARGET)mypy.ini $< > $@ 2>&1; then \
 		echo $(PY_SUCCESS_MAGIC) >> $@; \
 		exit 0; \
 	else \
@@ -876,7 +876,7 @@ $(MYPY_TARGET).%.py.out: $(MYPY_TARGET)%.py $(MYPY_TARGET)/mypy.ini
 UTILS_MYPY_OUT = $(MYPY_TARGET).$(UTILS).py.out
 $(UTILS_MYPY_OUT): $(UTILITY_FILES:%=$(SHARED)$(UTILS)/%)
 	@echo Type-checking $(SHARED)$(UTILS)...
-	@if $(MYPY) --config-file $(MYPY_TARGET)/mypy.ini $(SHARED)$(UTILS) > $@ 2>&1; then \
+	@if $(MYPY) --config-file $(MYPY_TARGET)mypy.ini $(SHARED)$(UTILS) > $@ 2>&1; then \
 		echo $(PY_SUCCESS_MAGIC) >> $@; \
 		exit 0; \
 	else \

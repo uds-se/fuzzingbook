@@ -398,9 +398,11 @@ def add_links_to_imports(contents, html_file):
             link = 'https://matplotlib.org/'
         elif module.startswith('plotly'):
             link = 'https://plotly.com/python/'
+        elif module.startswith('scipy'):
+            link = 'https://docs.scipy.org/doc/scipy/reference/'
         elif module.startswith('sklearn'):
             link = 'https://scikit-learn.org/'
-        elif module in ['ep', 'go', 'plt', 'np']:
+        elif module in ['ep', 'go', 'plt', 'np', 'mtick']:
             link = None  # aliases
         elif module == 'cProfile':
             link = 'https://docs.python.org/3/library/profile.html'
@@ -415,7 +417,7 @@ def add_links_to_imports(contents, html_file):
 
         if link:
             if link.startswith('http') and not link_exists(link):
-                print(f"{html_file}: Cannot find link {link} for {repr(module)}",
+                print(f"{html_file}: Cannot find link {link} for module {repr(module)}",
                       file=sys.stderr)
             else:
                 contents = contents.replace(r'<span class="nn">' + module + r'</span>',
