@@ -402,6 +402,8 @@ def add_links_to_imports(contents, html_file):
             link = 'https://docs.scipy.org/doc/scipy/reference/'
         elif module.startswith('sklearn'):
             link = 'https://scikit-learn.org/'
+        elif module.startswith('z3'):
+            link = 'https://github.com/Z3Prover/z3#readme'
         elif module in ['ep', 'go', 'plt', 'np', 'mtick']:
             link = None  # aliases
         elif module == 'cProfile':
