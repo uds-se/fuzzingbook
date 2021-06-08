@@ -801,10 +801,18 @@ $(CODE_TARGET).%.py.out:	$(CODE_TARGET)%.py
 		exit 1; \
 	fi
 
-# No need to check if Tracking.py works; it's not run by users anyway
-$(CODE_TARGET).Tracking.py.out:	$(CODE_TARGET)Tracking.py
+
+# No need to check if these work; they are not run by users anyway
+$(CODE_TARGET).Tracking.py.out: $(CODE_TARGET)Tracking.py
 	@echo Skipping $<...
 	@echo $(PY_SUCCESS_MAGIC) > $@
+
+$(CODE_TARGET).FuzzingInTheLarge.py.out: $(CODE_TARGET)FuzzingInTheLarge.py
+	@echo Skipping $<...
+	@echo $(PY_SUCCESS_MAGIC) > $@
+
+
+
 
 .PHONY: test-code
 test-code: code $(PYS_OUT)
