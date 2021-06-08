@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Timer" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Timer.html
-# Last change: 2020-10-13 15:12:26+02:00
+# Last change: 2021-06-02 17:56:35+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,101 +27,141 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Timer
 
-# # Timer
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python Timer.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.Timer import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/Timer.html
+
+The `Timer` class allows you to measure elapsed real time (in fractional seconds).  Its typical usage is in conjunction with a `with` clause:
+
+>>> with Timer() as t:
+>>>     some_long_running_function()
+>>> t.elapsed_time()
+0.04725892299757106
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Timer"
+at https://www.fuzzingbook.org/html/Timer.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Timer
+# =====
+
+if __name__ == '__main__':
     print('# Timer')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## Measuring Time
+## --------------
 
-# ## Measuring Time
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Measuring Time')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
-
 import time
 
-def clock():
-    try:
-        return time.perf_counter()  # Python 3
-    except:
-        return time.clock()         # Python 2
+from typing import Type, Any
 
-class Timer(object):
-    # Begin of `with` block
-    def __enter__(self):
+def clock() -> float:
+    """
+    Return the number of fractional seconds elapsed since some point of reference.
+    """
+    return time.perf_counter()
+
+from types import TracebackType
+
+class Timer:
+    def __init__(self) -> None:
+        """Constructor"""
+        self.start_time = clock()
+        self.end_time = None
+
+    def __enter__(self) -> Any:
+        """Begin of `with` block"""
         self.start_time = clock()
         self.end_time = None
         return self
 
-    # End of `with` block
-    def __exit__(self, exc_type, exc_value, tb):
-        self.end_time = clock()
+    def __exit__(self, exc_type: Type, exc_value: BaseException,
+                 tb: TracebackType) -> None:
+        """End of `with` block"""
+        self.end_time = clock()  # type: ignore
 
-    def elapsed_time(self):
+    def elapsed_time(self) -> float:
         """Return elapsed time in seconds"""
         if self.end_time is None:
             # still running
             return clock() - self.start_time
         else:
-            return self.end_time - self.start_time
+            return self.end_time - self.start_time  # type: ignore
 
-def some_long_running_function():
+def some_long_running_function() -> None:
     i = 1000000
     while i > 0:
         i -= 1
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("Stopping total time:")
     with Timer() as t:
         some_long_running_function()
     print(t.elapsed_time())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("Stopping time in between:")
     with Timer() as t:
         for i in range(10):
+            some_long_running_function()
             print(t.elapsed_time())
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Timer() as t:
         some_long_running_function()
     t.elapsed_time()
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
-
 
 

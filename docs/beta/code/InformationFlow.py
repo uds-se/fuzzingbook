@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Tracking Information Flow" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2020-10-13 15:12:21+02:00
+# Last change: 2021-06-02 17:49:12+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,34 +27,79 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Tracking Information Flow
 
-# # Tracking Information Flow
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python InformationFlow.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.InformationFlow import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/InformationFlow.html
+
+This chapter provides two wrappers to Python _strings_ that allow one to track various properties. These include information on the security properties of the input, and information on originating indexes of the input string.
+
+For tracking information on security properties, use `tstr` as follows:
+
+>>> thello = tstr('hello', taint='LOW')
+
+Now, any operation from `thello` that results in a string fragment would include the correct taint. For example:
+
+>>> thello[1:2].taint
+'LOW'
+
+For tracking the originating indexes from the input string, use `ostr` as follows:
+
+>>> ohw = ostr("hello\tworld", origin=100)
+
+The originating indexes can be recovered as follows:
+
+>>> (ohw[0:4] +"-"+ ohw[6:]).origin
+[100, 101, 102, 103, -1, 106, 107, 108, 109, 110]
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Tracking Information Flow"
+at https://www.fuzzingbook.org/html/InformationFlow.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Tracking Information Flow
+# =========================
+
+if __name__ == '__main__':
     print('# Tracking Information Flow')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## A Vulnerable Database
+## ---------------------
 
-# ## A Vulnerable Database
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## A Vulnerable Database')
-
 
 
 
@@ -73,11 +118,10 @@ class DB:
     def __init__(self, db={}):
         self.db = dict(db)
 
-# ### Representing Tables
+### Representing Tables
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Representing Tables')
-
 
 
 
@@ -97,10 +141,9 @@ def sample_db():
     db.create_table('inventory', inventory_def)
     return db
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     db = sample_db()
     db.table('inventory')
-
 
 class DB(DB):
     def column(self, table_decl, c_name):
@@ -108,17 +151,15 @@ class DB(DB):
             return table_decl[c_name]
         raise SQLException('Column (%s) was not found' % repr(c_name))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     db = sample_db()
     decl, rows = db.table('inventory')
     db.column(decl, 'year')
 
+### Executing SQL Statements
 
-# ### Executing SQL Statements
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Executing SQL Statements')
-
 
 
 
@@ -142,11 +183,10 @@ class DB(DB):
                 return method(query[len(key):])
         raise SQLException('Unknown SQL (%s)' % query)
 
-# ### Selecting Data
+### Selecting Data
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Selecting Data')
-
 
 
 
@@ -192,21 +232,18 @@ class DB(DB):
         except:
             raise SQLException('Invalid WHERE (%s)' % repr(statement))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     db = sample_db()
     db.sql('select year from inventory')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db = sample_db()
     db.sql('select year from inventory where year == 2018')
 
+### Inserting Data
 
-# ### Inserting Data
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Inserting Data')
-
 
 
 
@@ -253,25 +290,21 @@ class DB(DB):
         except:
             raise SQLException('Invalid Conversion %s(%s)' % (cast, value))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     db = sample_db()
     db.sql('insert into inventory (year, kind, company, model) values (1997, "van", "Ford", "E350")')
     db.table('inventory')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql('select year + 1, kind from inventory')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql('select year, kind from inventory where year == 1997')
 
+### Updating Data
 
-# ### Updating Data
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Updating Data')
-
 
 
 
@@ -317,26 +350,22 @@ class DB(DB):
                 
         return "%d records were updated" % len(updated)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     db = sample_db()
     db.sql('insert into inventory (year, kind, company, model) values (1997, "van", "Ford", "E350")')
     db.sql('select year from inventory')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql('update inventory set year = 1998 where year == 1997')
     db.sql('select year from inventory')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.table('inventory')
 
+### Deleting Data
 
-# ### Deleting Data
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Deleting Data')
-
 
 
 
@@ -355,36 +384,30 @@ class DB(DB):
             del table[i]
         return "%d records were deleted" % len(deleted)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     db = sample_db()
     db.sql('insert into inventory (year, kind, company, model) values (1997, "van", "Ford", "E350")')
     db.sql('select year from inventory')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql('delete from inventory where company == "Ford"')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql('select year from inventory')
 
+### All Methods Together
 
-# ### All Methods Together
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### All Methods Together')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db = DB()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     inventory_def = {'year': int, 'kind': str, 'company': str, 'model': str}
     db.create_table('inventory', inventory_def)
-
 
 def update_inventory(sqldb, vehicle):
     inventory_def = sqldb.db['inventory'][0]
@@ -393,52 +416,41 @@ def update_inventory(sqldb, vehicle):
     sqldb.sql('insert into inventory (%s) values (%s)' % (','.join(k),
                                                           ','.join(val)))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for V in VEHICLES:
         update_inventory(db, V)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.db
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql('select year,kind from inventory')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql("select company,model from inventory where kind == 'car'")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql("update inventory set year = 1998, company = 'Suzuki' where kind == 'van'")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.db
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql('select int(year)+10 from inventory')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql("insert into inventory (year, kind, company, model) values (1, 'charriot', 'Rome', 'Quadriga')")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.db
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql("delete from inventory where year < 1900")
 
+### Fuzzing SQL
 
-# ### Fuzzing SQL
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Fuzzing SQL')
-
 
 
 
@@ -496,13 +508,9 @@ INVENTORY_GRAMMAR = dict(
 
 INVENTORY_GRAMMAR_F = dict(INVENTORY_GRAMMAR, **{'<table>': ['inventory']})
 
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer
-else:
-    from .GrammarFuzzer import GrammarFuzzer
+from .GrammarFuzzer import GrammarFuzzer
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gf = GrammarFuzzer(INVENTORY_GRAMMAR_F)
     for _ in range(10):
         query = gf.fuzz()
@@ -518,40 +526,35 @@ if __name__ == "__main__":
             break
         print()
 
+## The Evil of Eval
+## ----------------
 
-# ## The Evil of Eval
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## The Evil of Eval')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql('select year from inventory where year < 2000')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql('select year - 1900 if year < 2000 else year - 2000 from inventory')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.sql('select __import__("os").popen("pwd").read() from inventory')
 
+## Tracking String Taints
+## ----------------------
 
-# ## Tracking String Taints
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Tracking String Taints')
 
 
 
+### A Class for Tainted Strings
 
-# ### A Class for Tainted Strings
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### A Class for Tainted Strings')
-
 
 
 
@@ -570,17 +573,14 @@ class tstr(tstr):
     def __str__(self):
         return str.__str__(self)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello = tstr('hello', taint='LOW')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello.taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     repr(thello).taint
-
 
 class tstr(tstr):
     def clear_taint(self):
@@ -590,11 +590,10 @@ class tstr(tstr):
     def has_taint(self):
         return self.taint is not None
 
-# ### String Operators
+### String Operators
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### String Operators')
-
 
 
 
@@ -616,9 +615,8 @@ def informationflow_init_1():
         fun = getattr(str, name)
         setattr(tstr, name, make_str_wrapper(fun))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     informationflow_init_1()
-
 
 INITIALIZER_LIST = [informationflow_init_1]
 
@@ -630,53 +628,43 @@ class tstr(tstr):
     def __radd__(self, s):
         return self.create(s + str(self))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello = tstr('hello', taint='LOW')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello[0].taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello[1:3].taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     (tstr('foo', taint='HIGH') + 'bar').taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ('foo' + tstr('bar', taint='HIGH')).taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello += ', world'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello.taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     (thello * 5).taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ('hw %s' % thello).taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     (tstr('hello %s', taint='HIGH') % 'world').taint
-
 
 import string
 
-# ## Tracking Untrusted Input
+## Tracking Untrusted Input
+## ------------------------
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Tracking Untrusted Input')
-
 
 
 
@@ -686,26 +674,19 @@ class TrustedDB(DB):
         assert s.taint == 'TRUSTED', "Need a string with trusted taint"
         return super().sql(s)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     bdb = TrustedDB(db.db)
 
+from .ExpectError import ExpectError
 
-if __package__ is None or __package__ == "":
-    from ExpectError import ExpectError
-else:
-    from .ExpectError import ExpectError
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         bdb.sql("select year from INVENTORY")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     bad_user_input = tstr('__import__("os").popen("ls").read()', taint='UNTRUSTED')
     with ExpectError():
         bdb.sql(bad_user_input)
-
 
 import re
 
@@ -717,39 +698,33 @@ def sanitize(user_input):
     else:
         return tstr('', taint='UNTRUSTED')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     good_user_input = tstr("select year,model from inventory", taint='UNTRUSTED')
     sanitized_input = sanitize(good_user_input)
     sanitized_input
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sanitized_input.taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     bdb.sql(sanitized_input)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sanitized_input = sanitize(bad_user_input)
     sanitized_input
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sanitized_input.taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         bdb.sql(sanitized_input)
 
+## Taint Aware Fuzzing
+## -------------------
 
-# ## Taint Aware Fuzzing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Taint Aware Fuzzing')
-
 
 
 
@@ -760,11 +735,10 @@ class Tainted(Exception):
     def __str__(self):
         return 'Tainted[%s]' % self.v
 
-# ### TaintedDB
+### TaintedDB
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### TaintedDB')
-
 
 
 
@@ -777,17 +751,15 @@ class TaintedDB(DB):
         except:
             raise SQLException('Invalid SQL (%s)' % repr(statement))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tdb = TaintedDB()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tdb.db = db.db
-
 
 import traceback
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for _ in range(10):
         query = gf.fuzz()
         print(repr(query))
@@ -803,100 +775,79 @@ if __name__ == "__main__":
             break
         print()
 
+## Preventing Privacy Leaks
+## ------------------------
 
-# ## Preventing Privacy Leaks
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Preventing Privacy Leaks')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     secrets = tstr('<Plenty of secret keys>', taint='SECRET')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     secrets[1:3].taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     user_input = "hello"
     reply = user_input
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     isinstance(reply, tstr)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     reply = user_input + secrets[0:5]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     reply
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     reply.taint
-
 
 def send_back(s):
     assert not isinstance(s, tstr) and not s.taint == 'SECRET'
     ...
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         send_back(reply)
 
+### Tracking Character Origins
 
-# ### Tracking Character Origins
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Tracking Character Origins')
 
 
 
+from .Fuzzer import heartbeat
 
-if __package__ is None or __package__ == "":
-    from Fuzzer import heartbeat
-else:
-    from .Fuzzer import heartbeat
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     reply = heartbeat('hello', 5, memory=secrets)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     reply.taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thilo = tstr("High", taint='HIGH') + tstr("Low", taint='LOW')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thilo
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thilo.taint
 
+### Tracking Individual Characters
 
-# ### Tracking Individual Characters
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Tracking Individual Characters')
 
 
 
+### A Class for Tracking Character Origins
 
-# ### A Class for Tracking Character Origins
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### A Class for Tracking Character Origins')
-
 
 
 
@@ -936,35 +887,28 @@ class ostr(ostr):
     def __str__(self):
         return str.__str__(self)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello = ostr('hello')
     assert thello.origin == [0, 1, 2, 3, 4]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tworld = ostr('world', origin=6)
     assert tworld.origin == [6, 7, 8, 9, 10]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     a = ostr("hello\tworld")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     repr(a).origin
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert type(str(thello)) == str
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     repr(thello)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     repr(thello).origin
-
 
 class ostr(ostr):
     def clear_taint(self):
@@ -982,21 +926,18 @@ class ostr(ostr):
     def has_origin(self):
         return any(origin != self.UNKNOWN_ORIGIN for origin in self.origin)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello = ostr('Hello')
     assert thello.has_origin()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello.clear_origin()
     assert not thello.has_origin()
 
+#### Create
 
-# #### Create
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Create')
-
 
 
 
@@ -1004,29 +945,24 @@ class ostr(ostr):
     def create(self, res, origin=None):
         return ostr(res, taint=self.taint, origin=origin)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello = ostr('hello', taint='HIGH')
     tworld = thello.create('world', origin=6)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tworld.origin
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tworld.taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert (thello.origin, tworld.origin) == (
         [0, 1, 2, 3, 4], [6, 7, 8, 9, 10])
 
+#### Index
 
-# #### Index
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Index')
-
 
 
 
@@ -1041,17 +977,15 @@ class ostr(ostr):
         else:
             assert False
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     hello = ostr('hello', taint='HIGH')
     assert (hello[0], hello[-1]) == ('h', 'o')
     hello[0].taint
 
+#### Slices
 
-# #### Slices
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Slices')
-
 
 
 
@@ -1073,29 +1007,24 @@ class ostr_iterator():
         self._str_idx += 1
         return c
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     thw = ostr('hello world', taint='HIGH')
     thw[0:5]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert thw[0:5].has_taint()
     assert thw[0:5].has_origin()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thw[0:5].taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thw[0:5].origin
 
+#### Splits
 
-# #### Splits
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Splits')
-
 
 
 
@@ -1105,26 +1034,22 @@ def make_split_wrapper(fun):
         return [self.create(elem) for elem in lst]
     return proxy
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for name in ['split', 'rsplit', 'splitlines']:
         fun = getattr(str, name)
         setattr(ostr, name, make_split_wrapper(fun))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello = ostr('hello world', taint='LOW')
     thello == 'hello world'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello.split()[0].taint
 
+#### Concatenation
 
-# #### Concatenation
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Concatenation')
-
 
 
 
@@ -1137,14 +1062,13 @@ class ostr(ostr):
             return self.create(str.__add__(self, other),
                                (self.origin + [self.UNKNOWN_ORIGIN for i in other]))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello = ostr("hello")
     tworld = ostr("world", origin=6)
     thw = thello + tworld
     assert thw.origin == [0, 1, 2, 3, 4, 6, 7, 8, 9, 10]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     space = "  "
     th_w = thello + space + tworld
     assert th_w.origin == [
@@ -1161,25 +1085,22 @@ if __name__ == "__main__":
         9,
         10]
 
-
 class ostr(ostr):
     def __radd__(self, other):
         origin = other.origin if isinstance(other, ostr) else [
             self.UNKNOWN_ORIGIN for i in other]
         return self.create(str.__add__(other, self), (origin + self.origin))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     shello = "hello"
     tworld = ostr("world")
     thw = shello + tworld
     assert thw.origin == [ostr.UNKNOWN_ORIGIN] * len(shello) + [0, 1, 2, 3, 4]
 
+#### Extract Origin String
 
-# #### Extract Origin String
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Extract Origin String')
-
 
 
 
@@ -1198,23 +1119,19 @@ class ostr(ostr):
             return [self[p]
                     for p in [k for k, j in enumerate(self.origin) if j in r]]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     thw = ostr('hello world', origin=100)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert thw.x(101) == ['e']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert thw.x(slice(101, 105)) == ['e', 'l', 'l', 'o']
 
+#### Replace
 
-# #### Replace
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Replace')
-
 
 
 
@@ -1238,7 +1155,7 @@ class ostr(ostr):
             i += 1
         return self.create(mystr, old_origin)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_str = ostr("aa cde aa")
     res = my_str.replace('aa', 'bb')
     assert res, res.origin == ('bb', 'cde', 'bb',
@@ -1246,8 +1163,7 @@ if __name__ == "__main__":
                                 2, 3, 4, 5, 6,
                                 self.UNKNOWN_ORIGIN, self.UNKNOWN_ORIGIN])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_str = ostr("aa cde aa")
     res = my_str.replace('aa', ostr('bb', origin=100))
     assert (
@@ -1255,12 +1171,10 @@ if __name__ == "__main__":
             ('bb cde bb'), [
                 100, 101, 2, 3, 4, 5, 6, 100, 101])
 
+#### Split
 
-# #### Split
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Split')
-
 
 
 
@@ -1304,7 +1218,7 @@ class ostr(ostr):
             return self._split_space(splitted)
         return self._split_helper(sep, splitted)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_str = ostr('ab cdef ghij kl')
     ab, cdef, ghij, kl = my_str.rsplit(sep=' ')
     assert (ab.origin, cdef.origin, ghij.origin,
@@ -1314,8 +1228,7 @@ if __name__ == "__main__":
     ab, cdef, ghij, kl = my_str.rsplit(sep=' ')
     assert(ab.origin, cdef.origin, kl.origin) == ([0, 1], [3, 4, 5, 6], [13, 14])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_str = ostr('ab   cdef ghij    kl', origin=100, taint='HIGH')
     ab, cdef, ghij, kl = my_str.rsplit()
     assert (ab.origin, cdef.origin, ghij.origin,
@@ -1327,12 +1240,10 @@ if __name__ == "__main__":
     assert (ab.origin, cdef.origin, kl.origin) == ([0, 1], [5, 6, 7, 8], [18, 19])
     assert ab.taint == 'HIGH'
 
+#### Strip
 
-# #### Strip
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Strip')
-
 
 
 
@@ -1349,29 +1260,25 @@ class ostr(ostr):
         res = super().rstrip(cl)
         return self[0:len(res)]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_str1 = ostr("  abc  ")
     v = my_str1.strip()
     assert v, v.origin == ('abc', [2, 3, 4])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_str1 = ostr("  abc  ")
     v = my_str1.lstrip()
     assert (v, v.origin) == ('abc  ', [2, 3, 4, 5, 6])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_str1 = ostr("  abc  ")
     v = my_str1.rstrip()
     assert (v, v.origin) == ('  abc', [0, 1, 2, 3, 4])
 
+#### Expand Tabs
 
-# #### Expand Tabs
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Expand Tabs')
-
 
 
 
@@ -1387,17 +1294,15 @@ class ostr(ostr):
                 all_parts.extend([p.origin[-1]] * l)
         return self.create(res, all_parts)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_str = str("ab\tcd")
     my_ostr = ostr("ab\tcd")
     v1 = my_str.expandtabs(4)
     v2 = my_ostr.expandtabs(4)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert str(v1) == str(v2)
     assert (len(v1), repr(v2), v2.origin) == (6, "'ab  cd'", [0, 1, 1, 1, 3, 4])
-
 
 class ostr(ostr):
     def join(self, iterable):
@@ -1417,37 +1322,32 @@ class ostr(ostr):
         assert len(res) == len(mystr)
         return self.create(res, myorigin)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_str = ostr("ab cd", origin=100)
     (v1, v2), v3 = my_str.split(), 'ef'
     assert (v1.origin, v2.origin) == ([100, 101], [103, 104])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v4 = ostr('').join([v2, v3, v1])
     assert (
         v4, v4.origin) == (
             'cdefab', [
                 103, 104, ostr.UNKNOWN_ORIGIN, ostr.UNKNOWN_ORIGIN, 100, 101])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_str = ostr("ab cd", origin=100)
     (v1, v2), v3 = my_str.split(), 'ef'
     assert (v1.origin, v2.origin) == ([100, 101], [103, 104])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v4 = ostr(',').join([v2, v3, v1])
     assert (v4, v4.origin) == ('cd,ef,ab',
                                [103, 104, 0, ostr.UNKNOWN_ORIGIN, ostr.UNKNOWN_ORIGIN, 0, 100, 101])
 
+#### Partitions
 
-# #### Partitions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Partitions')
-
 
 
 
@@ -1466,11 +1366,10 @@ class ostr(ostr):
                             self.origin[len(partA):len(partA) + len(sep)]),
                 self.create(partB, self.origin[len(partA) + len(sep):]))
 
-# #### Justify
+#### Justify
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Justify')
-
 
 
 
@@ -1494,11 +1393,10 @@ class ostr(ostr):
             t = self.UNKNOWN_ORIGIN
         return self.create(res, self.origin + [t] * final)
 
-# #### mod
+#### mod
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### mod')
-
 
 
 
@@ -1528,26 +1426,22 @@ class ostr(ostr):
         r_origin[i:i + 2] = s_origin
         return self.create(res, origin=r_origin)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     a = ostr('hello %s world', origin=100)
     a
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     (a % 'good').origin
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     b = 'hello %s world'
     c = ostr('bad', origin=10)
     (b % c).origin
 
+#### String methods that do not change origin
 
-# #### String methods that do not change origin
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### String methods that do not change origin')
-
 
 
 
@@ -1567,16 +1461,14 @@ class ostr(ostr):
     def title(self):
         return self.create(str(self).title(), self.origin)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     a = ostr('aa', origin=100).upper()
     a, a.origin
 
+#### General wrappers
 
-# #### General wrappers
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### General wrappers')
-
 
 
 
@@ -1599,19 +1491,15 @@ def informationflow_init_2():
                             '__repr__', '__getattribute__']) | set(ostr_members):
             setattr(ostr, name, make_str_wrapper(fn))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     informationflow_init_2()
 
+INITIALIZER_LIST.append(informationflow_init_2)
 
-if __name__ == "__main__":
-    INITIALIZER_LIST.append(informationflow_init_2)
+#### Methods yet to be translated
 
-
-# #### Methods yet to be translated
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Methods yet to be translated')
-
 
 
 
@@ -1630,131 +1518,105 @@ def informationflow_init_3():
                     '__mul__', '__rmul__', 'center', 'zfill', 'decode', 'encode']:
             setattr(ostr, name, make_str_abort_wrapper(fn))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     informationflow_init_3()
 
+INITIALIZER_LIST.append(informationflow_init_3)
 
-if __name__ == "__main__":
-    INITIALIZER_LIST.append(informationflow_init_3)
+### Checking Origins
 
-
-# ### Checking Origins
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Checking Origins')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     s = ostr("hello", origin=100)
     s[1]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     s[1].origin
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     set(s[1].origin) <= set(s.origin)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     t = ostr("world", origin=200)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     set(s.origin) <= set(t.origin)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     u = s + t + "!"
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     u.origin
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ostr.UNKNOWN_ORIGIN in u.origin
 
+### Privacy Leaks Revisited
 
-# ### Privacy Leaks Revisited
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Privacy Leaks Revisited')
-
 
 
 
 SECRET_ORIGIN = 1000
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     secret = ostr('<again, some super-secret input>', origin=SECRET_ORIGIN)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(secret.origin)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     s = heartbeat('hello', 5, memory=secret)
     s
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(s.origin)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert s.origin == [ostr.UNKNOWN_ORIGIN] * len(s)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert all(origin == ostr.UNKNOWN_ORIGIN for origin in s.origin)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert not any(origin >= SECRET_ORIGIN for origin in s.origin)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     s = heartbeat('hello', 32, memory=secret)
     s
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(s.origin)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         assert s.origin == [ostr.UNKNOWN_ORIGIN] * len(s)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         assert all(origin == ostr.UNKNOWN_ORIGIN for origin in s.origin)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         assert not any(origin >= SECRET_ORIGIN for origin in s.origin)
 
+## Taint-Directed Fuzzing
+## ----------------------
 
-# ## Taint-Directed Fuzzing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Taint-Directed Fuzzing')
 
 
 
+### TrackingDB
 
-# ### TrackingDB
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### TrackingDB')
-
 
 
 
@@ -1767,33 +1629,20 @@ class TrackingDB(TaintedDB):
         except:
             raise SQLException('Invalid SQL (%s)' % repr(statement))
 
-# ### TaintedGrammarFuzzer
+### TaintedGrammarFuzzer
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### TaintedGrammarFuzzer')
-
 
 
 
 import random
 
-if __package__ is None or __package__ == "":
-    from Grammars import START_SYMBOL
-else:
-    from .Grammars import START_SYMBOL
+from .Grammars import START_SYMBOL
 
+from .GrammarFuzzer import GrammarFuzzer
 
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer
-else:
-    from .GrammarFuzzer import GrammarFuzzer
-
-
-if __package__ is None or __package__ == "":
-    from Parser import canonical
-else:
-    from .Parser import canonical
-
+from .Parser import canonical
 
 class TaintedGrammarFuzzer(GrammarFuzzer):
     def __init__(self,
@@ -1871,9 +1720,8 @@ class TaintedGrammarFuzzer(TaintedGrammarFuzzer):
         for key, val in self.ct_grammar.items():
             self.ctp_grammar[key] = [(v, dict(use=0)) for v in val]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     trdb = TrackingDB(db.db)
-
 
 class TaintedGrammarFuzzer(TaintedGrammarFuzzer):
     def tree_to_string(self, tree):
@@ -1909,7 +1757,7 @@ def tree_type(tree):
     key, children = tree
     return (type(key), key, [tree_type(c) for c in children])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tgf = TaintedGrammarFuzzer(INVENTORY_GRAMMAR_F)
     x = None
     for _ in range(10):
@@ -1931,24 +1779,20 @@ if __name__ == "__main__":
             break
         print()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tgf.ctp_grammar
 
+### The Limits of Taint Tracking
 
-# ### The Limits of Taint Tracking
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### The Limits of Taint Tracking')
 
 
 
+#### Conversions
 
-# #### Conversions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Conversions')
-
 
 
 
@@ -1958,49 +1802,41 @@ def strip_all_info(s):
         t += chr(ord(c))
     return t
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello = ostr("Secret")
     thello
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello.origin
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello_stripped = strip_all_info(thello)
     thello_stripped
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         thello_stripped.origin
 
+#### Internal C libraries
 
-# #### Internal C libraries
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Internal C libraries')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     hello = ostr('hello', origin=100)
     world = ostr('world', origin=200)
     (hello + ' ' + world).origin
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         ''.join([hello, ' ', world]).origin
 
+#### Implicit Information Flow
 
-# #### Implicit Information Flow
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Implicit Information Flow')
-
 
 
 
@@ -2015,83 +1851,76 @@ def strip_all_info_again(s):
             t += 'c'
     ...
 
-# #### Enforcing Tainting
+#### Enforcing Tainting
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Enforcing Tainting')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello = tstr('hello', taint='LOW')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     thello[1:2].taint
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ohw = ostr("hello\tworld", origin=100)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     (ohw[0:4] +"-"+ ohw[6:]).origin
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: Tainted Numbers
 
-# ### Exercise 1: Tainted Numbers
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: Tainted Numbers')
 
 
 
+#### Part 1: Creation
 
-# #### Part 1: Creation
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 1: Creation')
-
 
 
 
@@ -2102,16 +1931,14 @@ class tint(int):
     def __init__(self, value, taint=None, **kwargs):
         self.taint = taint
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     x = tint(42, taint='SECRET')
     assert x.taint == 'SECRET'
 
+#### Part 2: Arithmetic expressions
 
-# #### Part 2: Arithmetic expressions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 2: Arithmetic expressions')
-
 
 
 
@@ -2127,24 +1954,21 @@ def make_int_wrapper(fun):
         return self.create(res)
     return proxy
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for name in ['__add__', '__radd__', '__mul__', '__rmul__', '__sub__',
                  '__floordiv__', '__truediv__']:
         fun = getattr(int, name)
         setattr(tint, name, make_int_wrapper(fun))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     x = tint(42, taint='SECRET')
     y = x + 1
     y.taint
 
+#### Part 3: Passing taints from integers to strings
 
-# #### Part 3: Passing taints from integers to strings
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 3: Passing taints from integers to strings')
-
 
 
 
@@ -2157,17 +1981,15 @@ class tint(tint):
     def __str__(self):
         return tstr(int.__str__(self), taint=self.taint)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     x = tint(42, taint='SECRET')
     s = repr(x)
     assert s.taint == 'SECRET'
 
+#### Part 4: Passing taints from strings to integers
 
-# #### Part 4: Passing taints from strings to integers
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 4: Passing taints from strings to integers')
-
 
 
 
@@ -2178,23 +2000,19 @@ class tint(tint):
         else:
             self.taint = getattr(value, 'taint', None)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     password = tstr('1234', taint='NOT_EXACTLY_SECRET')
     x = tint(password)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert x == 1234
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert x.taint == 'NOT_EXACTLY_SECRET'
 
+### Exercise 2: Information Flow Testing
 
-# ### Exercise 2: Information Flow Testing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Information Flow Testing')
-
 
 

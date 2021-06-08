@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Mining Function Specifications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2020-10-24 12:13:00+02:00
+# Last change: 2021-06-02 17:50:08+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,45 +27,108 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Mining Function Specifications
 
-# # Mining Function Specifications
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python DynamicInvariants.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.DynamicInvariants import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/DynamicInvariants.html
+
+This chapter provides two classes that automatically extract specifications from a function and a set of inputs:
+
+* `TypeAnnotator` for _types_, and
+* `InvariantAnnotator` for _pre-_ and _postconditions_.
+
+Both work by _observing_ a function and its invocations within a `with` clause.  Here is an example for the type annotator:
+
+>>> def sum2(a, b):
+>>>     return a + b
+>>> with TypeAnnotator() as type_annotator:
+>>>     sum2(1, 2)
+>>>     sum2(-4, -5)
+>>>     sum2(0, 0)
+
+The `typed_functions()` method will return a representation of `sum2()` annotated with types observed during execution.
+
+>>> print(type_annotator.typed_functions())
+def sum2(a: int, b: int) ->int:
+    return a + b
+
+
+
+The invariant annotator works in a similar fashion:
+
+>>> with InvariantAnnotator() as inv_annotator:
+>>>     sum2(1, 2)
+>>>     sum2(-4, -5)
+>>>     sum2(0, 0)
+
+The `functions_with_invariants()` method will return a representation of `sum2()` annotated with inferred pre- and postconditions that all hold for the observed values.
+
+>>> print(inv_annotator.functions_with_invariants())
+@precondition(lambda a, b: isinstance(a, int))
+@precondition(lambda a, b: isinstance(b, int))
+@postcondition(lambda return_value, a, b: a == return_value - b)
+@postcondition(lambda return_value, a, b: b == return_value - a)
+@postcondition(lambda return_value, a, b: isinstance(return_value, int))
+@postcondition(lambda return_value, a, b: return_value == a + b)
+@postcondition(lambda return_value, a, b: return_value == b + a)
+def sum2(a, b):
+    return a + b
+
+
+
+Such type specifications and invariants can be helpful as _oracles_ (to detect deviations from a given set of runs) as well as for all kinds of _symbolic code analyses_.  The chapter gives details on how to customize the properties checked for.
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Mining Function Specifications"
+at https://www.fuzzingbook.org/html/DynamicInvariants.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Mining Function Specifications
+# ==============================
+
+if __name__ == '__main__':
     print('# Mining Function Specifications')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
+from . import Coverage
+from . import Intro_Testing
 
-if __package__ is None or __package__ == "":
-    import Coverage
-else:
-    from . import Coverage
+## Synopsis
+## --------
 
-if __package__ is None or __package__ == "":
-    import Intro_Testing
-else:
-    from . import Intro_Testing
-
-
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## Specifications and Assertions
+## -----------------------------
 
-# ## Specifications and Assertions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Specifications and Assertions')
-
 
 
 
@@ -77,19 +140,18 @@ def my_sqrt(x):
     assert result * result == x  # Postcondition
     return result
 
-# ## Why Generic Error Checking is Not Enough
+## Why Generic Error Checking is Not Enough
+## ----------------------------------------
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Why Generic Error Checking is Not Enough')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
-
 
 def my_sqrt(x):
     """Computes the square root of x, using the Newton-Raphson method"""
@@ -100,32 +162,25 @@ def my_sqrt(x):
         guess = (approx + x / approx) / 2
     return approx
 
-if __package__ is None or __package__ == "":
-    from ExpectError import ExpectError, ExpectTimeout
-else:
-    from .ExpectError import ExpectError, ExpectTimeout
+from .ExpectError import ExpectError, ExpectTimeout
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         my_sqrt("foo")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         x = my_sqrt(0.0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectTimeout(1):
         x = my_sqrt(-1.0)
 
+## Specifying and Checking Data Types
+## ----------------------------------
 
-# ## Specifying and Checking Data Types
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Specifying and Checking Data Types')
-
 
 
 
@@ -133,11 +188,10 @@ def my_sqrt_with_type_annotations(x: float) -> float:
     """Computes the square root of x, using the Newton-Raphson method"""
     return my_sqrt(x)
 
-# ### Runtime Type Checking
+### Runtime Type Checking
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Runtime Type Checking')
-
 
 
 
@@ -148,32 +202,28 @@ def my_sqrt_with_checked_type_annotations(x: float) -> float:
     """Computes the square root of x, using the Newton-Raphson method"""
     return my_sqrt(x)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         my_sqrt_with_checked_type_annotations(True)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt(True)
 
+### Static Type Checking
 
-# ### Static Type Checking
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Static Type Checking')
-
 
 
 
 import inspect
 import tempfile
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = tempfile.NamedTemporaryFile(mode='w', suffix='.py')
     f.name
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f.write(inspect.getsource(my_sqrt))
     f.write('\n')
     f.write(inspect.getsource(my_sqrt_with_type_annotations))
@@ -181,51 +231,40 @@ if __name__ == "__main__":
     f.write("print(my_sqrt_with_type_annotations('123'))\n")
     f.flush()
 
+from .bookutils import print_file
 
-if __package__ is None or __package__ == "":
-    from bookutils import print_file
-else:
-    from .bookutils import print_file
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_file(f.name)
-
 
 import subprocess
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = subprocess.run(["mypy", "--strict", f.name], universal_newlines=True, stdout=subprocess.PIPE)
     del f  # Delete temporary file
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(result.stdout)
 
+## Mining Type Specifications
+## --------------------------
 
-# ## Mining Type Specifications
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Mining Type Specifications')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     y = my_sqrt(25.0)
     y
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     y = my_sqrt(2.0)
     y
 
+### Tracking Calls
 
-# ### Tracking Calls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Tracking Calls')
-
 
 
 
@@ -325,81 +364,67 @@ class CallTracker(CallTracker):
 
         return self._calls[function_name]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with CallTracker(log=True) as tracker:
         y = my_sqrt(25)
         y = my_sqrt(2.0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     calls = tracker.calls('my_sqrt')
     calls
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt_argument_list, my_sqrt_return_value = calls[0]
     simple_call_string('my_sqrt', my_sqrt_argument_list, my_sqrt_return_value)
-
 
 def hello(name):
     print("Hello,", name)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with CallTracker() as tracker:
         hello("world")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     hello_calls = tracker.calls('hello')
     hello_calls
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     hello_argument_list, hello_return_value = hello_calls[0]
     simple_call_string('hello', hello_argument_list, hello_return_value)
 
+### Getting Types
 
-# ### Getting Types
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Getting Types')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     type(4)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     type(2.0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     type([4])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     parameter, value = my_sqrt_argument_list[0]
     parameter, type(value)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     type(my_sqrt_return_value)
-
 
 def my_sqrt_annotated(x: int) -> float:
     return my_sqrt(x)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt_annotated.__annotations__
 
+### Accessing Function Structure
 
-# ### Accessing Function Structure
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Accessing Function Structure')
-
 
 
 
@@ -407,50 +432,35 @@ import ast
 import inspect
 import astor
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt_source = inspect.getsource(my_sqrt)
     my_sqrt_source
 
+from .bookutils import print_content
 
-if __package__ is None or __package__ == "":
-    from bookutils import print_content
-else:
-    from .bookutils import print_content
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(my_sqrt_source, '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt_ast = ast.parse(my_sqrt_source)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(astor.dump_tree(my_sqrt_ast))
 
+from .bookutils import rich_output
 
-if __package__ is None or __package__ == "":
-    from bookutils import rich_output
-else:
-    from .bookutils import rich_output
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if rich_output():
         import showast
         showast.show_ast(my_sqrt_ast)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(astor.to_source(my_sqrt_ast), '.py')
 
+### Annotating Functions with Given Types
 
-# ### Annotating Functions with Given Types
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Annotating Functions with Given Types')
-
 
 
 
@@ -464,13 +474,11 @@ def parse_type(name):
     name_visitor.visit(tree)
     return name_visitor.value_node
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(astor.dump_tree(parse_type('int')))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(astor.dump_tree(parse_type('[object]')))
-
 
 class TypeTransformer(ast.NodeTransformer):
     def __init__(self, argument_types, return_type=None):
@@ -511,62 +519,50 @@ class TypeTransformer(TypeTransformer):
             arg.annotation = parse_type(self.argument_types[arg_name])
         return arg
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     new_ast = TypeTransformer({'x': 'int'}, 'float').visit(my_sqrt_ast)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(astor.to_source(new_ast), '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     hello_source = inspect.getsource(hello)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     hello_ast = ast.parse(hello_source)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     new_ast = TypeTransformer({'name': 'str'}, 'None').visit(hello_ast)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(astor.to_source(new_ast), '.py')
 
+### Annotating Functions with Mined Types
 
-# ### Annotating Functions with Mined Types
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Annotating Functions with Mined Types')
-
 
 
 
 def type_string(value):
     return type(value).__name__
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     type_string(4)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     type_string([])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     type_string([3])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with CallTracker() as tracker:
         y = my_sqrt(25.0)
         y = my_sqrt(2.0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tracker.calls()
-
 
 def annotate_types(calls):
     annotated_functions = {}
@@ -614,15 +610,13 @@ def annotate_function_ast_with_types(function_ast, function_calls):
     annotated_function_ast = TypeTransformer(parameter_types, return_type).visit(function_ast)
     return annotated_function_ast
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(astor.to_source(annotate_types(tracker.calls())['my_sqrt']), '.py')
 
+### All-in-one Annotation
 
-# ### All-in-one Annotation
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### All-in-one Annotation')
-
 
 
 
@@ -649,104 +643,87 @@ class TypeAnnotator(TypeTracker):
 
         return astor.to_source(self.typed_functions_ast(function_name))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with TypeAnnotator() as annotator:
         y = my_sqrt(25.0)
         y = my_sqrt(2.0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.typed_functions(), '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with TypeAnnotator() as annotator:
         hello('type annotations')
         y = my_sqrt(1.0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.typed_functions(), '.py')
 
+### Multiple Types
 
-# ### Multiple Types
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Multiple Types')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with CallTracker() as tracker:
         y = my_sqrt(25.0)
         y = my_sqrt(4)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(astor.to_source(annotate_types(tracker.calls())['my_sqrt']), '.py')
-
 
 def sum3(a, b, c):
     return a + b + c
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with TypeAnnotator() as annotator:
         y = sum3(1.0, 2.0, 3.0)
     y
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.typed_functions(), '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with TypeAnnotator() as annotator:
         y = sum3(1, 2, 3)
     y
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.typed_functions(), '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with TypeAnnotator() as annotator:
         y = sum3("one", "two", "three")
     y
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.typed_functions(), '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with TypeAnnotator() as annotator:
         y = sum3(1, 2, 3)
         y = sum3("one", "two", "three")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     typed_sum3_def = annotator.typed_functions('sum3')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(typed_sum3_def, '.py')
 
+## Specifying and Checking Invariants
+## ----------------------------------
 
-# ## Specifying and Checking Invariants
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Specifying and Checking Invariants')
 
 
 
+### Annotating Functions with Pre- and Postconditions
 
-# ### Annotating Functions with Pre- and Postconditions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Annotating Functions with Pre- and Postconditions')
-
 
 
 
@@ -785,10 +762,9 @@ def postcondition(check):
 def my_sqrt_with_precondition(x):
     return my_sqrt(x)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         my_sqrt_with_precondition(-1.0)
-
 
 EPSILON = 1e-5
 
@@ -796,33 +772,30 @@ EPSILON = 1e-5
 def my_sqrt_with_postcondition(x):
     return my_sqrt(x)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     y = my_sqrt_with_postcondition(2.0)
     y
-
 
 @postcondition(lambda ret, x: ret * ret - x < EPSILON)
 def buggy_my_sqrt_with_postcondition(x):
     return my_sqrt(x) + 0.1
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         y = buggy_my_sqrt_with_postcondition(2.0)
 
+## Mining Invariants
+## -----------------
 
-# ## Mining Invariants
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Mining Invariants')
 
 
 
+### Defining Properties
 
-# ### Defining Properties
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Defining Properties')
-
 
 
 
@@ -835,57 +808,46 @@ INVARIANT_PROPERTIES = [
     "X != 0",
 ]
 
-if __name__ == "__main__":
-    INVARIANT_PROPERTIES += [
-        "X == Y",
-        "X > Y",
-        "X < Y",
-        "X >= Y",
-        "X <= Y",
-    ]
+INVARIANT_PROPERTIES += [
+    "X == Y",
+    "X > Y",
+    "X < Y",
+    "X >= Y",
+    "X <= Y",
+]
 
+INVARIANT_PROPERTIES += [
+    "isinstance(X, bool)",
+    "isinstance(X, int)",
+    "isinstance(X, float)",
+    "isinstance(X, list)",
+    "isinstance(X, dict)",
+]
 
-if __name__ == "__main__":
-    INVARIANT_PROPERTIES += [
-        "isinstance(X, bool)",
-        "isinstance(X, int)",
-        "isinstance(X, float)",
-        "isinstance(X, list)",
-        "isinstance(X, dict)",
-    ]
+INVARIANT_PROPERTIES += [
+    "X == Y + Z",
+    "X == Y * Z",
+    "X == Y - Z",
+    "X == Y / Z",
+]
 
+INVARIANT_PROPERTIES += [
+    "X < Y < Z",
+    "X <= Y <= Z",
+    "X > Y > Z",
+    "X >= Y >= Z",
+]
 
-if __name__ == "__main__":
-    INVARIANT_PROPERTIES += [
-        "X == Y + Z",
-        "X == Y * Z",
-        "X == Y - Z",
-        "X == Y / Z",
-    ]
+INVARIANT_PROPERTIES += [
+    "X == len(Y)",
+    "X == sum(Y)",
+    "X.startswith(Y)",
+]
 
+### Extracting Meta-Variables
 
-if __name__ == "__main__":
-    INVARIANT_PROPERTIES += [
-        "X < Y < Z",
-        "X <= Y <= Z",
-        "X > Y > Z",
-        "X >= Y >= Z",
-    ]
-
-
-if __name__ == "__main__":
-    INVARIANT_PROPERTIES += [
-        "X == len(Y)",
-        "X == sum(Y)",
-        "X.startswith(Y)",
-    ]
-
-
-# ### Extracting Meta-Variables
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Extracting Meta-Variables')
-
 
 
 
@@ -900,23 +862,19 @@ def metavars(prop):
     ArgVisitor().visit(ast.parse(prop))
     return metavar_list
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert metavars("X < 0") == ['X']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert metavars("X.startswith(Y)") == ['X', 'Y']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert metavars("isinstance(X, str)") == ['X']
 
+### Instantiating Properties
 
-# ### Instantiating Properties
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Instantiating Properties')
-
 
 
 
@@ -946,19 +904,16 @@ def instantiate_prop(prop, var_names):
         prop_text = prop_text[1:-1]
     return prop_text
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert instantiate_prop("X > Y", ['a', 'b']) == 'a > b'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert instantiate_prop("X.startswith(Y)", ['x', 'y']) == 'x.startswith(y)'
 
+### Evaluating Properties
 
-# ### Evaluating Properties
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Evaluating Properties')
-
 
 
 
@@ -968,33 +923,28 @@ def prop_function_text(prop):
 def prop_function(prop):
     return eval(prop_function_text(prop))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     prop_function_text("X > Y")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     p = prop_function("X > Y")
     p(100, 1)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     p(1, 100)
 
+### Checking Invariants
 
-# ### Checking Invariants
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Checking Invariants')
-
 
 
 
 import itertools
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for combination in itertools.permutations([1.0, 2.0, 3.0], 2):
         print(combination)
-
 
 def true_property_instantiations(prop, vars_and_values, log=False):
     instantiations = set()
@@ -1017,30 +967,25 @@ def true_property_instantiations(prop, vars_and_values, log=False):
             
     return instantiations
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     invs = true_property_instantiations("X < Y", [('x', -1), ('y', 1)], log=True)
     invs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for prop, var_names in invs:
         print(instantiate_prop(prop, var_names))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     invs = true_property_instantiations("X < 0", [('x', -1), ('y', 1)], log=True)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for prop, var_names in invs:
         print(instantiate_prop(prop, var_names))
 
+### Extracting Invariants
 
-# ### Extracting Invariants
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Extracting Invariants')
-
 
 
 
@@ -1073,18 +1018,16 @@ class InvariantTracker(InvariantTracker):
 
         return invariants
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantTracker() as tracker:
         y = my_sqrt(25.0)
         y = my_sqrt(10.0)
 
     tracker.calls()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     invs = tracker.invariants('my_sqrt')
     invs
-
 
 def pretty_invariants(invariants):
     props = []
@@ -1092,15 +1035,13 @@ def pretty_invariants(invariants):
         props.append(instantiate_prop(prop, var_names))
     return sorted(props)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     pretty_invariants(invs)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt(0.01)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantTracker() as tracker:
         y = my_sqrt(25.0)
         y = my_sqrt(10.0)
@@ -1108,24 +1049,21 @@ if __name__ == "__main__":
 
     pretty_invariants(tracker.invariants('my_sqrt'))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantTracker() as tracker:
         y = sum3(1, 2, 3)
         y = sum3(-4, -5, -6)
 
     pretty_invariants(tracker.invariants('sum3'))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantTracker() as tracker:
         y = sum3('a', 'b', 'c')
         y = sum3('f', 'e', 'd')
 
     pretty_invariants(tracker.invariants('sum3'))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantTracker() as tracker:
         y = sum3('a', 'b', 'c')
         y = sum3('c', 'b', 'a')
@@ -1134,12 +1072,10 @@ if __name__ == "__main__":
 
     pretty_invariants(tracker.invariants('sum3'))
 
+### Converting Mined Invariants to Annotations
 
-# ### Converting Mined Invariants to Annotations
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Converting Mined Invariants to Annotations')
-
 
 
 
@@ -1148,19 +1084,16 @@ class InvariantAnnotator(InvariantTracker):
         arguments, return_value = self.calls(function_name)[0]
         return ", ".join(arg_name for (arg_name, arg_value) in arguments)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         y = my_sqrt(25.0)
         y = sum3(1, 2, 3)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     annotator.params('my_sqrt')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     annotator.params('sum3')
-
 
 class InvariantAnnotator(InvariantAnnotator):
     def preconditions(self, function_name):
@@ -1175,16 +1108,14 @@ class InvariantAnnotator(InvariantAnnotator):
 
         return conditions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         y = my_sqrt(25.0)
         y = my_sqrt(0.01)
         y = sum3(1, 2, 3)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     annotator.preconditions('my_sqrt')
-
 
 class InvariantAnnotator(InvariantAnnotator):
     def postconditions(self, function_name):
@@ -1200,16 +1131,14 @@ class InvariantAnnotator(InvariantAnnotator):
 
         return conditions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         y = my_sqrt(25.0)
         y = my_sqrt(0.01)
         y = sum3(1, 2, 3)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     annotator.postconditions('my_sqrt')
-
 
 class InvariantAnnotator(InvariantAnnotator):
     def functions_with_invariants(self):
@@ -1228,22 +1157,19 @@ class InvariantAnnotator(InvariantAnnotator):
         return "\n".join(self.preconditions(function_name) + 
                          self.postconditions(function_name)) + '\n' + source
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         y = my_sqrt(25.0)
         y = my_sqrt(0.01)
         y = sum3(1, 2, 3)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.function_with_invariants('my_sqrt'), '.py')
 
+### Some Examples
 
-# ### Some Examples
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Some Examples')
-
 
 
 
@@ -1254,114 +1180,97 @@ def list_length(L):
         length = 1 + list_length(L[1:])
     return length
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         length = list_length([1, 2, 3])
 
     print_content(annotator.functions_with_invariants(), '.py')
 
-
 def sum2(a, b):
     return a + b
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         sum2(31, 45)
         sum2(0, 0)
         sum2(-1, -5)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.functions_with_invariants(), '.py')
-
 
 def print_sum(a, b):
     print(a + b)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         print_sum(31, 45)
         print_sum(0, 0)
         print_sum(-1, -5)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.functions_with_invariants(), '.py')
 
+### Checking Specifications
 
-# ### Checking Specifications
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Checking Specifications')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         y = my_sqrt(25.0)
         y = my_sqrt(0.01)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt_def = annotator.functions_with_invariants()
     my_sqrt_def = my_sqrt_def.replace('my_sqrt', 'my_sqrt_annotated')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(my_sqrt_def, '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     exec(my_sqrt_def)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         my_sqrt_annotated(-1.0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectTimeout(1):
         my_sqrt(-1.0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt_def = my_sqrt_def.replace('my_sqrt_annotated', 'my_sqrt_negative')
     my_sqrt_def = my_sqrt_def.replace('return approx', 'return -approx')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(my_sqrt_def, '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     exec(my_sqrt_def)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         my_sqrt_negative(2.0)
 
+## Mining Specifications from Generated Tests
+## ------------------------------------------
 
-# ## Mining Specifications from Generated Tests
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Mining Specifications from Generated Tests')
-
 
 
 
 def sum2(a, b):
     return a + b
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         y = sum2(2, 2)
     print_content(annotator.functions_with_invariants(), '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         length = sum2(1, 2)
         length = sum2(-1, -2)
@@ -1369,17 +1278,8 @@ if __name__ == "__main__":
 
     print_content(annotator.functions_with_invariants(), '.py')
 
-
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer  # minor dependency
-else:
-    from .GrammarFuzzer import GrammarFuzzer  # minor dependency
-
-if __package__ is None or __package__ == "":
-    from Grammars import is_valid_grammar, crange, convert_ebnf_grammar  # minor dependency
-else:
-    from .Grammars import is_valid_grammar, crange, convert_ebnf_grammar  # minor dependency
-
+from .GrammarFuzzer import GrammarFuzzer  # minor dependency
+from .Grammars import is_valid_grammar, crange, convert_ebnf_grammar  # minor dependency
 
 SUM2_EBNF_GRAMMAR = {
     "<start>": ["<sum2>"],
@@ -1392,93 +1292,85 @@ SUM2_EBNF_GRAMMAR = {
 
 assert is_valid_grammar(SUM2_EBNF_GRAMMAR)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sum2_grammar =  convert_ebnf_grammar(SUM2_EBNF_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sum2_fuzzer = GrammarFuzzer(sum2_grammar)
     [sum2_fuzzer.fuzz() for i in range(10)]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         for i in range(10):
             eval(sum2_fuzzer.fuzz())
 
     print_content(annotator.function_with_invariants('sum2'), '.py')
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
-
 
 
 
 def sum2(a, b):
     return a + b
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with TypeAnnotator() as type_annotator:
         sum2(1, 2)
         sum2(-4, -5)
         sum2(0, 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(type_annotator.typed_functions())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as inv_annotator:
         sum2(1, 2)
         sum2(-4, -5)
         sum2(0, 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(inv_annotator.functions_with_invariants())
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: Union Types
 
-# ### Exercise 1: Union Types
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: Union Types')
-
 
 
 
@@ -1487,11 +1379,10 @@ from typing import Union, Optional
 def my_sqrt_with_union_type(x: Union[int, float]) -> float:
     ...
 
-# ### Exercise 2: Types for Local Variables
+### Exercise 2: Types for Local Variables
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Types for Local Variables')
-
 
 
 
@@ -1504,11 +1395,10 @@ def my_sqrt_with_local_types(x: Union[int, float]) -> float:
         guess: float = (approx + x / approx) / 2
     return approx
 
-# ### Exercise 3: Verbose Invariant Checkers
+### Exercise 3: Verbose Invariant Checkers
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 3: Verbose Invariant Checkers')
-
 
 
 
@@ -1516,10 +1406,9 @@ if __name__ == "__main__":
 def remove_first_char(s):
     return s[1:]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         remove_first_char('')
-
 
 def condition(precondition=None, postcondition=None, doc='Unknown'):
    def decorator(func):
@@ -1548,10 +1437,9 @@ def remove_first_char(s):
 
 remove_first_char('abc')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         remove_first_char('')
-
 
 class InvariantAnnotator(InvariantAnnotator):
    def preconditions(self, function_name):
@@ -1580,57 +1468,50 @@ class InvariantAnnotator(InvariantAnnotator):
 
        return conditions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
         y = sum2(2, 2)
     print_content(annotator.functions_with_invariants(), '.py')
 
+### Exercise 4: Save Initial Values
 
-# ### Exercise 4: Save Initial Values
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 4: Save Initial Values')
 
 
 
+### Exercise 5: Implications
 
-# ### Exercise 5: Implications
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 5: Implications')
 
 
 
+### Exercise 6: Local Variables
 
-# ### Exercise 6: Local Variables
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 6: Local Variables')
 
 
 
+### Exercise 7: Exploring Invariant Alternatives
 
-# ### Exercise 7: Exploring Invariant Alternatives
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 7: Exploring Invariant Alternatives')
 
 
 
+### Exercise 8: Grammar-Generated Properties
 
-# ### Exercise 8: Grammar-Generated Properties
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 8: Grammar-Generated Properties')
 
 
 
+### Exercise 9: Embedding Invariants as Assertions
 
-# ### Exercise 9: Embedding Invariants as Assertions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 9: Embedding Invariants as Assertions')
-
 
 
 
@@ -1717,25 +1598,21 @@ class PreconditionTransformer(ast.NodeTransformer):
 class EmbeddedInvariantTransformer(PreconditionTransformer):
     pass
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with EmbeddedInvariantAnnotator() as annotator:
         my_sqrt(5)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.functions_with_invariants(), '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with EmbeddedInvariantAnnotator() as annotator:
         y = sum3(3, 4, 5)
         y = sum3(-3, -4, -5)
         y = sum3(0, 0, 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.functions_with_invariants(), '.py')
-
 
 class EmbeddedInvariantTransformer(PreconditionTransformer):
     def postconditions(self):
@@ -1768,51 +1645,41 @@ class EmbeddedInvariantTransformer(PreconditionTransformer):
         else:
             return new_body + postconditions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with EmbeddedInvariantAnnotator() as annotator:
         my_sqrt(5)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt_def = annotator.functions_with_invariants()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(my_sqrt_def, '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     exec(my_sqrt_def.replace('my_sqrt', 'my_sqrt_annotated'))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         my_sqrt_annotated(-1)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with EmbeddedInvariantAnnotator() as annotator:
         y = sum3(3, 4, 5)
         y = sum3(-3, -4, -5)
         y = sum3(0, 0, 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.functions_with_invariants(), '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with EmbeddedInvariantAnnotator() as annotator:
         length = list_length([1, 2, 3])
 
     print_content(annotator.functions_with_invariants(), '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with EmbeddedInvariantAnnotator() as annotator:
         print_sum(31, 45)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(annotator.functions_with_invariants(), '.py')
-

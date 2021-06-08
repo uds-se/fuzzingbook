@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Prototyping with Python" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/PrototypingWithPython.html
-# Last change: 2020-10-27 10:48:21+01:00
+# Last change: 2021-06-02 17:56:07+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,25 +27,50 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Prototyping with Python
 
-# # Prototyping with Python
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python PrototypingWithPython.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.PrototypingWithPython import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/PrototypingWithPython.html
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Prototyping with Python"
+at https://www.fuzzingbook.org/html/PrototypingWithPython.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Prototyping with Python
+# =======================
+
+if __name__ == '__main__':
     print('# Prototyping with Python')
 
 
 
-
-if __name__ == "__main__":
-    from bookutils import YouTubeVideo
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
     YouTubeVideo("IAreRIID9lM")
 
+## Python is Easy
+## --------------
 
-# ## Python is Easy
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Python is Easy')
-
 
 
 
@@ -64,21 +89,20 @@ def triangle(a, b, c):
             else:
                 return 'scalene'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     triangle(2, 3, 4)
 
+## Fuzzing is as Easy as Always
+## ----------------------------
 
-# ## Fuzzing is as Easy as Always
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Fuzzing is as Easy as Always')
-
 
 
 
 from random import randrange
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for i in range(10):
         a = randrange(1, 10)
         b = randrange(1, 10)
@@ -87,12 +111,11 @@ if __name__ == "__main__":
         t = triangle(a, b, c)
         print(f"triangle({a}, {b}, {c}) = {repr(t)}")
 
+## Dynamic Analysis in Python: So Easy it Hurts
+## --------------------------------------------
 
-# ## Dynamic Analysis in Python: So Easy it Hurts
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Dynamic Analysis in Python: So Easy it Hurts')
-
 
 
 
@@ -118,28 +141,23 @@ def triangle_traced():
     triangle(2, 2, 1)
     sys.settrace(None)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     triangle_traced()
 
+## Static Analysis in Python: Still Easy
+## -------------------------------------
 
-# ## Static Analysis in Python: Still Easy
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Static Analysis in Python: Still Easy')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from bookutils import rich_output
-else:
-    from .bookutils import rich_output
-
+from .bookutils import rich_output
 
 import ast
 import astor
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     if rich_output():
         # Normally, this will do
         from showast import show_ast
@@ -147,12 +165,10 @@ if __name__ == "__main__":
         def show_ast(tree):
             ast.dump(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     triangle_source = inspect.getsource(triangle)
     triangle_ast = ast.parse(triangle_source)
     show_ast(triangle_ast)
-
 
 def collect_conditions(tree):
     conditions = []
@@ -168,47 +184,42 @@ def collect_conditions(tree):
     traverse(tree)
     return conditions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     collect_conditions(triangle_ast)
 
+## Symbolic Reasoning in Python: There's a Package for That
+## --------------------------------------------------------
 
-# ## Symbolic Reasoning in Python: There's a Package for That
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("\n## Symbolic Reasoning in Python: There's a Package for That")
-
 
 
 
 import z3
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     a = z3.Int('a')
     b = z3.Int('b')
     c = z3.Int('c')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     s = z3.Solver()
     s.add(z3.And(a > 0, b > 0, c > 0))  # Triangle edges are positive
     s.add(z3.And(a != b, b != c, a != c))  # Our condition
     s.check()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     m = s.model()
     m
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     triangle(m[a].as_long(), m[b].as_long(), m[c].as_long())
 
+## A Symbolic Test Generator
+## -------------------------
 
-# ## A Symbolic Test Generator
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## A Symbolic Test Generator')
-
 
 
 
@@ -238,12 +249,11 @@ def collect_path_conditions(tree):
     
     return ["z3.And(" + ", ".join(path) + ")" for path in paths]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     path_conditions = collect_path_conditions(triangle_ast)
     path_conditions
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for path_condition in path_conditions:
         s = z3.Solver()
         s.add(a > 0, b > 0, c > 0)
@@ -251,40 +261,36 @@ if __name__ == "__main__":
         m = s.model()
         print(m, triangle(m[a].as_long(), m[b].as_long(), m[c].as_long()))
 
+## Things that will not work
+## -------------------------
 
-# ## Things that will not work
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Things that will not work')
 
 
 
+### (No) Type Checking
 
-# ### (No) Type Checking
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### (No) Type Checking')
-
 
 
 
 def typed_triangle(a: int, b: int, c: int) -> str:
     return triangle(a, b, c)
 
-# ### (No) Program Proofs
+### (No) Program Proofs
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### (No) Program Proofs')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     x = 42
     x = "a string"
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     p1, p2 = True, False
 
     if p1:
@@ -294,59 +300,57 @@ if __name__ == "__main__":
 
     # Does x exist at this point?
 
+## The Virtues of Prototyping
+## --------------------------
 
-# ## The Virtues of Prototyping
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## The Virtues of Prototyping')
 
 
 
+## Try it out!
+## -----------
 
-# ## Try it out!
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Try it out!')
 
 
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: Features! Features!
 
-# ### Exercise 1: Features! Features!
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: Features! Features!')
-
 
 
