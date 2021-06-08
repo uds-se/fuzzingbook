@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Code Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2019-12-21 16:38:57+01:00
+# Last change: 2021-06-02 17:41:31+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,28 +27,71 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Code Coverage
 
-# # Code Coverage
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python Coverage.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.Coverage import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/Coverage.html
+
+This chapter introduces a `Coverage` class allowing you to measure coverage for Python programs.  Its typical usage is in conjunction with a `with` clause:
+
+>>> with Coverage() as cov:
+>>>     cgi_decode("a+b")
+
+The `trace()` method returns the coverage as a list of locations covered.  Each location comes as a pair (`function name`, `line`).
+
+>>> print(cov.trace())
+[('cgi_decode', 9), ('cgi_decode', 10), ('cgi_decode', 11), ('cgi_decode', 12), ('cgi_decode', 15), ('cgi_decode', 16), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 21), ('cgi_decode', 30), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 20), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 21), ('cgi_decode', 30), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 32), ('__exit__', 25)]
+
+
+The `coverage()` method returns the set of locations executed at least once:
+
+>>> print(cov.coverage())
+{('cgi_decode', 12), ('cgi_decode', 21), ('cgi_decode', 31), ('cgi_decode', 20), ('cgi_decode', 30), ('cgi_decode', 11), ('cgi_decode', 32), ('cgi_decode', 10), ('cgi_decode', 9), ('cgi_decode', 19), ('__exit__', 25), ('cgi_decode', 18), ('cgi_decode', 15), ('cgi_decode', 17), ('cgi_decode', 16)}
+
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Code Coverage"
+at https://www.fuzzingbook.org/html/Coverage.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Code Coverage
+# =============
+
+if __name__ == '__main__':
     print('# Code Coverage')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## A CGI Decoder
+## -------------
 
-# ## A CGI Decoder
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## A CGI Decoder')
-
 
 
 
@@ -85,19 +128,18 @@ def cgi_decode(s):
         i += 1
     return t
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode("Hello+world")
 
+## Black-Box Testing
+## -----------------
 
-# ## Black-Box Testing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Black-Box Testing')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert cgi_decode('+') == ' '
     assert cgi_decode('%20') == ' '
     assert cgi_decode('abc') == 'abc'
@@ -108,30 +150,27 @@ if __name__ == "__main__":
     except ValueError:
         pass
 
+## White-Box Testing
+## -----------------
 
-# ## White-Box Testing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## White-Box Testing')
 
 
 
+## Tracing Executions
+## ------------------
 
-# ## Tracing Executions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Tracing Executions')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode("a+b")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     coverage = []
-
 
 def traceit(frame, event, arg):
     if event == "line":
@@ -150,49 +189,37 @@ def cgi_decode_traced(s):
     cgi_decode(s)
     sys.settrace(None)    # Turn off
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode_traced("a+b")
     print(coverage)
 
-
 import inspect
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode_code = inspect.getsource(cgi_decode)
 
+from .bookutils import print_content, print_file
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import print_content, print_file
-else:
-    from .fuzzingbook_utils import print_content, print_file
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(cgi_decode_code[:300] + "...", ".py")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode_lines = [""] + cgi_decode_code.splitlines()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode_lines[1]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode_lines[9:13]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode_lines[15]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     covered_lines = set(coverage)
     print(covered_lines)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for lineno in range(1, len(cgi_decode_lines)):
         if lineno not in covered_lines:
             print("# ", end="")
@@ -201,12 +228,11 @@ if __name__ == "__main__":
         print("%2d  " % lineno, end="")
         print_content(cgi_decode_lines[lineno], '.py')
 
+## A Coverage Class
+## ----------------
 
-# ## A Coverage Class
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## A Coverage Class')
-
 
 
 
@@ -244,22 +270,21 @@ class Coverage(object):
         """The set of executed lines, as (function_name, line_number) pairs"""
         return set(self.trace())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov:
         cgi_decode("a+b")
 
     print(cov.coverage())
 
+## Comparing Coverage
+## ------------------
 
-# ## Comparing Coverage
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Comparing Coverage')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov_plus:
         cgi_decode("a+b")
     with Coverage() as cov_standard:
@@ -267,14 +292,12 @@ if __name__ == "__main__":
 
     cov_plus.coverage() - cov_standard.coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov_max:
         cgi_decode('+')
         cgi_decode('%20')
@@ -284,31 +307,24 @@ if __name__ == "__main__":
         except:
             pass
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov_max.coverage() - cov_plus.coverage()
 
+##  Coverage of Basic Fuzzing
+## --------------------------
 
-# ##  Coverage of Basic Fuzzing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n##  Coverage of Basic Fuzzing')
 
 
 
+from .Fuzzer import fuzzer
 
-if __package__ is None or __package__ == "":
-    from Fuzzer import fuzzer
-else:
-    from .Fuzzer import fuzzer
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sample = fuzzer()
     sample
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov_fuzz:
         try:
             cgi_decode(sample)
@@ -316,14 +332,11 @@ if __name__ == "__main__":
             pass
     cov_fuzz.coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov_max.coverage() - cov_fuzz.coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     trials = 100
-
 
 def population_coverage(population, function):
     cumulative_coverage = []
@@ -346,25 +359,22 @@ def hundred_inputs():
         population.append(fuzzer())
     return population
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_coverage, cumulative_coverage = population_coverage(
         hundred_inputs(), cgi_decode)
 
-
 # %matplotlib inline
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     plt.plot(cumulative_coverage)
     plt.title('Coverage of cgi_decode() with random inputs')
     plt.xlabel('# of inputs')
     plt.ylabel('lines covered')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     runs = 100
 
     # Create an array with TRIALS elements, all zero
@@ -380,135 +390,119 @@ if __name__ == "__main__":
     for i in range(trials):
         average_coverage.append(sum_coverage[i] / runs)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     plt.plot(average_coverage)
     plt.title('Average coverage of cgi_decode() with random inputs')
     plt.xlabel('# of inputs')
     plt.ylabel('lines covered')
 
+## Getting Coverage from External Programs
+## ---------------------------------------
 
-# ## Getting Coverage from External Programs
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Getting Coverage from External Programs')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_c_code = """
-    /* CGI decoding as C program */
+/* CGI decoding as C program */
 
-    #include <stdlib.h>
-    #include <string.h>
-    #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
-    """
+"""
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_c_code += r"""
-    int hex_values[256];
+int hex_values[256];
 
-    void init_hex_values() {
-        for (int i = 0; i < sizeof(hex_values) / sizeof(int); i++) {
-            hex_values[i] = -1;
-        }
-        hex_values['0'] = 0; hex_values['1'] = 1; hex_values['2'] = 2; hex_values['3'] = 3;
-        hex_values['4'] = 4; hex_values['5'] = 5; hex_values['6'] = 6; hex_values['7'] = 7;
-        hex_values['8'] = 8; hex_values['9'] = 9;
-
-        hex_values['a'] = 10; hex_values['b'] = 11; hex_values['c'] = 12; hex_values['d'] = 13;
-        hex_values['e'] = 14; hex_values['f'] = 15;
-
-        hex_values['A'] = 10; hex_values['B'] = 11; hex_values['C'] = 12; hex_values['D'] = 13;
-        hex_values['E'] = 14; hex_values['F'] = 15;
+void init_hex_values() {
+    for (int i = 0; i < sizeof(hex_values) / sizeof(int); i++) {
+        hex_values[i] = -1;
     }
-    """
+    hex_values['0'] = 0; hex_values['1'] = 1; hex_values['2'] = 2; hex_values['3'] = 3;
+    hex_values['4'] = 4; hex_values['5'] = 5; hex_values['6'] = 6; hex_values['7'] = 7;
+    hex_values['8'] = 8; hex_values['9'] = 9;
 
+    hex_values['a'] = 10; hex_values['b'] = 11; hex_values['c'] = 12; hex_values['d'] = 13;
+    hex_values['e'] = 14; hex_values['f'] = 15;
 
-if __name__ == "__main__":
+    hex_values['A'] = 10; hex_values['B'] = 11; hex_values['C'] = 12; hex_values['D'] = 13;
+    hex_values['E'] = 14; hex_values['F'] = 15;
+}
+"""
+
+if __name__ == '__main__':
     cgi_c_code += r"""
-    int cgi_decode(char *s, char *t) {
-        while (*s != '\0') {
-            if (*s == '+')
-                *t++ = ' ';
-            else if (*s == '%') {
-                int digit_high = *++s;
-                int digit_low = *++s;
-                if (hex_values[digit_high] >= 0 && hex_values[digit_low] >= 0) {
-                    *t++ = hex_values[digit_high] * 16 + hex_values[digit_low];
-                }
-                else
-                    return -1;
+int cgi_decode(char *s, char *t) {
+    while (*s != '\0') {
+        if (*s == '+')
+            *t++ = ' ';
+        else if (*s == '%') {
+            int digit_high = *++s;
+            int digit_low = *++s;
+            if (hex_values[digit_high] >= 0 && hex_values[digit_low] >= 0) {
+                *t++ = hex_values[digit_high] * 16 + hex_values[digit_low];
             }
             else
-                *t++ = *s;
-            s++;
-        }
-        *t = '\0';
-        return 0;
-    }
-    """
-
-
-if __name__ == "__main__":
-    cgi_c_code += r"""
-    int main(int argc, char *argv[]) {
-        init_hex_values();
-
-        if (argc >= 2) {
-            char *s = argv[1];
-            char *t = malloc(strlen(s) + 1); /* output is at most as long as input */
-            int ret = cgi_decode(s, t);
-            printf("%s\n", t);
-            return ret;
+                return -1;
         }
         else
-        {
-            printf("cgi_decode: usage: cgi_decode STRING\n");
-            return 1;
-        }
+            *t++ = *s;
+        s++;
     }
-    """
+    *t = '\0';
+    return 0;
+}
+"""
 
+if __name__ == '__main__':
+    cgi_c_code += r"""
+int main(int argc, char *argv[]) {
+    init_hex_values();
 
-if __name__ == "__main__":
+    if (argc >= 2) {
+        char *s = argv[1];
+        char *t = malloc(strlen(s) + 1); /* output is at most as long as input */
+        int ret = cgi_decode(s, t);
+        printf("%s\n", t);
+        return ret;
+    }
+    else
+    {
+        printf("cgi_decode: usage: cgi_decode STRING\n");
+        return 1;
+    }
+}
+"""
+
+if __name__ == '__main__':
     with open("cgi_decode.c", "w") as f:
         f.write(cgi_c_code)
 
+from .bookutils import print_file
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import print_file
-else:
-    from .fuzzingbook_utils import print_file
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_file("cgi_decode.c")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import os
-    os.system('cc --coverage -o cgi_decode cgi_decode.c')
+    os.system(f'cc --coverage -o cgi_decode cgi_decode.c')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import os
-    os.system("./cgi_decode 'Send+mail+to+me%40fuzzingbook.org'")
+    os.system(f"./cgi_decode 'Send+mail+to+me%40fuzzingbook.org'")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import os
-    os.system('gcov cgi_decode.c')
+    os.system(f'gcov cgi_decode.c')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     lines = open('cgi_decode.c.gcov').readlines()
     for i in range(30, 50):
         print(lines[i], end='')
-
 
 def read_gcov_coverage(c_file):
     gcov_file = c_file + ".gcov"
@@ -523,29 +517,23 @@ def read_gcov_coverage(c_file):
             coverage.add((c_file, line_number))
     return coverage
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     coverage = read_gcov_coverage('cgi_decode.c')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     list(coverage)[:5]
 
+## Finding Errors with Basic Fuzzing
+## ---------------------------------
 
-# ## Finding Errors with Basic Fuzzing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Finding Errors with Basic Fuzzing')
 
 
 
+from .ExpectError import ExpectError
 
-if __package__ is None or __package__ == "":
-    from ExpectError import ExpectError
-else:
-    from .ExpectError import ExpectError
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         for i in range(trials):
             try:
@@ -554,93 +542,83 @@ if __name__ == "__main__":
             except ValueError:
                 pass
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     s
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov:
         cgi_decode("a+b")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(cov.trace())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(cov.coverage())
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
-
 
 
 
 import os
 import glob
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for file in glob.glob("cgi_decode") + glob.glob("cgi_decode.*"):
         os.remove(file)
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: Fixing cgi_decode
 
-# ### Exercise 1: Fixing cgi_decode
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: Fixing cgi_decode')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         assert cgi_decode('%') == '%'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         assert cgi_decode('%4') == '%4'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert cgi_decode('%40') == '@'
-
 
 def fixed_cgi_decode(s):
     """Decode the CGI-encoded string `s`:
@@ -676,19 +654,16 @@ def fixed_cgi_decode(s):
     return t
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert fixed_cgi_decode('%') == '%'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert fixed_cgi_decode('%4') == '%4'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert fixed_cgi_decode('%40') == '@'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for i in range(trials):
         try:
             s = fuzzer()
@@ -696,34 +671,29 @@ if __name__ == "__main__":
         except ValueError:
             pass
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_c_code = cgi_c_code.replace(
         r"if (*s == '%')",  # old code
         r"if (*s == '%' && s[1] != '\0' && s[2] != '\0')"  # new code
     )
 
+### Exercise 2: Branch Coverage
 
-# ### Exercise 2: Branch Coverage
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Branch Coverage')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov:
         cgi_decode("a+b")
     trace = cov.trace()
     trace[:5]
 
+#### Part 1: Compute branch coverage
 
-# #### Part 1: Compute branch coverage
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 1: Compute branch coverage')
-
 
 
 
@@ -737,9 +707,8 @@ def branch_coverage(trace):
 
     return coverage
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     branch_coverage(trace)
-
 
 class BranchCoverage(Coverage):
     def coverage(self):
@@ -753,22 +722,20 @@ class BranchCoverage(Coverage):
 
         return coverage
 
-# #### Part 2: Comparing statement coverage and branch coverage
+#### Part 2: Comparing statement coverage and branch coverage
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 2: Comparing statement coverage and branch coverage')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with BranchCoverage() as cov:
         cgi_decode("a+b")
 
     print(cov.coverage())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with BranchCoverage() as cov_plus:
         cgi_decode("a+b")
     with BranchCoverage() as cov_standard:
@@ -776,8 +743,7 @@ if __name__ == "__main__":
 
     cov_plus.coverage() - cov_standard.coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with BranchCoverage() as cov_max:
         cgi_decode('+')
         cgi_decode('%20')
@@ -787,16 +753,13 @@ if __name__ == "__main__":
         except:
             pass
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov_max.coverage() - cov_plus.coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sample
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with BranchCoverage() as cov_fuzz:
         try:
             cgi_decode(s)
@@ -804,10 +767,8 @@ if __name__ == "__main__":
             pass
     cov_fuzz.coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov_max.coverage() - cov_fuzz.coverage()
-
 
 def population_branch_coverage(population, function):
     cumulative_coverage = []
@@ -824,45 +785,38 @@ def population_branch_coverage(population, function):
 
     return all_coverage, cumulative_coverage
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_branch_coverage, cumulative_branch_coverage = population_branch_coverage(
         hundred_inputs(), cgi_decode)
 
-
 # %matplotlib inline
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     plt.plot(cumulative_branch_coverage)
     plt.title('Branch coverage of cgi_decode() with random inputs')
     plt.xlabel('# of inputs')
     plt.ylabel('line pairs covered')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     len(cov_max.coverage())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_branch_coverage - cov_max.coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov_max.coverage() - all_branch_coverage
 
+#### Part 3: Average coverage
 
-# #### Part 3: Average coverage
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 3: Average coverage')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     runs = 100
 
     # Create an array with TRIALS elements, all zero
@@ -880,10 +834,8 @@ if __name__ == "__main__":
         average_coverage.append(sum_coverage[i] / runs)
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     plt.plot(average_coverage)
     plt.title('Average branch coverage of cgi_decode() with random inputs')
     plt.xlabel('# of inputs')
     plt.ylabel('line pairs covered')
-

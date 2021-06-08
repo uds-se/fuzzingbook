@@ -208,7 +208,7 @@ th {
   *:before,
   *:after {
     background: transparent !important;
-    color: #000 !important;
+    
     box-shadow: none !important;
     text-shadow: none !important;
   }
@@ -256,7 +256,7 @@ th {
   }
   .btn > .caret,
   .dropup > .btn > .caret {
-    border-top-color: #000 !important;
+    border-top-
   }
   .label {
     border: 1px solid #000;
@@ -11614,8 +11614,13 @@ ul.typeahead-list > li > a {
 /*# sourceMappingURL=style.min.css.map */
     </style>
 <style type="text/css">
-    .highlight .hll { background-color: #ffffcc }
-.highlight  { background: #f8f8f8; }
+    pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #ffffcc }
+.highlight { background: #f8f8f8; }
 .highlight .c { color: #408080; font-style: italic } /* Comment */
 .highlight .err { border: 1px solid #FF0000 } /* Error */
 .highlight .k { color: #008000; font-weight: bold } /* Keyword */
@@ -11796,6 +11801,8 @@ MathJax.Hub.Config({
 <meta property="og:description" content="In the chapter on Grammars, we discussed how grammars can beused to represent various languages. We also saw how grammars can be used togenerate strings of the corresponding language. Grammars can also perform thereverse. That is, given a string, one can decompose the string into itsconstituent parts that correspond to the parts of grammar used to generate it– the derivation tree of that string. These parts (and parts from other similarstrings) can later be recombined using the same grammar to produce new strings.In this chapter, we use grammars to parse and decompose a given set of valid seed inputs into their corresponding derivation trees. This structural representation allows us to mutate, crossover, and recombine their parts in order to generate new valid, slightly changed inputs (i.e., fuzz)Prerequisites You should have read the chapter on grammars. An understanding of derivation trees from the chapter on grammar fuzzer  is also required." />
 <meta property="og:image" content="https://www.fuzzingbook.org/html/PICS/wordcloud.png" />
 
+<meta name="twitter:dnt" content="on">
+
 <link rel="shortcut icon" href="favicon/favicon.ico" type="image/x-icon">
 <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-touch-icon.png">
 
@@ -11869,7 +11876,7 @@ MathJax.Hub.Config({
 <li><a href="https://www.fuzzingbook.org/html/00_Table_of_Contents.html"><i class="fa fa-fw fa-sitemap"></i></span> Sitemap</a></li>
 <li class="has-sub"><a href="01_Intro.html" class="chapters"><span class="part_number">I</span> Whetting Your Appetite <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
-<li><a href="Tours.html">Tours through the Book <strong class="new_chapter">&bull;</strong></a></li>
+<li><a href="Tours.html">Tours through the Book</a></li>
 <li><a href="Intro_Testing.html">Introduction to Software Testing</a></li>
 </ul><li class="has-sub"><a href="02_Lexical_Fuzzing.html" class="chapters"><span class="part_number">II</span> Lexical Fuzzing <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
@@ -11909,6 +11916,7 @@ MathJax.Hub.Config({
 <li><a href="WhenToStopFuzzing.html">When To Stop Fuzzing</a></li>
 </ul><li class="has-sub"><a href="99_Appendices.html" class="chapters">Appendices <i class="fa fa-fw fa-caret-right"></i></a>
 <ul>
+<li><a href="PrototypingWithPython.html">Prototyping with Python</a></li>
 <li><a href="ExpectError.html">Error Handling</a></li>
 <li><a href="Timer.html">Timer</a></li>
 <li><a href="ControlFlow.html">Control Flow Graph</a></li>
@@ -11943,6 +11951,7 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Extracting-Trees">Extracting Trees</a>
 </li><li class="has-sub"><a href="#Ambiguous-Parsing">Ambiguous Parsing</a>
 </li><li class="has-sub"><a href="#The-Aycock-Epsilon-Fix">The Aycock Epsilon Fix</a>
+</li><li class="has-sub"><a href="#Tree-Extractor">Tree Extractor</a>
 </li><li class="has-sub"><a href="#More-Earley-Parsing">More Earley Parsing</a>
 </ul></li><li class="has-sub"><a href="#Testing-the-Parsers">&nbsp;&bull;&nbsp;&nbsp; Testing the Parsers</a>
 </li><li class="has-sub"><a href="#Background"><i class="fa fa-fw fa-mortar-board"></i> Background</a>
@@ -12056,7 +12065,322 @@ is also required.</li>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">tree</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">trees</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 </pre></div>
-<p><img src="PICS/Parser-synopsis-1.svg" alt=""></p>
+<p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="646pt" height="227pt"
+ viewBox="0.00 0.00 646.00 227.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 223)">
+<title>%3</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-223 642,-223 642,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="263" y="-207.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="263" y="-156.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;phone&#45;number&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="#000000" d="M263,-203.9748C263,-197.195 263,-186.966 263,-178.1331"/>
+<polygon fill="#000000" stroke="#000000" points="266.5001,-178.0561 263,-168.0561 259.5001,-178.0561 266.5001,-178.0561"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="128" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">(</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="#000000" d="M236.4141,-152.9442C211.0368,-145.3061 172.0321,-132.4442 140,-117 139.7898,-116.8986 139.5786,-116.7945 139.3669,-116.6878"/>
+<polygon fill="#000000" stroke="#000000" points="141.031,-113.6036 130.6668,-111.4047 137.3976,-119.5868 141.031,-113.6036"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="169" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;area&gt;</text>
+</g>
+<!-- 1&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>1&#45;&gt;3</title>
+<path fill="none" stroke="#000000" d="M249.13,-152.9748C234.1346,-144.839 209.9849,-131.7365 192.1123,-122.0397"/>
+<polygon fill="#000000" stroke="#000000" points="193.3857,-118.7486 182.9269,-117.0561 190.0475,-124.9014 193.3857,-118.7486"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="236" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">)</text>
+</g>
+<!-- 1&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>1&#45;&gt;10</title>
+<path fill="none" stroke="#000000" d="M259.0161,-152.9748C254.8794,-145.1611 248.3174,-132.7662 243.2566,-123.2069"/>
+<polygon fill="#000000" stroke="#000000" points="246.3123,-121.4982 238.5401,-114.298 240.1258,-124.7735 246.3123,-121.4982"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="291" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;exchange&gt;</text>
+</g>
+<!-- 1&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>1&#45;&gt;11</title>
+<path fill="none" stroke="#000000" d="M267.1315,-152.9748C271.0192,-145.8936 276.9726,-135.05 281.9609,-125.9641"/>
+<polygon fill="#000000" stroke="#000000" points="285.1069,-127.5063 286.8516,-117.0561 278.9709,-124.1375 285.1069,-127.5063"/>
+</g>
+<!-- 18 -->
+<g id="node19" class="node">
+<title>18</title>
+<text text-anchor="middle" x="346" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&#45;</text>
+</g>
+<!-- 1&#45;&gt;18 -->
+<g id="edge18" class="edge">
+<title>1&#45;&gt;18</title>
+<path fill="none" stroke="#000000" d="M275.3339,-152.9891C289.5119,-144.3445 313.4713,-129.7036 334,-117 334.1985,-116.8772 334.3987,-116.7532 334.6004,-116.6282"/>
+<polygon fill="#000000" stroke="#000000" points="336.6106,-119.4993 343.2399,-111.2347 332.9037,-113.5614 336.6106,-119.4993"/>
+</g>
+<!-- 19 -->
+<g id="node20" class="node">
+<title>19</title>
+<text text-anchor="middle" x="497" y="-105.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;line&gt;</text>
+</g>
+<!-- 1&#45;&gt;19 -->
+<g id="edge19" class="edge">
+<title>1&#45;&gt;19</title>
+<path fill="none" stroke="#000000" d="M297.5275,-152.9748C343.9191,-142.8638 425.5081,-125.0816 468.5573,-115.6991"/>
+<polygon fill="#000000" stroke="#000000" points="469.3532,-119.1078 478.3785,-113.5585 467.8625,-112.2684 469.3532,-119.1078"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="35" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;lead&#45;digit&gt;</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="#000000" d="M149.2278,-101.9748C126.8619,-93.4624 90.2097,-79.5126 64.4685,-69.7156"/>
+<polygon fill="#000000" stroke="#000000" points="65.4443,-66.3421 54.8533,-66.0561 62.9543,-72.8843 65.4443,-66.3421"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="109" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 3&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>3&#45;&gt;6</title>
+<path fill="none" stroke="#000000" d="M160.1468,-101.9748C151.1071,-94.291 136.8553,-82.177 125.6893,-72.6859"/>
+<polygon fill="#000000" stroke="#000000" points="127.7757,-69.8658 117.8895,-66.0561 123.2422,-75.1994 127.7757,-69.8658"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="169" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 3&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>3&#45;&gt;8</title>
+<path fill="none" stroke="#000000" d="M169,-101.9748C169,-95.195 169,-84.966 169,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="172.5001,-76.0561 169,-66.0561 165.5001,-76.0561 172.5001,-76.0561"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="35" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="#000000" d="M35,-50.9748C35,-44.195 35,-33.966 35,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="38.5001,-25.0561 35,-15.0561 31.5001,-25.0561 38.5001,-25.0561"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="109" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+</g>
+<!-- 6&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>6&#45;&gt;7</title>
+<path fill="none" stroke="#000000" d="M109,-50.9748C109,-44.195 109,-33.966 109,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="112.5001,-25.0561 109,-15.0561 105.5001,-25.0561 112.5001,-25.0561"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="169" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="#000000" d="M169,-50.9748C169,-44.195 169,-33.966 169,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="172.5001,-25.0561 169,-15.0561 165.5001,-25.0561 172.5001,-25.0561"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="243" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;lead&#45;digit&gt;</text>
+</g>
+<!-- 11&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>11&#45;&gt;12</title>
+<path fill="none" stroke="#000000" d="M283.9174,-101.9748C276.8983,-94.517 265.9513,-82.8857 257.1459,-73.53"/>
+<polygon fill="#000000" stroke="#000000" points="259.514,-70.9393 250.1116,-66.0561 254.4166,-75.7369 259.514,-70.9393"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="317" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 11&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>11&#45;&gt;14</title>
+<path fill="none" stroke="#000000" d="M294.8364,-101.9748C298.408,-94.969 303.8571,-84.2803 308.4584,-75.2547"/>
+<polygon fill="#000000" stroke="#000000" points="311.7241,-76.5548 313.1479,-66.0561 305.4878,-73.3755 311.7241,-76.5548"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="377" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 11&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>11&#45;&gt;16</title>
+<path fill="none" stroke="#000000" d="M303.6896,-101.9748C317.2817,-93.9143 339.0948,-80.9787 355.399,-71.3099"/>
+<polygon fill="#000000" stroke="#000000" points="357.4423,-74.1674 364.2583,-66.0561 353.8718,-68.1465 357.4423,-74.1674"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="243" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">9</text>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="#000000" d="M243,-50.9748C243,-44.195 243,-33.966 243,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="246.5001,-25.0561 243,-15.0561 239.5001,-25.0561 246.5001,-25.0561"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="317" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">8</text>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="#000000" d="M317,-50.9748C317,-44.195 317,-33.966 317,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="320.5001,-25.0561 317,-15.0561 313.5001,-25.0561 320.5001,-25.0561"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+<text text-anchor="middle" x="377" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">7</text>
+</g>
+<!-- 16&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>16&#45;&gt;17</title>
+<path fill="none" stroke="#000000" d="M377,-50.9748C377,-44.195 377,-33.966 377,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="380.5001,-25.0561 377,-15.0561 373.5001,-25.0561 380.5001,-25.0561"/>
+</g>
+<!-- 20 -->
+<g id="node21" class="node">
+<title>20</title>
+<text text-anchor="middle" x="437" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 19&#45;&gt;20 -->
+<g id="edge20" class="edge">
+<title>19&#45;&gt;20</title>
+<path fill="none" stroke="#000000" d="M488.1468,-101.9748C479.1071,-94.291 464.8553,-82.177 453.6893,-72.6859"/>
+<polygon fill="#000000" stroke="#000000" points="455.7757,-69.8658 445.8895,-66.0561 451.2422,-75.1994 455.7757,-69.8658"/>
+</g>
+<!-- 22 -->
+<g id="node23" class="node">
+<title>22</title>
+<text text-anchor="middle" x="497" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 19&#45;&gt;22 -->
+<g id="edge22" class="edge">
+<title>19&#45;&gt;22</title>
+<path fill="none" stroke="#000000" d="M497,-101.9748C497,-95.195 497,-84.966 497,-76.1331"/>
+<polygon fill="#000000" stroke="#000000" points="500.5001,-76.0561 497,-66.0561 493.5001,-76.0561 500.5001,-76.0561"/>
+</g>
+<!-- 24 -->
+<g id="node25" class="node">
+<title>24</title>
+<text text-anchor="middle" x="557" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 19&#45;&gt;24 -->
+<g id="edge24" class="edge">
+<title>19&#45;&gt;24</title>
+<path fill="none" stroke="#000000" d="M505.8532,-101.9748C514.8929,-94.291 529.1447,-82.177 540.3107,-72.6859"/>
+<polygon fill="#000000" stroke="#000000" points="542.7578,-75.1994 548.1105,-66.0561 538.2243,-69.8658 542.7578,-75.1994"/>
+</g>
+<!-- 26 -->
+<g id="node27" class="node">
+<title>26</title>
+<text text-anchor="middle" x="617" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;digit&gt;</text>
+</g>
+<!-- 19&#45;&gt;26 -->
+<g id="edge26" class="edge">
+<title>19&#45;&gt;26</title>
+<path fill="none" stroke="#000000" d="M514.7064,-101.9748C534.5584,-93.5377 566.9786,-79.7591 589.996,-69.9767"/>
+<polygon fill="#000000" stroke="#000000" points="591.3866,-73.1887 599.2209,-66.0561 588.6486,-66.7464 591.3866,-73.1887"/>
+</g>
+<!-- 21 -->
+<g id="node22" class="node">
+<title>21</title>
+<text text-anchor="middle" x="437" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">6</text>
+</g>
+<!-- 20&#45;&gt;21 -->
+<g id="edge21" class="edge">
+<title>20&#45;&gt;21</title>
+<path fill="none" stroke="#000000" d="M437,-50.9748C437,-44.195 437,-33.966 437,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="440.5001,-25.0561 437,-15.0561 433.5001,-25.0561 440.5001,-25.0561"/>
+</g>
+<!-- 23 -->
+<g id="node24" class="node">
+<title>23</title>
+<text text-anchor="middle" x="497" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+</g>
+<!-- 22&#45;&gt;23 -->
+<g id="edge23" class="edge">
+<title>22&#45;&gt;23</title>
+<path fill="none" stroke="#000000" d="M497,-50.9748C497,-44.195 497,-33.966 497,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="500.5001,-25.0561 497,-15.0561 493.5001,-25.0561 500.5001,-25.0561"/>
+</g>
+<!-- 25 -->
+<g id="node26" class="node">
+<title>25</title>
+<text text-anchor="middle" x="557" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">4</text>
+</g>
+<!-- 24&#45;&gt;25 -->
+<g id="edge25" class="edge">
+<title>24&#45;&gt;25</title>
+<path fill="none" stroke="#000000" d="M557,-50.9748C557,-44.195 557,-33.966 557,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="560.5001,-25.0561 557,-15.0561 553.5001,-25.0561 560.5001,-25.0561"/>
+</g>
+<!-- 27 -->
+<g id="node28" class="node">
+<title>27</title>
+<text text-anchor="middle" x="617" y="-3.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+</g>
+<!-- 26&#45;&gt;27 -->
+<g id="edge27" class="edge">
+<title>26&#45;&gt;27</title>
+<path fill="none" stroke="#000000" d="M617,-50.9748C617,-44.195 617,-33.966 617,-25.1331"/>
+<polygon fill="#000000" stroke="#000000" points="620.5001,-25.0561 617,-15.0561 613.5001,-25.0561 620.5001,-25.0561"/>
+</g>
+</g>
+</svg>
+</p>
 <p>These derivation trees can then be used for test generation, notably for mutating and recombining existing inputs.</p>
 </div>
 </div>
@@ -12282,7 +12606,7 @@ It is an old but reliable model!
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook/tree/master/notebooks/fuzzingbook_utils" class="import" target="_blank">fuzzingbook_utils</a></span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span>
 </pre></div>
 
 </div>
@@ -12296,12 +12620,12 @@ It is an old but reliable model!
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">RE_NONTERMINAL</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">syntax_diagram</span>
-<span class="kn">from</span> <span class="nn"><a href="Fuzzer.html" class="import" target="_blank">Fuzzer</a></span> <span class="k">import</span> <span class="n">Fuzzer</span>
-<span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="k">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">FasterGrammarFuzzer</span><span class="p">,</span> <span class="n">display_tree</span><span class="p">,</span> <span class="n">tree_to_string</span><span class="p">,</span> <span class="n">dot_escape</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">RE_NONTERMINAL</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">syntax_diagram</span>
+<span class="kn">from</span> <span class="nn"><a href="Fuzzer.html" class="import" target="_blank">Fuzzer</a></span> <span class="kn">import</span> <span class="n">Fuzzer</span>
+<span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="kn">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">FasterGrammarFuzzer</span><span class="p">,</span> <span class="n">display_tree</span><span class="p">,</span> <span class="n">tree_to_string</span><span class="p">,</span> <span class="n">dot_escape</span>
 
-<span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="k">import</span> <span class="n">ExpectError</span>
-<span class="kn">from</span> <span class="nn"><a href="Timer.html" class="import" target="_blank">Timer</a></span> <span class="k">import</span> <span class="n">Timer</span>
+<span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="kn">import</span> <span class="n">ExpectError</span>
+<span class="kn">from</span> <span class="nn"><a href="Timer.html" class="import" target="_blank">Timer</a></span> <span class="kn">import</span> <span class="n">Timer</span>
 </pre></div>
 
 </div>
@@ -12865,7 +13189,7 @@ It is an old but reliable model!
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0 valid strings, that is GrammarFuzzer generated 0.000000% valid entries from 1000 inputs
-Total time of 5.587989 seconds
+Total time of 5.857865 seconds
 </pre>
 </div>
 
@@ -12969,7 +13293,7 @@ Indeed, the reason is that the grammar itself does not capture the complete info
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PooledGrammarFuzzer</span><span class="p">(</span><span class="n">GrammarFuzzer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_node_cache</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -16215,7 +16539,7 @@ in two ways as we see below using the <code>A1_GRAMMAR</code></p>
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Parser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">grammar</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_symbol&#39;</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
@@ -16279,7 +16603,7 @@ in two ways as we see below using the <code>A1_GRAMMAR</code></p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Parsing-Expression-Grammars">Parsing Expression Grammars<a class="anchor-link" href="#Parsing-Expression-Grammars">&#182;</a></h2><p>A <em><a href="http://bford.info/pub/lang/peg">Parsing Expression Grammar</a></em> (<em>PEG</em>) [<a href="https://doi.org/10.1145/982962.964011">Ford <em>et al</em>, 2004.</a>] is a type of <em>recognition based formal grammar</em> that specifies the sequence of steps to take to parse a given string.
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Parsing-Expression-Grammars">Parsing Expression Grammars<a class="anchor-link" href="#Parsing-Expression-Grammars">&#182;</a></h2><p>A <em><a href="http://bford.info/pub/lang/peg">Parsing Expression Grammar</a></em> (<em>PEG</em>) [<a href="https://doi.org/10.1145/982962.964011">Ford <em>et al</em>, 2004</a>] is a type of <em>recognition based formal grammar</em> that specifies the sequence of steps to take to parse a given string.
 A <em>parsing expression grammar</em> is very similar to a <em>context-free grammar</em> (<em>CFG</em>) such as the ones we saw in the <a href="Grammars.html">chapter on grammars</a>. As in a CFG, a parsing expression grammar is represented by a set of nonterminals and corresponding alternatives representing how to match each. For example, here is a PEG that matches <code>a</code> or <code>b</code>.</p>
 </div>
 </div>
@@ -16386,7 +16710,34 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">letters</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">single_char_tokens</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
+    <span class="n">g_</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
+        <span class="n">rules_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span>
+            <span class="n">rule_</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">rule</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">grammar</span><span class="p">:</span>
+                    <span class="n">rule_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">rule_</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+            <span class="n">rules_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule_</span><span class="p">)</span>
+        <span class="n">g_</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">rules_</span>
+    <span class="k">return</span> <span class="n">g_</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="n">expansion</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expansion</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
             <span class="n">expansion</span> <span class="o">=</span> <span class="n">expansion</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -16394,17 +16745,8 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
         <span class="k">return</span> <span class="p">[</span><span class="n">token</span> <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
             <span class="n">RE_NONTERMINAL</span><span class="p">,</span> <span class="n">expansion</span><span class="p">)</span> <span class="k">if</span> <span class="n">token</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">tokenize</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="k">if</span> <span class="n">letters</span> <span class="k">else</span> <span class="p">[</span><span class="n">word</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="nf">canonical_expr</span><span class="p">(</span><span class="n">expression</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">[</span>
-            <span class="n">token</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">split</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="p">([</span><span class="n">word</span><span class="p">]</span> <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">grammar</span> <span class="k">else</span> <span class="n">tokenize</span><span class="p">(</span><span class="n">word</span><span class="p">))</span>
-        <span class="p">]</span>
-
     <span class="k">return</span> <span class="p">{</span>
-        <span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">canonical_expr</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span> <span class="k">for</span> <span class="n">expression</span> <span class="ow">in</span> <span class="n">alternatives</span><span class="p">]</span>
+        <span class="n">k</span><span class="p">:</span> <span class="p">[</span><span class="n">split</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span> <span class="k">for</span> <span class="n">expression</span> <span class="ow">in</span> <span class="n">alternatives</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">alternatives</span> <span class="ow">in</span> <span class="n">grammar</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
     <span class="p">}</span>
 </pre></div>
@@ -16633,18 +16975,18 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Parser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_symbol&#39;</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tokens&#39;</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coalesce_tokens</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coalesce&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">canonical_grammar</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;canonical&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">canonical_grammar</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="n">single_char_tokens</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">non_canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="n">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="n">single_char_tokens</span><span class="p">(</span><span class="n">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">))</span>
         <span class="c1"># we do not require a single rule for the start symbol</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grammar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span><span class="p">,</span> <span class="p">[]))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span><span class="p">[</span><span class="s1">&#39;&lt;&gt;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span><span class="p">]]</span>
@@ -17035,7 +17377,7 @@ unify_key: &#39;2&#39; with &#39;2&#39;
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/functools.html" class="import" target="_blank">functools</a></span> <span class="k">import</span> <span class="n">lru_cache</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/functools.html" class="import" target="_blank">functools</a></span> <span class="kn">import</span> <span class="n">lru_cache</span>
 </pre></div>
 
 </div>
@@ -17125,7 +17467,7 @@ unify_key: &#39;2&#39; with &#39;2&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>One should be aware that while the grammar looks like a <em>CFG</em>, the language described by a <em>PEG</em> may be different. Indeed, only <em>LL(1)</em> grammars are guaranteed to represent the same language for both PEGs and other parsers. Behavior of PEGs for other classes of grammars could be surprising [<a href="http://dl.acm.org/citation.cfm?id=2365896.2365924">Redziejowski <em>et al</em>, 2008.</a>].</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>One should be aware that while the grammar looks like a <em>CFG</em>, the language described by a <em>PEG</em> may be different. Indeed, only <em>LL(1)</em> grammars are guaranteed to represent the same language for both PEGs and other parsers. Behavior of PEGs for other classes of grammars could be surprising [<a href="http://dl.acm.org/citation.cfm?id=2365896.2365924">Redziejowski <em>et al</em>, 2008</a>].</p>
 </div>
 </div>
 </div>
@@ -17142,7 +17484,7 @@ unify_key: &#39;2&#39; with &#39;2&#39;
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Problems-with-PEG">Problems with PEG<a class="anchor-link" href="#Problems-with-PEG">&#182;</a></h3><p>While <em>PEGs</em> are simple at first sight, their behavior in some cases might be a bit unintuitive. For example, here is an example [<a href="http://dl.acm.org/citation.cfm?id=2365896.2365924">Redziejowski <em>et al</em>, 2008.</a>]:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Problems-with-PEG">Problems with PEG<a class="anchor-link" href="#Problems-with-PEG">&#182;</a></h3><p>While <em>PEGs</em> are simple at first sight, their behavior in some cases might be a bit unintuitive. For example, here is an example [<a href="http://dl.acm.org/citation.cfm?id=2365896.2365924">Redziejowski <em>et al</em>, 2008</a>]:</p>
 </div>
 </div>
 </div>
@@ -17248,9 +17590,9 @@ aaaaaaaa
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-76-dec55ebf796e&gt;&#34;, line 4, in &lt;module&gt;
+  File &#34;&lt;ipython-input-1-dec55ebf796e&gt;&#34;, line 4, in &lt;module&gt;
     for tree in peg.parse(s):
-  File &#34;&lt;ipython-input-49-2be54e1115d5&gt;&#34;, line 22, in parse
+  File &#34;&lt;ipython-input-1-2be54e1115d5&gt;&#34;, line 22, in parse
     raise SyntaxError(&#34;at &#34; + repr(text[cursor:]))
   File &#34;&lt;string&gt;&#34;, line None
 SyntaxError: at &#39;aa&#39; (expected)
@@ -17288,7 +17630,7 @@ SyntaxError: at &#39;aa&#39; (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The Earley parser is a general parser that is able to parse any arbitrary <em>CFG</em>. It was invented by Jay Earley [<a href="https://doi.org/10.1145/362007.362035">Earley <em>et al</em>, 1970.</a>] for use in computational linguistics. While its computational complexity is $O(n^3)$ for parsing strings with arbitrary grammars, it can parse strings with unambiguous grammars in $O(n^2)$ time, and all <em><a href="https://en.wikipedia.org/wiki/LR_parser">LR(k)</a></em> grammars in linear time ($O(n)$ [<a href="https://doi.org/https://doi.org/10.1016/0304-3975(91)90180-A">Joop M.I.M. Leo, 1991.</a>]). Further improvements – notably handling epsilon rules – were invented by Aycock et al. [John Aycock <em>et al</em>, 2002.].</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The Earley parser is a general parser that is able to parse any arbitrary <em>CFG</em>. It was invented by Jay Earley [<a href="https://doi.org/10.1145/362007.362035">Earley <em>et al</em>, 1970</a>] for use in computational linguistics. While its computational complexity is $O(n^3)$ for parsing strings with arbitrary grammars, it can parse strings with unambiguous grammars in $O(n^2)$ time, and all <em><a href="https://en.wikipedia.org/wiki/LR_parser">LR(k)</a></em> grammars in linear time ($O(n)$ [<a href="https://doi.org/https://doi.org/10.1016/0304-3975(91)90180-A">Joop M.I.M. Leo, 1991</a>]). Further improvements – notably handling epsilon rules – were invented by Aycock et al. [John Aycock <em>et al</em>, 2002].</p>
 </div>
 </div>
 </div>
@@ -17738,11 +18080,11 @@ SyntaxError: at &#39;aa&#39; (expected)
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Column</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">letter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">letter</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">letter</span> <span class="o">=</span> <span class="n">index</span><span class="p">,</span> <span class="n">letter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unique</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> chart[</span><span class="si">%d</span><span class="s2">]</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">letter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span> <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">finished</span><span class="p">()))</span>
 </pre></div>
@@ -17799,7 +18141,7 @@ SyntaxError: at &#39;aa&#39; (expected)
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Item</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">dot</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">dot</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dot</span> <span class="o">=</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">dot</span>
 </pre></div>
 
@@ -17968,11 +18310,11 @@ Since we are interested in comparing states, we define <code>hash()</code> and <
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">State</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">dot</span><span class="p">,</span> <span class="n">s_col</span><span class="p">,</span> <span class="n">e_col</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">dot</span><span class="p">,</span> <span class="n">s_col</span><span class="p">,</span> <span class="n">e_col</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">dot</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">s_col</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">e_col</span> <span class="o">=</span> <span class="n">s_col</span><span class="p">,</span> <span class="n">e_col</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">idx</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">var</span><span class="o">.</span><span class="n">index</span> <span class="k">if</span> <span class="n">var</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
 
@@ -17987,10 +18329,10 @@ Since we are interested in comparing states, we define <code>hash()</code> and <
     <span class="k">def</span> <span class="nf">_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dot</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">s_col</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">())</span>
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_t</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">advance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -18096,23 +18438,6 @@ Since we are interested in comparing states, we define <code>hash()</code> and <
 </div>
 </div>
 
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="n">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">letters</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -18128,7 +18453,7 @@ Since we are interested in comparing states, we define <code>hash()</code> and <
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">chart_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">words</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
         <span class="n">alt</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span><span class="p">[</span><span class="n">start</span><span class="p">])</span>
         <span class="n">chart</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">tok</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tok</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">words</span><span class="p">])]</span>
@@ -19011,20 +19336,20 @@ d chart[4]
 
 <div class="output_text output_subarea output_execute_result">
 <pre>(&#39;&lt;start&gt;&#39;,
- [[(&lt;__main__.State at 0x114c58fd0&gt;,
+ [[(&lt;__main__.State at 0x7ffad9e0bd68&gt;,
     &#39;n&#39;,
-    [&lt;__main__.Column at 0x114c504a8&gt;,
-     &lt;__main__.Column at 0x114c50eb8&gt;,
-     &lt;__main__.Column at 0x114c50358&gt;,
-     &lt;__main__.Column at 0x114c50908&gt;,
-     &lt;__main__.Column at 0x114c50898&gt;]),
-   (&lt;__main__.State at 0x114c37198&gt;,
+    [&lt;__main__.Column at 0x7ffad9e1d390&gt;,
+     &lt;__main__.Column at 0x7ffad9e1da20&gt;,
+     &lt;__main__.Column at 0x7ffad9e1d4a8&gt;,
+     &lt;__main__.Column at 0x7ffad9e1d438&gt;,
+     &lt;__main__.Column at 0x7ffad9e0b588&gt;]),
+   (&lt;__main__.State at 0x7ffad9e0b278&gt;,
     &#39;n&#39;,
-    [&lt;__main__.Column at 0x114c504a8&gt;,
-     &lt;__main__.Column at 0x114c50eb8&gt;,
-     &lt;__main__.Column at 0x114c50358&gt;,
-     &lt;__main__.Column at 0x114c50908&gt;,
-     &lt;__main__.Column at 0x114c50898&gt;])]])
+    [&lt;__main__.Column at 0x7ffad9e1d390&gt;,
+     &lt;__main__.Column at 0x7ffad9e1da20&gt;,
+     &lt;__main__.Column at 0x7ffad9e1d4a8&gt;,
+     &lt;__main__.Column at 0x7ffad9e1d438&gt;,
+     &lt;__main__.Column at 0x7ffad9e0b588&gt;])]])
 </pre>
 </div>
 
@@ -19592,6 +19917,20 @@ d chart[4]
 
 <div class="inner_cell">
 <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/itertools.html" class="import" target="_blank">itertools</a></span> <span class="k">as</span> <span class="nn"><a href="I.html" class="import" target="_blank">I</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">extract_trees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forest_node</span><span class="p">):</span>
         <span class="n">name</span><span class="p">,</span> <span class="n">paths</span> <span class="o">=</span> <span class="n">forest_node</span>
@@ -19600,7 +19939,7 @@ d chart[4]
         <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
             <span class="n">ptrees</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_trees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forest</span><span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">path</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">ptrees</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">I</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">ptrees</span><span class="p">):</span>
                 <span class="k">yield</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> 
 </pre></div>
 
@@ -19968,7 +20307,7 @@ d chart[4]
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Aycock et al.[John Aycock <em>et al</em>, 2002.] suggests a simple fix. Their idea is to pre-compute the <code>nullable</code> set and use it to advance the <code>nullable</code> states. However, before we do that, we need to compute the <code>nullable</code> set. The <code>nullable</code> set consists of all nonterminals that can derive an empty string.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Aycock et al.[John Aycock <em>et al</em>, 2002] suggests a simple fix. Their idea is to pre-compute the <code>nullable</code> set and use it to advance the <code>nullable</code> states. However, before we do that, we need to compute the <code>nullable</code> set. The <code>nullable</code> set consists of all nonterminals that can derive an empty string.</p>
 </div>
 </div>
 </div>
@@ -20188,8 +20527,8 @@ d chart[4]
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;start&gt;&#39;}
-E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
+<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;E&gt;&#39;}
+E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 </pre>
 </div>
 
@@ -20211,9 +20550,8 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span> <span class="o">=</span> <span class="n">canonical</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="n">letters</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">nullable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">sym</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
@@ -20263,7 +20601,7 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">DIRECTLY_SELF_REFERRING</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;query&gt;&#39;</span><span class="p">],</span>
     <span class="s1">&#39;&lt;query&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;select &lt;expr&gt; from a&#39;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 <span class="n">INDIRECTLY_SELF_REFERRING</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;query&gt;&#39;</span><span class="p">],</span>
@@ -20286,10 +20624,96 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;select a from a&#39;</span>
 <span class="k">for</span> <span class="n">grammar</span> <span class="ow">in</span> <span class="p">[</span><span class="n">DIRECTLY_SELF_REFERRING</span><span class="p">,</span> <span class="n">INDIRECTLY_SELF_REFERRING</span><span class="p">]:</span>
-    <span class="n">trees</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">trees</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="n">mystring</span> <span class="o">==</span> <span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-        <span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    <span class="n">forest</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">grammar</span><span class="p">)</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;recognized&#39;</span><span class="p">,</span> <span class="n">mystring</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">forest</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">RecursionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Recursion error&quot;</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>recognized select a from a
+Recursion error maximum recursion depth exceeded in comparison
+recognized select a from a
+Recursion error maximum recursion depth exceeded in comparison
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Why do we get recursion error here? The reason is that, our implementation of <code>extract_trees()</code> is eager. That is, it attempts to extract <em>all</em> inner parse trees before it can construct the outer parse tree. When there is a self reference, this results in recursion. Here is a simple extractor that avoids this problem. The idea here is that we randomly and lazily choose a node to expand, which avoids the infinite recursion.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tree-Extractor">Tree Extractor<a class="anchor-link" href="#Tree-Extractor">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As you saw above, one of the problems with attempting to extract all trees is that the parse forest can consist of an infinite number of trees. So, here, we solve that problem by extracting one tree at a time.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleExtractor</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
+        <span class="n">cursor</span><span class="p">,</span> <span class="n">states</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_prefix</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">states</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">finished</span><span class="p">()),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cursor</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">start</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;at &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">cursor</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">my_forest</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_forest</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">table</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">extract_a_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forest_node</span><span class="p">):</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">paths</span> <span class="o">=</span> <span class="n">forest_node</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">[]),</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">cur_path</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_path</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
+        <span class="n">child_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pos_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">chart</span> <span class="ow">in</span> <span class="n">cur_path</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">forest</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">chart</span><span class="p">)</span>
+            <span class="n">postree</span><span class="p">,</span> <span class="n">ntree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_a_node</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">child_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ntree</span><span class="p">)</span>
+            <span class="n">pos_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">postree</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span><span class="p">),</span> <span class="n">pos_nodes</span><span class="p">),</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">child_nodes</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">choose_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span>
+
+    <span class="k">def</span> <span class="nf">extract_a_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pos_tree</span><span class="p">,</span> <span class="n">parse_tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_a_node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">my_forest</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">parse_tree</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -20300,7 +20724,411 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="More-Earley-Parsing">More Earley Parsing<a class="anchor-link" href="#More-Earley-Parsing">&#182;</a></h3><p>A number of other optimizations exist for Earley parsers. A fast industrial strength Earley parser implementation is the <a href="https://jeffreykegler.github.io/Marpa-web-site/">Marpa parser</a>. Further, Earley parsing need not be restricted to character data. One may also parse streams (audio and video streams) [Qi <em>et al</em>, 2018.] using a generalized Earley parser.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Using it is as folows:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">de</span> <span class="o">=</span> <span class="n">SimpleExtractor</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">DIRECTLY_SELF_REFERRING</span><span class="p">),</span> <span class="n">mystring</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">de</span><span class="o">.</span><span class="n">extract_a_tree</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>select a from a
+select a from a
+select a from a
+select a from a
+select a from a
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>On the indirect reference:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ie</span> <span class="o">=</span> <span class="n">SimpleExtractor</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">INDIRECTLY_SELF_REFERRING</span><span class="p">),</span> <span class="n">mystring</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">ie</span><span class="o">.</span><span class="n">extract_a_tree</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>select a from a
+select a from a
+select a from a
+select a from a
+select a from a
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Note that the <code>SimpleExtractor</code> gives no guarantee of the uniqueness of the returned trees. This can however be fixed by keeping track of the particular nodes that were expanded from <code>pos_tree</code> variable, and hence, avoiding exploration of the same paths.</p>
+<p>For implementing this, we extract the random stream passing into the <code>SimpleExtractor</code>, and use it to control which nodes are explored. Different exploration paths can then form a tree of nodes.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We start with the node definition for a single choice. The <code>self._chosen</code> is the current choice made, <code>self.next</code> holds the next choice done using <code>self._chosen</code>. The <code>self.total</code> holds the total number of choices that one can have in this node.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ChoiceNode</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">total</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span> <span class="o">=</span> <span class="n">parent</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">next</span> <span class="o">=</span> <span class="n">total</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">chosen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">(</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_i</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span><span class="p">),</span>
+                                 <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">))</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">increment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># as soon as we increment, next becomes invalid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">next</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="o">.</span><span class="n">increment</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">finished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Now we come to the enhanced <code>EnhancedExtractor()</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EnhancedExtractor</span><span class="p">(</span><span class="n">SimpleExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span> <span class="o">=</span> <span class="n">ChoiceNode</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>First we define <code>choose_path()</code> that given an array and a choice node, returns the element in array corresponding to the next choice node if it exists, or produces a new choice nodes, and returns that element.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EnhancedExtractor</span><span class="p">(</span><span class="n">EnhancedExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">choose_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">choices</span><span class="p">):</span>
+        <span class="n">arr_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">choices</span><span class="o">.</span><span class="n">next</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">choices</span><span class="o">.</span><span class="n">next</span><span class="o">.</span><span class="n">finished</span><span class="p">():</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">choices</span><span class="o">.</span><span class="n">next</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">choices</span><span class="o">.</span><span class="n">next</span> <span class="o">=</span> <span class="n">ChoiceNode</span><span class="p">(</span><span class="n">choices</span><span class="p">,</span> <span class="n">arr_len</span><span class="p">)</span>
+        <span class="n">next_choice</span> <span class="o">=</span> <span class="n">choices</span><span class="o">.</span><span class="n">next</span><span class="o">.</span><span class="n">chosen</span><span class="p">()</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span><span class="o">.</span><span class="n">next</span>
+        <span class="k">return</span> <span class="n">arr</span><span class="p">[</span><span class="n">next_choice</span><span class="p">],</span> <span class="n">next_choice</span><span class="p">,</span> <span class="n">arr_len</span><span class="p">,</span> <span class="n">choices</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We define <code>extract_a_node()</code> here. While extracting, we have a choice. Should we allow infinite forests, or should we have a finite number of trees with no direct recursion? A direct recursion is when there exists a parent node with the same nonterminal that parsed the same span. We choose here not to extract such trees. They can be added back after parsing.</p>
+<p>This is a recursive procedure that inspects a node, extracts the path required to complete that node. A single path (corresponding to a nonterminal) may again be composed of a sequence of smaller paths. Such paths are again extracted using another call to <code>extract_a_node()</code> recursively.</p>
+<p>What happens when we hit on one of the node recursions we want to avoid? In that case, we return the current choice node, which bubbles up to <code>extract_a_tree()</code>. That procedure increments the last choice, which in turn increments up the parents until we reach a choice node that still has options to explore.</p>
+<p>What if we hit the end of choices for a particular choice node(i.e, we have exhausted paths that can be taken from a node)? In this case also, we return the current choice node, which bubbles up to <code>extract_a_tree()</code>.
+That procedure increments the last choice, which bubbles up to the next choice that has some unexplored paths.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EnhancedExtractor</span><span class="p">(</span><span class="n">EnhancedExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_a_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">forest_node</span><span class="p">,</span> <span class="n">seen</span><span class="p">,</span> <span class="n">choices</span><span class="p">):</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">paths</span> <span class="o">=</span> <span class="n">forest_node</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">choices</span>
+
+        <span class="n">cur_path</span><span class="p">,</span> <span class="n">_i</span><span class="p">,</span> <span class="n">_l</span><span class="p">,</span> <span class="n">new_choices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choose_path</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">choices</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cur_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_choices</span>
+        <span class="n">child_nodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">chart</span> <span class="ow">in</span> <span class="n">cur_path</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span>
+                <span class="n">child_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">s</span><span class="p">,</span> <span class="p">[]))</span>
+                <span class="k">continue</span>
+            <span class="n">nid</span> <span class="o">=</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">s_col</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">e_col</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nid</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">new_choices</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">forest</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">chart</span><span class="p">)</span>
+            <span class="n">ntree</span><span class="p">,</span> <span class="n">newer_choices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_a_node</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">seen</span> <span class="o">|</span> <span class="p">{</span><span class="n">nid</span><span class="p">},</span> <span class="n">new_choices</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ntree</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">newer_choices</span>
+            <span class="n">child_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ntree</span><span class="p">)</span>
+            <span class="n">new_choices</span> <span class="o">=</span> <span class="n">newer_choices</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">child_nodes</span><span class="p">),</span> <span class="n">new_choices</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>extract_a_tree()</code> is a depth first extractor of a single tree. It tries to extract a tree, and if the extraction returns <code>None</code>, it means that a particular choice was exhausted, or we hit on a recursion. In that case, we increment the choice, and explore a new path.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EnhancedExtractor</span><span class="p">(</span><span class="n">EnhancedExtractor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_a_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="o">.</span><span class="n">finished</span><span class="p">():</span>
+            <span class="n">parse_tree</span><span class="p">,</span> <span class="n">choices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_a_node</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">my_forest</span><span class="p">,</span> <span class="nb">set</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">)</span>
+            <span class="n">choices</span><span class="o">.</span><span class="n">increment</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">parse_tree</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">parse_tree</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Note that the <code>EnhancedExtractor</code> only extracts nodes that are not directly recursive. That is, if it finds a node with a nonterminal that covers the same span as that of a parent node with the same nonterminal, it skips the node.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ee</span> <span class="o">=</span> <span class="n">EnhancedExtractor</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">INDIRECTLY_SELF_REFERRING</span><span class="p">),</span> <span class="n">mystring</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ee</span><span class="o">.</span><span class="n">extract_a_tree</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">break</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">tree_to_string</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s</span> <span class="o">==</span> <span class="n">mystring</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>1 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;query&gt;&#39;, [(&#39;select &#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;a&#39;, [])]), (&#39; from a&#39;, [])])])
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">istring</span> <span class="o">=</span> <span class="s1">&#39;1+2+3+4&#39;</span>
+<span class="n">ee</span> <span class="o">=</span> <span class="n">EnhancedExtractor</span><span class="p">(</span><span class="n">EarleyParser</span><span class="p">(</span><span class="n">A1_GRAMMAR</span><span class="p">),</span> <span class="n">istring</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">ee</span><span class="o">.</span><span class="n">extract_a_tree</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="k">break</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">tree_to_string</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">s</span> <span class="o">==</span> <span class="n">istring</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>1 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;1&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;2&#39;, [])])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;3&#39;, [])])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;4&#39;, [])])])])])])
+2 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;1&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;2&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;3&#39;, [])])])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;4&#39;, [])])])])])])
+3 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;1&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;2&#39;, [])])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;3&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;4&#39;, [])])])])])])])
+4 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;1&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;2&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;3&#39;, [])])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;4&#39;, [])])])])])])])
+5 (&#39;&lt;start&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;1&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;2&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;3&#39;, [])])])]), (&#39;+&#39;, []), (&#39;&lt;expr&gt;&#39;, [(&#39;&lt;integer&gt;&#39;, [(&#39;&lt;digit&gt;&#39;, [(&#39;4&#39;, [])])])])])])])])
+</pre>
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="More-Earley-Parsing">More Earley Parsing<a class="anchor-link" href="#More-Earley-Parsing">&#182;</a></h3><p>A number of other optimizations exist for Earley parsers. A fast industrial strength Earley parser implementation is the <a href="https://jeffreykegler.github.io/Marpa-web-site/">Marpa parser</a>. Further, Earley parsing need not be restricted to character data. One may also parse streams (audio and video streams) [Qi <em>et al</em>, 2018] using a generalized Earley parser.</p>
 </div>
 </div>
 </div>
@@ -20805,7 +21633,7 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(&#39;&lt;KWR&gt;&#39;, [&#39;&lt;A&gt;&lt;A&gt;&#39;, &#39;&lt;B&gt;12&#39;, &#39;&lt;A&gt;11&#39;])
+<pre>(&#39;&lt;FYU&gt;&#39;, [&#39;&lt;C&gt;23&#39;, &#39;&lt;C&gt;&lt;A&gt;&#39;, &#39;&lt;B&gt;&lt;C&gt;3&#39;])
 </pre>
 </div>
 
@@ -20817,7 +21645,7 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="k">import</span> <span class="n">unreachable_nonterminals</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">unreachable_nonterminals</span>
 </pre></div>
 
 </div>
@@ -20874,10 +21702,10 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>{&#39;&lt;YNK&gt;&#39;: [&#39;oxz&#39;, &#39;gh&#39;, &#39;m&#39;],
- &#39;&lt;AGT&gt;&#39;: [&#39;m&lt;YNK&gt;fy&#39;, &#39;f&lt;YNK&gt;uv&#39;, &#39;&lt;YNK&gt;aj&#39;],
- &#39;&lt;XSJ&gt;&#39;: [&#39;&lt;AGT&gt;oy&#39;, &#39;y&lt;YNK&gt;gd&#39;, &#39;&lt;YNK&gt;dk&#39;],
- &#39;&lt;start&gt;&#39;: [&#39;&lt;XSJ&gt;&#39;]}
+<pre>{&#39;&lt;ILY&gt;&#39;: [&#39;lhp&#39;, &#39;gta&#39;, &#39;sm&#39;],
+ &#39;&lt;FZD&gt;&#39;: [&#39;qn&lt;ILY&gt;&#39;, &#39;e&lt;ILY&gt;&lt;ILY&gt;g&#39;, &#39;&lt;ILY&gt;f&lt;ILY&gt;m&#39;],
+ &#39;&lt;ITK&gt;&#39;: [&#39;&lt;ILY&gt;fyy&#39;, &#39;&lt;ILY&gt;&lt;ILY&gt;t&#39;, &#39;&lt;FZD&gt;l&lt;ILY&gt;ao&#39;],
+ &#39;&lt;start&gt;&#39;: [&#39;&lt;ITK&gt;&#39;]}
 </pre>
 </div>
 
@@ -20918,16 +21746,16 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{&#39;&lt;HIT&gt;&#39;: [&#39;kk&#39;, &#39;&#39;, &#39;c&#39;], &#39;&lt;ROZ&gt;&#39;: [&#39;&lt;HIT&gt;gy&#39;, &#39;nyz&#39;, &#39;&lt;HIT&gt;md&#39;], &#39;&lt;start&gt;&#39;: [&#39;&lt;ROZ&gt;&#39;]}
-gy
-{&#39;&lt;YYM&gt;&#39;: [&#39;t&#39;, &#39;dw&#39;, &#39;gki&#39;], &#39;&lt;TZU&gt;&#39;: [&#39;&lt;YYM&gt;rx&#39;, &#39;&lt;YYM&gt;uix&#39;, &#39;&lt;YYM&gt;j&#39;], &#39;&lt;XUG&gt;&#39;: [&#39;&lt;TZU&gt;jvj&#39;, &#39;&lt;YYM&gt;s&#39;, &#39;&lt;YYM&gt;d&#39;], &#39;&lt;start&gt;&#39;: [&#39;&lt;XUG&gt;&#39;]}
-ts
-{&#39;&lt;OAK&gt;&#39;: [&#39;d&#39;, &#39;t&#39;, &#39;g&#39;], &#39;&lt;VFU&gt;&#39;: [&#39;&lt;OAK&gt;ta&#39;, &#39;&lt;OAK&gt;qy&#39;, &#39;&lt;OAK&gt;m&lt;OAK&gt;b&#39;], &#39;&lt;PIQ&gt;&#39;: [&#39;&lt;VFU&gt;ic&#39;, &#39;p&lt;VFU&gt;np&#39;, &#39;&lt;OAK&gt;v&#39;], &#39;&lt;start&gt;&#39;: [&#39;&lt;PIQ&gt;&#39;]}
-gv
-{&#39;&lt;DYN&gt;&#39;: [&#39;c&#39;, &#39;ff&#39;, &#39;w&#39;], &#39;&lt;DNQ&gt;&#39;: [&#39;&lt;DYN&gt;eoa&#39;, &#39;&lt;DYN&gt;&lt;DYN&gt;&#39;, &#39;beu&lt;DYN&gt;&lt;DYN&gt;&#39;], &#39;&lt;XYW&gt;&#39;: [&#39;&lt;DNQ&gt;o&#39;, &#39;&lt;DYN&gt;rx&#39;, &#39;&lt;DYN&gt;k&#39;], &#39;&lt;start&gt;&#39;: [&#39;&lt;XYW&gt;&#39;]}
-wrx
-{&#39;&lt;JPV&gt;&#39;: [&#39;rxx&#39;, &#39;knkbb&#39;, &#39;aq&#39;], &#39;&lt;JSE&gt;&#39;: [&#39;c&lt;JPV&gt;i&#39;, &#39;oh&lt;JPV&gt;&lt;JPV&gt;&lt;JPV&gt;h&#39;, &#39;&lt;JPV&gt;&lt;JPV&gt;l&#39;], &#39;&lt;JLL&gt;&#39;: [&#39;&lt;JSE&gt;qo&#39;, &#39;&lt;JSE&gt;wx&#39;, &#39;&lt;JSE&gt;hm&#39;], &#39;&lt;start&gt;&#39;: [&#39;&lt;JLL&gt;&#39;]}
-rxxaqlqo
+<pre>{&#39;&lt;SCS&gt;&#39;: [&#39;ts&#39;, &#39;f&#39;, &#39;ng&#39;], &#39;&lt;BQN&gt;&#39;: [&#39;wm&lt;SCS&gt;&#39;, &#39;&lt;SCS&gt;wi&#39;, &#39;&lt;SCS&gt;hw&#39;], &#39;&lt;UZC&gt;&#39;: [&#39;gyk&lt;BQN&gt;br&#39;, &#39;&lt;SCS&gt;iqp&#39;, &#39;&lt;BQN&gt;vb&#39;], &#39;&lt;start&gt;&#39;: [&#39;&lt;UZC&gt;&#39;]}
+fhwvb
+{&#39;&lt;CRN&gt;&#39;: [&#39;meze&#39;, &#39;de&#39;, &#39;cpcv&#39;], &#39;&lt;AIS&gt;&#39;: [&#39;&lt;CRN&gt;hb&#39;, &#39;dc&lt;CRN&gt;&#39;, &#39;pa&lt;CRN&gt;x&#39;], &#39;&lt;MAO&gt;&#39;: [&#39;&lt;CRN&gt;su&#39;, &#39;&lt;CRN&gt;hj&#39;, &#39;&lt;CRN&gt;&lt;AIS&gt;g&#39;], &#39;&lt;start&gt;&#39;: [&#39;&lt;MAO&gt;&#39;]}
+dehj
+{&#39;&lt;MFY&gt;&#39;: [&#39;y&#39;, &#39;w&#39;, &#39;&#39;], &#39;&lt;ZOY&gt;&#39;: [&#39;oe&lt;MFY&gt;&#39;, &#39;h&lt;MFY&gt;u&#39;, &#39;lowr&#39;], &#39;&lt;HFT&gt;&#39;: [&#39;&lt;ZOY&gt;ro&#39;, &#39;&lt;ZOY&gt;w&#39;, &#39;&lt;ZOY&gt;&lt;ZOY&gt;w&#39;], &#39;&lt;start&gt;&#39;: [&#39;&lt;HFT&gt;&#39;]}
+lowrro
+{&#39;&lt;CYC&gt;&#39;: [&#39;cg&#39;, &#39;enl&#39;, &#39;ovd&#39;], &#39;&lt;TUV&gt;&#39;: [&#39;&lt;CYC&gt;hf&#39;, &#39;&lt;CYC&gt;nl&#39;, &#39;fhg&#39;], &#39;&lt;MOQ&gt;&#39;: [&#39;g&lt;TUV&gt;g&#39;, &#39;&lt;CYC&gt;ix&#39;, &#39;&lt;CYC&gt;&lt;TUV&gt;&lt;CYC&gt;&#39;], &#39;&lt;start&gt;&#39;: [&#39;&lt;MOQ&gt;&#39;]}
+cgix
+{&#39;&lt;WJJ&gt;&#39;: [&#39;dszdlh&#39;, &#39;j&#39;, &#39;fd&#39;], &#39;&lt;RQM&gt;&#39;: [&#39;&lt;WJJ&gt;wx&#39;, &#39;xs&lt;WJJ&gt;&lt;WJJ&gt;&#39;, &#39;&lt;WJJ&gt;x&#39;], &#39;&lt;JNY&gt;&#39;: [&#39;&lt;WJJ&gt;oa&#39;, &#39;&lt;WJJ&gt;&lt;WJJ&gt;cx&#39;, &#39;xd&lt;RQM&gt;&#39;], &#39;&lt;start&gt;&#39;: [&#39;&lt;JNY&gt;&#39;]}
+joa
 </pre>
 </div>
 
@@ -20952,7 +21780,7 @@ These classes of grammars are named after the specific kind of parser
 that can accept grammars of that category. That is, the upper bound for
 the capabilities of the parser defines the grammar class named after that
 parser.</p>
-<p>The <em>LL</em> and <em>LR</em> parsing are the main traditions in parsing. Here, <em>LL</em> means left-to-right, leftmost derivation, and it represents a top-down approach. On the other hand, and LR (left-to-right, rightmost derivation) represents a bottom-up approach. Another way to look at it is that LL parsers compute the derivation tree incrementally in <em>pre-order</em> while LR parsers compute the derivation tree in <em>post-order</em> [Pingali <em>et al</em>, 2015.]).</p>
+<p>The <em>LL</em> and <em>LR</em> parsing are the main traditions in parsing. Here, <em>LL</em> means left-to-right, leftmost derivation, and it represents a top-down approach. On the other hand, and LR (left-to-right, rightmost derivation) represents a bottom-up approach. Another way to look at it is that LL parsers compute the derivation tree incrementally in <em>pre-order</em> while LR parsers compute the derivation tree in <em>post-order</em> [Pingali <em>et al</em>, 2015]).</p>
 <p>Different classes of grammars differ in the features that are available to
 the user for writing a grammar of that class. That is, the corresponding
 kind of parser will be unable to parse a grammar that makes use of more
@@ -20963,10 +21791,10 @@ its input from left to right, and constructs the leftmost derivation of its
 input by expanding the nonterminals it encounters. If there is a left
 recursion in one of these rules, an <em>LL</em> parser will enter an infinite loop.</p>
 <p>Similarly, a grammar is LL(k) if it can be parsed by an LL parser with k lookahead token, and LR(k) grammar can only be parsed with LR parser with at least k lookahead tokens. These grammars are interesting because both LL(k) and LR(k) grammars have $O(n)$ parsers, and can be used with relatively restricted computational budget compared to other grammars.</p>
-<p>The languages for which one can provide an <em>LL(k)</em> grammar is called <em>LL(k)</em> languages (where k is the minimum lookahead required). Similarly, <em>LR(k)</em> is defined as the set of languages that have an <em>LR(k)</em> grammar. In terms of languages, LL(k) $\subset$ LL(k+1) and LL(k) $\subset$ LR(k), and <em>LR(k)</em> $=$ <em>LR(1)</em>. All deterministic <em>CFLs</em> have an <em>LR(1)</em> grammar. However, there exist <em>CFLs</em> that are inherently ambiguous [Ogden <em>et al</em>, 1968.], and for these, one can't provide an <em>LR(1)</em> grammar.</p>
-<p>The other main parsing algorithms for <em>CFGs</em> are GLL [Scott <em>et al</em>, 2010.], GLR [Tomita <em>et al</em>, 1987., Tomita <em>et al</em>, 2012.], and CYK [Grune <em>et al</em>, 2008.].
+<p>The languages for which one can provide an <em>LL(k)</em> grammar is called <em>LL(k)</em> languages (where k is the minimum lookahead required). Similarly, <em>LR(k)</em> is defined as the set of languages that have an <em>LR(k)</em> grammar. In terms of languages, LL(k) $\subset$ LL(k+1) and LL(k) $\subset$ LR(k), and <em>LR(k)</em> $=$ <em>LR(1)</em>. All deterministic <em>CFLs</em> have an <em>LR(1)</em> grammar. However, there exist <em>CFLs</em> that are inherently ambiguous [Ogden <em>et al</em>, 1968], and for these, one can't provide an <em>LR(1)</em> grammar.</p>
+<p>The other main parsing algorithms for <em>CFGs</em> are GLL [Scott <em>et al</em>, 2010], GLR [Tomita <em>et al</em>, 1987, Tomita <em>et al</em>, 2012], and CYK [Grune <em>et al</em>, 2008].
 The ALL(*) (used by ANTLR) on the other hand is a grammar representation that uses <em>Regular Expression</em> like predicates (similar to advanced PEGs – see <a href="#Exercise-3:-PEG-Predicates">Exercise</a>) rather than a fixed lookahead. Hence, ALL(*) can accept a larger class of grammars than CFGs.</p>
-<p>In terms of computational limits of parsing, the main CFG parsers have a complexity of $O(n^3)$ for arbitrary grammars. However, parsing with arbitrary <em>CFG</em> is reducible to boolean matrix multiplication [<a href="https://doi.org/10.1016/S0022-0000(75)80046-8">Valiant <em>et al</em>, 1975.</a>] (and the reverse [<a href="https://doi.org/10.1145/505241.505242">Lee <em>et al</em>, 2002.</a>]). This is at present bounded by $O(2^{23728639}$)  [<a href="https://doi.org/10.1145/2608628.2608664">Le Gall <em>et al</em>, 2014.</a>]. Hence, worse case complexity for parsing arbitrary CFG is likely to remain close to cubic.</p>
+<p>In terms of computational limits of parsing, the main CFG parsers have a complexity of $O(n^3)$ for arbitrary grammars. However, parsing with arbitrary <em>CFG</em> is reducible to boolean matrix multiplication [<a href="https://doi.org/10.1016/S0022-0000(75)80046-8">Valiant <em>et al</em>, 1975</a>] (and the reverse [<a href="https://doi.org/10.1145/505241.505242">Lee <em>et al</em>, 2002</a>]). This is at present bounded by $O(2^{23728639}$)  [<a href="https://doi.org/10.1145/2608628.2608664">Le Gall <em>et al</em>, 2014</a>]. Hence, worse case complexity for parsing arbitrary CFG is likely to remain close to cubic.</p>
 <p>Regarding PEGs, the actual class of languages that is expressible in <em>PEG</em> is currently unknown. In particular, we know that <em>PEGs</em> can express certain languages such as $a^n b^n c^n$. However, we do not know if there exist <em>CFLs</em> that are not expressible with <em>PEGs</em>. In Section 2.3, we provided an instance of a counter-intuitive PEG grammar. While important for our purposes (we use grammars for generation of inputs) this is not a criticism of parsing with PEGs. PEG focuses on writing grammars for recognizing a given language, and not necessarily in interpreting what language an arbitrary PEG might yield. Given a Context-Free Language to parse, it is almost always possible to write a grammar for it in PEG, and given that 1) a PEG can parse any string in $O(n)$ time, and 2) at present we know of no CFL that can't be expressed as a PEG, and 3) compared with <em>LR</em> grammars, a PEG is often more intuitive because it allows top-down interpretation, when writing a parser for a language, PEGs should be under serious consideration.</p>
 </div>
 </div>
@@ -21241,8 +22069,8 @@ a chart[6]
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>As can be seen from the parsing log for each letter, the number of states with representation <code>&lt;A&gt;: a &lt;A&gt; ● (i, j)</code> increases at each stage, and these are simply a left over from the previous letter. They do not contribute anything more to the parse other than to simply complete these entries. However, they take up space, and require resources for inspection, contributing a factor of <code>n</code> in analysis.</p>
-<p>Joop Leo [<a href="https://doi.org/https://doi.org/10.1016/0304-3975(91)90180-A">Joop M.I.M. Leo, 1991.</a>] found that this inefficiency can be avoided by detecting right recursion. The idea is that before starting the <code>completion</code> step, check whether the current item has a <em>deterministic reduction path</em>. If such a path exists, add a copy of the topmost element of the <em>deteministic reduction path</em> to the current column, and return. If not, perform the original <code>completion</code> step.</p>
-<p><strong>Definition 2.1</strong>: An item is said to be on the deterministic reduction path above $[A \rightarrow  \gamma., i]$ if it is $[B \rightarrow \alpha A ., k]$ with $[B \rightarrow \alpha . A, k]$ being the only item in $ I_i $ with the dot in front of A, or if it is on the deterministic reduction path above $[B \rightarrow \alpha A ., k]$. An item on such a path is called <em>topmost</em> one if there is no item on the deterministic reduction path above it[<a href="https://doi.org/https://doi.org/10.1016/0304-3975(91)90180-A">Joop M.I.M. Leo, 1991.</a>].</p>
+<p>Joop Leo [<a href="https://doi.org/https://doi.org/10.1016/0304-3975(91)90180-A">Joop M.I.M. Leo, 1991</a>] found that this inefficiency can be avoided by detecting right recursion. The idea is that before starting the <code>completion</code> step, check whether the current item has a <em>deterministic reduction path</em>. If such a path exists, add a copy of the topmost element of the <em>deteministic reduction path</em> to the current column, and return. If not, perform the original <code>completion</code> step.</p>
+<p><strong>Definition 2.1</strong>: An item is said to be on the deterministic reduction path above $[A \rightarrow  \gamma., i]$ if it is $[B \rightarrow \alpha A ., k]$ with $[B \rightarrow \alpha . A, k]$ being the only item in $ I_i $ with the dot in front of A, or if it is on the deterministic reduction path above $[B \rightarrow \alpha A ., k]$. An item on such a path is called <em>topmost</em> one if there is no item on the deterministic reduction path above it[<a href="https://doi.org/https://doi.org/10.1016/0304-3975(91)90180-A">Joop M.I.M. Leo, 1991</a>].</p>
 </div>
 </div>
 </div>
@@ -21283,7 +22111,7 @@ The <code>seq_1</code> and <code>seq_2</code> are arbitrary symbol sequences.</p
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Essentially, what we want to do is to identify potential deterministic right recursion candidates, perform completion on them, and <em>throw away the result</em>. We do this until we reach the top. See Grune et al.~[Grune <em>et al</em>, 2008.] for further information.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Essentially, what we want to do is to identify potential deterministic right recursion candidates, perform completion on them, and <em>throw away the result</em>. We do this until we reach the top. See Grune et al.~[Grune <em>et al</em>, 2008] for further information.</p>
 </div>
 </div>
 </div>
@@ -21437,7 +22265,7 @@ in further and further earlier columns (as shown below):</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>With this grammar, one can produce an infinite chain of derivations of <code>&lt;A&gt;</code>, (direct recursion) or an infinite chain of derivations of <code>&lt;B&gt; -&gt; &lt;C&gt; -&gt; &lt;B&gt; ...</code> (indirect recursion). The problem is that, our implementation can get stuck trying to derive one of these infinite chains.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>With this grammar, one can produce an infinite chain of derivations of <code>&lt;A&gt;</code>, (direct recursion) or an infinite chain of derivations of <code>&lt;B&gt; -&gt; &lt;C&gt; -&gt; &lt;B&gt; ...</code> (indirect recursion). The problem is that, our implementation can get stuck trying to derive one of these infinite chains. One possibility is to use the <code>LazyExtractor</code>. Another, is to simply avoid generating such chains.</p>
 </div>
 </div>
 </div>
@@ -21449,7 +22277,7 @@ in further and further earlier columns (as shown below):</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="k">import</span> <span class="n">ExpectTimeout</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="kn">import</span> <span class="n">ExpectTimeout</span>
 </pre></div>
 
 </div>
@@ -21479,7 +22307,7 @@ in further and further earlier columns (as shown below):</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>TimeoutError (expected)
+<pre>RecursionError: maximum recursion depth exceeded in comparison (expected)
 </pre>
 </div>
 
@@ -21825,13 +22653,11 @@ It should result in the following table:</p>
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
-The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2020-02-12 13:41:23+01:00</a> &bull; 
+The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2021-01-30 18:33:43+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
-<a href="https://www.uni-saarland.de/en/footer/dialogue/legal-notice.html" target=_blank>Imprint</a>
+<a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
-
-<iframe src="http://fuzzingbook.cispa.saarland/rVBkxhK1wuOrGfGe1HZL/Parsing Inputs" style="width:0;height:0;border:0; border:none;"></iframe>
 
 <script>
 function revealCitation() {
@@ -21844,19 +22670,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Parser.html">Parsing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler (eds.), "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/Parser.html">https://www.fuzzingbook.org/html/Parser.html</a>.  Retrieved 2020-02-12 13:41:23+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Parser.html">Parsing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/Parser.html">https://www.fuzzingbook.org/html/Parser.html</a>.  Retrieved 2021-01-30 18:33:43+01:00.
 </p>
 <pre>
-@incollection{fuzzingbook2020:Parser,
+@incollection{fuzzingbook2021:Parser,
     author = {Andreas Zeller and Rahul Gopinath and Marcel B{\"o}hme and Gordon Fraser and Christian Holler},
     booktitle = {The Fuzzing Book},
     title = {Parsing Inputs},
-    year = {2020},
-    publisher = {Saarland University},
+    year = {2021},
+    publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/html/Parser.html}},
-    note = {Retrieved 2020-02-12 13:41:23+01:00},
+    note = {Retrieved 2021-01-30 18:33:43+01:00},
     url = {https://www.fuzzingbook.org/html/Parser.html},
-    urldate = {2020-02-12 13:41:23+01:00}
+    urldate = {2021-01-30 18:33:43+01:00}
 }
 </pre>
 </div>

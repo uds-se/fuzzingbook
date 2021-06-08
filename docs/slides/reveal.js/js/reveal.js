@@ -26,7 +26,7 @@ import {
 } from './utils/constants.js'
 
 // The reveal.js version
-export const VERSION = '4.1.0';
+export const VERSION = '4.1.1';
 
 /**
  * reveal.js
@@ -1251,7 +1251,10 @@ export default function( revealElement, options ) {
 			// Note 20-03-2020:
 			// This needs to happen before we update slide visibility,
 			// otherwise transitions will still run in Safari.
-			if( previousSlide.hasAttribute( 'data-auto-animate' ) && currentSlide.hasAttribute( 'data-auto-animate' ) ) {
+			if( previousSlide.hasAttribute( 'data-auto-animate' ) && currentSlide.hasAttribute( 'data-auto-animate' )
+					&& previousSlide.getAttribute( 'data-auto-animate-id' ) === currentSlide.getAttribute( 'data-auto-animate-id' )
+					&& !( ( indexh > indexhBefore || indexv > indexvBefore ) ? currentSlide : previousSlide ).hasAttribute( 'data-auto-animate-restart' ) ) {
+
 				autoAnimateTransition = true;
 				dom.slides.classList.add( 'disable-slide-transitions' );
 			}
@@ -1335,7 +1338,11 @@ export default function( revealElement, options ) {
 		}
 
 		// Announce the current slide contents to screen readers
-		announceStatus( getStatusText( currentSlide ) );
+		// Use animation frame to prevent getComputedStyle in getStatusText
+		// from triggering layout mid-frame
+		requestAnimationFrame( () => {
+			announceStatus( getStatusText( currentSlide ) );
+		});
 
 		progress.update();
 		controls.update();
@@ -2290,7 +2297,7 @@ export default function( revealElement, options ) {
 			// When looping is enabled `routes.down` is always available
 			// so we need a separate check for when we've reached the
 			// end of a stack and should move horizontally
-			if( routes.down && routes.right && config.loop && isLastVerticalSlide( currentSlide ) ) {
+			if( routes.down && routes.right && config.loop && isLastVerticalSlide() ) {
 				routes.down = false;
 			}
 
@@ -2499,6 +2506,10 @@ export default function( revealElement, options ) {
 		// Slide preloading
 		loadSlide: slideContent.load.bind( slideContent ),
 		unloadSlide: slideContent.unload.bind( slideContent ),
+
+		// Preview management
+		showPreview,
+		hidePreview: closeOverlay,
 
 		// Adds or removes all internal event listeners
 		addEventListeners,

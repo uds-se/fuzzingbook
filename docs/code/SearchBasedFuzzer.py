@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Search-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2019-12-21 16:40:04+01:00
+# Last change: 2021-06-02 17:43:48+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,48 +27,139 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Search-Based Fuzzing
 
-# # Search-Based Fuzzing
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python SearchBasedFuzzer.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.SearchBasedFuzzer import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
+
+This chapter demonstrates how to use meta-heuristic search algorithms to find inputs that reach specific locations in the source code. The simplest search algorithm is hillclimbing, which is applied to the simple `test_me` example as follows:
+
+>>> hillclimber()
+Initial value: -67005, 8742 at fitness 84491.0000
+New value: -67006, 8741 at fitness 84490.0000
+New value: -67007, 8740 at fitness 84489.0000
+New value: -67008, 8739 at fitness 84488.0000
+New value: -67009, 8738 at fitness 84487.0000
+New value: -67010, 8737 at fitness 84486.0000
+New value: -67011, 8736 at fitness 84485.0000
+New value: -67012, 8735 at fitness 84484.0000
+New value: -67013, 8734 at fitness 84483.0000
+New value: -67014, 8733 at fitness 84482.0000
+New value: -67015, 8732 at fitness 84481.0000
+New value: -67016, 8731 at fitness 84480.0000
+New value: -67017, 8730 at fitness 84479.0000
+New value: -67018, 8729 at fitness 84478.0000
+New value: -67019, 8728 at fitness 84477.0000
+New value: -67020, 8727 at fitness 84476.0000
+New value: -67021, 8726 at fitness 84475.0000
+New value: -67022, 8725 at fitness 84474.0000
+New value: -67023, 8724 at fitness 84473.0000
+New value: -67024, 8723 at fitness 84472.0000
+New value: -67025, 8722 at fitness 84471.0000
+...
+Found optimum after 58743 iterations at -100000, -50001
+
+
+Different aspects and challenges require different variations of this algorithm, such as a `steepest_ascent_hillclimber` or a `restarting_hillclimber`.
+
+The search can be guided by different optimization goals captured in fitness functions. A fitness function to measure how close we are to reaching locations in the source code uses source code instrumentation. To produce an instrumented version of `cgi_decode`, use:
+
+>>> cgi_decode_instrumented = create_instrumented_function(cgi_decode)
+
+Fitness values are obtained by executing `cgi_decode_instrumented`, which is done by the `get_fitness_cgi` function:
+
+>>> get_fitness_cgi("Foo")
+5.0
+
+Complex functions like `cgi_decode` result in vastly larger search spaces, which can be explored using evolutionary search algorithms such as genetic algorithms:
+
+>>> genetic_algorithm()
+Best fitness of initial population: '䫪Ʝ\uf42b铺뿱ጻ䗷䌮肵篭' - 5.0000000000
+Best fitness at generation 1: '\u19cdꥁ캖蝻ⅹ\uf37f功ᰲ\ued7eᱨ' - 5.00000000
+Best fitness at generation 2: '绑䀕\u20c5֜적\udfaeᇒ툧痮Ꮶ' - 5.00000000
+Best fitness at generation 3: '끍碼ߝ䣅쾜\u0b7b죅ᦜ\uf1fd䈕' - 5.00000000
+Best fitness at generation 4: '甚ᇆꏭ貰꾵訴྿ꙩᏃด' - 5.00000000
+Best fitness at generation 5: '\uf644ᇆꏭ貰虀ꎍ\uf6f9嫛ሎ㺁' - 5.00000000
+Best fitness at generation 6: '빫\uf61a\ud85c熆꾵訴ဍꙩᑓ\ue8e0' - 5.00000000
+Best fitness at generation 7: '닅\uf307Ɗ\uefc5筂鐞嚂ᡥ⃫㺤' - 5.00000000
+Best fitness at generation 8: '漻㺅揝䄩薽턫轼\u0dcc\udb87胮' - 5.00000000
+Best fitness at generation 9: '甚ᇩ護㿦腄ꑗ\uf6f9嫛ም凂' - 5.00000000
+Best fitness at generation 10: '끍ᇆ⁔峤羘䶦Ⓛ巖桿\ue8ac' - 5.00000000
+Best fitness at generation 11: '㞮械ꏭഡ鰴勂ᇒ툧䧱㺡' - 5.00000000
+Best fitness at generation 12: '닅\uf307Ɗ䣅筂鐮\uf697媭ም凂' - 5.00000000
+Best fitness at generation 13: '췵㪈쾟⢥筂鐇勨憣并ꓹ' - 5.00000000
+Best fitness at generation 14: '睾\uf2aaﾒ\uef8b鰴⥢邹坅櫼砳' - 5.00000000
+Best fitness at generation 15: '盾㩭譂䅎웱勂ᇒ텬䧱㺡' - 5.00000000
+Best fitness at generation 16: '끍ᇆ₩豻畕傞ᅢ툧䧱Ａ' - 5.00000000
+Best fitness at generation 17: '뀳硺ߝ\uefdb笧勂ᇒ텬桘．' - 5.00000000
+Best fitness at generation 18: '㴄ᅕ큕谉畕傞ᅢ툧䧱Ａ' - 5.00000000
+Best fitness at generation 19: '滴㪈㹮䣻羘䷴⒲嵟\udc02㺤' - 5.00000000
+Best fitness at generation 20: '矖㪈㺂䢶羘䶦ᇒ䙗뭜탤' - 5.00000000
+...
+Best individual: '쩴篊㬍鍵糄䧱﬩廁\ude21萇', fitness 5.0000000000
+
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Search-Based Fuzzing"
+at https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Search-Based Fuzzing
+# ====================
+
+if __name__ == '__main__':
     print('# Search-Based Fuzzing')
 
 
 
+## Synopsis
+## --------
 
-# ## Test Generation as a Search Problem
+if __name__ == '__main__':
+    print('\n## Synopsis')
 
-if __name__ == "__main__":
+
+
+## Test Generation as a Search Problem
+## -----------------------------------
+
+if __name__ == '__main__':
     print('\n## Test Generation as a Search Problem')
 
 
 
+### Representing Program Inputs as a Search Problem
 
-# ### Representing Program Inputs as a Search Problem
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Representing Program Inputs as a Search Problem')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
+from . import Fuzzer
 
-if __package__ is None or __package__ == "":
-    import Fuzzer
-else:
-    from . import Fuzzer
-
-
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import unicode_escape, terminal_escape
-else:
-    from .fuzzingbook_utils import unicode_escape, terminal_escape
-
+from .bookutils import unicode_escape, terminal_escape
 
 def test_me(x, y):
     if x == 2 * (y + 1):
@@ -76,17 +167,14 @@ def test_me(x, y):
     else:
         return False
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_me(0, 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_me(4, 2)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_me(22, 10)
-
 
 MAX = 1000
 MIN = -MAX
@@ -98,42 +186,35 @@ def neighbours(x, y):
             and ((MIN <= x + dx <= MAX)
                  and (MIN <= y + dy <= MAX))]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(neighbours(10, 10))
 
+### Defining a Search Landscape: Fitness functions
 
-# ### Defining a Search Landscape: Fitness functions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Defining a Search Landscape: Fitness functions')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     x = 274
     y = 153
     x, 2 * (y + 1)
 
-
 def calculate_distance(x, y):
     return abs(x - 2 * (y + 1))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     calculate_distance(274, 153)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     from mpl_toolkits.mplot3d import Axes3D
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import numpy as np
-
 
 # %matplotlib inline
 # 
@@ -146,11 +227,10 @@ if __name__ == "__main__":
 # 
 # ax.plot_surface(x, y, z, cmap=plt.cm.jet, rstride=1, cstride=1, linewidth=0);
 
-# ### Instrumentation
+### Instrumentation
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Instrumentation')
-
 
 
 
@@ -162,21 +242,17 @@ def test_me_instrumented(x, y):
     else:
         return False
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_me_instrumented(0, 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_me_instrumented(5, 2)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_me_instrumented(22, 10)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     distance = 0
-
 
 def test_me_instrumented(x, y):
     global distance
@@ -192,32 +268,27 @@ def get_fitness(x, y):
     fitness = distance
     return fitness
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     get_fitness(0, 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     get_fitness(1, 2)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     get_fitness(22, 10)
 
+### Hillclimbing the Example
 
-# ### Hillclimbing the Example
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Hillclimbing the Example')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     x, y = 274, 153
     print("Origin %d, %d has fitness %d" % (x, y, get_fitness(x, y)))
     for nx, ny in neighbours(x, y):
         print("Neighbour %d, %d has fitness %d" % (nx, ny, get_fitness(nx, ny)))
-
 
 import random
 
@@ -251,9 +322,8 @@ def hillclimber():
 
     print("Found optimum after %d iterations at %d, %d" % (iterations, x, y))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     hillclimber()
-
 
 def steepest_ascent_hillclimber():
     # Create and evaluate starting point
@@ -280,9 +350,8 @@ def steepest_ascent_hillclimber():
 
     print("Found optimum after %d iterations at %d, %d" % (iterations, x, y))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     steepest_ascent_hillclimber()
-
 
 def plotting_hillclimber(fitness_function):
     data = []
@@ -308,21 +377,18 @@ def plotting_hillclimber(fitness_function):
     print("Found optimum after %d iterations at %d, %d" % (iterations, x, y))
     return data
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     data = plotting_hillclimber(get_fitness)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     fig = plt.figure()
     ax = plt.axes()
 
     x = range(len(data))
     ax.plot(x, data);
-
 
 def test_me2(x, y):
     if(x * x == y * y * (x % 20)):
@@ -344,24 +410,21 @@ def bad_fitness(x, y):
     fitness = distance
     return fitness
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from mpl_toolkits.mplot3d import Axes3D
-
 
 from math import exp, tan
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     x = np.outer(np.linspace(-10, 10, 30), np.ones(30))
     y = x.copy().T
     z = abs(x * x - y * y * (x % 20))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     fig = plt.figure()
     ax = plt.axes(projection='3d')
 
     ax.plot_surface(x, y, z, cmap=plt.cm.jet, rstride=1, cstride=1, linewidth=0);
-
 
 def restarting_hillclimber(fitness_function):
     data = []
@@ -397,42 +460,34 @@ def restarting_hillclimber(fitness_function):
 MAX = 1000
 MIN = -MAX
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     data = restarting_hillclimber(bad_fitness)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     fig = plt.figure()
     ax = plt.axes()
 
     x = range(len(data))
     ax.plot(x, data);
 
-
 MAX = 100000
 MIN = -MAX
 
-if __package__ is None or __package__ == "":
-    from Timer import Timer
-else:
-    from .Timer import Timer
+from .Timer import Timer
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Timer() as t:
         restarting_hillclimber(get_fitness)
         print("Search time: %.2fs" % t.elapsed_time())
 
+## Testing a More Complex Program
+## ------------------------------
 
-# ## Testing a More Complex Program
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Testing a More Complex Program')
-
 
 
 
@@ -469,11 +524,10 @@ def cgi_decode(s):
         i += 1
     return t
 
-# ### CGI Decoder as a Search Problem
+### CGI Decoder as a Search Problem
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### CGI Decoder as a Search Problem')
-
 
 
 
@@ -481,21 +535,19 @@ def neighbour_strings(x):
     n = []
     for pos in range(len(x)):
         c = ord(x[pos])
-        if c < 127:
+        if c < 126:
             n += [x[:pos] + chr(c + 1) + x[pos + 1:]]
-        if c > 20:
+        if c > 32:
             n += [x[:pos] + chr(c - 1) + x[pos + 1:]]
     return n
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(neighbour_strings("Hello"))
 
+### Branch Distances
 
-# ### Branch Distances
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Branch Distances')
-
 
 
 
@@ -512,27 +564,23 @@ def distance_character(target, values):
             minimum = distance
     return minimum
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     distance_character(10, [1, 5, 12, 100])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     distance_character(10, [0, 50, 80, 200])
 
+### Dealing with Complex Conditions
 
-# ### Dealing with Complex Conditions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Dealing with Complex Conditions')
 
 
 
+### Instrumentation for Atomic Conditions
 
-# ### Instrumentation for Atomic Conditions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Instrumentation for Atomic Conditions')
-
 
 
 
@@ -552,13 +600,11 @@ def evaluate_condition(num, op, lhs, rhs):
     else:
         return False
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     evaluate_condition(1, "Eq", 10, 20)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     evaluate_condition(2, "Eq", 20, 20)
-
 
 def update_maps(condition_num, d_true, d_false):
     global distances_true, distances_false
@@ -619,11 +665,10 @@ def evaluate_condition(num, op, lhs, rhs):
     else:
         return False
 
-# ### Instrumenting Source Code Automatically
+### Instrumenting Source Code Automatically
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Instrumenting Source Code Automatically')
-
 
 
 
@@ -655,13 +700,9 @@ import inspect
 import ast
 import astor
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import print_content
-else:
-    from .fuzzingbook_utils import print_content
+from .bookutils import print_content
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     source = inspect.getsource(cgi_decode)
     node = ast.parse(source)
     BranchTransformer().visit(node)
@@ -669,7 +710,6 @@ if __name__ == "__main__":
     # Make sure the line numbers are ok before printing
     node = ast.fix_missing_locations(node)
     print_content(astor.to_source(node), '.py')
-
 
 def create_instrumented_function(f):
     source = inspect.getsource(f)
@@ -684,57 +724,45 @@ def create_instrumented_function(f):
     code = compile(node, filename="<ast>", mode="exec")
     exec(code, current_module.__dict__)
 
-if __name__ == "__main__":
-    # Set up the global maps
+if __name__ == '__main__':
     distances_true = {}
     distances_false = {}
 
-
-if __name__ == "__main__":
-    # Create instrumented function
-    # cgi_decode_instrumented = 
+if __name__ == '__main__':
     create_instrumented_function(cgi_decode)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert cgi_decode("Hello+Reader") == cgi_decode_instrumented("Hello+Reader")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode_instrumented("Hello+Reader")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     distances_true
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     distances_false
 
+### Fitness Function to Create Valid Hexadecimal Inputs
 
-# ### Fitness Function to Create Valid Hexadecimal Inputs
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Fitness Function to Create Valid Hexadecimal Inputs')
-
 
 
 
 def normalize(x):
     return x / (1.0 + x)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     fig = plt.figure()
     ax = plt.axes()
 
     x = range(100)
     y = [value / (value + 1.0) for value in x]
     ax.plot(x, y);
-
 
 def get_fitness_cgi(x):
     # Reset any distance values from previous executions
@@ -764,36 +792,25 @@ def get_fitness_cgi(x):
 
     return fitness
 
-if __name__ == "__main__":
-    # Empty string does not even enter the loop
+if __name__ == '__main__':
     get_fitness_cgi("")
 
-
-if __name__ == "__main__":
-    # String contains no percentage character
+if __name__ == '__main__':
     get_fitness_cgi("Hello+Reader")
 
-
-if __name__ == "__main__":
-    # String contains a percentage character, but no valid hex char
+if __name__ == '__main__':
     get_fitness_cgi("%UU")
 
-
-if __name__ == "__main__":
-    # String contains a percentage character, but only one valid hex char
+if __name__ == '__main__':
     get_fitness_cgi("%AU")
 
-
-if __name__ == "__main__":
-    # String contains a percentage character and two valid hex chars
+if __name__ == '__main__':
     get_fitness_cgi("%AA")
 
+### Hillclimbing Valid Hexadecimal Inputs
 
-# ### Hillclimbing Valid Hexadecimal Inputs
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Hillclimbing Valid Hexadecimal Inputs')
-
 
 
 
@@ -827,15 +844,14 @@ def hillclimb_cgi():
 
     print("Optimum at %s, fitness %.4f" % (x, fitness))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     hillclimb_cgi()
 
+## Evolutionary Search
+## -------------------
 
-# ## Evolutionary Search
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Evolutionary Search')
-
 
 
 
@@ -893,15 +909,13 @@ def hillclimb_cgi_limited(max_iterations):
 
     print("Optimum at %s, fitness %.4f" % (terminal_repr(x), fitness))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     hillclimb_cgi_limited(100)
 
+### Global Search
 
-# ### Global Search
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Global Search')
-
 
 
 
@@ -929,37 +943,32 @@ def randomized_hillclimb():
     print("Optimum at %s after %d iterations" %
           (terminal_repr(x), iterations))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     randomized_hillclimb()
 
+### Genetic Algorithms
 
-# ### Genetic Algorithms
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Genetic Algorithms')
-
 
 
 
 def create_population(size):
     return [random_unicode_string(10) for i in range(size)]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     create_population(10)
-
 
 def evaluate_population(population):
     fitness = [get_fitness_cgi(x) for x in population]
     return list(zip(population, fitness))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     population = create_population(10)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for (individual, fitness) in evaluate_population(population):
         print("%s: %.4f" % (terminal_repr(individual), fitness))
-
 
 def selection(evaluated_population, tournament_size):
     competition = random.sample(evaluated_population, tournament_size)
@@ -968,20 +977,17 @@ def selection(evaluated_population, tournament_size):
     # Return a copy of the selected individual
     return winner[:]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     population = create_population(10)
     fitness = evaluate_population(population)
     selected = selection(fitness, 10)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for (individual, fitness_value) in fitness:
         print("%s: %.4f" % (terminal_repr(individual), fitness_value))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("Winner: %s" % terminal_repr(selected))
-
 
 def crossover(parent1, parent2):
     pos = random.randint(1, len(parent1))
@@ -991,12 +997,11 @@ def crossover(parent1, parent2):
 
     return (offspring1, offspring2)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parent1 = "Hello World"
     parent2 = "Goodbye Book"
 
     crossover(parent1, parent2)
-
 
 def mutate(chromosome):
     mutated = chromosome[:]
@@ -1061,62 +1066,57 @@ def genetic_algorithm():
         "Best individual: %s, fitness %.10f" %
         (terminal_repr(best_individual), best_fitness))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     genetic_algorithm()
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     hillclimber()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode_instrumented = create_instrumented_function(cgi_decode)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     get_fitness_cgi("Foo")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     genetic_algorithm()
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
-
 
 

@@ -18,10 +18,11 @@ python -c "import matplotlib as mpl; mpl.use('Agg'); import pylab as plt; fig, a
 test -e test.png && rm test.png
 
 # Trust notebooks such that users can see their HTML and JS output
-echo postBuild: Trusting notebooks ...
-jupyter trust notebooks/*.ipynb \
-    docs/notebooks/*.ipynb \
-    docs/beta/notebooks/*.ipynb
+echo postBuild: Trusting notebooks...
+for notebook in notebooks/*.ipynb docs/notebooks/*.ipynb docs/beta/notebooks/*.ipynb; do
+    echo postBuild: Trusting notebook "$notebook" ...
+    jupyter trust "$notebook"
+done
 
 # Create custom.css
 echo postBuild: Creating custom.css...
@@ -276,6 +277,12 @@ a:active {
     /* text-decoration: none!important; */
 }
 
+svg a {
+    text-decoration: none!important;
+}
+
+
+
 /* Make selections yellow; easier to see in classroom */
 ::selection {
     background: #ffff50;
@@ -385,6 +392,12 @@ summary {
     font-weight: bold;
     color: #ffffff;
 }
+
+/* Page not public yet in menu */
+#cssmenu a.not_public {
+    color: #a0a0a0;
+}
+
 
 /* Notebook page in menu */
 #cssmenu a.edit_as_notebook {

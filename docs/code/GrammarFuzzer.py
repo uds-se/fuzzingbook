@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Efficient Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2019-12-21 16:38:57+01:00
+# Last change: 2021-06-02 17:44:44+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,94 +27,136 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Efficient Grammar Fuzzing
 
-# # Efficient Grammar Fuzzing
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python GrammarFuzzer.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.GrammarFuzzer import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/GrammarFuzzer.html
+
+This chapter introduces `GrammarFuzzer`, an efficient grammar fuzzer that takes a grammar to produce syntactically valid input strings.  Here's a typical usage:
+
+>>> from Grammars import US_PHONE_GRAMMAR
+>>> phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
+>>> phone_fuzzer.fuzz()
+'(837)233-0041'
+
+The `GrammarFuzzer` constructor takes a number of keyword arguments to control its behavior.  `start_symbol`, for instance, allows to set the symbol that expansion starts with (instead of ``):
+
+>>> area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='')
+>>> area_fuzzer.fuzz()
+'385'
+>>> import inspect
+>>> print(inspect.getdoc(GrammarFuzzer.__init__))
+Produce strings from `grammar`, starting with `start_symbol`.
+If `min_nonterminals` or `max_nonterminals` is given, use them as limits 
+for the number of nonterminals produced.  
+If `disp` is set, display the intermediate derivation trees.
+If `log` is set, show intermediate steps as text on standard output.
+
+
+Internally, `GrammarFuzzer` makes use of [derivation trees](#Derivation-Trees), which it expands step by step.  After producing a string, the tree produced can be accessed in the `derivation_tree` attribute.
+
+>>> display_tree(phone_fuzzer.derivation_tree)
+In the internal representation of a derivation tree, a _node_ is a pair (`symbol`, `children`).  For nonterminals, `symbol` is the symbol that is being expanded, and `children` is a list of further nodes.  For terminals, `symbol` is the terminal string, and `children` is empty.
+
+>>> phone_fuzzer.derivation_tree
+('',
+ [('',
+   [('(', []),
+    ('',
+     [('', [('8', [])]),
+      ('', [('3', [])]),
+      ('', [('7', [])])]),
+    (')', []),
+    ('',
+     [('', [('2', [])]),
+      ('', [('3', [])]),
+      ('', [('3', [])])]),
+    ('-', []),
+    ('',
+     [('', [('0', [])]),
+      ('', [('0', [])]),
+      ('', [('4', [])]),
+      ('', [('1', [])])])])])
+
+The chapter contains various helpers to work with derivation trees, including visualization tools.
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Efficient Grammar Fuzzing"
+at https://www.fuzzingbook.org/html/GrammarFuzzer.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Efficient Grammar Fuzzing
+# =========================
+
+if __name__ == '__main__':
     print('# Efficient Grammar Fuzzing')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## An Insufficient Algorithm
+## -------------------------
 
-# ## An Insufficient Algorithm
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## An Insufficient Algorithm')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
+from .bookutils import unicode_escape
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import unicode_escape
-else:
-    from .fuzzingbook_utils import unicode_escape
+from .Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer, is_valid_grammar, exp_string, exp_opts
 
-
-if __package__ is None or __package__ == "":
-    from Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer, is_valid_grammar, exp_string, exp_opts
-else:
-    from .Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer, is_valid_grammar, exp_string, exp_opts
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     expr_grammar = convert_ebnf_grammar(EXPR_EBNF_GRAMMAR)
     expr_grammar
 
+from .ExpectError import ExpectTimeout
 
-if __package__ is None or __package__ == "":
-    from ExpectError import ExpectTimeout
-else:
-    from .ExpectError import ExpectTimeout
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectTimeout(1):
         simple_grammar_fuzzer(grammar=expr_grammar, max_nonterminals=3)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     expr_grammar['<factor>']
 
+from .Grammars import simple_grammar_fuzzer
 
-if __package__ is None or __package__ == "":
-    from Grammars import simple_grammar_fuzzer
-else:
-    from .Grammars import simple_grammar_fuzzer
+from .Grammars import START_SYMBOL, EXPR_GRAMMAR, URL_GRAMMAR, CGI_GRAMMAR
 
+from .Grammars import RE_NONTERMINAL, nonterminals, is_nonterminal
 
-if __package__ is None or __package__ == "":
-    from Grammars import START_SYMBOL, EXPR_GRAMMAR, URL_GRAMMAR, CGI_GRAMMAR
-else:
-    from .Grammars import START_SYMBOL, EXPR_GRAMMAR, URL_GRAMMAR, CGI_GRAMMAR
+from .Timer import Timer
 
-
-if __package__ is None or __package__ == "":
-    from Grammars import RE_NONTERMINAL, nonterminals, is_nonterminal
-else:
-    from .Grammars import RE_NONTERMINAL, nonterminals, is_nonterminal
-
-
-if __package__ is None or __package__ == "":
-    from Timer import Timer
-else:
-    from .Timer import Timer
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     trials = 50
     xs = []
     ys = []
@@ -126,59 +168,49 @@ if __name__ == "__main__":
         print(i, end=" ")
     print()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     average_time = sum(ys) / trials
     print("Average time:", average_time)
-
 
 # %matplotlib inline
 # 
 # import matplotlib.pyplot as plt
 # plt.scatter(xs, ys)
-# plt.title('Time required for generating an output')
+# plt.title('Time required for generating an output');
 
-# ## Derivation Trees
+## Derivation Trees
+## ----------------
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Derivation Trees')
 
 
 
+from graphviz import Digraph
 
-if __name__ == "__main__":
-    from graphviz import Digraph
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = Digraph("root")
     tree.attr('node', shape='plain')
     tree.node(r"\<start\>")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree.edge(r"\<start\>", r"\<expr\>")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree.edge(r"\<expr\>", r"\<expr\> ")
     tree.edge(r"\<expr\>", r"+")
     tree.edge(r"\<expr\>", r"\<term\>")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree.edge(r"\<expr\> ", r"\<term\> ")
     tree.edge(r"\<term\> ", r"\<factor\> ")
     tree.edge(r"\<factor\> ", r"\<integer\> ")
@@ -190,20 +222,18 @@ if __name__ == "__main__":
     tree.edge(r"\<integer\>", r"\<digit\>")
     tree.edge(r"\<digit\>", r"2")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree
 
+## Representing Derivation Trees
+## -----------------------------
 
-# ## Representing Derivation Trees
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Representing Derivation Trees')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     derivation_tree = ("<start>",
                        [("<expr>",
                          [("<expr>", None),
@@ -211,14 +241,17 @@ if __name__ == "__main__":
                              ("<term>", None)]
                          )])
 
+#### Excursion: Implementing `display_tree()`
 
-if __name__ == "__main__":
-    from graphviz import Digraph
+if __name__ == '__main__':
+    print('\n#### Excursion: Implementing `display_tree()`')
 
 
-if __name__ == "__main__":
+
+from graphviz import Digraph
+
+if __name__ == '__main__':
     from IPython.display import display
-
 
 import re
 
@@ -227,11 +260,10 @@ def dot_escape(s):
     s = re.sub(r'([^a-zA-Z0-9" ])', r"\\\1", s)
     return s
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert dot_escape("hello") == "hello"
     assert dot_escape("<hello>, world") == "\\<hello\\>\\, world"
     assert dot_escape("\\n") == "\\\\n"
-
 
 def extract_node(node, id):
     symbol, children, *annotation = node
@@ -277,8 +309,21 @@ def display_tree(derivation_tree,
         print(dot)
     return dot
 
-if __name__ == "__main__":
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
+if __name__ == '__main__':
     display_tree(derivation_tree)
+
+#### Excursion: Source code and example for `display_annotated_tree()`
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Source code and example for `display_annotated_tree()`')
+
 
 
 def display_annotated_tree(tree, a_nodes, a_edges, log=False):
@@ -304,8 +349,14 @@ def display_annotated_tree(tree, a_nodes, a_edges, log=False):
                  edge_attr=annotate_edge,
                  graph_attr=graph_attr)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_annotated_tree(derivation_tree, {3: 'plus'}, {(1, 3): 'op'}, log=False)
+
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
 
 
 def all_terminals(tree):
@@ -322,9 +373,8 @@ def all_terminals(tree):
     # Concatenate all terminal symbols from all children
     return ''.join([all_terminals(c) for c in children])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_terminals(derivation_tree)
-
 
 def tree_to_string(tree):
     symbol, children, *_ = tree
@@ -333,23 +383,18 @@ def tree_to_string(tree):
     else:
         return '' if is_nonterminal(symbol) else symbol
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree_to_string(derivation_tree)
 
+## Expanding a Node
+## ----------------
 
-# ## Expanding a Node
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Expanding a Node')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from Fuzzer import Fuzzer
-else:
-    from .Fuzzer import Fuzzer
-
+from .Fuzzer import Fuzzer
 
 class GrammarFuzzer(Fuzzer):
     def __init__(self, grammar, start_symbol=START_SYMBOL,
@@ -366,7 +411,14 @@ class GrammarFuzzer(Fuzzer):
         self.max_nonterminals = max_nonterminals
         self.disp = disp
         self.log = log
-        self.check_grammar()
+        self.check_grammar()  # Invokes is_valid_grammar()
+
+#### Excursion: `check_grammar()` implementation
+
+if __name__ == '__main__':
+    print('\n#### Excursion: `check_grammar()` implementation')
+
+
 
 class GrammarFuzzer(GrammarFuzzer):
     def check_grammar(self):
@@ -379,14 +431,20 @@ class GrammarFuzzer(GrammarFuzzer):
     def supported_opts(self):
         return set()
 
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
 class GrammarFuzzer(GrammarFuzzer):
     def init_tree(self):
         return (self.start_symbol, None)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR)
     display_tree(f.init_tree())
-
 
 def expansion_to_children(expansion):
     # print("Converting " + repr(expansion))
@@ -403,21 +461,25 @@ def expansion_to_children(expansion):
     return [(s, None) if is_nonterminal(s) else (s, [])
             for s in strings if len(s) > 0]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     expansion_to_children("<term> + <expr>")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     expansion_to_children("")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     expansion_to_children(("+<term>", ["extra_data"]))
-
 
 class GrammarFuzzer(GrammarFuzzer):
     def expansion_to_children(self, expansion):
         return expansion_to_children(expansion)
+
+#### Excursion: `expand_node_randomly()` implementation
+
+if __name__ == '__main__':
+    print('\n#### Excursion: `expand_node_randomly()` implementation')
+
+
 
 import random
 
@@ -458,25 +520,30 @@ class GrammarFuzzer(GrammarFuzzer):
         """Process children after selection.  By default, does nothing."""
         return chosen_children
 
-if __name__ == "__main__":
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
+if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
 
     print("Before:")
     tree = ("<integer>", None)
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("After:")
     tree = f.expand_node_randomly(tree)
     display_tree(tree)
 
+## Expanding a Tree
+## ----------------
 
-# ## Expanding a Tree
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Expanding a Tree')
-
 
 
 
@@ -488,10 +555,9 @@ class GrammarFuzzer(GrammarFuzzer):
 
         return sum(self.possible_expansions(c) for c in children)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR)
     print(f.possible_expansions(derivation_tree))
-
 
 class GrammarFuzzer(GrammarFuzzer):
     def any_possible_expansions(self, node):
@@ -501,9 +567,15 @@ class GrammarFuzzer(GrammarFuzzer):
 
         return any(self.any_possible_expansions(c) for c in children)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR)
     f.any_possible_expansions(derivation_tree)
+
+#### Excursion: `expand_tree_once()` implementation
+
+if __name__ == '__main__':
+    print('\n#### Excursion: `expand_tree_once()` implementation')
+
 
 
 class GrammarFuzzer(GrammarFuzzer):
@@ -537,7 +609,14 @@ class GrammarFuzzer(GrammarFuzzer):
 
         return tree
 
-if __name__ == "__main__":
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
+if __name__ == '__main__':
     derivation_tree = ("<start>",
                        [("<expr>",
                          [("<expr>", None),
@@ -546,23 +625,20 @@ if __name__ == "__main__":
                          )])
     display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
     derivation_tree = f.expand_tree_once(derivation_tree)
     display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     derivation_tree = f.expand_tree_once(derivation_tree)
     display_tree(derivation_tree)
 
+## Closing the Expansion
+## ---------------------
 
-# ## Closing the Expansion
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Closing the Expansion')
-
 
 
 
@@ -583,13 +659,18 @@ class GrammarFuzzer(GrammarFuzzer):
         # inside + 1
         return sum(self.symbol_cost(s, seen) for s in symbols) + 1
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR)
     assert f.symbol_cost("<digit>") == 1
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert f.symbol_cost("<expr>") == 5
+
+#### Excursion: `expand_node_by_cost()` implementation
+
+if __name__ == '__main__':
+    print('\n#### Excursion: `expand_node_by_cost()` implementation')
+
 
 
 class GrammarFuzzer(GrammarFuzzer):
@@ -624,6 +705,13 @@ class GrammarFuzzer(GrammarFuzzer):
         # Return with a new list
         return (symbol, chosen_children)
 
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
 class GrammarFuzzer(GrammarFuzzer):
     def expand_node_min_cost(self, node):
         if self.log:
@@ -635,43 +723,37 @@ class GrammarFuzzer(GrammarFuzzer):
     def expand_node(self, node):
         return self.expand_node_min_cost(node)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
     display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
         display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
         display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
         display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     while f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)    
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(derivation_tree)
 
+## Node Inflation
+## --------------
 
-# ## Node Inflation
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Node Inflation')
-
 
 
 
@@ -686,7 +768,7 @@ class GrammarFuzzer(GrammarFuzzer):
     def expand_node(self, node):
         return self.expand_node_max_cost(node)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     derivation_tree = ("<start>",
                        [("<expr>",
                          [("<expr>", None),
@@ -694,35 +776,37 @@ if __name__ == "__main__":
                              ("<term>", None)]
                          )])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
     display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
         display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
         display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
         display_tree(derivation_tree)
 
+## Three Expansion Phases
+## ----------------------
 
-# ## Three Expansion Phases
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Three Expansion Phases')
 
+
+
+#### Excursion: Implementation of three-phase `expand_tree()`
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Implementation of three-phase `expand_tree()`')
 
 
 
@@ -760,35 +844,43 @@ class GrammarFuzzer(GrammarFuzzer):
 
         return tree
 
-if __name__ == "__main__":
-    derivation_tree = ("<start>",
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
+if __name__ == '__main__':
+    initial_derivation_tree = ("<start>",
                        [("<expr>",
                          [("<expr>", None),
                           (" + ", []),
                              ("<term>", None)]
                          )])
 
+if __name__ == '__main__':
+    display_tree(initial_derivation_tree)
+
+if __name__ == '__main__':
     f = GrammarFuzzer(
         EXPR_GRAMMAR,
         min_nonterminals=3,
         max_nonterminals=5,
         log=True)
-    derivation_tree = f.expand_tree(derivation_tree)
+    derivation_tree = f.expand_tree(initial_derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_terminals(derivation_tree)
 
+## Putting it all Together
+## -----------------------
 
-# ## Putting it all Together
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Putting it all Together')
-
 
 
 
@@ -810,34 +902,28 @@ class GrammarFuzzer(GrammarFuzzer):
         self.derivation_tree = self.fuzz_tree()
         return all_terminals(self.derivation_tree)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR)
     f.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(f.derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(URL_GRAMMAR)
     f.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(f.derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(CGI_GRAMMAR, min_nonterminals=3, max_nonterminals=5)
     f.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(f.derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     trials = 50
     xs = []
     ys = []
@@ -850,114 +936,99 @@ if __name__ == "__main__":
         print(i, end=" ")
     print()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     average_time = sum(ys) / trials
     print("Average time:", average_time)
-
 
 # %matplotlib inline
 # 
 # import matplotlib.pyplot as plt
 # plt.scatter(xs, ys)
-# plt.title('Time required for generating an output')
+# plt.title('Time required for generating an output');
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(expr_grammar, max_nonterminals=10)
     f.fuzz()
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+from .Grammars import US_PHONE_GRAMMAR
 
-if __package__ is None or __package__ == "":
-    from Grammars import US_PHONE_GRAMMAR
-else:
-    from .Grammars import US_PHONE_GRAMMAR
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
     phone_fuzzer.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='<area>')
     area_fuzzer.fuzz()
 
-
 import inspect
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(inspect.getdoc(GrammarFuzzer.__init__))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(phone_fuzzer.derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     phone_fuzzer.derivation_tree
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+### Extending Grammars
 
-# ### Extending Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Extending Grammars')
 
 
 
+### Applying Grammars
 
-# ### Applying Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Applying Grammars')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: Caching Method Results
 
-# ### Exercise 1: Caching Method Results
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: Caching Method Results')
-
 
 
 
@@ -981,29 +1052,24 @@ class FasterGrammarFuzzer(GrammarFuzzer):
         self._expansion_cache[expansion] = result
         return result
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = FasterGrammarFuzzer(EXPR_GRAMMAR, min_nonterminals=3, max_nonterminals=5)
     f.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f._expansion_invocations
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f._expansion_invocations_cached
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("%.2f%% of invocations can be cached" %
           (f._expansion_invocations_cached * 100 / f._expansion_invocations))
 
+### Exercise 2: Grammar Pre-Compilation
 
-# ### Exercise 2: Grammar Pre-Compilation
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Grammar Pre-Compilation')
-
 
 
 
@@ -1031,36 +1097,30 @@ class EvenFasterGrammarFuzzer(GrammarFuzzer):
         self.symbol_cost = self.new_symbol_cost
         self.expansion_cost = self.new_expansion_cost
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = EvenFasterGrammarFuzzer(EXPR_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f._symbol_costs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f._expansion_costs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = EvenFasterGrammarFuzzer(EXPR_GRAMMAR)
     f.fuzz()
 
+### Exercise 3: Maintaining Trees to be Expanded
 
-# ### Exercise 3: Maintaining Trees to be Expanded
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 3: Maintaining Trees to be Expanded')
 
 
 
+### Exercise 4: Alternate Random Expansions
 
-# ### Exercise 4: Alternate Random Expansions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 4: Alternate Random Expansions')
-
 
 
 

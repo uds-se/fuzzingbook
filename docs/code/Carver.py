@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Carving Unit Tests" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2019-05-21 19:58:03+02:00
+# Last change: 2021-06-04 15:28:25+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,40 +27,108 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Carving Unit Tests
 
-# # Carving Unit Tests
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python Carver.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.Carver import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/Carver.html
+
+This chapter provides means to _record and replay function calls_ during a system test.  Since individual function calls are much faster than a whole system run, such "carving" mechanisms have the potential to run tests much faster.
+
+### Recording Calls
+
+The `CallCarver` class records all calls occurring while it is active.  It is used in conjunction with a `with` clause:
+
+>>> with CallCarver() as carver:
+>>>     y = my_sqrt(2)
+>>>     y = my_sqrt(4)
+
+After execution, `called_functions()` lists the names of functions encountered:
+
+>>> carver.called_functions()
+['my_sqrt', '__exit__']
+
+The `arguments()` method lists the arguments recorded for a function.  This is a mapping of the function name to a list of lists of arguments; each argument is a pair (parameter name, value).
+
+>>> carver.arguments('my_sqrt')
+[[('x', 2)], [('x', 4)]]
+
+Complex arguments are properly serialized, such that they can be easily restored.
+
+### Synthesizing Calls
+
+While such recorded arguments already could be turned into arguments and calls, a much nicer alternative is to create a _grammar_ for recorded calls.  This allows to synthesize arbitrary _combinations_ of arguments, and also offers a base for further customization of calls.
+
+The `CallGrammarMiner` class turns a list of carved executions into a grammar.
+
+>>> my_sqrt_miner = CallGrammarMiner(carver)
+>>> my_sqrt_grammar = my_sqrt_miner.mine_call_grammar()
+>>> my_sqrt_grammar
+{'': [''],
+ '': [''],
+ '': ['2', '4'],
+ '': ['my_sqrt()']}
+
+This grammar can be used to synthesize calls.
+
+>>> fuzzer = GrammarCoverageFuzzer(my_sqrt_grammar)
+>>> fuzzer.fuzz()
+'my_sqrt(4)'
+
+These calls can be executed in isolation, effectively extracting unit tests from system tests:
+
+>>> eval(fuzzer.fuzz())
+1.414213562373095
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Carving Unit Tests"
+at https://www.fuzzingbook.org/html/Carver.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Carving Unit Tests
+# ==================
+
+if __name__ == '__main__':
     print('# Carving Unit Tests')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
+from . import APIFuzzer
 
-if __package__ is None or __package__ == "":
-    import APIFuzzer
-else:
-    from . import APIFuzzer
+## Synopsis
+## --------
 
-
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## System Tests vs Unit Tests
+## --------------------------
 
-# ## System Tests vs Unit Tests
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## System Tests vs Unit Tests')
-
 
 
 
@@ -73,13 +141,9 @@ def webbrowser(url):
     r = requests.get(url)
     return r.text
 
-if __package__ is None or __package__ == "":
-    from Timer import Timer
-else:
-    from .Timer import Timer
+from .Timer import Timer
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Timer() as webbrowser_timer:
         fuzzingbook_contents = webbrowser(
             "http://www.fuzzingbook.org/html/Fuzzer.html")
@@ -87,18 +151,15 @@ if __name__ == "__main__":
     print("Downloaded %d bytes in %.2f seconds" %
           (len(fuzzingbook_contents), webbrowser_timer.elapsed_time()))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     fuzzingbook_contents[:100]
-
 
 from urllib.parse import urlparse
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     urlparse('https://www.fuzzingbook.com/html/Carver.html')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     runs = 1000
     with Timer() as urlparse_timer:
         for i in range(runs):
@@ -107,28 +168,25 @@ if __name__ == "__main__":
     avg_urlparse_time = urlparse_timer.elapsed_time() / 1000
     avg_urlparse_time
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     webbrowser_timer.elapsed_time()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     webbrowser_timer.elapsed_time() / avg_urlparse_time
 
+## Carving Unit Tests
+## ------------------
 
-# ## Carving Unit Tests
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Carving Unit Tests')
 
 
 
+## Recording Calls
+## ---------------
 
-# ## Recording Calls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Recording Calls')
-
 
 
 
@@ -215,37 +273,28 @@ class CallCarver(CallCarver):
             return [function_name for function_name in self._calls.keys()
                     if function_name.find('.') < 0]
 
-# ### Recording my_sqrt()
+### Recording my_sqrt()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Recording my_sqrt()')
 
 
 
+from .Intro_Testing import my_sqrt
 
-if __package__ is None or __package__ == "":
-    from Intro_Testing import my_sqrt
-else:
-    from .Intro_Testing import my_sqrt
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with CallCarver() as sqrt_carver:
         my_sqrt(2)
         my_sqrt(4)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sqrt_carver.calls()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sqrt_carver.called_functions()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sqrt_carver.arguments("my_sqrt")
-
 
 def simple_call_string(function_name, argument_list):
     """Return function_name(arg[0], arg[1], ...) as a string"""
@@ -253,95 +302,80 @@ def simple_call_string(function_name, argument_list):
         ", ".join([var + "=" + repr(value)
                    for (var, value) in argument_list]) + ")"
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for function_name in sqrt_carver.called_functions():
         for argument_list in sqrt_carver.arguments(function_name):
             print(simple_call_string(function_name, argument_list))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     eval("my_sqrt(x=2)")
 
+### Carving urlparse()
 
-# ### Carving urlparse()
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Carving urlparse()')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with CallCarver() as webbrowser_carver:
         webbrowser("http://www.example.com")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     function_list = webbrowser_carver.called_functions(qualified=True)
     len(function_list)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(function_list[:50])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     urlparse_argument_list = webbrowser_carver.arguments("urllib.parse.urlparse")
     urlparse_argument_list
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     urlparse_call = simple_call_string("urlparse", urlparse_argument_list[0])
     urlparse_call
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     eval(urlparse_call)
 
+## Replaying Calls
+## ---------------
 
-# ## Replaying Calls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Replaying Calls')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     email_parse_argument_list = webbrowser_carver.arguments("email.parser.parse")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     email_parse_call = simple_call_string(
         "email.parser.parse",
         email_parse_argument_list[0])
     email_parse_call
 
+### Serializing Objects
 
-# ### Serializing Objects
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Serializing Objects')
-
 
 
 
 import pickle    
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser_object = email_parse_argument_list[0][0][1]
     parser_object
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     pickled = pickle.dumps(parser_object)
     pickled
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     unpickled_parser_object = pickle.loads(pickled)
     unpickled_parser_object
-
 
 def call_value(value):
     value_as_string = repr(value)
@@ -364,20 +398,17 @@ def call_string(function_name, argument_list):
         ", ".join([var + "=" + call_value(value)
                    for (var, value) in argument_list]) + ")"
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     call = call_string("email.parser.parse", email_parse_argument_list[0])
     print(call)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     eval(call)
 
+### All Calls
 
-# ### All Calls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### All Calls')
-
 
 
 
@@ -386,13 +417,12 @@ import traceback
 import enum
 import socket
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_functions = set(webbrowser_carver.called_functions(qualified=True))
     call_success = set()
     run_success = set()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     exceptions_seen = set()
 
     for function_name in webbrowser_carver.called_functions(qualified=True):
@@ -411,32 +441,28 @@ if __name__ == "__main__":
                 # print("", file=sys.stderr)
                 continue
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("%d/%d calls (%.2f%%) successfully created and %d/%d calls (%.2f%%) successfully ran" % (
         len(call_success), len(all_functions), len(
             call_success) * 100 / len(all_functions),
         len(run_success), len(all_functions), len(run_success) * 100 / len(all_functions)))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for i in range(10):
         print(list(exceptions_seen)[i])
 
+## Mining API Grammars from Carved Calls
+## -------------------------------------
 
-# ## Mining API Grammars from Carved Calls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Mining API Grammars from Carved Calls')
 
 
 
+### From Calls to Grammars
 
-# ### From Calls to Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### From Calls to Grammars')
-
 
 
 
@@ -445,21 +471,15 @@ import math
 def power(x, y):
     return math.pow(x, y)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with CallCarver() as power_carver:
         z = power(1, 2)
         z = power(3, 4)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     power_carver.arguments("power")
 
-
-if __package__ is None or __package__ == "":
-    from Grammars import START_SYMBOL, is_valid_grammar, new_symbol, extend_grammar
-else:
-    from .Grammars import START_SYMBOL, is_valid_grammar, new_symbol, extend_grammar
-
+from .Grammars import START_SYMBOL, is_valid_grammar, new_symbol, extend_grammar
 
 POWER_GRAMMAR = {
     "<start>": ["power(<x>, <y>)"],
@@ -469,22 +489,16 @@ POWER_GRAMMAR = {
 
 assert is_valid_grammar(POWER_GRAMMAR)
 
-if __package__ is None or __package__ == "":
-    from GrammarCoverageFuzzer import GrammarCoverageFuzzer
-else:
-    from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
+from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     power_fuzzer = GrammarCoverageFuzzer(POWER_GRAMMAR)
     [power_fuzzer.fuzz() for i in range(5)]
 
+### A Grammar Miner for Calls
 
-# ### A Grammar Miner for Calls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### A Grammar Miner for Calls')
-
 
 
 
@@ -493,11 +507,10 @@ class CallGrammarMiner(object):
         self.carver = carver
         self.log = log
 
-# #### Initial Grammar
+#### Initial Grammar
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Initial Grammar')
-
 
 
 
@@ -512,24 +525,21 @@ class CallGrammarMiner(CallGrammarMiner):
                 self.CALL_SYMBOL: []
              })
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     m = CallGrammarMiner(power_carver)
     initial_grammar = m.initial_grammar()
     initial_grammar
 
+#### A Grammar from Arguments
 
-# #### A Grammar from Arguments
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### A Grammar from Arguments')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     arguments = power_carver.arguments("power")
     arguments
-
 
 class CallGrammarMiner(CallGrammarMiner):
     def var_symbol(self, function_name, var, grammar):
@@ -561,25 +571,21 @@ class CallGrammarMiner(CallGrammarMiner):
 
         return var_grammar, var_symbols
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     m = CallGrammarMiner(power_carver)
     var_grammar, var_symbols = m.mine_arguments_grammar(
         "power", arguments, initial_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     var_grammar
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     var_symbols
 
+#### A Grammar from Calls
 
-# #### A Grammar from Calls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### A Grammar from Calls')
-
 
 
 
@@ -612,28 +618,24 @@ class CallGrammarMiner(CallGrammarMiner):
 
         return function_grammar, function_symbol
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     m = CallGrammarMiner(power_carver)
     function_grammar, function_symbol = m.mine_function_grammar(
         "power", initial_grammar)
     function_grammar
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     function_symbol
 
+#### A Grammar from all Calls
 
-# #### A Grammar from all Calls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### A Grammar from all Calls')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     power_carver.called_functions()
-
 
 class CallGrammarMiner(CallGrammarMiner):
     def mine_call_grammar(self, function_list=None, qualified=False):
@@ -661,170 +663,145 @@ class CallGrammarMiner(CallGrammarMiner):
         assert is_valid_grammar(grammar)
         return grammar
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     m = CallGrammarMiner(power_carver)
     power_grammar = m.mine_call_grammar()
     power_grammar
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     power_fuzzer = GrammarCoverageFuzzer(power_grammar)
     [power_fuzzer.fuzz() for i in range(5)]
 
+## Fuzzing Web Functions
+## ---------------------
 
-# ## Fuzzing Web Functions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Fuzzing Web Functions')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with CallCarver() as webbrowser_carver:
         webbrowser("https://www.fuzzingbook.org")
         webbrowser("http://www.example.com")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     m = CallGrammarMiner(webbrowser_carver)
     webbrowser_grammar = m.mine_call_grammar()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     call_list = webbrowser_grammar['<call>']
     len(call_list)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(call_list[:20])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     webbrowser_grammar["<urlsplit>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     webbrowser_grammar["<urlsplit-url>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     webbrowser_grammar["<urlsplit-scheme>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     urlsplit_fuzzer = GrammarCoverageFuzzer(
         webbrowser_grammar, start_symbol="<urlsplit>")
     for i in range(5):
         print(urlsplit_fuzzer.fuzz())
 
-
 from urllib.parse import urlsplit
 
-if __package__ is None or __package__ == "":
-    from Timer import Timer
-else:
-    from .Timer import Timer
+from .Timer import Timer
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Timer() as urlsplit_timer:
         urlsplit('http://www.fuzzingbook.org/', 'http', True)
     urlsplit_timer.elapsed_time()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Timer() as webbrowser_timer:
         webbrowser("http://www.fuzzingbook.org")
     webbrowser_timer.elapsed_time()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     webbrowser_timer.elapsed_time() / urlsplit_timer.elapsed_time()
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+### Recording Calls
 
-# ### Recording Calls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Recording Calls')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with CallCarver() as carver:
         y = my_sqrt(2)
         y = my_sqrt(4)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     carver.called_functions()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     carver.arguments('my_sqrt')
 
+### Synthesizing Calls
 
-# ### Synthesizing Calls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Synthesizing Calls')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt_miner = CallGrammarMiner(carver)
     my_sqrt_grammar = my_sqrt_miner.mine_call_grammar()
     my_sqrt_grammar
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     fuzzer = GrammarCoverageFuzzer(my_sqrt_grammar)
     fuzzer.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     eval(fuzzer.fuzz())
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
-
 
 
 
@@ -839,16 +816,14 @@ class ResultCarver(CallCarver):
         # events
         return self.traceit
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ResultCarver(log=True) as result_carver:
         my_sqrt(2)
 
+#### Part 1: Store function results
 
-# #### Part 1: Store function results
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 1: Store function results')
-
 
 
 
@@ -891,17 +866,15 @@ class ResultCarver(CallCarver):
         # events
         return self.traceit
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ResultCarver(log=True) as result_carver:
         my_sqrt(2)
     result_carver._results
 
+#### Part 2: Access results
 
-# #### Part 2: Access results
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 2: Access results')
-
 
 
 
@@ -910,20 +883,18 @@ class ResultCarver(ResultCarver):
         key = simple_call_string(function_name, arguments)
         return self._results[key]
 
-# #### Part 3: Produce assertions
+#### Part 3: Produce assertions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 3: Produce assertions')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ResultCarver() as webbrowser_result_carver:
         webbrowser("http://www.example.com")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for function_name in ["urllib.parse.urlparse", "urllib.parse.urlsplit"]:
         for arguments in webbrowser_result_carver.arguments(function_name):
             try:
@@ -933,10 +904,9 @@ if __name__ == "__main__":
             except Exception:
                 continue
 
-
 from urllib.parse import SplitResult, ParseResult, urlparse, urlsplit
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert urlparse(
         url='http://www.example.com',
         scheme='',
@@ -957,11 +927,9 @@ if __name__ == "__main__":
             query='',
         fragment='')
 
+### Exercise 2: Abstracting Arguments
 
-# ### Exercise 2: Abstracting Arguments
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Abstracting Arguments')
-
 
 
