@@ -311,7 +311,7 @@ ZIP_OPTIONS = -r
 # Default target is to build everything needed for publishing,
 # such that we can run "make -k" in a loop
 .PHONY: chapters web default
-web default: html code test-code test-imports test-packages test-types slides
+web default: html code test-code test-imports test-packages slides
 chapters: html
 
 # The book is recreated after any change to any source
@@ -908,7 +908,7 @@ check-types: test-types
 	fi
 
 .PHONY: run
-run: check-imports check-standard-imports check-package check-types check-code
+run: check-imports check-standard-imports check-package check-code
 
 # Todo checks
 check-todo todo:
