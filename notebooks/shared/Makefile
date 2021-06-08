@@ -522,7 +522,7 @@ check-bib-python: .$(BIB).python
 check-bib-biber: .$(BIB).biber
 .$(BIB).biber: $(BIB)
 	@echo "Checking $(BIB) for LaTeX usage with Biber"
-	@if which $(BIBER); then $(BIBER) --tool --validate-datamodel --quiet $(BIB); else :; fi
+	@if which $(BIBER) > /dev/null; then $(BIBER) --tool --validate-datamodel --quiet $(BIB); else :; fi
 	@$(RM) fuzzingbook_bibertool.bib fuzzingbook.bib.blg
 	@touch .$(BIB).biber
 

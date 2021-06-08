@@ -392,7 +392,7 @@ def add_links_to_imports(contents, html_file):
             link = 'https://github.com/google/diff-match-patch'
         elif module == 'easyplotly':
             link = 'https://mwouts.github.io/easyplotly/'
-        elif module == 'numpy':
+        elif module.startswith('numpy'):
             link = 'https://numpy.org/'
         elif module.startswith('matplotlib'):
             link = 'https://matplotlib.org/'
