@@ -394,6 +394,10 @@ def add_links_to_imports(contents, html_file):
             link = 'https://mwouts.github.io/easyplotly/'
         elif module.startswith('numpy'):
             link = 'https://numpy.org/'
+        elif module.startswith('networkx'):
+            link = 'https://networkx.org/'
+        elif module.startswith('mpl_toolkits'):
+            link = 'https://matplotlib.org/stable/api/toolkits/'
         elif module.startswith('matplotlib'):
             link = 'https://matplotlib.org/'
         elif module.startswith('plotly'):
@@ -404,7 +408,7 @@ def add_links_to_imports(contents, html_file):
             link = 'https://scikit-learn.org/'
         elif module.startswith('z3'):
             link = 'https://github.com/Z3Prover/z3#readme'
-        elif module in ['ep', 'go', 'plt', 'np', 'mtick']:
+        elif module in ['ep', 'go', 'plt', 'np', 'mtick', 'nx']:
             link = None  # aliases
         elif module == 'cProfile':
             link = 'https://docs.python.org/3/library/profile.html'
