@@ -8,6 +8,6 @@
 
 import random
 
-def set_fixed_seed(seed=2001):
+def set_fixed_seed(seed: int = 2001) -> None:
     # print("Setting fixed seed to", seed)
     random.seed(seed)

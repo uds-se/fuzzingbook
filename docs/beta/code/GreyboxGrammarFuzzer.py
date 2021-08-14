@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Greybox Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
-# Last change: 2020-10-13 15:12:20+02:00
+# Last change: 2021-06-02 17:48:08+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,45 +27,61 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Greybox Fuzzing with Grammars
 
-# # Greybox Fuzzing with Grammars
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python GreyboxGrammarFuzzer.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.GreyboxGrammarFuzzer import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Greybox Fuzzing with Grammars"
+at https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Greybox Fuzzing with Grammars
+# =============================
+
+if __name__ == '__main__':
     print('# Greybox Fuzzing with Grammars')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
+from .GreyboxFuzzer import Mutator, Seed, PowerSchedule, MutationFuzzer, GreyboxFuzzer
+from .MutationFuzzer import FunctionCoverageRunner
 
-if __package__ is None or __package__ == "":
-    from GreyboxFuzzer import Mutator, Seed, PowerSchedule, MutationFuzzer, GreyboxFuzzer
-else:
-    from .GreyboxFuzzer import Mutator, Seed, PowerSchedule, MutationFuzzer, GreyboxFuzzer
-
-if __package__ is None or __package__ == "":
-    from MutationFuzzer import FunctionCoverageRunner
-else:
-    from .MutationFuzzer import FunctionCoverageRunner
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Mutator().mutate("Hello World")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     population = [Seed("A"), Seed("B"), Seed("C")]
     schedule = PowerSchedule()
     hits = {
@@ -80,25 +96,23 @@ if __name__ == "__main__":
 
     hits
 
-
 from html.parser import HTMLParser
 
 def my_parser(inp):
     parser = HTMLParser()
     parser.feed(inp)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     runner = FunctionCoverageRunner(my_parser)
     runner.run("Hello World")
     cov = runner.coverage()
 
     list(cov)[:5] # Print 5 statements covered in HTMLParser
 
-
 import time
 import random
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     n = 5000
     seed_input = " " # empty seed
     runner = FunctionCoverageRunner(my_parser)
@@ -110,16 +124,14 @@ if __name__ == "__main__":
 
     "It took the fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     "During this fuzzing campaign, we covered %d statements." % len(runner.coverage())
 
+## Building a Keyword Dictionary
+## -----------------------------
 
-# ## Building a Keyword Dictionary
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Building a Keyword Dictionary')
-
 
 
 
@@ -135,7 +147,7 @@ class DictMutator(Mutator):
         random_keyword = random.choice(self.dictionary)
         return s[:pos] + random_keyword + s[pos:]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     runner = FunctionCoverageRunner(my_parser)
     dict_mutator = DictMutator(["<a>","</a>","<a/>", "='a'"])
     dict_fuzzer = GreyboxFuzzer([seed_input], dict_mutator, PowerSchedule())
@@ -146,22 +158,15 @@ if __name__ == "__main__":
 
     "It took the fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     "During this fuzzing campaign, we covered %d statements." % len(runner.coverage())
 
+from .Coverage import population_coverage
 
-if __package__ is None or __package__ == "":
-    from Coverage import population_coverage
-else:
-    from .Coverage import population_coverage
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     _, dict_cov = population_coverage(dict_fuzzer.inputs, my_parser)
     _, fuzz_cov = population_coverage(fuzzer.inputs, my_parser)
     line_dict, = plt.plot(dict_cov, label="With Dictionary")
@@ -172,38 +177,31 @@ if __name__ == "__main__":
     plt.xlabel('# of inputs')
     plt.ylabel('lines covered');
 
+## Fuzzing with Input Fragments
+## ----------------------------
 
-# ## Fuzzing with Input Fragments
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Fuzzing with Input Fragments')
 
 
 
+### Parsing and Recombining JavaScript, or How to Make 50,000 USD in Four Weeks
 
-# ### Parsing and Recombining JavaScript, or How to Make 50,000 USD in Four Weeks
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Parsing and Recombining JavaScript, or How to Make 50,000 USD in Four Weeks')
 
 
 
+### Parsing and Recombining HTML
 
-# ### Parsing and Recombining HTML
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Parsing and Recombining HTML')
-
 
 
 
 import string
 
-if __package__ is None or __package__ == "":
-    from Grammars import is_valid_grammar, srange
-else:
-    from .Grammars import is_valid_grammar, srange
-
+from .Grammars import is_valid_grammar, srange
 
 XML_TOKENS = {"<id>","<text>"}
 
@@ -223,33 +221,22 @@ XML_GRAMMAR = {
     "<letter_space>":      srange(string.ascii_letters + string.digits +"\""+"'"+" "+"\t"),
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert is_valid_grammar(XML_GRAMMAR)
 
+from .Parser import EarleyParser
+from .GrammarFuzzer import display_tree
 
-if __package__ is None or __package__ == "":
-    from Parser import EarleyParser
-else:
-    from .Parser import EarleyParser
-
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import display_tree
-else:
-    from .GrammarFuzzer import display_tree
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS)
 
     for tree in parser.parse("<html>Text</html>"):
         display_tree(tree)
 
+### Building the Fragment Pool
 
-# ### Building the Fragment Pool
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Building the Fragment Pool')
-
 
 
 
@@ -260,11 +247,7 @@ class FragmentMutator(Mutator):
         self.fragments = {k: [] for k in self.parser.cgrammar}
         super().__init__()
 
-if __package__ is None or __package__ == "":
-    from Parser import terminals
-else:
-    from .Parser import terminals
-
+from .Parser import terminals
 
 class FragmentMutator(FragmentMutator):
     def add_fragment(self, fragment):
@@ -305,13 +288,9 @@ class FragmentMutator(FragmentMutator):
             seed.has_structure = False
             signal.setitimer(signal.ITIMER_REAL, 0)
 
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import tree_to_string
-else:
-    from .GrammarFuzzer import tree_to_string
+from .GrammarFuzzer import tree_to_string
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     valid_seed = Seed("<html><header><title>Hello</title></header><body>World<br/></body></html>")
     fragment_mutator = FragmentMutator(EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS))
     fragment_mutator.add_to_fragment_pool(valid_seed)
@@ -321,12 +300,10 @@ if __name__ == "__main__":
         for f in fragment_mutator.fragments[key]:
             print("|-%s" % tree_to_string(f))
 
+### Fragment-Based Mutation
 
-# ### Fragment-Based Mutation
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Fragment-Based Mutation')
-
 
 
 
@@ -381,12 +358,11 @@ class FragmentMutator(FragmentMutator):
             return new_seed
         return seed
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     valid_seed = Seed("<html><header><title>Hello</title></header><body>World<br/></body></html>")
     lf_mutator = FragmentMutator(parser)
     print(valid_seed)
     lf_mutator.mutate(valid_seed)
-
 
 class FragmentMutator(FragmentMutator):
     def recursive_delete(self, fragment):
@@ -420,11 +396,10 @@ class FragmentMutator(FragmentMutator):
             else: return new_seed
         return seed
 
-# ### Fragment-Based Fuzzing
+### Fragment-Based Fuzzing
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Fragment-Based Fuzzing')
-
 
 
 
@@ -437,7 +412,7 @@ class LangFuzzer(MutationFuzzer):
             candidate = self.mutator.mutate(candidate)
         return candidate
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     n = 300
     runner = FunctionCoverageRunner(my_parser)
     mutator = FragmentMutator(EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS))
@@ -451,8 +426,7 @@ if __name__ == "__main__":
 
     "It took LangFuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     runner = FunctionCoverageRunner(my_parser)
     mutator = Mutator()
     schedule = PowerSchedule()
@@ -465,17 +439,11 @@ if __name__ == "__main__":
 
     "It took a blackbox fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     blackbox_coverage = len(runner.coverage())
     "During this fuzzing campaign, the blackbox fuzzer covered %d statements." % blackbox_coverage
 
-
-if __package__ is None or __package__ == "":
-    from Coverage import population_coverage
-else:
-    from .Coverage import population_coverage
-
+from .Coverage import population_coverage
 
 def print_stats(fuzzer, parser):
     coverage, _ = population_coverage(fuzzer.inputs, my_parser)
@@ -504,19 +472,16 @@ def print_stats(fuzzer, parser):
         100 * has_structure / len(fuzzer.inputs),
         len(coverage)))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_stats(langFuzzer, EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_stats(blackFuzzer, EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS))
 
+### Integration with Greybox Fuzzing
 
-# ### Integration with Greybox Fuzzing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Integration with Greybox Fuzzing')
-
 
 
 
@@ -542,7 +507,7 @@ class GreyboxGrammarFuzzer(GreyboxFuzzer):
                 candidate = self.mutator.mutate(candidate)
         return candidate
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     runner = FunctionCoverageRunner(my_parser)
     byte_mutator = Mutator()
     tree_mutator = FragmentMutator(EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS))
@@ -556,28 +521,25 @@ if __name__ == "__main__":
 
     "It took the greybox grammar fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_stats(gg_fuzzer, EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS))
 
+## Mutating Invalid Seeds
+## ----------------------
 
-# ## Mutating Invalid Seeds
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Mutating Invalid Seeds')
 
 
 
+### Determining Symbol Regions
 
-# ### Determining Symbol Regions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Determining Symbol Regions')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     invalid_seed = Seed("<html><body><i>World</i><br/>>/body></html>")
     parser = EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS)
     table = parser.chart_parse(invalid_seed.data, parser.start_symbol())
@@ -585,26 +547,22 @@ if __name__ == "__main__":
         print(column)
         print("---")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cols = [col for col in table if col.states]
     parsable = invalid_seed.data[:len(cols)-1]
 
     print("'%s'" % invalid_seed)
     parsable
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     validity = 100 * len(parsable) / len(invalid_seed.data)
 
     "%0.1f%% of the string can be parsed successfully." % validity
 
+### Region-based Mutation
 
-# ### Region-based Mutation
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Region-based Mutation')
-
 
 
 
@@ -629,14 +587,13 @@ class RegionMutator(FragmentMutator):
         else:
             seed.has_regions = False
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mutator = RegionMutator(parser)
     mutator.add_to_fragment_pool(invalid_seed)
     for symbol in invalid_seed.regions:
         print(symbol)
         for (s, e) in invalid_seed.regions[symbol]:
             print("|-(%d,%d) : %s" % (s, e, invalid_seed.data[s:e]))
-
 
 class RegionMutator(RegionMutator):
     def swap_fragment(self, seed):
@@ -678,7 +635,7 @@ class RegionMutator(RegionMutator):
         else:
             return super().delete_fragment(seed)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     simple_seed = Seed("<b>Text</b>")
     mutator = RegionMutator(parser)
     mutator.add_to_fragment_pool(simple_seed)
@@ -686,16 +643,14 @@ if __name__ == "__main__":
     print(invalid_seed)
     mutator.mutate(invalid_seed)
 
+### Region-Based Fuzzing
 
-# ### Region-Based Fuzzing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Region-Based Fuzzing')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     runner = FunctionCoverageRunner(my_parser)
     byte_mutator = Mutator()
     tree_mutator = RegionMutator(EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS))
@@ -710,7 +665,6 @@ if __name__ == "__main__":
     "It took the structural greybox fuzzer with region mutator\
      %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
 def print_more_stats(fuzzer, parser):
     print_stats(fuzzer, parser)
     validity = 0
@@ -724,15 +678,14 @@ def print_more_stats(fuzzer, parser):
         total += 1
     print("On average, %0.1f%% of a seed in the population can be successfully parsed." % (100 * validity / total))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_more_stats(regionFuzzer, parser)
 
+## Focusing on Valid Seeds
+## -----------------------
 
-# ## Focusing on Valid Seeds
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Focusing on Valid Seeds')
-
 
 
 
@@ -763,22 +716,20 @@ class AFLSmartSchedule(PowerSchedule):
             seed.energy = ((self.degree_of_validity(seed) / math.log(len(seed.data))) ** self.exponent
                            if len(seed.data) > 1 else 0)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     smart_schedule = AFLSmartSchedule(parser, 1)
     print("%11s: %s" % ("Entire seed", simple_seed))
     print("%11s: %s" % ("Parsable", smart_schedule.parsable(simple_seed)))
 
     "Degree of validity: %0.2f%%" % (100 * smart_schedule.degree_of_validity(simple_seed))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("%11s: %s" % ("Entire seed", invalid_seed))
     print("%11s: %s" % ("Parsable", smart_schedule.parsable(invalid_seed)))
 
     "Degree of validity: %0.2f%%" % (100 * smart_schedule.degree_of_validity(invalid_seed))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     runner = FunctionCoverageRunner(my_parser)
     byte_mutator = Mutator()
     tree_mutator = RegionMutator(EarleyParser(XML_GRAMMAR, tokens=XML_TOKENS))
@@ -792,55 +743,52 @@ if __name__ == "__main__":
 
     "It took AFLSmart %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_more_stats(aflsmart, parser)
 
+## Mining Seeds
+## ------------
 
-# ## Mining Seeds
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Mining Seeds')
 
 
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: The Big Greybox Fuzzer Shoot-Out
 
-# ### Exercise 1: The Big Greybox Fuzzer Shoot-Out
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: The Big Greybox Fuzzer Shoot-Out')
-
 
 

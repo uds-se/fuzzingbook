@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Reducing Failure-Inducing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2020-10-13 15:12:20+02:00
+# Last change: 2021-06-02 17:48:27+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,42 +27,100 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Reducing Failure-Inducing Inputs
 
-# # Reducing Failure-Inducing Inputs
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python Reducer.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.Reducer import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/Reducer.html
+
+A _reducer_ takes a failure-inducing input and reduces it to the minimum that still reproduces the failure.  This chapter provides `Reducer` classes that implement such reducers.
+
+Here is a simple example: An arithmetic expression causes an error in the Python interpreter:
+
+>>> !python -c 'x = 1 + 2 * 3 / 0'
+Traceback (most recent call last):
+  File "", line 1, in 
+ZeroDivisionError: division by zero
+
+
+Can we reduce this input to a minimum?  To use a `Reducer`, one first has to build a `Runner` whose outcome is `FAIL` if the precise error occurs.  We therefore build a `ZeroDivisionRunner` whose `run()` method will specifically return a `FAIL` outcome if a `ZeroDivisionError` occurs.
+
+>>> from Fuzzer import ProgramRunner
+>>> class ZeroDivisionRunner(ProgramRunner):
+>>>     """Make outcome 'FAIL' if ZeroDivisionError occurs"""
+>>>     def run(self, inp=""):
+>>>         result, outcome = super().run(inp)
+>>>         if result.stderr.find('ZeroDivisionError') >= 0:
+>>>             outcome = 'FAIL'
+>>>         return result, outcome
+
+If we feed this expression into a `ZeroDivisionRunner`, it will produce an outcome of `FAIL` as designed.
+
+>>> python_input = "x = 1 + 2 * 3 / 0"
+>>> python_runner = ZeroDivisionRunner("python")
+>>> result, outcome = python_runner.run(python_input)
+>>> outcome
+'FAIL'
+
+Delta Debugging is a simple and robust reduction algorithm.  We can tie a `DeltaDebuggingReducer` to this runner, and have it determine the substring that causes the `python` program to fail:
+
+>>> dd = DeltaDebuggingReducer(python_runner)
+>>> dd.reduce(python_input)
+'3/0'
+
+The input is reduced to the maximum: We get the essence of the division by zero.
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Reducing Failure-Inducing Inputs"
+at https://www.fuzzingbook.org/html/Reducer.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Reducing Failure-Inducing Inputs
+# ================================
+
+if __name__ == '__main__':
     print('# Reducing Failure-Inducing Inputs')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## Why Reducing?
+## -------------
 
-# ## Why Reducing?
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Why Reducing?')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
-
-if __package__ is None or __package__ == "":
-    from Fuzzer import RandomFuzzer, Runner
-else:
-    from .Fuzzer import RandomFuzzer, Runner
-
+from .Fuzzer import RandomFuzzer, Runner
 
 import re
 
@@ -75,7 +133,7 @@ class MysteryRunner(Runner):
         else:
             return (inp, Runner.PASS)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystery = MysteryRunner()
     random_fuzzer = RandomFuzzer()
     while True:
@@ -84,72 +142,61 @@ if __name__ == "__main__":
         if outcome == mystery.FAIL:
             break
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     failing_input = result
     failing_input
 
+## Manual Input Reduction
+## ----------------------
 
-# ## Manual Input Reduction
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Manual Input Reduction')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     failing_input
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     half_length = len(failing_input) // 2   # // is integer division
     first_half = failing_input[:half_length]
     mystery.run(first_half)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     second_half = failing_input[half_length:]
     mystery.run(second_half)
 
+## Delta Debugging
+## ---------------
 
-# ## Delta Debugging
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Delta Debugging')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     quarter_length = len(failing_input) // 4
     input_without_first_quarter = failing_input[quarter_length:]
     mystery.run(input_without_first_quarter)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     input_without_first_and_second_quarter = failing_input[quarter_length * 2:]
     mystery.run(input_without_first_and_second_quarter)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     second_half
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     input_without_first_and_second_quarter
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     input_without_first_and_third_quarter = failing_input[quarter_length:
                                                           quarter_length * 2] + failing_input[quarter_length * 3:]
     mystery.run(input_without_first_and_third_quarter)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     input_without_first_and_fourth_quarter = failing_input[quarter_length:quarter_length * 3]
     mystery.run(input_without_first_and_fourth_quarter)
-
 
 class Reducer(object):
     def __init__(self, runner, log_test=False):
@@ -216,44 +263,33 @@ class DeltaDebuggingReducer(CachingReducer):
 
         return inp
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     dd_reducer = DeltaDebuggingReducer(mystery, log_test=True)
     dd_reducer.reduce(failing_input)
 
+## Grammar-Based Input Reduction
+## -----------------------------
 
-# ## Grammar-Based Input Reduction
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Grammar-Based Input Reduction')
 
 
 
+### Lexical Reduction vs. Syntactic Rules
 
-# ### Lexical Reduction vs. Syntactic Rules
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Lexical Reduction vs. Syntactic Rules')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     expr_input = "1 + (2 * 3)"
     dd_reducer = DeltaDebuggingReducer(mystery, log_test=True)
     dd_reducer.reduce(expr_input)
 
+from .Grammars import EXPR_GRAMMAR
 
-if __package__ is None or __package__ == "":
-    from Grammars import EXPR_GRAMMAR
-else:
-    from .Grammars import EXPR_GRAMMAR
-
-
-if __package__ is None or __package__ == "":
-    from Parser import EarleyParser  # minor dependency
-else:
-    from .Parser import EarleyParser  # minor dependency
-
+from .Parser import EarleyParser  # minor dependency
 
 class EvalMysteryRunner(MysteryRunner):
     def __init__(self):
@@ -267,92 +303,74 @@ class EvalMysteryRunner(MysteryRunner):
 
         return super().run(inp)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     eval_mystery = EvalMysteryRunner()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dd_reducer = DeltaDebuggingReducer(eval_mystery, log_test=True)
     dd_reducer.reduce(expr_input)
 
+### A Grammmar-Based Reduction Approach
 
-# ### A Grammmar-Based Reduction Approach
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### A Grammmar-Based Reduction Approach')
 
 
 
+from .GrammarFuzzer import all_terminals, expansion_to_children, display_tree
 
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import all_terminals, expansion_to_children, display_tree
-else:
-    from .GrammarFuzzer import all_terminals, expansion_to_children, display_tree
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     derivation_tree, *_ = EarleyParser(EXPR_GRAMMAR).parse(expr_input)
     display_tree(derivation_tree)
 
+### Simplifying by Replacing Subtrees
 
-# ### Simplifying by Replacing Subtrees
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Simplifying by Replacing Subtrees')
-
 
 
 
 import copy
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     new_derivation_tree = copy.deepcopy(derivation_tree)
     # We really should have some query language
     sub_expr_tree = new_derivation_tree[1][0][1][2]
     display_tree(sub_expr_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     new_derivation_tree[1][0] = sub_expr_tree
     display_tree(new_derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_terminals(new_derivation_tree)
 
+### Simplifying by Alternative Expansions
 
-# ### Simplifying by Alternative Expansions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Simplifying by Alternative Expansions')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     term_tree = new_derivation_tree[1][0][1][0][1][0][1][1][1][0]
     display_tree(term_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     shorter_term_tree = term_tree[1][2]
     display_tree(shorter_term_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     new_derivation_tree[1][0][1][0][1][0][1][1][1][0] = shorter_term_tree
     display_tree(new_derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_terminals(new_derivation_tree)
 
+### A Class for Reducing with Grammars
 
-# ### A Class for Reducing with Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### A Class for Reducing with Grammars')
-
 
 
 
@@ -365,20 +383,18 @@ class GrammarReducer(CachingReducer):
         self.log_reduce = log_reduce
         self.try_all_combinations = False
 
-# ### A Few Helpers
+### A Few Helpers
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### A Few Helpers')
-
 
 
 
 def tree_list_to_string(q):
     return "[" + ", ".join([all_terminals(tree) for tree in q]) + "]"
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree_list_to_string([derivation_tree, derivation_tree])
-
 
 def possible_combinations(list_of_lists):
     if len(list_of_lists) == 0:
@@ -394,17 +410,15 @@ def possible_combinations(list_of_lists):
                 ret.append(new_combo)
     return ret
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     possible_combinations([[1, 2], ['a', 'b']])
-
 
 def number_of_nodes(tree):
     (symbol, children) = tree
     return 1 + sum([number_of_nodes(c) for c in children])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     number_of_nodes(derivation_tree)
-
 
 def max_height(tree):
     (symbol, children) = tree
@@ -412,23 +426,20 @@ def max_height(tree):
         return 1
     return 1 + max([max_height(c) for c in children])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     max_height(derivation_tree)
 
+### Simplification Strategies
 
-# ### Simplification Strategies
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Simplification Strategies')
 
 
 
+#### Finding Subtrees
 
-# #### Finding Subtrees
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Finding Subtrees')
-
 
 
 
@@ -452,27 +463,23 @@ class GrammarReducer(GrammarReducer):
 
         return ret
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_reducer = GrammarReducer(
         mystery,
         EarleyParser(EXPR_GRAMMAR),
         log_reduce=True)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_terminals(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     [all_terminals(t) for t in grammar_reducer.subtrees_with_symbol(
         derivation_tree, "<term>")]
 
+#### Alternate Expansions
 
-# #### Alternate Expansions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Alternate Expansions')
-
 
 
 
@@ -515,34 +522,29 @@ class GrammarReducer(GrammarReducer):
 
         return reductions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_reducer = GrammarReducer(
         mystery,
         EarleyParser(EXPR_GRAMMAR),
         log_reduce=True)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_terminals(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_reducer.try_all_combinations = True
     print([all_terminals(t)
            for t in grammar_reducer.alternate_reductions(derivation_tree, "<term>")])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_reducer.try_all_combinations = False
     [all_terminals(t) for t in grammar_reducer.alternate_reductions(
         derivation_tree, "<term>")]
 
+#### Both Strategies Together
 
-# #### Both Strategies Together
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Both Strategies Together')
-
 
 
 
@@ -560,32 +562,27 @@ class GrammarReducer(GrammarReducer):
 
         return unique_reductions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_reducer = GrammarReducer(
         mystery,
         EarleyParser(EXPR_GRAMMAR),
         log_reduce=True)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_terminals(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     reductions = grammar_reducer.symbol_reductions(derivation_tree, "<expr>")
     tree_list_to_string([r for r in reductions])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     reductions = grammar_reducer.symbol_reductions(derivation_tree, "<term>")
     tree_list_to_string([r for r in reductions])
 
+### The Reduction Strategy
 
-# ### The Reduction Strategy
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### The Reduction Strategy')
-
 
 
 
@@ -656,55 +653,46 @@ class GrammarReducer(GrammarReducer):
         self.reduce_tree(tree)
         return all_terminals(tree)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     expr_input
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_reducer = GrammarReducer(
         eval_mystery,
         EarleyParser(EXPR_GRAMMAR),
         log_test=True)
     grammar_reducer.reduce(expr_input)
 
+### A Depth-Oriented Strategy
 
-# ### A Depth-Oriented Strategy
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### A Depth-Oriented Strategy')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_reducer = GrammarReducer(
         mystery,
         EarleyParser(EXPR_GRAMMAR),
         log_reduce=True)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     all_terminals(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     [all_terminals(t) for t in grammar_reducer.subtrees_with_symbol(
         derivation_tree, "<term>", depth=1)]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     [all_terminals(t) for t in grammar_reducer.subtrees_with_symbol(
         derivation_tree, "<term>", depth=2)]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     [all_terminals(t) for t in grammar_reducer.subtrees_with_symbol(
         derivation_tree, "<term>", depth=3)]
-
 
 class GrammarReducer(GrammarReducer):
     def reduce_tree(self, tree):
@@ -717,85 +705,63 @@ class GrammarReducer(GrammarReducer):
                 depth += 1   # Extend search for subtrees
         return tree        
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_reducer = GrammarReducer(
         mystery,
         EarleyParser(EXPR_GRAMMAR),
         log_test=True)
     grammar_reducer.reduce(expr_input)
 
+### Comparing Strategies
 
-# ### Comparing Strategies
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Comparing Strategies')
 
 
 
+from .GrammarFuzzer import GrammarFuzzer
 
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer
-else:
-    from .GrammarFuzzer import GrammarFuzzer
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     long_expr_input = GrammarFuzzer(EXPR_GRAMMAR, min_nonterminals=100).fuzz()
     long_expr_input
 
+from .Timer import Timer
 
-if __package__ is None or __package__ == "":
-    from Timer import Timer
-else:
-    from .Timer import Timer
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_reducer = GrammarReducer(eval_mystery, EarleyParser(EXPR_GRAMMAR))
     with Timer() as grammar_time:
         print(grammar_reducer.reduce(long_expr_input))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_reducer.tests
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar_time.elapsed_time()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dd_reducer = DeltaDebuggingReducer(eval_mystery)
     with Timer() as dd_time:
         print(dd_reducer.reduce(long_expr_input))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dd_reducer.tests
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dd_time.elapsed_time()
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import os
-    os.system("python -c 'x = 1 + 2 * 3 / 0'")
+    os.system(f"python -c 'x = 1 + 2 * 3 / 0'")
 
-
-if __package__ is None or __package__ == "":
-    from Fuzzer import ProgramRunner
-else:
-    from .Fuzzer import ProgramRunner
-
+from .Fuzzer import ProgramRunner
 
 class ZeroDivisionRunner(ProgramRunner):
     """Make outcome 'FAIL' if ZeroDivisionError occurs"""
@@ -805,70 +771,65 @@ class ZeroDivisionRunner(ProgramRunner):
             outcome = 'FAIL'
         return result, outcome
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     python_input = "x = 1 + 2 * 3 / 0"
     python_runner = ZeroDivisionRunner("python")
     result, outcome = python_runner.run(python_input)
     outcome
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dd = DeltaDebuggingReducer(python_runner)
     dd.reduce(python_input)
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: Mutation-Based Fuzzing with Reduction
 
-# ### Exercise 1: Mutation-Based Fuzzing with Reduction
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: Mutation-Based Fuzzing with Reduction')
 
 
 
+### Exercise 2: Reduction by Production
 
-# ### Exercise 2: Reduction by Production
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Reduction by Production')
 
 
 
+### Exercise 3: The Big Reduction Shoot-Out
 
-# ### Exercise 3: The Big Reduction Shoot-Out
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 3: The Big Reduction Shoot-Out')
-
 
 

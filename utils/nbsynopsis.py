@@ -14,8 +14,33 @@ from IPython.core.interactiveshell import InteractiveShell
 import nbformat
 import argparse
 import base64
+import shutil
 
 SYNOPSIS_TITLE = "## Synopsis"
+
+RXTERM = re.compile('\x1b' + r'\[[^a-zA-Z]*[a-zA-Z]')
+def unterm(text):
+    """Remove terminal escape commands such as <ESC>[34m"""
+    return RXTERM.sub('', text)
+    
+def convert(svg_filename, png_filename):
+    """Convert `svg_filename` into `png_filename`."""
+
+    if os.path.exists('/Applications/Inkscape.app/'):
+        # Inkscape on a Mac
+        os.system(f"/Applications/Inkscape.app/Contents/MacOS/inkscape -d 300 '{svg_filename}' --export-filename '{png_filename}'")
+
+    elif shutil.which('inkscape'):
+        # Inkscape on Linux
+        os.system(f"inkscape -d 300 '{svg_filename}' --export-filename '{png_filename}'")
+
+    elif shutil.which('convert'):
+        # ImageMagick anywhere
+        os.system(f"convert -density 300 '{svg_filename}' '{png_filename}'")
+
+    else:
+        raise ValueError("Please install Inkscape (preferred) or ImageMagick")
+
 
 def notebook_synopsis(notebook_name):
     notebook_path = notebook_name
@@ -88,12 +113,18 @@ and then make use of the following features.
                             with open(svg_filename, "w") as f:
                                 f.write(svg)
                             print("Creating", png_filename)
-                            os.system('convert -density 300 ' + svg_filename + ' ' + png_filename)
+                            
+                            convert(svg_filename, png_filename)
+                            
                             if 'RENDER_HTML' in os.environ:
                                 # Render all HTML and SVG into PNG
-                                text = "![](" + 'PICS/' + png_basename + ')\n'
+                                pics_name = png_basename
                             else:
-                                text = "![](" + 'PICS/' + svg_basename + ')\n'
+                                pics_name = svg_basename
+
+                            text = ("```\n" + 
+                            '![](' +  'PICS/' + pics_name + ')\n' +
+                            '```\n')
 
                     # PNG output
                     if text is None:
@@ -116,26 +147,37 @@ and then make use of the following features.
                             print("Creating", png_filename)
                             with open(png_filename, "wb") as f:
                                 f.write(base64.b64decode(png, validate=True))
-                            text = "![](" + 'PICS/' + png_basename + ')\n'
+                            text = "```\n![](" + 'PICS/' + png_basename + ')\n```\n'
 
-                    # Text output
+                    # Markdown output
                     if text is None:
                         try:
-                            text = output.text
+                            text = "```\n" + output.data['text/markdown'] + "\n```\n"
+                        except KeyError:
+                            pass
                         except AttributeError:
                             pass
-                    
+
                     # HTML output
                     if text is None:
                         try:
                             text = "```\n" + output.data['text/html'] + "\n```\n"
                         except KeyError:
                             pass
+                        except AttributeError:
+                            pass
+
+                    # Text output
+                    if text is None:
+                        try:
+                            text = unterm(output.text)
+                        except AttributeError:
+                            pass
 
                     # Data output
                     if text is None:
                         try:
-                            text = output.data['text/plain'] + '\n'
+                            text = unterm(output.data['text/plain'] + '\n')
                         except KeyError:
                             pass
                     
@@ -150,7 +192,9 @@ and then make use of the following features.
             else:
                 synopsis += cell.source + "\n\n"
     
-    synopsis = synopsis.replace("```\n```python\n", "")
+    synopsis = synopsis.replace("```python\n```\n", "\n")
+    synopsis = synopsis.replace("```\n```python\n", "\n")
+    synopsis = synopsis.replace("```\n```\n", "\n")
 
     return synopsis
     
@@ -199,7 +243,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--project", help="project name", default="fuzzingbook")
     parser.add_argument("--update", action='store_true', 
-                        help="Update synopis section")
+                        help="Update synopsis section")
     parser.add_argument("notebooks", nargs='*', help="notebooks to extract/update synopsis for")
     args = parser.parse_args()
 

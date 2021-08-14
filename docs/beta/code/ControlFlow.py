@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Control Flow Graph" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2020-10-13 15:12:26+02:00
+# Last change: 2021-06-02 17:56:47+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,39 +27,63 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Control Flow Graph
 
-# # Control Flow Graph
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python ControlFlow.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.ControlFlow import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/ControlFlow.html
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Control Flow Graph"
+at https://www.fuzzingbook.org/html/ControlFlow.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Control Flow Graph
+# ==================
+
+if __name__ == '__main__':
     print('# Control Flow Graph')
 
 
 
+## Control Flow Graph
+## ------------------
 
-# ## Control Flow Graph
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Control Flow Graph')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
-
 
 import ast
 import re
 import astor
 from graphviz import Source, Graph, Digraph
 
-# ### Registry
+### Registry
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Registry')
-
 
 
 
@@ -86,11 +110,10 @@ def register_node(node):
 def get_registry():
     return dict(REGISTRY)
 
-# ### CFGNode
+### CFGNode
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### CFGNode')
-
 
 
 
@@ -179,11 +202,10 @@ def register_node(node):
     node.rid = get_registry_idx()
     REGISTRY[node.rid] = node
 
-# ### PyCFG
+### PyCFG
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### PyCFG')
-
 
 
 
@@ -549,11 +571,10 @@ class PyCFG(PyCFG):
         self.update_functions()
         self.link_functions()
 
-# ### Supporting Functions
+### Supporting Functions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Supporting Functions')
-
 
 
 
@@ -674,19 +695,17 @@ def unhack(v):
         v = re.sub(r'^_%s:' % i, '%s:' % i, v)
     return v
 
-# ### Examples
+### Examples
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Examples')
 
 
 
+#### check_triangle
 
-# #### check_triangle
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### check_triangle')
-
 
 
 
@@ -710,19 +729,16 @@ def check_triangle(a,b,c):
 
 import inspect
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     graph = to_graph(gen_cfg(inspect.getsource(check_triangle)))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Source(graph)
 
+#### cgi_decode
 
-# #### cgi_decode
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### cgi_decode')
-
 
 
 
@@ -753,19 +769,16 @@ def cgi_decode(s):
         i += 1
     return t
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     graph = to_graph(gen_cfg(inspect.getsource(cgi_decode)))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Source(graph)
 
+#### gcd
 
-# #### gcd
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### gcd')
-
 
 
 
@@ -781,13 +794,11 @@ def gcd(a, b):
         b: int = c % b
     return a
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     graph = to_graph(gen_cfg(inspect.getsource(gcd)))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Source(graph)
-
 
 def compute_gcd(x, y): 
     if x > y: 
@@ -800,19 +811,16 @@ def compute_gcd(x, y):
               
     return gcd 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     graph = to_graph(gen_cfg(inspect.getsource(compute_gcd)))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Source(graph)
 
+#### fib
 
-# #### fib
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### fib')
-
 
 
 
@@ -822,19 +830,16 @@ def fib(n,):
         l.append(l[-1]+l[-2])
     return l
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     graph = to_graph(gen_cfg(inspect.getsource(fib)))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Source(graph)
 
+#### quad_solver
 
-# #### quad_solver
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### quad_solver')
-
 
 
 
@@ -855,19 +860,17 @@ def quad_solver(a, b, c):
         return (r1, r2)
     return ((r1,i1), (r2,i2))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     graph = to_graph(gen_cfg(inspect.getsource(quad_solver)))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Source(graph)
 
+## Call Graph
+## ----------
 
-# ## Call Graph
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Call Graph')
-
 
 
 
@@ -875,11 +878,10 @@ import os
 import networkx as nx
 from graphviz import Source
 
-# ### Call Graph Helpers
+### Call Graph Helpers
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Call Graph Helpers')
-
 
 
 
@@ -900,25 +902,23 @@ def get_callgraph(code, name="callgraph"):
         construct_callgraph(code, name)
     return nx.drawing.nx_pydot.read_dot(name + '.dot')
 
-# ### Example: Maze
+### Example: Maze
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Example: Maze')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     maze_string = """
-    +-+-----+
-    |X|     |
-    | | --+ |
-    | |   | |
-    | +-- | |
-    |     |#|
-    +-----+-+
-    """
-
++-+-----+
+|X|     |
+| | --+ |
+| |   | |
+| +-- | |
+|     |#|
++-----+-+
+"""
 
 def generate_print_maze(maze_string):
     return """
@@ -1002,33 +1002,29 @@ def generate_maze_code(maze, name="maze"):
 
     return code
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     maze_code = generate_maze_code(maze_string)
     exec(maze_code)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(maze("DDDDRRRRUULLUURRRRDDD")) # Appending one more 'D', you have reached the target.
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     callgraph(maze_code)
 
+## Cleanup
+## -------
 
-# ## Cleanup
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Cleanup')
-
 
 
 
 import shutil
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     if os.path.exists('callgraph.dot'):
         os.remove('callgraph.dot')
 
     if os.path.exists('callgraph.py'):
         os.remove('callgraph.py')
-

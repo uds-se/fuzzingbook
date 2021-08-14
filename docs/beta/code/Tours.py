@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Tours through the Book" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Tours.html
-# Last change: 2020-10-13 15:12:15+02:00
+# Last change: 2021-06-08 13:13:11+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,75 +27,99 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Tours through the Book
 
-# # Tours through the Book
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python Tours.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.Tours import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/Tours.html
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Tours through the Book"
+at https://www.fuzzingbook.org/html/Tours.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Tours through the Book
+# ======================
+
+if __name__ == '__main__':
     print('# Tours through the Book')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     from IPython.display import SVG
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     SVG(filename='PICS/Sitemap.svg')
 
+## The Pragmatic Programmer Tour
+## -----------------------------
 
-# ## The Pragmatic Programmer Tour
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## The Pragmatic Programmer Tour')
 
 
 
+## The Page-by-Page Tours
+## ----------------------
 
-# ## The Page-by-Page Tours
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## The Page-by-Page Tours')
 
 
 
+## The Undergraduate Tour
+## ----------------------
 
-# ## The Undergraduate Tour
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## The Undergraduate Tour')
 
 
 
+## The Graduate Tour
+## -----------------
 
-# ## The Graduate Tour
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## The Graduate Tour')
 
 
 
+## The Researcher Tour
+## -------------------
 
-# ## The Researcher Tour
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## The Researcher Tour')
 
 
 
+## The Author Tour
+## ---------------
 
-# ## The Author Tour
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## The Author Tour')
 
 
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
-
 
 

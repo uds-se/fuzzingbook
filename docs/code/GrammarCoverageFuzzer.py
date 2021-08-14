@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Grammar Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2019-12-21 22:21:21+01:00
+# Last change: 2021-06-04 14:55:54+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,65 +27,106 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Grammar Coverage
 
-# # Grammar Coverage
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python GrammarCoverageFuzzer.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.GrammarCoverageFuzzer import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
+
+This chapter introduces `GrammarCoverageFuzzer`, an efficient grammar fuzzer extending `GrammarFuzzer` from the [chapter on efficient grammar fuzzing](GrammarFuzzer.ipynb).  It strives to cover all expansions at least once.  In the following example, for instance, all digits in the area code are different, as are the digits in the line number:
+
+>>> from Grammars import US_PHONE_GRAMMAR
+>>> phone_fuzzer = GrammarCoverageFuzzer(US_PHONE_GRAMMAR)
+>>> phone_fuzzer.fuzz()
+'(521)383-0695'
+
+After fuzzing, the `expansion_coverage()` method returns a mapping of grammar expansions covered.
+
+>>> phone_fuzzer.expansion_coverage()
+{' -> ',
+ ' -> 0',
+ ' -> 1',
+ ' -> 2',
+ ' -> 3',
+ ' -> 5',
+ ' -> 6',
+ ' -> 8',
+ ' -> 9',
+ ' -> ',
+ ' -> 3',
+ ' -> 5',
+ ' -> ',
+ ' -> ()-',
+ ' -> '}
+
+Subsequent calls to `fuzz()` will go for further coverage (i.e., covering the other area code digits, for example); a call to `reset()` clears the recored coverage, starting anew.
+
+Since such coverage in inputs also yields higher code coverage, `GrammarCoverageFuzzer` is a recommended extension to `GrammarFuzzer`.
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Grammar Coverage"
+at https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Grammar Coverage
+# ================
+
+if __name__ == '__main__':
     print('# Grammar Coverage')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## Covering Grammar Elements
+## -------------------------
 
-# ## Covering Grammar Elements
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Covering Grammar Elements')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
+from .Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
+from .Grammars import is_valid_grammar, extend_grammar
 
-if __package__ is None or __package__ == "":
-    from Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
-else:
-    from .Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
-
-if __package__ is None or __package__ == "":
-    from Grammars import is_valid_grammar, extend_grammar
-else:
-    from .Grammars import is_valid_grammar, extend_grammar
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     EXPR_GRAMMAR["<factor>"]
 
+### Tracking Grammar Coverage
 
-# ### Tracking Grammar Coverage
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Tracking Grammar Coverage')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer, all_terminals, nonterminals, display_tree
-else:
-    from .GrammarFuzzer import GrammarFuzzer, all_terminals, nonterminals, display_tree
-
+from .GrammarFuzzer import GrammarFuzzer, all_terminals, nonterminals, display_tree
 
 import random
 
@@ -110,14 +151,12 @@ def expansion_key(symbol, expansion):
         expansion = all_terminals((symbol, children))
     return symbol + " -> " + expansion
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     expansion_key(START_SYMBOL, EXPR_GRAMMAR[START_SYMBOL][0])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     children = [("<expr>", None), (" + ", []), ("<term>", None)]
     expansion_key("<expr>", children)
-
 
 class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
     def _max_expansion_coverage(self, symbol, max_depth):
@@ -149,10 +188,9 @@ class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
 
         return cov
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     expr_fuzzer = TrackingGrammarCoverageFuzzer(EXPR_GRAMMAR)
     expr_fuzzer.max_expansion_coverage()
-
 
 class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
     def add_coverage(self, symbol, new_children):
@@ -172,31 +210,25 @@ class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
     def missing_expansion_coverage(self):
         return self.max_expansion_coverage() - self.expansion_coverage()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     digit_fuzzer = TrackingGrammarCoverageFuzzer(
         EXPR_GRAMMAR, start_symbol="<digit>", log=True)
     digit_fuzzer.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     digit_fuzzer.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     digit_fuzzer.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     digit_fuzzer.expansion_coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     digit_fuzzer.max_expansion_coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     digit_fuzzer.missing_expansion_coverage()
-
 
 def average_length_until_full_coverage(fuzzer):
     trials = 50
@@ -211,21 +243,18 @@ def average_length_until_full_coverage(fuzzer):
 
     return sum / trials
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     digit_fuzzer.log = False
     average_length_until_full_coverage(digit_fuzzer)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     expr_fuzzer = TrackingGrammarCoverageFuzzer(EXPR_GRAMMAR)
     average_length_until_full_coverage(expr_fuzzer)
 
+### Covering Grammar Expansions
 
-# ### Covering Grammar Expansions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Covering Grammar Expansions')
-
 
 
 
@@ -256,94 +285,77 @@ class SimpleGrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
         return TrackingGrammarCoverageFuzzer.choose_node_expansion(
             self, node, possible_children)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = SimpleGrammarCoverageFuzzer(EXPR_GRAMMAR, start_symbol="<digit>")
     f.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f.expansion_coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for i in range(7):
         print(f.fuzz(), end=" ")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f.missing_expansion_coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = SimpleGrammarCoverageFuzzer(EXPR_GRAMMAR)
     for i in range(10):
         print(f.fuzz())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f.missing_expansion_coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     average_length_until_full_coverage(SimpleGrammarCoverageFuzzer(EXPR_GRAMMAR))
 
+## Deep Foresight
+## --------------
 
-# ## Deep Foresight
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Deep Foresight')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     CGI_GRAMMAR
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = SimpleGrammarCoverageFuzzer(CGI_GRAMMAR)
     for i in range(10):
         print(f.fuzz())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f.missing_expansion_coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     CGI_GRAMMAR["<letter>"]
 
+### Determining Maximum per-Symbol Coverage
 
-# ### Determining Maximum per-Symbol Coverage
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Determining Maximum per-Symbol Coverage')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = SimpleGrammarCoverageFuzzer(EXPR_GRAMMAR)
     f.max_expansion_coverage('<integer>')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f.max_expansion_coverage('<digit>')
 
+### Determining yet Uncovered Children
 
-# ### Determining yet Uncovered Children
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Determining yet Uncovered Children')
-
 
 
 
@@ -363,26 +375,22 @@ class GrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
         new_cov -= self.expansion_coverage()   # -= is set subtraction
         return new_cov
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarCoverageFuzzer(EXPR_GRAMMAR, start_symbol="<digit>", log=True)
     f.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f.expansion_coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for expansion in EXPR_GRAMMAR["<digit>"]:
         children = f.expansion_to_children(expansion)
         print(expansion, f.new_child_coverage("<digit>", children))
 
+### Adaptive Lookahead
 
-# ### Adaptive Lookahead
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Adaptive Lookahead')
-
 
 
 
@@ -403,11 +411,10 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
         # All covered
         return None
 
-# ### All Together
+### All Together
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### All Together')
-
 
 
 
@@ -441,58 +448,49 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
 
         return index_map[new_children_index]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarCoverageFuzzer(EXPR_GRAMMAR, min_nonterminals=3)
     f.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f.max_expansion_coverage() - f.expansion_coverage()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     average_length_until_full_coverage(GrammarCoverageFuzzer(EXPR_GRAMMAR))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarCoverageFuzzer(CGI_GRAMMAR, min_nonterminals=5)
     while len(f.max_expansion_coverage() - f.expansion_coverage()) > 0:
         print(f.fuzz())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     average_length_until_full_coverage(TrackingGrammarCoverageFuzzer(CGI_GRAMMAR))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     average_length_until_full_coverage(SimpleGrammarCoverageFuzzer(CGI_GRAMMAR))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     average_length_until_full_coverage(GrammarCoverageFuzzer(CGI_GRAMMAR))
 
+## Coverage in Context
+## -------------------
 
-# ## Coverage in Context
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Coverage in Context')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     EXPR_GRAMMAR["<factor>"]
 
+### Extending Grammars for Context Coverage Manually
 
-# ### Extending Grammars for Context Coverage Manually
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Extending Grammars for Context Coverage Manually')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dup_expr_grammar = extend_grammar(EXPR_GRAMMAR,
                                       {
                                           "<factor>": ["+<factor>", "-<factor>", "(<expr>)", "<integer-1>.<integer-2>", "<integer>"],
@@ -507,35 +505,23 @@ if __name__ == "__main__":
                                       }
                                       )
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert is_valid_grammar(dup_expr_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarCoverageFuzzer(dup_expr_grammar, start_symbol="<factor>")
     for i in range(10):
         print(f.fuzz())
 
+### Extending Grammars for Context Coverage Programmatically
 
-# ### Extending Grammars for Context Coverage Programmatically
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Extending Grammars for Context Coverage Programmatically')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from Grammars import new_symbol, unreachable_nonterminals
-else:
-    from .Grammars import new_symbol, unreachable_nonterminals
-
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import expansion_to_children
-else:
-    from .GrammarFuzzer import expansion_to_children
-
+from .Grammars import new_symbol, unreachable_nonterminals
+from .GrammarFuzzer import expansion_to_children
 
 def duplicate_context(grammar, symbol, expansion=None, depth=float('inf')):
     """Duplicate an expansion within a grammar.
@@ -578,90 +564,73 @@ def _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen):
 
             grammar[symbol][i] = new_expansion
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     dup_expr_grammar = extend_grammar(EXPR_GRAMMAR)
     duplicate_context(dup_expr_grammar, "<factor>", "<integer>.<integer>")
     dup_expr_grammar
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarCoverageFuzzer(dup_expr_grammar, start_symbol="<factor>")
     for i in range(10):
         print(f.fuzz())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dup_expr_grammar = extend_grammar(EXPR_GRAMMAR)
     duplicate_context(dup_expr_grammar, "<factor>", "<integer>.<integer>", depth=1)
     dup_expr_grammar
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert is_valid_grammar(dup_expr_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dup_expr_grammar = extend_grammar(EXPR_GRAMMAR)
     duplicate_context(dup_expr_grammar, "<expr>")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert is_valid_grammar(dup_expr_grammar)
     len(dup_expr_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarCoverageFuzzer(dup_expr_grammar)
     len(f.max_expansion_coverage())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dup_expr_grammar = extend_grammar(EXPR_GRAMMAR)
     duplicate_context(dup_expr_grammar, "<expr>")
     duplicate_context(dup_expr_grammar, "<expr-1>")
     len(dup_expr_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarCoverageFuzzer(dup_expr_grammar)
     len(f.max_expansion_coverage())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dup_expr_grammar["<expr>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dup_expr_grammar["<term-1-1>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dup_expr_grammar["<factor-1-1>"]
 
+## Covering Code by Covering Grammars
+## ----------------------------------
 
-# ## Covering Code by Covering Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Covering Code by Covering Grammars')
 
 
 
+### CGI Grammars
 
-# ### CGI Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### CGI Grammars')
 
 
 
+from .Coverage import Coverage, cgi_decode
 
-if __package__ is None or __package__ == "":
-    from Coverage import Coverage, cgi_decode
-else:
-    from .Coverage import Coverage, cgi_decode
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov_max:
         cgi_decode('+')
         cgi_decode('%20')
@@ -671,8 +640,7 @@ if __name__ == "__main__":
         except:
             pass
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarCoverageFuzzer(CGI_GRAMMAR, max_nonterminals=2)
     coverages = {}
 
@@ -694,24 +662,20 @@ if __name__ == "__main__":
                 coverages[x] = []
             coverages[x].append(y)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     xs = list(coverages.keys())
     ys = [sum(coverages[x]) / len(coverages[x]) for x in coverages]
 
-
 # %matplotlib inline
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import matplotlib.ticker as mtick
 
-
-if __name__ == "__main__":
-    ax = plt.axes(label="coverage")
+if __name__ == '__main__':
+    ax = plt.axes(label="CGI coverage")
     ax.yaxis.set_major_formatter(mtick.PercentFormatter())
     ax.xaxis.set_major_formatter(mtick.PercentFormatter())
 
@@ -723,47 +687,39 @@ if __name__ == "__main__":
     plt.ylabel('code coverage (lines)')
     plt.scatter(xs, ys);
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     import numpy as np
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     np.corrcoef(xs, ys)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     from scipy.stats import spearmanr
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     spearmanr(xs, ys)
 
+### URL Grammars
 
-# ### URL Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### URL Grammars')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     try:
         from urlparse import urlparse      # Python 2
     except ImportError:
         from urllib.parse import urlparse  # Python 3
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov_max:
         urlparse("http://foo.bar/path")
         urlparse("https://foo.bar#fragment")
         urlparse("ftp://user:password@foo.bar?query=value")
         urlparse("ftps://127.0.0.1/?x=1&y=2")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarCoverageFuzzer(URL_GRAMMAR, max_nonterminals=2)
     coverages = {}
 
@@ -784,14 +740,12 @@ if __name__ == "__main__":
                 coverages[x] = []
             coverages[x].append(y)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     xs = list(coverages.keys())
     ys = [sum(coverages[x]) / len(coverages[x]) for x in coverages]
 
-
-if __name__ == "__main__":
-    ax = plt.axes(label="coverage")
+if __name__ == '__main__':
+    ax = plt.axes(label="URL coverage")
     ax.yaxis.set_major_formatter(mtick.PercentFormatter())
     ax.xaxis.set_major_formatter(mtick.PercentFormatter())
 
@@ -803,99 +757,86 @@ if __name__ == "__main__":
     plt.ylabel('code coverage (lines)')
     plt.scatter(xs, ys);
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     np.corrcoef(xs, ys)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     spearmanr(xs, ys)
 
+### Will this always work?
 
-# ### Will this always work?
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Will this always work?')
 
 
 
+#### Equivalent Elements
 
-# #### Equivalent Elements
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Equivalent Elements')
 
 
 
+#### Deep Data Processing
 
-# #### Deep Data Processing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Deep Data Processing')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+from .Grammars import US_PHONE_GRAMMAR
 
-if __package__ is None or __package__ == "":
-    from Grammars import US_PHONE_GRAMMAR
-else:
-    from .Grammars import US_PHONE_GRAMMAR
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     phone_fuzzer = GrammarCoverageFuzzer(US_PHONE_GRAMMAR)
     phone_fuzzer.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     phone_fuzzer.expansion_coverage()
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: Testing ls
 
-# ### Exercise 1: Testing ls
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: Testing ls')
-
 
 
 
@@ -907,15 +848,10 @@ LS_EBNF_GRAMMAR = {
                  ]
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert is_valid_grammar(LS_EBNF_GRAMMAR)
 
-
-if __package__ is None or __package__ == "":
-    from Grammars import convert_ebnf_grammar, srange
-else:
-    from .Grammars import convert_ebnf_grammar, srange
-
+from .Grammars import convert_ebnf_grammar, srange
 
 LS_EBNF_GRAMMAR = {
     '<start>': ['-<options>'],
@@ -923,19 +859,14 @@ LS_EBNF_GRAMMAR = {
     '<option>': srange("ABCFGHLOPRSTUW@abcdefghiklmnopqrstuwx1")
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert is_valid_grammar(LS_EBNF_GRAMMAR)
-
 
 LS_GRAMMAR = convert_ebnf_grammar(LS_EBNF_GRAMMAR)
 
-if __package__ is None or __package__ == "":
-    from Fuzzer import ProgramRunner
-else:
-    from .Fuzzer import ProgramRunner
+from .Fuzzer import ProgramRunner
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarCoverageFuzzer(LS_GRAMMAR, max_nonterminals=3)
     while len(f.max_expansion_coverage() - f.expansion_coverage()) > 0:
         invocation = f.fuzz()
@@ -945,11 +876,9 @@ if __name__ == "__main__":
         ls.run()
     print()
 
+### Exercise 2: Caching
 
-# ### Exercise 2: Caching
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Caching')
-
 
 

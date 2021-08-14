@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2019-12-21 16:38:57+01:00
+# Last change: 2021-06-08 13:13:28+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,28 +27,72 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Symbolic Fuzzing
 
-# # Symbolic Fuzzing
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python SymbolicFuzzer.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.SymbolicFuzzer import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/SymbolicFuzzer.html
+
+This chapter provides an implementation of a symbolic fuzzing engine `AdvancedSymbolicFuzzer`. The fuzzer uses symbolic execution to exhaustively explore paths in the program to a limited depth, and generate inputs that will reach these paths. Given a program to explore (`gcd` here), the fuzzer can be used as follows:
+
+>>> gcd_fuzzer = AdvancedSymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
+>>> for i in range(10):
+>>>     r = gcd_fuzzer.fuzz()
+>>>     print(r)
+{'a': 7, 'b': 5}
+{'a': -1, 'b': 0}
+{'a': 2, 'b': 7}
+{'a': 10, 'b': 9}
+{'a': 11, 'b': 21}
+{'a': 11, 'b': -11}
+{'a': 7, 'b': 6}
+{'a': -2, 'b': 0}
+{'a': 12, 'b': -12}
+{'a': 9, 'b': 2}
+
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Symbolic Fuzzing"
+at https://www.fuzzingbook.org/html/SymbolicFuzzer.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Symbolic Fuzzing
+# ================
+
+if __name__ == '__main__':
     print('# Symbolic Fuzzing')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## Obtaining Path Conditions for Coverage
+## --------------------------------------
 
-# ## Obtaining Path Conditions for Coverage
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Obtaining Path Conditions for Coverage')
-
 
 
 
@@ -70,40 +114,31 @@ def check_triangle(a: int, b: int, c: int) -> int:
         else:
             return "Isosceles"
 
-# ### The Control Flow Graph
+### The Control Flow Graph
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### The Control Flow Graph')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
-
-if __package__ is None or __package__ == "":
-    from ControlFlow import PyCFG, CFGNode, to_graph, gen_cfg
-else:
-    from .ControlFlow import PyCFG, CFGNode, to_graph, gen_cfg
-
+from .ControlFlow import PyCFG, CFGNode, to_graph, gen_cfg
 
 import inspect
 
-if __name__ == "__main__":
-    from graphviz import Source, Graph
-
+from graphviz import Source, Graph
 
 def show_cfg(fn, **kwargs):
     return Source(to_graph(gen_cfg(inspect.getsource(fn)), **kwargs))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     show_cfg(check_triangle)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     paths = {
         '<path 1>': ([1, 2, 3, 4, 5], 'Equilateral'),
         '<path 2>': ([1, 2, 3, 4, 7], 'Isosceles'),
@@ -113,7 +148,6 @@ if __name__ == "__main__":
         '<path 6>': ([1, 2, 11, 17], 'Isosceles'),
     }
 
-
 import z3
 
 def get_annotations(fn):
@@ -121,10 +155,9 @@ def get_annotations(fn):
     return ([(i.name, i.annotation)
              for i in sig.parameters.values()], sig.return_annotation)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     params, ret = get_annotations(check_triangle)
     params, ret
-
 
 SYM_VARS = {
     int: (
@@ -137,127 +170,98 @@ def get_symbolicparams(fn):
     return [SYM_VARS[typ][0](name)
             for name, typ in params], SYM_VARS[ret][0]('__return__')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     (a, b, c), r = get_symbolicparams(check_triangle)
     a, b, c, r
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.solve(a == b, a == c, b == c)
 
+from .ConcolicFuzzer import ArcCoverage  # minor dependency
 
-if __package__ is None or __package__ == "":
-    from ConcolicFuzzer import ArcCoverage  # minor dependency
-else:
-    from .ConcolicFuzzer import ArcCoverage  # minor dependency
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         assert check_triangle(0, 0, 0) == 'Equilateral'
     cov._trace, cov.arcs()
 
+### The CFG with Path Taken
 
-# ### The CFG with Path Taken
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### The CFG with Path Taken')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     show_cfg(check_triangle, arcs=cov.arcs())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.solve(a == b, a == c, z3.Not(b == c))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.solve(a == b, z3.Not(a == c))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         assert check_triangle(1, 1, 0) == 'Isosceles'
     [i for fn, i in cov._trace if fn == 'check_triangle']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     paths['<path 3>']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.solve(z3.Not(a == b), b != c, a == c)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     pre_condition = z3.And(a > 0, b > 0, c > 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.solve(pre_condition, z3.Not(a == b), b != c, a == c)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         assert check_triangle(1, 2, 1) == 'Isosceles'
     [i for fn, i in cov._trace if fn == 'check_triangle']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     paths['<path 4>']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.solve(pre_condition, z3.Not(a == b), b != c, z3.Not(a == c))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         assert check_triangle(3, 1, 2) == 'Scalene'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     paths['<path 5>']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.solve(pre_condition, z3.Not(a == b), z3.Not(b != c))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         assert check_triangle(2, 1, 1) == 'Isosceles'
     [i for fn, i in cov._trace if fn == 'check_triangle']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     paths['<path 6>']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     seen = [z3.And(a == 2, b == 1, c == 1)]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.solve(pre_condition, z3.Not(z3.Or(seen)), z3.Not(a == b), z3.Not(b != c))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     seen.append(z3.And(a == 1, b == 2, c == 2))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.solve(pre_condition, z3.Not(z3.Or(seen)), z3.Not(a == b), z3.Not(b != c))
 
+### Visualizing the Coverage
 
-# ### Visualizing the Coverage
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Visualizing the Coverage')
-
 
 
 
@@ -268,7 +272,7 @@ class ArcCoverage(ArcCoverage):
         for i, s in enumerate(src.split('\n')):
             print('%s %2d: %s' % ('#' if i + 1 in covered else ' ', i + 1, s))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         assert check_triangle(0, 0, 0) == 'Equilateral'
         assert check_triangle(1, 1, 0) == 'Isosceles'
@@ -276,16 +280,13 @@ if __name__ == "__main__":
         assert check_triangle(3, 1, 2) == 'Scalene'
         assert check_triangle(2, 1, 1) == 'Isosceles'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov.show_coverage(check_triangle)
 
+### Function Summaries
 
-# ### Function Summaries
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Function Summaries')
-
 
 
 
@@ -296,42 +297,35 @@ def abs_value(x: float) -> float:
         v: float = x
     return v
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     show_cfg(abs_value)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     (x,), r = get_symbolicparams(abs_value)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     l2_F = x < 0
     l2_T = z3.Not(x < 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v_0 = z3.Real('v_0')
     l3 = z3.And(l2_F, v_0 == -x)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v_1 = z3.Real('v_1')
     l5 = z3.And(l2_T, v_1 == x)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v = z3.Real('v')
     for s in [z3.And(l3, v == v_0), z3.And(l5, v == v_1)]:
         z3.solve(x != 0, s)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v = z3.Real('v')
     l6 = z3.Or(z3.And(l3, v == v_0), z3.And(l5, v == v_1))
     z3.solve(l6)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     s = z3.Solver()
     s.add(l6)
     for i in range(5):
@@ -345,8 +339,7 @@ if __name__ == "__main__":
         s.add(z3.Not(x == x_val))
     s
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     s.add(x < 0)
     for i in range(5):
         if s.check() == z3.sat:
@@ -360,15 +353,12 @@ if __name__ == "__main__":
 
     s
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     abs_value_summary = l6
     abs_value_summary
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.simplify(l6)
-
 
 import ast
 import astor
@@ -401,35 +391,30 @@ def prefix_vars(astnode, prefix):
     else:
         return astnode
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ast.parse('x+y')
-
 
 def get_expression(src):
     return ast.parse(src).body[0].value
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     e = get_expression('x+y')
     e
-
 
 def to_src(astnode):
     return astor.to_source(astnode).strip()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     to_src(e)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     abs_value_summary_ast = get_expression(str(abs_value_summary))
     print(to_src(prefix_vars(abs_value_summary_ast, 'x1_')))
 
+#### Get Names and Types of Variables Used
 
-# #### Get Names and Types of Variables Used
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Get Names and Types of Variables Used')
-
 
 
 
@@ -447,10 +432,9 @@ def z3_names_and_types(z3_ast):
             pass
     return hm
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     abs_value_declarations = z3_names_and_types(abs_value_summary)
     abs_value_declarations
-
 
 def used_identifiers(src):
     def names(astnode):
@@ -488,16 +472,14 @@ def used_identifiers(src):
         return list(set(lst))
     return names(ast.parse(src))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     used_identifiers(str(abs_value_summary))
 
-
-if __name__ == "__main__":
-    Function_Summaries = {}
-    Function_Summaries['abs_value'] = {
+if __name__ == '__main__':
+    function_summaries = {}
+    function_summaries['abs_value'] = {
         'predicate': str(abs_value_summary),
         'vars': abs_value_declarations}
-
 
 SYM_VARS_STR = {
     k.__name__: ("z3.%s" % v1.__name__, "z3.%s" % v2.__name__)
@@ -525,7 +507,7 @@ def declarations(astnode, hm=None):
         n = astnode.function
         assert isinstance(n, ast.Name)  # for now.
         name = n.id
-        hm.update(dict(Function_Summaries[name]['vars']))
+        hm.update(dict(function_summaries[name]['vars']))
     elif isinstance(astnode, ast.AnnAssign):
         assert isinstance(astnode.target, ast.Name)
         hm[astnode.target.id] = translate_to_z3_name(astnode.annotation.id)
@@ -548,20 +530,17 @@ def declarations(astnode, hm=None):
         raise Exception(str(astnode))
     return hm
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     declarations(ast.parse('s: int = 3\np: float = 4.0\ns += 1'))
-
 
 def used_vars(fn):
     return declarations(ast.parse(inspect.getsource(fn)))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     used_vars(check_triangle)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     used_vars(abs_value)
-
 
 def define_symbolic_vars(fn_vars, prefix):
     sym_var_dec = ', '.join([prefix + n for n in fn_vars])
@@ -569,24 +548,21 @@ def define_symbolic_vars(fn_vars, prefix):
                              for n, t in fn_vars.items()])
     return "%s = %s" % (sym_var_dec, sym_var_def)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     define_symbolic_vars(abs_value_declarations, '')
 
-
 def gen_fn_summary(prefix, fn):
-    summary = Function_Summaries[fn.__name__]['predicate']
-    fn_vars = Function_Summaries[fn.__name__]['vars']
+    summary = function_summaries[fn.__name__]['predicate']
+    fn_vars = function_summaries[fn.__name__]['vars']
     decl = define_symbolic_vars(fn_vars, prefix)
     summary_ast = get_expression(summary)
     return decl, to_src(prefix_vars(summary_ast, prefix))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gen_fn_summary('a_', abs_value)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gen_fn_summary('b_', abs_value)
-
 
 def abs_max(a: float, b: float):
     a1: float = abs_value(a)
@@ -597,114 +573,91 @@ def abs_max(a: float, b: float):
         c: float = b1
     return c
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     a = z3.Real('a')
     b = z3.Real('b')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     a1 = z3.Real('a1')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     d, v = gen_fn_summary('abs1_', abs_value)
     d, v
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     l2_src = "l2 = z3.And(a == abs1_x, a1 == abs1_v, %s)" % v
     l2_src
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     exec(d)
     exec(l2_src)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     l2
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     b1 = z3.Real('b1')
     d, v = gen_fn_summary('abs2_', abs_value)
     l3_src = "l3_ = z3.And(b == abs2_x, b1 == abs2_v, %s)" % v
     exec(d)
     exec(l3_src)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     l3_
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     l3 = z3.And(l2, l3_)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     l3
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     z3.simplify(l3)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     l4_cond = a1 > b1
     l4 = z3.And(l3, l4_cond)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     c_0 = z3.Real('c_0')
     l5 = z3.And(l4, c_0 == a1)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     l6 = z3.And(l3, z3.Not(l4_cond))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     c_1 = z3.Real('c_1')
     l7 = z3.And(l6, c_1 == b1)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     s1 = z3.Solver()
     s1.add(l5)
     s1.check()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     m1 = s1.model()
     sorted([(d, m1[d]) for d in m1.decls() if not d.name(
     ).startswith('abs')], key=lambda x: x[0].name())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     s2 = z3.Solver()
     s2.add(l7)
     s2.check()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     m2 = s2.model()
     sorted([(d, m2[d]) for d in m2.decls() if not d.name(
     ).startswith('abs')], key=lambda x: x[0].name())
 
+## SimpleSymbolicFuzzer
+## --------------------
 
-# ## SimpleSymbolicFuzzer
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## SimpleSymbolicFuzzer')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from Fuzzer import Fuzzer
-else:
-    from .Fuzzer import Fuzzer
-
+from .Fuzzer import Fuzzer
 
 class SimpleSymbolicFuzzer(Fuzzer):
     def __init__(self, fn, **kwargs):
@@ -738,19 +691,16 @@ class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
         self.max_iter = kwargs.get('max_iter', MAX_ITER)
         self._options = kwargs
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     symfz_ct = SimpleSymbolicFuzzer(check_triangle)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     symfz_ct.fnenter, symfz_ct.fnexit
 
+### Generating All Possible Paths
 
-# ### Generating All Possible Paths
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Generating All Possible Paths')
-
 
 
 
@@ -769,23 +719,21 @@ class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
                 fnpaths.append([(idx, fenter)] + path)
         return fnpaths
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     symfz_ct = SimpleSymbolicFuzzer(check_triangle)
     paths = symfz_ct.get_all_paths(symfz_ct.fnenter)
     print(len(paths))
     paths[1]
-
 
 class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
     def process(self):
         self.paths = self.get_all_paths(self.fnenter)
         self.last_path = len(self.paths)
 
-# ### Extracting All Constraints
+### Extracting All Constraints
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Extracting All Constraints')
-
 
 
 
@@ -811,22 +759,19 @@ class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
                 pass
         return predicates
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     symfz_ct = SimpleSymbolicFuzzer(check_triangle)
     paths = symfz_ct.get_all_paths(symfz_ct.fnenter)
     symfz_ct.extract_constraints(paths[0])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     constraints = symfz_ct.extract_constraints(paths[1])
     constraints
 
+### Fuzzing with Simple Symbolic Fuzzer
 
-# ### Fuzzing with Simple Symbolic Fuzzer
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Fuzzing with Simple Symbolic Fuzzer')
-
 
 
 
@@ -875,7 +820,7 @@ class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
                 return res
         return {}
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     a, b, c = None, None, None
     symfz_ct = SimpleSymbolicFuzzer(check_triangle)
     for i in range(1, 10):
@@ -883,20 +828,17 @@ if __name__ == "__main__":
         v = check_triangle(r['a'].as_long(), r['b'].as_long(), r['c'].as_long())
         print(r, "result:", v)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     symfz_av = SimpleSymbolicFuzzer(abs_value)
     for i in range(1, 10):
         r = symfz_av.fuzz()
         v = abs_value(r['x'].numerator_as_long() / r['x'].denominator_as_long())
         print(r, "result:", v)
 
+### Problems with the Simple Fuzzer
 
-# ### Problems with the Simple Fuzzer
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Problems with the Simple Fuzzer')
-
 
 
 
@@ -912,17 +854,12 @@ def gcd(a: int, b: int) -> int:
         b = c % b
     return a
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     show_cfg(gcd)
 
+from .ExpectError import ExpectError
 
-if __package__ is None or __package__ == "":
-    from ExpectError import ExpectError
-else:
-    from .ExpectError import ExpectError
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         symfz_gcd = SimpleSymbolicFuzzer(gcd, max_depth=1000, max_iter=10)
         for i in range(1, 100):
@@ -930,12 +867,11 @@ if __name__ == "__main__":
             v = gcd(r['a'].as_long(), r['b'].as_long())
             print(r, v)
 
+## Advanced Symbolic Fuzzer
+## ------------------------
 
-# ## Advanced Symbolic Fuzzer
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Advanced Symbolic Fuzzer')
-
 
 
 
@@ -943,11 +879,10 @@ class AdvancedSymbolicFuzzer(SimpleSymbolicFuzzer):
     def options(self, kwargs):
         super().options(kwargs)
 
-# ### Dealing with Reassingments
+### Dealing with Reassingments
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Dealing with Reassingments')
-
 
 
 
@@ -987,82 +922,65 @@ def rename_variables(astnode, env):
     else:
         return astnode
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     env = {'x': 1}
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ba = get_expression('x == 1 and y == 2')
     type(ba)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert to_src(rename_variables(ba, env)) == 'z3.And(_x_1 == 1, _y_0 == 2)'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     bo = get_expression('x == 1 or y == 2')
     type(bo.op)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert to_src(rename_variables(bo, env)) == 'z3.Or(_x_1 == 1, _y_0 == 2)'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     b = get_expression('x + y')
     type(b)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert to_src(rename_variables(b, env)) == '(_x_1 + _y_0)'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     u = get_expression('-y')
     type(u)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert to_src(rename_variables(u, env)) == '(-_y_0)'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     un = get_expression('not y')
     type(un.op)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert to_src(rename_variables(un, env)) == 'z3.Not(_y_0)'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     c = get_expression('x == y')
     type(c)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert to_src(rename_variables(c, env)) == '(_x_1 == _y_0)'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = get_expression('fn(x,y)')
     type(f)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert to_src(rename_variables(f, env)) == 'fn(_x_1, _y_0)'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     env
 
+### Tracking Assignments
 
-# ### Tracking Assignments
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Tracking Assignments')
-
 
 
 
@@ -1076,15 +994,13 @@ class PNode:
         return "PNode:%d[%s order:%d]" % (self.idx, str(self.cfgnode),
                                           self.order)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cfg = PyCFG()
     cfg.gen_cfg(inspect.getsource(gcd))
     gcd_fnenter, _ = cfg.functions['gcd']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     PNode(0, gcd_fnenter)
-
 
 class PNode(PNode):
     def copy(self, order):
@@ -1092,15 +1008,13 @@ class PNode(PNode):
         assert p.order == order
         return p
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     PNode(0, gcd_fnenter).copy(1)
 
+#### Stepwise Exploration of Paths
 
-# #### Stepwise Exploration of Paths
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Stepwise Exploration of Paths')
-
 
 
 
@@ -1117,13 +1031,11 @@ class PNode(PNode):
             ret.append(pn)
         return ret
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     PNode(0, gcd_fnenter).explore()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     PNode(0, gcd_fnenter).explore()[0].explore()
-
 
 class PNode(PNode):
     def get_path_to_root(self):
@@ -1134,10 +1046,9 @@ class PNode(PNode):
             n = n.parent
         return list(reversed(path))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     p = PNode(0, gcd_fnenter)
     [s.get_path_to_root() for s in p.explore()[0].explore()[0].explore()[0].explore()]
-
 
 class PNode(PNode):
     def __str__(self):
@@ -1145,11 +1056,10 @@ class PNode(PNode):
         ssa_path = to_single_assignment_predicates(path)
         return ', '.join([to_src(p) for p in ssa_path])
 
-# #### Renaming Used Variables
+#### Renaming Used Variables
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Renaming Used Variables')
-
 
 
 
@@ -1195,21 +1105,18 @@ def to_single_assignment_predicates(path):
         new_path.append(new_node)
     return new_path
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     p = PNode(0, gcd_fnenter)
     path = p.explore()[0].explore()[0].explore()[0].get_path_to_root()
     spath = to_single_assignment_predicates(path)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     [to_src(s) for s in spath]
 
+#### Check Before You Loop
 
-# #### Check Before You Loop
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Check Before You Loop')
-
 
 
 
@@ -1228,11 +1135,10 @@ class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
     def extract_constraints(self, path):
         return [to_src(p) for p in to_single_assignment_predicates(path) if p]
 
-# ### Solving Path Constraints
+### Solving Path Constraints
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Solving Path Constraints')
-
 
 
 
@@ -1262,11 +1168,10 @@ class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
         eval('self.z3.add(z3.Not(%s))' % predicate)
         return my_args
 
-# ### Generating All Paths
+### Generating All Paths
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Generating All Paths')
-
 
 
 
@@ -1289,27 +1194,23 @@ class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
             path_lst = new_paths
         return completed + path_lst
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     asymfz_gcd = AdvancedSymbolicFuzzer(
         gcd, max_iter=10, max_tries=10, max_depth=10)
     paths = asymfz_gcd.get_all_paths(asymfz_gcd.fnenter)
     print(len(paths))
     paths[37].get_path_to_root()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for s in to_single_assignment_predicates(paths[37].get_path_to_root()):
         if s is not None:
             print(to_src(s))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     constraints = asymfz_gcd.extract_constraints(paths[37].get_path_to_root())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     constraints
-
 
 class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
     def get_next_path(self):
@@ -1318,15 +1219,14 @@ class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
             self.last_path = len(self.paths) - 1
         return self.paths[self.last_path].get_path_to_root()
 
-# ### Fuzzing with Advanced Symbolic Fuzzer
+### Fuzzing with Advanced Symbolic Fuzzer
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Fuzzing with Advanced Symbolic Fuzzer')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     asymfz_gcd = AdvancedSymbolicFuzzer(
         gcd, max_tries=10, max_iter=10, max_depth=10)
     data = []
@@ -1336,26 +1236,21 @@ if __name__ == "__main__":
         v = gcd(*data[-1])
         print(r, "result:", repr(v))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         for a, b in data:
             gcd(a, b)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov.show_coverage(gcd)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     show_cfg(gcd, arcs=cov.arcs())
 
+#### Example: Roots of a Quadratic Equation
 
-# #### Example: Roots of a Quadratic Equation
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Example: Roots of a Quadratic Equation')
-
 
 
 
@@ -1381,7 +1276,7 @@ def sym_to_float(v):
         return v.as_long()
     return v.numerator_as_long() / v.denominator_as_long()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     asymfz_roots = AdvancedSymbolicFuzzer(
         roots,
         max_tries=10,
@@ -1395,12 +1290,10 @@ if __name__ == "__main__":
             v = roots(*d)
             print(d, v)
 
+#####  Roots - Check Before Divide
 
-# #####  Roots - Check Before Divide
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#####  Roots - Check Before Divide')
-
 
 
 
@@ -1421,7 +1314,7 @@ def roots2(a: float, b: float, c: float) -> Tuple[float, float]:
     ba2: float = b / a2
     return -ba2 + s / a2, -ba2 - s / a2
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     asymfz_roots = AdvancedSymbolicFuzzer(
         roots2,
         max_tries=10,
@@ -1434,12 +1327,10 @@ if __name__ == "__main__":
             v = roots2(*d)
             #print(d, v)
 
+#####  Roots - Eliminating the Zero Division Error
 
-# #####  Roots - Eliminating the Zero Division Error
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#####  Roots - Eliminating the Zero Division Error')
-
 
 
 
@@ -1464,7 +1355,7 @@ def roots3(a: float, b: float, c: float) -> Tuple[float, float]:
     ba2: float = b / a2
     return -ba2 + s / a2, -ba2 - s / a2
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     asymfz_roots = AdvancedSymbolicFuzzer(
         roots3,
         max_tries=10,
@@ -1477,83 +1368,78 @@ if __name__ == "__main__":
         v = roots3(*d)
         print(d, v)
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gcd_fuzzer = AdvancedSymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
     for i in range(10):
         r = gcd_fuzzer.fuzz()
         print(r)
 
+## Limitations
+## -----------
 
-# ## Limitations
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Limitations')
 
 
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: _Extending Symbolic Fuzzer to use function summaries_
 
-# ### Exercise 1: _Extending Symbolic Fuzzer to use function summaries_
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: _Extending Symbolic Fuzzer to use function summaries_')
 
 
 
+### Exercise 2: _Statically checking if a loop should be unrolled further_
 
-# ### Exercise 2: _Statically checking if a loop should be unrolled further_
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: _Statically checking if a loop should be unrolled further_')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     i = 0
     while i < 10:
         i += 1
-
 
 class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
     def get_all_paths(self, fenter):
@@ -1588,11 +1474,10 @@ class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
         exec("s.add(z3.And(%s))" % ','.join(s2), globals(), locals())
         return s.check() == z3.sat
 
-# ### Exercise 3: _Implementing a Concolic Fuzzer_
+### Exercise 3: _Implementing a Concolic Fuzzer_
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 3: _Implementing a Concolic Fuzzer_')
-
 
 
 
@@ -1601,14 +1486,12 @@ class ArcCoverage(ArcCoverage):
         zero = self._trace[0][1] - 1
         return [l - zero for (f, l) in self._trace if f == fn]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         roots3(1, 1, 1)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov.offsets_from_entry('roots3')
-
 
 class ConcolicTracer(AdvancedSymbolicFuzzer):
     def __init__(self, fn, fnargs, **kwargs):
@@ -1639,15 +1522,14 @@ class ConcolicTracer(ConcolicTracer):
         assert len(self.lines) == self.current_line
         return [last_node]
 
-# #### Tracing the Execution Concolicaly
+#### Tracing the Execution Concolicaly
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Tracing the Execution Concolicaly')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     acfz_roots = ConcolicTracer(
         roots3,
         fnargs=[1, 1, 1],
@@ -1655,79 +1537,63 @@ if __name__ == "__main__":
         max_iter=10,
         max_depth=10)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     acfz_roots.paths[0].get_path_to_root()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(cov.offsets_from_entry('roots3'))
     print([i.cfgnode.ast_node.lineno for i in acfz_roots.paths[0].get_path_to_root()])
     print(acfz_roots.lines)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     constraints = acfz_roots.extract_constraints(
         acfz_roots.paths[0].get_path_to_root())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     constraints
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     identifiers = [c for i in constraints for c in used_identifiers(i)]
     with_types = identifiers_with_types(identifiers, acfz_roots.used_variables)
     decl = define_symbolic_vars(with_types, '')
     exec(decl)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     eval('z3.solve(%s)' % ','.join(constraints))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     acfz_roots.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         roots(1, 1, 1)
     show_cfg(roots, arcs=cov.arcs())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         roots(-1, 0, 0)
     show_cfg(roots, arcs=cov.arcs())
 
+#### Exploring Nearby Paths
 
-# #### Exploring Nearby Paths
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Exploring Nearby Paths')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     constraints
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     new_constraints = constraints[0:4] + ['z3.Not(%s)' % constraints[4]]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     new_constraints
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     eval('z3.solve(%s)' % ','.join(new_constraints))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ArcCoverage() as cov:
         roots3(1, 0, -11 / 20)
     show_cfg(roots3, arcs=cov.arcs())
-

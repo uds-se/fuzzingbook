@@ -12,7 +12,12 @@ TWITTER = @FuzzingBook
 # Chapter(s) to be marked as "new" in menu
 NEW_CHAPTERS = 
 
-# Chapters to include in the book, in this order
+# Chapters to include in the book, in this order.
+# * Chapters in `..._PART` get published.
+# * Chapters in `..._PART_READY` only get published as beta, with a disclaimer.
+# * Chapters in `..._PART_TODO` only get published as beta, with a disclaimer.
+#      and a "todo" (wrench) marker in the menu.
+
 INTRO_PART = \
 	01_Intro.ipynb \
 	Tours.ipynb \

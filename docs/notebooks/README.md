@@ -1,3 +1,15 @@
+<!-- Fuzzingbook README -->
+
+<!-- Badges to be shown on project page -->
+
+[![Website www.fuzzingbook.org](https://img.shields.io/website-up-down-green-red/https/www.fuzzingbook.org.svg)](https://www.fuzzingbook.org/)
+
+[![Made with Python](https://img.shields.io/badge/Made%20with-Python-blue.svg)](https://www.python.org/)
+&nbsp;
+[![Made with Jupyter](https://img.shields.io/badge/Made%20with-Jupyter-orange.svg)](https://www.jupyter.org/)
+&nbsp;
+[![License: MIT (Code), CC BY-NC-SA (Book)](https://img.shields.io/badge/License-MIT_(Code),_CC_BY--NC--SA_4.0_(Book)-blue.svg)](https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md)
+
 
 # About this Book
 
@@ -6,7 +18,7 @@ Software has bugs, and catching bugs can involve lots of effort.  This book addr
 
 
 ```python
-from fuzzingbook_utils import YouTubeVideo
+from bookutils import YouTubeVideo
 YouTubeVideo("w4u5gCgPlmg")
 ```
 
@@ -14,13 +26,9 @@ YouTubeVideo("w4u5gCgPlmg")
 
 
 
-        <iframe
-            width="640"
-            height="360"
-            src="https://www.youtube.com/embed/w4u5gCgPlmg"
-            frameborder="0"
-            allowfullscreen
-        ></iframe>
+<a href="https://www.youtube-nocookie.com/embed/w4u5gCgPlmg" target="_blank">
+<img src="https://www.fuzzingbook.org/html/PICS/youtube.png" width=640>
+</a>
         
 
 
@@ -31,11 +39,11 @@ You can use this book in four ways:
 
 * You can __read chapters in your browser__.  Check out the list of chapters in the menu above, or start right away with the [introduction to testing](https://www.fuzzingbook.org/html/Intro_Testing.html) or the [introduction to fuzzing](https://www.fuzzingbook.org/html/Fuzzer.html).  All code is available for download.
 
-* You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you to edit and extend the code, experimenting _live in your browser._  Simply select "Resources $\rightarrow$ Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
+* You can __interact with chapters as Jupyter Notebooks__ (beta).  This allows you to edit and extend the code, experimenting _live in your browser._  Simply select "Resources → Edit as Notebook" at the top of each chapter. <a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/Fuzzer.ipynb" target=_blank>Try interacting with the introduction to fuzzing.</a>
 
-* You can __use the code in your own projects__.  You can download the code as Python programs; simply select "Resources $\rightarrow$ Download Code" for one chapter or "Resources $\rightarrow$ All Code" for all chapters.  These code files can be executed, yielding (hopefully) the same results as the notebooks.  Even easier: [Install the fuzzingbook Python package](https://www.fuzzingbook.org/html/Importing.html).
+* You can __use the code in your own projects__.  You can download the code as Python programs; simply select "Resources → Download Code" for one chapter or "Resources → All Code" for all chapters.  These code files can be executed, yielding (hopefully) the same results as the notebooks.  Even easier: [Install the fuzzingbook Python package](https://www.fuzzingbook.org/html/Importing.html).
 
-* You can __present chapters as slides__.  This allows for presenting the material in lectures.  Just select "Resources $\rightarrow$ View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing the slides for the introduction to fuzzing.</a>
+* You can __present chapters as slides__.  This allows for presenting the material in lectures.  Just select "Resources → View slides" at the top of each chapter. <a href="https://www.fuzzingbook.org/slides/Fuzzer.slides.html" target=_blank>Try viewing the slides for the introduction to fuzzing.</a>
 
 ## Who this Book is for
 
@@ -45,7 +53,7 @@ This work is designed as a _textbook_ for a course in software testing; as _supp
 
 This book is _work in progress._  All chapters planned are out now, but we keep on refining the material with [minor and major releases.](https://www.fuzzingbook.org/html/ReleaseNotes.html)  To get notified on updates, <a href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-show-count="false">follow us on Twitter</a>.
 
-<a class="twitter-timeline" data-width="500" data-chrome="noheader nofooter noborders transparent" data-link-color="#A93226" data-align="center" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw">News from @FuzzingBook</a> 
+<a class="twitter-timeline" data-width="500" data-chrome="noheader nofooter noborders transparent" data-link-color="#A93226" data-align="center" href="https://twitter.com/FuzzingBook?ref_src=twsrc%5Etfw" data-dnt="true">News from @FuzzingBook</a> 
 
 
 ## About the Authors

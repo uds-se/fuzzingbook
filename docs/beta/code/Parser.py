@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Parsing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2020-10-13 15:12:19+02:00
+# Last change: 2021-06-02 17:45:37+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,28 +27,71 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Parsing Inputs
 
-# # Parsing Inputs
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python Parser.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.Parser import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/Parser.html
+
+This chapter introduces `Parser` classes, parsing a string into a _derivation tree_ as introduced in the [chapter on efficient grammar fuzzing](GrammarFuzzer.ipynb).  Two important parser classes are provided:
+
+* [Parsing Expression Grammar parsers](#Parsing-Expression-Grammars) (`PEGParser`), which are very efficient, but limited to specific grammar structure; and
+* [Earley parsers](#Parsing-Context-Free-Grammars) (`EarleyParser`), which accept any kind of context-free grammars.
+
+Using any of these is fairly easy, though.  First, instantiate them with a grammar:
+
+>>> from Grammars import US_PHONE_GRAMMAR
+>>> us_phone_parser = EarleyParser(US_PHONE_GRAMMAR)
+
+Then, use the `parse()` method to retrieve a list of possible derivation trees:
+
+>>> trees = us_phone_parser.parse("(555)987-6543")
+>>> tree = list(trees)[0]
+>>> display_tree(tree)
+These derivation trees can then be used for test generation, notably for mutating and recombining existing inputs.
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Parsing Inputs"
+at https://www.fuzzingbook.org/html/Parser.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Parsing Inputs
+# ==============
+
+if __name__ == '__main__':
     print('# Parsing Inputs')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## Fuzzing a Simple Program
+## ------------------------
 
-# ## Fuzzing a Simple Program
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Fuzzing a Simple Program')
-
 
 
 
@@ -88,13 +131,12 @@ def process_car(year, company, model):
         res.append("It is an old but reliable model!")
     return res
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = """\
-    1997,van,Ford,E350
-    2000,car,Mercury,Cougar\
-    """
+1997,van,Ford,E350
+2000,car,Mercury,Cougar\
+"""
     print(process_inventory(mystring))
-
 
 import string
 
@@ -107,44 +149,22 @@ CSV_GRAMMAR = {
     '<letter>': list(string.ascii_letters + string.digits + string.punctuation + ' \t\n')
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
+from .Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL, is_valid_grammar, syntax_diagram
+from .Fuzzer import Fuzzer
+from .GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
 
-if __package__ is None or __package__ == "":
-    from Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL, is_valid_grammar, syntax_diagram
-else:
-    from .Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL, is_valid_grammar, syntax_diagram
+from .ExpectError import ExpectError
+from .Timer import Timer
 
-if __package__ is None or __package__ == "":
-    from Fuzzer import Fuzzer
-else:
-    from .Fuzzer import Fuzzer
-
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
-else:
-    from .GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
-
-
-if __package__ is None or __package__ == "":
-    from ExpectError import ExpectError
-else:
-    from .ExpectError import ExpectError
-
-if __package__ is None or __package__ == "":
-    from Timer import Timer
-else:
-    from .Timer import Timer
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(CSV_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gf = GrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     trials = 1000
     valid = []
@@ -162,8 +182,7 @@ if __name__ == "__main__":
           (len(valid), len(valid) * 100.0 / trials, trials))
     print("Total time of %f seconds" % time)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gf = GrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     trials = 10
     valid = []
@@ -177,7 +196,6 @@ if __name__ == "__main__":
             print("\t", e)
         else:
             print()
-
 
 import copy
 
@@ -200,7 +218,7 @@ class PooledGrammarFuzzer(GrammarFuzzer):
             return copy.deepcopy(random.choice(self._node_cache[symbol]))
         return super().expand_node_randomly(node)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gf = PooledGrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     gf.update_cache('<item>', [
         ('<item>', [('car', [])]),
@@ -219,20 +237,19 @@ if __name__ == "__main__":
         else:
             print()
 
+## Using a Parser
+## --------------
 
-# ## Using a Parser
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Using a Parser')
 
 
 
+## An Ad Hoc Parser
+## ----------------
 
-# ## An Ad Hoc Parser
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## An Ad Hoc Parser')
-
 
 
 
@@ -248,17 +265,15 @@ def lr_graph(dot):
     dot.attr('node', shape='plain')
     dot.graph_attr['rankdir'] = 'LR'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = parse_csv(mystring)
     display_tree(tree, graph_attr=lr_graph)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = '''\
-    1997,Ford,E350,"ac, abs, moon",3000.00\
-    '''
+1997,Ford,E350,"ac, abs, moon",3000.00\
+'''
     print(mystring)
-
 
 def highlight_node(predicate):
     def hl_node(dot, nid, symbol, ann):
@@ -268,18 +283,16 @@ def highlight_node(predicate):
             dot.node(repr(nid), dot_escape(symbol))
     return hl_node
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = parse_csv(mystring)
     bad_nodes = {5, 6, 7, 12, 13, 20, 22, 23, 24, 25}
 
-
 def hl_predicate(_d, nid, _s, _a): return nid in bad_nodes
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     highlight_err_node = highlight_node(hl_predicate)
     display_tree(tree, log=False, node_attr=highlight_err_node,
                  graph_attr=lr_graph)
-
 
 def parse_quote(string, i):
     v = string[i + 1:].find('"')
@@ -317,43 +330,38 @@ def parse_csv(mystring):
                                            for cell in comma_split(line)]))
     return tree
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = parse_csv(mystring)
     display_tree(tree, graph_attr=lr_graph)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = '''\
-    1999,Chevy,"Venture \\"Extended Edition, Very Large\\"",,5000.00\
-    '''
+1999,Chevy,"Venture \\"Extended Edition, Very Large\\"",,5000.00\
+'''
     print(mystring)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = parse_csv(mystring)
     bad_nodes = {4, 5}
     display_tree(tree, node_attr=highlight_err_node, graph_attr=lr_graph)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = '''\
-    1996,Jeep,Grand Cherokee,"MUST SELL!
-    air, moon roof, loaded",4799.00
-    '''
+1996,Jeep,Grand Cherokee,"MUST SELL!
+air, moon roof, loaded",4799.00
+'''
     print(mystring)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = parse_csv(mystring)
     bad_nodes = {5, 6, 7, 8, 9, 10}
     display_tree(tree, node_attr=highlight_err_node, graph_attr=lr_graph)
 
+## Grammars
+## --------
 
-# ## Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Grammars')
-
 
 
 
@@ -364,15 +372,13 @@ A1_GRAMMAR = {
     "<digit>": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(A1_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = '1+2'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = ('<start>', [('<expr>',
                          [('<expr>', [('<integer>', [('<digit>', [('1', [])])])]),
                           ('+', []),
@@ -380,7 +386,6 @@ if __name__ == "__main__":
                                                                    [])])])])])])
     assert mystring == tree_to_string(tree)
     display_tree(tree)
-
 
 A2_GRAMMAR = {
     "<start>": ["<expr>"],
@@ -391,11 +396,10 @@ A2_GRAMMAR = {
     "<digit>": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(A2_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = ('<start>', [('<expr>', [('<integer>', [('<digit>', [('1', [])]),
                                                    ('<integer_>', [])]),
                                     ('<expr_>', [('+', []),
@@ -407,12 +411,10 @@ if __name__ == "__main__":
     assert mystring == tree_to_string(tree)
     display_tree(tree)
 
+#### Recursion
 
-# #### Recursion
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Recursion')
-
 
 
 
@@ -421,39 +423,34 @@ LR_GRAMMAR = {
     '<A>': ['<A>a', ''],
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(LR_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'aaaaaa'
     display_tree(
         ('<start>', (('<A>', (('<A>', (('<A>', []), ('a', []))), ('a', []))), ('a', []))))
-
 
 RR_GRAMMAR = {
     '<start>': ['<A>'],
     '<A>': ['a<A>', ''],
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(RR_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(('<start>', ((
         '<A>', (('a', []), ('<A>', (('a', []), ('<A>', (('a', []), ('<A>', []))))))),)))
 
+#### Ambiguity
 
-# #### Ambiguity
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Ambiguity')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = '1+2+3'
     tree = ('<start>',
             [('<expr>',
@@ -465,8 +462,7 @@ if __name__ == "__main__":
     assert mystring == tree_to_string(tree)
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = ('<start>',
             [('<expr>', [('<expr>', [('<integer>', [('<digit>', [('1', [])])])]),
                          ('+', []),
@@ -477,7 +473,6 @@ if __name__ == "__main__":
                                                                     [])])])])])])])
     assert tree_to_string(tree) == mystring
     display_tree(tree)
-
 
 class Parser(object):
     def __init__(self, grammar, **kwargs):
@@ -535,11 +530,11 @@ class Parser(object):
         else:
             return (name, [self.prune_tree(c) for c in children])
 
-# ## Parsing Expression Grammars
+## Parsing Expression Grammars
+## ---------------------------
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Parsing Expression Grammars')
-
 
 
 
@@ -551,11 +546,10 @@ PEG2 = {
     '<start>': ['ab', 'abc']
 }
 
-# ### The Packrat Parser for Predicate Expression Grammars
+### The Packrat Parser for Predicate Expression Grammars
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### The Packrat Parser for Predicate Expression Grammars')
-
 
 
 
@@ -608,9 +602,8 @@ def show_grammar(grammar, start_symbol=START_SYMBOL):
     recurse_grammar(grammar, start_symbol, order)
     return {k: sorted(grammar[k]) for k in order}
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     show_grammar(CE_GRAMMAR)
-
 
 def non_canonical(grammar):
     new_grammar = {}
@@ -622,9 +615,8 @@ def non_canonical(grammar):
         new_grammar[k] = new_rules
     return new_grammar
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     non_canonical(CE_GRAMMAR)
-
 
 class Parser(Parser):
     def __init__(self, grammar, **kwargs):
@@ -656,11 +648,10 @@ class Parser(Parser):
         else:
             return (name, [self.prune_tree(c) for c in children])
 
-# ### The Parser
+### The Parser
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### The Parser')
-
 
 
 
@@ -669,11 +660,10 @@ class PEGParser(Parser):
         cursor, tree = self.unify_key(self.start_symbol(), text, 0)
         return cursor, [tree]
 
-# #### Unify Key
+#### Unify Key
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Unify Key')
-
 
 
 
@@ -692,22 +682,19 @@ class PEGParser(PEGParser):
                 return (to, (key, res))
         return 0, None
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = "1"
     peg = PEGParser(EXPR_GRAMMAR, log=True)
     peg.unify_key('1', mystring)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = "2"
     peg.unify_key('1', mystring)
 
+#### Unify Rule
 
-# #### Unify Rule
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Unify Rule')
-
 
 
 
@@ -723,22 +710,19 @@ class PEGParser(PEGParser):
             results.append(res)
         return at, results
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = "0"
     peg = PEGParser(EXPR_GRAMMAR, log=True)
     peg.unify_rule(peg.cgrammar['<digit>'][0], mystring, 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = "12"
     peg.unify_rule(peg.cgrammar['<integer>'][0], mystring, 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = "1 + 2"
     peg = PEGParser(EXPR_GRAMMAR, log=False)
     peg.parse(mystring)
-
 
 from functools import lru_cache
 
@@ -756,34 +740,31 @@ class PEGParser(PEGParser):
                 return (to, (key, res))
         return 0, None
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = "1 + (2 * 3)"
     peg = PEGParser(EXPR_GRAMMAR)
     for tree in peg.parse(mystring):
         assert tree_to_string(tree) == mystring
         display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = "1 * (2 + 3.35)"
     for tree in peg.parse(mystring):
         assert tree_to_string(tree) == mystring
         display_tree(tree)
 
+## Parsing Context-Free Grammars
+## -----------------------------
 
-# ## Parsing Context-Free Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Parsing Context-Free Grammars')
 
 
 
+###  Problems with PEG
 
-# ###  Problems with PEG
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n###  Problems with PEG')
-
 
 
 
@@ -791,7 +772,7 @@ PEG_SURPRISE = {
     "<A>": ["a<A>a", "aa"]
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     strings = []
     for e in range(4):
         f = GrammarFuzzer(PEG_SURPRISE, start_symbol='<A>')
@@ -803,8 +784,7 @@ if __name__ == "__main__":
         display_tree(tree)
     strings
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     peg = PEGParser(PEG_SURPRISE, start_symbol='<A>')
     for s in strings:
         with ExpectError():
@@ -812,12 +792,10 @@ if __name__ == "__main__":
                 display_tree(tree)
             print(s)
 
+### The Earley Parser
 
-# ### The Earley Parser
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### The Earley Parser')
-
 
 
 
@@ -830,15 +808,13 @@ SAMPLE_GRAMMAR = {
 }
 C_SAMPLE_GRAMMAR = canonical(SAMPLE_GRAMMAR)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(SAMPLE_GRAMMAR)
 
+### Columns
 
-# ### Columns
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Columns')
-
 
 
 
@@ -860,11 +836,10 @@ class Column(Column):
         state.e_col = self
         return self._unique[state]
 
-# ### Items
+### Items
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Items')
-
 
 
 
@@ -882,29 +857,24 @@ class Item(Item):
     def at_dot(self):
         return self.expr[self.dot] if self.dot < len(self.expr) else None
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     item_name = '<B>'
     item_expr = C_SAMPLE_GRAMMAR[item_name][1]
     an_item = Item(item_name, tuple(item_expr), 0)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     an_item.at_dot()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     another_item = an_item.advance()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     another_item.finished()
 
+### States
 
-# ### States
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### States')
-
 
 
 
@@ -937,27 +907,24 @@ class State(Item):
     def advance(self):
         return State(self.name, self.expr, self.dot + 1, self.s_col)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     col_0 = Column(0, None)
     item_expr = tuple(*C_SAMPLE_GRAMMAR[START_SYMBOL])
     start_state = State(START_SYMBOL, item_expr, 0, col_0)
     col_0.add(start_state)
     start_state.at_dot()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sym = start_state.at_dot()
     for alt in C_SAMPLE_GRAMMAR[sym]:
         col_0.add(State(sym, tuple(alt), 0, col_0))
     for s in col_0.states:
         print(s)
 
+### The Parsing Algorithm
 
-# ### The Parsing Algorithm
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### The Parsing Algorithm')
-
 
 
 
@@ -968,11 +935,10 @@ class EarleyParser(Parser):
         chart[0].add(State(start, alt, 0, chart[0]))
         return self.fill_chart(chart)
 
-# ### Predicting States
+### Predicting States
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Predicting States')
-
 
 
 
@@ -981,29 +947,25 @@ class EarleyParser(EarleyParser):
         for alt in self.cgrammar[sym]:
             col.add(State(sym, tuple(alt), 0, col))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     col_0 = Column(0, None)
     col_0.add(start_state)
     ep = EarleyParser(SAMPLE_GRAMMAR)
     ep.chart = [col_0]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for s in ep.chart[0].states:
         print(s)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ep.predict(col_0, '<A>', s)
     for s in ep.chart[0].states:
         print(s)
 
+### Scanning Tokens
 
-# ### Scanning Tokens
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Scanning Tokens')
-
 
 
 
@@ -1012,28 +974,24 @@ class EarleyParser(EarleyParser):
         if letter == col.letter:
             col.add(state.advance())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ep = EarleyParser(SAMPLE_GRAMMAR)
     col_1 = Column(1, 'a')
     ep.chart = [col_0, col_1]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     new_state = ep.chart[0].states[1]
     print(new_state)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ep.scan(col_1, new_state, 'a')
     for s in ep.chart[1].states:
         print(s)
 
+### Completing Processing
 
-# ### Completing Processing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Completing Processing')
-
 
 
 
@@ -1048,7 +1006,7 @@ class EarleyParser(EarleyParser):
         for st in parent_states:
             col.add(st.advance())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ep = EarleyParser(SAMPLE_GRAMMAR)
     col_1 = Column(1, 'a')
     col_2 = Column(2, 'd')
@@ -1057,24 +1015,21 @@ if __name__ == "__main__":
     for s in ep.chart[0].states:
         print(s)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for state in ep.chart[0].states:
         if state.at_dot() not in SAMPLE_GRAMMAR:
             ep.scan(col_1, state, 'a')
     for s in ep.chart[1].states:
         print(s)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for state in ep.chart[1].states:
         if state.at_dot() in SAMPLE_GRAMMAR:
             ep.predict(col_1, state.at_dot(), state)
     for s in ep.chart[1].states:
         print(s)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for state in ep.chart[1].states:
         if state.at_dot() not in SAMPLE_GRAMMAR:
             ep.scan(col_2, state, state.at_dot())
@@ -1082,8 +1037,7 @@ if __name__ == "__main__":
     for s in ep.chart[2].states:
         print(s)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for state in ep.chart[2].states:
         if state.finished():
             ep.complete(col_2, state)
@@ -1091,12 +1045,10 @@ if __name__ == "__main__":
     for s in ep.chart[2].states:
         print(s)
 
+### Filling the Chart
 
-# ### Filling the Chart
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Filling the Chart')
-
 
 
 
@@ -1118,23 +1070,20 @@ class EarleyParser(EarleyParser):
                 print(col, '\n')
         return chart
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ep = EarleyParser(SAMPLE_GRAMMAR, log=True)
     columns = ep.chart_parse('adcd', START_SYMBOL)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     last_col = columns[-1]
     for s in last_col.states:
         if s.name == '<start>':
             print(s)
 
+### The Parse Method
 
-# ### The Parse Method
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### The Parse Method')
-
 
 
 
@@ -1149,11 +1098,10 @@ class EarleyParser(EarleyParser):
                 return col.index, states
         return -1, []
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ep = EarleyParser(SAMPLE_GRAMMAR)
     cursor, last_states = ep.parse_prefix('adcd')
     print(cursor, [str(s) for s in last_states])
-
 
 class EarleyParser(EarleyParser):
     def parse(self, text):
@@ -1167,11 +1115,10 @@ class EarleyParser(EarleyParser):
         for tree in self.extract_trees(forest):
             yield self.prune_tree(tree)
 
-# ### Parsing Paths
+### Parsing Paths
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Parsing Paths')
-
 
 
 
@@ -1195,7 +1142,7 @@ class EarleyParser(EarleyParser):
 
         return [p for s, start, k in starts for p in paths(s, start, k, expr)]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(SAMPLE_GRAMMAR['<start>'])
     ep = EarleyParser(SAMPLE_GRAMMAR)
     completed_start = last_states[0]
@@ -1203,12 +1150,10 @@ if __name__ == "__main__":
     for path in paths:
         print([list(str(s_) for s_ in s) for s in path])
 
+### Parsing Forests
 
-# ### Parsing Forests
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Parsing Forests')
-
 
 
 
@@ -1222,17 +1167,15 @@ class EarleyParser(EarleyParser):
         return state.name, [[(v, k, chart) for v, k in reversed(pathexpr)]
                             for pathexpr in pathexprs]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ep = EarleyParser(SAMPLE_GRAMMAR)
     result = ep.parse_forest(columns, last_states[0])
     result
 
+### Extracting Trees
 
-# ### Extracting Trees
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Extracting Trees')
-
 
 
 
@@ -1260,23 +1203,20 @@ A3_GRAMMAR = {
     "<gt>": ['>']
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(A3_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = '(1+24)=33'
     parser = EarleyParser(A3_GRAMMAR)
     for tree in parser.parse(mystring):
         assert tree_to_string(tree) == mystring
         display_tree(tree)
 
+### Ambiguous Parsing
 
-# ### Ambiguous Parsing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Ambiguous Parsing')
-
 
 
 
@@ -1293,15 +1233,14 @@ class EarleyParser(EarleyParser):
             for p in I.product(*ptrees):
                 yield (name, p) 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = '1+2'
     parser = EarleyParser(A1_GRAMMAR)
     for tree in parser.parse(mystring):
         assert mystring == tree_to_string(tree)
         display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gf = GrammarFuzzer(A1_GRAMMAR)
     for i in range(5):
         s = gf.fuzz()
@@ -1309,12 +1248,10 @@ if __name__ == "__main__":
         for tree in parser.parse(s):
             assert tree_to_string(tree) == s
 
+### The Aycock Epsilon Fix
 
-# ### The Aycock Epsilon Fix
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### The Aycock Epsilon Fix')
-
 
 
 
@@ -1332,22 +1269,19 @@ E_GRAMMAR = {
     '<E>': [EPSILON]
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(E_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'a'
     parser = EarleyParser(E_GRAMMAR)
     with ExpectError():
         trees = parser.parse(mystring)
 
+#### Fixpoint
 
-# #### Fixpoint
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Fixpoint')
-
 
 
 
@@ -1369,15 +1303,13 @@ def my_sqrt(x):
 
     return _my_sqrt(1)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_sqrt(2)
 
+#### Nullable
 
-# #### Nullable
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Nullable')
-
 
 
 
@@ -1406,13 +1338,12 @@ def nullable(grammar):
 
     return nullable_({EPSILON})
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for key, grammar in {
             'E_GRAMMAR': E_GRAMMAR,
             'E_GRAMMAR_1': E_GRAMMAR_1
     }.items():
         print(key, nullable(canonical(grammar)))
-
 
 class EarleyParser(EarleyParser):
     def __init__(self, grammar, **kwargs):
@@ -1425,12 +1356,11 @@ class EarleyParser(EarleyParser):
         if sym in self.epsilon:
             col.add(state.advance())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'a'
     parser = EarleyParser(E_GRAMMAR)
     for tree in parser.parse(mystring):
         display_tree(tree)
-
 
 DIRECTLY_SELF_REFERRING = {
     '<start>': ['<query>'],
@@ -1444,7 +1374,7 @@ INDIRECTLY_SELF_REFERRING = {
     "<aexpr>": [ "<expr>"],
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'select a from a'
     for grammar in [DIRECTLY_SELF_REFERRING, INDIRECTLY_SELF_REFERRING]:
         forest = EarleyParser(grammar).parse(mystring)
@@ -1455,12 +1385,10 @@ if __name__ == "__main__":
         except RecursionError as e:
              print("Recursion error",e)
 
+### Tree Extractor
 
-# ### Tree Extractor
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Tree Extractor')
-
 
 
 
@@ -1497,25 +1425,21 @@ class SimpleExtractor:
         pos_tree, parse_tree = self.extract_a_node(self.my_forest)
         return self.parser.prune_tree(parse_tree)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     de = SimpleExtractor(EarleyParser(DIRECTLY_SELF_REFERRING), mystring)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for i in range(5):
         tree = de.extract_a_tree()
         print(tree_to_string(tree))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ie = SimpleExtractor(EarleyParser(INDIRECTLY_SELF_REFERRING), mystring)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for i in range(5):
         tree = ie.extract_a_tree()
         print(tree_to_string(tree))
-
 
 class ChoiceNode:
     def __init__(self, parent, total):
@@ -1596,11 +1520,10 @@ class EnhancedExtractor(EnhancedExtractor):
                 return self.parser.prune_tree(parse_tree)
         return None
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ee = EnhancedExtractor(EarleyParser(INDIRECTLY_SELF_REFERRING), mystring)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     i = 0
     while True:
         i += 1
@@ -1610,13 +1533,11 @@ if __name__ == "__main__":
         s = tree_to_string(t)
         assert s == mystring
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     istring = '1+2+3+4'
     ee = EnhancedExtractor(EarleyParser(A1_GRAMMAR), istring)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     i = 0
     while True:
         i += 1
@@ -1626,20 +1547,18 @@ if __name__ == "__main__":
         s = tree_to_string(t)
         assert s == istring
 
+### More Earley Parsing
 
-# ### More Earley Parsing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### More Earley Parsing')
 
 
 
+## Testing the Parsers
+## -------------------
 
-# ## Testing the Parsers
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Testing the Parsers')
-
 
 
 
@@ -1663,9 +1582,8 @@ def prod_line_grammar(nonterminals, terminals):
 
     return g
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(prod_line_grammar(["A", "B", "C"], ["1", "2", "3"]))
-
 
 def make_rule(nonterminals, terminals, num_alts):
     prod_grammar = prod_line_grammar(nonterminals, terminals)
@@ -1675,15 +1593,10 @@ def make_rule(nonterminals, terminals, num_alts):
 
     return (name, [gf.fuzz() for _ in range(num_alts)])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     make_rule(["A", "B", "C"], ["1", "2", "3"], 3)
 
-
-if __package__ is None or __package__ == "":
-    from Grammars import unreachable_nonterminals
-else:
-    from .Grammars import unreachable_nonterminals
-
+from .Grammars import unreachable_nonterminals
 
 def make_grammar(num_symbols=3, num_alts=3):
     terminals = list(string.ascii_lowercase)
@@ -1705,11 +1618,10 @@ def make_grammar(num_symbols=3, num_alts=3):
     
     return grammar
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     make_grammar()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for i in range(5):
         my_grammar = make_grammar()
         print(my_grammar)
@@ -1721,68 +1633,60 @@ if __name__ == "__main__":
             assert tree_to_string(tree) == s
             display_tree(tree)
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+from .Grammars import US_PHONE_GRAMMAR
 
-if __package__ is None or __package__ == "":
-    from Grammars import US_PHONE_GRAMMAR
-else:
-    from .Grammars import US_PHONE_GRAMMAR
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     us_phone_parser = EarleyParser(US_PHONE_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     trees = us_phone_parser.parse("(555)987-6543")
     tree = list(trees)[0]
     display_tree(tree)
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: An Alternative Packrat
 
-# ### Exercise 1: An Alternative Packrat
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: An Alternative Packrat')
-
 
 
 
@@ -1818,58 +1722,50 @@ class PackratParser(Parser):
                 return (text_, (key, res))
         return text, None
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = "1 + (2 * 3)"
     for tree in PackratParser(EXPR_GRAMMAR).parse(mystring):
         assert tree_to_string(tree) == mystring
         display_tree(tree)
 
+### Exercise 2: More PEG Syntax
 
-# ### Exercise 2: More PEG Syntax
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: More PEG Syntax')
 
 
 
+### Exercise 3: PEG Predicates
 
-# ### Exercise 3: PEG Predicates
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 3: PEG Predicates')
 
 
 
+### Exercise 4: Earley Fill Chart
 
-# ### Exercise 4: Earley Fill Chart
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 4: Earley Fill Chart')
 
 
 
+### Exercise 5: Leo Parser
 
-# ### Exercise 5: Leo Parser
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 5: Leo Parser')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'aaaaaa'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = EarleyParser(LR_GRAMMAR, log=True).parse(mystring)
     for _ in result: pass # consume the generator so that we can see the logs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = EarleyParser(RR_GRAMMAR, log=True).parse(mystring)
     for _ in result: pass
-
 
 class LeoParser(EarleyParser):
     def complete(self, col, state):
@@ -1906,10 +1802,9 @@ class LeoParser(LeoParser):
         matching_st_B = [s for s in parent_states if s.dot == len(s.expr) - 1]
         return matching_st_B[0] if matching_st_B else None
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     lp = LeoParser(RR_GRAMMAR)
     [(str(s), str(lp.uniq_postdot(s))) for s in columns[-1].states]
-
 
 class LeoParser(LeoParser):
     def get_top(self, state_A):
@@ -1930,16 +1825,14 @@ class LeoParser(LeoParser):
     def deterministic_reduction(self, state):
         return self.get_top(state)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     lp = LeoParser(RR_GRAMMAR)
     columns = lp.chart_parse(mystring, lp.start_symbol())
     [(str(s), str(lp.get_top(s))) for s in columns[-1].states]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR, log=True).parse(mystring)
     for _ in result: pass
-
 
 RR_GRAMMAR2 = {
     '<start>': ['<A>'],
@@ -1947,10 +1840,9 @@ RR_GRAMMAR2 = {
 }
 mystring2 = 'ababababab'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR2, log=True).parse(mystring2)
     for _ in result: pass
-
 
 RR_GRAMMAR3 = {
     '<start>': ['c<A>'],
@@ -1958,10 +1850,9 @@ RR_GRAMMAR3 = {
 }
 mystring3 = 'cababababab'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR3, log=True).parse(mystring3)
     for _ in result: pass
-
 
 RR_GRAMMAR4 = {
     '<start>': ['<A>c'],
@@ -1969,10 +1860,9 @@ RR_GRAMMAR4 = {
 }
 mystring4 = 'ababababc'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR4, log=True).parse(mystring4)
     for _ in result: pass
-
 
 RR_GRAMMAR5 = {
     '<start>': ['<A>'],
@@ -1981,10 +1871,9 @@ RR_GRAMMAR5 = {
 }
 mystring5 = 'abababab'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR5, log=True).parse(mystring5)
     for _ in result: pass
-
 
 RR_GRAMMAR6 = {
     '<start>': ['<A>'],
@@ -1993,10 +1882,9 @@ RR_GRAMMAR6 = {
 }
 mystring6 = 'abababab'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR6, log=True).parse(mystring6)
     for _ in result: pass
-
 
 RR_GRAMMAR7 = {
     '<start>': ['<A>'],
@@ -2004,15 +1892,13 @@ RR_GRAMMAR7 = {
 }
 mystring7 = 'aaaaaaaa'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR7, log=True).parse(mystring7)
     for _ in result: pass
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(LR_GRAMMAR, log=True).parse(mystring)
     for _ in result: pass
-
 
 class Column(Column):
     def add_transitive(self, key, state):
@@ -2065,13 +1951,12 @@ class LeoParser(LeoParser):
                 f_table[s.s_col.index].states.append(s)
         return f_table
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ep = LeoParser(RR_GRAMMAR)
     columns = ep.chart_parse(mystring, ep.start_symbol())
     r_table = ep.rearrange(columns)
     for col in r_table:
         print(col, "\n")
-
 
 class LeoParser(LeoParser):
     def parse(self, text):
@@ -2092,53 +1977,45 @@ class LeoParser(LeoParser):
         
         return super().parse_forest(chart, state)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR).parse(mystring)
     for tree in result:
         assert mystring == tree_to_string(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR2).parse(mystring2)
     for tree in result:
         assert mystring2 == tree_to_string(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR3).parse(mystring3)
     for tree in result:
         assert mystring3 == tree_to_string(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR4).parse(mystring4)
     for tree in result:
         assert mystring4 == tree_to_string(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR5).parse(mystring5)
     for tree in result:
         assert mystring5 == tree_to_string(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR6).parse(mystring6)
     for tree in result:
         assert mystring6 == tree_to_string(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR7).parse(mystring7)
     for tree in result:
         assert mystring7 == tree_to_string(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(LR_GRAMMAR).parse(mystring)
     for tree in result:
         assert mystring == tree_to_string(tree)
-
 
 RR_GRAMMAR8 = {
    '<start>': ['<A>'],
@@ -2153,25 +2030,22 @@ RR_GRAMMAR9 = {
 }
 mystring9 = 'bbbbbbb'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR8).parse(mystring8)
     for tree in result:
         print(repr(tree_to_string(tree)))
         assert mystring8 == tree_to_string(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     result = LeoParser(RR_GRAMMAR9).parse(mystring9)
     for tree in result:
         print(repr(tree_to_string(tree)))
         assert mystring9 == tree_to_string(tree)
 
+### Exercise 6: Filtered Earley Parser
 
-# ### Exercise 6: Filtered Earley Parser
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 6: Filtered Earley Parser')
-
 
 
 
@@ -2182,20 +2056,15 @@ RECURSION_GRAMMAR = {
     "<C>": ["<B>", "<B>bb", "BB"]
 }
 
-if __package__ is None or __package__ == "":
-    from ExpectError import ExpectTimeout
-else:
-    from .ExpectError import ExpectTimeout
+from .ExpectError import ExpectTimeout
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectTimeout(1, print_traceback=False):
         mystring = 'AA'
         parser = LeoParser(RECURSION_GRAMMAR)
         tree, *_ = parser.parse(mystring)
         assert tree_to_string(tree) == mystring
         display_tree(tree)
-
 
 class FilteredLeoParser(LeoParser):
     def forest(self, s, kind, seen, chart):
@@ -2223,67 +2092,59 @@ class FilteredLeoParser(LeoParser):
                              for s, k in reversed(pathexpr)
                              if not was_seen(seen, s)] for pathexpr in pathexprs]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'AA'
     parser = FilteredLeoParser(RECURSION_GRAMMAR)
     tree, *_ = parser.parse(mystring)
     assert tree_to_string(tree) == mystring
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'AAaa'
     parser = FilteredLeoParser(RECURSION_GRAMMAR)
     tree, *_ = parser.parse(mystring)
     assert tree_to_string(tree) == mystring
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'AAaaaa'
     parser = FilteredLeoParser(RECURSION_GRAMMAR)
     tree, *_ = parser.parse(mystring)
     assert tree_to_string(tree) == mystring
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'CC'
     parser = FilteredLeoParser(RECURSION_GRAMMAR)
     tree, *_ = parser.parse(mystring)
     assert tree_to_string(tree) == mystring
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'BBcc'
     parser = FilteredLeoParser(RECURSION_GRAMMAR)
     tree, *_ = parser.parse(mystring)
     assert tree_to_string(tree) == mystring
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'BB'
     parser = FilteredLeoParser(RECURSION_GRAMMAR)
     tree, *_ = parser.parse(mystring)
     assert tree_to_string(tree) == mystring
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mystring = 'BBccbb'
     parser = FilteredLeoParser(RECURSION_GRAMMAR)
     tree, *_ = parser.parse(mystring)
     assert tree_to_string(tree) == mystring
     display_tree(tree)
 
+### Exercise 7: Iterative Earley Parser
 
-# ### Exercise 7: Iterative Earley Parser
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 7: Iterative Earley Parser')
-
 
 
 
@@ -2345,7 +2206,7 @@ class IterativeEarleyParser(IterativeEarleyParser):
     def extract_trees(self, forest):
         yield self.extract_a_tree(forest)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_cases = [
         (A1_GRAMMAR, '1-2-3+4-5'),
         (A2_GRAMMAR, '1+2'),
@@ -2364,12 +2225,10 @@ if __name__ == "__main__":
         tree, *_ =  IterativeEarleyParser(grammar).parse(text)
         assert text == tree_to_string(tree)
 
+### Exercise 8: First Set of a Nonterminal
 
-# ### Exercise 8: First Set of a Nonterminal
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 8: First Set of a Nonterminal')
-
 
 
 
@@ -2394,15 +2253,13 @@ def firstset_(arg):
         first[A] |= first_expr(expression, first, epsilon)
     return (rules, first, epsilon)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     firstset(canonical(A1_GRAMMAR), EPSILON)
 
+### Exercise 9: Follow Set of a Nonterminal
 
-# ### Exercise 9: Follow Set of a Nonterminal
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 9: Follow Set of a Nonterminal')
-
 
 
 
@@ -2428,23 +2285,20 @@ def followset_(arg):
 
     return (grammar, epsilon, first, follow)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     followset(canonical(A1_GRAMMAR), START_SYMBOL)
 
+### Exercise 10: A LL(1) Parser
 
-# ### Exercise 10: A LL(1) Parser
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 10: A LL(1) Parser')
 
 
 
+#### Part 1: A LL(1) Parsing Table
 
-# #### Part 1: A LL(1) Parsing Table
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 1: A LL(1) Parsing Table')
-
 
 
 
@@ -2465,10 +2319,9 @@ class LL1Parser(Parser):
             actions = list(str(pr[t]) if t in pr else ' ' for t in ts)
             print('%s  \t| %s' % (k, ' | '.join(actions)))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for i, r in enumerate(rules(canonical(A2_GRAMMAR))):
         print("%d\t %s := %s" % (i, r[0], r[1]))
-
 
 class LL1Parser(LL1Parser):
     def predict(self, rulepair, first, follow, epsilon):
@@ -2496,17 +2349,15 @@ class LL1Parser(LL1Parser):
 
         self.table = parse_tbl
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ll1parser = LL1Parser(A2_GRAMMAR)
     ll1parser.parse_table()
     ll1parser.show_table()
 
+#### Part 2: The Parser
 
-# #### Part 2: The Parser
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 2: The Parser')
-
 
 
 
@@ -2550,8 +2401,7 @@ class LL1Parser(LL1Parser):
         assert len(stack) == 1
         return stack[0]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     ll1parser = LL1Parser(A2_GRAMMAR)
     tree = ll1parser.parse('1+2')
     display_tree(tree)
-

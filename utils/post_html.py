@@ -15,6 +15,7 @@ import re
 import sys
 import io
 import html
+import urllib
 
 try:
     import nbformat
@@ -32,6 +33,7 @@ parser.add_argument("--title", help="book title", default="The Fuzzing Book")
 parser.add_argument("--authors", help="list of authors", default="A. Zeller et al.")
 parser.add_argument("--twitter", help="twitter handle", default="@FuzzingBook")
 parser.add_argument("--menu-prefix", help="prefix to html files in menu")
+parser.add_argument("--all-chapters", help="List of all chapters")
 parser.add_argument("--public-chapters", help="List of public chapters")
 parser.add_argument("--ready-chapters", help="List of ready chapters")
 parser.add_argument("--todo-chapters", help="List of work-in-progress chapters")
@@ -126,12 +128,11 @@ site_citation_template = r"""
 __AUTHORS__: "<a href="__SITE_HTML__">__BOOKTITLE__</a>".  Retrieved __DATE__.
 </p>
 <pre>
-@incollection{__BIBTEX_KEY__:__CHAPTER__,
+@book{__BIBTEX_KEY__,
     author = {__AUTHORS_BIBTEX__},
-    booktitle = {__BOOKTITLE__},
     title = {__BOOKTITLE__},
     year = {__YEAR__},
-    publisher = {CISPA},
+    publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{__SITE_HTML__}},
     note = {Retrieved __DATE__},
     url = {__SITE_HTML__},
@@ -146,7 +147,7 @@ chapter_citation_template = r"""
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-__AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__ (eds.), "<a href="__SITE_HTML__">__BOOKTITLE__</a>", <a href="__CHAPTER_HTML__">__CHAPTER_HTML__</a>.  Retrieved __DATE__.
+__AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__, "<a href="__SITE_HTML__">__BOOKTITLE__</a>", <a href="__CHAPTER_HTML__">__CHAPTER_HTML__</a>.  Retrieved __DATE__.
 </p>
 <pre>
 @incollection{__BIBTEX_KEY__:__CHAPTER__,
@@ -154,7 +155,7 @@ __AUTHORS__: "<a href="__CHAPTER_HTML__">__CHAPTER_TITLE__</a>".  In __AUTHORS__
     booktitle = {__BOOKTITLE__},
     title = {__CHAPTER_TITLE__},
     year = {__YEAR__},
-    publisher = {CISPA},
+    publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{__CHAPTER_HTML__}},
     note = {Retrieved __DATE__},
     url = {__CHAPTER_HTML__},
@@ -174,8 +175,6 @@ The source code that is part of the content, as well as the source code used to 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
-
-<iframe src="http://fuzzingbook.cispa.saarland/rVBkxhK1wuOrGfGe1HZL/__CHAPTER_TITLE__" style="width:0;height:0;border:0; border:none;"></iframe>
 
 <script>
 function revealCitation() {
@@ -216,10 +215,15 @@ def get_sections(notebook):
 
     sections = [match.replace(r'\n', '') for match in matches]
     # print("Sections", repr(sections).encode('utf-8'))
-
+    
     # Filter out second synopsis section
     if '## Synopsis' in sections:
         sections = ['## Synopsis'] + [sec for sec in sections if sec != '## Synopsis']
+    
+    # Filter out "End of Excursion" titles
+    sections = [sec for sec in sections 
+        if sec != '## End of Excursion' and sec != '### End of Excursion']
+
     return sections
 
     
@@ -309,7 +313,7 @@ assert bibtex_unescape(r"P{\`e}zze") == 'Pèzze'
 RE_IMPORT = re.compile(r'<span class="nn">([^<]+)</span>')
 
 # Add links to imports
-def add_links_to_imports(contents):
+def add_links_to_imports(contents, html_file):
     imports = re.findall(RE_IMPORT, contents)
     for module in imports:
         link = None
@@ -326,14 +330,60 @@ def add_links_to_imports(contents):
         elif module.startswith(project):
             # Point to notebook
             link = module[module.find('.') + 1:] + '.html'
+        elif module in ['debuggingbook', 'fuzzingbook']:
+            link = f"https://www.{module}.org/"
+        elif (module.startswith('debuggingbook') or
+              module.startswith('fuzzingbook')):
+            base = module[:module.find('.')]
+            submodule = module[module.find('.') + 1:]
+            link = f"https://www.{base}.org/html/{submodule}.html"
+        elif module in ['astor', 'pydriller', 'ipywidgets', 'graphviz']:
+            link = f'https://{module}.readthedocs.io/'
+        elif module in ['enforce', 'showast']:
+            link = f'https://pypi.org/project/{module}/'
+        elif module == 'magic':
+            link = 'https://pypi.org/project/python-magic/'
+        elif module == 'diff_match_patch':
+            link = 'https://github.com/google/diff-match-patch'
+        elif module == 'easyplotly':
+            link = 'https://mwouts.github.io/easyplotly/'
+        elif module == 'numpy':
+            link = 'https://numpy.org/'
+        elif module.startswith('matplotlib'):
+            link = 'https://matplotlib.org/'
+        elif module.startswith('plotly'):
+            link = 'https://plotly.com/python/'
+        elif module.startswith('sklearn'):
+            link = 'https://scikit-learn.org/'
+        elif module in ['ep', 'go', 'plt', 'np']:
+            link = None  # aliases
         elif module[0].islower():
             # Point to Python doc
             link = "https://docs.python.org/3/library/" + module + ".html"
         else:
             # Point to notebook
             link = module + '.html'
+            
+        # print(f'{module} -> ', repr(link))
+   
+        if link and link.startswith('http'):
+            # Check whether link exists
+            try:
+                urllib.request.urlopen(link)
+            except urllib.error.HTTPError as exc:
+                if exc.code == 403:
+                    # We get this when accessing readthedocs.io
+                    pass
+                else:
+                    print(f"{html_file}: Cannot find link {link} for {repr(module)}: {exc}",
+                          file=sys.stderr)
+                    link = None
+            except urllib.error.URLError as exc:
+                print(f"{html_file}: Cannot open {link} for {repr(module)}: {exc}",
+                          file=sys.stderr)
+                link = None
 
-        if link is not None:
+        if link:
             contents = contents.replace(r'<span class="nn">' + module + r'</span>',
                 r'<span class="nn"><a href="' + link 
                 + r'" class="import" target="_blank">' 
@@ -341,8 +391,9 @@ def add_links_to_imports(contents):
 
     return contents
 
-# Remove cells that only contain a quiz() or a display() call. Keep the output.
-RE_DISPLAY = re.compile(r'''
+# Remove cells that start with `# ignore` or only contain 
+# a quiz() or a display() call. Keep the output.
+RE_IGNORE = re.compile(r'''
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -357,7 +408,7 @@ RE_DISPLAY = re.compile(r'''
 ''', re.DOTALL)
 
 def remove_ignored_code(text):
-    return RE_DISPLAY.sub('', text)
+    return RE_IGNORE.sub('', text)
 
 assert remove_ignored_code('''
 <div class="input_code">
@@ -378,6 +429,12 @@ assert remove_ignored_code('''
 </div>
 </div>
 ''') == ''
+
+
+# Remove `# type: ignore` comments
+RE_TYPE_IGNORE = re.compile(r'  <span class="c1"># type: ignore</span>')
+def remove_type_ignore(text):
+    return RE_TYPE_IGNORE.sub('', text)
 
 
 # Sharing
@@ -426,6 +483,24 @@ def highlight_synopsis(text):
 def fix_css(text):
     # Avoid forcing text color to black when printing
     return text.replace('color: #000 !important;', '')
+
+
+# Inline our SVG graphics
+RE_IMG_SVG = re.compile(r'<img src="(PICS/[^"]*.svg)"[^>]*>')
+
+def inline_svg_graphics(text, chapter_html_file):
+    while True:
+        match = RE_IMG_SVG.search(text)
+        if not match:
+            break
+        
+        src = match.group(1)
+        svg_file = os.path.join(os.path.dirname(chapter_html_file), src)
+        svg_data = open(svg_file).read()
+        text = text[:match.start()] + svg_data + text[match.end():]
+
+    return text
+
 
 # Handle Excursions
 # Cells with "Excursion: <summary>" and "End of Excursion" are translated to 
@@ -529,6 +604,11 @@ if args.public_chapters is not None:
 else:
     public_chapters = []
 
+if args.all_chapters is not None:
+    all_chapters = args.all_chapters.split()
+else:
+    all_chapters = []
+
 if args.include_ready and args.ready_chapters is not None:
     ready_chapters = args.ready_chapters.split()
 else:
@@ -541,7 +621,6 @@ else:
     
 new_chapters = args.new_chapters.split()
 beta_chapters = ready_chapters + todo_chapters
-all_chapters = public_chapters # + beta_chapters
 include_beta = args.include_ready or args.include_todo
 
 new_suffix = ' <strong class="new_chapter">&bull;</strong>'
@@ -599,6 +678,9 @@ for section in sections:
     depth = section.count('#')
     while section.startswith('#') or section.startswith(' '):
         section = section[1:]
+        
+    if section.startswith('['):
+        section = section[1:section.find(']')]
 
     if depth == current_depth:
         all_sections_menu += '</li>'
@@ -635,8 +717,8 @@ is_todo_chapter = include_beta and chapter_ipynb_file in todo_chapters
 is_ready_chapter = include_beta and chapter_ipynb_file in ready_chapters
 if is_todo_chapter:
     chapter_title_beta += " " + todo_suffix
-if is_ready_chapter:
-    chapter_title_beta += " " + ready_suffix
+# if is_ready_chapter:
+#     chapter_title_beta += " " + ready_suffix
 
 if args.home:
     link_class = ' class="this_page"'
@@ -658,11 +740,16 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
     basename = os.path.splitext(os.path.basename(menu_ipynb_file))[0]
     structured_title = '' # '<span class="chnum">' + repr(counter + 1) + '</span> '
     title = ""
+    
+    is_public = menu_ipynb_file in public_chapters
 
     if menu_ipynb_file == chapter_ipynb_file:
         link_class = ' class="this_page"'
+    elif not is_public:
+        link_class = ' class="not_public"'
     else:
         link_class = ''
+
     file_title = get_title(menu_ipynb_file)
     
     if menu_ipynb_file in new_chapters:
@@ -691,8 +778,8 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
     structured_title += file_title
 
     beta_indicator = ''
-    if menu_ipynb_file in ready_chapters:
-        beta_indicator = "&nbsp;" + ready_suffix
+    # if menu_ipynb_file in ready_chapters:
+    #     beta_indicator = "&nbsp;" + ready_suffix
     if menu_ipynb_file in todo_chapters:
         beta_indicator = "&nbsp;" + todo_suffix
     menu_html_file = menu_prefix + basename + ".html"
@@ -708,12 +795,16 @@ for counter, menu_ipynb_file in enumerate(all_chapters):
         structured_all_chapters_menu += ' <i class="fa fa-fw fa-caret-right"></i></a>\n<ul>\n'
         in_sublist = True
     else:
+        # New chapter
+        menu_link = menu_html_file if is_public else "#"
+        
         structured_item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
-            (menu_html_file, link_class, structured_title, beta_indicator)
+            (menu_link, link_class, structured_title, beta_indicator)
+
         structured_all_chapters_menu += structured_item
-    
+
         item = '<li><a href="%s"%s>%s%s</a></li>\n' % \
-            (menu_html_file, link_class, title, beta_indicator)
+            (menu_link, link_class, title, beta_indicator)
         all_chapters_menu += item
     
 if in_sublist:
@@ -790,11 +881,17 @@ chapter_contents = chapter_contents \
     .replace("__YEAR__", notebook_modification_year) \
     .replace("__BIBTEX_KEY__", project + notebook_modification_year)
 
-# Remove code cells that only display graphics
+# Remove code cells that only display graphics or start with `#ignore`
 chapter_contents = remove_ignored_code(chapter_contents)
 
+# Remove `# type: ignore` comments
+chapter_contents = remove_type_ignore(chapter_contents)
+
 # Add links to imports
-chapter_contents = add_links_to_imports(chapter_contents)
+chapter_contents = add_links_to_imports(chapter_contents, chapter_html_file)
+
+# Inline SVG graphics (preserving style and tooltips)
+chapter_contents = inline_svg_graphics(chapter_contents, chapter_html_file)
 
 # Fix simple .ipynb links within text and XML
 if args.home:

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2020-10-10 17:48:32+02:00
+# Last change: 2021-06-08 11:29:43+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,89 +27,150 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Testing Graphical User Interfaces
 
-# # Testing Graphical User Interfaces
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python GUIFuzzer.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.GUIFuzzer import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/GUIFuzzer.html
+
+This chapter demonstrates how to programmatically interact with user interfaces, using Selenium on Web browsers.  It provides an experimental  `GUICoverageFuzzer` class that automatically explores a user interface by systematically interacting with all available user interface elements.
+
+The function `start_webdriver()` starts a headless Web browser in the background and returns a _GUI driver_ as handle for further communication.
+
+>>> gui_driver = start_webdriver()
+
+We let it the browser open the URL of the server we want to investigate (in this case, the vulnerable server from [the chapter on Web fuzzing](WebFuzzer.ipynb)) and obtain a screen shot.
+
+>>> gui_driver.get(httpd_url)
+>>> Image(gui_driver.get_screenshot_as_png())
+The `GUICoverageFuzzer` class explores the user interface and builds a _grammar_ that encodes all states as well as the user interactions required to move from one state to the next.  It is paired with a `GUIRunner` which interacts with the GUI driver.
+
+>>> gui_fuzzer = GUICoverageFuzzer(gui_driver)
+>>> gui_runner = GUIRunner(gui_driver)
+
+The `explore_all()` method extracts all states and all transitions from a Web user interface.
+
+>>> gui_fuzzer.explore_all(gui_runner)
+
+The grammar embeds a finite state automation and is best visualized as such.
+
+>>> fsm_diagram(gui_fuzzer.grammar)
+The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow paths through the finite state machine.  Since `GUICoverageFuzzer` is derived from `CoverageFuzzer` (see the [chapter on coverage-based grammar fuzzing](GrammarCoverageFuzzer.ipynb)), it automatically covers (a) as many transitions between states as well as (b) as many form elements as possible.  In our case, the first set of actions explores the transition via the "order form" link; the second set then goes until the "" state.
+
+>>> gui_driver.get(httpd_url)
+>>> actions = gui_fuzzer.fuzz()
+>>> print(actions)
+fill('zip', '9')
+fill('name', 'h')
+check('terms', True)
+fill('city', 'j')
+fill('email', 'a@xb')
+submit('submit')
+click('order form')
+fill('zip', '0')
+fill('name', 'L')
+check('terms', False)
+fill('city', 'N')
+fill('email', 'k@B')
+submit('submit')
+
+
+
+These actions can be fed into the GUI runner, which will execute them on the given GUI driver.
+
+>>> gui_driver.get(httpd_url)
+>>> result, outcome = gui_runner.run(actions)
+>>> Image(gui_driver.get_screenshot_as_png())
+Further invocations of `fuzz()` will further cover the model – for instance, exploring the terms and conditions.
+
+A tool like `GUICoverageFuzzer` will provide "deep" exploration of user interfaces, even filling out forms to explore what is behind them. Keep in mind, though, that `GUICoverageFuzzer` is experimental: It only supports a subset of HTML form and link features, and does not take JavaScript into account.
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Testing Graphical User Interfaces"
+at https://www.fuzzingbook.org/html/GUIFuzzer.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Testing Graphical User Interfaces
+# =================================
+
+if __name__ == '__main__':
     print('# Testing Graphical User Interfaces')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## Automated GUI Interaction
+## -------------------------
 
-# ## Automated GUI Interaction
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Automated GUI Interaction')
 
 
 
+### Our Web Server, Again
 
-# ### Our Web Server, Again
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Our Web Server, Again')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
-
-if __package__ is None or __package__ == "":
-    from WebFuzzer import init_db, start_httpd, webbrowser, print_httpd_messages, print_url, ORDERS_DB
-else:
-    from .WebFuzzer import init_db, start_httpd, webbrowser, print_httpd_messages, print_url, ORDERS_DB
-
+from .WebFuzzer import init_db, start_httpd, webbrowser, print_httpd_messages, print_url, ORDERS_DB
 
 import html
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     db = init_db()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     httpd_process, httpd_url = start_httpd()
     print_url(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     from IPython.display import display, Image
 
+from .bookutils import HTML, rich_output
 
-if __package__ is None or __package__ == "":
-    from bookutils import HTML, rich_output
-else:
-    from .bookutils import HTML, rich_output
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(webbrowser(httpd_url))
 
+### Remote Control with Selenium
 
-# ### Remote Control with Selenium
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Remote Control with Selenium')
-
 
 
 
 from selenium import webdriver
 
 BROWSER = 'firefox'
-
-# BROWSER = 'chrome'
 
 HEADLESS = True
 
@@ -141,136 +202,107 @@ def start_webdriver(browser=BROWSER, headless=HEADLESS, zoom=1.4):
             
     return gui_driver
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver = start_webdriver(browser=BROWSER, headless=HEADLESS)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_httpd_messages()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
+### Filling out Forms
 
-# ### Filling out Forms
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Filling out Forms')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     name = gui_driver.find_element_by_name("name")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     name.send_keys("Jane Doe")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     email = gui_driver.find_element_by_name("email")
     email.send_keys("j.doe@example.com")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     city = gui_driver.find_element_by_name('city')
     city.send_keys("Seattle")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     zip = gui_driver.find_element_by_name('zip')
     zip.send_keys("98104")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     terms = gui_driver.find_element_by_name('terms')
     terms.click()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     submit = gui_driver.find_element_by_name('submit')
     submit.click()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_httpd_messages()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
+### Navigating
 
-# ### Navigating
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Navigating')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.back()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     links = gui_driver.find_elements_by_tag_name("a")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     links[0].get_attribute('href')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     links[0].click()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_httpd_messages()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.back()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_httpd_messages()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
+### Writing Test Cases
 
-# ### Writing Test Cases
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Writing Test Cases')
-
 
 
 
@@ -302,65 +334,55 @@ def test_successful_order(driver, url):
     
     return True
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_successful_order(gui_driver, httpd_url)
 
+## Retrieving User Interface Actions
+## ---------------------------------
 
-# ## Retrieving User Interface Actions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Retrieving User Interface Actions')
 
 
 
+### User Interface Elements
 
-# ### User Interface Elements
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### User Interface Elements')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ui_elements = gui_driver.find_elements_by_tag_name("input")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for element in ui_elements:
         print("Name: %-10s | Type: %-10s | Text: %s" % (element.get_attribute('name'), element.get_attribute('type'), element.text))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ui_elements = gui_driver.find_elements_by_tag_name("a")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for element in ui_elements:
         print("Name: %-10s | Type: %-10s | Text: %s" % (element.get_attribute('name'), element.get_attribute('type'), element.text))
 
+### User Interface Actions
 
-# ### User Interface Actions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### User Interface Actions')
 
 
 
+### Retrieving Actions
 
-# ### Retrieving Actions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Retrieving Actions')
-
 
 
 
@@ -376,11 +398,10 @@ class GUIGrammarMiner(GUIGrammarMiner):
             | self.mine_button_element_actions()
             | self.mine_a_element_actions())
 
-# #### Input Element Actions
+#### Input Element Actions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Input Element Actions')
-
 
 
 
@@ -413,16 +434,14 @@ class GUIGrammarMiner(GUIGrammarMiner):
 
         return actions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_grammar_miner = GUIGrammarMiner(gui_driver)
     gui_grammar_miner.mine_input_element_actions()
 
+#### Button Element Actions
 
-# #### Button Element Actions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Button Element Actions')
-
 
 
 
@@ -445,16 +464,14 @@ class GUIGrammarMiner(GUIGrammarMiner):
 
         return actions
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_grammar_miner = GUIGrammarMiner(gui_driver)
     gui_grammar_miner.mine_button_element_actions()
 
+#### Link Element Actions
 
-# #### Link Element Actions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Link Element Actions')
-
 
 
 
@@ -486,114 +503,81 @@ class GUIGrammarMiner(GUIGrammarMiner):
         target_url = urljoin(current_url, link)
         return urlsplit(current_url).hostname == urlsplit(target_url).hostname       
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_grammar_miner = GUIGrammarMiner(gui_driver)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_grammar_miner.follow_link("ftp://foo.bar/")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_grammar_miner.follow_link("https://127.0.0.1/")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_grammar_miner = GUIGrammarMiner(gui_driver)
     gui_grammar_miner.mine_a_element_actions()
 
+#### All Together
 
-# #### All Together
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### All Together')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_grammar_miner = GUIGrammarMiner(gui_driver)
     gui_grammar_miner.mine_state_actions()
 
+## Models for User Interfaces
+## --------------------------
 
-# ## Models for User Interfaces
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Models for User Interfaces')
 
 
 
+### User Interfaces as Finite State Machines
 
-# ### User Interfaces as Finite State Machines
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### User Interfaces as Finite State Machines')
 
 
 
+from graphviz import Digraph
 
-if __name__ == "__main__":
-    from graphviz import Digraph
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     from IPython.display import display
 
+from .GrammarFuzzer import dot_escape
 
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import dot_escape
-else:
-    from .GrammarFuzzer import dot_escape
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dot = Digraph(comment="Finite State Machine")
     dot.node(dot_escape('<start>'))
     dot.edge(dot_escape('<start>'), dot_escape('<Order Form>'))
     dot.edge(dot_escape('<Order Form>'), dot_escape('<Terms and Conditions>'), "click('Terms and conditions')")
-    dot.edge(dot_escape('<Order Form>'), dot_escape('<Thank You>'), "fill(...)\lsubmit('submit')")
+    dot.edge(dot_escape('<Order Form>'), dot_escape('<Thank You>'), r"fill(...)\lsubmit('submit')")
     dot.edge(dot_escape('<Terms and Conditions>'), dot_escape('<Order Form>'), "click('order form')")
     dot.edge(dot_escape('<Thank You>'), dot_escape('<Order Form>'), "click('order form')")
     display(dot)
 
+### State Machines as Grammars
 
-# ### State Machines as Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### State Machines as Grammars')
 
 
 
+### Retrieving State Grammars
 
-# ### Retrieving State Grammars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Retrieving State Grammars')
 
 
 
+from .Grammars import new_symbol
 
-if __package__ is None or __package__ == "":
-    from Grammars import new_symbol
-else:
-    from .Grammars import new_symbol
-
-
-if __package__ is None or __package__ == "":
-    from Grammars import nonterminals, START_SYMBOL
-else:
-    from .Grammars import nonterminals, START_SYMBOL
-
-if __package__ is None or __package__ == "":
-    from Grammars import extend_grammar, unreachable_nonterminals, opts, crange, srange
-else:
-    from .Grammars import extend_grammar, unreachable_nonterminals, opts, crange, srange
-
-if __package__ is None or __package__ == "":
-    from Grammars import syntax_diagram, is_valid_grammar
-else:
-    from .Grammars import syntax_diagram, is_valid_grammar
-
+from .Grammars import nonterminals, START_SYMBOL
+from .Grammars import extend_grammar, unreachable_nonterminals, opts, crange, srange
+from .Grammars import syntax_diagram, is_valid_grammar
 
 class GUIGrammarMiner(GUIGrammarMiner):
     START_STATE = "<state>"
@@ -627,9 +611,8 @@ class GUIGrammarMiner(GUIGrammarMiner):
         "<hidden>": "<string>",
     })
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(GUIGrammarMiner.GUI_GRAMMAR)
-
 
 class GUIGrammarMiner(GUIGrammarMiner):
     def new_state_symbol(self, grammar):
@@ -685,34 +668,25 @@ class GUIGrammarMiner(GUIGrammarMiner):
         
         return grammar
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_grammar_miner = GUIGrammarMiner(gui_driver)
     state_grammar = gui_grammar_miner.mine_state_grammar()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     state_grammar[GUIGrammarMiner.START_STATE]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     state_grammar['<state-1>']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     state_grammar['<state-2>']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     state_grammar['<unexplored>']
-
 
 from collections import deque
 
-if __package__ is None or __package__ == "":
-    from bookutils import unicode_escape
-else:
-    from .bookutils import unicode_escape
-
+from .bookutils import unicode_escape
 
 def fsm_diagram(grammar, start_symbol=START_SYMBOL):
     from graphviz import Digraph
@@ -744,17 +718,12 @@ def fsm_diagram(grammar, start_symbol=START_SYMBOL):
                 
     return display(dot)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     fsm_diagram(state_grammar)
 
+from .GrammarFuzzer import GrammarFuzzer
 
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer
-else:
-    from .GrammarFuzzer import GrammarFuzzer
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer = GrammarFuzzer(state_grammar)
     while True:
         action = gui_fuzzer.fuzz()
@@ -762,20 +731,14 @@ if __name__ == "__main__":
             break
     print(action)
 
+### Executing User Interface Actions
 
-# ### Executing User Interface Actions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Executing User Interface Actions')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from Fuzzer import Runner
-else:
-    from .Fuzzer import Runner
-
+from .Fuzzer import Runner
 
 class GUIRunner(Runner):
     def __init__(self, driver):
@@ -840,76 +803,56 @@ class GUIRunner(GUIRunner):
         element.click()
         WebDriverWait(self.driver, self.DELAY_AFTER_CLICK)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_runner = GUIRunner(gui_driver)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_runner.run("fill('name', 'Walter White')")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_runner.run("submit('submit')")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer = GrammarFuzzer(state_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     while True:
         action = gui_fuzzer.fuzz()
         if action.find('submit(') > 0:
             break
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(action)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_runner.run(action)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
+## Exploring User Interfaces
+## -------------------------
 
-# ## Exploring User Interfaces
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exploring User Interfaces')
 
 
 
+from .Grammars import is_nonterminal
 
-if __package__ is None or __package__ == "":
-    from Grammars import is_nonterminal
-else:
-    from .Grammars import is_nonterminal
-
-
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer
-else:
-    from .GrammarFuzzer import GrammarFuzzer
-
+from .GrammarFuzzer import GrammarFuzzer
 
 class GUIFuzzer(GrammarFuzzer):
     def __init__(self, driver, 
@@ -932,45 +875,35 @@ class GUIFuzzer(GrammarFuzzer):
         grammar = self.miner.mine_state_grammar()
         super().__init__(grammar, **kwargs)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer = GUIFuzzer(gui_driver)
     gui_fuzzer.state_symbol
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer.state
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer.states_seen[gui_fuzzer.state]
-
 
 class GUIFuzzer(GUIFuzzer):
     def restart(self):
         self.driver.get(self.initial_url)
         self.state = GUIGrammarMiner.START_STATE
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     while True:
         action = gui_fuzzer.fuzz()
         if action.find('click(') >= 0:
             break
 
+from .GrammarFuzzer import display_tree
 
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import display_tree
-else:
-    from .GrammarFuzzer import display_tree
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = gui_fuzzer.derivation_tree
     display_tree(tree)
-
 
 class GUIFuzzer(GUIFuzzer):
     def fsm_path(self, tree):
@@ -983,10 +916,9 @@ class GUIFuzzer(GUIFuzzer):
         else:
             return [node] + self.fsm_path(children[-1])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer = GUIFuzzer(gui_driver)
     gui_fuzzer.fsm_path(tree)
-
 
 class GUIFuzzer(GUIFuzzer):
     def fsm_last_state_symbol(self, tree):
@@ -996,10 +928,9 @@ class GUIFuzzer(GUIFuzzer):
                 return state
         assert False
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer = GUIFuzzer(gui_driver)
     gui_fuzzer.fsm_last_state_symbol(tree)
-
 
 class GUIFuzzer(GUIFuzzer):
     def run(self, runner):
@@ -1049,11 +980,7 @@ class GUIFuzzer(GUIFuzzer):
         del state_grammar[GUIGrammarMiner.START_STATE]
         self.set_grammar(extend_grammar(self.grammar, state_grammar))
 
-if __package__ is None or __package__ == "":
-    from Grammars import exp_string, exp_opts
-else:
-    from .Grammars import exp_string, exp_opts
-
+from .Grammars import exp_string, exp_opts
 
 def replace_symbol(grammar, old_symbol, new_symbol):
     """Return a grammar in which all occurrences of `old_symbol` are replaced by `new_symbol`"""
@@ -1092,49 +1019,35 @@ class GUIFuzzer(GUIFuzzer):
             self.state_symbol = self.states_seen[self.state]
             self.set_grammar(new_grammar)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer = GUIFuzzer(gui_driver, log_gui_exploration=True, disp_gui_exploration=True)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer.run(gui_runner)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer.run(gui_runner)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer.run(gui_runner)
 
+## Covering States
+## ---------------
 
-# ## Covering States
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Covering States')
 
 
 
+from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
 
-if __package__ is None or __package__ == "":
-    from GrammarCoverageFuzzer import GrammarCoverageFuzzer
-else:
-    from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
+from .bookutils import inheritance_conflicts
 
-
-if __package__ is None or __package__ == "":
-    from bookutils import inheritance_conflicts
-else:
-    from .bookutils import inheritance_conflicts
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     inheritance_conflicts(GUIFuzzer, GrammarCoverageFuzzer)
-
 
 class GUICoverageFuzzer(GUIFuzzer, GrammarCoverageFuzzer):
     def __init__(self, *args, **kwargs):
@@ -1157,233 +1070,198 @@ class GUICoverageFuzzer(GUICoverageFuzzer):
             except NoSuchElementException:
                 pass
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer = GUICoverageFuzzer(gui_driver)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer.explore_all(gui_runner)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     fsm_diagram(gui_fuzzer.grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer.covered_expansions
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer.missing_expansion_coverage()
 
+## Exploring Large Sites
+## ---------------------
 
-# ## Exploring Large Sites
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exploring Large Sites')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get("https://www.fuzzingbook.org/html/Fuzzer.html")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     book_runner = GUIRunner(gui_driver)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     book_fuzzer = GUICoverageFuzzer(gui_driver, log_gui_exploration=True)  # , disp_gui_exploration=True)
-
 
 ACTIONS = 5
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     book_fuzzer.explore_all(book_runner, max_actions=ACTIONS)
 
-
-if __name__ == "__main__":
-    # Inspect this graph in the notebook to see it in full glory
+if __name__ == '__main__':
     fsm_diagram(book_fuzzer.grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.quit()
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver = start_webdriver()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get(httpd_url)
     Image(gui_driver.get_screenshot_as_png())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer = GUICoverageFuzzer(gui_driver)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_runner = GUIRunner(gui_driver)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_fuzzer.explore_all(gui_runner)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     fsm_diagram(gui_fuzzer.grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get(httpd_url)
     actions = gui_fuzzer.fuzz()
     print(actions)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.get(httpd_url)
     result, outcome = gui_runner.run(actions)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     httpd_process.terminate()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gui_driver.quit()
-
 
 import os
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for temp_file in [ORDERS_DB, "geckodriver.log", "ghostdriver.log"]:
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: Stay in Local State
 
-# ### Exercise 1: Stay in Local State
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: Stay in Local State')
 
 
 
+### Exercise 2: Going Back
 
-# ### Exercise 2: Going Back
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Going Back')
 
 
 
+### Exercise 3: Avoiding Bad Form Values
 
-# ### Exercise 3: Avoiding Bad Form Values
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 3: Avoiding Bad Form Values')
 
 
 
+### Exercise 4: Saving Form Values
 
-# ### Exercise 4: Saving Form Values
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 4: Saving Form Values')
 
 
 
+### Exercise 5: Same Names, Same States
 
-# ### Exercise 5: Same Names, Same States
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 5: Same Names, Same States')
 
 
 
+### Exercise 6: Combinatorial Coverage
 
-# ### Exercise 6: Combinatorial Coverage
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 6: Combinatorial Coverage')
 
 
 
+### Exercise 7: Implicit Delays
 
-# ### Exercise 7: Implicit Delays
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 7: Implicit Delays')
 
 
 
+### Exercise 8: Oracles
 
-# ### Exercise 8: Oracles
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 8: Oracles')
 
 
 
+### Exercise 9: More UI Elements
 
-# ### Exercise 9: More UI Elements
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 9: More UI Elements')
-
 
 

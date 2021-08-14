@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Mutation Analysis" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationAnalysis.html
-# Last change: 2019-10-19 14:18:05+02:00
+# Last change: 2021-06-04 14:41:13+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,28 +27,170 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Mutation Analysis
 
-# # Mutation Analysis
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python MutationAnalysis.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.MutationAnalysis import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/MutationAnalysis.html
+
+This chapter introduces two methods of running *mutation analysis* on subject programs. The first class `MuFunctionAnalyzer` targets individual functions. Given a function `gcd` and two test cases evaluate, one can run mutation analysis on the test cases as follows:
+
+>>> for mutant in MuFunctionAnalyzer(gcd, log=True):
+>>>     with mutant:
+>>>         assert gcd(1, 0) == 1, "Minimal"
+>>>         assert gcd(0, 1) == 1, "Mirror"
+>>> mutant.pm.score()
+->	gcd_1
+	gcd_2
+	gcd_3
+	gcd_4
+ Minimal
+
+
+0.25
+
+The second class `MuProgramAnalyzer` targets standalone programs with test suites. Given a program `gcd` whose source code is provided in `gcd_src` and the test suite is provided by `TestGCD`, one can evaluate the mutation score of `TestGCD` as follows:
+
+>>> class TestGCD(unittest.TestCase):
+>>>     def test_simple(self):
+>>>         assert cfg.gcd(1, 0) == 1
+>>> 
+>>>     def test_mirror(self):
+>>>         assert cfg.gcd(0, 1) == 1
+>>> for mutant in MuProgramAnalyzer('gcd', gcd_src):
+>>>     mutant[test_module].runTest('TestGCD')
+>>> mutant.pm.score()
+======================================================================
+FAIL: test_simple (__main__.TestGCD)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "", line 3, in test_simple
+    assert cfg.gcd(1, 0) == 1
+AssertionError
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+======================================================================
+FAIL: test_simple (__main__.TestGCD)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "", line 3, in test_simple
+    assert cfg.gcd(1, 0) == 1
+AssertionError
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+======================================================================
+FAIL: test_simple (__main__.TestGCD)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "", line 3, in test_simple
+    assert cfg.gcd(1, 0) == 1
+AssertionError
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+======================================================================
+FAIL: test_simple (__main__.TestGCD)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "", line 3, in test_simple
+    assert cfg.gcd(1, 0) == 1
+AssertionError
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+======================================================================
+FAIL: test_simple (__main__.TestGCD)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "", line 3, in test_simple
+    assert cfg.gcd(1, 0) == 1
+AssertionError
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+======================================================================
+FAIL: test_simple (__main__.TestGCD)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "", line 3, in test_simple
+    assert cfg.gcd(1, 0) == 1
+AssertionError
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+======================================================================
+FAIL: test_simple (__main__.TestGCD)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "", line 3, in test_simple
+    assert cfg.gcd(1, 0) == 1
+AssertionError
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (failures=1)
+
+1.0
+
+The mutation score thus obtained is a better indicator of the quality of a given test suite than pure coverage.
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Mutation Analysis"
+at https://www.fuzzingbook.org/html/MutationAnalysis.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Mutation Analysis
+# =================
+
+if __name__ == '__main__':
     print('# Mutation Analysis')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## Why Structural Coverage is Not Enough
+## -------------------------------------
 
-# ## Why Structural Coverage is Not Enough
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Why Structural Coverage is Not Enough')
-
 
 
 
@@ -63,19 +205,19 @@ def ineffective_test():
         pass
     assert True
 
-# ## Seeding Artificial Faults with Mutation Analysis
+## Seeding Artificial Faults with Mutation Analysis
+## ------------------------------------------------
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Seeding Artificial Faults with Mutation Analysis')
 
 
 
+## Structural Coverage Adequacy by Example
+## ---------------------------------------
 
-# ## Structural Coverage Adequacy by Example
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Structural Coverage Adequacy by Example')
-
 
 
 
@@ -103,21 +245,15 @@ def strong_oracle(fn):
 
     assert fn(1, 2, 3) == 'Scalene'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     strong_oracle(triangle)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
-
-if __package__ is None or __package__ == "":
-    from Coverage import Coverage
-else:
-    from .Coverage import Coverage
-
+from .Coverage import Coverage
 
 import inspect
 
@@ -130,14 +266,12 @@ class Coverage(Coverage):
         for i, s in enumerate(src.split('\n')):
             print('%s %2d: %s' % ('#' if i + 1 in covered else ' ', i + 1, s))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov:
         strong_oracle(triangle)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov.show_coverage(triangle)
-
 
 def weak_oracle(fn):
     assert fn(1, 1, 1) == 'Equilateral'
@@ -148,20 +282,18 @@ def weak_oracle(fn):
 
     assert fn(1, 2, 3) != 'Equilateral'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov:
         weak_oracle(triangle)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov.show_coverage(triangle)
 
+## Injecting Artificial Faults
+## ---------------------------
 
-# ## Injecting Artificial Faults
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Injecting Artificial Faults')
-
 
 
 
@@ -181,27 +313,21 @@ def triangle_m1(a, b, c):
             else:
                 return "Scalene"
 
-if __package__ is None or __package__ == "":
-    from ExpectError import ExpectError
-else:
-    from .ExpectError import ExpectError
+from .ExpectError import ExpectError
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         weak_oracle(triangle_m1)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with ExpectError():
         strong_oracle(triangle_m1)
 
+## Mutating Python Code
+## --------------------
 
-# ## Mutating Python Code
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Mutating Python Code')
-
 
 
 
@@ -209,50 +335,36 @@ import ast
 import astor
 import inspect
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     triangle_source = inspect.getsource(triangle)
     triangle_source
 
+from .bookutils import print_content
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import print_content
-else:
-    from .fuzzingbook_utils import print_content
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(triangle_source, '.py')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     triangle_ast = ast.parse(triangle_source)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(astor.dump_tree(triangle_ast))
 
+from .bookutils import rich_output
 
-if __package__ is None or __package__ == "":
-    from fuzzingbook_utils import rich_output
-else:
-    from .fuzzingbook_utils import rich_output
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if rich_output():
         import showast
         showast.show_ast(triangle_ast)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_content(astor.to_source(triangle_ast), '.py')
 
+## A Simple Mutator for Functions
+## ------------------------------
 
-# ## A Simple Mutator for Functions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## A Simple Mutator for Functions')
-
 
 
 
@@ -317,9 +429,8 @@ class StmtDeletionMutator(Mutator):
 class StmtDeletionMutator(StmtDeletionMutator):
     def mutation_visit(self, node): return ast.Pass()    
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     MuFunctionAnalyzer(triangle).nmutations
-
 
 class MuFunctionAnalyzer(MuFunctionAnalyzer):
     def __iter__(self):
@@ -351,10 +462,9 @@ class Mutant:
         self.detected = False
         self.log = log
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for m in MuFunctionAnalyzer(triangle):
         print(m.name)
-
 
 class Mutant(Mutant):
     def generate_mutant(self, location):
@@ -370,7 +480,7 @@ class Mutant(Mutant):
 
 import difflib
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuFunctionAnalyzer(triangle):
         shape_src = mutant.pm.src
         for line in difflib.unified_diff(mutant.pm.src.split('\n'),
@@ -378,7 +488,6 @@ if __name__ == "__main__":
                                          fromfile=mutant.pm.name,
                                          tofile=mutant.name, n=3):
             print(line)
-
 
 class Mutant(Mutant):
     def diff(self):
@@ -388,11 +497,11 @@ class Mutant(Mutant):
                                               tofile='mutant',
                                               n=3))
 
-# ## Evaluating Mutations
+## Evaluating Mutations
+## --------------------
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Evaluating Mutations')
-
 
 
 
@@ -416,11 +525,7 @@ class Mutant(Mutant):
             print()
         return True
 
-if __package__ is None or __package__ == "":
-    from ExpectError import ExpectTimeout
-else:
-    from .ExpectError import ExpectTimeout
-
+from .ExpectError import ExpectTimeout
 
 class MuFunctionAnalyzer(MuFunctionAnalyzer):
     def finish(self):
@@ -433,7 +538,7 @@ class MuFunctionAnalyzer(MuFunctionAnalyzer):
 
 import sys
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuFunctionAnalyzer(triangle, log=True):
         with mutant:
             assert triangle(1, 1, 1) == 'Equilateral', "Equal Check1"
@@ -441,23 +546,20 @@ if __name__ == "__main__":
             assert triangle(1, 0, 2) != 'Equilateral', "Equal Check3"
     mutant.pm.score()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuFunctionAnalyzer(triangle):
         with mutant:
             weak_oracle(triangle)
     mutant.pm.score()
 
-
 def oracle():
     strong_oracle(triangle)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuFunctionAnalyzer(triangle, log=True):
         with mutant:
             oracle()
     mutant.pm.score()
-
 
 def gcd(a, b):
     if a < b:
@@ -471,36 +573,33 @@ def gcd(a, b):
         b = c % b
     return a
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuFunctionAnalyzer(gcd, log=True):
         with mutant:
             assert gcd(1, 0) == 1, "Minimal"
             assert gcd(0, 1) == 1, "Mirror"
     mutant.pm.score()
 
+## Mutator for Modules and Test Suites
+## -----------------------------------
 
-# ## Mutator for Modules and Test Suites
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Mutator for Modules and Test Suites')
 
 
 
-
-import imp
+import types
 
 def import_code(code, name):
-    module = imp.new_module(name)
+    module = types.ModuleType(name)
     exec(code, module.__dict__)
     return module
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     shape = import_code(shape_src, 'shape')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     shape.triangle(1, 1, 1)
-
 
 import unittest
 
@@ -524,23 +623,19 @@ def suite(test_class):
             suite.addTest(test_class(f))
     return suite
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     suite(StrongShapeTest).run(unittest.TestResult())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     runner = unittest.TextTestRunner(verbosity=0, failfast=True)
     runner.run(suite(StrongShapeTest))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov:
         suite(StrongShapeTest).run(unittest.TestResult())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov.show_coverage(triangle)
-
 
 class WeakShapeTest(unittest.TestCase):
     def test_equilateral(self):
@@ -554,14 +649,12 @@ class WeakShapeTest(unittest.TestCase):
     def test_scalene(self):
         assert shape.triangle(1, 2, 3) != 'Equilateral'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Coverage() as cov:
         suite(WeakShapeTest).run(unittest.TestResult())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cov.show_coverage(triangle)
-
 
 class MuProgramAnalyzer(MuFunctionAnalyzer):
     def __init__(self, name, src):
@@ -604,9 +697,8 @@ class AdvStmtDeletionMutator(AdvMutator, StmtDeletionMutator):
             else:
                 return self.generic_visit(node)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     MuProgramAnalyzer('shape', shape_src).nmutations
-
 
 class MuProgramAnalyzer(MuProgramAnalyzer):
     def __iter__(self):
@@ -634,14 +726,12 @@ class AdvMutant(Mutant):
                                '_'.join([str(i) for i in self.i]))
         self._src = None
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     shape_src = inspect.getsource(triangle)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for m in MuProgramAnalyzer('shape', shape_src):
         print(m.name)
-
 
 class AdvMutant(AdvMutant):
     def generate_mutant(self, locations):
@@ -665,12 +755,11 @@ class AdvMutant(AdvMutant):
                                               tofile='mutant',
                                               n=3))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuProgramAnalyzer('shape', shape_src):
         print(mutant.name)
         print(mutant.diff())
         break
-
 
 class AdvMutant(AdvMutant):
     def __getitem__(self, test_module):
@@ -679,11 +768,7 @@ class AdvMutant(AdvMutant):
             self.src(), self.pm.name)
         return MutantTestRunner(self, test_module)
 
-if __package__ is None or __package__ == "":
-    from ExpectError import ExpectTimeout
-else:
-    from .ExpectError import ExpectTimeout
-
+from .ExpectError import ExpectTimeout
 
 class MutantTestRunner:
     def __init__(self, mutant, test_module):
@@ -714,22 +799,19 @@ class MuProgramAnalyzer(MuProgramAnalyzer):
 
 import sys
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_module = sys.modules[__name__]
     for mutant in MuProgramAnalyzer('shape', shape_src):
         mutant[test_module].runTest('WeakShapeTest')
     mutant.pm.score()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuProgramAnalyzer('shape', shape_src):
         mutant[test_module].runTest('StrongShapeTest')
     mutant.pm.score()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     gcd_src = inspect.getsource(gcd)
-
 
 class TestGCD(unittest.TestCase):
     def test_simple(self):
@@ -738,17 +820,16 @@ class TestGCD(unittest.TestCase):
     def test_mirror(self):
         assert cfg.gcd(0, 1) == 1
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuProgramAnalyzer('cfg', gcd_src):
         mutant[test_module].runTest('TestGCD')
     mutant.pm.score()
 
+## The Problem of  Equivalent Mutants
+## ----------------------------------
 
-# ## The Problem of  Equivalent Mutants
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## The Problem of  Equivalent Mutants')
-
 
 
 
@@ -772,42 +853,38 @@ def gcd(a, b):
         a, b = b, a % b
     return a
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for i, mutant in enumerate(MuFunctionAnalyzer(new_gcd)):
         print(i,mutant.src())
 
+### Statistical Estimation of Number of Equivalent Mutants
 
-# ### Statistical Estimation of Number of Equivalent Mutants
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Statistical Estimation of Number of Equivalent Mutants')
 
 
 
+### Statistical Estimation of the Number of Immortals by Chao's Estimator
 
-# ### Statistical Estimation of the Number of Immortals by Chao's Estimator
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("\n### Statistical Estimation of the Number of Immortals by Chao's Estimator")
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuFunctionAnalyzer(gcd, log=True):
         with mutant:
             assert gcd(1, 0) == 1, "Minimal"
             assert gcd(0, 1) == 1, "Mirror"
     mutant.pm.score()
-
 
 class TestGCD(unittest.TestCase):
     def test_simple(self):
@@ -816,59 +893,55 @@ class TestGCD(unittest.TestCase):
     def test_mirror(self):
         assert cfg.gcd(0, 1) == 1
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuProgramAnalyzer('gcd', gcd_src):
         mutant[test_module].runTest('TestGCD')
     mutant.pm.score()
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1:  Arithmetic Expression Mutators
 
-# ### Exercise 1:  Arithmetic Expression Mutators
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1:  Arithmetic Expression Mutators')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(astor.dump_tree(ast.parse("1 + 2 - 3 * 4 / 5")))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(astor.dump_tree(ast.parse("1 + 2 - 3 * 4 / 5")))
-
 
 class BinOpMutator(Mutator):
     def visit_BinOp(self, node): return self.mutable_visit(node)
@@ -896,31 +969,27 @@ class MuBinOpAnalyzer(MuFunctionAnalyzer):
 def arith_expr():
     return 1 + 2 - 3 * 4 / 5
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for mutant in MuBinOpAnalyzer(arith_expr, log=True):
         print(mutant.diff())
 
+### Exercise 2: Optimizing Mutation Analysis
 
-# ### Exercise 2: Optimizing Mutation Analysis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Optimizing Mutation Analysis')
 
 
 
+### Exercise 3: Byte Code Mutator
 
-# ### Exercise 3: Byte Code Mutator
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 3: Byte Code Mutator')
 
 
 
+### Exercise 4: Estimating Residual Defect Density
 
-# ### Exercise 4: Estimating Residual Defect Density
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 4: Estimating Residual Defect Density')
-
 
 

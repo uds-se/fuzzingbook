@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2019-12-21 16:38:57+01:00
+# Last change: 2021-06-02 17:43:31+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,51 +27,70 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Greybox Fuzzing
 
-# # Greybox Fuzzing
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python GreyboxFuzzer.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.GreyboxFuzzer import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/GreyboxFuzzer.html
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Greybox Fuzzing"
+at https://www.fuzzingbook.org/html/GreyboxFuzzer.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Greybox Fuzzing
+# ===============
+
+if __name__ == '__main__':
     print('# Greybox Fuzzing')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
+## Ingredients for Greybox Fuzzing
+## -------------------------------
 
-# ## Ingredients for Greybox Fuzzing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Ingredients for Greybox Fuzzing')
 
 
 
+### Background
 
-# ### Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Background')
 
 
 
+### Mutator and Seed
 
-# ### Mutator and Seed
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Mutator and Seed')
 
 
 
-
 import random
-if __package__ is None or __package__ == "":
-    from Coverage import Coverage, population_coverage
-else:
-    from .Coverage import Coverage, population_coverage
-
+from .Coverage import Coverage, population_coverage
 
 class Mutator(object):
     def __init__(self):
@@ -115,15 +134,13 @@ class Mutator(Mutator):
         mutator = random.choice(self.mutators)
         return mutator(inp)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     Mutator().mutate("good")
 
+### Power Schedules
 
-# ### Power Schedules
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Power Schedules')
-
 
 
 
@@ -137,9 +154,8 @@ class Seed(object):
         return self.data
     __repr__ = __str__
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import numpy as np
-
 
 class PowerSchedule(object):    
     def assignEnergy(self, population):
@@ -163,7 +179,7 @@ class PowerSchedule(object):
         seed = np.random.choice(population, p=norm_energy)
         return seed
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     population = [Seed("A"), Seed("B"), Seed("C")]
     schedule = PowerSchedule()
     hits = {
@@ -178,20 +194,14 @@ if __name__ == "__main__":
 
     hits
 
+### Runner and Sample Program
 
-# ### Runner and Sample Program
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Runner and Sample Program')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from MutationFuzzer import FunctionCoverageRunner
-else:
-    from .MutationFuzzer import FunctionCoverageRunner
-
+from .MutationFuzzer import FunctionCoverageRunner
 
 def crashme (s):
     if             len(s) > 0 and s[0] == 'b':
@@ -200,23 +210,20 @@ def crashme (s):
                 if len(s) > 3 and s[3] == '!':
                     raise Exception()
 
-crashme_runner = FunctionCoverageRunner(crashme)
-crashme_runner.run("good")
-list(crashme_runner.coverage())
+if __name__ == '__main__':
+    crashme_runner = FunctionCoverageRunner(crashme)
+    crashme_runner.run("good")
+    list(crashme_runner.coverage())
 
-# ## Blackbox, Greybox, and Boosted Greybox Fuzzing
+## Blackbox, Greybox, and Boosted Greybox Fuzzing
+## ----------------------------------------------
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Blackbox, Greybox, and Boosted Greybox Fuzzing')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from Fuzzer import Fuzzer
-else:
-    from .Fuzzer import Fuzzer
-
+from .Fuzzer import Fuzzer
 
 class MutationFuzzer(Fuzzer):
     
@@ -257,18 +264,17 @@ class MutationFuzzer(Fuzzer):
         return self.inp
     
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     seed_input = "good"
     mutation_fuzzer = MutationFuzzer([seed_input], Mutator(), PowerSchedule())
     print(mutation_fuzzer.fuzz())
     print(mutation_fuzzer.fuzz())
     print(mutation_fuzzer.fuzz())
 
-
 import time
 n = 30000
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     blackbox_fuzzer = MutationFuzzer([seed_input], Mutator(), PowerSchedule())
 
     start = time.time()
@@ -277,32 +283,24 @@ if __name__ == "__main__":
 
     "It took the blackbox mutation-based fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
+from .Coverage import population_coverage
 
-if __package__ is None or __package__ == "":
-    from Coverage import population_coverage
-else:
-    from .Coverage import population_coverage
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     _, blackbox_coverage = population_coverage(blackbox_fuzzer.inputs, crashme)
     bb_max_coverage = max(blackbox_coverage)
 
     "The blackbox mutation-based fuzzer achieved a maximum coverage of %d statements." % bb_max_coverage
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     [seed_input] + \
     [blackbox_fuzzer.inputs[idx] for idx in range(len(blackbox_coverage)) 
         if blackbox_coverage[idx] > blackbox_coverage[idx - 1]
     ]
 
+### Greybox Mutation-based Fuzzer
 
-# ### Greybox Mutation-based Fuzzer
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Greybox Mutation-based Fuzzer')
-
 
 
 
@@ -329,7 +327,7 @@ class GreyboxFuzzer(MutationFuzzer):
 
         return (result, outcome)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     seed_input = "good"
     greybox_fuzzer = GreyboxFuzzer([seed_input], Mutator(), PowerSchedule())
 
@@ -339,25 +337,21 @@ if __name__ == "__main__":
 
     "It took the greybox mutation-based fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     _, greybox_coverage = population_coverage(greybox_fuzzer.inputs, crashme)
     gb_max_coverage = max(greybox_coverage)
 
     "Our greybox mutation-based fuzzer covers %d more statements" % (gb_max_coverage - bb_max_coverage)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     greybox_fuzzer.population
-
 
 # %matplotlib inline
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     line_bb, = plt.plot(blackbox_coverage, label="Blackbox")
     line_gb, = plt.plot(greybox_coverage, label="Greybox")
     plt.legend(handles=[line_bb, line_gb])
@@ -365,12 +359,10 @@ if __name__ == "__main__":
     plt.xlabel('# of inputs')
     plt.ylabel('lines covered');
 
+### Boosted Greybox Fuzzer
 
-# ### Boosted Greybox Fuzzer
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Boosted Greybox Fuzzer')
-
 
 
 
@@ -409,7 +401,7 @@ class CountingGreyboxFuzzer(GreyboxFuzzer):
             
         return(result, outcome)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     n = 10000
     seed_input = "good"
     fast_schedule = AFLFastSchedule(5)
@@ -420,8 +412,7 @@ if __name__ == "__main__":
 
     "It took the fuzzer w/ exponential schedule %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     x_axis = np.arange(len(fast_schedule.path_frequency))
     y_axis = list(fast_schedule.path_frequency.values())
 
@@ -432,13 +423,11 @@ if __name__ == "__main__":
     #plt.yticks([10,100,1000,10000])
     plt;
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("             path id 'p'           : path frequency 'f(p)'")
     fast_schedule.path_frequency
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     seed_input = "good"
     orig_schedule = PowerSchedule()
     orig_fuzzer = CountingGreyboxFuzzer([seed_input], Mutator(), orig_schedule)
@@ -448,8 +437,7 @@ if __name__ == "__main__":
 
     "It took the fuzzer w/ original schedule %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     x_axis = np.arange(len(orig_schedule.path_frequency))
     y_axis = list(orig_schedule.path_frequency.values())
 
@@ -460,27 +448,23 @@ if __name__ == "__main__":
     #plt.yticks([10,100,1000,10000])
     plt;
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print("             path id 'p'           : path frequency 'f(p)'")
     orig_schedule.path_frequency
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     orig_energy = orig_schedule.normalizedEnergy(orig_fuzzer.population)
 
     for (seed, norm_energy) in zip(orig_fuzzer.population, orig_energy):
         print("'%s', %0.5f, %s" % (getPathID(seed.coverage), norm_energy, repr(seed.data)))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     fast_energy = fast_schedule.normalizedEnergy(fast_fuzzer.population)
 
     for (seed, norm_energy) in zip(fast_fuzzer.population, fast_energy):
         print("'%s', %0.5f, %s" % (getPathID(seed.coverage), norm_energy, repr(seed.data)))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     _, orig_coverage = population_coverage(orig_fuzzer.inputs, crashme)
     _, fast_coverage = population_coverage(fast_fuzzer.inputs, crashme)
     line_orig, = plt.plot(orig_coverage, label="Original Greybox Fuzzer")
@@ -490,32 +474,27 @@ if __name__ == "__main__":
     plt.xlabel('# of inputs')
     plt.ylabel('lines covered');
 
+### Complex Example: HTMLParser
 
-# ### Complex Example: XMLParser
-
-if __name__ == "__main__":
-    print('\n### Complex Example: XMLParser')
-
+if __name__ == '__main__':
+    print('\n### Complex Example: HTMLParser')
 
 
 
 from html.parser import HTMLParser
 import traceback
 
-if __name__ == "__main__":
-    # create wrapper function
-    def my_parser(inp):
-        parser = HTMLParser()  # resets the HTMLParser object for every fuzz input
-        parser.feed(inp)
+def my_parser(inp):
+    parser = HTMLParser()  # resets the HTMLParser object for every fuzz input
+    parser.feed(inp)
 
-    n = 5000
-    seed_input = " " # empty seed
-    blackbox_fuzzer = MutationFuzzer([seed_input], Mutator(), PowerSchedule())
-    greybox_fuzzer  = GreyboxFuzzer([seed_input], Mutator(), PowerSchedule())
-    boosted_fuzzer  = CountingGreyboxFuzzer([seed_input], Mutator(), AFLFastSchedule(5))
+n = 5000
+seed_input = " " # empty seed
+blackbox_fuzzer = MutationFuzzer([seed_input], Mutator(), PowerSchedule())
+greybox_fuzzer  = GreyboxFuzzer([seed_input], Mutator(), PowerSchedule())
+boosted_fuzzer  = CountingGreyboxFuzzer([seed_input], Mutator(), AFLFastSchedule(5))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     start = time.time()
     blackbox_fuzzer.runs(FunctionCoverageRunner(my_parser), trials=n)
     greybox_fuzzer.runs(FunctionCoverageRunner(my_parser), trials=n)
@@ -524,8 +503,7 @@ if __name__ == "__main__":
 
     "It took all three fuzzers %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     _, black_coverage = population_coverage(blackbox_fuzzer.inputs, my_parser)
     _, grey_coverage = population_coverage(greybox_fuzzer.inputs, my_parser)
     _, boost_coverage = population_coverage(boosted_fuzzer.inputs, my_parser)
@@ -537,73 +515,56 @@ if __name__ == "__main__":
     plt.xlabel('# of inputs')
     plt.ylabel('lines covered');
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     blackbox_fuzzer.inputs[-10:]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     greybox_fuzzer.inputs[-10:]
 
+## Directed Greybox Fuzzing
+## ------------------------
 
-# ## Directed Greybox Fuzzing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Directed Greybox Fuzzing')
 
 
 
+### Solving the Maze
 
-# ### Solving the Maze
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Solving the Maze')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     maze_string = """
-    +-+-----+
-    |X|     |
-    | | --+ |
-    | |   | |
-    | +-- | |
-    |     |#|
-    +-----+-+
-    """
++-+-----+
+|X|     |
+| | --+ |
+| |   | |
+| +-- | |
+|     |#|
++-----+-+
+"""
 
+from .ControlFlow import generate_maze_code
 
-if __package__ is None or __package__ == "":
-    from ControlFlow import generate_maze_code
-else:
-    from .ControlFlow import generate_maze_code
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     maze_code = generate_maze_code(maze_string)
     exec(maze_code)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(maze("DDDDRRRRUULLUURRRRDDDD")) # Appending one more 'D', you have reached the target.
 
+from .ControlFlow import callgraph
 
-if __package__ is None or __package__ == "":
-    from ControlFlow import callgraph
-else:
-    from .ControlFlow import callgraph
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     callgraph(maze_code)
 
+### A First Attempt
 
-# ### A First Attempt
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### A First Attempt')
-
 
 
 
@@ -635,7 +596,7 @@ class MazeMutator(DictMutator):
         if (len(s) > 0):
             return s[:-1]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     n = 10000
     seed_input = " " # empty seed
 
@@ -648,7 +609,6 @@ if __name__ == "__main__":
     end = time.time()
 
     "It took the fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
-
 
 def print_stats(fuzzer):
     total = len(fuzzer.population)
@@ -670,31 +630,24 @@ def print_stats(fuzzer):
 * %4d were valid but did not solve the maze, and 
 * %4d were invalid""" % (total, solved, valid, invalid))   
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_stats(maze_fuzzer)
 
+### Computing Function-Level Distance
 
-# ### Computing Function-Level Distance
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Computing Function-Level Distance')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     target = target_tile()
     target
 
-
 import networkx as nx
-if __package__ is None or __package__ == "":
-    from ControlFlow import get_callgraph
-else:
-    from .ControlFlow import get_callgraph
+from .ControlFlow import get_callgraph
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cg = get_callgraph(maze_code)
     for node in cg.nodes():
         if target in node:
@@ -702,8 +655,7 @@ if __name__ == "__main__":
             break
     target_node
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     distance = {}
     for node in cg.nodes():
         if "__" in node: 
@@ -715,16 +667,13 @@ if __name__ == "__main__":
         except:
             distance[name] = 0xFFFF
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     {k: distance[k] for k in list(distance) if distance[k] < 0xFFFF}
 
+### Directed Power Schedule
 
-# ### Directed Power Schedule
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Directed Power Schedule')
-
 
 
 
@@ -753,7 +702,7 @@ class DirectedSchedule(PowerSchedule):
                 seed.distance = sum_dist / num_dist
                 seed.energy = (1 / seed.distance) ** self.exponent
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     directed_schedule = DirectedSchedule(distance, 3)
     directed_fuzzer  = GreyboxFuzzer([seed_input], maze_mutator, directed_schedule)
 
@@ -763,19 +712,16 @@ if __name__ == "__main__":
 
     "It took the fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_stats(directed_fuzzer)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     y = [seed.distance for seed in directed_fuzzer.population]
     x = range(len(y))
     plt.scatter(x, y)
     plt.ylim(0,max(y))
     plt.xlabel("Seed ID")
     plt.ylabel("Distance");
-
 
 class AFLGoSchedule(DirectedSchedule):
     def assignEnergy(self, population):
@@ -804,7 +750,7 @@ class AFLGoSchedule(DirectedSchedule):
             else:
                 seed.energy = ((max_dist - min_dist) / (seed.distance - min_dist)) 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     aflgo_schedule = AFLGoSchedule(distance, 3)
     aflgo_fuzzer  = GreyboxFuzzer([seed_input], maze_mutator, aflgo_schedule)
 
@@ -814,12 +760,10 @@ if __name__ == "__main__":
 
     "It took the fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_stats(aflgo_fuzzer)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for seed in aflgo_fuzzer.population:
         s = maze(str(seed.data))
         if "SOLVED" in s:
@@ -827,46 +771,44 @@ if __name__ == "__main__":
             print(filtered)
             break
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
-
 
 
 
 import shutil
 import os
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     if os.path.exists('callgraph.dot'):
         os.remove('callgraph.dot')
 
     if os.path.exists('callgraph.py'):
         os.remove('callgraph.py')
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
-
 
 

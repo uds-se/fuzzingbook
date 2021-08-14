@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Testing Web Applications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2020-10-13 15:12:24+02:00
+# Last change: 2021-06-04 16:11:46+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,28 +27,89 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Testing Web Applications
 
-# # Testing Web Applications
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python WebFuzzer.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.WebFuzzer import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/WebFuzzer.html
+
+This chapter provides a simple (and vulnerable) Web server and two experimental fuzzers that are applied to it.
+
+### Fuzzing Web Forms
+
+`WebFormFuzzer` demonstrates how to interact with a Web form.  Given a URL with a Web form, it automatically extracts a grammar that produces a URL; this URL contains values for all form elements.  Support is limited to GET forms and a subset of HTML form elements.
+
+Here's the grammar extracted for our vulnerable Web server:
+
+>>> web_form_fuzzer = WebFormFuzzer(httpd_url)
+>>> web_form_fuzzer.grammar['']
+['?']
+>>> web_form_fuzzer.grammar['']
+['/order']
+>>> web_form_fuzzer.grammar['']
+['&&&&&&']
+
+Using it for fuzzing yields a path with all form values filled; accessing this path acts like filling out and submitting the form.
+
+>>> web_form_fuzzer.fuzz()
+'/order?item=lockset&name=%43+&email=+c%40_+c&city=%37b_4&zip=5&terms=on&submit='
+
+Repeated calls to `WebFormFuzzer.fuzz()` invoke the form again and again, each time with different (fuzzed) values.
+
+### SQL Injection Attacks
+
+`SQLInjectionFuzzer` is an experimental extension of `WebFormFuzzer` whose constructor takes an additional _payload_ – an SQL command to be injected and executed on the server.  Otherwise, it is used like `WebFormFuzzer`:
+
+>>> sql_fuzzer = SQLInjectionFuzzer(httpd_url, "DELETE FROM orders")
+>>> sql_fuzzer.fuzz()
+"/order?item=lockset&name=+&email=0%404&city=+'+)%3b+DELETE+FROM+orders%3b+--&zip='+OR+1%3d1--'&terms=on&submit="
+
+As you can see, the path to be retrieved contains the payload encoded into one of the form field values.
+
+`SQLInjectionFuzzer` is a proof-of-concept on how to build a malicious fuzzer; you should study and extend its code to make actual use of it.
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Testing Web Applications"
+at https://www.fuzzingbook.org/html/WebFuzzer.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Testing Web Applications
+# ========================
+
+if __name__ == '__main__':
     print('# Testing Web Applications')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## A Web User Interface
+## --------------------
 
-# ## A Web User Interface
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## A Web User Interface')
-
 
 
 
@@ -57,19 +118,17 @@ from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     pass
 
-# ### Taking Orders
+### Taking Orders
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Taking Orders')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
-
 
 FUZZINGBOOK_SWAG = {
     "tshirt": "One FuzzingBook T-Shirt",
@@ -116,25 +175,18 @@ HTML_ORDER_FORM += """
 </body></html>
 """
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from IPython.display import display
 
+from .bookutils import HTML
 
-if __package__ is None or __package__ == "":
-    from bookutils import HTML
-else:
-    from .bookutils import HTML
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(HTML_ORDER_FORM)
 
+### Order Confirmation
 
-# ### Order Confirmation
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Order Confirmation')
-
 
 
 
@@ -153,19 +205,17 @@ HTML_ORDER_RECEIVED = """
 </body></html>
 """
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(HTML_ORDER_RECEIVED.format(item_name="One FuzzingBook Rotary Hammer",
                                     name="Jane Doe",
                                     email="doe@example.com",
                                     city="Seattle",
                                     zip="98104"))
 
+### Terms and Conditions
 
-# ### Terms and Conditions
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Terms and Conditions')
-
 
 
 
@@ -185,15 +235,14 @@ HTML_TERMS_AND_CONDITIONS = """
 </body></html>
 """
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(HTML_TERMS_AND_CONDITIONS)
 
+## Storing Orders
+## --------------
 
-# ## Storing Orders
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Storing Orders')
-
 
 
 
@@ -213,38 +262,31 @@ def init_db():
 
     return db_connection
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     db = init_db()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders").fetchall())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.execute("INSERT INTO orders " +
                "VALUES ('lockset', 'Walter White', 'white@jpwynne.edu', 'Albuquerque', '87101')")
     db.commit()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders").fetchall())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.execute("DELETE FROM orders WHERE name = 'Walter White'")
     db.commit()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders").fetchall())
 
+### Handling HTTP Requests
 
-# ### Handling HTTP Requests
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Handling HTTP Requests')
-
 
 
 
@@ -263,11 +305,10 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         except Exception:
             self.internal_server_error()
 
-# #### Order Form
+#### Order Form
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Order Form')
-
 
 
 
@@ -285,11 +326,10 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(HTML_TERMS_AND_CONDITIONS.encode("utf8"))
 
-# #### Processing Orders
+#### Processing Orders
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Processing Orders')
-
 
 
 
@@ -335,11 +375,10 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(confirmation)
 
-# #### Other HTTP commands
+#### Other HTTP commands
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Other HTTP commands')
-
 
 
 
@@ -350,19 +389,17 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.end_headers()
 
-# ### Error Handling
+### Error Handling
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Error Handling')
 
 
 
+#### Page Not Found
 
-# #### Page Not Found
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Page Not Found')
-
 
 
 
@@ -377,9 +414,8 @@ HTML_NOT_FOUND = """
 </body></html>
   """
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(HTML_NOT_FOUND)
-
 
 class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
     def not_found(self):
@@ -391,11 +427,10 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         message = HTML_NOT_FOUND
         self.wfile.write(message.encode("utf8"))
 
-# #### Internal Errors
+#### Internal Errors
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Internal Errors')
-
 
 
 
@@ -411,9 +446,8 @@ HTML_INTERNAL_SERVER_ERROR = """
 </body></html>
   """
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(HTML_INTERNAL_SERVER_ERROR)
-
 
 import sys
 import traceback
@@ -431,11 +465,10 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
         message = HTML_INTERNAL_SERVER_ERROR.format(error_message=exc)
         self.wfile.write(message.encode("utf8"))
 
-# ### Logging
+### Logging
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Logging')
-
 
 
 
@@ -443,19 +476,11 @@ from multiprocessing import Queue
 
 HTTPD_MESSAGE_QUEUE = Queue()
 
-if __name__ == "__main__":
-    HTTPD_MESSAGE_QUEUE.put("I am another message")
+HTTPD_MESSAGE_QUEUE.put("I am another message")
 
+HTTPD_MESSAGE_QUEUE.put("I am one more message")
 
-if __name__ == "__main__":
-    HTTPD_MESSAGE_QUEUE.put("I am one more message")
-
-
-if __package__ is None or __package__ == "":
-    from bookutils import rich_output, terminal_escape
-else:
-    from .bookutils import rich_output, terminal_escape
-
+from .bookutils import rich_output, terminal_escape
 
 def display_httpd_message(message):
     if rich_output():
@@ -467,9 +492,8 @@ def display_httpd_message(message):
     else:
         print(terminal_escape(message))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_httpd_message("I am a httpd server message")
-
 
 def print_httpd_messages():
     while not HTTPD_MESSAGE_QUEUE.empty():
@@ -478,10 +502,9 @@ def print_httpd_messages():
 
 import time
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     time.sleep(1)
     print_httpd_messages()
-
 
 def clear_httpd_messages():
     while not HTTPD_MESSAGE_QUEUE.empty():
@@ -495,9 +518,8 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
                     format % args))
         HTTPD_MESSAGE_QUEUE.put(message)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import requests
-
 
 def webbrowser(url, mute=False):
     """Download the http/https resource given by the URL"""
@@ -514,11 +536,10 @@ def webbrowser(url, mute=False):
 
     return contents
 
-# ### Running the Server
+### Running the Server
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Running the Server')
-
 
 
 
@@ -548,24 +569,21 @@ def start_httpd(handler_class=SimpleHTTPRequestHandler):
     httpd_url = HTTPD_MESSAGE_QUEUE.get()
     return httpd_process, httpd_url
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     httpd_process, httpd_url = start_httpd()
     httpd_url
 
+### Interacting with the Server
 
-# ### Interacting with the Server
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Interacting with the Server')
 
 
 
+#### Direct Browser Access
 
-# #### Direct Browser Access
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Direct Browser Access')
-
 
 
 
@@ -575,96 +593,82 @@ def print_url(url):
     else:
         print(terminal_escape(url))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_url(httpd_url)
 
+if __name__ == '__main__':
+    from IPython.display import IFrame
 
-if __name__ == "__main__":
-    HTML('<iframe src="' + httpd_url + '" ' +
-         'width="100%" height="230"></iframe>')
+if __name__ == '__main__':
+    IFrame(httpd_url, '100%', 230)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_httpd_messages()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders").fetchall())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     db.execute("DELETE FROM orders")
     db.commit()
 
+#### Retrieving the Home Page
 
-# #### Retrieving the Home Page
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Retrieving the Home Page')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     contents = webbrowser(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(contents)
 
+#### Placing Orders
 
-# #### Placing Orders
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Placing Orders')
-
 
 
 
 from urllib.parse import urljoin, urlsplit
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     urljoin(httpd_url, "/order?foo=bar")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     contents = webbrowser(urljoin(httpd_url,
                                   "/order?item=tshirt&name=Jane+Doe&email=doe%40example.com&city=Seattle&zip=98104"))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(contents)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders").fetchall())
 
+#### Error Messages
 
-# #### Error Messages
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Error Messages')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(webbrowser(urljoin(httpd_url, "/some/other/path")))
 
+## Fuzzing Input Forms
+## -------------------
 
-# ## Fuzzing Input Forms
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Fuzzing Input Forms')
 
 
 
+### Fuzzing with Expected Values
 
-# ### Fuzzing with Expected Values
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Fuzzing with Expected Values')
-
 
 
 
@@ -682,30 +686,19 @@ def cgi_encode(s, do_not_encode=""):
             ret += "%%%02x" % ord(c)
     return ret
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     s = cgi_encode('Is "DOW30" down .24%?')
     s
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_encode("<string>@<string>", "<>")
 
+from .Coverage import cgi_decode  # minor dependency
 
-if __package__ is None or __package__ == "":
-    from Coverage import cgi_decode  # minor dependency
-else:
-    from .Coverage import cgi_decode  # minor dependency
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cgi_decode(s)
 
-
-if __package__ is None or __package__ == "":
-    from Grammars import crange, is_valid_grammar, syntax_diagram
-else:
-    from .Grammars import crange, is_valid_grammar, syntax_diagram
-
+from .Grammars import crange, is_valid_grammar, syntax_diagram
 
 ORDER_GRAMMAR = {
     "<start>": ["<order>"],
@@ -718,58 +711,42 @@ ORDER_GRAMMAR = {
     "<digit>": crange('0', '9')
 }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert is_valid_grammar(ORDER_GRAMMAR)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(ORDER_GRAMMAR)
 
+from .GrammarFuzzer import GrammarFuzzer
 
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer
-else:
-    from .GrammarFuzzer import GrammarFuzzer
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     order_fuzzer = GrammarFuzzer(ORDER_GRAMMAR)
     [order_fuzzer.fuzz() for i in range(5)]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(webbrowser(urljoin(httpd_url, order_fuzzer.fuzz())))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders").fetchall())
 
+### Fuzzing with Unexpected Values
 
-# ### Fuzzing with Unexpected Values
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Fuzzing with Unexpected Values')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     seed = order_fuzzer.fuzz()
     seed
 
+from .MutationFuzzer import MutationFuzzer  # minor deoendency
 
-if __package__ is None or __package__ == "":
-    from MutationFuzzer import MutationFuzzer  # minor deoendency
-else:
-    from .MutationFuzzer import MutationFuzzer  # minor deoendency
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     mutate_order_fuzzer = MutationFuzzer([seed], min_mutations=1, max_mutations=1)
     [mutate_order_fuzzer.fuzz() for i in range(5)]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     while True:
         path = mutate_order_fuzzer.fuzz()
         url = urljoin(httpd_url, path)
@@ -777,26 +754,18 @@ if __name__ == "__main__":
         if r.status_code == HTTPStatus.INTERNAL_SERVER_ERROR:
             break
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     url
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     clear_httpd_messages()
     HTML(webbrowser(url))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     failing_path = path
     failing_path
 
-
-if __package__ is None or __package__ == "":
-    from Fuzzer import Runner
-else:
-    from .Fuzzer import Runner
-
+from .Fuzzer import Runner
 
 class WebRunner(Runner):
     def __init__(self, base_url=None):
@@ -815,52 +784,42 @@ class WebRunner(Runner):
         else:
             return url, Runner.UNRESOLVED
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     web_runner = WebRunner(httpd_url)
     web_runner.run(failing_path)
 
+from .Reducer import DeltaDebuggingReducer  # minor
 
-if __package__ is None or __package__ == "":
-    from Reducer import DeltaDebuggingReducer  # minor
-else:
-    from .Reducer import DeltaDebuggingReducer  # minor
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     minimized_path = DeltaDebuggingReducer(web_runner).reduce(failing_path)
     minimized_path
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     minimized_url = urljoin(httpd_url, minimized_path)
     minimized_url
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     clear_httpd_messages()
     HTML(webbrowser(minimized_url))
 
+## Extracting Grammars for Input Forms
+## -----------------------------------
 
-# ## Extracting Grammars for Input Forms
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Extracting Grammars for Input Forms')
 
 
 
+### Searching HTML for Input Fields
 
-# ### Searching HTML for Input Fields
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Searching HTML for Input Fields')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     html_text = webbrowser(httpd_url)
     print(html_text[html_text.find("<form"):html_text.find("</form>") + len("</form>")])
-
 
 from html.parser import HTMLParser
 
@@ -916,28 +875,21 @@ class HTMLGrammarMiner(object):
         self.fields = html_parser.fields
         self.action = html_parser.action
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     html_miner = HTMLGrammarMiner(html_text)
     html_miner.action
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     html_miner.fields
 
+### Mining Grammars for Web Pages
 
-# ### Mining Grammars for Web Pages
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Mining Grammars for Web Pages')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from Grammars import crange, srange, new_symbol, unreachable_nonterminals, CGI_GRAMMAR, extend_grammar
-else:
-    from .Grammars import crange, srange, new_symbol, unreachable_nonterminals, CGI_GRAMMAR, extend_grammar
-
+from .Grammars import crange, srange, new_symbol, unreachable_nonterminals, CGI_GRAMMAR, extend_grammar
 
 class HTMLGrammarMiner(HTMLGrammarMiner):
     QUERY_GRAMMAR = extend_grammar(CGI_GRAMMAR, {
@@ -1003,46 +955,37 @@ class HTMLGrammarMiner(HTMLGrammarMiner):
 
         return grammar
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     html_miner = HTMLGrammarMiner(html_text)
     grammar = html_miner.mine_grammar()
     grammar
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar["<start>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar["<action>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar["<query>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar["<zip>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar["<terms>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     order_fuzzer = GrammarFuzzer(grammar)
     [order_fuzzer.fuzz() for i in range(3)]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(webbrowser(urljoin(httpd_url, order_fuzzer.fuzz())))
 
+### A Fuzzer for Web Forms
 
-# ### A Fuzzer for Web Forms
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### A Fuzzer for Web Forms')
-
 
 
 
@@ -1059,25 +1002,22 @@ class WebFormFuzzer(GrammarFuzzer):
         grammar_miner = HTMLGrammarMiner(html_text)
         return grammar_miner.mine_grammar()        
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     web_form_fuzzer = WebFormFuzzer(httpd_url)
     web_form_fuzzer.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     web_form_runner = WebRunner(httpd_url)
     web_form_fuzzer.runs(web_form_runner, 10)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     clear_httpd_messages()
 
+## Crawling User Interfaces
+## ------------------------
 
-# ## Crawling User Interfaces
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Crawling User Interfaces')
-
 
 
 
@@ -1147,49 +1087,40 @@ def crawl(url, max_pages=1, same_host=True):
             urls_seen.add(page)
             yield page
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     for url in crawl(httpd_url):
         print_httpd_messages()
         print_url(url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for url in crawl("https://www.fuzzingbook.org/"):
         print_url(url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for url in crawl(httpd_url, max_pages=float('inf')):
         web_form_fuzzer = WebFormFuzzer(url)
         web_form_runner = WebRunner(url)
         print(web_form_fuzzer.run(web_form_runner))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     clear_httpd_messages()
 
+## Crafting Web Attacks
+## --------------------
 
-# ## Crafting Web Attacks
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Crafting Web Attacks')
 
 
 
+### HTML Injection Attacks
 
-# ### HTML Injection Attacks
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### HTML Injection Attacks')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from Grammars import extend_grammar
-else:
-    from .Grammars import extend_grammar
-
+from .Grammars import extend_grammar
 
 ORDER_GRAMMAR_WITH_HTML_INJECTION = extend_grammar(ORDER_GRAMMAR, {
     "<name>": [cgi_encode('''
@@ -1199,25 +1130,21 @@ ORDER_GRAMMAR_WITH_HTML_INJECTION = extend_grammar(ORDER_GRAMMAR, {
     ''')],
 })
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     html_injection_fuzzer = GrammarFuzzer(ORDER_GRAMMAR_WITH_HTML_INJECTION)
     order_with_injected_html = html_injection_fuzzer.fuzz()
     order_with_injected_html
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(webbrowser(urljoin(httpd_url, order_with_injected_html)))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders WHERE name LIKE '%<%'").fetchall())
 
+### Cross-Site Scripting Attacks
 
-# ### Cross-Site Scripting Attacks
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Cross-Site Scripting Attacks')
-
 
 
 
@@ -1229,34 +1156,29 @@ ORDER_GRAMMAR_WITH_XSS_INJECTION = extend_grammar(ORDER_GRAMMAR, {
                ],
 })
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     xss_injection_fuzzer = GrammarFuzzer(ORDER_GRAMMAR_WITH_XSS_INJECTION)
     order_with_injected_xss = xss_injection_fuzzer.fuzz()
     order_with_injected_xss
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     url_with_injected_xss = urljoin(httpd_url, order_with_injected_xss)
     url_with_injected_xss
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(webbrowser(url_with_injected_xss, mute=True))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML('<script>document.title = "Jupyter"</script>')
 
+### SQL Injection Attacks
 
-# ### SQL Injection Attacks
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### SQL Injection Attacks')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     values = {
         "item": "tshirt",
         "name": "Jane Doe",
@@ -1265,72 +1187,57 @@ if __name__ == "__main__":
         "zip": "98104"
     }
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sql_command = ("INSERT INTO orders " +
                    "VALUES ('{item}', '{name}', '{email}', '{city}', '{zip}')".format(**values))
     sql_command
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     values["name"] = "Jane', 'x', 'x', 'x'); DELETE FROM orders; -- "
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sql_command = ("INSERT INTO orders " +
                    "VALUES ('{item}', '{name}', '{email}', '{city}', '{zip}')".format(**values))
     sql_command
 
-
-if __package__ is None or __package__ == "":
-    from Grammars import extend_grammar
-else:
-    from .Grammars import extend_grammar
-
+from .Grammars import extend_grammar
 
 ORDER_GRAMMAR_WITH_SQL_INJECTION = extend_grammar(ORDER_GRAMMAR, {
     "<name>": [cgi_encode("Jane', 'x', 'x', 'x'); DELETE FROM orders; --")],
 })
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sql_injection_fuzzer = GrammarFuzzer(ORDER_GRAMMAR_WITH_SQL_INJECTION)
     order_with_injected_sql = sql_injection_fuzzer.fuzz()
     order_with_injected_sql
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders").fetchall())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     contents = webbrowser(urljoin(httpd_url, order_with_injected_sql))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders").fetchall())
 
+### Leaking Internal Information
 
-# ### Leaking Internal Information
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Leaking Internal Information')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     answer = webbrowser(urljoin(httpd_url, "/order"), mute=True)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(answer)
 
+## Fully Automatic Web Attacks
+## ---------------------------
 
-# ## Fully Automatic Web Attacks
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Fully Automatic Web Attacks')
-
 
 
 
@@ -1358,33 +1265,27 @@ class SQLInjectionGrammarMiner(HTMLGrammarMiner):
             "<sql-comment>": ["--", "#"],
         })
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     html_miner = SQLInjectionGrammarMiner(
         html_text, sql_payload="DROP TABLE orders")
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar = html_miner.mine_grammar()
     grammar
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar["<text>"]
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sql_fuzzer = GrammarFuzzer(grammar)
     sql_fuzzer.fuzz()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(db.execute("SELECT * FROM orders").fetchall())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     contents = webbrowser(urljoin(httpd_url,
                                   "/order?item=tshirt&name=Jane+Doe&email=doe%40example.com&city=Seattle&zip=98104"))
-
 
 def orders_db_is_empty():
     try:
@@ -1393,9 +1294,8 @@ def orders_db_is_empty():
         return True
     return len(entries) == 0
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     orders_db_is_empty()
-
 
 class SQLInjectionFuzzer(WebFormFuzzer):
     def __init__(self, url, sql_payload="", **kwargs):
@@ -1407,7 +1307,7 @@ class SQLInjectionFuzzer(WebFormFuzzer):
             html_text, sql_payload=self.sql_payload)
         return grammar_miner.mine_grammar()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sql_fuzzer = SQLInjectionFuzzer(httpd_url, "DELETE FROM orders")
     web_runner = WebRunner(httpd_url)
     trials = 1
@@ -1418,126 +1318,110 @@ if __name__ == "__main__":
             break
         trials += 1
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     trials
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     orders_db_is_empty()
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+### Fuzzing Web Forms
 
-# ### Fuzzing Web Forms
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Fuzzing Web Forms')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     web_form_fuzzer = WebFormFuzzer(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     web_form_fuzzer.grammar['<start>']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     web_form_fuzzer.grammar['<action>']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     web_form_fuzzer.grammar['<query>']
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     web_form_fuzzer.fuzz()
 
+### SQL Injection Attacks
 
-# ### SQL Injection Attacks
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### SQL Injection Attacks')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sql_fuzzer = SQLInjectionFuzzer(httpd_url, "DELETE FROM orders")
     sql_fuzzer.fuzz()
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     clear_httpd_messages()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     httpd_process.terminate()
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: Fix the Server
 
-# ### Exercise 1: Fix the Server
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: Fix the Server')
 
 
 
+#### Part 1: Silent Failures
 
-# #### Part 1: Silent Failures
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 1: Silent Failures')
-
 
 
 
 BETTER_HTML_INTERNAL_SERVER_ERROR = \
     HTML_INTERNAL_SERVER_ERROR.replace("<pre>{error_message}</pre>", "")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     HTML(BETTER_HTML_INTERNAL_SERVER_ERROR)
-
 
 class BetterHTTPRequestHandler(SimpleHTTPRequestHandler):
     def internal_server_error(self):
@@ -1554,11 +1438,10 @@ class BetterHTTPRequestHandler(SimpleHTTPRequestHandler):
         message = BETTER_HTML_INTERNAL_SERVER_ERROR
         self.wfile.write(message.encode("utf8"))
 
-# #### Part 2: Sanitized HTML
+#### Part 2: Sanitized HTML
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 2: Sanitized HTML')
-
 
 
 
@@ -1580,11 +1463,10 @@ class BetterHTTPRequestHandler(BetterHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(confirmation)
 
-# #### Part 3: Sanitized SQL
+#### Part 3: Sanitized SQL
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 3: Sanitized SQL')
-
 
 
 
@@ -1595,11 +1477,10 @@ class BetterHTTPRequestHandler(BetterHTTPRequestHandler):
                 (values['item'], values['name'], values['email'], values['city'], values['zip']))
         db.commit()
 
-# #### Part 4: A Robust Server
+#### Part 4: A Robust Server
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 4: A Robust Server')
-
 
 
 
@@ -1616,117 +1497,98 @@ class BetterHTTPRequestHandler(BetterHTTPRequestHandler):
         self.store_order(values)
         self.send_order_received(values)
 
-# #### Part 5: Test it!
+#### Part 5: Test it!
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 5: Test it!')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     httpd_process, httpd_url = start_httpd(BetterHTTPRequestHandler)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_url(httpd_url)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print_httpd_messages()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     standard_order = "/order?item=tshirt&name=Jane+Doe&email=doe%40example.com&city=Seattle&zip=98104"
     contents = webbrowser(httpd_url + standard_order)
     HTML(contents)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert contents.find("Thank you") > 0
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     bad_order = "/order?item="
     contents = webbrowser(httpd_url + bad_order)
     HTML(contents)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert contents.find("Order Form") > 0
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     injection_order = "/order?item=tshirt&name=Jane+Doe" + cgi_encode("<script></script>") + \
         "&email=doe%40example.com&city=Seattle&zip=98104"
     contents = webbrowser(httpd_url + injection_order)
     HTML(contents)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert contents.find("Thank you") > 0
     assert contents.find("<script>") < 0
     assert contents.find("&lt;script&gt;") > 0
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sql_order = "/order?item=tshirt&name=" + \
         cgi_encode("Robert', 'x', 'x', 'x'); DELETE FROM orders; --") + \
         "&email=doe%40example.com&city=Seattle&zip=98104"
     contents = webbrowser(httpd_url + sql_order)
     HTML(contents)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     assert contents.find("DELETE FROM") > 0
     assert not orders_db_is_empty()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     httpd_process.terminate()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if os.path.exists(ORDERS_DB):
         os.remove(ORDERS_DB)
 
+### Exercise 2: Protect the Server
 
-# ### Exercise 2: Protect the Server
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Protect the Server')
 
 
 
+#### Part 1: A Blacklisting Filter
 
-# #### Part 1: A Blacklisting Filter
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 1: A Blacklisting Filter')
 
 
 
+#### Part 2: A Whitelisting Filter
 
-# #### Part 2: A Whitelisting Filter
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Part 2: A Whitelisting Filter')
 
 
 
+### Exercise 3: Input Patterns
 
-# ### Exercise 3: Input Patterns
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 3: Input Patterns')
 
 
 
+### Exercise 4: Coverage-Driven Web Fuzzing
 
-# ### Exercise 4: Coverage-Driven Web Fuzzing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 4: Coverage-Driven Web Fuzzing')
-
 
 

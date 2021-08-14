@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# This material is part of "The Fuzzing Book".
+# "Mining Input Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2019-12-21 16:38:57+01:00
+# Last change: 2021-06-04 14:56:57+02:00
 #
-#!/
-# Copyright (c) 2018-2020 CISPA, Saarland University, authors, and contributors
+# Copyright (c) 2021 CISPA Helmholtz Center for Information Security
+# Copyright (c) 2018-2020 Saarland University, authors, and contributors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -27,42 +27,105 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+r'''
+The Fuzzing Book - Mining Input Grammars
 
-# # Mining Input Grammars
+This file can be _executed_ as a script, running all experiments:
 
-if __name__ == "__main__":
+    $ python GrammarMiner.py
+
+or _imported_ as a package, providing classes, functions, and constants:
+
+    >>> from fuzzingbook.GrammarMiner import <identifier>
+    
+but before you do so, _read_ it and _interact_ with it at:
+
+    https://www.fuzzingbook.org/html/GrammarMiner.html
+
+This chapter provides a number of classes to mine input grammars from existing programs.  The function `recover_grammar()` could be the easiest to use.  It takes a function and a set of inputs, and returns a grammar that describes its input language.
+
+We apply `recover_grammar()` on a `url_parse()` function that takes and decomposes URLs:
+
+>>> url_parse('https://www.fuzzingbook.org/')
+>>> URLS
+['http://user:pass@www.google.com:80/?q=path#ref',
+ 'https://www.cispa.saarland:80/',
+ 'http://www.fuzzingbook.org/#News']
+
+We extract the input grammar for `url_parse()` using `recover_grammar()`:
+
+>>> grammar = recover_grammar(url_parse, URLS)
+>>> grammar
+{'': [''],
+ '': [':'],
+ '': ['', 'http', 'https'],
+ '': ['///',
+  '//'],
+ '': ['user:pass@www.google.com:80',
+  'www.cispa.saarland:80',
+  'www.fuzzingbook.org'],
+ '': ['/#',
+  '#'],
+ '': ['/?'],
+ '': ['q=path', ''],
+ '': ['ref', 'News', '']}
+
+The names of nonterminals are a bit technical; but the grammar nicely represents the structure of the input; for instance, the different schemes (`"http"`, `"https"`) are all identified.
+The grammar can be immediately used for fuzzing, producing arbitrary combinations of input elements, which are all syntactically valid.
+
+>>> from GrammarCoverageFuzzer import GrammarCoverageFuzzer
+>>> fuzzer = GrammarCoverageFuzzer(grammar)
+>>> [fuzzer.fuzz() for i in range(5)]
+['http://user:pass@www.google.com:80/?q=path#News',
+ 'https://www.fuzzingbook.org/',
+ 'http://www.cispa.saarland:80/#ref',
+ 'http://user:pass@www.google.com:80/#News',
+ 'http://www.fuzzingbook.org/#News']
+
+Being able to automatically extract a grammar and to use this grammar for fuzzing makes for very effective test generation with a minimum of manual work.
+
+
+For more details, source, and documentation, see
+"The Fuzzing Book - Mining Input Grammars"
+at https://www.fuzzingbook.org/html/GrammarMiner.html
+'''
+
+
+# Allow to use 'from . import <module>' when run as script (cf. PEP 366)
+if __name__ == '__main__' and __package__ is None:
+    __package__ = 'fuzzingbook'
+
+
+# Mining Input Grammars
+# =====================
+
+if __name__ == '__main__':
     print('# Mining Input Grammars')
 
 
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
+## A Grammar Challenge
+## -------------------
 
-# ## A Grammar Challenge
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## A Grammar Challenge')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
-
-if __package__ is None or __package__ == "":
-    from Parser import process_inventory, process_vehicle, process_car, process_van, lr_graph  # minor dependency
-else:
-    from .Parser import process_inventory, process_vehicle, process_car, process_van, lr_graph  # minor dependency
-
+from .Parser import process_inventory, process_vehicle, process_car, process_van, lr_graph  # minor dependency
 
 INVENTORY = """\
 1997,van,Ford,E350
@@ -70,15 +133,14 @@ INVENTORY = """\
 1999,car,Chevy,Venture\
 """
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(process_inventory(INVENTORY))
 
+## A Simple Grammar Miner
+## ----------------------
 
-# ## A Simple Grammar Miner
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## A Simple Grammar Miner')
-
 
 
 
@@ -90,19 +152,14 @@ INVENTORY_METHODS = {
     'process_van',
     'process_car'}
 
-# ### Tracer
+### Tracer
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Tracer')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from Coverage import Coverage
-else:
-    from .Coverage import Coverage
-
+from .Coverage import Coverage
 
 import inspect
 
@@ -119,16 +176,14 @@ class Tracer(Coverage):
         print(event, file_name, lineno, method_name, param_names, local_vars)
         return self.traceit
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer() as tracer:
         process_vehicle(VEHICLES[0])
 
+### Context
 
-# ### Context
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Context')
-
 
 
 
@@ -164,10 +219,9 @@ class Tracer(Tracer):
         log_event(event, Context(frame))
         return self.traceit
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer() as tracer:
         process_vehicle(VEHICLES[0])
-
 
 class Tracer(Tracer):
     def __init__(self, my_input, **kwargs):
@@ -212,26 +266,22 @@ class Tracer(Tracer):
         self.on_event(event, arg, cxt, my_vars)
         return self.traceit
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer(VEHICLES[0], methods=INVENTORY_METHODS, log=True) as tracer:
         process_vehicle(VEHICLES[0])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     for t in tracer.trace:
         print(t[0], t[2].method, dict(t[3]))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer(VEHICLES[0], methods=INVENTORY_METHODS, log=True) as tracer:
         process_vehicle(tracer.my_input)
 
+### DefineTracker
 
-# ### DefineTracker
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### DefineTracker')
-
 
 
 
@@ -268,80 +318,61 @@ class DefineTracker(DefineTracker):
         for event, arg, cxt, my_vars in self.trace:
             self.track_event(event, arg, cxt, my_vars)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tracker = DefineTracker(tracer.my_input, tracer.trace, fragment_len=5)
     for k, v in tracker.my_assignments.items():
         print(k, '=', repr(v))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     tracker = DefineTracker(tracer.my_input, tracer.trace)
     for k, v in tracker.my_assignments.items():
         print(k, '=', repr(v))
-
 
 class DefineTracker(DefineTracker):
     def assignments(self):
         return self.my_assignments.items()
 
-# ### Assembling a Derivation Tree
+### Assembling a Derivation Tree
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Assembling a Derivation Tree')
 
 
 
+from .Grammars import START_SYMBOL, syntax_diagram, is_nonterminal
 
-if __package__ is None or __package__ == "":
-    from Grammars import START_SYMBOL, syntax_diagram, is_nonterminal
-else:
-    from .Grammars import START_SYMBOL, syntax_diagram, is_nonterminal
+from .GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string
 
-
-if __package__ is None or __package__ == "":
-    from GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string
-else:
-    from .GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     derivation_tree = (START_SYMBOL, [("1997,van,Ford,E350", [])])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     derivation_tree = (START_SYMBOL, [('<vehicle>', [("1997,van,Ford,E350", [])],
                                        [])])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     derivation_tree = (START_SYMBOL, [('<vehicle>', [('<year>', [('1997', [])]),
                                                      (",van,Ford,E350", [])], [])])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     derivation_tree = (START_SYMBOL, [('<vehicle>', [('<year>', [('1997', [])]),
                                                      (",van,", []),
                                                      ('<company>', [('Ford', [])]),
                                                      (",E350", [])], [])])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(derivation_tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     derivation_tree = (START_SYMBOL, [('<vehicle>', [('<year>', [('1997', [])]),
                                                      (",", []),
                                                      ("<kind>", [('van', [])]),
@@ -351,10 +382,8 @@ if __name__ == "__main__":
                                                      ("<model>", [('E350', [])])
                                                      ], [])])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(derivation_tree)
-
 
 class TreeMiner:
     def __init__(self, my_input, my_assignments, **kwargs):
@@ -418,54 +447,42 @@ class TreeMiner(TreeMiner):
                 continue
         return applied
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     tree = (START_SYMBOL, [("1997,van,Ford,E350", [])])
     m = TreeMiner('', {}, log=True)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v = m.insert_into_tree(tree, ('<vehicle>', "1997,van,Ford,E350"))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v = m.insert_into_tree(tree, ('<model>', 'E350'))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree((tree))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v = m.insert_into_tree(tree, ('<company>', 'Ford'))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v = m.insert_into_tree(tree, ('<kind>', 'van'))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v = m.insert_into_tree(tree, ('<year>', '1997'))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(tree)
-
 
 class TreeMiner(TreeMiner):
     def nt_var(self, var):
@@ -485,19 +502,17 @@ class TreeMiner(TreeMiner):
             self.apply_new_definition(tree, var, value)
         return tree
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer(VEHICLES[0]) as tracer:
         process_vehicle(tracer.my_input)
     assignments = DefineTracker(tracer.my_input, tracer.trace).assignments()
     dt = TreeMiner(tracer.my_input, assignments, log=True)
     dt.tree
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     display_tree(TreeMiner(tracer.my_input, assignments).tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     trees = []
     for vehicle in VEHICLES:
         print(vehicle)
@@ -509,8 +524,7 @@ if __name__ == "__main__":
             print(var + " = " + repr(val))
         print()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     csv_dt = []
     for inputstr, assignments in trees:
         print(inputstr)
@@ -518,12 +532,10 @@ if __name__ == "__main__":
         csv_dt.append(dt)
         display_tree(dt.tree)
 
+### Recovering Grammars from Derivation Trees
 
-# ### Recovering Grammars from Derivation Trees
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Recovering Grammars from Derivation Trees')
-
 
 
 
@@ -547,10 +559,9 @@ class GrammarMiner(GrammarMiner):
                     hsh[k].extend(chsh[k])
         return hsh
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     gm = GrammarMiner()
     gm.tree_to_grammar(csv_dt[0].tree)
-
 
 def readable(grammar):
     def readable_rule(rule):
@@ -559,9 +570,8 @@ def readable(grammar):
     return {k: list(set(readable_rule(a) for a in grammar[k]))
             for k in grammar}
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(readable(gm.tree_to_grammar(csv_dt[0].tree)))
-
 
 import itertools
 
@@ -573,15 +583,13 @@ class GrammarMiner(GrammarMiner):
             for key in itertools.chain(self.grammar.keys(), t_grammar.keys())
         }
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     inventory_grammar = GrammarMiner()
     for dt in csv_dt:
         inventory_grammar.add_tree(dt)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(readable(inventory_grammar.grammar))
-
 
 class GrammarMiner(GrammarMiner):
     def update_grammar(self, inputstr, trace):
@@ -604,27 +612,23 @@ def recover_grammar(fn, inputs, **kwargs):
         miner.update_grammar(tracer.my_input, tracer.trace)
     return readable(miner.grammar)
 
-# #### Example 1. Recovering the Inventory Grammar
+#### Example 1. Recovering the Inventory Grammar
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Example 1. Recovering the Inventory Grammar')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     inventory_grammar = recover_grammar(process_vehicle, VEHICLES)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     inventory_grammar
 
+#### Example 2. Recovering URL Grammar
 
-# #### Example 2. Recovering URL Grammar
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Example 2. Recovering URL Grammar')
-
 
 
 
@@ -640,7 +644,7 @@ def url_parse(url):
     clear_cache()
     urlparse(url)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     trees = []
     for url in URLS:
         print(url)
@@ -660,54 +664,45 @@ if __name__ == "__main__":
         url_dt.append(dt)
         display_tree(dt.tree)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     url_grammar = recover_grammar(url_parse, URLS, files=['urllib/parse.py'])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(url_grammar)
 
+### Fuzzing
 
-# ### Fuzzing
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Fuzzing')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(inventory_grammar)
     for _ in range(10):
         print(f.fuzz())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(url_grammar)
     for _ in range(10):
         print(f.fuzz())
 
+### Problems with the Simple Miner
 
-# ### Problems with the Simple Miner
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Problems with the Simple Miner')
-
 
 
 
 URLS_X = URLS + ['ftp://freebsd.org/releases/5.8']
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     url_grammar = recover_grammar(url_parse, URLS_X, files=['urllib/parse.py'])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(url_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     clear_cache()
     with Tracer(URLS_X[0]) as tracer:
         urlparse(tracer.my_input)
@@ -715,20 +710,18 @@ if __name__ == "__main__":
         if t[0] in {'call', 'line'} and 'parse.py' in str(t[2]) and t[3]:
             print(i, t[2]._t()[1], t[3:])
 
+## Grammar Miner with Reassignment
+## -------------------------------
 
-# ## Grammar Miner with Reassignment
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Grammar Miner with Reassignment')
 
 
 
+### Tracking variable assignment locations
 
-# ### Tracking variable assignment locations
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Tracking variable assignment locations')
-
 
 
 
@@ -751,19 +744,17 @@ def A(ap_12):
     a_14 = B(a_13) + '@17'
     a_14 = B(a_13) + '@18'
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer('____') as tracer:
         A(tracer.my_input)
 
     for t in tracer.trace:
         print(t[0], "%d:%s" % (t[2].line_no, t[2].method), t[3])
 
+### CallStack
 
-# ### CallStack
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### CallStack')
-
 
 
 
@@ -812,47 +803,40 @@ def display_stack(istack):
         return (repr(current), [stack_to_tree(rest)])
     display_tree(stack_to_tree(istack.mstack), graph_attr=lr_graph)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cs = CallStack()
     display_stack(cs)
     cs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cs.enter('hello')
     display_stack(cs)
     cs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cs.enter('world')
     display_stack(cs)
     cs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cs.leave()
     display_stack(cs)
     cs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cs.enter('world')
     display_stack(cs)
     cs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cs.leave()
     display_stack(cs)
     cs
 
+### Vars
 
-# ### Vars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Vars')
-
 
 
 
@@ -872,26 +856,22 @@ class Vars(Vars):
         for k, v in v.items():
             self._set_kv(k, v)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     v = Vars('')
     v.defs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v['x'] = 'X'
     v.defs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     v.update({'x': 'x', 'y': 'y'})
     v.defs
 
+### AssignmentVars
 
-# ### AssignmentVars
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### AssignmentVars')
-
 
 
 
@@ -932,22 +912,18 @@ class AssignmentVars(AssignmentVars):
         self.new_vars.add(self.var_name(var))
         return self.var_name(var)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sav = AssignmentVars('')
     sav.defs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sav.var_access('v1')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sav.var_assign('v1')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sav.var_assign('v1')
-
 
 class AssignmentVars(AssignmentVars):
     def _set_kv(self, var, val):
@@ -956,21 +932,18 @@ class AssignmentVars(AssignmentVars):
             return
         self.defs[self.var_assign(var)] = val
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sav = AssignmentVars('')
     sav['x'] = 'X'
     sav.defs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sav['x'] = 'X'
     sav.defs
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     sav['x'] = 'Y'
     sav.defs
-
 
 class AssignmentVars(AssignmentVars):
     def method_enter(self, cxt, my_vars):
@@ -1027,11 +1000,10 @@ class AssignmentVars(AssignmentVars):
 
         return {fmt(k): v for k, v in self.defs.items()}
 
-# ### AssignmentTracker
+### AssignmentTracker
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### AssignmentTracker')
-
 
 
 
@@ -1098,7 +1070,7 @@ def A(ap_12):
     a_14 = B(a_13)
     a_14 = B(a_14)[3:]
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer('---xxx') as tracer:
         A(tracer.my_input)
     tracker = AssignmentTracker(tracer.my_input, tracer.trace, log=True)
@@ -1108,8 +1080,7 @@ if __name__ == "__main__":
     for k, v in tracker.my_assignments.defined_vars(formatted=True):
         print(k, '=', repr(v))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     traces = []
     for inputstr in URLS_X:
         clear_cache()
@@ -1122,12 +1093,10 @@ if __name__ == "__main__":
             print(k, '=', repr(v))
         print()
 
+### Recovering a Derivation Tree
 
-# ### Recovering a Derivation Tree
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Recovering a Derivation Tree')
-
 
 
 
@@ -1139,23 +1108,21 @@ class TreeMiner(TreeMiner):
             self.apply_new_definition(tree, var, value)
         return tree
 
-# #### Example 1: Recovering URL Derivation Tree
+#### Example 1: Recovering URL Derivation Tree
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Example 1: Recovering URL Derivation Tree')
 
 
 
+##### URL 1 derivation tree
 
-# ##### URL 1 derivation tree
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n##### URL 1 derivation tree')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     clear_cache()
     with Tracer(URLS_X[0], files=['urllib/parse.py']) as tracer:
         urlparse(tracer.my_input)
@@ -1163,16 +1130,14 @@ if __name__ == "__main__":
     dt = TreeMiner(tracer.my_input, sm.my_assignments.defined_vars())
     display_tree(dt.tree)
 
+##### URL 4 derivation tree
 
-# ##### URL 4 derivation tree
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n##### URL 4 derivation tree')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     clear_cache()
     with Tracer(URLS_X[-1], files=['urllib/parse.py']) as tracer:
         urlparse(tracer.my_input)
@@ -1180,12 +1145,10 @@ if __name__ == "__main__":
     dt = TreeMiner(tracer.my_input, sm.my_assignments.defined_vars())
     display_tree(dt.tree)
 
+### Recover Grammar
 
-# ### Recover Grammar
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Recover Grammar')
-
 
 
 
@@ -1202,75 +1165,64 @@ class GrammarMiner(GrammarMiner):
     def create_tree_miner(self, *args):
         return TreeMiner(*args)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     url_grammar = recover_grammar(url_parse, URLS_X, files=['urllib/parse.py'])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(url_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(url_grammar)
     for _ in range(10):
         print(f.fuzz())
 
+#### Example 2: Recovering Inventory Grammar
 
-# #### Example 2: Recovering Inventory Grammar
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Example 2: Recovering Inventory Grammar')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     inventory_grammar = recover_grammar(process_vehicle, VEHICLES)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(inventory_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(inventory_grammar)
     for _ in range(10):
         print(f.fuzz())
 
+### Problems with the Grammar Miner with Reassignment
 
-# ### Problems with the Grammar Miner with Reassignment
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Problems with the Grammar Miner with Reassignment')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer(INVENTORY) as tracer:
         process_inventory(tracer.my_input)
     sm = AssignmentTracker(tracer.my_input, tracer.trace)
     dt = TreeMiner(tracer.my_input, sm.my_assignments.defined_vars())
     display_tree(dt.tree, graph_attr=lr_graph)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     dt = TreeMiner(tracer.my_input, sm.my_assignments.defined_vars(), log=True)
 
+## A Grammar Miner with Scope
+## --------------------------
 
-# ## A Grammar Miner with Scope
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## A Grammar Miner with Scope')
 
 
 
+### Input Stack
 
-# ### Input Stack
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Input Stack')
-
 
 
 
@@ -1284,46 +1236,37 @@ class InputStack(InputStack):
     def in_current_record(self, val):
         return any(val in var for var in self.inputs[-1].values())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_istack = InputStack('hello my world')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_istack.in_current_record('hello')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_istack.in_current_record('bye')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_istack.inputs.append({'greeting': 'hello', 'location': 'world'})
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_istack.in_current_record('hello')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_istack.in_current_record('my')
-
 
 class InputStack(InputStack):
     def ignored(self, val):
         return not (isinstance(val, str) and len(val) >= self.fragment_len)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_istack = InputStack('hello world')
     my_istack.ignored(1)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_istack.ignored('a')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     my_istack.ignored('help')
-
 
 class InputStack(InputStack):
     def in_scope(self, k, val):
@@ -1342,11 +1285,10 @@ class InputStack(InputStack):
         self.inputs.pop()
         super().leave()
 
-# ### ScopedVars
+### ScopedVars
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### ScopedVars')
-
 
 
 
@@ -1415,11 +1357,10 @@ class ScopedVars(ScopedVars):
 
         return {fmt(k): v for k, v in self.defs.items()}
 
-# ### Scope Tracker
+### Scope Tracker
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Scope Tracker')
-
 
 
 
@@ -1435,7 +1376,7 @@ class ScopeTracker(ScopeTracker):
     def is_input_fragment(self, var, value):
         return self.my_assignments.call_stack.in_scope(var, value)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     vehicle_traces = []
     with Tracer(INVENTORY) as tracer:
         process_inventory(tracer.my_input)
@@ -1444,12 +1385,10 @@ if __name__ == "__main__":
     for k, v in sm.my_assignments.seq_vars().items():
         print(k, '=', repr(v))
 
+### Recovering a Derivation Tree
 
-# ### Recovering a Derivation Tree
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Recovering a Derivation Tree')
-
 
 
 
@@ -1517,15 +1456,14 @@ class ScopeTreeMiner(ScopeTreeMiner):
             self.apply_new_definition(tree, var, value)
         return tree
 
-# #### Example 1: Recovering URL Parse Tree
+#### Example 1: Recovering URL Parse Tree
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Example 1: Recovering URL Parse Tree')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     url_dts = []
     for inputstr in URLS_X:
         clear_cache()
@@ -1541,16 +1479,14 @@ if __name__ == "__main__":
         display_tree(dt.tree, graph_attr=lr_graph)
         url_dts.append(dt)
 
+#### Example 2: Recovering Inventory Parse Tree
 
-# #### Example 2: Recovering Inventory Parse Tree
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n#### Example 2: Recovering Inventory Parse Tree')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer(INVENTORY) as tracer:
         process_inventory(tracer.my_input)
 
@@ -1563,12 +1499,10 @@ if __name__ == "__main__":
             formatted=False))
     display_tree(inventory_dt.tree, graph_attr=lr_graph)
 
+### Grammar Mining
 
-# ### Grammar Mining
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Grammar Mining')
-
 
 
 
@@ -1589,18 +1523,16 @@ class ScopedGrammarMiner(GrammarMiner):
                     hsh[k].extend(chsh[k])
         return hsh
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     si = ScopedGrammarMiner()
     si.add_tree(inventory_dt)
     syntax_diagram(readable(si.grammar))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     su = ScopedGrammarMiner()
     for url_dt in url_dts:
         su.add_tree(url_dt)
     syntax_diagram(readable(su.grammar))
-
 
 class ScopedGrammarMiner(ScopedGrammarMiner):
     def get_replacements(self, grammar):
@@ -1646,11 +1578,10 @@ class ScopedGrammarMiner(ScopedGrammarMiner):
                 self.grammar.pop(k, None)
         return readable(self.grammar)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     si = ScopedGrammarMiner()
     si.add_tree(inventory_dt)
     syntax_diagram(readable(si.clean_grammar()))
-
 
 class ScopedGrammarMiner(ScopedGrammarMiner):
     def update_grammar(self, inputstr, trace):
@@ -1675,103 +1606,88 @@ def recover_grammar(fn, inputs, **kwargs):
         miner.update_grammar(tracer.my_input, tracer.trace)
     return readable(miner.clean_grammar())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     url_grammar = recover_grammar(url_parse, URLS_X, files=['urllib/parse.py'])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(url_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(url_grammar)
     for _ in range(10):
         print(f.fuzz())
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     inventory_grammar = recover_grammar(process_inventory, [INVENTORY])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(inventory_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     f = GrammarFuzzer(inventory_grammar)
     for _ in range(10):
         print(f.fuzz())
 
+## Synopsis
+## --------
 
-# ## Synopsis
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Synopsis')
 
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     url_parse('https://www.fuzzingbook.org/')
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     URLS
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     grammar = recover_grammar(url_parse, URLS)
     grammar
 
+from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
 
-if __package__ is None or __package__ == "":
-    from GrammarCoverageFuzzer import GrammarCoverageFuzzer
-else:
-    from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     fuzzer = GrammarCoverageFuzzer(grammar)
     [fuzzer.fuzz() for i in range(5)]
 
+## Lessons Learned
+## ---------------
 
-# ## Lessons Learned
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Lessons Learned')
 
 
 
+## Next Steps
+## ----------
 
-# ## Next Steps
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Next Steps')
 
 
 
+## Background
+## ----------
 
-# ## Background
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Background')
 
 
 
+## Exercises
+## ---------
 
-# ## Exercises
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n## Exercises')
 
 
 
+### Exercise 1: Flattening complex objects
 
-# ### Exercise 1: Flattening complex objects
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 1: Flattening complex objects')
-
 
 
 
@@ -1822,25 +1738,22 @@ def process_car(vehicle):
         res.append("It is an old but reliable model!")
     return res
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     vehicle_grammar = recover_grammar(
         process_inventory,
         [INVENTORY],
         methods=INVENTORY_METHODS)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(vehicle_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer(INVENTORY, methods=INVENTORY_METHODS, log=True) as tracer:
         process_inventory(tracer.my_input)
     print()
     print('Traced values:')
     for t in tracer.trace:
         print(t)
-
 
 MAX_DEPTH = 10
 
@@ -1882,7 +1795,7 @@ class Context(Context):
     def qualified(self, all_vars):
         return {"%s:%s" % (self.method, k): v for k, v in all_vars.items()}
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     with Tracer(INVENTORY, methods=INVENTORY_METHODS, log=True) as tracer:
         process_inventory(tracer.my_input)
     print()
@@ -1890,31 +1803,23 @@ if __name__ == "__main__":
     for t in tracer.trace:
         print(t)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     vehicle_grammar = recover_grammar(
         process_inventory,
         [INVENTORY],
         methods=INVENTORY_METHODS)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(vehicle_grammar)
 
+### Exercise 2: Incorporating Taints from InformationFlow
 
-# ### Exercise 2: Incorporating Taints from InformationFlow
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     print('\n### Exercise 2: Incorporating Taints from InformationFlow')
 
 
 
-
-if __package__ is None or __package__ == "":
-    from InformationFlow import ostr
-else:
-    from .InformationFlow import ostr
-
+from .InformationFlow import ostr
 
 def is_fragment(fragment, original):
     assert isinstance(original, ostr)
@@ -1940,7 +1845,7 @@ class TaintedScopeTracker(ScopeTracker):
 
 class TaintedScopeTreeMiner(ScopeTreeMiner):
     def string_part_of_value(self, part, value):
-        return str(part.origin).strip('[]') in str(value.origin).strip('[]')
+        return is_fragment(part, value)
     
     def partition(self, part, value):
         begin = value.origin.index(part.origin[0])
@@ -1962,24 +1867,20 @@ def recover_grammar_with_taints(fn, inputs, **kwargs):
         miner.update_grammar(tracer.my_input, tracer.trace)
     return readable(miner.clean_grammar())
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     inventory_grammar = recover_grammar_with_taints(
         process_inventory, [INVENTORY],
         methods=[
             'process_inventory', 'process_vehicle', 'process_car', 'process_van'
         ])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(inventory_grammar)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     url_grammar = recover_grammar_with_taints(
         url_parse, URLS_X + ['ftp://user4:pass1@host4/?key4=value3'],
         methods=['urlsplit', 'urlparse', '_splitnetloc'])
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     syntax_diagram(url_grammar)
-
