@@ -1049,6 +1049,7 @@ $(DOCS_TARGET)dist/$(PROJECT)-code.zip: \
 	ln -s ../code $(DOCS_TARGET)$(PROJECT)/$(PROJECT)
 	mv $(DOCS_TARGET)$(PROJECT)/$(PROJECT)/setup.py $(DOCS_TARGET)$(PROJECT)
 	mv $(DOCS_TARGET)$(PROJECT)/$(PROJECT)/README.md $(DOCS_TARGET)$(PROJECT)
+	# ln -s ../../requirements.txt $(DOCS_TARGET)$(PROJECT)
 	cd $(DOCS_TARGET)$(PROJECT); PYTHONPATH= $(PYTHON) ./setup.py sdist
 	mv $(DOCS_TARGET)$(PROJECT)/dist/* $(DOCS_TARGET)dist
 	# mv $(DOCS_TARGET)$(PROJECT)/*.egg-info $(DOCS_TARGET)dist
@@ -1170,11 +1171,14 @@ no-synopsis:
 ## Python packages
 # After this, you can do 'pip install fuzzingbook / debuggingbook' 
 # and then 'from fuzzingbook.Fuzzer import Fuzzer' :-)
-.PHONY: upload-dist
+.PHONY: upload-test
 upload-dist: dist
 	@echo "Use your pypi.org password to upload"
 	cd $(DOCS_TARGET); twine upload dist/*.tar.gz
 
+upload-test: dist
+	@echo "Use your pypi.org password to upload"
+	cd $(DOCS_TARGET); twine upload --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
 
 
 ## Binder services
