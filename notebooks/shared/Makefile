@@ -311,7 +311,7 @@ ZIP_OPTIONS = -r
 # Default target is to build everything needed for publishing,
 # such that we can run "make -k" in a loop
 .PHONY: chapters web default
-web default: html code test-code test-imports test-packages slides
+web default: setup html code test-code test-imports test-packages slides
 chapters: html
 
 # The book is recreated after any change to any source
@@ -397,6 +397,12 @@ help:
 	@echo "* Use make PUBLISH=(nbconvert|nbpublish|bookbook) to choose a converter"
 	@echo "  (default: automatic)"
 	
+# Setup repo
+.PHONY: setup
+setup: .gitignore
+.gitignore: shared/gitignore
+	$(CP) $< $@
+
 # Run a notebook, (re)creating all output cells
 ADD_METADATA = $(SHARED)utils/add_metadata.py
 NBAUTOSLIDE = $(SHARED)utils/nbautoslide.py
