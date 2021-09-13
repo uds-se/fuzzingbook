@@ -401,7 +401,8 @@ help:
 .PHONY: setup
 setup: .gitignore
 .gitignore: shared/gitignore
-	$(CP) $< $@
+	$(RM) $@
+	cp $< $@
 
 # Run a notebook, (re)creating all output cells
 ADD_METADATA = $(SHARED)utils/add_metadata.py
