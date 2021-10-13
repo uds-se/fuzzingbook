@@ -1178,8 +1178,8 @@ no-synopsis:
 ## Python packages
 # After this, you can do 'pip install fuzzingbook / debuggingbook' 
 # and then 'from fuzzingbook.Fuzzer import Fuzzer' :-)
-.PHONY: upload-test
-upload-dist: dist
+.PHONY: upload upload-dist upload-test
+upload upload-dist: dist
 	@echo "Use your pypi.org password to upload"
 	cd $(DOCS_TARGET); twine upload dist/*.tar.gz
 
