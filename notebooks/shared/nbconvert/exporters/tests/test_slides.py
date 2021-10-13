@@ -5,7 +5,7 @@
 
 from nbformat import v4 as nbformat
 from .base import ExportersTestsBase
-from ..slides import SlidesExporter, _RevealMetadataPreprocessor 
+from ..slides import SlidesExporter, prepare
 
 
 class TestSlidesExporter(ExportersTestsBase):
@@ -33,7 +33,7 @@ class TestSlidesExporter(ExportersTestsBase):
         """
         Can a SlidesExporter export using the 'reveal' template?
         """
-        (output, resources) = SlidesExporter().from_filename(self._get_notebook())
+        (output, resources) = SlidesExporter(template_file='slides_reveal').from_filename(self._get_notebook())
         assert len(output) > 0
 
     def build_notebook(self):
@@ -54,10 +54,9 @@ class TestSlidesExporter(ExportersTestsBase):
 
         return nbformat.new_notebook(cells=cells)
 
-    def test_metadata_preprocessor(self):
-        preprocessor = _RevealMetadataPreprocessor()
+    def test_prepare(self):
         nb = self.build_notebook()
-        nb, resources = preprocessor.preprocess(nb)
+        nb = prepare(nb)
         cells = nb.cells
 
         # Make sure correct metadata tags are available on every cell.

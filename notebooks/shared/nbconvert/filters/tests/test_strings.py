@@ -1,4 +1,3 @@
-# -*- coding: UTF-8 -*-
 """
 Module with tests for Strings
 """
@@ -15,12 +14,11 @@ Module with tests for Strings
 # Imports
 #-----------------------------------------------------------------------------
 import os
-import re
 
 from ...tests.base import TestsBase
 from ..strings import (wrap_text, html2text, add_anchor, strip_dollars, 
     strip_files_prefix, get_lines, comment_lines, ipython2python, posix_path,
-    add_prompts, prevent_list_blocks,ascii_only
+    add_prompts, prevent_list_blocks
 )
 
 
@@ -68,25 +66,10 @@ class TestStrings(TestsBase):
         results = add_anchor(html)
         self.assertEqual(html, results)
 
-    def test_add_anchor_valid_url_fragment(self):
-        """add_anchor creates a valid URL fragment"""
-        results = add_anchor(r'<h1>$\pi$ with #s and unicode 中</h1>')
-        match = re.search(r'href="#(.*?)"', results)
-        assert match
-        assert len(match.groups()) == 1
-        href = match.groups()[0]
-
-        assert len(href) > 0
-        # No invalid characters should be present
-        assert '\\' not in href
-        assert '#' not in href
-        assert '中' not in href
-
     def test_strip_dollars(self):
         """strip_dollars test"""
         tests = [
             ('', ''), 
-            ('  ', '  '),
             ('$$', ''), 
             ('$H$', 'H'), 
             ('$He', 'He'), 
@@ -180,14 +163,3 @@ class TestStrings(TestsBase):
         ]
         for test in tests:
             self.assertEqual(prevent_list_blocks(test[0]), test[1])
-
-    def test_ascii_only(self):
-        """ascii only test"""
-        tests = [
-                ('', ''),
-                ('  ', '  '),
-                ('Hello', 'Hello'),
-                ('Hello 中文', 'Hello ??'),
-        ]
-        for test in tests:
-            self.assertEqual(test[1], ascii_only(test[0]))

@@ -12,15 +12,14 @@ import os
 import copy
 import collections
 import datetime
-import sys
 
 import nbformat
 
 from traitlets.config.configurable import LoggingConfigurable
 from traitlets.config import Config
-from traitlets import Bool, HasTraits, Unicode, List, TraitError
+from traitlets import HasTraits, Unicode, List, TraitError
 from traitlets.utils.importstring import import_item
-from typing import Optional
+from ipython_genutils import text, py3compat
 
 
 class ResourcesDict(collections.defaultdict):
@@ -36,7 +35,7 @@ class FilenameExtension(Unicode):
 
     def validate(self, obj, value):
         # cast to proper unicode
-        value = super().validate(obj, value)
+        value = super(FilenameExtension, self).validate(obj, value)
 
         # check that it starts with a dot
         if value and not value.startswith('.'):
@@ -53,11 +52,7 @@ class Exporter(LoggingConfigurable):
     accompanying resources dict.
     """
 
-    enabled = Bool(True,
-        help = "Disable this exporter (and any exporters inherited from it)."
-    ).tag(config=True)
-
-    file_extension = FilenameExtension(
+    file_extension = FilenameExtension('.txt',
         help="Extension of the file that should be written to disk"
     ).tag(config=True)
 
@@ -65,10 +60,6 @@ class Exporter(LoggingConfigurable):
     # This is *not* a traitlet, because we want to be able to access it from
     # the class, not just on instances.
     output_mimetype = ''
-
-    # Should this converter be accessible from the notebook front-end?
-    # If so, should be a friendly name to display (and possibly translated).
-    export_from_notebook = None
 
     #Configurability, allows the user to easily add filters and preprocessors.
     preprocessors = List(
@@ -84,10 +75,10 @@ class Exporter(LoggingConfigurable):
                                   'nbconvert.preprocessors.ExecutePreprocessor',
                                   'nbconvert.preprocessors.coalesce_streams',
                                   'nbconvert.preprocessors.SVG2PDFPreprocessor',
+                                  'nbconvert.preprocessors.CSSHTMLHeaderPreprocessor',
                                   'nbconvert.preprocessors.LatexPreprocessor',
                                   'nbconvert.preprocessors.HighlightMagicsPreprocessor',
                                   'nbconvert.preprocessors.ExtractOutputPreprocessor',
-                                  'nbconvert.preprocessors.ClearMetadataPreprocessor',
                               ],
         help="""List of preprocessors available by default, by name, namespace,
         instance, or type."""
@@ -99,7 +90,7 @@ class Exporter(LoggingConfigurable):
 
         Parameters
         ----------
-        config : ``traitlets.config.Config``
+        config : :class:`~traitlets.config.Config`
             User configuration instance.
         `**kw`
             Additional keyword arguments passed to parent __init__
@@ -109,7 +100,7 @@ class Exporter(LoggingConfigurable):
         if config:
             with_default_config.merge(config)
 
-        super().__init__(config=with_default_config, **kw)
+        super(Exporter, self).__init__(config=with_default_config, **kw)
 
         self._init_preprocessors()
 
@@ -124,13 +115,13 @@ class Exporter(LoggingConfigurable):
 
         Parameters
         ----------
-        nb : `nbformat.NotebookNode`
-            Notebook node (dict-like with attr-access)
+        nb : :class:`~nbformat.NotebookNode`
+          Notebook node (dict-like with attr-access)
         resources : dict
-            Additional resources that can be accessed read/write by
-            preprocessors and filters.
+          Additional resources that can be accessed read/write by
+          preprocessors and filters.
         `**kw`
-            Ignored
+          Ignored
 
         """
         nb_copy = copy.deepcopy(nb)
@@ -144,7 +135,8 @@ class Exporter(LoggingConfigurable):
 
         return nb_copy, resources
 
-    def from_filename(self, filename: str, resources: Optional[dict] = None, **kw):
+
+    def from_filename(self, filename, resources=None, **kw):
         """
         Convert a notebook from a notebook file.
 
@@ -153,29 +145,30 @@ class Exporter(LoggingConfigurable):
         filename : str
             Full filename of the notebook file to open and convert.
         resources : dict
-            Additional resources that can be accessed read/write by
-            preprocessors and filters.
+          Additional resources that can be accessed read/write by
+          preprocessors and filters.
         `**kw`
-            Ignored
+          Ignored
 
         """
+        # Convert full filename string to unicode
+        # In python 2.7.x if filename comes as unicode string,
+        # just skip converting it.
+        if isinstance(filename, str):
+           filename = py3compat.str_to_unicode(filename)
+
         # Pull the metadata from the filesystem.
         if resources is None:
             resources = ResourcesDict()
         if not 'metadata' in resources or resources['metadata'] == '':
             resources['metadata'] = ResourcesDict()
         path, basename = os.path.split(filename)
-        notebook_name = os.path.splitext(basename)[0]
+        notebook_name = basename[:basename.rfind('.')]
         resources['metadata']['name'] = notebook_name
         resources['metadata']['path'] = path
 
         modified_date = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
-        # datetime.strftime date format for ipython
-        if sys.platform == 'win32':
-            date_format = "%B %d, %Y"
-        else:
-            date_format = "%B %-d, %Y"
-        resources['metadata']['modified_date'] = modified_date.strftime(date_format)
+        resources['metadata']['modified_date'] = modified_date.strftime(text.date_format)
 
         with io.open(filename, encoding='utf-8') as f:
             return self.from_file(f, resources=resources, **kw)
@@ -190,10 +183,10 @@ class Exporter(LoggingConfigurable):
         file_stream : file-like object
             Notebook file-like object to convert.
         resources : dict
-            Additional resources that can be accessed read/write by
-            preprocessors and filters.
+          Additional resources that can be accessed read/write by
+          preprocessors and filters.
         `**kw`
-            Ignored
+          Ignored
 
         """
         return self.from_notebook_node(nbformat.read(file_stream, as_version=4), resources=resources, **kw)
@@ -203,13 +196,13 @@ class Exporter(LoggingConfigurable):
         """
         Register a preprocessor.
         Preprocessors are classes that act upon the notebook before it is
-        passed into the Jinja templating engine. Preprocessors are also
+        passed into the Jinja templating engine.  preprocessors are also
         capable of passing additional information to the Jinja
         templating engine.
 
         Parameters
         ----------
-        preprocessor : `nbconvert.preprocessors.Preprocessor`
+        preprocessor : :class:`~nbconvert.preprocessors.Preprocessor`
             A dotted module name, a type, or an instance
         enabled : bool
             Mark the preprocessor as enabled
@@ -221,7 +214,7 @@ class Exporter(LoggingConfigurable):
         constructed = not isclass
 
         # Handle preprocessor's registration based on it's type
-        if constructed and isinstance(preprocessor, str,):
+        if constructed and isinstance(preprocessor, py3compat.string_types):
             # Preprocessor is a string, import the namespace and recursively call
             # this register_preprocessor method
             preprocessor_cls = import_item(preprocessor)
@@ -257,7 +250,7 @@ class Exporter(LoggingConfigurable):
         """
         self._preprocessors = []
 
-        # Load default preprocessors (not necessarily enabled by default).
+        # Load default preprocessors (not necessarly enabled by default).
         for preprocessor in self.default_preprocessors:
             self.register_preprocessor(preprocessor)
 
@@ -312,14 +305,14 @@ class Exporter(LoggingConfigurable):
         nbc =  copy.deepcopy(nb)
         resc = copy.deepcopy(resources)
 
-        # Run each preprocessor on the notebook.  Carry the output along
-        # to each preprocessor
+        #Run each preprocessor on the notebook.  Carry the output along
+        #to each preprocessor
         for preprocessor in self._preprocessors:
             nbc, resc = preprocessor(nbc, resc)
-            try:
+            try: 
                 nbformat.validate(nbc, relax_add_props=True)
             except nbformat.ValidationError:
-                self.log.error('Notebook is invalid after preprocessor %s',
+                self.log.error('Notebook is invalid after preprocessor {}',
                                preprocessor)
                 raise
 

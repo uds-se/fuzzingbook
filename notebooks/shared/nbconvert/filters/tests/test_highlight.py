@@ -75,6 +75,8 @@ class TestHighlight(TestsBase):
                 ( ht, ('def', )),
                 ( rb, ('def','end'  ) )
                 ]:
+            print(tkns)
+            print(lang)
             root = xml.etree.ElementTree.fromstring(lang)
             self.assertEqual(self._extract_tokens(root,'k'), set(tkns))
 

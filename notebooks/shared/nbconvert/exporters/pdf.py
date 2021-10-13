@@ -7,10 +7,9 @@ import subprocess
 import os
 import sys
 
-import shutil
-from traitlets import Integer, List, Bool, Instance, Unicode, default
+from ipython_genutils.py3compat import which, cast_bytes_py2, getcwd
+from traitlets import Integer, List, Bool, Instance, Unicode
 from testpath.tempdir import TemporaryWorkingDirectory
-from typing import Optional
 from .latex import LatexExporter
 
 class LatexFailed(IOError):
@@ -26,32 +25,22 @@ class LatexFailed(IOError):
     
     def __str__(self):
         u = self.__unicode__()
-        return u
+        return cast_bytes_py2(u)
 
-def prepend_to_env_search_path(varname, value, envdict):
-    """Add value to the environment variable varname in envdict
-
-    e.g. prepend_to_env_search_path('BIBINPUTS', '/home/sally/foo', os.environ)
-    """
-    if not value:
-        return  # Nothing to add
-
-    envdict[varname] = value + os.pathsep + envdict.get(varname, '')
 
 class PDFExporter(LatexExporter):
     """Writer designed to write to PDF files.
 
-    This inherits from `LatexExporter`. It creates a LaTeX file in
+    This inherits from :class:`LatexExporter`. It creates a LaTeX file in
     a temporary directory using the template machinery, and then runs LaTeX
     to create a pdf.
     """
-    export_from_notebook="PDF via LaTeX"
 
     latex_count = Integer(3,
         help="How many times latex will be called."
     ).tag(config=True)
 
-    latex_command = List([u"xelatex", u"{filename}", "-quiet"],
+    latex_command = List([u"xelatex", u"{filename}"],
         help="Shell command used to compile latex."
     ).tag(config=True)
 
@@ -63,25 +52,18 @@ class PDFExporter(LatexExporter):
         help="Whether to display the output of latex commands."
     ).tag(config=True)
 
+    temp_file_exts = List(['.aux', '.bbl', '.blg', '.idx', '.log', '.out'],
+        help="File extensions of temp files to remove after running."
+    ).tag(config=True)
+    
     texinputs = Unicode(help="texinputs dir. A notebook's directory is added")
-    writer = Instance("nbconvert.writers.FilesWriter", args=(), kw={'build_directory': '.'})
-
-    output_mimetype = "application/pdf"
+    writer = Instance("nbconvert.writers.FilesWriter", args=())
     
     _captured_output = List()
 
-    @default('file_extension')
-    def _file_extension_default(self):
-        return '.pdf'
-
-
-    @default('template_extension')
-    def _template_extension_default(self):
-        return '.tex.j2'
-
-    def run_command(self, command_list, filename, count, log_function, raise_on_failure=None):
+    def run_command(self, command_list, filename, count, log_function):
         """Run command_list count times.
-
+        
         Parameters
         ----------
         command_list : list
@@ -91,10 +73,7 @@ class PDFExporter(LatexExporter):
             The name of the file to convert.
         count : int
             How many times to run the command.
-        raise_on_failure: Exception class (default None)
-            If provided, will raise the given exception for if an instead of
-            returning False on command failure.
-
+        
         Returns
         -------
         success : bool
@@ -103,14 +82,22 @@ class PDFExporter(LatexExporter):
         """
         command = [c.format(filename=filename) for c in command_list]
 
+        # On windows with python 2.x there is a bug in subprocess.Popen and
+        # unicode commands are not supported
+        if sys.platform == 'win32' and sys.version_info < (3,0):
+            #We must use cp1252 encoding for calling subprocess.Popen
+            #Note that sys.stdin.encoding and encoding.DEFAULT_ENCODING
+            # could be different (cp437 in case of dos console)
+            command = [c.encode('cp1252') for c in command]
+
         # This will throw a clearer error if the command is not found
-        cmd = shutil.which(command_list[0])
+        cmd = which(command_list[0])
         if cmd is None:
             link = "https://nbconvert.readthedocs.io/en/latest/install.html#installing-tex"
             raise OSError("{formatter} not found on PATH, if you have not installed "
                           "{formatter} you may need to do so. Find further instructions "
                           "at {link}.".format(formatter=command_list[0], link=link))
-
+        
         times = 'time' if count == 1 else 'times'
         self.log.info("Running %s %i %s: %s", command_list[0], count, times, command)
         
@@ -118,10 +105,10 @@ class PDFExporter(LatexExporter):
         if shell:
             command = subprocess.list2cmdline(command)
         env = os.environ.copy()
-        prepend_to_env_search_path('TEXINPUTS', self.texinputs, env)
-        prepend_to_env_search_path('BIBINPUTS', self.texinputs, env)
-        prepend_to_env_search_path('BSTINPUTS', self.texinputs, env)
-
+        env['TEXINPUTS'] = os.pathsep.join([
+            cast_bytes_py2(self.texinputs),
+            env.get('TEXINPUTS', ''),
+        ])
         with open(os.devnull, 'rb') as null:
             stdout = subprocess.PIPE if not self.verbose else None
             for index in range(count):
@@ -137,53 +124,60 @@ class PDFExporter(LatexExporter):
                         out = out.decode('utf-8', 'replace')
                     log_function(command, out)
                     self._captured_output.append(out)
-                    if raise_on_failure:
-                        raise raise_on_failure(
-                            'Failed to run "{command}" command:\n{output}'.format(
-                            command=command, output=out))
                     return False # failure
         return True # success
 
-    def run_latex(self, filename, raise_on_failure=LatexFailed):
+    def run_latex(self, filename):
         """Run xelatex self.latex_count times."""
 
         def log_error(command, out):
             self.log.critical(u"%s failed: %s\n%s", command[0], command, out)
 
         return self.run_command(self.latex_command, filename,
-            self.latex_count, log_error, raise_on_failure)
+            self.latex_count, log_error)
 
-    def run_bib(self, filename, raise_on_failure=False):
-        """Run bibtex one time."""
+    def run_bib(self, filename):
+        """Run bibtex self.latex_count times."""
         filename = os.path.splitext(filename)[0]
 
         def log_error(command, out):
-            self.log.warning('%s had problems, most likely because there were no citations',
+            self.log.warn('%s had problems, most likely because there were no citations',
                 command[0])
             self.log.debug(u"%s output: %s\n%s", command[0], command, out)
 
-        return self.run_command(self.bib_command, filename, 1, log_error, raise_on_failure)
+        return self.run_command(self.bib_command, filename, 1, log_error)
+
+    def clean_temp_files(self, filename):
+        """Remove temporary files created by xelatex/bibtex."""
+        self.log.info("Removing temporary LaTeX files")
+        filename = os.path.splitext(filename)[0]
+        for ext in self.temp_file_exts:
+            try:
+                os.remove(filename+ext)
+            except OSError:
+                pass
     
     def from_notebook_node(self, nb, resources=None, **kw):
-        latex, resources = super().from_notebook_node(
+        latex, resources = super(PDFExporter, self).from_notebook_node(
             nb, resources=resources, **kw
         )
         # set texinputs directory, so that local files will be found
         if resources and resources.get('metadata', {}).get('path'):
             self.texinputs = resources['metadata']['path']
         else:
-            self.texinputs = os.getcwd()
-
+            self.texinputs = getcwd()
+        
         self._captured_outputs = []
         with TemporaryWorkingDirectory():
             notebook_name = 'notebook'
-            resources['output_extension'] = '.tex'
             tex_file = self.writer.write(latex, resources, notebook_name=notebook_name)
             self.log.info("Building PDF")
-            self.run_latex(tex_file)
-            if self.run_bib(tex_file):
-                self.run_latex(tex_file)
-
+            rc = self.run_latex(tex_file)
+            if rc:
+                rc = self.run_bib(tex_file)
+            if rc:
+                rc = self.run_latex(tex_file)
+            
             pdf_file = notebook_name + '.pdf'
             if not os.path.isfile(pdf_file):
                 raise LatexFailed('\n'.join(self._captured_output))

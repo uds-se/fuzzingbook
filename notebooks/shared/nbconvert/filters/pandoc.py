@@ -10,15 +10,17 @@ def convert_pandoc(source, from_format, to_format, extra_args=None):
     Parameters
     ----------
     source : string
-        Input string, assumed to be valid in from_format.
+      Input string, assumed to be valid in from_format.
+
     from_format : string
         Pandoc format of source.
+
     to_format : string
         Pandoc format for output.
 
     Returns
     -------
     out : string
-        Output as returned by pandoc.
+      Output as returned by pandoc.
     """
     return pandoc(source, from_format, to_format, extra_args=extra_args)

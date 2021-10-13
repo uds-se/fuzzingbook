@@ -13,9 +13,6 @@ import logging
 import sys
 import os
 import glob
-import asyncio
-from textwrap import fill, dedent
-from ipython_genutils.text import indent
 
 from jupyter_core.application import JupyterApp, base_aliases, base_flags
 from traitlets.config import catch_config_error, Configurable
@@ -27,7 +24,6 @@ from traitlets import (
 from traitlets.utils.importstring import import_item
 
 from .exporters.base import get_export_names, get_exporter
-from .exporters.templateexporter import TemplateExporter
 from nbconvert import exporters, preprocessors, writers, postprocessors, __version__
 from .utils.base import NbConvertBase
 from .utils.exceptions import ConversionException
@@ -45,7 +41,7 @@ class DottedOrNone(DottedObjectName):
 
     def validate(self, obj, value):
         if value is not None and len(value) > 0:
-            return super().validate(obj, value)
+            return super(DottedOrNone, self).validate(obj, value)
         else:
             return value
             
@@ -53,8 +49,7 @@ nbconvert_aliases = {}
 nbconvert_aliases.update(base_aliases)
 nbconvert_aliases.update({
     'to' : 'NbConvertApp.export_format',
-    'template' : 'TemplateExporter.template_name',
-    'template-file' : 'TemplateExporter.template_file',
+    'template' : 'TemplateExporter.template_file',
     'writer' : 'NbConvertApp.writer_class',
     'post': 'NbConvertApp.postprocessor_class',
     'output': 'NbConvertApp.output_base',
@@ -119,37 +114,6 @@ nbconvert_flags.update({
         },
         "Exclude input and output prompts from converted document."
         ),
-    'no-input' : (
-        {'TemplateExporter' : {
-            'exclude_output_prompt' : True,
-            'exclude_input': True,
-            'exclude_input_prompt': True,
-            }
-        },
-        """Exclude input cells and output prompts from converted document. 
-        This mode is ideal for generating code-free reports."""
-        ),
-    'allow-chromium-download' : (
-        {'WebPDFExporter' : {
-            'allow_chromium_download' : True,
-            }
-        },
-        """Whether to allow downloading chromium if no suitable version is found on the system."""
-        ),
-    'disable-chromium-sandbox': (
-        {'WebPDFExporter': {
-            'disable_sandbox': True,
-            }
-        },
-        """Disable chromium security sandbox when converting to PDF.."""
-        ),
-    'show-input' : (
-        {'TemplateExporter' : {
-            'exclude_input': False,
-            }
-        },
-        """Shows code input. This is flag is only useful for dejavu users."""
-        ),
 })
 
 
@@ -160,7 +124,7 @@ class NbConvertApp(JupyterApp):
     name = 'jupyter-nbconvert'
     aliases = nbconvert_aliases
     flags = nbconvert_flags
-
+    
     @default('log_level')
     def _log_level_default(self):
         return logging.INFO
@@ -197,15 +161,18 @@ class NbConvertApp(JupyterApp):
     output_files_dir = Unicode('{notebook_name}_files',
          help='''Directory to copy extra files (figures) to.
                '{notebook_name}' in the string will be converted to notebook
-               basename.'''
+               basename'''
     ).tag(config=True)
 
     examples = Unicode(u"""
         The simplest way to use nbconvert is
         
-        > jupyter nbconvert mynotebook.ipynb --to html
-
-        Options include {formats}.
+        > jupyter nbconvert mynotebook.ipynb
+        
+        which will convert mynotebook.ipynb to the default format (probably HTML).
+        
+        You can specify the export format with `--to`.
+        Options include {0}
         
         > jupyter nbconvert --to latex mynotebook.ipynb
 
@@ -213,7 +180,7 @@ class NbConvertApp(JupyterApp):
         'base', 'article' and 'report'.  HTML includes 'basic' and 'full'. You
         can specify the flavor of the format used.
 
-        > jupyter nbconvert --to html --template lab mynotebook.ipynb
+        > jupyter nbconvert --to html --template basic mynotebook.ipynb
         
         You can also pipe the output to stdout, rather than a file
         
@@ -238,7 +205,7 @@ class NbConvertApp(JupyterApp):
             c.NbConvertApp.notebooks = ["my_notebook.ipynb"]
         
         > jupyter nbconvert --config mycfg.py
-        """.format(formats=get_export_names()))
+        """.format(get_export_names()))
 
     # Writer specific variables
     writer = Instance('nbconvert.writers.base.WriterBase',
@@ -279,12 +246,13 @@ class NbConvertApp(JupyterApp):
         if new:
             self.postprocessor_factory = import_item(new)
 
+
     export_format = Unicode(
+        'html',
         allow_none=False,
-        help="""The export format to be used, either one of the built-in formats
-        {formats}
+        help="""The export format to be used, either one of the built-in formats,
         or a dotted object name that represents the import path for an
-        ``Exporter`` class""".format(formats=get_export_names())
+        `Exporter` class"""
     ).tag(config=True)
 
     notebooks = List([], help="""List of notebooks to convert.
@@ -297,12 +265,8 @@ class NbConvertApp(JupyterApp):
     @catch_config_error
     def initialize(self, argv=None):
         """Initialize application, notebooks, writer, and postprocessor"""
-        # See https://bugs.python.org/issue37373 :(
-        if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
         self.init_syspath()
-        super().initialize(argv)
+        super(NbConvertApp, self).initialize(argv)
         self.init_notebooks()
         self.init_writer()
         self.init_postprocessor()
@@ -335,7 +299,7 @@ class NbConvertApp(JupyterApp):
             globbed_files = glob.glob(pattern)
             globbed_files.extend(glob.glob(pattern + '.ipynb'))
             if not globbed_files:
-                self.log.warning("pattern %r matched no files", pattern)
+                self.log.warn("pattern %r matched no files", pattern)
 
             for filename in globbed_files:
                 if not filename in filenames:
@@ -357,7 +321,7 @@ class NbConvertApp(JupyterApp):
 
     def start(self):
         """Run start after initialization process has completed"""
-        super().start()
+        super(NbConvertApp, self).start()
         self.convert_notebooks()
 
     def init_single_notebook_resources(self, notebook_filename):
@@ -367,6 +331,7 @@ class NbConvertApp(JupyterApp):
 
         Returns
         -------
+
         dict
             resources dictionary for a single notebook that MUST include the following keys:
                 - config_dir: the location of the Jupyter config directory
@@ -417,6 +382,7 @@ class NbConvertApp(JupyterApp):
         Returns
         -------
         output
+
         dict
             resources (possibly modified)
         """
@@ -511,21 +477,15 @@ class NbConvertApp(JupyterApp):
                 """
             )
             self.exit(1)
+        
+        # initialize the exporter
+        cls = get_exporter(self.export_format)
+        self.exporter = cls(config=self.config)
 
         # no notebooks to convert!
         if len(self.notebooks) == 0 and not self.from_stdin:
             self.print_help()
             sys.exit(-1)
-
-        if not self.export_format:
-            raise ValueError(
-                "Please specify an output format with '--to <format>'."
-                f"\nThe following formats are available: {get_export_names()}"
-            )
-
-        # initialize the exporter
-        cls = get_exporter(self.export_format)
-        self.exporter = cls(config=self.config)
 
         # convert each notebook
         if not self.from_stdin:
@@ -535,69 +495,9 @@ class NbConvertApp(JupyterApp):
             input_buffer = unicode_stdin_stream()
             # default name when conversion from stdin
             self.convert_single_notebook("notebook.ipynb", input_buffer=input_buffer)
-
-    def document_flag_help(self):
-        """
-        Return a string containing descriptions of all the flags.
-        """
-        flags = "The following flags are defined:\n\n"
-        for flag, (cfg, fhelp) in self.flags.items():
-            flags += "{}\n".format(flag)
-            flags += indent(fill(fhelp, 80)) + '\n\n'
-            flags += indent(fill("Long Form: "+str(cfg), 80)) + '\n\n'
-        return flags
-
-    def document_alias_help(self):
-        """Return a string containing all of the aliases"""
-
-        aliases = "The folowing aliases are defined:\n\n"
-        for alias, longname in self.aliases.items():
-            aliases += "\t**{}** ({})\n\n".format(alias, longname)
-        return aliases
-
-    def document_config_options(self):
-        """
-        Provides a much improves version of the configuration documentation by
-        breaking the configuration options into app, exporter, writer,
-        preprocessor, postprocessor, and other sections.
-        """
-        categories = {category: [c for c in self._classes_inc_parents() if category in c.__name__.lower()]
-                    for category in ['app', 'exporter', 'writer', 'preprocessor', 'postprocessor']}
-        accounted_for = {c for category in categories.values() for c in category}
-        categories['other']=  [c for c in self._classes_inc_parents() if c not in accounted_for]
-
-        header = dedent("""
-                        {section} Options
-                        -----------------------
-
-                        """)
-        sections = ""
-        for category in categories:
-            sections += header.format(section=category.title())
-            if category in ['exporter','preprocessor','writer']:
-                sections += ".. image:: _static/{image}_inheritance.png\n\n".format(image=category)
-            sections += '\n'.join(c.class_config_rst_doc() for c in categories[category])
-
-        return sections.replace(' : ',r' \: ')
             
-
-class DejavuApp(NbConvertApp):
-    def initialize(self, argv=None):
-        self.config.TemplateExporter.exclude_input = True
-        self.config.TemplateExporter.exclude_output_prompt = True
-        self.config.TemplateExporter.exclude_input_prompt = True
-        self.config.ExecutePreprocessor.enabled = True
-        self.config.WebPDFExporter.paginate = False
-
-        super().initialize(argv)
-
-    @default('export_format')
-    def default_export_format(self):
-        return 'html'
-
 #-----------------------------------------------------------------------------
 # Main entry point
 #-----------------------------------------------------------------------------
 
 main = launch_new_instance = NbConvertApp.launch_instance
-dejavu_main = DejavuApp.launch_instance

@@ -18,8 +18,12 @@ import sys
 
 from ...tests.base import TestsBase
 from ..debug import DebugWriter
+from ipython_genutils.py3compat import PY3
 
-from io import StringIO
+if PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 
 #-----------------------------------------------------------------------------

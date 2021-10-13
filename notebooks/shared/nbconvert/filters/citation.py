@@ -11,7 +11,11 @@
 #-----------------------------------------------------------------------------
 # Imports
 #-----------------------------------------------------------------------------
-from html.parser import HTMLParser
+from ipython_genutils.py3compat import PY3
+if PY3:
+    from html.parser import HTMLParser
+else:
+    from HTMLParser import HTMLParser
 
 #-----------------------------------------------------------------------------
 # Functions
@@ -23,15 +27,15 @@ __all__ = ['citation2latex']
 def citation2latex(s):
     """Parse citations in Markdown cells.
     
-    This looks for HTML tags having a data attribute names ``data-cite``
-    and replaces it by the call to LaTeX cite command. The transformation
-    looks like this::
+    This looks for HTML tags having a data attribute names `data-cite`
+    and replaces it by the call to LaTeX cite command. The tranformation
+    looks like this:
     
-        <cite data-cite="granger">(Granger, 2013)</cite>
+    `<cite data-cite="granger">(Granger, 2013)</cite>`
     
-    Becomes ::
+    Becomes
     
-        \\cite{granger}
+    `\\cite{granger}`
     
     Any HTML tag can be used, which allows the citations to be formatted
     in HTML in any manner.

@@ -11,18 +11,18 @@ class FakeCustomKernelManager(KernelManager):
     def __init__(self, *args, **kwargs):
         self.log.info('FakeCustomKernelManager initialized')
         self.expected_methods['__init__'] += 1
-        super().__init__(*args, **kwargs)
+        super(FakeCustomKernelManager, self).__init__(*args, **kwargs)
 
     def start_kernel(self, *args, **kwargs):
         self.log.info('FakeCustomKernelManager started a kernel')
         self.expected_methods['start_kernel'] += 1
-        return super().start_kernel(
+        return super(FakeCustomKernelManager, self).start_kernel(
             *args,
             **kwargs)
 
     def client(self, *args, **kwargs):
         self.log.info('FakeCustomKernelManager created a client')
         self.expected_methods['client'] += 1
-        return super().client(
+        return super(FakeCustomKernelManager, self).client(
             *args,
             **kwargs)

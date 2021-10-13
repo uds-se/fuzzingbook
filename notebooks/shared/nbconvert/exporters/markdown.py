@@ -13,15 +13,14 @@ class MarkdownExporter(TemplateExporter):
     """
     Exports to a markdown document (.md)
     """
-    export_from_notebook = "Markdown"
 
     @default('file_extension')
     def _file_extension_default(self):
         return '.md'
 
-    @default('template_name')
-    def _template_name_default(self):
-        return 'markdown'
+    @default('template_file')
+    def _template_file_default(self):
+        return 'markdown.tpl'
 
     output_mimetype = 'text/markdown'
 
@@ -47,5 +46,5 @@ class MarkdownExporter(TemplateExporter):
                 'enabled':True
                 },
         })
-        c.merge(super().default_config)
+        c.merge(super(MarkdownExporter, self).default_config)
         return c

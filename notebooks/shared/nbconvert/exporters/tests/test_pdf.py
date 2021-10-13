@@ -6,11 +6,12 @@
 import logging
 import os
 import shutil
-from tempfile import TemporaryDirectory
+
+from ipython_genutils.testing import decorators as dec
+from testpath import tempdir
 
 from .base import ExportersTestsBase
 from ..pdf import PDFExporter
-from ...tests.utils import onlyif_cmds_exist
 
 
 #-----------------------------------------------------------------------------
@@ -27,15 +28,14 @@ class TestPDF(ExportersTestsBase):
         self.exporter_class()
 
 
-    @onlyif_cmds_exist('xelatex', 'pandoc')
+    @dec.onlyif_cmds_exist('xelatex')
+    @dec.onlyif_cmds_exist('pandoc')
     def test_export(self):
         """Smoke test PDFExporter"""
-        with TemporaryDirectory() as td:
-            file_name = os.path.basename(self._get_notebook())
-            newpath = os.path.join(td, file_name)
+        with tempdir.TemporaryDirectory() as td:
+            newpath = os.path.join(td, os.path.basename(self._get_notebook()))
             shutil.copy(self._get_notebook(), newpath)
             (output, resources) = self.exporter_class(latex_count=1).from_filename(newpath)
             self.assertIsInstance(output, bytes)
             assert len(output) > 0
-            # all temporary file should be cleaned up
-            assert {file_name} == set(os.listdir(td))
+

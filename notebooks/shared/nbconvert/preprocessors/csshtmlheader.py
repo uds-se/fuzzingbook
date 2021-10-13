@@ -9,11 +9,10 @@ import io
 import hashlib
 import nbconvert.resources
 
-from traitlets import Unicode, Union, Type
-from pygments.style import Style
-from jupyterlab_pygments import JupyterStyle
-
+from traitlets import Unicode
+from ipython_genutils.py3compat import str_to_bytes
 from .base import Preprocessor
+
 
 try:
     from notebook import DEFAULT_STATIC_FILES_PATH
@@ -30,11 +29,6 @@ class CSSHTMLHeaderPreprocessor(Preprocessor):
                               help="CSS highlight class identifier"
     ).tag(config=True)
 
-    style = Union([Unicode('default'), Type(klass=Style)],
-                  help='Name of the pygments style to use',
-                  default_value=JupyterStyle
-    ).tag(config=True)
-
     def __init__(self, *pargs, **kwargs):
         Preprocessor.__init__(self, *pargs, **kwargs)
         self._default_css_hash = None
@@ -43,9 +37,9 @@ class CSSHTMLHeaderPreprocessor(Preprocessor):
         """Fetch and add CSS to the resource dictionary
 
         Fetch CSS from IPython and Pygments to add at the beginning
-        of the html files.  Add this css in resources in the
+        of the html files.  Add this css in resources in the 
         "inlining.css" key
-
+        
         Parameters
         ----------
         nb : NotebookNode
@@ -59,16 +53,68 @@ class CSSHTMLHeaderPreprocessor(Preprocessor):
         return nb, resources
 
     def _generate_header(self, resources):
-        """
-        Fills self.header with lines of CSS extracted from IPython
+        """ 
+        Fills self.header with lines of CSS extracted from IPython 
         and Pygments.
         """
         from pygments.formatters import HtmlFormatter
         header = []
+        
+        # Construct path to Jupyter CSS
+        sheet_filename = os.path.join(
+            os.path.dirname(nbconvert.resources.__file__),
+            'style.min.css',
+        )
+        
+        # Load style CSS file.
+        with io.open(sheet_filename, encoding='utf-8') as f:
+            header.append(f.read())
 
-        formatter = HtmlFormatter(style=self.style)
+        # Add pygments CSS
+        formatter = HtmlFormatter()
         pygments_css = formatter.get_style_defs(self.highlight_class)
         header.append(pygments_css)
+
+        # These ANSI CSS definitions will be part of style.min.css with the
+        # Notebook release 5.0 and shall be removed afterwards!
+        # See https://github.com/jupyter/nbconvert/pull/259
+        header.append("""
+/* Temporary definitions which will become obsolete with Notebook release 5.0 */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-bold { font-weight: bold; }
+""")
 
         # Load the user's custom CSS and IPython's default custom CSS.  If they
         # differ, assume the user has made modifications to his/her custom CSS
@@ -86,6 +132,6 @@ class CSSHTMLHeaderPreprocessor(Preprocessor):
     def _hash(self, filename):
         """Compute the hash of a file."""
         md5 = hashlib.md5()
-        with open(filename, 'rb') as f:
-            md5.update(f.read())
+        with open(filename) as f:
+            md5.update(str_to_bytes(f.read()))
         return md5.digest()

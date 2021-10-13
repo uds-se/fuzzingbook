@@ -19,8 +19,12 @@ import sys
 
 from ...tests.base import TestsBase
 from ..stdout import StdoutWriter
+from ipython_genutils.py3compat import PY3
 
-from io import StringIO
+if PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 
 
 #-----------------------------------------------------------------------------
@@ -42,6 +46,8 @@ class TestStdout(TestsBase):
         writer = StdoutWriter()
         writer.write(u'a×', {'b': 'c'})
         output = stream.getvalue()
+        if not PY3:
+            output = output.decode('utf-8')
         self.fuzzy_compare(output, u'a×')
 
         # Revert stdout

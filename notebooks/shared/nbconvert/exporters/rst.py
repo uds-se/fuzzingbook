@@ -18,12 +18,11 @@ class RSTExporter(TemplateExporter):
     def _file_extension_default(self):
         return '.rst'
 
-    @default('template_name')
-    def _template_name_default(self):
-        return 'rst'
+    @default('template_file')
+    def _template_file_default(self):
+        return 'rst.tpl'
 
     output_mimetype = 'text/restructuredtext'
-    export_from_notebook = "reST"
 
     @property
     def default_config(self):
@@ -35,5 +34,5 @@ class RSTExporter(TemplateExporter):
                 'enabled':True
                 },
             })
-        c.merge(super().default_config)
+        c.merge(super(RSTExporter,self).default_config)
         return c
