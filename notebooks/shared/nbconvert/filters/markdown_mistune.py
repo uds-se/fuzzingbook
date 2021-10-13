@@ -9,7 +9,14 @@ Used from markdown.py
 from __future__ import print_function
 
 import re
-import cgi
+from functools import partial
+
+try:
+    from html import escape
+    html_escape = partial(escape, quote=False)
+except ImportError:
+    # Python 2
+    from cgi import escape as html_escape
 
 import mistune
 
@@ -21,7 +28,42 @@ from pygments.util import ClassNotFound
 from nbconvert.filters.strings import add_anchor
 
 
+class MathBlockGrammar(mistune.BlockGrammar):
+    """This defines a single regex comprised of the different patterns that
+    identify math content spanning multiple lines. These are used by the
+    MathBlockLexer.
+    """
+    multi_math_str = "|".join([r"^\$\$.*?\$\$",
+                               r"^\\\\\[.*?\\\\\]",
+                               r"^\\begin\{([a-z]*\*?)\}(.*?)\\end\{\1\}"])
+    multiline_math = re.compile(multi_math_str, re.DOTALL)
+
+
+class MathBlockLexer(mistune.BlockLexer):
+    """ This acts as a pass-through to the MathInlineLexer. It is needed in
+    order to avoid other block level rules splitting math sections apart.
+    """
+
+    default_rules = (['multiline_math']
+                     + mistune.BlockLexer.default_rules)
+
+    def __init__(self, rules=None, **kwargs):
+        if rules is None:
+            rules = MathBlockGrammar()
+        super().__init__(rules, **kwargs)
+
+    def parse_multiline_math(self, m):
+        """Add token to pass through mutiline math."""
+        self.tokens.append({
+            "type": "multiline_math",
+            "text": m.group(0)
+        })
+
+
 class MathInlineGrammar(mistune.InlineGrammar):
+    """This defines different ways of declaring math objects that should be
+    passed through to mathjax unaffected. These are used by the MathInlineLexer.
+    """
     inline_math = re.compile(r"^\$(.+?)\$|^\\\\\((.+?)\\\\\)", re.DOTALL)
     block_math = re.compile(r"^\$\$(.*?)\$\$|^\\\\\[(.*?)\\\\\]", re.DOTALL)
     latex_environment = re.compile(r"^\\begin\{([a-z]*\*?)\}(.*?)\\end\{\1\}",
@@ -30,19 +72,27 @@ class MathInlineGrammar(mistune.InlineGrammar):
 
 
 class MathInlineLexer(mistune.InlineLexer):
+    r"""This interprets the content of LaTeX style math objects using the rules
+    defined by the MathInlineGrammar.
+
+    In particular this grabs ``$$...$$``, ``\\[...\\]``, ``\\(...\\)``, ``$...$``,
+    and ``\begin{foo}...\end{foo}`` styles for declaring mathematics. It strips
+    delimiters from all these varieties, and extracts the type of environment
+    in the last case (``foo`` in this example).
+    """
     default_rules = (['block_math', 'inline_math', 'latex_environment']
                      + mistune.InlineLexer.default_rules)
 
     def __init__(self, renderer, rules=None, **kwargs):
         if rules is None:
             rules = MathInlineGrammar()
-        super(MathInlineLexer, self).__init__(renderer, rules, **kwargs)
+        super().__init__(renderer, rules, **kwargs)
 
     def output_inline_math(self, m):
         return self.renderer.inline_math(m.group(1) or m.group(2))
 
     def output_block_math(self, m):
-        return self.renderer.block_math(m.group(1) or m.group(2))
+        return self.renderer.block_math(m.group(1) or m.group(2) or "")
 
     def output_latex_environment(self, m):
         return self.renderer.latex_environment(m.group(1),
@@ -53,7 +103,13 @@ class MarkdownWithMath(mistune.Markdown):
     def __init__(self, renderer, **kwargs):
         if 'inline' not in kwargs:
             kwargs['inline'] = MathInlineLexer
-        super(MarkdownWithMath, self).__init__(renderer, **kwargs)
+        if 'block' not in kwargs:
+            kwargs['block'] = MathBlockLexer
+        super().__init__(renderer, **kwargs)
+
+
+    def output_multiline_math(self):
+        return self.inline(self.token["text"])
 
 
 class IPythonRenderer(mistune.Renderer):
@@ -73,16 +129,14 @@ class IPythonRenderer(mistune.Renderer):
         return highlight(code, lexer, formatter)
 
     def header(self, text, level, raw=None):
-        html = super(IPythonRenderer, self).header(text, level, raw=raw)
+        html = super().header(text, level, raw=raw)
+        if self.options.get("exclude_anchor_links"):
+            return html
         anchor_link_text = self.options.get('anchor_link_text', u'¶')
         return add_anchor(html, anchor_link_text=anchor_link_text)
 
-    # We must be careful here for compatibility
-    # html.escape() is not availale on python 2.7
-    # For more details, see:
-    # https://wiki.python.org/moin/EscapingHtml
     def escape_html(self, text):
-        return cgi.escape(text)
+        return html_escape(text)
 
     def block_math(self, text):
         return '$$%s$$' % self.escape_html(text)
@@ -94,6 +148,31 @@ class IPythonRenderer(mistune.Renderer):
 
     def inline_math(self, text):
         return '$%s$' % self.escape_html(text)
+
+    def image(self, src, title, text):
+        """Rendering a image with title and text.
+
+        :param src: source link of the image.
+        :param title: title text of the image.
+        :param text: alt text of the image.
+        """
+        attachments = self.options.get('attachments', {})
+        attachment_prefix = 'attachment:'
+        if src.startswith(attachment_prefix):
+            name = src[len(attachment_prefix):]
+            assert name in attachments, "missing attachment: {}".format(name)
+            attachment = attachments[name]
+            # we choose vector over raster, and lossless over lossy
+            preferred_mime_types = ['image/svg+xml', 'image/png', 'image/jpeg']
+            for preferred_mime_type in preferred_mime_types:
+                if preferred_mime_type in attachment:
+                    break
+            else:  # otherwise we choose the first mimetype we can find
+                preferred_mime_type = list(attachment.keys())[0]
+            mime_type = preferred_mime_type
+            data = attachment[mime_type]
+            src = 'data:' + mime_type + ';base64,' + data
+        return super().image(src, title, text)
 
 
 def markdown2html_mistune(source):

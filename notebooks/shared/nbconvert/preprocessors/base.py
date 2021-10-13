@@ -16,9 +16,9 @@ class Preprocessor(NbConvertBase):
     Any configurable traitlets this class exposed will be configurable in
     profiles using c.SubClassName.attribute = value
 
-    you can overwrite :meth:`preprocess_cell` to apply a transformation
-    independently on each cell or :meth:`preprocess` if you prefer your own
-    logic. See corresponding docstring for informations.
+    You can overwrite `preprocess_cell()` to apply a transformation
+    independently on each cell or `preprocess()` if you prefer your own
+    logic. See corresponding docstring for information.
 
     Disabled by default and can be enabled via the config by
         'c.YourPreprocessorName.enabled = True'
@@ -29,7 +29,7 @@ class Preprocessor(NbConvertBase):
     def __init__(self, **kw):
         """
         Public constructor
-        
+
         Parameters
         ----------
         config : Config
@@ -38,7 +38,7 @@ class Preprocessor(NbConvertBase):
             Additional keyword arguments passed to parent
         """
         
-        super(Preprocessor, self).__init__(**kw)
+        super().__init__(**kw)
 
     def __call__(self, nb, resources):
         if self.enabled:
@@ -51,12 +51,12 @@ class Preprocessor(NbConvertBase):
     def preprocess(self, nb, resources):
         """
         Preprocessing to apply on each notebook.
-        
+
         Must return modified nb, resources.
-        
+
         If you wish to apply your preprocessing to each cell, you might want
         to override preprocess_cell method instead.
-        
+
         Parameters
         ----------
         nb : NotebookNode
@@ -73,7 +73,7 @@ class Preprocessor(NbConvertBase):
         """
         Override if you want to apply some preprocessing to each cell.
         Must return modified cell and resource dictionary.
-        
+
         Parameters
         ----------
         cell : NotebookNode cell

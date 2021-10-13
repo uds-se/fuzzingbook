@@ -18,11 +18,12 @@ class ASCIIDocExporter(TemplateExporter):
     def _file_extension_default(self):
         return '.asciidoc'
 
-    @default('template_file')
-    def _template_file_default(self):
+    @default('template_name')
+    def _template_name_default(self):
         return 'asciidoc'
 
     output_mimetype = 'text/asciidoc'
+    export_from_notebook = "AsciiDoc"
 
     @default('raw_mimetypes')
     def _raw_mimetypes_default(self):
@@ -46,5 +47,5 @@ class ASCIIDocExporter(TemplateExporter):
                 'enabled':True
                 },
         })
-        c.merge(super(ASCIIDocExporter, self).default_config)
+        c.merge(super().default_config)
         return c

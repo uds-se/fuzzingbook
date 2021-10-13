@@ -16,7 +16,7 @@ class TestRegexRemove(PreprocessorTestsBase):
     """Contains test functions for regexremove.py"""
 
     def build_notebook(self):
-        notebook = super(TestRegexRemove, self).build_notebook()
+        notebook = super().build_notebook()
         # Add a few empty cells
         notebook.cells.extend([
             nbformat.new_code_cell(''),
@@ -44,9 +44,9 @@ class TestRegexRemove(PreprocessorTestsBase):
             'disallow_tab_newline': [r'\t\Z', r'\n\Z']
         }
         expected_cell_count = {
-            'default': 5,  # only strictly empty cells
+            'default': 6,  # nothing is removed
             'disallow_whitespace': 2,  # all "empty" cells are removed
-            'disallow_tab_newline': 3,  # all "empty" cells but the single space
+            'disallow_tab_newline': 4,  # cells with tab and newline are removed
             'none': 6,
         }
         for method in ['default', 'disallow_whitespace', 'disallow_tab_newline', 'none']:
@@ -68,25 +68,4 @@ class TestRegexRemove(PreprocessorTestsBase):
             for cell in nb.cells:
                 for pattern in patterns:
                     self.assertFalse(pattern.match(cell.source))
-
-    def test_nosource_with_output(self):
-        """
-        Test that the check_conditions returns true when given a code-cell
-        that has non-empty outputs but no source.
-        """
-
-        cell = {
-            'cell_type': 'code',
-            'execution_count': 2,
-            'metadata': {},
-            'outputs': [{
-                'name': 'stdout',
-                'output_type': 'stream',
-                'text': 'I exist.\n'
-            }],
-            'source': ''
-        }
-        preprocessor = self.build_preprocessor()
-        node = from_dict(cell)
-        assert preprocessor.check_conditions(node)
 

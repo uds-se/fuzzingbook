@@ -13,12 +13,15 @@ Module with tests for exporter.py
 #-----------------------------------------------------------------------------
 # Imports
 #-----------------------------------------------------------------------------
-
+import os
 from traitlets.config import Config
+
+from unittest.mock import patch
 
 from .base import ExportersTestsBase
 from ...preprocessors.base import Preprocessor
 from ..exporter import Exporter
+from ..base import get_export_names, ExporterDisabledError
 
 
 #-----------------------------------------------------------------------------
@@ -57,3 +60,45 @@ class TestExporter(ExportersTestsBase):
         exporter = Exporter(config=config)
         (notebook, resources) = exporter.from_filename(self._get_notebook())
         self.assertEqual(notebook['pizza'], 'cheese')
+
+    def test_get_export_names_disable(self):
+        """Can we disable a specific importer?"""
+        config = Config({'Exporter': {'enabled': False}})
+        export_names = get_export_names()
+        self.assertFalse('Exporter' in export_names)
+
+    def test_get_export_names_disable(self):
+        """Can we disable all exporters then enable a single one"""
+        config = Config({
+            'Exporter': {'enabled': False}, 
+            'NotebookExporter': {'enabled': True}
+        })
+        export_names = get_export_names(config=config)
+        self.assertEqual(export_names, ['notebook'])
+
+    def test_get_exporter_disable_config_exporters(self):
+        """
+        Does get_export_names behave correctly with respect to
+        NBCONVERT_DISABLE_CONFIG_EXPORTERS being set in the
+        environment?
+        """
+        config = Config({
+            'Exporter': {'enabled': False},
+            'NotebookExporter': {'enabled': True}
+        })
+        os.environ["NBCONVERT_DISABLE_CONFIG_EXPORTERS"] = "1"
+        with patch("nbconvert.exporters.base.get_exporter") as exp:
+            export_names = get_export_names(config=config)
+            # get_export_names should not call get_exporter for
+            # any of the entry points because we return before then.
+            exp.assert_not_called()
+
+            # We should have all exporters, not just the ones
+            # enabled in the config
+            self.assertNotEqual(export_names, ['notebook'])
+
+        # In the absence of this variable we should revert to
+        # the normal behavior.
+        del os.environ["NBCONVERT_DISABLE_CONFIG_EXPORTERS"]
+        export_names = get_export_names(config=config)
+        self.assertEqual(export_names, ['notebook'])

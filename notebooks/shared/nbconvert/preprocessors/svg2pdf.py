@@ -1,4 +1,4 @@
-"""Module containing a preprocessor that converts outputs in the notebook from 
+"""Module containing a preprocessor that converts outputs in the notebook from
 one format to another.
 """
 
@@ -10,15 +10,21 @@ import io
 import os
 import sys
 import subprocess
+from tempfile import TemporaryDirectory
 
-from ipython_genutils.py3compat import cast_unicode_py2
-from testpath.tempdir import TemporaryDirectory
-from traitlets import Unicode, default
+from traitlets import Unicode, default, Union, List
 
 from .convertfigures import ConvertFiguresPreprocessor
+from ..utils.io import FormatSafeDict
+
+from shutil import which
 
 
+# inkscape path for darwin (macOS)
 INKSCAPE_APP = '/Applications/Inkscape.app/Contents/Resources/bin/inkscape'
+# Recent versions of Inkscape (v1.0) moved the executable from 
+# Resources/bin/inkscape to MacOS/inkscape
+INKSCAPE_APP_v1 = '/Applications/Inkscape.app/Contents/MacOS/inkscape'
 
 if sys.platform == "win32":
     try:
@@ -40,25 +46,66 @@ class SVG2PDFPreprocessor(ConvertFiguresPreprocessor):
     def _to_format_default(self):
         return 'application/pdf'
 
-    command = Unicode(
-        help="""The command to use for converting SVG to PDF
-        
-        This string is a template, which will be formatted with the keys
+    inkscape_version = Unicode(
+        help="""The version of inkscape being used.
+
+        This affects how the conversion command is run.
+        """
+    ).tag(config=True)
+
+    @default('inkscape_version')
+    def _inkscape_version_default(self):
+        p = subprocess.Popen([self.inkscape, '--version'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        output, _ = p.communicate()
+        if p.returncode != 0:
+            raise RuntimeError("Unable to find inkscape executable --version")
+        return output.decode('utf-8').split(' ')[1]
+
+    # FIXME: Deprecate passing a string here
+    command = Union(
+        [Unicode(), List()],
+        help="""
+        The command to use for converting SVG to PDF
+
+        This traitlet is a template, which will be formatted with the keys
         to_filename and from_filename.
-        
-        The conversion call must read the SVG from {from_flename},
+
+        The conversion call must read the SVG from {from_filename},
         and write a PDF to {to_filename}.
+
+        It could be a List (recommended) or a String. If string, it will
+        be passed to a shell for execution.
         """).tag(config=True)
 
     @default('command')
     def _command_default(self):
-        return self.inkscape + \
-               ' --without-gui --export-pdf="{to_filename}" "{from_filename}"'
-    
+        major_version = self.inkscape_version.split('.')[0]
+        command = [self.inkscape]
+
+        if int(major_version) < 1:
+            # --without-gui is only needed for inkscape 0.x
+            command.append('--without-gui')
+            # --export-pdf is old name for --export-filename
+            command.append('--export-pdf={to_filename}')
+        else:
+            command.append('--export-filename={to_filename}')
+
+        command.append('{from_filename}')
+        return command
+
     inkscape = Unicode(help="The path to Inkscape, if necessary").tag(config=True)
     @default('inkscape')
     def _inkscape_default(self):
+        inkscape_path = which('inkscape')
+        if inkscape_path is not None:
+            return inkscape_path
         if sys.platform == "darwin":
+            if os.path.isfile(INKSCAPE_APP_v1):
+                return INKSCAPE_APP_v1
+            # Order is important. If INKSCAPE_APP exists, prefer it over
+            # the executable in the MacOS directory.
             if os.path.isfile(INKSCAPE_APP):
                 return INKSCAPE_APP
         if sys.platform == "win32":
@@ -77,26 +124,35 @@ class SVG2PDFPreprocessor(ConvertFiguresPreprocessor):
         Convert a single SVG figure to PDF.  Returns converted data.
         """
 
-        #Work in a temporary directory
+        # Work in a temporary directory
         with TemporaryDirectory() as tmpdir:
-            
-            #Write fig to temp file
+
+            # Write fig to temp file
             input_filename = os.path.join(tmpdir, 'figure.svg')
             # SVG data is unicode text
             with io.open(input_filename, 'w', encoding='utf8') as f:
-                f.write(cast_unicode_py2(data))
+                f.write(data)
 
-            #Call conversion application
+            # Call conversion application
             output_filename = os.path.join(tmpdir, 'figure.pdf')
-            shell = self.command.format(from_filename=input_filename, 
-                                   to_filename=output_filename)
-            subprocess.call(shell, shell=True) #Shell=True okay since input is trusted.
 
-            #Read output from drive
+            template_vars = {
+                'from_filename': input_filename,
+                'to_filename': output_filename
+            }
+            if isinstance(self.command, list):
+                full_cmd = [s.format_map(FormatSafeDict(**template_vars)) for s in self.command]
+            else:
+                # For backwards compatibility with specifying strings
+                # Okay-ish, since the string is trusted
+                full_cmd = self.command.format(*template_vars)
+            subprocess.call(full_cmd, shell=isinstance(full_cmd, str))
+
+            # Read output from drive
             # return value expects a filename
             if os.path.isfile(output_filename):
                 with open(output_filename, 'rb') as f:
                     # PDF is a nb supported binary, data type, so base64 encode.
-                    return base64.encodestring(f.read())
+                    return base64.encodebytes(f.read())
             else:
                 raise TypeError("Inkscape svg to pdf conversion failed")

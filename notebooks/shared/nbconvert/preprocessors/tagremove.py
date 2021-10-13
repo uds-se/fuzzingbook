@@ -7,38 +7,46 @@ one or more regular expression.
 # Distributed under the terms of the Modified BSD License.
 
 from traitlets import Set, Unicode
-from . import ClearOutputPreprocessor
+from .base import Preprocessor
 
 
-class TagRemovePreprocessor(ClearOutputPreprocessor):
+class TagRemovePreprocessor(Preprocessor):
     """
-    Removes cells from a notebook that have tags that designate they are to be
-    removed prior to exporting the notebook.
+    Removes inputs, outputs, or cells from a notebook that
+    have tags that designate they are to be removed prior to exporting
+    the notebook.
 
-    Traitlets:
-    ----------
-    remove_cell_tags: removes cells tagged with these values
-    remove_all_output_tags: removes entire output areas on cells
-                            tagged with these values
-    remove_single_output_tags: removes individual output objects on
-                               outputs tagged with these values
+    remove_cell_tags
+        removes cells tagged with these values
 
+    remove_all_outputs_tags
+        removes entire output areas on cells
+        tagged with these values
+
+    remove_single_output_tags
+        removes individual output objects on
+        outputs tagged with these values
+
+    remove_input_tags
+        removes inputs tagged with these values
     """
 
-    remove_cell_tags = Set(Unicode, default_value=[],
+    remove_cell_tags = Set(Unicode(), default_value=[],
             help=("Tags indicating which cells are to be removed,"
-                  "matches tags in `cell.metadata.tags`.")).tag(config=True)
-    remove_all_outputs_tags = Set(Unicode, default_value=[],
+                  "matches tags in ``cell.metadata.tags``.")).tag(config=True)
+    remove_all_outputs_tags = Set(Unicode(), default_value=[],
             help=("Tags indicating cells for which the outputs are to be removed,"
-                  "matches tags in `cell.metadata.tags`.")).tag(config=True)
-    remove_single_output_tags = Set(Unicode, default_value=[],
+                  "matches tags in ``cell.metadata.tags``.")).tag(config=True)
+    remove_single_output_tags = Set(Unicode(), default_value=[],
             help=("Tags indicating which individual outputs are to be removed,"
-                  "matches output *i* tags in `cell.outputs[i].metadata.tags`.")
+                  "matches output *i* tags in ``cell.outputs[i].metadata.tags``.")
             ).tag(config=True)
-    remove_input_tags = Set(Unicode, default_value=[],
+    remove_input_tags = Set(Unicode(), default_value=[],
             help=("Tags indicating cells for which input is to be removed,"
-                  "matches tags in `cell.metadata.tags`.")).tag(config=True)
-
+                  "matches tags in ``cell.metadata.tags``.")).tag(config=True)
+    remove_metadata_fields = Set(
+        {'collapsed', 'scrolled'}
+    ).tag(config=True)
 
     def check_cell_conditions(self, cell, resources, index):
         """

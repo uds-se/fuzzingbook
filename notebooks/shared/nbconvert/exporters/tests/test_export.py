@@ -10,11 +10,13 @@ import sys
 
 import nbformat
 import nbconvert.tests
+import pytest
+
+from traitlets.config import Config
 
 from .base import ExportersTestsBase
-from ..base import get_exporter, export, ExporterNameError, get_export_names
+from ..base import get_exporter, export, ExporterNameError, ExporterDisabledError, get_export_names
 from ..exporter import Exporter
-from ..exporter_locator import export_by_name
 from ..python import PythonExporter
 
 
@@ -27,16 +29,27 @@ class TestExport(ExportersTestsBase):
         Is the right error thrown when a bad template name is used?
         """
         try:
-            export_by_name('not_a_name', self._get_notebook())
+            exporter = get_exporter('not_a_name')
+            export(exporter, self._get_notebook())
         except ExporterNameError as e:
             pass
+
+
+    def test_export_disabled(self):
+        """
+        Trying to use a disabled exporter should raise ExporterDisbledError
+        """
+        config = Config({'NotebookExporter': {'enabled': False}})
+        with pytest.raises(ExporterDisabledError):
+            get_exporter('notebook', config=config)
 
 
     def test_export_filename(self):
         """
         Can a notebook be exported by filename?
         """
-        (output, resources) = export_by_name('python', self._get_notebook())
+        exporter = get_exporter('python')
+        (output, resources) = export(exporter, self._get_notebook())
         assert len(output) > 0
 
 
@@ -46,7 +59,8 @@ class TestExport(ExportersTestsBase):
         """
         with open(self._get_notebook(), 'r') as f:
             notebook = nbformat.read(f, 4)
-            (output, resources) = export_by_name('python', notebook)
+            exporter = get_exporter('python')
+            (output, resources) = export(exporter, notebook)
         assert len(output) > 0
 
 
@@ -55,7 +69,8 @@ class TestExport(ExportersTestsBase):
         Can a notebook be exported by a filesteam?
         """
         with open(self._get_notebook(), 'r') as f:
-            (output, resources) = export_by_name('python', f)
+            exporter = get_exporter('python')
+            (output, resources) = export(exporter, f)
         assert len(output) > 0
 
 

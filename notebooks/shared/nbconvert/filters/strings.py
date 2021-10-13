@@ -12,14 +12,13 @@ import os
 import re
 import textwrap
 import warnings
+import base64
 
-try:
-    from urllib.parse import quote  # Py 3
-except ImportError:
-    from urllib2 import quote  # Py 2
-from xml.etree import ElementTree
+from urllib.parse import quote
 
-from ipython_genutils import py3compat
+# defusedxml does safe(r) parsing of untrusted XML data
+from defusedxml import ElementTree
+from xml.etree.ElementTree import Element
 
 
 __all__ = [
@@ -36,14 +35,16 @@ __all__ = [
     'add_prompts',
     'ascii_only',
     'prevent_list_blocks',
+    'strip_trailing_newline',
+    'text_base64',
 ]
 
 
 def wrap_text(text, width=100):
-    """ 
+    """
     Intelligently wrap text.
     Wrap text without breaking words if possible.
-    
+
     Parameters
     ----------
     text : str
@@ -60,16 +61,16 @@ def wrap_text(text, width=100):
 
 def html2text(element):
     """extract inner text from html
-    
+
     Analog of jQuery's $(element).text()
     """
-    if isinstance(element, py3compat.string_types):
+    if isinstance(element, (str,)):
         try:
             element = ElementTree.fromstring(element)
         except Exception:
             # failed to parse, just return it unmodified
             return element
-    
+
     text = element.text or ""
     for child in element:
         text += html2text(child)
@@ -79,33 +80,39 @@ def html2text(element):
 
 def _convert_header_id(header_contents):
     """Convert header contents to valid id value. Takes string as input, returns string.
-    
+
     Note: this may be subject to change in the case of changes to how we wish to generate ids.
 
     For use on markdown headings.
     """
-    return header_contents.replace(' ', '-')
+    # Valid IDs need to be non-empty and contain no space characters, but are otherwise arbitrary.
+    # However, these IDs are also used in URL fragments, which are more restrictive, so we URL
+    # encode any characters that are not valid in URL fragments.
+    return quote(header_contents.replace(' ', '-'), safe="?/:@!$&'()*+,;=")
+
 
 def add_anchor(html, anchor_link_text=u'¶'):
     """Add an id and an anchor-link to an html header
-    
+
     For use on markdown headings
     """
     try:
-        h = ElementTree.fromstring(py3compat.cast_bytes_py2(html, encoding='utf-8'))
+        h = ElementTree.fromstring(html)
     except Exception:
         # failed to parse, just return it unmodified
         return html
     link = _convert_header_id(html2text(h))
     h.set('id', link)
-    a = ElementTree.Element("a", {"class" : "anchor-link", "href" : "#" + link})
-    a.text = anchor_link_text
+    a = Element("a", {"class": "anchor-link", "href": "#" + link})
+    try:
+        # Test if the anchor link text is HTML (e.g. an image)
+        a.append(ElementTree.fromstring(anchor_link_text))
+    except Exception:
+        # If we fail to parse, assume we've just got regular text
+        a.text = anchor_link_text
     h.append(a)
 
-    # Known issue of Python3.x, ElementTree.tostring() returns a byte string
-    # instead of a text string.  See issue http://bugs.python.org/issue10942
-    # Workaround is to make sure the bytes are casted to a string.
-    return py3compat.decode(ElementTree.tostring(h), 'utf-8')
+    return ElementTree.tostring(h).decode(encoding='utf-8')
 
 
 def add_prompts(code, first='>>> ', cont='... '):
@@ -117,11 +124,11 @@ def add_prompts(code, first='>>> ', cont='... '):
         new_code.append(cont + line)
     return '\n'.join(new_code)
 
-    
+
 def strip_dollars(text):
     """
     Remove all dollar symbols from text
-    
+
     Parameters
     ----------
     text : str
@@ -136,9 +143,9 @@ markdown_url_pattern = re.compile(r'(!?)\[(?P<caption>.*?)\]\(/?files/(?P<locati
 
 def strip_files_prefix(text):
     """
-    Fix all fake URLs that start with `files/`, stripping out the `files/` prefix.
+    Fix all fake URLs that start with ``files/``, stripping out the ``files/`` prefix.
     Applies to both urls (for html) and relative paths (for markdown paths).
-    
+
     Parameters
     ----------
     text : str
@@ -152,7 +159,7 @@ def strip_files_prefix(text):
 def comment_lines(text, prefix='# '):
     """
     Build a Python comment line from input text.
-    
+
     Parameters
     ----------
     text : str
@@ -160,18 +167,18 @@ def comment_lines(text, prefix='# '):
     prefix : str
         Character to append to the start of each line.
     """
-    
+
     #Replace line breaks with line breaks and comment symbols.
     #Also add a comment symbol at the beginning to comment out
     #the first line.
-    return prefix + ('\n'+prefix).join(text.split('\n')) 
+    return prefix + ('\n'+prefix).join(text.split('\n'))
 
 
 def get_lines(text, start=None,end=None):
     """
-    Split the input text into separate lines and then return the 
+    Split the input text into separate lines and then return the
     lines that the caller is interested in.
-    
+
     Parameters
     ----------
     text : str
@@ -181,10 +188,10 @@ def get_lines(text, start=None,end=None):
     end : int, optional
         Last line to grab from.
     """
-    
+
     # Split the input into lines.
     lines = text.split("\n")
-    
+
     # Return the right lines.
     return "\n".join(lines[start:end]) #re-join
 
@@ -193,7 +200,6 @@ def ipython2python(code):
 
     Parameters
     ----------
-
     code : str
         IPython code, to be transformed to pure Python
     """
@@ -211,7 +217,7 @@ def ipython2python(code):
 
 def posix_path(path):
     """Turn a path into posix-style path/to/etc
-    
+
     Mainly for use in latex on Windows,
     where native Windows paths are not allowed.
     """
@@ -226,15 +232,28 @@ def path2url(path):
 
 def ascii_only(s):
     """ensure a string is ascii"""
-    s = py3compat.cast_unicode(s)
     return s.encode('ascii', 'replace').decode('ascii')
 
 def prevent_list_blocks(s):
     """
     Prevent presence of enumerate or itemize blocks in latex headings cells
     """
-    out = re.sub('(^\s*\d*)\.', '\\1\.', s)
-    out = re.sub('(^\s*)\-', '\\1\-', out)
-    out = re.sub('(^\s*)\+', '\\1\+', out)
-    out = re.sub('(^\s*)\*', '\\1\*', out)
+    out = re.sub(r'(^\s*\d*)\.', r'\1\.', s)
+    out = re.sub(r'(^\s*)\-', r'\1\-', out)
+    out = re.sub(r'(^\s*)\+', r'\1\+', out)
+    out = re.sub(r'(^\s*)\*', r'\1\*', out)
     return out
+
+def strip_trailing_newline(text):
+    """
+    Strips a newline from the end of text.
+    """
+    if text.endswith('\n'):
+        text = text[:-1]
+    return text
+
+def text_base64(text):
+    """
+    Encode base64 text
+    """
+    return base64.b64encode(text.encode()).decode()

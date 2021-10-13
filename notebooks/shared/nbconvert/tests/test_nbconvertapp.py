@@ -6,15 +6,16 @@
 
 import os
 import io
+import nbformat
+from tempfile import TemporaryDirectory
 
 from .base import TestsBase
 from ..postprocessors import PostProcessorBase
+from ..tests.utils import onlyif_cmds_exist
 from nbconvert import nbconvertapp
-from nbconvert.exporters import Exporter
+from nbconvert.exporters import Exporter, HTMLExporter
 
 from traitlets.tests.utils import check_help_all_output
-from ipython_genutils.testing import decorators as dec
-from testpath import tempdir
 import pytest
 
 #-----------------------------------------------------------------------------
@@ -24,6 +25,7 @@ import pytest
 class DummyPost(PostProcessorBase):
     def postprocess(self, filename):
         print("Dummy:%s" % filename)
+
 
 class TestNbConvertApp(TestsBase):
     """Collection of NbConvertApp tests"""
@@ -47,7 +49,6 @@ class TestNbConvertApp(TestsBase):
             self.nbconvert('--to python *.ipynb --log-level 0')
             assert os.path.isfile('notebook1.py')
             assert os.path.isfile('notebook2.py')
-
 
     def test_glob_subdir(self):
         """
@@ -90,35 +91,48 @@ class TestNbConvertApp(TestsBase):
             assert not os.path.isfile('notebook1.py')
             assert os.path.isfile('notebook2.py')
 
+    def test_clear_output(self):
+        """
+        Can we clear outputs?
+        """
+        with self.create_temp_cwd(['notebook*.ipynb']) as td:
+            self.nbconvert('--clear-output notebook1')
+            assert os.path.isfile('notebook1.ipynb')
+            with open('notebook1.ipynb', encoding='utf8') as f:
+                nb = nbformat.read(f, 4)
+                for cell in nb.cells:
+                    # Skip markdown cells
+                    if 'outputs' in cell:
+                        assert cell.outputs == []
+
     def test_absolute_template_file(self):
-        """--template '/path/to/template.tpl'"""
-        with self.create_temp_cwd(['notebook*.ipynb']), tempdir.TemporaryDirectory() as td:
+        """--template-file '/path/to/template.tpl'"""
+        with self.create_temp_cwd(['notebook*.ipynb']), TemporaryDirectory() as td:
             template = os.path.join(td, 'mytemplate.tpl')
             test_output = 'success!'
             with open(template, 'w') as f:
                 f.write(test_output)
-            self.nbconvert('--log-level 0 notebook2 --template %s' % template)
+            self.nbconvert('--log-level 0 notebook2 --to html --template-file %s' % template)
             assert os.path.isfile('notebook2.html')
-            with open('notebook2.html') as f:
+            with open('notebook2.html', 'r', encoding="utf8") as f:
                 text = f.read()
             assert text == test_output
 
     def test_relative_template_file(self):
-        """Test --template 'relative/path.tpl'"""
+        """Test --template-file 'relative/path.tpl'"""
         with self.create_temp_cwd(['notebook*.ipynb']):
             os.mkdir('relative')
             template = os.path.join('relative', 'path.tpl')
             test_output = 'success!'
             with open(template, 'w') as f:
                 f.write(test_output)
-            self.nbconvert('--log-level 0 notebook2 --template %s' % template)
+            self.nbconvert('--log-level 0 notebook2 --to html --template-file %s' % template)
             assert os.path.isfile('notebook2.html')
-            with open('notebook2.html') as f:
+            with open('notebook2.html', 'r', encoding="utf8") as f:
                 text = f.read()
             assert text == test_output
 
-    @dec.onlyif_cmds_exist('xelatex')
-    @dec.onlyif_cmds_exist('pandoc')
+    @onlyif_cmds_exist('pandoc', 'xelatex')
     def test_filename_spaces(self):
         """
         Generate PDFs with graphics if notebooks have spaces in the name?
@@ -132,12 +146,22 @@ class TestNbConvertApp(TestsBase):
             )
             assert os.path.isfile('notebook with spaces.pdf')
 
+    @pytest.mark.network
+    def test_webpdf_with_chromium(self):
+        """
+        Generate PDFs if chromium allowed to be downloaded?
+        """
+        with self.create_temp_cwd(['notebook2.ipynb']):
+            self.nbconvert('--to webpdf '
+                           '--allow-chromium-download '
+                           '"notebook2"'
+            )
+            assert os.path.isfile('notebook2.pdf')
 
-    @dec.onlyif_cmds_exist('xelatex')
-    @dec.onlyif_cmds_exist('pandoc')
+    @onlyif_cmds_exist('pandoc', 'xelatex')
     def test_pdf(self):
         """
-        Check to see if pdfs compile, even if strikethroughs are included. 
+        Check to see if pdfs compile, even if strikethroughs are included.
         """
         with self.create_temp_cwd(['notebook2.ipynb']):
             self.nbconvert('--log-level 0 --to pdf'
@@ -154,7 +178,7 @@ class TestNbConvertApp(TestsBase):
                       '--post nbconvert.tests.test_nbconvertapp.DummyPost')
             self.assertIn('Dummy:notebook1.py', out)
 
-    @dec.onlyif_cmds_exist('pandoc')
+    @onlyif_cmds_exist('pandoc')
     def test_spurious_cr(self):
         """Check for extra CR characters"""
         with self.create_temp_cwd(['notebook2.ipynb']):
@@ -164,22 +188,22 @@ class TestNbConvertApp(TestsBase):
                 tex = f.read()
             self.nbconvert('--log-level 0 --to html notebook2')
             assert os.path.isfile('notebook2.html')
-            with open('notebook2.html') as f:
+            with open('notebook2.html', 'r', encoding="utf8") as f:
                 html = f.read()
         self.assertEqual(tex.count('\r'), tex.count('\r\n'))
         self.assertEqual(html.count('\r'), html.count('\r\n'))
 
-    @dec.onlyif_cmds_exist('pandoc')
+    @onlyif_cmds_exist('pandoc')
     def test_png_base64_html_ok(self):
         """Is embedded png data well formed in HTML?"""
         with self.create_temp_cwd(['notebook2.ipynb']):
             self.nbconvert('--log-level 0 --to HTML '
-                      'notebook2.ipynb --template full')
+                      'notebook2.ipynb --template lab')
             assert os.path.isfile('notebook2.html')
-            with open('notebook2.html') as f:
+            with open('notebook2.html', 'r', encoding="utf8") as f:
                 assert "data:image/png;base64,b'" not in f.read()
 
-    @dec.onlyif_cmds_exist('pandoc')
+    @onlyif_cmds_exist('pandoc')
     def test_template(self):
         """
         Do export templates work?
@@ -188,7 +212,7 @@ class TestNbConvertApp(TestsBase):
             self.nbconvert('--log-level 0 --to slides '
                       'notebook2.ipynb')
             assert os.path.isfile('notebook2.slides.html')
-            with open('notebook2.slides.html') as f:
+            with open('notebook2.slides.html', 'r', encoding="utf8") as f:
                 assert '/reveal.css' in f.read()
 
     def test_output_ext(self):
@@ -212,7 +236,6 @@ class TestNbConvertApp(TestsBase):
             assert os.path.isfile('notebook1.py')
             assert os.path.isfile('notebook2.py')
 
-
     def test_explicit_glob(self):
         """
         Can explicit notebook names be used and then a matching search pattern?
@@ -223,7 +246,6 @@ class TestNbConvertApp(TestsBase):
             assert os.path.isfile('notebook1.py')
             assert os.path.isfile('notebook2.py')
 
-
     def test_default_config(self):
         """
         Does the default config work?
@@ -233,10 +255,9 @@ class TestNbConvertApp(TestsBase):
             assert os.path.isfile('notebook1.py')
             assert not os.path.isfile('notebook2.py')
 
-
     def test_override_config(self):
         """
-        Can the default config be overriden?
+        Can the default config be overridden?
         """
         with self.create_temp_cwd(['notebook*.ipynb',
                                    'jupyter_nbconvert_config.py',
@@ -254,7 +275,7 @@ class TestNbConvertApp(TestsBase):
             self.nbconvert('--log-level 0 --to Python nb1_*')
             assert os.path.isfile(u'nb1_análisis.py')
 
-    @dec.onlyif_cmds_exist('xelatex', 'pandoc')
+    @onlyif_cmds_exist('xelatex', 'pandoc')
     def test_filename_accent_pdf(self):
         """
         Generate PDFs if notebooks have an accent in their name?
@@ -272,6 +293,7 @@ class TestNbConvertApp(TestsBase):
         """
         with self.create_temp_cwd(['hello.py']):
             self.create_empty_notebook(u'empty.ipynb')
+            assert os.path.isfile('hello.py')
             self.nbconvert('empty --to html --NbConvertApp.writer_class=\'hello.HelloWriter\'')
             assert os.path.isfile(u'hello.txt')
 
@@ -306,25 +328,75 @@ class TestNbConvertApp(TestsBase):
             assert os.path.isfile('empty.ipynb')
             assert not os.path.isfile('empty.nbconvert.ipynb')
             assert not os.path.isfile('empty.html')
-    
+
     def test_no_prompt(self):
         """
-        Verify that the notebook is converted in place
+        Verify that the html has no prompts when given --no-prompt.
         """
         with self.create_temp_cwd(["notebook1.ipynb"]):
             self.nbconvert('notebook1.ipynb --log-level 0 --no-prompt --to html')
             assert os.path.isfile('notebook1.html')
-            with open("notebook1.html",'r') as f:
+            with open("notebook1.html", 'r', encoding="utf8") as f:
                 text = f.read()
                 assert "In&nbsp;[" not in text
-                assert "Out[" not in text
+                assert "Out[6]" not in text
             self.nbconvert('notebook1.ipynb --log-level 0 --to html')
             assert os.path.isfile('notebook1.html')
-            with open("notebook1.html",'r') as f:
+            with open("notebook1.html", 'r', encoding="utf8") as f:
                 text2 = f.read()
-                print(text2)
                 assert "In&nbsp;[" in text2
-                assert "Out[" in text2
+                assert "Out[6]" in text2
+
+    def test_cell_tag_output(self):
+        """
+        Verify that the html has tags in cell attributes if they exist.
+        """
+        with self.create_temp_cwd(["notebook_tags.ipynb"]):
+            self.nbconvert('notebook_tags.ipynb --log-level 0 --to html')
+            assert os.path.isfile('notebook_tags.html')
+            with open("notebook_tags.html", 'r', encoding="utf8") as f:
+                text = f.read()
+                assert 'celltag_mycelltag celltag_mysecondcelltag' in text
+                assert 'celltag_mymarkdowncelltag' in text
+
+
+    def test_no_input(self):
+        """
+        Verify that the html has no input when given --no-input.
+        """
+        with self.create_temp_cwd(["notebook1.ipynb"]):
+            self.nbconvert('notebook1.ipynb --log-level 0 --no-input --to html')
+            assert os.path.isfile('notebook1.html')
+            with open("notebook1.html", 'r', encoding="utf8") as f:
+                text = f.read()
+                assert "In&nbsp;[" not in text
+                assert "Out[6]" not in text
+                assert ('<span class="n">x</span>'
+                        '<span class="p">,</span>'
+                        '<span class="n">y</span>'
+                        '<span class="p">,</span>'
+                        '<span class="n">z</span> '
+                        '<span class="o">=</span> '
+                        '<span class="n">symbols</span>'
+                        '<span class="p">(</span>'
+                        '<span class="s1">&#39;x y z&#39;</span>'
+                        '<span class="p">)</span>') not in text
+            self.nbconvert('notebook1.ipynb --log-level 0 --to html')
+            assert os.path.isfile('notebook1.html')
+            with open("notebook1.html", 'r', encoding="utf8") as f:
+                text2 = f.read()
+                assert "In&nbsp;[" in text2
+                assert "Out[6]" in text2
+                assert ('<span class="n">x</span>'
+                        '<span class="p">,</span>'
+                        '<span class="n">y</span>'
+                        '<span class="p">,</span>'
+                        '<span class="n">z</span> '
+                        '<span class="o">=</span> '
+                        '<span class="n">symbols</span>'
+                        '<span class="p">(</span>'
+                        '<span class="s1">&#39;x y z&#39;</span>'
+                        '<span class="p">)</span>') in text2
 
     def test_allow_errors(self):
         """
@@ -382,7 +454,7 @@ class TestNbConvertApp(TestsBase):
             output2, _ = self.nbconvert('--to markdown --stdout notebook_jl.ipynb')
             assert '```julia' in output2  # shouldn't have language
             assert "```" in output2  # but should also plain ``` to close cell
-    
+
     def test_convert_from_stdin_to_stdout(self):
         """
         Verify that conversion can be done via stdin to stdout
@@ -403,13 +475,12 @@ class TestNbConvertApp(TestsBase):
                 notebook = f.read().encode()
                 self.nbconvert('--to markdown --stdin', stdin=notebook)
             assert os.path.isfile("notebook.md") # default name for stdin input
-            with io.open('notebook.md') as f:
+            with io.open('notebook.md', 'r', encoding="utf8") as f:
                 output1 = f.read()
                 assert '```python' not in output1 # shouldn't have language
                 assert "```" in output1 # but should have fenced blocks
 
-    @dec.onlyif_cmds_exist('xelatex')
-    @dec.onlyif_cmds_exist('pandoc')
+    @onlyif_cmds_exist('pandoc', 'xelatex')
     def test_linked_images(self):
         """
         Generate PDFs with an image linked in a markdown cell
@@ -418,7 +489,7 @@ class TestNbConvertApp(TestsBase):
             self.nbconvert('--to pdf latex-linked-image.ipynb')
             assert os.path.isfile('latex-linked-image.pdf')
 
-    @dec.onlyif_cmds_exist('pandoc')
+    @onlyif_cmds_exist('pandoc')
     def test_embedded_jpeg(self):
         """
         Verify that latex conversion succeeds
@@ -429,22 +500,22 @@ class TestNbConvertApp(TestsBase):
             self.nbconvert('--to latex notebook4_jpeg.ipynb')
             assert os.path.isfile('notebook4_jpeg.tex')
 
-    @dec.onlyif_cmds_exist('pandoc')
+    @onlyif_cmds_exist('pandoc')
     def test_markdown_display_priority(self):
         """
-        Check to see if markdown conversion embedds PNGs,
+        Check to see if markdown conversion embeds PNGs,
         even if an (unsupported) PDF is present.
         """
         with self.create_temp_cwd(['markdown_display_priority.ipynb']):
             self.nbconvert('--log-level 0 --to markdown '
                            '"markdown_display_priority.ipynb"')
             assert os.path.isfile('markdown_display_priority.md')
-            with io.open('markdown_display_priority.md') as f:
+            with open('markdown_display_priority.md', 'r', encoding="utf8") as f:
                 markdown_output = f.read()
                 assert ("markdown_display_priority_files/"
                         "markdown_display_priority_0_1.png") in markdown_output
 
-    @dec.onlyif_cmds_exist('pandoc')
+    @onlyif_cmds_exist('pandoc')
     def test_write_figures_to_custom_path(self):
         """
         Check if figure files are copied to configured path.
@@ -456,7 +527,7 @@ class TestNbConvertApp(TestsBase):
         # check absolute path
         with self.create_temp_cwd(['notebook4_jpeg.ipynb',
                                    'containerized_deployments.jpeg']):
-            output_dir = tempdir.TemporaryDirectory()
+            output_dir = TemporaryDirectory()
             path = os.path.join(output_dir.name, 'files')
             self.nbconvert(
                 '--log-level 0 notebook4_jpeg.ipynb --to rst '
@@ -480,3 +551,22 @@ class TestNbConvertApp(TestsBase):
                 '--log-level 0 notebook4_jpeg.ipynb --to rst')
             assert fig_exists('notebook4_jpeg_files')
 
+    def test_widgets_from_nbconvert(self):
+        """Check jupyter widgets URL"""
+        
+        with self.create_temp_cwd(["Widget_List.ipynb"]):
+            self.nbconvert('Widget_List.ipynb --log-level 0 --to html')
+            assert os.path.isfile('Widget_List.html')
+            with open("Widget_List.html", 'r', encoding="utf8") as f:
+                text = f.read()
+                assert "var widgetRendererSrc = 'https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js';" in text
+
+    def test_widgets_from_htmlexporter(self):
+        """Check jupyter widgets URL"""
+        with self.create_temp_cwd(["Widget_List.ipynb"]) as tmpdir:
+            with open(os.path.join(tmpdir, 'Widget_List.ipynb')) as f:
+                nb = nbformat.read(f, 4)
+
+            output, _ = HTMLExporter().from_notebook_node(nb)
+            
+            assert "var widgetRendererSrc = 'https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js';" in output

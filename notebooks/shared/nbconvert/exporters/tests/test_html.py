@@ -3,10 +3,13 @@
 # Copyright (c) IPython Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import re
+
 from .base import ExportersTestsBase
 from ..html import HTMLExporter
+
+from traitlets.config import Config
 from nbformat import v4
-import re
 
 
 class TestHTMLExporter(ExportersTestsBase):
@@ -30,26 +33,26 @@ class TestHTMLExporter(ExportersTestsBase):
         assert len(output) > 0
 
 
-    def test_export_basic(self):
+    def test_export_classic(self):
         """
-        Can a HTMLExporter export using the 'basic' template?
+        Can a HTMLExporter export using the 'classic' template?
         """
-        (output, resources) = HTMLExporter(template_file='basic').from_filename(self._get_notebook())
+        (output, resources) = HTMLExporter(template_name='classic').from_filename(self._get_notebook())
         assert len(output) > 0
 
 
-    def test_export_full(self):
+    def test_export_notebook(self):
         """
-        Can a HTMLExporter export using the 'full' template?
+        Can a HTMLExporter export using the 'lab' template?
         """
-        (output, resources) = HTMLExporter(template_file='full').from_filename(self._get_notebook())
+        (output, resources) = HTMLExporter(template_name='lab').from_filename(self._get_notebook())
         assert len(output) > 0
 
     def test_prompt_number(self):
         """
         Does HTMLExporter properly format input and output prompts?
         """
-        (output, resources) = HTMLExporter(template_file='full').from_filename(
+        (output, resources) = HTMLExporter(template_name='lab').from_filename(
             self._get_notebook(nb_name="prompt_numbers.ipynb"))
         in_regex = r"In&nbsp;\[(.*)\]:"
         out_regex = r"Out\[(.*)\]:"
@@ -59,12 +62,32 @@ class TestHTMLExporter(ExportersTestsBase):
 
         assert re.findall(in_regex, output) == ins
         assert re.findall(out_regex, output) == outs
+        
+    def test_prompt_number(self):
+        """
+        Does HTMLExporter properly format input and output prompts?
+        """
+        no_prompt_conf = Config(
+            {"TemplateExporter":{
+                "exclude_input_prompt": True,
+                "exclude_output_prompt": True,
+                }
+            }
+        )
+        exporter = HTMLExporter(config=no_prompt_conf, template_name='lab')
+        (output, resources) = exporter.from_filename(
+            self._get_notebook(nb_name="prompt_numbers.ipynb"))
+        in_regex = r"In&nbsp;\[(.*)\]:"
+        out_regex = r"Out\[(.*)\]:"
+
+        assert not re.findall(in_regex, output)
+        assert not re.findall(out_regex, output)
 
     def test_png_metadata(self):
         """
-        Does HTMLExporter with the 'basic' template treat pngs with width/height metadata correctly?
+        Does HTMLExporter with the 'classic' template treat pngs with width/height metadata correctly?
         """
-        (output, resources) = HTMLExporter(template_file='basic').from_filename(
+        (output, resources) = HTMLExporter(template_name='classic').from_filename(
             self._get_notebook(nb_name="pngmetadata.ipynb"))
         check_for_png = re.compile(r'<img src="[^"]*?"([^>]*?)>')
         result = check_for_png.search(output)
@@ -85,5 +108,41 @@ class TestHTMLExporter(ExportersTestsBase):
                 )
             ]
         )
-        (output, resources) = HTMLExporter(template_file='basic').from_notebook_node(nb)
+        (output, resources) = HTMLExporter(template_name='classic').from_notebook_node(nb)
         self.assertIn('javascript_output', output)
+
+    def test_attachments(self):
+        (output, resources) = HTMLExporter(template_name='classic').from_file(
+            self._get_notebook(nb_name='attachment.ipynb')
+        )
+        check_for_png = re.compile(r'<img src="[^"]*?"([^>]*?)>')
+        result = check_for_png.search(output)
+        self.assertTrue(result.group(0).strip().startswith('<img src="data:image/png;base64,iVBOR'))
+        self.assertTrue(result.group(1).strip().startswith('alt="image.png"'))
+
+        check_for_data = re.compile(r'<img src="(?P<url>[^"]*?)"')
+        results = check_for_data.findall(output)
+        assert results[0] != results[1], 'attachments only need to be unique within a cell'
+        assert 'image/svg' in results[1], 'second image should use svg'
+
+
+    def test_custom_filter_highlight_code(self):
+        # Overwriting filters takes place at: Exporter.from_notebook_node
+        nb = v4.new_notebook()
+        nb.cells.append(v4.new_code_cell("some_text"))
+
+        def custom_highlight_code(source, language="python", metadata=None):
+            return source + " ADDED_TEXT"
+
+        filters = {
+            "highlight_code": custom_highlight_code
+        }
+        (output, resources) = HTMLExporter(template_name='classic', filters=filters).from_notebook_node(nb)
+        self.assertTrue("ADDED_TEXT" in output)
+
+    def test_basic_name(self):
+        """
+        Can a HTMLExporter export using the 'basic' template?
+        """
+        (output, resources) = HTMLExporter(template_name='basic').from_filename(self._get_notebook())
+        assert len(output) > 0

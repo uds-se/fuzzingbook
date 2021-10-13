@@ -16,20 +16,18 @@ class RegexRemovePreprocessor(Preprocessor):
     Removes cells from a notebook that match one or more regular expression.
 
     For each cell, the preprocessor checks whether its contents match
-    the regular expressions in the `patterns` traitlet which is a list
+    the regular expressions in the ``patterns`` traitlet which is a list
     of unicode strings. If the contents match any of the patterns, the cell
     is removed from the notebook.
 
-    By default, `patterns = [r'\Z']` which matches the empty string such that
-    strictly empty cells are removed. To modify the list of matched patterns,
+    To modify the list of matched patterns,
     modify the patterns traitlet. For example, execute the following command
-    to convert a notebook to html and remove cells containing only whitespace:
+    to convert a notebook to html and remove cells containing only whitespace::
 
-    > jupyter nbconvert --RegexRemovePreprocessor.enabled=True \
-      --RegexRemovePreprocessor.patterns="['\\s*\\Z']" mynotebook.ipynb
+      jupyter nbconvert --RegexRemovePreprocessor.patterns="['\\s*\\Z']" mynotebook.ipynb
 
-    The first command line argument enables the preprocessor and the second
-    sets the list of patterns to '\\s*\\Z' which matches an arbitrary number
+    The command line argument
+    sets the list of patterns to ``'\\s*\\Z'`` which matches an arbitrary number
     of whitespace characters followed by the end of the string.
 
     See https://regex101.com/ for an interactive guide to regular expressions
@@ -38,12 +36,11 @@ class RegexRemovePreprocessor(Preprocessor):
     documentation in python.
     """
 
-    patterns = List(Unicode, default_value=[r'\Z']).tag(config=True)
+    patterns = List(Unicode(), default_value=[]).tag(config=True)
 
     def check_conditions(self, cell):
         """
-        Checks that a cell matches the pattern and that (if a code cell)
-        it does not have any outputs.
+        Checks that a cell matches the pattern.
 
         Returns: Boolean.
         True means cell should *not* be removed.
@@ -56,7 +53,7 @@ class RegexRemovePreprocessor(Preprocessor):
                              for pattern in self.patterns))
 
         # Filter out cells that meet the pattern and have no outputs
-        return cell.get('outputs') or not pattern.match(cell.source)
+        return not pattern.match(cell.source)
 
     def preprocess(self, nb, resources):
         """

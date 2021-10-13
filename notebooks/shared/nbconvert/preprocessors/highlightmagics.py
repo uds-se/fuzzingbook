@@ -32,6 +32,7 @@ class HighlightMagicsPreprocessor(Preprocessor):
             '%%perl': 'perl',
             '%%ruby': 'ruby',
             '%%sh': 'sh',
+            '%%sql': 'sql',
     })
 
     # user defined language extensions
@@ -44,7 +45,7 @@ class HighlightMagicsPreprocessor(Preprocessor):
     def __init__(self, config=None, **kw):
         """Public constructor"""
 
-        super(HighlightMagicsPreprocessor, self).__init__(config=config, **kw)
+        super().__init__(config=config, **kw)
 
         # Update the default languages dict with the user configured ones
         self.default_languages.update(self.languages)

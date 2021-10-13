@@ -7,9 +7,9 @@ import io
 import os
 import glob
 
+from pathlib import Path
 from traitlets import Unicode, observe
 from ipython_genutils.path import link_or_copy, ensure_dir_exists
-from ipython_genutils.py3compat import unicode_type
 
 from .base import WriterBase
 
@@ -41,7 +41,7 @@ class FilesWriter(WriterBase):
             ensure_dir_exists(new)
 
     def __init__(self, **kw):
-        super(FilesWriter, self).__init__(**kw)
+        super().__init__(**kw)
         self._build_directory_changed({'new': self.build_directory})
     
     def _makedir(self, path):
@@ -53,7 +53,7 @@ class FilesWriter(WriterBase):
     def write(self, output, resources, notebook_name=None, **kw):
             """
             Consume and write Jinja output to the file system.  Output directory
-            is set via the 'build_directory' variable of this instance (a 
+            is set via the 'build_directory' variable of this instance (a
             configurable).
 
             See base for more...
@@ -118,11 +118,11 @@ class FilesWriter(WriterBase):
                 dest = notebook_name + output_extension
             else:
                 dest = notebook_name
-            dest = os.path.join(build_directory, dest)
+            dest = Path(build_directory) / dest
 
             # Write conversion results.
             self.log.info("Writing %i bytes to %s", len(output), dest)
-            if isinstance(output, unicode_type):
+            if isinstance(output, str):
                 with io.open(dest, 'w', encoding='utf-8') as f:
                     f.write(output)
             else:
