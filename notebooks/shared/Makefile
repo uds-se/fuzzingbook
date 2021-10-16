@@ -803,8 +803,7 @@ $(CODE_TARGET).%.py.out:	$(CODE_TARGET)%.py
 	else \
 		echo "Error while running $<" >> $@; \
 		tail $@; \
-		touch -r $< $@; \
-		touch -A -010000 $@; \
+		touch -r $< -A -010000 $@ 2> /dev/null || touch -r $< --date='-1 hour' $@; \
 		exit 1; \
 	fi
 
