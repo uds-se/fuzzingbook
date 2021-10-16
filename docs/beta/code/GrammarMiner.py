@@ -3,7 +3,7 @@
 
 # "Mining Input Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2021-06-04 14:56:57+02:00
+# Last change: 2021-10-16 15:15:37+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -54,33 +54,44 @@ We apply `recover_grammar()` on a `url_parse()` function that takes and decompos
 
 We extract the input grammar for `url_parse()` using `recover_grammar()`:
 
->>> grammar = recover_grammar(url_parse, URLS)
+>>> grammar = recover_grammar(url_parse, URLS, files=['urllib/parse.py'])
 >>> grammar
 {'': [''],
  '': [':'],
- '': ['', 'http', 'https'],
+ '': ['http', 'https'],
  '': ['///',
   '//'],
  '': ['user:pass@www.google.com:80',
-  'www.cispa.saarland:80',
-  'www.fuzzingbook.org'],
+  'www.fuzzingbook.org',
+  'www.cispa.saarland:80'],
  '': ['/#',
   '#'],
  '': ['/?'],
- '': ['q=path', ''],
- '': ['ref', 'News', '']}
+ '': ['q=path'],
+ '': ['ref', 'News']}
 
-The names of nonterminals are a bit technical; but the grammar nicely represents the structure of the input; for instance, the different schemes (`"http"`, `"https"`) are all identified.
+The names of nonterminals are a bit technical; but the grammar nicely represents the structure of the input; for instance, the different schemes (`"http"`, `"https"`) are all identified:
+
+>>> syntax_diagram(grammar)
+start
+urlsplit@437:url
+urlparse@394:scheme
+_splitnetloc@411:url
+urlparse@394:netloc
+urlsplit@481:url
+urlsplit@486:url
+urlparse@394:query
+urlparse@394:fragment
 The grammar can be immediately used for fuzzing, producing arbitrary combinations of input elements, which are all syntactically valid.
 
 >>> from GrammarCoverageFuzzer import GrammarCoverageFuzzer
 >>> fuzzer = GrammarCoverageFuzzer(grammar)
 >>> [fuzzer.fuzz() for i in range(5)]
-['http://user:pass@www.google.com:80/?q=path#News',
- 'https://www.fuzzingbook.org/',
+['http://www.fuzzingbook.org/',
+ 'https://user:pass@www.google.com:80/?q=path#News',
  'http://www.cispa.saarland:80/#ref',
- 'http://user:pass@www.google.com:80/#News',
- 'http://www.fuzzingbook.org/#News']
+ 'http://user:pass@www.google.com:80/?q=path#ref',
+ 'https://user:pass@www.google.com:80/#News']
 
 Being able to automatically extract a grammar and to use this grammar for fuzzing makes for very effective test generation with a minimum of manual work.
 
@@ -1643,8 +1654,11 @@ if __name__ == '__main__':
     URLS
 
 if __name__ == '__main__':
-    grammar = recover_grammar(url_parse, URLS)
+    grammar = recover_grammar(url_parse, URLS, files=['urllib/parse.py'])
     grammar
+
+if __name__ == '__main__':
+    syntax_diagram(grammar)
 
 from .GrammarCoverageFuzzer import GrammarCoverageFuzzer
 

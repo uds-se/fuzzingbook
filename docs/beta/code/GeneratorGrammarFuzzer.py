@@ -3,7 +3,7 @@
 
 # "Fuzzing with Generators" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2021-06-04 14:56:27+02:00
+# Last change: 2021-10-16 14:38:06+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -712,7 +712,24 @@ if __name__ == '__main__':
 
 
 
-from .LangFuzzer import VAR_GRAMMAR  # minor dependency
+import string
+
+VAR_GRAMMAR = {
+    '<start>': ['<statements>'],
+    '<statements>': ['<statement>;<statements>', '<statement>'],
+    '<statement>': ['<assignment>'],
+    '<assignment>': ['<identifier>=<expr>'],
+    '<identifier>': ['<word>'],
+    '<word>': ['<alpha><word>', '<alpha>'],
+    '<alpha>': list(string.ascii_letters),
+    '<expr>': ['<term>+<expr>', '<term>-<expr>', '<term>'],
+    '<term>': ['<factor>*<term>', '<factor>/<term>', '<factor>'],
+    '<factor>':
+    ['+<factor>', '-<factor>', '(<expr>)', '<identifier>', '<number>'],
+    '<number>': ['<integer>.<integer>', '<integer>'],
+    '<integer>': ['<digit><integer>', '<digit>'],
+    '<digit>': crange('0', '9')
+}
 
 if __name__ == '__main__':
     g = GrammarFuzzer(VAR_GRAMMAR)

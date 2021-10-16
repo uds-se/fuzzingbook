@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2021-10-14 18:44:34+02:00
+# Last change: 2021-10-16 15:12:35+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -554,7 +554,7 @@ if __name__ == '__main__':
     exec(maze_code)
 
 if __name__ == '__main__':
-    print(maze("DDDDRRRRUULLUURRRRDDDD")) # Appending one more 'D', you have reached the target.
+    print(maze("DDDDRRRRUULLUURRRRDDDD"))  # Appending one more 'D', you have reached the target.
 
 from .ControlFlow import callgraph
 
@@ -573,7 +573,7 @@ class DictMutator(Mutator):
         super().__init__()
         self.dictionary = dictionary
         self.mutators.append(self.insert_from_dictionary)
-        
+
     def insert_from_dictionary(self, s):
         """Returns s with a keyword from the dictionary inserted"""
         pos = random.randint(0, len(s))
@@ -590,7 +590,7 @@ class MazeMutator(DictMutator):
         """Returns s with a keyword from the dictionary appended"""
         random_keyword = random.choice(self.dictionary)
         return s + random_keyword
-    
+
     def delete_last_character(self,s):
         """Returns s without the last character"""
         if (len(s) > 0):
@@ -617,13 +617,16 @@ def print_stats(fuzzer):
     valid = 0
     for seed in fuzzer.population:
         s = maze(str(seed.data))
-        if "INVALID" in s: invalid += 1
-        elif "VALID" in s: valid += 1
-        elif "SOLVED" in s: 
+        if "INVALID" in s:
+            invalid += 1
+        elif "VALID" in s:
+            valid += 1
+        elif "SOLVED" in s:
             solved += 1
-            if solved == 1: 
+            if solved == 1:
                 print("First solution: %s" % repr(seed))
-        else: print("??")
+        else:
+            print("??")
 
     print("""Out of %d seeds, 
 * %4d solved the maze, 
@@ -658,9 +661,9 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     distance = {}
     for node in cg.nodes():
-        if "__" in node: 
+        if "__" in node:
             name = node.split("__")[-1]
-        else: 
+        else:
             name = node
         try:
             distance[name] = nx.shortest_path_length(cg, node, target_node)
@@ -687,7 +690,7 @@ class DirectedSchedule(PowerSchedule):
         for f, _ in set(coverage):
             functions.add(f)
         return functions
-    
+
     def assignEnergy(self, population):
         """Assigns each seed energy inversely proportional
            to the average function-level distance to target."""
@@ -704,7 +707,7 @@ class DirectedSchedule(PowerSchedule):
 
 if __name__ == '__main__':
     directed_schedule = DirectedSchedule(distance, 3)
-    directed_fuzzer  = GreyboxFuzzer([seed_input], maze_mutator, directed_schedule)
+    directed_fuzzer = GreyboxFuzzer([seed_input], maze_mutator, directed_schedule)
 
     start = time.time()
     directed_fuzzer.runs(FunctionCoverageRunner(maze), trials=n)
@@ -738,8 +741,10 @@ class AFLGoSchedule(DirectedSchedule):
                         sum_dist += distance[f]
                         num_dist += 1
                 seed.distance = sum_dist / num_dist
-            if seed.distance < min_dist: min_dist = seed.distance
-            if seed.distance > max_dist: max_dist = seed.distance
+            if seed.distance < min_dist:
+                min_dist = seed.distance
+            if seed.distance > max_dist:
+                max_dist = seed.distance
 
         for seed in population:
             if (seed.distance == min_dist):
@@ -752,7 +757,7 @@ class AFLGoSchedule(DirectedSchedule):
 
 if __name__ == '__main__':
     aflgo_schedule = AFLGoSchedule(distance, 3)
-    aflgo_fuzzer  = GreyboxFuzzer([seed_input], maze_mutator, aflgo_schedule)
+    aflgo_fuzzer = GreyboxFuzzer([seed_input], maze_mutator, aflgo_schedule)
 
     start = time.time()
     aflgo_fuzzer.runs(FunctionCoverageRunner(maze), trials=n)
@@ -787,7 +792,6 @@ if __name__ == '__main__':
 
 
 
-import shutil
 import os
 
 if __name__ == '__main__':
