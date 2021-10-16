@@ -3,7 +3,7 @@
 
 # "Fuzzing: Breaking Things with Random Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2021-06-02 17:40:53+02:00
+# Last change: 2021-10-14 18:39:59+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -836,11 +836,11 @@ class TroffRunner(Runner):
 
         return inp
 
-
 if __name__ == '__main__':
     random_fuzzer = RandomFuzzer(char_start=0, char_range=256, max_length=10)
     troff_runner = TroffRunner()
 
+if __name__ == '__main__':
     trials = 100000
     for i in range(trials):
         random_fuzzer.run(troff_runner)
@@ -863,7 +863,6 @@ if __name__ == '__main__':
 # import matplotlib.pyplot as plt
 # plt.bar(["\\D", "8bit", "dot"], ys)
 # plt.title("Occurrences of error classes");
-# 
 
 ### Exercise 3: Run Real Troff
 

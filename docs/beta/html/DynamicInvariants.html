@@ -11930,7 +11930,7 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Specifications-and-Assertions">&nbsp;&bull;&nbsp;&nbsp; Specifications and Assertions</a>
 </li><li class="has-sub"><a href="#Why-Generic-Error-Checking-is-Not-Enough">&nbsp;&bull;&nbsp;&nbsp; Why Generic Error Checking is Not Enough</a>
 </li><li class="has-sub"><a href="#Specifying-and-Checking-Data-Types">&nbsp;&bull;&nbsp;&nbsp; Specifying and Checking Data Types</a>
-<ul><li class="has-sub"><a href="#Runtime-Type-Checking">Runtime Type Checking</a>
+<ul><li class="has-sub"><a href="#Excursion:-Runtime-Type-Checking">Excursion: Runtime Type Checking</a>
 </li><li class="has-sub"><a href="#Static-Type-Checking">Static Type Checking</a>
 </ul></li><li class="has-sub"><a href="#Mining-Type-Specifications">&nbsp;&bull;&nbsp;&nbsp; Mining Type Specifications</a>
 <ul><li class="has-sub"><a href="#Tracking-Calls">Tracking Calls</a>
@@ -12093,7 +12093,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </pre></div>
 <p>The <code>typed_functions()</code> method will return a representation of <code>sum2()</code> annotated with types observed during execution.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">type_annotator</span><span class="o">.</span><span class="n">typed_functions</span><span class="p">())</span>
-<span class="k">def</span> <span class="nf">sum2</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span><span class="nb">int</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">sum2</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
 </pre></div>
 <p>The invariant annotator works in a similar fashion:</p>
@@ -12104,13 +12104,13 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </pre></div>
 <p>The <code>functions_with_invariants()</code> method will return a representation of <code>sum2()</code> annotated with inferred pre- and postconditions that all hold for the observed values.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">inv_annotator</span><span class="o">.</span><span class="n">functions_with_invariants</span><span class="p">())</span>
-<span class="nd">@precondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
-<span class="nd">@precondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
-<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">a</span> <span class="o">==</span> <span class="n">return_value</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">b</span> <span class="o">==</span> <span class="n">return_value</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
-<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">return_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
-<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">return_value</span> <span class="o">==</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
-<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">return_value</span> <span class="o">==</span> <span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span>
+<span class="nd">@precondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+<span class="nd">@precondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span> <span class="o">==</span> <span class="n">return_value</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
+<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">b</span> <span class="o">==</span> <span class="n">return_value</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">return_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">return_value</span> <span class="o">==</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">return_value</span> <span class="o">==</span> <span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">sum2</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
 </pre></div>
@@ -12257,9 +12257,9 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-774676a5ccb8&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/829521914.py&#34;, line 2, in &lt;module&gt;
     my_sqrt(&#34;foo&#34;)
-  File &#34;&lt;ipython-input-1-47185ad159a1&gt;&#34;, line 4, in my_sqrt
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2661069967.py&#34;, line 4, in my_sqrt
     guess = x / 2
 TypeError: unsupported operand type(s) for /: &#39;str&#39; and &#39;int&#39; (expected)
 </pre>
@@ -12286,9 +12286,9 @@ TypeError: unsupported operand type(s) for /: &#39;str&#39; and &#39;int&#39; (e
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-262c66114b1c&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/1975547953.py&#34;, line 2, in &lt;module&gt;
     x = my_sqrt(0.0)
-  File &#34;&lt;ipython-input-1-47185ad159a1&gt;&#34;, line 7, in my_sqrt
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2661069967.py&#34;, line 7, in my_sqrt
     guess = (approx + x / approx) / 2
 ZeroDivisionError: float division by zero (expected)
 </pre>
@@ -12324,13 +12324,13 @@ ZeroDivisionError: float division by zero (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-b72078127dc0&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/1349814288.py&#34;, line 2, in &lt;module&gt;
     x = my_sqrt(-1.0)
-  File &#34;&lt;ipython-input-1-47185ad159a1&gt;&#34;, line 5, in my_sqrt
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2661069967.py&#34;, line 5, in my_sqrt
     while approx != guess:
-  File &#34;&lt;ipython-input-1-47185ad159a1&gt;&#34;, line 5, in my_sqrt
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2661069967.py&#34;, line 5, in my_sqrt
     while approx != guess:
-  File &#34;ExpectError.ipynb&#34;, line 86, in check_time
+  File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/ExpectError.ipynb&#34;, line 86, in check_time
     raise TimeoutError
 TimeoutError (expected)
 </pre>
@@ -12411,7 +12411,8 @@ TimeoutError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Runtime-Type-Checking">Runtime Type Checking<a class="anchor-link" href="#Runtime-Type-Checking">&#182;</a></h3><p>The Python <code>enforce</code> package provides a function decorator that automatically inserts type-checking code that is executed at runtime.  Here is how to use it:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Excursion:-Runtime-Type-Checking">Excursion: Runtime Type Checking<a class="anchor-link" href="#Excursion:-Runtime-Type-Checking">&#182;</a></h3><p>(Commented out as <code>enforce</code> is not supported by Python 3.9)</p>
+<p>The Python <code>enforce</code> package provides a function decorator that automatically inserts type-checking code that is executed at runtime.  Here is how to use it:</p>
 </div>
 </div>
 </div>
@@ -12423,7 +12424,7 @@ TimeoutError (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://pypi.org/project/enforce/" class="import" target="_blank">enforce</a></span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># import enforce</span>
 </pre></div>
 
 </div>
@@ -12437,10 +12438,10 @@ TimeoutError (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nd">@enforce</span><span class="o">.</span><span class="n">runtime_validation</span>
-<span class="k">def</span> <span class="nf">my_sqrt_with_checked_type_annotations</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Computes the square root of x, using the Newton-Raphson method&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">my_sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># @enforce.runtime_validation</span>
+<span class="c1"># def my_sqrt_with_checked_type_annotations(x: float) -&gt; float:</span>
+<span class="c1">#     &quot;&quot;&quot;Computes the square root of x, using the Newton-Raphson method&quot;&quot;&quot;</span>
+<span class="c1">#     return my_sqrt(x)</span>
 </pre></div>
 
 </div>
@@ -12463,31 +12464,13 @@ TimeoutError (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
-    <span class="n">my_sqrt_with_checked_type_annotations</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># with ExpectError():</span>
+<span class="c1">#     my_sqrt_with_checked_type_annotations(True)</span>
 </pre></div>
 
 </div>
 </div></div>
 </div>
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-68b73bd3f6ef&gt;&#34;, line 2, in &lt;module&gt;
-    my_sqrt_with_checked_type_annotations(True)
-  File &#34;/Users/zeller/Library/Python/3.6/site-packages/enforce/decorators.py&#34;, line 104, in universal
-    _args, _kwargs, _ = enforcer.validate_inputs(parameters)
-  File &#34;/Users/zeller/Library/Python/3.6/site-packages/enforce/enforcers.py&#34;, line 86, in validate_inputs
-    raise RuntimeTypeError(exception_text)
-enforce.exceptions.RuntimeTypeError: 
-  The following runtime type errors were encountered:
-       Argument &#39;x&#39; was not of type &lt;class &#39;float&#39;&gt;. Actual type was bool. (expected)
-</pre>
-</div>
-
 </div>
 
 <div class="input_markdown">
@@ -12505,21 +12488,12 @@ enforce.exceptions.RuntimeTypeError:
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">my_sqrt</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># my_sqrt(True)</span>
 </pre></div>
 
 </div>
 </div></div>
 </div>
-</div>
-
-<div class="output_area">
-
-<div class="output_text output_subarea output_execute_result">
-<pre>1.0
-</pre>
-</div>
-
 </div>
 
 <div class="input_markdown">
@@ -12530,6 +12504,8 @@ enforce.exceptions.RuntimeTypeError:
 </div>
 </div>
 </div>
+
+</details>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
@@ -12573,7 +12549,7 @@ enforce.exceptions.RuntimeTypeError:
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpv4jlwt9q.py&#39;
+<pre>&#39;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpfhghpo92.py&#39;
 </pre>
 </div>
 
@@ -12712,10 +12688,10 @@ enforce.exceptions.RuntimeTypeError:
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpv4jlwt9q.py:1: error: Function is missing a type annotation
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpv4jlwt9q.py:12: error: Returning Any from function declared to return &#34;float&#34;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpv4jlwt9q.py:12: error: Call to untyped function &#34;my_sqrt&#34; in typed context
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpv4jlwt9q.py:14: error: Argument 1 to &#34;my_sqrt_with_type_annotations&#34; has incompatible type &#34;str&#34;; expected &#34;float&#34;
+<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpfhghpo92.py:1: error: Function is missing a type annotation
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpfhghpo92.py:12: error: Returning Any from function declared to return &#34;float&#34;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpfhghpo92.py:12: error: Call to untyped function &#34;my_sqrt&#34; in typed context
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpfhghpo92.py:14: error: Argument 1 to &#34;my_sqrt_with_type_annotations&#34; has incompatible type &#34;str&#34;; expected &#34;float&#34;
 Found 4 errors in 1 file (checked 1 source file)
 </pre>
 </div>
@@ -12947,7 +12923,8 @@ Found 4 errors in 1 file (checked 1 source file)
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">get_arguments</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return call arguments in the given frame&quot;&quot;&quot;</span>
     <span class="c1"># When called, all arguments are local variables</span>
-    <span class="n">arguments</span> <span class="o">=</span> <span class="p">[(</span><span class="n">var</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">[</span><span class="n">var</span><span class="p">])</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">]</span>
+    <span class="n">local_variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">)</span>  <span class="c1"># explicit copy</span>
+    <span class="n">arguments</span> <span class="o">=</span> <span class="p">[(</span><span class="n">var</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="p">[</span><span class="n">var</span><span class="p">])</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">local_variables</span><span class="p">]</span>
     <span class="n">arguments</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>  <span class="c1"># Want same order as call</span>
     <span class="k">return</span> <span class="n">arguments</span>
 </pre></div>
@@ -13116,7 +13093,7 @@ Found 4 errors in 1 file (checked 1 source file)
 my_sqrt(x=25) returns 5.0
 my_sqrt(x=2.0)
 my_sqrt(x=2.0) returns 1.414213562373095
-__exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=None, exc_value=None, tb=None)
+__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallTracker object at 0x11c9a2df0&gt;)
 </pre>
 </div>
 
@@ -13518,7 +13495,6 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/ast.html" class="import" target="_blank">ast</a></span>
 <span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/inspect.html" class="import" target="_blank">inspect</a></span>
-<span class="kn">import</span> <span class="nn"><a href="https://astor.readthedocs.io/" class="import" target="_blank">astor</a></span>
 </pre></div>
 
 </div>
@@ -13638,7 +13614,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>What does this AST look like?  The helper functions <code>astor.dump_tree()</code> (textual output) and <code>showast.show_ast()</code> (graphical output with <a href="https://github.com/hchasestevens/show_ast">showast</a>) allow us to inspect the structure of the tree.  We see that the function starts as a <code>FunctionDef</code> with name and arguments, followed by a body, which is a list of statements of type <code>Expr</code> (the docstring), type <code>Assign</code> (assignments), <code>While</code> (while loop with its own body), and finally <code>Return</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>What does this AST look like?  The helper functions <code>ast.dump()</code> (textual output) and <code>showast.show_ast()</code> (graphical output with <a href="https://github.com/hchasestevens/show_ast">showast</a>) allow us to inspect the structure of the tree.  We see that the function starts as a <code>FunctionDef</code> with name and arguments, followed by a body, which is a list of statements of type <code>Expr</code> (the docstring), type <code>Assign</code> (assignments), <code>While</code> (while loop with its own body), and finally <code>Return</code>.</p>
 </div>
 </div>
 </div>
@@ -13650,7 +13626,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">astor</span><span class="o">.</span><span class="n">dump_tree</span><span class="p">(</span><span class="n">my_sqrt_ast</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">my_sqrt_ast</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -13663,31 +13639,59 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Module(
     body=[
-        FunctionDef(name=&#39;my_sqrt&#39;,
-            args=arguments(args=[arg(arg=&#39;x&#39;, annotation=None)],
-                vararg=None,
+        FunctionDef(
+            name=&#39;my_sqrt&#39;,
+            args=arguments(
+                posonlyargs=[],
+                args=[
+                    arg(arg=&#39;x&#39;)],
                 kwonlyargs=[],
                 kw_defaults=[],
-                kwarg=None,
                 defaults=[]),
             body=[
-                Expr(value=Str(s=&#39;Computes the square root of x, using the Newton-Raphson method&#39;)),
-                Assign(targets=[Name(id=&#39;approx&#39;)], value=NameConstant(value=None)),
-                Assign(targets=[Name(id=&#39;guess&#39;)], value=BinOp(left=Name(id=&#39;x&#39;), op=Div, right=Num(n=2))),
+                Expr(
+                    value=Constant(value=&#39;Computes the square root of x, using the Newton-Raphson method&#39;)),
+                Assign(
+                    targets=[
+                        Name(id=&#39;approx&#39;, ctx=Store())],
+                    value=Constant(value=None)),
+                Assign(
+                    targets=[
+                        Name(id=&#39;guess&#39;, ctx=Store())],
+                    value=BinOp(
+                        left=Name(id=&#39;x&#39;, ctx=Load()),
+                        op=Div(),
+                        right=Constant(value=2))),
                 While(
-                    test=Compare(left=Name(id=&#39;approx&#39;), ops=[NotEq], comparators=[Name(id=&#39;guess&#39;)]),
-                    body=[Assign(targets=[Name(id=&#39;approx&#39;)], value=Name(id=&#39;guess&#39;)),
-                        Assign(targets=[Name(id=&#39;guess&#39;)],
+                    test=Compare(
+                        left=Name(id=&#39;approx&#39;, ctx=Load()),
+                        ops=[
+                            NotEq()],
+                        comparators=[
+                            Name(id=&#39;guess&#39;, ctx=Load())]),
+                    body=[
+                        Assign(
+                            targets=[
+                                Name(id=&#39;approx&#39;, ctx=Store())],
+                            value=Name(id=&#39;guess&#39;, ctx=Load())),
+                        Assign(
+                            targets=[
+                                Name(id=&#39;guess&#39;, ctx=Store())],
                             value=BinOp(
-                                left=BinOp(left=Name(id=&#39;approx&#39;),
-                                    op=Add,
-                                    right=BinOp(left=Name(id=&#39;x&#39;), op=Div, right=Name(id=&#39;approx&#39;))),
-                                op=Div,
-                                right=Num(n=2)))],
+                                left=BinOp(
+                                    left=Name(id=&#39;approx&#39;, ctx=Load()),
+                                    op=Add(),
+                                    right=BinOp(
+                                        left=Name(id=&#39;x&#39;, ctx=Load()),
+                                        op=Div(),
+                                        right=Name(id=&#39;approx&#39;, ctx=Load()))),
+                                op=Div(),
+                                right=Constant(value=2)))],
                     orelse=[]),
-                Return(value=Name(id=&#39;approx&#39;))],
-            decorator_list=[],
-            returns=None)])
+                Return(
+                    value=Name(id=&#39;approx&#39;, ctx=Load()))],
+            decorator_list=[])],
+    type_ignores=[])
 </pre>
 </div>
 
@@ -13735,624 +13739,623 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg height="548pt" viewBox="0.00 0.00 1705.00 548.00" width="1705pt" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-<g class="graph" id="graph0" transform="scale(1 1) rotate(0) translate(4 544)">
-<title>%3</title>
-<polygon fill="#ffffff" points="-4,4 -4,-544 1701,-544 1701,4 -4,4" stroke="transparent"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1706pt" height="548pt" viewBox="0.00 0.00 1706.00 548.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 544)">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-544 1702,-544 1702,4 -4,4"/>
 <!-- 0 -->
-<g class="node" id="node1">
+<g id="node1" class="node">
 <title>0</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="303.5" y="-519.3">FunctionDef</text>
+<text text-anchor="start" x="286.5" y="-519.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">FunctionDef</text>
 </g>
 <!-- 1 -->
-<g class="node" id="node2">
+<g id="node2" class="node">
 <title>1</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="90" y="-446.3">&quot;my_sqrt&quot;</text>
+<text text-anchor="middle" x="82" y="-446.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;my_sqrt&quot;</text>
 </g>
 <!-- 0&#45;&#45;1 -->
-<g class="edge" id="edge1">
+<g id="edge1" class="edge">
 <title>0--1</title>
-<path d="M350,-504C350,-504 234.7415,-490.4433 145,-468 142.076,-467.2687 139.0819,-466.4617 136.0745,-465.6066" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M334,-503C334,-503 223.42,-488.95 137,-468 134.09,-467.29 131.1,-466.52 128.1,-465.7"/>
 </g>
 <!-- 2 -->
-<g class="node" id="node3">
+<g id="node3" class="node">
 <title>2</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="162" y="-447.3">arguments</text>
+<text text-anchor="start" x="154" y="-447.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">arguments</text>
 </g>
 <!-- 0&#45;&#45;2 -->
-<g class="edge" id="edge2">
+<g id="edge2" class="edge">
 <title>0--2</title>
-<path d="M350,-504C350,-504 290.3025,-482.5089 246.2289,-466.6424" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M334,-503C334,-503 279.57,-483.07 238.1,-467.88"/>
 </g>
 <!-- 5 -->
-<g class="node" id="node6">
+<g id="node6" class="node">
 <title>5</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="272.5" y="-447.3">Assign</text>
+<text text-anchor="start" x="264.5" y="-447.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Assign</text>
 </g>
 <!-- 0&#45;&#45;5 -->
-<g class="edge" id="edge5">
+<g id="edge5" class="edge">
 <title>0--5</title>
-<path d="M350,-504C350,-504 330.6904,-483.9478 315.6048,-468.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M334,-503C334,-503 317.24,-483.19 304.41,-468.03"/>
 </g>
 <!-- 10 -->
-<g class="node" id="node11">
+<g id="node11" class="node">
 <title>10</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="367.5" y="-447.3">Assign</text>
+<text text-anchor="start" x="350.5" y="-447.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Assign</text>
 </g>
 <!-- 0&#45;&#45;10 -->
-<g class="edge" id="edge10">
+<g id="edge10" class="edge">
 <title>0--10</title>
-<path d="M350,-504C350,-504 365.9675,-483.9478 378.4422,-468.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M334,-503C334,-503 350,-483.19 362.25,-468.03"/>
 </g>
 <!-- 21 -->
-<g class="node" id="node22">
+<g id="node22" class="node">
 <title>21</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="919.5" y="-447.3">While</text>
+<text text-anchor="start" x="919.5" y="-447.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">While</text>
 </g>
 <!-- 0&#45;&#45;21 -->
-<g class="edge" id="edge21">
+<g id="edge21" class="edge">
 <title>0--21</title>
-<path d="M350,-504C350,-504 791.4425,-463.6652 911.2872,-452.7149" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M334,-503C334,-503 789.45,-463.98 911.31,-453.54"/>
 </g>
 <!-- 58 -->
-<g class="node" id="node59">
+<g id="node59" class="node">
 <title>58</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1333.5" y="-447.3">Return</text>
+<text text-anchor="start" x="1333.5" y="-447.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Return</text>
 </g>
 <!-- 0&#45;&#45;58 -->
-<g class="edge" id="edge58">
+<g id="edge58" class="edge">
 <title>0--58</title>
-<path d="M350,-504C350,-504 1150.3518,-461.1665 1325.4288,-451.7967" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M334,-503C334,-503 1148.83,-461.66 1325.48,-452.7"/>
 </g>
 <!-- 3 -->
-<g class="node" id="node4">
+<g id="node4" class="node">
 <title>3</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="48" y="-375.3">arg</text>
+<text text-anchor="start" x="65" y="-375.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">arg</text>
 </g>
 <!-- 2&#45;&#45;3 -->
-<g class="edge" id="edge3">
+<g id="edge3" class="edge">
 <title>2--3</title>
-<path d="M164.9244,-431.8314C141.1186,-419.5003 110.1038,-403.435 88.1719,-392.0747" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M164.11,-431.88C146.18,-420.87 123,-406.63 105.21,-395.71"/>
 </g>
 <!-- 4 -->
-<g class="node" id="node5">
+<g id="node5" class="node">
 <title>4</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="27" y="-302.3">&quot;x&quot;</text>
+<text text-anchor="middle" x="27" y="-302.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;x&quot;</text>
 </g>
 <!-- 3&#45;&#45;4 -->
-<g class="edge" id="edge4">
+<g id="edge4" class="edge">
 <title>3--4</title>
-<path d="M52.4204,-359.8314C47.3056,-349 40.8302,-335.2876 35.6952,-324.4133" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M65.39,-359.7C57.49,-348.85 47.34,-334.92 39.46,-324.1"/>
 </g>
 <!-- 6 -->
-<g class="node" id="node7">
+<g id="node7" class="node">
 <title>6</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="168" y="-375.3">Name</text>
+<text text-anchor="start" x="185" y="-375.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 5&#45;&#45;6 -->
-<g class="edge" id="edge6">
+<g id="edge6" class="edge">
 <title>5--6</title>
-<path d="M287,-432C287,-432 242.2843,-408.327 212.0663,-392.3292" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M281,-431C281,-431 250.91,-411.19 227.87,-396.03"/>
 </g>
 <!-- 9 -->
-<g class="node" id="node10">
+<g id="node10" class="node">
 <title>9</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="289" y="-374.3">NameConstant</text>
+<text text-anchor="middle" x="289" y="-374.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Constant</text>
 </g>
 <!-- 5&#45;&#45;9 -->
-<g class="edge" id="edge9">
+<g id="edge9" class="edge">
 <title>5--9</title>
-<path d="M287,-432C287,-432 287.7427,-411.9478 288.3229,-396.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M281,-431C281,-431 284.05,-411.19 286.38,-396.03"/>
 </g>
 <!-- 7 -->
-<g class="node" id="node8">
+<g id="node8" class="node">
 <title>7</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="114" y="-302.3">&quot;approx&quot;</text>
+<text text-anchor="middle" x="114" y="-302.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;approx&quot;</text>
 </g>
 <!-- 6&#45;&#45;7 -->
-<g class="edge" id="edge7">
+<g id="edge7" class="edge">
 <title>6--7</title>
-<path d="M180,-360C180,-360 155.4917,-339.9478 136.3446,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M194,-359C194,-359 163.53,-339.19 140.19,-324.03"/>
 </g>
 <!-- 8 -->
-<g class="node" id="node9">
+<g id="node9" class="node">
 <title>8</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="204" y="-302.3">Store</text>
+<text text-anchor="middle" x="204" y="-302.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Store</text>
 </g>
 <!-- 6&#45;&#45;8 -->
-<g class="edge" id="edge8">
+<g id="edge8" class="edge">
 <title>6--8</title>
-<path d="M180,-360C180,-360 188.9121,-339.9478 195.8747,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M194,-359C194,-359 197.81,-339.19 200.73,-324.03"/>
 </g>
 <!-- 11 -->
-<g class="node" id="node12">
+<g id="node12" class="node">
 <title>11</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="376" y="-375.3">Name</text>
+<text text-anchor="start" x="359" y="-375.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 10&#45;&#45;11 -->
-<g class="edge" id="edge11">
+<g id="edge11" class="edge">
 <title>10--11</title>
-<path d="M403,-432C403,-432 399.2866,-411.9478 396.3855,-396.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M386,-431C386,-431 382.19,-411.19 379.27,-396.03"/>
 </g>
 <!-- 14 -->
-<g class="node" id="node15">
+<g id="node15" class="node">
 <title>14</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="482.5" y="-375.3">BinOp</text>
+<text text-anchor="start" x="465.5" y="-375.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">BinOp</text>
 </g>
 <!-- 10&#45;&#45;14 -->
-<g class="edge" id="edge14">
+<g id="edge14" class="edge">
 <title>10--14</title>
-<path d="M403,-432C403,-432 444.4504,-409.8384 474.2429,-393.9097" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M386,-431C386,-431 427.45,-409.66 457.24,-394.32"/>
 </g>
 <!-- 12 -->
-<g class="node" id="node13">
+<g id="node13" class="node">
 <title>12</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="289" y="-302.3">&quot;guess&quot;</text>
+<text text-anchor="middle" x="289" y="-302.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;guess&quot;</text>
 </g>
 <!-- 11&#45;&#45;12 -->
-<g class="edge" id="edge12">
+<g id="edge12" class="edge">
 <title>11--12</title>
-<path d="M380,-360C380,-360 345.9913,-339.819 319.5548,-324.1314" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M367,-359C367,-359 337.29,-339.19 314.54,-324.03"/>
 </g>
 <!-- 13 -->
-<g class="node" id="node14">
+<g id="node14" class="node">
 <title>13</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="374" y="-302.3">Store</text>
+<text text-anchor="middle" x="374" y="-302.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Store</text>
 </g>
 <!-- 11&#45;&#45;13 -->
-<g class="edge" id="edge13">
+<g id="edge13" class="edge">
 <title>11--13</title>
-<path d="M380,-360C380,-360 377.772,-339.9478 376.0313,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M367,-359C367,-359 369.67,-339.19 371.71,-324.03"/>
 </g>
 <!-- 15 -->
-<g class="node" id="node16">
+<g id="node16" class="node">
 <title>15</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="432" y="-303.3">Name</text>
+<text text-anchor="start" x="432" y="-303.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 14&#45;&#45;15 -->
-<g class="edge" id="edge15">
+<g id="edge15" class="edge">
 <title>14--15</title>
-<path d="M507,-360C507,-360 485.4624,-339.9478 468.6362,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M493,-359C493,-359 476.24,-339.19 463.41,-324.03"/>
 </g>
 <!-- 18 -->
-<g class="node" id="node19">
+<g id="node19" class="node">
 <title>18</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="521" y="-302.3">Div</text>
+<text text-anchor="middle" x="521" y="-302.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Div</text>
 </g>
 <!-- 14&#45;&#45;18 -->
-<g class="edge" id="edge18">
+<g id="edge18" class="edge">
 <title>14--18</title>
-<path d="M507,-360C507,-360 512.1987,-339.9478 516.2602,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M493,-359C493,-359 503.67,-339.19 511.83,-324.03"/>
 </g>
 <!-- 19 -->
-<g class="node" id="node20">
+<g id="node20" class="node">
 <title>19</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="580" y="-303.3">Num</text>
+<text text-anchor="start" x="574" y="-303.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Constant</text>
 </g>
 <!-- 14&#45;&#45;19 -->
-<g class="edge" id="edge19">
+<g id="edge19" class="edge">
 <title>14--19</title>
-<path d="M507,-360C507,-360 540.5938,-338.9063 565.7891,-323.0859" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M493,-359C493,-359 536.81,-339.19 570.34,-324.03"/>
 </g>
 <!-- 16 -->
-<g class="node" id="node17">
+<g id="node17" class="node">
 <title>16</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="377" y="-230.3">&quot;x&quot;</text>
+<text text-anchor="middle" x="377" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;x&quot;</text>
 </g>
 <!-- 15&#45;&#45;16 -->
-<g class="edge" id="edge16">
+<g id="edge16" class="edge">
 <title>15--16</title>
-<path d="M441,-288C441,-288 417.2344,-267.9478 398.6675,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M441,-287C441,-287 416.62,-267.19 397.96,-252.03"/>
 </g>
 <!-- 17 -->
-<g class="node" id="node18">
+<g id="node18" class="node">
 <title>17</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="449" y="-230.3">Load</text>
+<text text-anchor="middle" x="449" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Load</text>
 </g>
 <!-- 15&#45;&#45;17 -->
-<g class="edge" id="edge17">
+<g id="edge17" class="edge">
 <title>15--17</title>
-<path d="M441,-288C441,-288 443.9707,-267.9478 446.2916,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M441,-287C441,-287 444.05,-267.19 446.38,-252.03"/>
 </g>
 <!-- 20 -->
-<g class="node" id="node21">
+<g id="node21" class="node">
 <title>20</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="521" y="-230.3">2</text>
+<text text-anchor="middle" x="521" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">2</text>
 </g>
 <!-- 19&#45;&#45;20 -->
-<g class="edge" id="edge20">
+<g id="edge20" class="edge">
 <title>19--20</title>
-<path d="M574.8314,-287.8314C564,-277 550.2876,-263.2876 539.4133,-252.4133" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M586.49,-287.7C573.01,-276.85 555.7,-262.92 542.26,-252.1"/>
 </g>
 <!-- 22 -->
-<g class="node" id="node23">
+<g id="node23" class="node">
 <title>22</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="785.5" y="-375.3">Compare</text>
+<text text-anchor="start" x="785.5" y="-375.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Compare</text>
 </g>
 <!-- 21&#45;&#45;22 -->
-<g class="edge" id="edge22">
+<g id="edge22" class="edge">
 <title>21--22</title>
-<path d="M950,-432C950,-432 892.5504,-409.0202 852.605,-393.042" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M950,-431C950,-431 892.55,-408.87 852.61,-393.48"/>
 </g>
 <!-- 30 -->
-<g class="node" id="node31">
+<g id="node31" class="node">
 <title>30</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="967.5" y="-375.3">Assign</text>
+<text text-anchor="start" x="967.5" y="-375.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Assign</text>
 </g>
 <!-- 21&#45;&#45;30 -->
-<g class="edge" id="edge30">
+<g id="edge30" class="edge">
 <title>21--30</title>
-<path d="M950,-432C950,-432 965.9675,-411.9478 978.4422,-396.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M950,-431C950,-431 966.38,-411.19 978.92,-396.03"/>
 </g>
 <!-- 37 -->
-<g class="node" id="node38">
+<g id="node38" class="node">
 <title>37</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1305.5" y="-375.3">Assign</text>
+<text text-anchor="start" x="1305.5" y="-375.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Assign</text>
 </g>
 <!-- 21&#45;&#45;37 -->
-<g class="edge" id="edge37">
+<g id="edge37" class="edge">
 <title>21--37</title>
-<path d="M950,-432C950,-432 1203.9438,-396.008 1297.1888,-382.7921" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M950,-431C950,-431 1203.94,-396.34 1297.19,-383.61"/>
 </g>
 <!-- 23 -->
-<g class="node" id="node24">
+<g id="node24" class="node">
 <title>23</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="678" y="-303.3">Name</text>
+<text text-anchor="start" x="678" y="-303.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 22&#45;&#45;23 -->
-<g class="edge" id="edge23">
+<g id="edge23" class="edge">
 <title>22--23</title>
-<path d="M808,-360C808,-360 755.4964,-334.9098 722.0663,-318.9343" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M808,-359C808,-359 755.5,-334.84 722.07,-319.46"/>
 </g>
 <!-- 26 -->
-<g class="node" id="node27">
+<g id="node27" class="node">
 <title>26</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="778" y="-302.3">NotEq</text>
+<text text-anchor="middle" x="778" y="-302.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">NotEq</text>
 </g>
 <!-- 22&#45;&#45;26 -->
-<g class="edge" id="edge26">
+<g id="edge26" class="edge">
 <title>22--26</title>
-<path d="M808,-360C808,-360 796.8599,-339.9478 788.1566,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M808,-359C808,-359 796.57,-339.19 787.82,-324.03"/>
 </g>
 <!-- 27 -->
-<g class="node" id="node28">
+<g id="node28" class="node">
 <title>27</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="836" y="-303.3">Name</text>
+<text text-anchor="start" x="836" y="-303.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 22&#45;&#45;27 -->
-<g class="edge" id="edge27">
+<g id="edge27" class="edge">
 <title>22--27</title>
-<path d="M808,-360C808,-360 824.7102,-339.9478 837.7651,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M808,-359C808,-359 825.14,-339.19 838.27,-324.03"/>
 </g>
 <!-- 24 -->
-<g class="node" id="node25">
+<g id="node25" class="node">
 <title>24</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="608" y="-230.3">&quot;approx&quot;</text>
+<text text-anchor="middle" x="608" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;approx&quot;</text>
 </g>
 <!-- 23&#45;&#45;24 -->
-<g class="edge" id="edge24">
+<g id="edge24" class="edge">
 <title>23--24</title>
-<path d="M686,-288C686,-288 657.0356,-267.9478 634.4072,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M686,-287C686,-287 656.29,-267.19 633.54,-252.03"/>
 </g>
 <!-- 25 -->
-<g class="node" id="node26">
+<g id="node26" class="node">
 <title>25</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="695" y="-230.3">Load</text>
+<text text-anchor="middle" x="695" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Load</text>
 </g>
 <!-- 23&#45;&#45;25 -->
-<g class="edge" id="edge25">
+<g id="edge25" class="edge">
 <title>23--25</title>
-<path d="M686,-288C686,-288 689.342,-267.9478 691.953,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M686,-287C686,-287 689.43,-267.19 692.05,-252.03"/>
 </g>
 <!-- 28 -->
-<g class="node" id="node29">
+<g id="node29" class="node">
 <title>28</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="778" y="-230.3">&quot;guess&quot;</text>
+<text text-anchor="middle" x="778" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;guess&quot;</text>
 </g>
 <!-- 27&#45;&#45;28 -->
-<g class="edge" id="edge28">
+<g id="edge28" class="edge">
 <title>27--28</title>
-<path d="M846,-288C846,-288 820.749,-267.9478 801.0217,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M846,-287C846,-287 820.1,-267.19 800.27,-252.03"/>
 </g>
 <!-- 29 -->
-<g class="node" id="node30">
+<g id="node30" class="node">
 <title>29</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="861" y="-230.3">Load</text>
+<text text-anchor="middle" x="861" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Load</text>
 </g>
 <!-- 27&#45;&#45;29 -->
-<g class="edge" id="edge29">
+<g id="edge29" class="edge">
 <title>27--29</title>
-<path d="M846,-288C846,-288 851.5701,-267.9478 855.9217,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M846,-287C846,-287 851.71,-267.19 856.09,-252.03"/>
 </g>
 <!-- 31 -->
-<g class="node" id="node32">
+<g id="node32" class="node">
 <title>31</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="976" y="-303.3">Name</text>
+<text text-anchor="start" x="976" y="-303.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 30&#45;&#45;31 -->
-<g class="edge" id="edge31">
+<g id="edge31" class="edge">
 <title>30--31</title>
-<path d="M1004,-360C1004,-360 999.9153,-339.9478 996.7241,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1004,-359C1004,-359 999.81,-339.19 996.6,-324.03"/>
 </g>
 <!-- 34 -->
-<g class="node" id="node35">
+<g id="node35" class="node">
 <title>34</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1106" y="-303.3">Name</text>
+<text text-anchor="start" x="1106" y="-303.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 30&#45;&#45;34 -->
-<g class="edge" id="edge34">
+<g id="edge34" class="edge">
 <title>30--34</title>
-<path d="M1004,-360C1004,-360 1060.8871,-334.1857 1095.9971,-318.2534" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1004,-359C1004,-359 1060.89,-334.14 1096,-318.8"/>
 </g>
 <!-- 32 -->
-<g class="node" id="node33">
+<g id="node33" class="node">
 <title>32</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="948" y="-230.3">&quot;approx&quot;</text>
+<text text-anchor="middle" x="948" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;approx&quot;</text>
 </g>
 <!-- 31&#45;&#45;32 -->
-<g class="edge" id="edge32">
+<g id="edge32" class="edge">
 <title>31--32</title>
-<path d="M993,-288C993,-288 976.2898,-267.9478 963.2349,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M993,-287C993,-287 975.86,-267.19 962.73,-252.03"/>
 </g>
 <!-- 33 -->
-<g class="node" id="node34">
+<g id="node34" class="node">
 <title>33</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1038" y="-230.3">Store</text>
+<text text-anchor="middle" x="1038" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Store</text>
 </g>
 <!-- 31&#45;&#45;33 -->
-<g class="edge" id="edge33">
+<g id="edge33" class="edge">
 <title>31--33</title>
-<path d="M993,-288C993,-288 1009.7102,-267.9478 1022.7651,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M993,-287C993,-287 1010.14,-267.19 1023.27,-252.03"/>
 </g>
 <!-- 35 -->
-<g class="node" id="node36">
+<g id="node36" class="node">
 <title>35</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1123" y="-230.3">&quot;guess&quot;</text>
+<text text-anchor="middle" x="1123" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;guess&quot;</text>
 </g>
 <!-- 34&#45;&#45;35 -->
-<g class="edge" id="edge35">
+<g id="edge35" class="edge">
 <title>34--35</title>
-<path d="M1131,-288C1131,-288 1128.0293,-267.9478 1125.7084,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1131,-287C1131,-287 1127.95,-267.19 1125.62,-252.03"/>
 </g>
 <!-- 36 -->
-<g class="node" id="node37">
+<g id="node37" class="node">
 <title>36</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1206" y="-230.3">Load</text>
+<text text-anchor="middle" x="1206" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Load</text>
 </g>
 <!-- 34&#45;&#45;36 -->
-<g class="edge" id="edge36">
+<g id="edge36" class="edge">
 <title>34--36</title>
-<path d="M1131,-288C1131,-288 1158.8503,-267.9478 1180.6084,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1131,-287C1131,-287 1159.57,-267.19 1181.44,-252.03"/>
 </g>
 <!-- 38 -->
-<g class="node" id="node39">
+<g id="node39" class="node">
 <title>38</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1314" y="-303.3">Name</text>
+<text text-anchor="start" x="1314" y="-303.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 37&#45;&#45;38 -->
-<g class="edge" id="edge38">
+<g id="edge38" class="edge">
 <title>37--38</title>
-<path d="M1341,-360C1341,-360 1337.2866,-339.9478 1334.3855,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1341,-359C1341,-359 1337.19,-339.19 1334.27,-324.03"/>
 </g>
 <!-- 41 -->
-<g class="node" id="node42">
+<g id="node42" class="node">
 <title>41</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1429.5" y="-303.3">BinOp</text>
+<text text-anchor="start" x="1429.5" y="-303.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">BinOp</text>
 </g>
 <!-- 37&#45;&#45;41 -->
-<g class="edge" id="edge41">
+<g id="edge41" class="edge">
 <title>37--41</title>
-<path d="M1341,-360C1341,-360 1388.6554,-336.6055 1421.2324,-320.6132" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1341,-359C1341,-359 1388.66,-336.47 1421.23,-321.07"/>
 </g>
 <!-- 39 -->
-<g class="node" id="node40">
+<g id="node40" class="node">
 <title>39</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1289" y="-230.3">&quot;guess&quot;</text>
+<text text-anchor="middle" x="1289" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;guess&quot;</text>
 </g>
 <!-- 38&#45;&#45;39 -->
-<g class="edge" id="edge39">
+<g id="edge39" class="edge">
 <title>38--39</title>
-<path d="M1331,-288C1331,-288 1315.4038,-267.9478 1303.2193,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1331,-287C1331,-287 1315,-267.19 1302.75,-252.03"/>
 </g>
 <!-- 40 -->
-<g class="node" id="node41">
+<g id="node41" class="node">
 <title>40</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1374" y="-230.3">Store</text>
+<text text-anchor="middle" x="1374" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Store</text>
 </g>
 <!-- 38&#45;&#45;40 -->
-<g class="edge" id="edge40">
+<g id="edge40" class="edge">
 <title>38--40</title>
-<path d="M1331,-288C1331,-288 1346.9675,-267.9478 1359.4422,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1331,-287C1331,-287 1347.38,-267.19 1359.92,-252.03"/>
 </g>
 <!-- 42 -->
-<g class="node" id="node43">
+<g id="node43" class="node">
 <title>42</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1429.5" y="-231.3">BinOp</text>
+<text text-anchor="start" x="1429.5" y="-231.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">BinOp</text>
 </g>
 <!-- 41&#45;&#45;42 -->
-<g class="edge" id="edge42">
+<g id="edge42" class="edge">
 <title>41--42</title>
-<path d="M1465,-288C1465,-288 1459.8013,-267.9478 1455.7398,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1465,-287C1465,-287 1459.67,-267.19 1455.58,-252.03"/>
 </g>
 <!-- 55 -->
-<g class="node" id="node56">
+<g id="node56" class="node">
 <title>55</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1526" y="-230.3">Div</text>
+<text text-anchor="middle" x="1526" y="-230.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Div</text>
 </g>
 <!-- 41&#45;&#45;55 -->
-<g class="edge" id="edge55">
+<g id="edge55" class="edge">
 <title>41--55</title>
-<path d="M1465,-288C1465,-288 1487.6516,-267.9478 1505.3482,-252.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1465,-287C1465,-287 1488.24,-267.19 1506.03,-252.03"/>
 </g>
 <!-- 56 -->
-<g class="node" id="node57">
+<g id="node57" class="node">
 <title>56</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1586" y="-231.3">Num</text>
+<text text-anchor="start" x="1579" y="-231.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Constant</text>
 </g>
 <!-- 41&#45;&#45;56 -->
-<g class="edge" id="edge56">
+<g id="edge56" class="edge">
 <title>41--56</title>
-<path d="M1465,-288C1465,-288 1519.7189,-270.0797 1562,-252 1565.1527,-250.6519 1568.4239,-249.1765 1571.6584,-247.669" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1465,-287C1465,-287 1527.23,-265.14 1570.99,-249.76"/>
 </g>
 <!-- 43 -->
-<g class="node" id="node44">
+<g id="node44" class="node">
 <title>43</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1361" y="-159.3">Name</text>
+<text text-anchor="start" x="1362" y="-159.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 42&#45;&#45;43 -->
-<g class="edge" id="edge43">
+<g id="edge43" class="edge">
 <title>42--43</title>
-<path d="M1451,-216C1451,-216 1423.8923,-195.9478 1402.7145,-180.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1451,-215C1451,-215 1423.57,-195.19 1402.58,-180.03"/>
 </g>
 <!-- 46 -->
-<g class="node" id="node47">
+<g id="node47" class="node">
 <title>46</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1450" y="-158.3">Add</text>
+<text text-anchor="middle" x="1451" y="-158.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Add</text>
 </g>
 <!-- 42&#45;&#45;46 -->
-<g class="edge" id="edge46">
+<g id="edge46" class="edge">
 <title>42--46</title>
-<path d="M1451,-216C1451,-216 1450.6287,-195.9478 1450.3386,-180.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1451,-215C1451,-215 1451,-195.19 1451,-180.03"/>
 </g>
 <!-- 47 -->
-<g class="node" id="node48">
+<g id="node48" class="node">
 <title>47</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1503.5" y="-159.3">BinOp</text>
+<text text-anchor="start" x="1504.5" y="-159.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">BinOp</text>
 </g>
 <!-- 42&#45;&#45;47 -->
-<g class="edge" id="edge47">
+<g id="edge47" class="edge">
 <title>42--47</title>
-<path d="M1451,-216C1451,-216 1478.479,-195.9478 1499.947,-180.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1451,-215C1451,-215 1479.57,-195.19 1501.44,-180.03"/>
 </g>
 <!-- 44 -->
-<g class="node" id="node45">
+<g id="node45" class="node">
 <title>44</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1293" y="-86.3">&quot;approx&quot;</text>
+<text text-anchor="middle" x="1294" y="-86.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;approx&quot;</text>
 </g>
 <!-- 43&#45;&#45;44 -->
-<g class="edge" id="edge44">
+<g id="edge44" class="edge">
 <title>43--44</title>
-<path d="M1370,-144C1370,-144 1341.407,-123.9478 1319.0687,-108.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1371,-143C1371,-143 1341.67,-123.19 1319.21,-108.03"/>
 </g>
 <!-- 45 -->
-<g class="node" id="node46">
+<g id="node46" class="node">
 <title>45</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1380" y="-86.3">Load</text>
+<text text-anchor="middle" x="1381" y="-86.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Load</text>
 </g>
 <!-- 43&#45;&#45;45 -->
-<g class="edge" id="edge45">
+<g id="edge45" class="edge">
 <title>43--45</title>
-<path d="M1370,-144C1370,-144 1373.7134,-123.9478 1376.6145,-108.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1371,-143C1371,-143 1374.81,-123.19 1377.73,-108.03"/>
 </g>
 <!-- 48 -->
-<g class="node" id="node49">
+<g id="node49" class="node">
 <title>48</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1436" y="-87.3">Name</text>
+<text text-anchor="start" x="1437" y="-87.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 47&#45;&#45;48 -->
-<g class="edge" id="edge48">
+<g id="edge48" class="edge">
 <title>47--48</title>
-<path d="M1525,-144C1525,-144 1498.2637,-123.9478 1477.3759,-108.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1526,-143C1526,-143 1498.57,-123.19 1477.58,-108.03"/>
 </g>
 <!-- 51 -->
-<g class="node" id="node52">
+<g id="node52" class="node">
 <title>51</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1525" y="-86.3">Div</text>
+<text text-anchor="middle" x="1526" y="-86.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Div</text>
 </g>
 <!-- 47&#45;&#45;51 -->
-<g class="edge" id="edge51">
+<g id="edge51" class="edge">
 <title>47--51</title>
-<path d="M1525,-144C1525,-144 1525,-123.9478 1525,-108.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1526,-143C1526,-143 1526,-123.19 1526,-108.03"/>
 </g>
 <!-- 52 -->
-<g class="node" id="node53">
+<g id="node53" class="node">
 <title>52</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1580" y="-87.3">Name</text>
+<text text-anchor="start" x="1581" y="-87.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 47&#45;&#45;52 -->
-<g class="edge" id="edge52">
+<g id="edge52" class="edge">
 <title>47--52</title>
-<path d="M1525,-144C1525,-144 1551.7363,-123.9478 1572.6241,-108.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1526,-143C1526,-143 1553.43,-123.19 1574.42,-108.03"/>
 </g>
 <!-- 49 -->
-<g class="node" id="node50">
+<g id="node50" class="node">
 <title>49</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1396" y="-14.3">&quot;x&quot;</text>
+<text text-anchor="middle" x="1397" y="-14.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;x&quot;</text>
 </g>
 <!-- 48&#45;&#45;49 -->
-<g class="edge" id="edge49">
+<g id="edge49" class="edge">
 <title>48--49</title>
-<path d="M1449,-72C1449,-72 1429.3191,-51.9478 1413.9434,-36.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1450,-71C1450,-71 1429.81,-51.19 1414.35,-36.03"/>
 </g>
 <!-- 50 -->
-<g class="node" id="node51">
+<g id="node51" class="node">
 <title>50</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1468" y="-14.3">Load</text>
+<text text-anchor="middle" x="1469" y="-14.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Load</text>
 </g>
 <!-- 48&#45;&#45;50 -->
-<g class="edge" id="edge50">
+<g id="edge50" class="edge">
 <title>48--50</title>
-<path d="M1449,-72C1449,-72 1456.0554,-51.9478 1461.5675,-36.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1450,-71C1450,-71 1457.24,-51.19 1462.78,-36.03"/>
 </g>
 <!-- 53 -->
-<g class="node" id="node54">
+<g id="node54" class="node">
 <title>53</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1583" y="-14.3">&quot;approx&quot;</text>
+<text text-anchor="middle" x="1584" y="-14.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;approx&quot;</text>
 </g>
 <!-- 52&#45;&#45;53 -->
-<g class="edge" id="edge53">
+<g id="edge53" class="edge">
 <title>52--53</title>
-<path d="M1603,-72C1603,-72 1595.5732,-51.9478 1589.7711,-36.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1604,-71C1604,-71 1596.38,-51.19 1590.55,-36.03"/>
 </g>
 <!-- 54 -->
-<g class="node" id="node55">
+<g id="node55" class="node">
 <title>54</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1670" y="-14.3">Load</text>
+<text text-anchor="middle" x="1671" y="-14.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Load</text>
 </g>
 <!-- 52&#45;&#45;54 -->
-<g class="edge" id="edge54">
+<g id="edge54" class="edge">
 <title>52--54</title>
-<path d="M1603,-72C1603,-72 1627.8796,-51.9478 1647.3169,-36.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1604,-71C1604,-71 1629.52,-51.19 1649.06,-36.03"/>
 </g>
 <!-- 57 -->
-<g class="node" id="node58">
+<g id="node58" class="node">
 <title>57</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1600" y="-158.3">2</text>
+<text text-anchor="middle" x="1613" y="-158.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">2</text>
 </g>
 <!-- 56&#45;&#45;57 -->
-<g class="edge" id="edge57">
+<g id="edge57" class="edge">
 <title>56--57</title>
-<path d="M1599.2523,-215.8314C1599.4028,-205 1599.5932,-191.2876 1599.7443,-180.4133" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1613,-215.7C1613,-204.85 1613,-190.92 1613,-180.1"/>
 </g>
 <!-- 59 -->
-<g class="node" id="node60">
+<g id="node60" class="node">
 <title>59</title>
-<text fill="#004080" font-family="Courier,monospace" font-size="14.00" font-weight="bold" text-anchor="start" x="1524" y="-375.3">Name</text>
+<text text-anchor="start" x="1524" y="-375.3" font-family="Courier,monospace" font-weight="bold" font-size="14.00" fill="#004080">Name</text>
 </g>
 <!-- 58&#45;&#45;59 -->
-<g class="edge" id="edge59">
+<g id="edge59" class="edge">
 <title>58--59</title>
-<path d="M1392.8063,-436.6261C1427.7579,-422.7991 1481.6397,-401.4832 1513.8971,-388.722" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1392.81,-436C1427.76,-422.55 1481.64,-401.83 1513.9,-389.42"/>
 </g>
 <!-- 60 -->
-<g class="node" id="node61">
+<g id="node61" class="node">
 <title>60</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1541" y="-302.3">&quot;approx&quot;</text>
+<text text-anchor="middle" x="1541" y="-302.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">&quot;approx&quot;</text>
 </g>
 <!-- 59&#45;&#45;60 -->
-<g class="edge" id="edge60">
+<g id="edge60" class="edge">
 <title>59--60</title>
-<path d="M1550,-360C1550,-360 1546.658,-339.9478 1544.047,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1550,-359C1550,-359 1546.57,-339.19 1543.95,-324.03"/>
 </g>
 <!-- 61 -->
-<g class="node" id="node62">
+<g id="node62" class="node">
 <title>61</title>
-<text fill="#008040" font-family="Courier,monospace" font-size="14.00" text-anchor="middle" x="1628" y="-302.3">Load</text>
+<text text-anchor="middle" x="1628" y="-302.3" font-family="Courier,monospace" font-size="14.00" fill="#008040">Load</text>
 </g>
 <!-- 59&#45;&#45;61 -->
-<g class="edge" id="edge61">
+<g id="edge61" class="edge">
 <title>59--61</title>
-<path d="M1550,-360C1550,-360 1578.9644,-339.9478 1601.5928,-324.2819" fill="none" stroke="#000000"/>
+<path fill="none" stroke="black" d="M1550,-359C1550,-359 1579.71,-339.19 1602.46,-324.03"/>
 </g>
 </g>
 </svg>
@@ -14364,7 +14367,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The function <code>astor.to_source()</code> converts such a tree back into the more familiar textual Python code representation.  Comments are gone, and there may be more parentheses than before, but the result has the same semantics:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The function <code>ast.unparse()</code> converts such a tree back into the more familiar textual Python code representation.  Comments are gone, and there may be more parentheses than before, but the result has the same semantics:</p>
 </div>
 </div>
 </div>
@@ -14376,7 +14379,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="n">my_sqrt_ast</span><span class="p">),</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">my_sqrt_ast</span><span class="p">),</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14437,7 +14440,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">astor</span><span class="o">.</span><span class="n">dump_tree</span><span class="p">(</span><span class="n">parse_type</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">parse_type</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)))</span>
 </pre></div>
 
 </div>
@@ -14448,7 +14451,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Name(id=&#39;int&#39;)
+<pre>Name(id=&#39;int&#39;, ctx=Load())
 </pre>
 </div>
 
@@ -14460,7 +14463,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">astor</span><span class="o">.</span><span class="n">dump_tree</span><span class="p">(</span><span class="n">parse_type</span><span class="p">(</span><span class="s1">&#39;[object]&#39;</span><span class="p">)))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">parse_type</span><span class="p">(</span><span class="s1">&#39;[object]&#39;</span><span class="p">)))</span>
 </pre></div>
 
 </div>
@@ -14471,7 +14474,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>List(elts=[Name(id=&#39;object&#39;)])
+<pre>List(elts=[Name(id=&#39;object&#39;, ctx=Load())], ctx=Load())
 </pre>
 </div>
 
@@ -14531,6 +14534,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
             <span class="n">new_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotate_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span>
 
         <span class="n">new_arguments</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">arguments</span><span class="p">(</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">posonlyargs</span><span class="p">,</span>
             <span class="n">new_args</span><span class="p">,</span>
             <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">vararg</span><span class="p">,</span>
             <span class="n">node</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">kwonlyargs</span><span class="p">,</span>
@@ -14543,9 +14547,10 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">node</span><span class="o">.</span><span class="n">returns</span> <span class="o">=</span> <span class="n">parse_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_type</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">new_arguments</span><span class="p">,</span> 
-                                                 <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">decorator_list</span><span class="p">,</span>
-                                                 <span class="n">node</span><span class="o">.</span><span class="n">returns</span><span class="p">),</span> <span class="n">node</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">copy_location</span><span class="p">(</span>
+            <span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">new_arguments</span><span class="p">,</span> 
+                            <span class="n">node</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">decorator_list</span><span class="p">,</span>
+                            <span class="n">node</span><span class="o">.</span><span class="n">returns</span><span class="p">),</span> <span class="n">node</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14620,7 +14625,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="n">new_ast</span><span class="p">),</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">new_ast</span><span class="p">),</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14631,7 +14636,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">my_sqrt</span>(x: <span class="ansi-cyan-fg">int</span>) -&gt;<span class="ansi-cyan-fg">float</span>:
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">my_sqrt</span>(x: <span class="ansi-cyan-fg">int</span>) -&gt; <span class="ansi-cyan-fg">float</span>:
     <span class="ansi-yellow-fg">&#34;&#34;&#34;Computes the square root of x, using the Newton-Raphson method&#34;&#34;&#34;</span>
     approx = <span class="ansi-blue-fg">None</span>
     guess = x / <span class="ansi-blue-fg">2</span>
@@ -14701,7 +14706,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="n">new_ast</span><span class="p">),</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">new_ast</span><span class="p">),</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -14712,7 +14717,7 @@ __exit__(self=&lt;__main__.CallTracker object at 0x7fe5da6ff2b0&gt;, exc_type=No
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">hello</span>(name: <span class="ansi-cyan-fg">str</span>) -&gt;<span class="ansi-blue-fg">None</span>:
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">hello</span>(name: <span class="ansi-cyan-fg">str</span>) -&gt; <span class="ansi-blue-fg">None</span>:
     <span class="ansi-cyan-fg">print</span>(<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">Hello,</span><span class="ansi-yellow-fg">&#39;</span>, name)
 </pre>
 </div>
@@ -15005,7 +15010,7 @@ the appropriate type of a given value (as a string):</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="n">annotate_types</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">calls</span><span class="p">())[</span><span class="s1">&#39;my_sqrt&#39;</span><span class="p">]),</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">annotate_types</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">calls</span><span class="p">())[</span><span class="s1">&#39;my_sqrt&#39;</span><span class="p">]),</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -15016,7 +15021,7 @@ the appropriate type of a given value (as a string):</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">my_sqrt</span>(x: <span class="ansi-cyan-fg">float</span>) -&gt;<span class="ansi-cyan-fg">float</span>:
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">my_sqrt</span>(x: <span class="ansi-cyan-fg">float</span>) -&gt; <span class="ansi-cyan-fg">float</span>:
     <span class="ansi-yellow-fg">&#34;&#34;&#34;Computes the square root of x, using the Newton-Raphson method&#34;&#34;&#34;</span>
     approx = <span class="ansi-blue-fg">None</span>
     guess = x / <span class="ansi-blue-fg">2</span>
@@ -15064,20 +15069,21 @@ the appropriate type of a given value (as a string):</p>
         <span class="k">if</span> <span class="n">function_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">annotate_types</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calls</span><span class="p">())</span>
 
-        <span class="k">return</span> <span class="n">annotate_function_with_types</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">calls</span><span class="p">(</span><span class="n">function_name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">annotate_function_with_types</span><span class="p">(</span><span class="n">function_name</span><span class="p">,</span> 
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">calls</span><span class="p">(</span><span class="n">function_name</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">typed_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">function_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">functions</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
             <span class="k">for</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">calls</span><span class="p">():</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">f_text</span> <span class="o">=</span> <span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typed_functions_ast</span><span class="p">(</span><span class="n">f_name</span><span class="p">))</span>
+                    <span class="n">f_text</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typed_functions_ast</span><span class="p">(</span><span class="n">f_name</span><span class="p">))</span>
                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                     <span class="n">f_text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
                 <span class="n">functions</span> <span class="o">+=</span> <span class="n">f_text</span>
             <span class="k">return</span> <span class="n">functions</span>
 
-        <span class="k">return</span> <span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typed_functions_ast</span><span class="p">(</span><span class="n">function_name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">ast</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typed_functions_ast</span><span class="p">(</span><span class="n">function_name</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -15136,7 +15142,7 @@ the appropriate type of a given value (as a string):</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">my_sqrt</span>(x: <span class="ansi-cyan-fg">float</span>) -&gt;<span class="ansi-cyan-fg">float</span>:
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">my_sqrt</span>(x: <span class="ansi-cyan-fg">float</span>) -&gt; <span class="ansi-cyan-fg">float</span>:
     <span class="ansi-yellow-fg">&#34;&#34;&#34;Computes the square root of x, using the Newton-Raphson method&#34;&#34;&#34;</span>
     approx = <span class="ansi-blue-fg">None</span>
     guess = x / <span class="ansi-blue-fg">2</span>
@@ -15201,8 +15207,7 @@ the appropriate type of a given value (as a string):</p>
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">hello</span>(name: <span class="ansi-cyan-fg">str</span>):
-    <span class="ansi-cyan-fg">print</span>(<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">Hello,</span><span class="ansi-yellow-fg">&#39;</span>, name)
-<span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">my_sqrt</span>(x: <span class="ansi-cyan-fg">float</span>) -&gt;<span class="ansi-cyan-fg">float</span>:
+    <span class="ansi-cyan-fg">print</span>(<span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">Hello,</span><span class="ansi-yellow-fg">&#39;</span>, name)<span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">my_sqrt</span>(x: <span class="ansi-cyan-fg">float</span>) -&gt; <span class="ansi-cyan-fg">float</span>:
     <span class="ansi-yellow-fg">&#34;&#34;&#34;Computes the square root of x, using the Newton-Raphson method&#34;&#34;&#34;</span>
     approx = <span class="ansi-blue-fg">None</span>
     guess = x / <span class="ansi-blue-fg">2</span>
@@ -15255,7 +15260,7 @@ the appropriate type of a given value (as a string):</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="n">annotate_types</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">calls</span><span class="p">())[</span><span class="s1">&#39;my_sqrt&#39;</span><span class="p">]),</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">annotate_types</span><span class="p">(</span><span class="n">tracker</span><span class="o">.</span><span class="n">calls</span><span class="p">())[</span><span class="s1">&#39;my_sqrt&#39;</span><span class="p">]),</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -15266,7 +15271,7 @@ the appropriate type of a given value (as a string):</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">my_sqrt</span>(x: Any) -&gt;<span class="ansi-cyan-fg">float</span>:
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">my_sqrt</span>(x: Any) -&gt; <span class="ansi-cyan-fg">float</span>:
     <span class="ansi-yellow-fg">&#34;&#34;&#34;Computes the square root of x, using the Newton-Raphson method&#34;&#34;&#34;</span>
     approx = <span class="ansi-blue-fg">None</span>
     guess = x / <span class="ansi-blue-fg">2</span>
@@ -15345,7 +15350,7 @@ the appropriate type of a given value (as a string):</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum3</span>(a: <span class="ansi-cyan-fg">float</span>, b: <span class="ansi-cyan-fg">float</span>, c: <span class="ansi-cyan-fg">float</span>) -&gt;<span class="ansi-cyan-fg">float</span>:
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum3</span>(a: <span class="ansi-cyan-fg">float</span>, b: <span class="ansi-cyan-fg">float</span>, c: <span class="ansi-cyan-fg">float</span>) -&gt; <span class="ansi-cyan-fg">float</span>:
     <span class="ansi-blue-fg">return</span> a + b + c
 </pre>
 </div>
@@ -15403,7 +15408,7 @@ the appropriate type of a given value (as a string):</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum3</span>(a: <span class="ansi-cyan-fg">int</span>, b: <span class="ansi-cyan-fg">int</span>, c: <span class="ansi-cyan-fg">int</span>) -&gt;<span class="ansi-cyan-fg">int</span>:
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum3</span>(a: <span class="ansi-cyan-fg">int</span>, b: <span class="ansi-cyan-fg">int</span>, c: <span class="ansi-cyan-fg">int</span>) -&gt; <span class="ansi-cyan-fg">int</span>:
     <span class="ansi-blue-fg">return</span> a + b + c
 </pre>
 </div>
@@ -15461,7 +15466,7 @@ the appropriate type of a given value (as a string):</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum3</span>(a: <span class="ansi-cyan-fg">str</span>, b: <span class="ansi-cyan-fg">str</span>, c: <span class="ansi-cyan-fg">str</span>) -&gt;<span class="ansi-cyan-fg">str</span>:
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum3</span>(a: <span class="ansi-cyan-fg">str</span>, b: <span class="ansi-cyan-fg">str</span>, c: <span class="ansi-cyan-fg">str</span>) -&gt; <span class="ansi-cyan-fg">str</span>:
     <span class="ansi-blue-fg">return</span> a + b + c
 </pre>
 </div>
@@ -15524,7 +15529,7 @@ the appropriate type of a given value (as a string):</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum3</span>(a: Any, b: Any, c: Any) -&gt;Any:
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum3</span>(a: Any, b: Any, c: Any) -&gt; Any:
     <span class="ansi-blue-fg">return</span> a + b + c
 </pre>
 </div>
@@ -15704,9 +15709,9 @@ the appropriate type of a given value (as a string):</p>
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-c02dc99b6c54&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2353876897.py&#34;, line 2, in &lt;module&gt;
     my_sqrt_with_precondition(-1.0)
-  File &#34;&lt;ipython-input-1-39ada1fd0b7e&gt;&#34;, line 6, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/906718213.py&#34;, line 6, in wrapper
     assert precondition(*args, **kwargs), &#34;Precondition violated&#34;
 AssertionError: Precondition violated (expected)
 </pre>
@@ -15821,9 +15826,9 @@ AssertionError: Precondition violated (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-38a36260c5b6&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/1985029262.py&#34;, line 2, in &lt;module&gt;
     y = buggy_my_sqrt_with_postcondition(2.0)
-  File &#34;&lt;ipython-input-1-39ada1fd0b7e&gt;&#34;, line 10, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/906718213.py&#34;, line 10, in wrapper
     assert postcondition(retval, *args, **kwargs), &#34;Postcondition violated&#34;
 AssertionError: Postcondition violated (expected)
 </pre>
@@ -16156,7 +16161,7 @@ AssertionError: Postcondition violated (expected)
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">instantiate_prop</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">var_names</span><span class="p">):</span>
     <span class="n">prop_ast</span> <span class="o">=</span> <span class="n">instantiate_prop_ast</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">var_names</span><span class="p">)</span>
-    <span class="n">prop_text</span> <span class="o">=</span> <span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="n">prop_ast</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">prop_text</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">unparse</span><span class="p">(</span><span class="n">prop_ast</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="k">while</span> <span class="n">prop_text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">prop_text</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">):</span>
         <span class="n">prop_text</span> <span class="o">=</span> <span class="n">prop_text</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">prop_text</span>
@@ -17080,7 +17085,7 @@ X &lt; 0 ((&#39;y&#39;, 1),) False
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;a, b, c&#39;
+<pre>&#39;c, b, a&#39;
 </pre>
 </div>
 
@@ -17492,13 +17497,13 @@ X &lt; 0 ((&#39;y&#39;, 1),) False
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: <span class="ansi-cyan-fg">isinstance</span>(a, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: <span class="ansi-cyan-fg">isinstance</span>(b, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: a == return_value - b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: b == return_value - a)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: <span class="ansi-cyan-fg">isinstance</span>(return_value, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value == a + b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value == b + a)
+<pre><span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: <span class="ansi-cyan-fg">isinstance</span>(a, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: <span class="ansi-cyan-fg">isinstance</span>(b, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: a == return_value - b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: b == return_value - a)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: <span class="ansi-cyan-fg">isinstance</span>(return_value, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value == a + b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value == b + a)
 <span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum2</span>(a, b):
     <span class="ansi-blue-fg">return</span> a + b
 </pre>
@@ -17575,9 +17580,9 @@ X &lt; 0 ((&#39;y&#39;, 1),) False
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: <span class="ansi-cyan-fg">isinstance</span>(a, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: <span class="ansi-cyan-fg">isinstance</span>(b, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value != <span class="ansi-blue-fg">0</span>)
+<pre><span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: <span class="ansi-cyan-fg">isinstance</span>(a, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: <span class="ansi-cyan-fg">isinstance</span>(b, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value != <span class="ansi-blue-fg">0</span>)
 <span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">print_sum</span>(a, b):
     <span class="ansi-cyan-fg">print</span>(a + b)
 </pre>
@@ -17705,13 +17710,13 @@ X &lt; 0 ((&#39;y&#39;, 1),) False
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-c3c5c372ccd1&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/3390953352.py&#34;, line 2, in &lt;module&gt;
     my_sqrt_annotated(-1.0)
-  File &#34;&lt;ipython-input-1-39ada1fd0b7e&gt;&#34;, line 8, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/906718213.py&#34;, line 8, in wrapper
     retval = func(*args, **kwargs) # call original function or method
-  File &#34;&lt;ipython-input-1-39ada1fd0b7e&gt;&#34;, line 8, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/906718213.py&#34;, line 8, in wrapper
     retval = func(*args, **kwargs) # call original function or method
-  File &#34;&lt;ipython-input-1-39ada1fd0b7e&gt;&#34;, line 6, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/906718213.py&#34;, line 6, in wrapper
     assert precondition(*args, **kwargs), &#34;Precondition violated&#34;
 AssertionError: Precondition violated (expected)
 </pre>
@@ -17747,13 +17752,13 @@ AssertionError: Precondition violated (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-afc7add26ad6&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2605599394.py&#34;, line 2, in &lt;module&gt;
     my_sqrt(-1.0)
-  File &#34;&lt;ipython-input-1-47185ad159a1&gt;&#34;, line 7, in my_sqrt
-    guess = (approx + x / approx) / 2
-  File &#34;&lt;ipython-input-1-47185ad159a1&gt;&#34;, line 7, in my_sqrt
-    guess = (approx + x / approx) / 2
-  File &#34;ExpectError.ipynb&#34;, line 86, in check_time
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2661069967.py&#34;, line 6, in my_sqrt
+    approx = guess
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2661069967.py&#34;, line 6, in my_sqrt
+    approx = guess
+  File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/ExpectError.ipynb&#34;, line 86, in check_time
     raise TimeoutError
 TimeoutError (expected)
 </pre>
@@ -17865,16 +17870,16 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-c80e4295dbf8&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/3996509897.py&#34;, line 2, in &lt;module&gt;
     my_sqrt_negative(2.0)
-  File &#34;&lt;ipython-input-1-39ada1fd0b7e&gt;&#34;, line 8, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/906718213.py&#34;, line 8, in wrapper
     retval = func(*args, **kwargs) # call original function or method
-  File &#34;&lt;ipython-input-1-39ada1fd0b7e&gt;&#34;, line 8, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/906718213.py&#34;, line 8, in wrapper
     retval = func(*args, **kwargs) # call original function or method
-  File &#34;&lt;ipython-input-1-39ada1fd0b7e&gt;&#34;, line 8, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/906718213.py&#34;, line 8, in wrapper
     retval = func(*args, **kwargs) # call original function or method
   [Previous line repeated 4 more times]
-  File &#34;&lt;ipython-input-1-39ada1fd0b7e&gt;&#34;, line 10, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/906718213.py&#34;, line 10, in wrapper
     assert postcondition(retval, *args, **kwargs), &#34;Postcondition violated&#34;
 AssertionError: Postcondition violated (expected)
 </pre>
@@ -17934,44 +17939,44 @@ AssertionError: Postcondition violated (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: a != <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: a &lt;= b)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: a == b)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: a &gt; <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: a &gt;= <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: a &gt;= b)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: b != <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: b &lt;= a)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: b == a)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: b &gt; <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: b &gt;= <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: b &gt;= a)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: <span class="ansi-cyan-fg">isinstance</span>(a, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: <span class="ansi-cyan-fg">isinstance</span>(b, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: a &lt; return_value)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: a &lt;= b &lt;= return_value)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: a &lt;= return_value)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: a == return_value - b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: a == return_value / b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: b &lt; return_value)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: b &lt;= a &lt;= return_value)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: b &lt;= return_value)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: b == return_value - a)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: b == return_value / a)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: <span class="ansi-cyan-fg">isinstance</span>(return_value, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value != <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value == a * b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value == a + b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value == b * a)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value == b + a)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value &gt; <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value &gt; a)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value &gt; b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value &gt;= <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value &gt;= a)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value &gt;= a &gt;= b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value &gt;= b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value &gt;= b &gt;= a)
+<pre><span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: a != <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: a &lt;= b)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: a == b)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: a &gt; <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: a &gt;= <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: a &gt;= b)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: b != <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: b &lt;= a)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: b == a)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: b &gt; <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: b &gt;= <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: b &gt;= a)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: <span class="ansi-cyan-fg">isinstance</span>(a, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: <span class="ansi-cyan-fg">isinstance</span>(b, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: a &lt; return_value)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: a &lt;= b &lt;= return_value)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: a &lt;= return_value)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: a == return_value - b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: a == return_value / b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: b &lt; return_value)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: b &lt;= a &lt;= return_value)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: b &lt;= return_value)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: b == return_value - a)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: b == return_value / a)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: <span class="ansi-cyan-fg">isinstance</span>(return_value, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value != <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value == a * b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value == a + b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value == b * a)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value == b + a)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value &gt; <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value &gt; a)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value &gt; b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value &gt;= <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value &gt;= a)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value &gt;= a &gt;= b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value &gt;= b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value &gt;= b &gt;= a)
 <span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum2</span>(a, b):
     <span class="ansi-blue-fg">return</span> a + b
 </pre>
@@ -18019,13 +18024,13 @@ AssertionError: Postcondition violated (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: <span class="ansi-cyan-fg">isinstance</span>(a, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: <span class="ansi-cyan-fg">isinstance</span>(b, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: a == return_value - b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: b == return_value - a)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: <span class="ansi-cyan-fg">isinstance</span>(return_value, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value == a + b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value == b + a)
+<pre><span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: <span class="ansi-cyan-fg">isinstance</span>(a, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: <span class="ansi-cyan-fg">isinstance</span>(b, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: a == return_value - b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: b == return_value - a)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: <span class="ansi-cyan-fg">isinstance</span>(return_value, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value == a + b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value == b + a)
 <span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum2</span>(a, b):
     <span class="ansi-blue-fg">return</span> a + b
 </pre>
@@ -18148,15 +18153,15 @@ AssertionError: Postcondition violated (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre><span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: a != <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: <span class="ansi-cyan-fg">isinstance</span>(a, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> a, b: <span class="ansi-cyan-fg">isinstance</span>(b, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: a == return_value - b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: b == return_value - a)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: <span class="ansi-cyan-fg">isinstance</span>(return_value, <span class="ansi-cyan-fg">int</span>))
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value != <span class="ansi-blue-fg">0</span>)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value == a + b)
-<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, a, b: return_value == b + a)
+<pre><span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: a != <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: <span class="ansi-cyan-fg">isinstance</span>(a, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@precondition</span>(<span class="ansi-blue-fg">lambda</span> b, a: <span class="ansi-cyan-fg">isinstance</span>(b, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: a == return_value - b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: b == return_value - a)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: <span class="ansi-cyan-fg">isinstance</span>(return_value, <span class="ansi-cyan-fg">int</span>))
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value != <span class="ansi-blue-fg">0</span>)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value == a + b)
+<span class="ansi-black-intense-fg">@postcondition</span>(<span class="ansi-blue-fg">lambda</span> return_value, b, a: return_value == b + a)
 <span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">sum2</span>(a, b):
     <span class="ansi-blue-fg">return</span> a + b
 </pre>
@@ -18408,9 +18413,9 @@ AssertionError: Postcondition violated (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-dda18930f6db&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2212034949.py&#34;, line 2, in &lt;module&gt;
     remove_first_char(&#39;&#39;)
-  File &#34;&lt;ipython-input-1-39ada1fd0b7e&gt;&#34;, line 6, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/906718213.py&#34;, line 6, in wrapper
     assert precondition(*args, **kwargs), &#34;Precondition violated&#34;
 AssertionError: Precondition violated (expected)
 </pre>
@@ -18434,25 +18439,49 @@ AssertionError: Precondition violated (expected)
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">condition</span><span class="p">(</span><span class="n">precondition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">postcondition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="s1">&#39;Unknown&#39;</span><span class="p">):</span>
-   <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-       <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="c1"># preserves name, docstring, etc</span>
-       <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-           <span class="k">if</span> <span class="n">precondition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-               <span class="k">assert</span> <span class="n">precondition</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="s2">&quot;Precondition violated: &quot;</span> <span class="o">+</span> <span class="n">doc</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="c1"># preserves name, docstring, etc</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">precondition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">precondition</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="s2">&quot;Precondition violated: &quot;</span> <span class="o">+</span> <span class="n">doc</span>
 
-           <span class="n">retval</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="c1"># call original function or method</span>
-           <span class="k">if</span> <span class="n">postcondition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-               <span class="k">assert</span> <span class="n">postcondition</span><span class="p">(</span><span class="n">retval</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="s2">&quot;Postcondition violated: &quot;</span> <span class="o">+</span> <span class="n">doc</span>
+            <span class="n">retval</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="c1"># call original function or method</span>
+            <span class="k">if</span> <span class="n">postcondition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">postcondition</span><span class="p">(</span><span class="n">retval</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="s2">&quot;Postcondition violated: &quot;</span> <span class="o">+</span> <span class="n">doc</span>
 
-           <span class="k">return</span> <span class="n">retval</span>
-       <span class="k">return</span> <span class="n">wrapper</span>
-   <span class="k">return</span> <span class="n">decorator</span>
+            <span class="k">return</span> <span class="n">retval</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="k">return</span> <span class="n">decorator</span>
+</pre></div>
 
-<span class="k">def</span> <span class="nf">precondition</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-   <span class="k">return</span> <span class="n">condition</span><span class="p">(</span><span class="n">precondition</span><span class="o">=</span><span class="n">check</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;doc&#39;</span><span class="p">,</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">))</span>
+</div>
+</div></div>
+</div>
+</div>
 
-<span class="k">def</span> <span class="nf">postcondition</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-   <span class="k">return</span> <span class="n">condition</span><span class="p">(</span><span class="n">postcondition</span><span class="o">=</span><span class="n">check</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;doc&#39;</span><span class="p">,</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">))</span>
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">precondition</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">condition</span><span class="p">(</span><span class="n">precondition</span><span class="o">=</span><span class="n">check</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;doc&#39;</span><span class="p">,</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">postcondition</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">condition</span><span class="p">(</span><span class="n">postcondition</span><span class="o">=</span><span class="n">check</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;doc&#39;</span><span class="p">,</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -18506,9 +18535,9 @@ AssertionError: Precondition violated (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-dda18930f6db&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2212034949.py&#34;, line 2, in &lt;module&gt;
     remove_first_char(&#39;&#39;)
-  File &#34;&lt;ipython-input-1-683ee268305f&gt;&#34;, line 6, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_53694/2216663835.py&#34;, line 6, in wrapper
     assert precondition(*args, **kwargs), &#34;Precondition violated: &#34; + doc
 AssertionError: Precondition violated: len(s) &gt; 0 (expected)
 </pre>
@@ -18626,7 +18655,7 @@ AssertionError: Precondition violated: len(s) &gt; 0 (expected)
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/DynamicInvariants.ipynb" target=_blank)>Last change: 2020-11-27 20:15:24+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/DynamicInvariants.ipynb" target=_blank)>Last change: 2021-10-14 17:39:58+02:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -18642,19 +18671,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/DynamicInvariants.html">Mining Function Specifications</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/DynamicInvariants.html">https://www.fuzzingbook.org/beta/html/DynamicInvariants.html</a>.  Retrieved 2020-11-27 20:15:24+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/DynamicInvariants.html">Mining Function Specifications</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/DynamicInvariants.html">https://www.fuzzingbook.org/beta/html/DynamicInvariants.html</a>.  Retrieved 2021-10-14 17:39:58+02:00.
 </p>
 <pre>
-@incollection{fuzzingbook2020:DynamicInvariants,
+@incollection{fuzzingbook2021:DynamicInvariants,
     author = {Andreas Zeller and Rahul Gopinath and Marcel B{\"o}hme and Gordon Fraser and Christian Holler},
     booktitle = {The Fuzzing Book},
     title = {Mining Function Specifications},
-    year = {2020},
+    year = {2021},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/DynamicInvariants.html}},
-    note = {Retrieved 2020-11-27 20:15:24+01:00},
+    note = {Retrieved 2021-10-14 17:39:58+02:00},
     url = {https://www.fuzzingbook.org/beta/html/DynamicInvariants.html},
-    urldate = {2020-11-27 20:15:24+01:00}
+    urldate = {2021-10-14 17:39:58+02:00}
 }
 </pre>
 </div>

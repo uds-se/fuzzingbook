@@ -3,7 +3,7 @@
 
 # "Mutation Analysis" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationAnalysis.html
-# Last change: 2021-06-04 14:41:13+02:00
+# Last change: 2021-10-14 18:45:08+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -73,7 +73,7 @@ The second class `MuProgramAnalyzer` targets standalone programs with test suite
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -85,7 +85,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -97,7 +97,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -109,7 +109,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -121,7 +121,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -133,7 +133,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -145,7 +145,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -332,7 +332,6 @@ if __name__ == '__main__':
 
 
 import ast
-import astor
 import inspect
 
 if __name__ == '__main__':
@@ -348,7 +347,7 @@ if __name__ == '__main__':
     triangle_ast = ast.parse(triangle_source)
 
 if __name__ == '__main__':
-    print(astor.dump_tree(triangle_ast))
+    print(ast.dump(triangle_ast, indent=4))
 
 from .bookutils import rich_output
 
@@ -358,7 +357,7 @@ if __name__ == '__main__':
         showast.show_ast(triangle_ast)
 
 if __name__ == '__main__':
-    print_content(astor.to_source(triangle_ast), '.py')
+    print_content(ast.unparse(triangle_ast), '.py')
 
 ## A Simple Mutator for Functions
 ## ------------------------------
@@ -374,7 +373,7 @@ class MuFunctionAnalyzer:
         self.name = fn.__name__
         src = inspect.getsource(fn)
         self.ast = ast.parse(src)
-        self.src = astor.to_source(self.ast)  # normalize
+        self.src = ast.unparse(self.ast)  # normalize
         self.mutator = self.mutator_object()
         self.nmutations = self.get_mutation_count()
         self.un_detected = set()
@@ -470,7 +469,7 @@ class Mutant(Mutant):
     def generate_mutant(self, location):
         mutant_ast = self.pm.mutator_object(
             location).visit(ast.parse(self.pm.src))  # copy
-        return astor.to_source(mutant_ast)
+        return ast.unparse(mutant_ast)
 
 class Mutant(Mutant):
     def src(self):
@@ -660,7 +659,7 @@ class MuProgramAnalyzer(MuFunctionAnalyzer):
     def __init__(self, name, src):
         self.name = name
         self.ast = ast.parse(src)
-        self.src = astor.to_source(self.ast)
+        self.src = ast.unparse(self.ast)
         self.changes = []
         self.mutator = self.mutator_object()
         self.nmutations = self.get_mutation_count()
@@ -737,7 +736,7 @@ class AdvMutant(AdvMutant):
     def generate_mutant(self, locations):
         mutant_ast = self.pm.mutator_object(
             locations).visit(ast.parse(self.pm.src))  # copy
-        return astor.to_source(mutant_ast)
+        return ast.unparse(mutant_ast)
 
 class AdvMutant(AdvMutant):
     def src(self):
@@ -938,10 +937,10 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    print(astor.dump_tree(ast.parse("1 + 2 - 3 * 4 / 5")))
+    print(ast.dump(ast.parse("1 + 2 - 3 * 4 / 5"), indent=4))
 
 if __name__ == '__main__':
-    print(astor.dump_tree(ast.parse("1 + 2 - 3 * 4 / 5")))
+    print(ast.dump(ast.parse("1 + 2 - 3 * 4 / 5"), indent=4))
 
 class BinOpMutator(Mutator):
     def visit_BinOp(self, node): return self.mutable_visit(node)
@@ -954,7 +953,7 @@ class BinOpMutator(BinOpMutator):
             type(ast.Mult()): ast.Div(),
             type(ast.Div()): ast.Mult()
         }
-        
+
         try:
             node.op = replacement[type(node.op)]
         except KeyError:

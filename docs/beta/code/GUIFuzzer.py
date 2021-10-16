@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2021-06-08 11:29:43+02:00
+# Last change: 2021-10-16 12:23:03+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -48,10 +48,11 @@ The function `start_webdriver()` starts a headless Web browser in the background
 
 >>> gui_driver = start_webdriver()
 
-We let it the browser open the URL of the server we want to investigate (in this case, the vulnerable server from [the chapter on Web fuzzing](WebFuzzer.ipynb)) and obtain a screen shot.
+We let the browser open the URL of the server we want to investigate (in this case, the vulnerable server from [the chapter on Web fuzzing](WebFuzzer.ipynb)) and obtain a screen shot.
 
 >>> gui_driver.get(httpd_url)
 >>> Image(gui_driver.get_screenshot_as_png())
+
 The `GUICoverageFuzzer` class explores the user interface and builds a _grammar_ that encodes all states as well as the user interactions required to move from one state to the next.  It is paired with a `GUIRunner` which interacts with the GUI driver.
 
 >>> gui_fuzzer = GUICoverageFuzzer(gui_driver)
@@ -64,32 +65,19 @@ The `explore_all()` method extracts all states and all transitions from a Web us
 The grammar embeds a finite state automation and is best visualized as such.
 
 >>> fsm_diagram(gui_fuzzer.grammar)
+
 The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow paths through the finite state machine.  Since `GUICoverageFuzzer` is derived from `CoverageFuzzer` (see the [chapter on coverage-based grammar fuzzing](GrammarCoverageFuzzer.ipynb)), it automatically covers (a) as many transitions between states as well as (b) as many form elements as possible.  In our case, the first set of actions explores the transition via the "order form" link; the second set then goes until the "" state.
 
 >>> gui_driver.get(httpd_url)
 >>> actions = gui_fuzzer.fuzz()
 >>> print(actions)
-fill('zip', '9')
-fill('name', 'h')
-check('terms', True)
-fill('city', 'j')
-fill('email', 'a@xb')
-submit('submit')
-click('order form')
-fill('zip', '0')
-fill('name', 'L')
-check('terms', False)
-fill('city', 'N')
-fill('email', 'k@B')
-submit('submit')
-
-
 
 These actions can be fed into the GUI runner, which will execute them on the given GUI driver.
 
 >>> gui_driver.get(httpd_url)
 >>> result, outcome = gui_runner.run(actions)
 >>> Image(gui_driver.get_screenshot_as_png())
+
 Further invocations of `fuzz()` will further cover the model – for instance, exploring the terms and conditions.
 
 A tool like `GUICoverageFuzzer` will provide "deep" exploration of user interfaces, even filling out forms to explore what is behind them. Keep in mind, though, that `GUICoverageFuzzer` is experimental: It only supports a subset of HTML form and link features, and does not take JavaScript into account.
@@ -171,6 +159,14 @@ if __name__ == '__main__':
 from selenium import webdriver
 
 BROWSER = 'firefox'
+
+import shutil
+
+if __name__ == '__main__':
+    if BROWSER == 'firefox':
+        assert shutil.which('geckodriver') is not None, \
+        "Please install 'geckodriver' executable " \
+        "from https://github.com/mozilla/geckodriver/releases"
 
 HEADLESS = True
 

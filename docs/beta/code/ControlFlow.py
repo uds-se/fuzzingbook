@@ -3,7 +3,7 @@
 
 # "Control Flow Graph" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2021-06-02 17:56:47+02:00
+# Last change: 2021-10-14 18:59:48+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -77,8 +77,7 @@ if __name__ == '__main__':
 
 import ast
 import re
-import astor
-from graphviz import Source, Graph, Digraph
+from graphviz import Source, Digraph
 
 ### Registry
 
@@ -170,7 +169,7 @@ class CFGNode(dict):
         self.calls.append(func)
 
     def source(self):
-        return astor.to_source(self.ast_node).strip()
+        return ast.unparse(self.ast_node).strip()
 
     def to_json(self):
         return {
@@ -327,7 +326,7 @@ class PyCFG(PyCFG):
         #     mystatements
         
         init_node = CFGNode(parents=myparents,
-            ast=ast.parse('__iv = iter(%s)' % astor.to_source(node.iter).strip()).body[0])
+            ast=ast.parse('__iv = iter(%s)' % ast.unparse(node.iter).strip()).body[0])
         ast.copy_location(init_node.ast_node, node.iter)
         
         _test_node = CFGNode(
@@ -340,7 +339,7 @@ class PyCFG(PyCFG):
         test_node = self.walk(node.iter, [_test_node])
 
         extract_node = CFGNode(parents=test_node,
-            ast=ast.parse('%s = next(__iv)' % astor.to_source(node.target).strip()).body[0])
+            ast=ast.parse('%s = next(__iv)' % ast.unparse(node.target).strip()).body[0])
         ast.copy_location(extract_node.ast_node, node.iter)
 
         
@@ -360,7 +359,7 @@ class PyCFG(PyCFG):
         _test_node = CFGNode(
             parents=myparents,
             ast=ast.parse(
-                '_while: %s' % astor.to_source(node.test).strip()).body[0])
+                '_while: %s' % ast.unparse(node.test).strip()).body[0])
         ast.copy_location(_test_node.ast_node, node.test)
         _test_node.exit_nodes = []
         test_node = self.walk(node.test, [_test_node])
@@ -384,7 +383,7 @@ class PyCFG(PyCFG):
         _test_node = CFGNode(
             parents=myparents,
             ast=ast.parse(
-                '_if: %s' % astor.to_source(node.test).strip()).body[0])
+                '_if: %s' % ast.unparse(node.test).strip()).body[0])
         ast.copy_location(_test_node.ast_node, node.test)
         test_node = self.walk(node.test, [ _test_node])
         assert len(test_node) == 1
@@ -656,7 +655,8 @@ def to_graph(cache, arcs=[]):
                 shape, peripheries = 'oval', '2'
         else:
             shape = 'rectangle'
-        graph.node(cnode.i(), "%d: %s" % (lineno, unhack(cnode.source())), shape=shape, peripheries=peripheries)
+        graph.node(cnode.i(), "%d: %s" % (lineno, unhack(cnode.source())),
+                   shape=shape, peripheries=peripheries)
         for pn in cnode.parents:
             plineno = pn.lineno()
             if hasattr(pn, 'calllink') and pn.calllink > 0 and not hasattr(
@@ -682,7 +682,7 @@ def to_graph(cache, arcs=[]):
                 else:
                     graph.edge(pn.i(), cnode.i(), color='red')
             else:
-                order = {c.i():i for i,c in enumerate(pn.children)}
+                order = {c.i(): i for i, c in enumerate(pn.children)}
                 if len(order) < 2:
                     graph.edge(pn.i(), cnode.i())
                 else:
@@ -709,7 +709,7 @@ if __name__ == '__main__':
 
 
 
-def check_triangle(a,b,c):
+def check_triangle(a, b, c):
     if a == b:
         if a == c:
             if b == c:
@@ -725,15 +725,12 @@ def check_triangle(a,b,c):
             else:
                 return "Scalene"
         else:
-              return "Isosceles"
+            return "Isosceles"
 
 import inspect
 
 if __name__ == '__main__':
-    graph = to_graph(gen_cfg(inspect.getsource(check_triangle)))
-
-if __name__ == '__main__':
-    Source(graph)
+    to_graph(gen_cfg(inspect.getsource(check_triangle)))
 
 #### cgi_decode
 
@@ -770,10 +767,7 @@ def cgi_decode(s):
     return t
 
 if __name__ == '__main__':
-    graph = to_graph(gen_cfg(inspect.getsource(cgi_decode)))
-
-if __name__ == '__main__':
-    Source(graph)
+    to_graph(gen_cfg(inspect.getsource(cgi_decode)))
 
 #### gcd
 
@@ -795,27 +789,21 @@ def gcd(a, b):
     return a
 
 if __name__ == '__main__':
-    graph = to_graph(gen_cfg(inspect.getsource(gcd)))
+    to_graph(gen_cfg(inspect.getsource(gcd)))
+
+def compute_gcd(x, y):
+    if x > y:
+        small = y
+    else:
+        small = x
+    for i in range(1, small+1):
+        if((x % i == 0) and (y % i == 0)):
+            gcd = i
+
+    return gcd
 
 if __name__ == '__main__':
-    Source(graph)
-
-def compute_gcd(x, y): 
-    if x > y: 
-        small = y 
-    else: 
-        small = x 
-    for i in range(1, small+1): 
-        if((x % i == 0) and (y % i == 0)): 
-            gcd = i 
-              
-    return gcd 
-
-if __name__ == '__main__':
-    graph = to_graph(gen_cfg(inspect.getsource(compute_gcd)))
-
-if __name__ == '__main__':
-    Source(graph)
+    to_graph(gen_cfg(inspect.getsource(compute_gcd)))
 
 #### fib
 
@@ -825,16 +813,13 @@ if __name__ == '__main__':
 
 
 def fib(n,):
-    l = [0, 1]
+    ls = [0, 1]
     for i in range(n-2):
-        l.append(l[-1]+l[-2])
-    return l
+        ls.append(ls[-1] + ls[-2])
+    return ls
 
 if __name__ == '__main__':
-    graph = to_graph(gen_cfg(inspect.getsource(fib)))
-
-if __name__ == '__main__':
-    Source(graph)
+    to_graph(gen_cfg(inspect.getsource(fib)))
 
 #### quad_solver
 
@@ -861,10 +846,7 @@ def quad_solver(a, b, c):
     return ((r1,i1), (r2,i2))
 
 if __name__ == '__main__':
-    graph = to_graph(gen_cfg(inspect.getsource(quad_solver)))
-
-if __name__ == '__main__':
-    Source(graph)
+    to_graph(gen_cfg(inspect.getsource(quad_solver)))
 
 ## Call Graph
 ## ----------
@@ -876,7 +858,6 @@ if __name__ == '__main__':
 
 import os
 import networkx as nx
-from graphviz import Source
 
 ### Call Graph Helpers
 
@@ -890,8 +871,8 @@ def construct_callgraph(code, name="callgraph"):
     with open(file_name, 'w') as f:
         f.write(code)
     cg_file = name + '.dot'
-    os.system(f'pyan {file_name} --uses --defines --colored --grouped --annotated --dot > {cg_file}')
-    
+    os.system(f'pyan3 {file_name} --uses --defines --colored --grouped --annotated --dot > {cg_file}')
+
 def callgraph(code, name="callgraph"):
     if not os.path.isfile(name + '.dot'):
         construct_callgraph(code, name)
@@ -962,7 +943,7 @@ def tile_%d_%d(input, index):
        row - 1, col, 
        row + 1, col,
        row, col)
-    
+
     if c == "X":
         code += """
 def maze(input):
@@ -984,19 +965,19 @@ def generate_maze_code(maze, name="maze"):
     row = 0
     col = 0
     code = generate_print_maze(maze)
-    
+
     for c in list(maze):
         if c == '\n':
             row += 1
             col = 0
-        else: 
+        else:
             if c == "-" or c == "+" or c == "|":
                 code += generate_trap_tile(row, col)
             elif c == " " or c == "X":
                 code += generate_good_tile(c, row, col)
             elif c == "#":
                 code += generate_target_tile(row, col)
-            else: 
+            else:
                 print("Invalid maze! Try another one.")
             col += 1
 
@@ -1007,7 +988,7 @@ if __name__ == '__main__':
     exec(maze_code)
 
 if __name__ == '__main__':
-    print(maze("DDDDRRRRUULLUURRRRDDD")) # Appending one more 'D', you have reached the target.
+    print(maze("DDDDRRRRUULLUURRRRDDD"))
 
 if __name__ == '__main__':
     callgraph(maze_code)
@@ -1019,8 +1000,6 @@ if __name__ == '__main__':
     print('\n## Cleanup')
 
 
-
-import shutil
 
 if __name__ == '__main__':
     if os.path.exists('callgraph.dot'):

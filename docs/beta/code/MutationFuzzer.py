@@ -3,7 +3,7 @@
 
 # "Mutation-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2021-06-02 17:41:57+02:00
+# Last change: 2021-10-14 18:40:41+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -48,26 +48,16 @@ This chapter introduces a `MutationFuzzer` class that takes a list of _seed inpu
 >>> mutation_fuzzer = MutationFuzzer(seed=[seed_input])
 >>> [mutation_fuzzer.fuzz() for i in range(10)]
 ['http://www.google.com/search?q=fuzzing',
- 'http://w}ww.google.com/search/q=fwzing',
- 'http://www.google.cAom/&szeaRch?q=fuzzing',
- 'htTp>//www.google.com/search?q=5zzing',
- 'http://www.goog.comm/search?q=ezzig',
- 'ht|p:o/www.google.com/searFch?q=fuzzing',
- '6http://www.goo^leco/sea\\rch?q=fbuzing',
- 'http://wv\x7f.g\x7fRoge.co(m@/qearch?q=fuyzzing',
- 'http://www.oogle/com/search?q=f6uzzing',
- 'http://ww.google.com/search?q9fuzzing']
-
-The `MutationCoverageFuzzer` maintains a _population_ of inputs, which are then evolved in order to maximize coverage.
-
->>> mutation_fuzzer = MutationCoverageFuzzer(seed=[seed_input])
+ 'http://www.coogle.com/searc?q=nuzzi~g',
+ 'lttp://7ww.woogle$.co}/sear$ch?q=fuzzing',
+ 'http://ww>> mutation_fuzzer = MutationCoverageFuzzer(seed=[seed_input])
 >>> mutation_fuzzer.runs(http_runner, trials=10000)
 >>> mutation_fuzzer.population[:5]
 ['http://www.google.com/search?q=fuzzing',
- 'http://www.googl.com/search?q=fuzzig',
- 'http://www.googl.com/search\x7fs=fuzzig',
- 'Http://www.googl.com/seaxrch\x7fs=fuzzig',
- 'hTtp://ww.googl&comearch?q=fvuzigI']
+ 'http://wwlw.google.c"om/secrch?yq=fuzzin',
+ 'http://wwlw.woogle.c"om/secrch)7YQ=fuzzin',
+ 'http://wwlw.wooglec"om-secch7YQ=fuzzinl',
+ 'http://wwVhwweoogle.c"oms72c)7YQ=fuzzin']
 
 
 For more details, source, and documentation, see

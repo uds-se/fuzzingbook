@@ -3,7 +3,7 @@
 
 # "Search-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2021-06-02 17:43:48+02:00
+# Last change: 2021-10-14 18:44:55+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -698,7 +698,6 @@ class BranchTransformer(ast.NodeTransformer):
 
 import inspect
 import ast
-import astor
 
 from .bookutils import print_content
 
@@ -709,7 +708,7 @@ if __name__ == '__main__':
 
     # Make sure the line numbers are ok before printing
     node = ast.fix_missing_locations(node)
-    print_content(astor.to_source(node), '.py')
+    print_content(ast.unparse(node), '.py')
 
 def create_instrumented_function(f):
     source = inspect.getsource(f)

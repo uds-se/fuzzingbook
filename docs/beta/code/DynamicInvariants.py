@@ -3,7 +3,7 @@
 
 # "Mining Function Specifications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2021-06-02 17:50:08+02:00
+# Last change: 2021-10-14 18:51:34+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -59,9 +59,8 @@ Both work by _observing_ a function and its invocations within a `with` clause. 
 The `typed_functions()` method will return a representation of `sum2()` annotated with types observed during execution.
 
 >>> print(type_annotator.typed_functions())
-def sum2(a: int, b: int) ->int:
+def sum2(a: int, b: int) -> int:
     return a + b
-
 
 
 The invariant annotator works in a similar fashion:
@@ -74,13 +73,13 @@ The invariant annotator works in a similar fashion:
 The `functions_with_invariants()` method will return a representation of `sum2()` annotated with inferred pre- and postconditions that all hold for the observed values.
 
 >>> print(inv_annotator.functions_with_invariants())
-@precondition(lambda a, b: isinstance(a, int))
-@precondition(lambda a, b: isinstance(b, int))
-@postcondition(lambda return_value, a, b: a == return_value - b)
-@postcondition(lambda return_value, a, b: b == return_value - a)
-@postcondition(lambda return_value, a, b: isinstance(return_value, int))
-@postcondition(lambda return_value, a, b: return_value == a + b)
-@postcondition(lambda return_value, a, b: return_value == b + a)
+@precondition(lambda b, a: isinstance(a, int))
+@precondition(lambda b, a: isinstance(b, int))
+@postcondition(lambda return_value, b, a: a == return_value - b)
+@postcondition(lambda return_value, b, a: b == return_value - a)
+@postcondition(lambda return_value, b, a: isinstance(return_value, int))
+@postcondition(lambda return_value, b, a: return_value == a + b)
+@postcondition(lambda return_value, b, a: return_value == b + a)
 def sum2(a, b):
     return a + b
 
@@ -188,26 +187,19 @@ def my_sqrt_with_type_annotations(x: float) -> float:
     """Computes the square root of x, using the Newton-Raphson method"""
     return my_sqrt(x)
 
-### Runtime Type Checking
+### Excursion: Runtime Type Checking
 
 if __name__ == '__main__':
-    print('\n### Runtime Type Checking')
+    print('\n### Excursion: Runtime Type Checking')
 
 
 
-import enforce
-
-@enforce.runtime_validation
-def my_sqrt_with_checked_type_annotations(x: float) -> float:
-    """Computes the square root of x, using the Newton-Raphson method"""
-    return my_sqrt(x)
+### End of Excursion
 
 if __name__ == '__main__':
-    with ExpectError():
-        my_sqrt_with_checked_type_annotations(True)
+    print('\n### End of Excursion')
 
-if __name__ == '__main__':
-    my_sqrt(True)
+
 
 ### Static Type Checking
 
@@ -317,7 +309,8 @@ class CallTracker(CallTracker):
 def get_arguments(frame):
     """Return call arguments in the given frame"""
     # When called, all arguments are local variables
-    arguments = [(var, frame.f_locals[var]) for var in frame.f_locals]
+    local_variables = dict(frame.f_locals)  # explicit copy
+    arguments = [(var, frame.f_locals[var]) for var in local_variables]
     arguments.reverse()  # Want same order as call
     return arguments
 
@@ -328,13 +321,13 @@ class CallTracker(CallTracker):
         function_name = code.co_name
         return_value = arg
         # TODO: Could call get_arguments() here to also retrieve _final_ values of argument variables
-        
+
         called_function_name, called_arguments = self._stack.pop()
         assert function_name == called_function_name
-        
+
         if self._log:
             print(simple_call_string(function_name, called_arguments), "returns", return_value)
-            
+
         self.add_call(function_name, called_arguments, return_value)
 
 def simple_call_string(function_name, argument_list, return_value=None):
@@ -345,7 +338,7 @@ def simple_call_string(function_name, argument_list, return_value=None):
 
     if return_value is not None:
         call += " = " + repr(return_value)
-        
+
     return call
 
 class CallTracker(CallTracker):
@@ -430,7 +423,7 @@ if __name__ == '__main__':
 
 import ast
 import inspect
-import astor
+
 
 if __name__ == '__main__':
     my_sqrt_source = inspect.getsource(my_sqrt)
@@ -445,7 +438,7 @@ if __name__ == '__main__':
     my_sqrt_ast = ast.parse(my_sqrt_source)
 
 if __name__ == '__main__':
-    print(astor.dump_tree(my_sqrt_ast))
+    print(ast.dump(my_sqrt_ast, indent=4))
 
 from .bookutils import rich_output
 
@@ -455,7 +448,7 @@ if __name__ == '__main__':
         showast.show_ast(my_sqrt_ast)
 
 if __name__ == '__main__':
-    print_content(astor.to_source(my_sqrt_ast), '.py')
+    print_content(ast.unparse(my_sqrt_ast), '.py')
 
 ### Annotating Functions with Given Types
 
@@ -468,17 +461,17 @@ def parse_type(name):
     class ValueVisitor(ast.NodeVisitor):
         def visit_Expr(self, node):
             self.value_node = node.value
-        
+
     tree = ast.parse(name)
     name_visitor = ValueVisitor()
     name_visitor.visit(tree)
     return name_visitor.value_node
 
 if __name__ == '__main__':
-    print(astor.dump_tree(parse_type('int')))
+    print(ast.dump(parse_type('int')))
 
 if __name__ == '__main__':
-    print(astor.dump_tree(parse_type('[object]')))
+    print(ast.dump(parse_type('[object]')))
 
 class TypeTransformer(ast.NodeTransformer):
     def __init__(self, argument_types, return_type=None):
@@ -495,6 +488,7 @@ class TypeTransformer(TypeTransformer):
             new_args.append(self.annotate_arg(arg))
 
         new_arguments = ast.arguments(
+            node.args.posonlyargs,
             new_args,
             node.args.vararg,
             node.args.kwonlyargs,
@@ -506,10 +500,11 @@ class TypeTransformer(TypeTransformer):
         # Set return type
         if self.return_type is not None:
             node.returns = parse_type(self.return_type)
-        
-        return ast.copy_location(ast.FunctionDef(node.name, new_arguments, 
-                                                 node.body, node.decorator_list,
-                                                 node.returns), node)
+
+        return ast.copy_location(
+            ast.FunctionDef(node.name, new_arguments, 
+                            node.body, node.decorator_list,
+                            node.returns), node)
 
 class TypeTransformer(TypeTransformer):
     def annotate_arg(self, arg):
@@ -523,7 +518,7 @@ if __name__ == '__main__':
     new_ast = TypeTransformer({'x': 'int'}, 'float').visit(my_sqrt_ast)
 
 if __name__ == '__main__':
-    print_content(astor.to_source(new_ast), '.py')
+    print_content(ast.unparse(new_ast), '.py')
 
 if __name__ == '__main__':
     hello_source = inspect.getsource(hello)
@@ -535,7 +530,7 @@ if __name__ == '__main__':
     new_ast = TypeTransformer({'name': 'str'}, 'None').visit(hello_ast)
 
 if __name__ == '__main__':
-    print_content(astor.to_source(new_ast), '.py')
+    print_content(ast.unparse(new_ast), '.py')
 
 ### Annotating Functions with Mined Types
 
@@ -611,7 +606,7 @@ def annotate_function_ast_with_types(function_ast, function_calls):
     return annotated_function_ast
 
 if __name__ == '__main__':
-    print_content(astor.to_source(annotate_types(tracker.calls())['my_sqrt']), '.py')
+    print_content(ast.unparse(annotate_types(tracker.calls())['my_sqrt']), '.py')
 
 ### All-in-one Annotation
 
@@ -627,21 +622,22 @@ class TypeAnnotator(TypeTracker):
     def typed_functions_ast(self, function_name=None):
         if function_name is None:
             return annotate_types(self.calls())
-        
-        return annotate_function_with_types(function_name, self.calls(function_name))
-    
+
+        return annotate_function_with_types(function_name, 
+                                            self.calls(function_name))
+
     def typed_functions(self, function_name=None):
         if function_name is None:
             functions = ''
             for f_name in self.calls():
                 try:
-                    f_text = astor.to_source(self.typed_functions_ast(f_name))
+                    f_text = ast.unparse(self.typed_functions_ast(f_name))
                 except KeyError:
                     f_text = ''
                 functions += f_text
             return functions
 
-        return astor.to_source(self.typed_functions_ast(function_name))
+        return ast.unparse(self.typed_functions_ast(function_name))
 
 if __name__ == '__main__':
     with TypeAnnotator() as annotator:
@@ -672,7 +668,7 @@ if __name__ == '__main__':
         y = my_sqrt(4)
 
 if __name__ == '__main__':
-    print_content(astor.to_source(annotate_types(tracker.calls())['my_sqrt']), '.py')
+    print_content(ast.unparse(annotate_types(tracker.calls())['my_sqrt']), '.py')
 
 def sum3(a, b, c):
     return a + b + c
@@ -884,7 +880,7 @@ def instantiate_prop_ast(prop, var_names):
             if node.id not in mapping:
                 return node
             return ast.Name(id=mapping[node.id], ctx=ast.Load())
-    
+
     meta_variables = metavars(prop)
     assert len(meta_variables) == len(var_names)
 
@@ -899,7 +895,7 @@ def instantiate_prop_ast(prop, var_names):
 
 def instantiate_prop(prop, var_names):
     prop_ast = instantiate_prop_ast(prop, var_names)
-    prop_text = astor.to_source(prop_ast).strip()
+    prop_text = ast.unparse(prop_ast).strip()
     while prop_text.startswith('(') and prop_text.endswith(')'):
         prop_text = prop_text[1:-1]
     return prop_text
@@ -954,7 +950,7 @@ def true_property_instantiations(prop, vars_and_values, log=False):
     for combination in itertools.permutations(vars_and_values, len_metavars):
         args = [value for var_name, value in combination]
         var_names = [var_name for var_name, value in combination]
-        
+
         try:
             result = p(*args)
         except:
@@ -964,7 +960,7 @@ def true_property_instantiations(prop, vars_and_values, log=False):
             print(prop, combination, result)
         if result:
             instantiations.add((prop, tuple(var_names)))
-            
+
     return instantiations
 
 if __name__ == '__main__':
@@ -1003,11 +999,11 @@ class InvariantTracker(InvariantTracker):
     def invariants(self, function_name=None):
         if function_name is None:
             return {function_name: self.invariants(function_name) for function_name in self.calls()}
-        
+
         invariants = None
         for variables, return_value in self.calls(function_name):
             vars_and_values = variables + [(RETURN_VALUE, return_value)]
-            
+
             s = set()
             for prop in self.props:
                 s |= true_property_instantiations(prop, vars_and_values, self._log)
@@ -1411,25 +1407,25 @@ if __name__ == '__main__':
         remove_first_char('')
 
 def condition(precondition=None, postcondition=None, doc='Unknown'):
-   def decorator(func):
-       @functools.wraps(func) # preserves name, docstring, etc
-       def wrapper(*args, **kwargs):
-           if precondition is not None:
-               assert precondition(*args, **kwargs), "Precondition violated: " + doc
+    def decorator(func):
+        @functools.wraps(func) # preserves name, docstring, etc
+        def wrapper(*args, **kwargs):
+            if precondition is not None:
+                assert precondition(*args, **kwargs), "Precondition violated: " + doc
 
-           retval = func(*args, **kwargs) # call original function or method
-           if postcondition is not None:
-               assert postcondition(retval, *args, **kwargs), "Postcondition violated: " + doc
+            retval = func(*args, **kwargs) # call original function or method
+            if postcondition is not None:
+                assert postcondition(retval, *args, **kwargs), "Postcondition violated: " + doc
 
-           return retval
-       return wrapper
-   return decorator
+            return retval
+        return wrapper
+    return decorator
 
 def precondition(check, **kwargs):
-   return condition(precondition=check, doc=kwargs.get('doc', 'Unknown'))
+    return condition(precondition=check, doc=kwargs.get('doc', 'Unknown'))
 
 def postcondition(check, **kwargs):
-   return condition(postcondition=check, doc=kwargs.get('doc', 'Unknown'))
+    return condition(postcondition=check, doc=kwargs.get('doc', 'Unknown'))
 
 @precondition(lambda s: len(s) > 0, doc="len(s) > 0")
 def remove_first_char(s):
@@ -1442,31 +1438,31 @@ if __name__ == '__main__':
         remove_first_char('')
 
 class InvariantAnnotator(InvariantAnnotator):
-   def preconditions(self, function_name):
-       conditions = []
+    def preconditions(self, function_name):
+        conditions = []
 
-       for inv in pretty_invariants(self.invariants(function_name)):
-           if inv.find(RETURN_VALUE) >= 0:
-               continue  # Postcondition
+        for inv in pretty_invariants(self.invariants(function_name)):
+            if inv.find(RETURN_VALUE) >= 0:
+                continue  # Postcondition
 
-           cond = "@precondition(lambda " + self.params(function_name) + ": " + inv + ', doc=' + repr(inv) + ")"
-           conditions.append(cond)
+            cond = "@precondition(lambda " + self.params(function_name) + ": " + inv + ', doc=' + repr(inv) + ")"
+            conditions.append(cond)
 
-       return conditions
+        return conditions
 
 class InvariantAnnotator(InvariantAnnotator):
-   def postconditions(self, function_name):
-       conditions = []
+    def postconditions(self, function_name):
+        conditions = []
 
-       for inv in pretty_invariants(self.invariants(function_name)):
-           if inv.find(RETURN_VALUE) < 0:
-               continue  # Precondition
+        for inv in pretty_invariants(self.invariants(function_name)):
+            if inv.find(RETURN_VALUE) < 0:
+                continue  # Precondition
 
-           cond = ("@postcondition(lambda " + 
-               RETURN_VALUE + ", " + self.params(function_name) + ": " + inv + ', doc=' + repr(inv) + ")")
-           conditions.append(cond)
+            cond = ("@postcondition(lambda " + 
+                RETURN_VALUE + ", " + self.params(function_name) + ": " + inv + ', doc=' + repr(inv) + ")")
+            conditions.append(cond)
 
-       return conditions
+        return conditions
 
 if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
@@ -1527,13 +1523,13 @@ class EmbeddedInvariantAnnotator(InvariantTracker):
             functions = ''
             for f_name in self.invariants():
                 try:
-                    f_text = astor.to_source(self.functions_with_invariants_ast(f_name))
+                    f_text = ast.unparse(self.functions_with_invariants_ast(f_name))
                 except KeyError:
                     f_text = ''
                 functions += f_text
             return functions
 
-        return astor.to_source(self.functions_with_invariants_ast(function_name))
+        return ast.unparse(self.functions_with_invariants_ast(function_name))
     
     def function_with_invariants(self, function_name):
         return self.functions_with_invariants(function_name)
@@ -1565,7 +1561,7 @@ class PreconditionTransformer(ast.NodeTransformer):
     def __init__(self, invariants):
         self.invariants = invariants
         super().__init__()
-        
+
     def preconditions(self):
         preconditions = []
         for (prop, var_names) in self.invariants:
@@ -1576,14 +1572,14 @@ class PreconditionTransformer(ast.NodeTransformer):
                 preconditions += assertion_ast.body
 
         return preconditions
-    
+
     def insert_assertions(self, body):
         preconditions = self.preconditions()
         try:
             docstring = body[0].value.s
         except:
             docstring = None
-            
+
         if docstring:
             return [body[0]] + preconditions + body[1:]
         else:
@@ -1633,7 +1629,7 @@ class EmbeddedInvariantTransformer(PreconditionTransformer):
 
         body_ends_with_return = isinstance(new_body[-1], ast.Return)
         if body_ends_with_return:
-            saver = RETURN_VALUE + " = " + astor.to_source(new_body[-1].value)
+            saver = RETURN_VALUE + " = " + ast.unparse(new_body[-1].value)
         else:
             saver = RETURN_VALUE + " = None"
     

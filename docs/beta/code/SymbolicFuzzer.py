@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2021-06-08 13:13:28+02:00
+# Last change: 2021-10-14 18:51:07+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -48,16 +48,16 @@ This chapter provides an implementation of a symbolic fuzzing engine `AdvancedSy
 >>> for i in range(10):
 >>>     r = gcd_fuzzer.fuzz()
 >>>     print(r)
-{'a': 7, 'b': 5}
-{'a': -1, 'b': 0}
-{'a': 2, 'b': 7}
-{'a': 10, 'b': 9}
-{'a': 11, 'b': 21}
-{'a': 11, 'b': -11}
-{'a': 7, 'b': 6}
-{'a': -2, 'b': 0}
-{'a': 12, 'b': -12}
-{'a': 9, 'b': 2}
+{'a': 5, 'b': 3}
+{'a': 1, 'b': 4}
+{'a': 4, 'b': 5}
+{'a': 2, 'b': -4}
+{'a': 3, 'b': 4}
+{'a': 6, 'b': 6}
+{'a': 15, 'b': 7}
+{'a': 4, 'b': 8}
+{'a': 16, 'b': 16}
+{'a': 7, 'b': 2}
 
 
 
@@ -126,11 +126,11 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
-from .ControlFlow import PyCFG, CFGNode, to_graph, gen_cfg
+from .ControlFlow import PyCFG, to_graph, gen_cfg
 
 import inspect
 
-from graphviz import Source, Graph
+from graphviz import Source
 
 def show_cfg(fn, **kwargs):
     return Source(to_graph(gen_cfg(inspect.getsource(fn)), **kwargs))
@@ -361,7 +361,6 @@ if __name__ == '__main__':
     z3.simplify(l6)
 
 import ast
-import astor
 
 def prefix_vars(astnode, prefix):
     if isinstance(astnode, ast.BoolOp):
@@ -402,7 +401,7 @@ if __name__ == '__main__':
     e
 
 def to_src(astnode):
-    return astor.to_source(astnode).strip()
+    return ast.unparse(astnode).strip()
 
 if __name__ == '__main__':
     to_src(e)
@@ -744,7 +743,7 @@ class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
             if isinstance(elt.ast_node, ast.AnnAssign):
                 if elt.ast_node.target.id in {'_if', '_while'}:
                     s = to_src(elt.ast_node.annotation)
-                    predicates.append(("%s" if idx == 0 else "z3.Not%s") % s)
+                    predicates.append(("%s" if idx == 0 else "z3.Not(%s)") % s)
                 elif isinstance(elt.ast_node.annotation, ast.Call):
                     assert elt.ast_node.annotation.func.id == self.fn_name
                 else:
@@ -944,14 +943,14 @@ if __name__ == '__main__':
     type(b)
 
 if __name__ == '__main__':
-    assert to_src(rename_variables(b, env)) == '(_x_1 + _y_0)'
+    assert to_src(rename_variables(b, env)) == '_x_1 + _y_0'
 
 if __name__ == '__main__':
     u = get_expression('-y')
     type(u)
 
 if __name__ == '__main__':
-    assert to_src(rename_variables(u, env)) == '(-_y_0)'
+    assert to_src(rename_variables(u, env)) == '-_y_0'
 
 if __name__ == '__main__':
     un = get_expression('not y')
@@ -965,7 +964,7 @@ if __name__ == '__main__':
     type(c)
 
 if __name__ == '__main__':
-    assert to_src(rename_variables(c, env)) == '(_x_1 == _y_0)'
+    assert to_src(rename_variables(c, env)) == '_x_1 == _y_0'
 
 if __name__ == '__main__':
     f = get_expression('fn(x,y)')
