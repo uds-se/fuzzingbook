@@ -3,7 +3,7 @@
 
 # "Carving Unit Tests" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2021-06-04 15:28:25+02:00
+# Last change: 2021-10-16 15:49:27+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -75,19 +75,19 @@ The `CallGrammarMiner` class turns a list of carved executions into a grammar.
 >>> my_sqrt_grammar
 {'': [''],
  '': [''],
- '': ['2', '4'],
+ '': ['4', '2'],
  '': ['my_sqrt()']}
 
 This grammar can be used to synthesize calls.
 
 >>> fuzzer = GrammarCoverageFuzzer(my_sqrt_grammar)
 >>> fuzzer.fuzz()
-'my_sqrt(4)'
+'my_sqrt(2)'
 
 These calls can be executed in isolation, effectively extracting unit tests from system tests:
 
 >>> eval(fuzzer.fuzz())
-1.414213562373095
+2.0
 
 
 For more details, source, and documentation, see
@@ -223,7 +223,9 @@ def get_qualified_name(code):
 def get_arguments(frame):
     """Return call arguments in the given frame"""
     # When called, all arguments are local variables
-    arguments = [(var, frame.f_locals[var]) for var in frame.f_locals]
+    local_variables = frame.f_locals.copy()
+    arguments = [(var, frame.f_locals[var])
+                 for var in local_variables]
     arguments.reverse()  # Want same order as call
     return arguments
 
@@ -352,7 +354,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     email_parse_call = simple_call_string(
-        "email.parser.parse",
+        "email.parser.Parser.parse",
         email_parse_argument_list[0])
     email_parse_call
 
@@ -363,10 +365,13 @@ if __name__ == '__main__':
 
 
 
-import pickle    
+import pickle
 
 if __name__ == '__main__':
-    parser_object = email_parse_argument_list[0][0][1]
+    email_parse_argument_list
+
+if __name__ == '__main__':
+    parser_object = email_parse_argument_list[0][2][1]
     parser_object
 
 if __name__ == '__main__':
@@ -399,8 +404,10 @@ def call_string(function_name, argument_list):
                    for (var, value) in argument_list]) + ")"
 
 if __name__ == '__main__':
-    call = call_string("email.parser.parse", email_parse_argument_list[0])
+    call = call_string("email.parser.Parser.parse", email_parse_argument_list[0])
     print(call)
+
+import email
 
 if __name__ == '__main__':
     eval(call)
