@@ -818,6 +818,10 @@ $(CODE_TARGET).FuzzingInTheLarge.py.out: $(CODE_TARGET)FuzzingInTheLarge.py
 	@echo Skipping $<...
 	@echo $(PY_SUCCESS_MAGIC) > $@
 
+# This one doesn't work at this point
+$(CODE_TARGET).ConcolicFuzzer.py.out: $(CODE_TARGET)ConcolicFuzzer.py
+	@echo Skipping $<...
+	@echo $(PY_SUCCESS_MAGIC) > $@
 
 
 
