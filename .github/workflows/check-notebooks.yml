@@ -1,0 +1,68 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Notebook Tests
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "notebook-tests"
+  notebook-tests:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Cancel previous runs
+      # - name: Cancel Previous Runs
+      #   uses: styfle/cancel-workflow-action@0.9.0
+      #   with:
+      #     access_token: ${{ github.token }}
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out Repository
+        uses: actions/checkout@v2
+      
+      # We officially require Python 3.9 or later
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.7'
+
+      # Runs a set of commands using the runners shell
+      - name: Set up Path
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      # The `ChangeCounter` module needs the full git repo
+      # - name: Clone full git repository
+      #   run: git pull --unshallow
+
+      # Actual CI steps
+      - name: Install Packages
+        run: |
+            sudo apt-get install graphviz
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Check Python Version
+        run: python --version
+
+      - name: Run Notebooks
+        run: make -k full
+
+      - name: Create HTML
+        run: make -k html
+
+      # - name: Start tmate debugging session in case of failure
+      #   if: ${{ failure() }}
+      #   uses: mxschmitt/action-tmate@v3
