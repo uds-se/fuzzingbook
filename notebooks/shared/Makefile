@@ -1023,18 +1023,6 @@ DIST_CODE_FILES = \
 	$(DOCS_TARGET)code/LICENSE.md \
 	$(DOCS_TARGET)code/setup.py \
 	$(DOCS_TARGET)code/__init__.py
-	
-check-install:
-	$(eval TMPDIR := $(shell mktemp -d))
-	@cd $(TMPDIR); \
-	$(PYTHON) -c 'import $(PROJECT)' 2> /dev/null; \
-	if [ $$? = 0 ]; then \
-		echo "Error: Installed $(PROJECT) package conflicts with package creation" >&2; \
-		echo "Please uninstall it; e.g. with 'pip uninstall $(PROJECT)'." >&2; \
-		exit 1; \
-	else \
-		exit 0; \
-	fi
 
 clean-dist:
 	$(RM) -r code/__pycache__
@@ -1045,8 +1033,7 @@ clean-dist:
 	$(RM) -r $(DOCS_TARGET)notebooks/.ipynb_checkpoints
 
 $(DOCS_TARGET)dist/$(PROJECT)-code.zip: \
-	$(PYS) $(DIST_CODE_FILES) $(CHAPTERS_MAKEFILE) \
-	check-install clean-dist
+	$(PYS) $(DIST_CODE_FILES) $(CHAPTERS_MAKEFILE) clean-dist
 	@-mkdir $(DOCS_TARGET)dist
 	$(RM) -r $(DOCS_TARGET)dist/*
 	$(RM) -r $(DOCS_TARGET)$(PROJECT)
