@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
-# Last change: 2021-10-16 15:14:24+02:00
+# Last change: 2021-10-16 16:49:37+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors

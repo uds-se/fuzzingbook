@@ -3,7 +3,7 @@
 
 # "Control Flow Graph" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2021-10-14 18:59:48+02:00
+# Last change: 2021-10-17 13:20:36+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -75,8 +75,11 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
+from .bookutils import print_content
+
 import ast
 import re
+
 from graphviz import Source, Digraph
 
 ### Registry
@@ -324,11 +327,11 @@ class PyCFG(PyCFG):
         # while __iv.__length_hint() > 0:
         #     a = next(__iv)
         #     mystatements
-        
+
         init_node = CFGNode(parents=myparents,
             ast=ast.parse('__iv = iter(%s)' % ast.unparse(node.iter).strip()).body[0])
         ast.copy_location(init_node.ast_node, node.iter)
-        
+
         _test_node = CFGNode(
             parents=[init_node],
             ast=ast.parse('_for: __iv.__length__hint__() > 0').body[0])
@@ -342,7 +345,6 @@ class PyCFG(PyCFG):
             ast=ast.parse('%s = next(__iv)' % ast.unparse(node.target).strip()).body[0])
         ast.copy_location(extract_node.ast_node, node.iter)
 
-        
         # now we evaluate the body, one at a time.
         p1 = [extract_node]
         for n in node.body:
@@ -866,12 +868,16 @@ if __name__ == '__main__':
 
 
 
+import shutil
+
+PYAN = 'pyan3' if shutil.which('pyan3') is not None else 'pyan'
+
 def construct_callgraph(code, name="callgraph"):
     file_name = name + ".py"
     with open(file_name, 'w') as f:
         f.write(code)
     cg_file = name + '.dot'
-    os.system(f'pyan3 {file_name} --uses --defines --colored --grouped --annotated --dot > {cg_file}')
+    os.system(f'{PYAN} {file_name} --uses --defines --colored --grouped --annotated --dot > {cg_file}')
 
 def callgraph(code, name="callgraph"):
     if not os.path.isfile(name + '.dot'):
@@ -985,6 +991,11 @@ def generate_maze_code(maze, name="maze"):
 
 if __name__ == '__main__':
     maze_code = generate_maze_code(maze_string)
+
+if __name__ == '__main__':
+    print_content(maze_code, filename='.py')
+
+if __name__ == '__main__':
     exec(maze_code)
 
 if __name__ == '__main__':

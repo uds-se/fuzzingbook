@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2021-10-16 15:12:35+02:00
+# Last change: 2021-10-17 13:19:14+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -551,6 +551,8 @@ from .ControlFlow import generate_maze_code
 
 if __name__ == '__main__':
     maze_code = generate_maze_code(maze_string)
+
+if __name__ == '__main__':
     exec(maze_code)
 
 if __name__ == '__main__':
@@ -598,11 +600,11 @@ class MazeMutator(DictMutator):
 
 if __name__ == '__main__':
     n = 10000
-    seed_input = " " # empty seed
+    seed_input = " "  # empty seed
 
-    maze_mutator = MazeMutator(["L","R","U","D"])
+    maze_mutator = MazeMutator(["L", "R", "U", "D"])
     maze_schedule = PowerSchedule()
-    maze_fuzzer  = GreyboxFuzzer([seed_input], maze_mutator, maze_schedule)
+    maze_fuzzer = GreyboxFuzzer([seed_input], maze_mutator, maze_schedule)
 
     start = time.time()
     maze_fuzzer.runs(FunctionCoverageRunner(maze), trials=n)
@@ -656,6 +658,8 @@ if __name__ == '__main__':
         if target in node:
             target_node = node
             break
+
+if __name__ == '__main__':
     target_node
 
 if __name__ == '__main__':
