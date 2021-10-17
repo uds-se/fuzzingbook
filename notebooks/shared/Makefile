@@ -817,13 +817,6 @@ $(CODE_TARGET).FuzzingInTheLarge.py.out: $(CODE_TARGET)FuzzingInTheLarge.py
 	@echo Skipping $<...
 	@echo $(PY_SUCCESS_MAGIC) > $@
 
-# Temporary fix until we have updated it to work with recent Z3
-$(CODE_TARGET).ConcolicFuzzer.py.out: $(CODE_TARGET)ConcolicFuzzer.py
-	@echo Skipping $<...
-	@echo $(PY_SUCCESS_MAGIC) > $@
-
-
-
 
 
 .PHONY: test-code
