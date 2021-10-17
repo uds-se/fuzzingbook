@@ -801,10 +801,16 @@ $(CODE_TARGET).%.py.out:	$(CODE_TARGET)%.py
 		echo $(PY_SUCCESS_MAGIC) >> $@; \
 		exit 0; \
 	else \
-		echo "Error while running $<" >> $@; \
-		tail $@; \
-		touch -r $< -A -010000 $@ 2> /dev/null || touch -r $< --date='-1 hour' $@; \
-		exit 1; \
+	    echo Re-running $<...; \
+	    if $(PYTHON) $(PYTHON_WARNLEVEL) $< > $@ 2>&1; then \
+		    echo $(PY_SUCCESS_MAGIC) >> $@; \
+		    exit 0; \
+		else \
+			echo "Error while running $<" >> $@; \
+			tail $@; \
+			touch -r $< -A -010000 $@ 2> /dev/null || touch -r $< --date='-1 hour' $@; \
+			exit 1; \
+		fi; \
 	fi
 
 
