@@ -3,7 +3,7 @@
 
 # "Fuzzing in the Large" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2021-10-16 13:10:07+02:00
+# Last change: 2021-10-17 15:14:22+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -106,10 +106,10 @@ if __name__ == '__main__':
 
 
 
-### Setting up the Server
+### Excursion: Setting up the Server
 
 if __name__ == '__main__':
-    print('\n### Setting up the Server')
+    print('\n### Excursion: Setting up the Server')
 
 
 
@@ -126,26 +126,32 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     import os
+    os.system(f'cd FuzzManager; git checkout 0.4.1')
+
+if __name__ == '__main__':
+    import os
     os.system(f'pip install -r FuzzManager/server/requirements.txt > /dev/null')
 
 if __name__ == '__main__':
     import os
-    os.system(f'cd FuzzManager/server; python ./manage.py migrate > /dev/null')
+    os.system(f'cd FuzzManager; python server/manage.py migrate > /dev/null')
 
 if __name__ == '__main__':
     import os
-    os.system(f'(cd FuzzManager/server; echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser(\'demo\', \'demo@fuzzingbook.org\', \'demo\')" | python manage.py shell)')
+    os.system(f'(cd FuzzManager; echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser(\'demo\', \'demo@fuzzingbook.org\', \'demo\')" | python server/manage.py shell)')
 
 import subprocess
 import sys
 
 if __name__ == '__main__':
+    os.chdir('FuzzManager')
     result = subprocess.run(['python', 
-                             'FuzzManager/server/manage.py',
+                             'server/manage.py',
                              'get_auth_token',
                              'demo'], 
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE)
+    os.chdir('..')
 
     err = result.stderr.decode('ascii')
     if len(err) > 0:
@@ -185,20 +191,28 @@ from .bookutils import print_file
 if __name__ == '__main__':
     print_file(conf, lexer=IniLexer())
 
-### Starting the Server
+### End of Excursion
 
 if __name__ == '__main__':
-    print('\n### Starting the Server')
+    print('\n### End of Excursion')
 
 
 
-from multiprocessing import Process
+### Excursion: Starting the Server
+
+if __name__ == '__main__':
+    print('\n### Excursion: Starting the Server')
+
+
+
+from multiprocess import Process
 
 import subprocess
 
 def run_fuzzmanager():
     def run_fuzzmanager_forever():
-        proc = subprocess.Popen(['python', 'FuzzManager/server/manage.py',
+        os.chdir('FuzzManager')
+        proc = subprocess.Popen(['python', 'server/manage.py',
                                  'runserver'],
                                 stdout=subprocess.PIPE,
                                 stdin=subprocess.PIPE,
@@ -221,6 +235,13 @@ import time
 
 if __name__ == '__main__':
     time.sleep(2)
+
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
 
 ### Logging In
 
@@ -323,7 +344,9 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    from .FTB.ProgramConfiguration import ProgramConfiguration
+    os.chdir('FuzzManager')
+    from FTB.ProgramConfiguration import ProgramConfiguration
+    os.chdir('..')
 
 if __name__ == '__main__':
     configuration = ProgramConfiguration.fromBinary('simply-buggy/simple-crash')
@@ -337,7 +360,9 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    from .FTB.Signatures.CrashInfo import CrashInfo
+    os.chdir('FuzzManager')
+    from FTB.Signatures.CrashInfo import CrashInfo
+    os.chdir('..')
 
 if __name__ == '__main__':
     cmd = ["simply-buggy/simple-crash"]
@@ -363,13 +388,15 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    from .Collector.Collector import Collector
+    os.chdir('FuzzManager')
+    from Collector.Collector import Collector
+    os.chdir('..')
 
 if __name__ == '__main__':
     collector = Collector()
 
 if __name__ == '__main__':
-    collector.submit(crashInfo);
+    collector.submit(crashInfo)
 
 ### Inspecting Crashes
 
@@ -570,7 +597,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     import os
-    os.system(f'python3 FuzzManager/server/manage.py setup_repository simply-buggy GITSourceCodeProvider $HOME/simply-buggy-server')
+    os.system(f'cd FuzzManager; python3 server/manage.py setup_repository simply-buggy GITSourceCodeProvider $HOME/simply-buggy-server')
 
 import random
 import subprocess
@@ -618,7 +645,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     import os
-    os.system(f'python3 -mCovReporter --repository simply-buggy --description "Test1" --submit coverage.json')
+    os.system(f'cd FuzzManager; python3 -mCovReporter --repository simply-buggy --description "Test1" --submit ../coverage.json')
 
 if __name__ == '__main__':
     gui_driver.get(fuzzmanager_url + "/covmanager")

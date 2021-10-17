@@ -6,6 +6,9 @@
 &nbsp;
 [![Notebook Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-notebooks.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-notebooks.yml)
 &nbsp;
+<!-- [![Static Type Checking](https://github.com/uds-se/fuzzingbook/actions/workflows/check-types.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-types.yml)
+&nbsp;
+-->
 [![Imports](https://github.com/uds-se/fuzzingbook/actions/workflows/check-imports.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-imports.yml)
 &nbsp;
 [![Website www.fuzzingbook.org](https://img.shields.io/website-up-down-green-red/https/www.fuzzingbook.org.svg)](https://www.fuzzingbook.org/)
