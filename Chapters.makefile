@@ -141,3 +141,7 @@ TODO_CHAPTERS = \
 	$(DOMAINS_PART_TODO) \
 	$(MANAGEMENT_PART_TODO)
 
+## Specific settings
+# No timeouts; debuggingbook/GreyboxFuzzer can take up to 10 minutes to run
+EXECUTE_TIMEOUT = 600
+TIME = time
