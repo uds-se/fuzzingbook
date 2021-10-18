@@ -156,7 +156,7 @@ def fix_imports(code: str) -> str:
         # IPython
         return code
 
-    if code.find(r"\bCollector\b") >= 0 or code.find(r"\bFTB\b") >= 0:
+    if re.search(r"\b(Collector|FTB)\b", code) is not None:
         # FuzzManager imports
         return code
 
