@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2021-10-17 13:19:14+02:00
+# Last change: 2021-10-17 16:06:39+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
 
 import random
-from .Coverage import Coverage, population_coverage
+from .Coverage import population_coverage
 
 class Mutator(object):
     def __init__(self):
@@ -101,14 +101,14 @@ class Mutator(object):
         ]
 
 class Mutator(Mutator):
-    def insert_random_character(self,s):
+    def insert_random_character(self, s):
         """Returns s with a random character inserted"""
         pos = random.randint(0, len(s))
         random_character = chr(random.randrange(32, 127))
         return s[:pos] + random_character + s[pos:]
 
 class Mutator(Mutator):
-    def delete_random_character(self,s):
+    def delete_random_character(self, s):
         """Returns s with a random character deleted"""
         if s == "":
             return self.insert_random_character(s)
@@ -117,7 +117,7 @@ class Mutator(Mutator):
         return s[:pos] + s[pos + 1:]
 
 class Mutator(Mutator):
-    def flip_random_character(self,s):
+    def flip_random_character(self, s):
         """Returns s with a random bit flipped in a random position"""
         if s == "":
             return self.insert_random_character(s)
@@ -128,7 +128,7 @@ class Mutator(Mutator):
         new_c = chr(ord(c) ^ bit)
         return s[:pos] + new_c + s[pos + 1:]
 
-class Mutator(Mutator):    
+class Mutator(Mutator):
     def mutate(self, inp):
         """Return s with a random mutation applied"""
         mutator = random.choice(self.mutators)
@@ -148,16 +148,17 @@ class Seed(object):
     def __init__(self, data):
         """Set seed data"""
         self.data = data
-        
+
     def __str__(self):
         """Returns data as string representation of the seed"""
         return self.data
+
     __repr__ = __str__
 
 if __name__ == '__main__':
     import numpy as np
 
-class PowerSchedule(object):    
+class PowerSchedule(object):
     def assignEnergy(self, population):
         """Assigns each seed the same energy"""
         for seed in population:
@@ -169,7 +170,7 @@ class PowerSchedule(object):
         sum_energy = sum(energy)  # Add up all values in energy
         norm_energy = list(map(lambda nrg: nrg/sum_energy, energy))
         return norm_energy
-    
+
     def choose(self, population):
         """Choose weighted by normalized energy."""
         import numpy as np
@@ -183,9 +184,9 @@ if __name__ == '__main__':
     population = [Seed("A"), Seed("B"), Seed("C")]
     schedule = PowerSchedule()
     hits = {
-        "A" : 0,
-        "B" : 0,
-        "C" : 0
+        "A": 0,
+        "B": 0,
+        "C": 0
     }
 
     for i in range(10000):
@@ -203,10 +204,10 @@ if __name__ == '__main__':
 
 from .MutationFuzzer import FunctionCoverageRunner
 
-def crashme (s):
-    if             len(s) > 0 and s[0] == 'b':
-        if         len(s) > 1 and s[1] == 'a':
-            if     len(s) > 2 and s[2] == 'd':
+def crashme(s):
+    if len(s) > 0 and s[0] == 'b':
+        if len(s) > 1 and s[1] == 'a':
+            if len(s) > 2 and s[2] == 'd':
                 if len(s) > 3 and s[3] == '!':
                     raise Exception()
 
@@ -226,7 +227,6 @@ if __name__ == '__main__':
 from .Fuzzer import Fuzzer
 
 class MutationFuzzer(Fuzzer):
-    
     def __init__(self, seeds, mutator, schedule):
         self.seeds = seeds
         self.mutator = mutator
@@ -245,7 +245,7 @@ class MutationFuzzer(Fuzzer):
 
         # Stacking: Apply multiple mutations to generate the candidate
         candidate = seed.data
-        trials = min(len(candidate), 1 << random.randint(1,5))
+        trials = min(len(candidate), 1 << random.randint(1, 5))
         for i in range(trials):
             candidate = self.mutator.mutate(candidate)
         return candidate
@@ -259,10 +259,9 @@ class MutationFuzzer(Fuzzer):
         else:
             # Mutating
             self.inp = self.create_candidate()
-            
+
         self.inputs.append(self.inp)
         return self.inp
-    
 
 if __name__ == '__main__':
     seed_input = "good"
@@ -283,8 +282,6 @@ if __name__ == '__main__':
 
     "It took the blackbox mutation-based fuzzer %0.2f seconds to generate and execute %d inputs." % (end - start, n)
 
-from .Coverage import population_coverage
-
 if __name__ == '__main__':
     _, blackbox_coverage = population_coverage(blackbox_fuzzer.inputs, crashme)
     bb_max_coverage = max(blackbox_coverage)
@@ -293,9 +290,10 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     [seed_input] + \
-    [blackbox_fuzzer.inputs[idx] for idx in range(len(blackbox_coverage)) 
-        if blackbox_coverage[idx] > blackbox_coverage[idx - 1]
-    ]
+        [
+            blackbox_fuzzer.inputs[idx] for idx in range(len(blackbox_coverage))
+            if blackbox_coverage[idx] > blackbox_coverage[idx - 1]
+        ]
 
 ### Greybox Mutation-based Fuzzer
 
@@ -309,8 +307,8 @@ class GreyboxFuzzer(MutationFuzzer):
         """Reset the initial population, seed index, coverage information"""
         super().reset()
         self.coverages_seen = set()
-        self.population = [] # population is filled during greybox fuzzing
-           
+        self.population = []  # population is filled during greybox fuzzing
+
     def run(self, runner):
         """Run function(inp) while tracking coverage.
            If we reach new coverage,
@@ -377,7 +375,7 @@ def getPathID(coverage):
 class AFLFastSchedule(PowerSchedule): 
     def __init__(self, exponent):
         self.exponent = exponent
-            
+
     def assignEnergy(self, population):
         """Assign exponential energy inversely proportional to path frequency"""
         for seed in population:
@@ -388,17 +386,17 @@ class CountingGreyboxFuzzer(GreyboxFuzzer):
         """Reset path frequency"""
         super().reset()
         self.schedule.path_frequency = {}
-    
+
     def run(self, runner):
         """Inform scheduler about path frequency"""
         result, outcome = super().run(runner)
 
         path_id = getPathID(runner.coverage())
-        if not path_id in self.schedule.path_frequency:
+        if path_id not in self.schedule.path_frequency:
             self.schedule.path_frequency[path_id] = 1
         else:
             self.schedule.path_frequency[path_id] += 1
-            
+
         return(result, outcome)
 
 if __name__ == '__main__':
@@ -419,8 +417,8 @@ if __name__ == '__main__':
     plt.bar(x_axis, y_axis)
     plt.xticks(x_axis)
     plt.ylim(0, n)
-    #plt.yscale("log")
-    #plt.yticks([10,100,1000,10000])
+    # plt.yscale("log")
+    # plt.yticks([10,100,1000,10000])
     plt;
 
 if __name__ == '__main__':
@@ -444,8 +442,8 @@ if __name__ == '__main__':
     plt.bar(x_axis, y_axis)
     plt.xticks(x_axis)
     plt.ylim(0, n)
-    #plt.yscale("log")
-    #plt.yticks([10,100,1000,10000])
+    # plt.yscale("log")
+    # plt.yticks([10,100,1000,10000])
     plt;
 
 if __name__ == '__main__':
@@ -488,11 +486,12 @@ def my_parser(inp):
     parser = HTMLParser()  # resets the HTMLParser object for every fuzz input
     parser.feed(inp)
 
-n = 5000
-seed_input = " " # empty seed
-blackbox_fuzzer = MutationFuzzer([seed_input], Mutator(), PowerSchedule())
-greybox_fuzzer  = GreyboxFuzzer([seed_input], Mutator(), PowerSchedule())
-boosted_fuzzer  = CountingGreyboxFuzzer([seed_input], Mutator(), AFLFastSchedule(5))
+if __name__ == '__main__':
+    n = 5000
+    seed_input = " "  # empty seed
+    blackbox_fuzzer = MutationFuzzer([seed_input], Mutator(), PowerSchedule())
+    greybox_fuzzer = GreyboxFuzzer([seed_input], Mutator(), PowerSchedule())
+    boosted_fuzzer = CountingGreyboxFuzzer([seed_input], Mutator(), AFLFastSchedule(5))
 
 if __name__ == '__main__':
     start = time.time()
@@ -599,7 +598,7 @@ class MazeMutator(DictMutator):
             return s[:-1]
 
 if __name__ == '__main__':
-    n = 10000
+    n = 20000
     seed_input = " "  # empty seed
 
     maze_mutator = MazeMutator(["L", "R", "U", "D"])
@@ -754,7 +753,7 @@ class AFLGoSchedule(DirectedSchedule):
             if (seed.distance == min_dist):
                 if min_dist == max_dist:
                     seed.energy = 1
-                else: 
+                else:
                     seed.energy = max_dist - min_dist
             else:
                 seed.energy = ((max_dist - min_dist) / (seed.distance - min_dist)) 

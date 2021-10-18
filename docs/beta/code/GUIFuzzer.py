@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2021-10-16 12:23:03+02:00
+# Last change: 2021-10-17 16:13:06+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -129,6 +129,15 @@ if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
+
+import os
+import sys
+
+if __name__ == '__main__':
+    if 'CI' in os.environ:
+        # Can't run this in our continuous environment,
+        # since it can't run a headless Web browser
+        sys.exit(0)
 
 from .WebFuzzer import init_db, start_httpd, webbrowser, print_httpd_messages, print_url, ORDERS_DB
 

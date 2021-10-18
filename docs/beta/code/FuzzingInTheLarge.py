@@ -3,7 +3,7 @@
 
 # "Fuzzing in the Large" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2021-10-17 15:14:22+02:00
+# Last change: 2021-10-17 16:16:11+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -114,7 +114,14 @@ if __name__ == '__main__':
 
 
 import os
+import sys
 import shutil
+
+if __name__ == '__main__':
+    if 'CI' in os.environ:
+        # Can't run this in our continuous environment,
+        # since it can't run a headless Web browser
+        sys.exit(0)
 
 if __name__ == '__main__':
     if os.path.exists('FuzzManager'):
@@ -606,7 +613,7 @@ if __name__ == '__main__':
     random.seed(0)
     cmd = ["simply-buggy/maze"]
 
-    constants = [3735928559, 1111638594]; 
+    constants = [3735928559, 1111638594]
 
     TRIALS = 1000
 
