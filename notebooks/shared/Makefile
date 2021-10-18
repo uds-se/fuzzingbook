@@ -1032,6 +1032,7 @@ DIST_CODE_FILES = \
 
 clean-dist:
 	$(RM) -r code/__pycache__
+	-chmod +w code/$(UTILS) code/$(UTILS)/__pycache__
 	$(RM) -r code/$(UTILS)/__pycache__
 	$(RM) -r $(DOCS_TARGET)notebooks/$(PROJECT)/__pycache__
 	$(RM) -r $(DOCS_TARGET)notebooks/$(UTILS)/__pycache__
