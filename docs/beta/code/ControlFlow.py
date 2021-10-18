@@ -3,7 +3,7 @@
 
 # "Control Flow Graph" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2021-10-17 13:20:36+02:00
+# Last change: 2021-10-18 13:42:06+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -871,6 +871,13 @@ if __name__ == '__main__':
 import shutil
 
 PYAN = 'pyan3' if shutil.which('pyan3') is not None else 'pyan'
+
+if shutil.which(PYAN) is None:
+    # If installed from pypi, pyan may still be missing
+    os.system('pip install "git+https://github.com/uds-se/pyan#egg=pyan"')
+    PYAN = 'pyan3' if shutil.which('pyan3') is not None else 'pyan'
+
+assert shutil.which(PYAN) is not None
 
 def construct_callgraph(code, name="callgraph"):
     file_name = name + ".py"
