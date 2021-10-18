@@ -419,12 +419,15 @@ else
 COMMIT_SYNOPSIS =
 endif
 
-# These notebooks can't be run under CI, so we simply copy them instead
+# These notebooks can't be run under CI, as they interact with Firefox
+# So we simply copy them instead
 ifeq ($(origin CI),environment)
 $(FULL_NOTEBOOKS)/Tracking.ipynb: $(NOTEBOOKS)/Tracking.ipynb
 	cp -pr $< $@
-# $(FULL_NOTEBOOKS)/ChangeCounter.ipynb: $(NOTEBOOKS)/ChangeCounter.ipynb
-# 	cp -pr $< $@
+$(FULL_NOTEBOOKS)/GUIFuzzer.ipynb: $(NOTEBOOKS)/GUIFuzzer.ipynb
+	cp -pr $< $@
+$(FULL_NOTEBOOKS)/FuzzingInTheLarge.ipynb: $(NOTEBOOKS)/FuzzingInTheLarge.ipynb
+	cp -pr $< $@
 endif
 
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS)
