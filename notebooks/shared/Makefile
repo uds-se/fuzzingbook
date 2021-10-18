@@ -1199,7 +1199,7 @@ binder: .FORCE
 SHARED_LEADER = debuggingbook
 SHARED_FOLLOWER = fuzzingbook
 .PHONY: shared
-shared:
+shared: clean-dist
 	@if [ -d ../$(SHARED_FOLLOWER) ]; then \
 		echo "Copying $(SHARED) from $(SHARED_LEADER) -> $(SHARED_FOLLOWER)"; \
 		chmod -R +w ../$(SHARED_FOLLOWER)/$(SHARED); \
