@@ -3,7 +3,7 @@
 
 # "Fuzzing in the Large" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2021-10-17 16:16:11+02:00
+# Last change: 2021-10-18 10:44:10+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -351,9 +351,10 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    os.chdir('FuzzManager')
+    sys.path.append('FuzzManager')
+
+if __name__ == '__main__':
     from FTB.ProgramConfiguration import ProgramConfiguration
-    os.chdir('..')
 
 if __name__ == '__main__':
     configuration = ProgramConfiguration.fromBinary('simply-buggy/simple-crash')
@@ -367,9 +368,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    os.chdir('FuzzManager')
     from FTB.Signatures.CrashInfo import CrashInfo
-    os.chdir('..')
 
 if __name__ == '__main__':
     cmd = ["simply-buggy/simple-crash"]
@@ -395,9 +394,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    os.chdir('FuzzManager')
     from Collector.Collector import Collector
-    os.chdir('..')
 
 if __name__ == '__main__':
     collector = Collector()
@@ -744,9 +741,9 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     home = os.path.expanduser("~")
-    for temp_dir in ['coverage', 'simply-buggy', 'simply-buggy-server', 
+    for temp_dir in ['coverage', 'simply-buggy', 'simply-buggy-server',
                      os.path.join(home, 'simply-buggy-server'),
-                    'FuzzManager']:
+                     'FuzzManager']:
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
 
