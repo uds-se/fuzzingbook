@@ -1017,6 +1017,9 @@ publish-code-setup:
 	
 $(DOCS_TARGET)code/%: $(CODE_TARGET)%
 	cp -pr $< $@
+	
+$(DOCS_TARGET)code/requirements.txt: requirements.txt
+	cp -pr $< $@
 
 .PHONY: dist publish-dist
 dist publish-dist: publish-code toc \
