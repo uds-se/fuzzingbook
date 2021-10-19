@@ -3,7 +3,7 @@
 
 # "Fuzzing: Breaking Things with Random Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2021-10-14 18:39:59+02:00
+# Last change: 2021-10-19 15:14:19+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -101,6 +101,10 @@ if __name__ == '__main__':
     print('# Fuzzing: Breaking Things with Random Inputs')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('u833Dtfftmw')
 
 if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
