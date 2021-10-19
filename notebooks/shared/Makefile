@@ -822,11 +822,6 @@ $(CODE_TARGET).Tracking.py.out: $(CODE_TARGET)Tracking.py
 	@echo Skipping $<...
 	@echo $(PY_SUCCESS_MAGIC) > $@
 
-# $(CODE_TARGET).FuzzingInTheLarge.py.out: $(CODE_TARGET)FuzzingInTheLarge.py
-# 	@echo Skipping $<...
-# 	@echo $(PY_SUCCESS_MAGIC) > $@
-
-
 
 .PHONY: test-code
 test-code: code $(PYS_OUT)
@@ -1005,6 +1000,7 @@ $(DOCS_TARGET)html/%: $(HTML_TARGET)%
 publish-code: code publish-code-setup \
 	$(DOCS_TARGET)code/LICENSE.md \
 	$(DOCS_TARGET)code/README.md \
+	$(DOCS_TARGET)code/requirements.txt \
 	$(DOCS_TARGET)code/setup.py \
 	$(DOCS_TARGET)code/__init__.py \
 	$(UTILITY_FILES:%=$(DOCS_TARGET)code/$(UTILS)/%) \
@@ -1028,8 +1024,9 @@ dist publish-dist: publish-code toc \
 	$(DOCS_TARGET)dist/$(PROJECT)-notebooks.zip
 
 DIST_CODE_FILES = \
-	$(DOCS_TARGET)code/README.md \
 	$(DOCS_TARGET)code/LICENSE.md \
+	$(DOCS_TARGET)code/README.md \
+	$(DOCS_TARGET)code/requirements.txt \
 	$(DOCS_TARGET)code/setup.py \
 	$(DOCS_TARGET)code/__init__.py
 
@@ -1037,10 +1034,8 @@ clean-dist:
 	$(RM) -r code/__pycache__
 	-chmod +w code/$(UTILS) code/$(UTILS)/__pycache__
 	$(RM) -r code/$(UTILS)/__pycache__
-	$(RM) -r $(DOCS_TARGET)notebooks/$(PROJECT)/__pycache__
-	$(RM) -r $(DOCS_TARGET)notebooks/$(UTILS)/__pycache__
-	$(RM) -r $(DOCS_TARGET)code/$(UTILS)/__pycache__
-	$(RM) -r $(DOCS_TARGET)notebooks/.ipynb_checkpoints
+	-find $(DOCS_TARGET) -name __pycache__ -exec $(RM) -r {} \;
+	-find $(DOCS_TARGET) -name .ipynb_checkpoints -exec $(RM) -r {} \;
 
 $(DOCS_TARGET)dist/$(PROJECT)-code.zip: \
 	$(PYS) $(DIST_CODE_FILES) $(CHAPTERS_MAKEFILE) clean-dist
@@ -1051,7 +1046,7 @@ $(DOCS_TARGET)dist/$(PROJECT)-code.zip: \
 	ln -s ../code $(DOCS_TARGET)$(PROJECT)/$(PROJECT)
 	mv $(DOCS_TARGET)$(PROJECT)/$(PROJECT)/setup.py $(DOCS_TARGET)$(PROJECT)
 	mv $(DOCS_TARGET)$(PROJECT)/$(PROJECT)/README.md $(DOCS_TARGET)$(PROJECT)
-	# ln -s ../../requirements.txt $(DOCS_TARGET)$(PROJECT)
+	mv $(DOCS_TARGET)$(PROJECT)/$(PROJECT)/requirements.txt $(DOCS_TARGET)$(PROJECT)
 	cd $(DOCS_TARGET)$(PROJECT); PYTHONPATH= $(PYTHON) ./setup.py sdist
 	mv $(DOCS_TARGET)$(PROJECT)/dist/* $(DOCS_TARGET)dist
 	# mv $(DOCS_TARGET)$(PROJECT)/*.egg-info $(DOCS_TARGET)dist
@@ -1068,7 +1063,7 @@ $(DOCS_TARGET)dist/$(PROJECT)-notebooks.zip: $(FULLS) $(CHAPTERS_MAKEFILE) \
 	cd $(DOCS_TARGET); ln -s notebooks $(PROJECT)-notebooks
 	cd $(DOCS_TARGET); \
 		$(ZIP) $(ZIP_OPTIONS) $(PROJECT)-notebooks.zip $(PROJECT)-notebooks
-	$(RM) $(DOCS_TARGET)/$(PROJECT)-notebooks
+	$(RM) $(DOCS_TARGET)$(PROJECT)-notebooks
 	cd $(DOCS_TARGET); \
 		for file in $(EXTRAS); do \
 			$(ZIP) $(PROJECT)-notebooks.zip -d $(PROJECT)-notebooks/$$file; \
@@ -1101,6 +1096,7 @@ publish-notebooks: full-notebooks publish-notebooks-setup \
 	$(DOCS_TARGET)notebooks/$(BIB) \
 	$(DOCS_TARGET)notebooks/LICENSE.md \
 	$(DOCS_TARGET)notebooks/README.md \
+	$(DOCS_TARGET)notebooks/requirements.txt \
 	$(DOCS:%=$(DOCS_TARGET)notebooks/%.ipynb) \
 	$(UTILITY_FILES:%=$(DOCS_TARGET)notebooks/$(UTILS)/%)
 
@@ -1114,6 +1110,12 @@ publish-notebooks-setup:
 
 $(DOCS_TARGET)notebooks/%: $(FULL_NOTEBOOKS)/%
 	cp -pr $< $@
+
+$(DOCS_TARGET)notebooks/requirements.txt: requirements.txt
+	cp -pr $< $@
+$(DOCS_TARGET)notebooks/LICENSE,md: LICENSE.md
+	cp -pr $< $@
+
 
 .PHONY: publish-index
 publish-index: $(DOCS_TARGET)notebooks/00_Index.ipynb
@@ -1152,7 +1154,7 @@ $(DOCS_TARGET)notebooks/00_Table_of_Contents.ipynb: $(SHARED)utils/nbtoc.py \
 		
 # Index
 .PHONY: index
-index: $(DOCS_TARGET)notebooks/00_Index.ipynb $(DOCS_TARGET)/html/00_Index.html
+index: $(DOCS_TARGET)notebooks/00_Index.ipynb $(DOCS_TARGET)html/00_Index.html
 $(DOCS_TARGET)notebooks/00_Index.ipynb: $(SHARED)utils/nbindex.py \
 	$(TOC_CHAPTERS:%=$(DOCS_TARGET)notebooks/%) \
 	$(TOC_APPENDICES:%=$(DOCS_TARGET)notebooks/%) \
