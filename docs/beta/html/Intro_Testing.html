@@ -11832,6 +11832,8 @@ The same holds for `x = 2.0`, apparently, too:
 
 If you are reading this in the interactive notebook, you can try out `mysqrt()` with other values as well.  Click on one of the above cells with invocations of `mysqrt()` and change the value – say, to `mysqrt(1)`.  Press `Shift+Enter` (or click on the play symbol) to execute it and see the result.  If you get an error message, go to the above cell with the definition of `mysqrt()` and execute this first.  You can also run all cells at once; see the Notebook menu for details.  (You can actually also change the text by clicking on it, and corect mistaks such as in this sentence.)
 
+Try it out for yourself by uncommenting and executing the following line:
+
 Executing a single cell does not execute other cells, so if your cell builds on a definition in another cell that you have not executed yet, you will get an error.  You can select `Run all cells above` from the menu to ensure all definitions are set.
 
 Also keep in mind that, unless overwritten, all definitions are kept across executions.  Occasionally, it thus helps to restart the kernel (i.e. start the Python interpreter from scratch) to get rid of older, superfluous definitions.
@@ -11881,6 +11883,8 @@ We can also introduce a special function for this purpose, and now do more tests
 
 Seems to work, right?  If we know the expected results of a computation, we can use such assertions again and again to ensure our program works correctly.
 
+(Hint: a true Python programmer would use the function `math.isclose()` instead.)
+
 ## Generating Tests
 
 Remember that the property $\sqrt{x} \times \sqrt{x} = x$ universally holds?  We can also explicitly test this with a few values:
@@ -11905,13 +11909,15 @@ Such an automatic run-time check is very easy to implement:
 
 Now, whenever we compute a root with `mysqrtchecked()`$\dots$
 
-we already know that the result is correct, and will so for every new successful computation.
+... we already know that the result is correct, and will so for every new successful computation.
 
 Automatic run-time checks, as above, assume two things, though:
 
  One has to be able to formulate such run-time checks.  Having concrete values to check against should always be possible, but formulating desired properties in an abstract fashion can be very complex.  In practice, you need to decide which properties are most crucial, and design appropriate checks for them.  Plus, run-time checks may depend not only on local properties, but on several properties of the program state, which all have to be identified.
 
  One has to be able to afford such run-time checks.  In the case of `mysqrt()`, the check is not very expensive; but if we have to check, say, a large data structure even after a simple operation, the cost of the check may soon be prohibitive.  In practice, run-time checks will typically be disabled during production, trading reliability for efficiency.  On the other hand, a comprehensive suite of run-time checks is a great way to find errors and quickly debug them; you need to decide how many such capabilities you would still want during production.
+
+An important limitation of run-time checks is that they ensure correctness only if there is a result to be checked - that is, they do not guarantee that there always will be one. This is an important limitation compared to symbolic verification techniques and program proofs, which can also guarantee that there is a result – at a much higher (often manual) effort, though.
 
 ## System Input vs Function Input
 
@@ -11938,7 +11944,9 @@ We don&#x27;t want our code terminating with an exception.  Consequently, when a
 
 and then we can be sure that `mysqrt()` is only invoked according to its specification.
 
-But wait!  What happens if `sqrtprogram()` is not invoked with a number?  Then we would try to convert a non-number string, which would also result in a runtime error:
+But wait!  What happens if `sqrtprogram()` is not invoked with a number?
+
+Let&#x27;s try this out! When we try to convert a non-number string, this would also result in a runtime error:
 
 Here&#x27;s a version which also checks for bad inputs:
 
@@ -12499,6 +12507,148 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span> <span class="kn">import</span> <span class="n">quiz</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <script>
+    var bad_answers = new Map();
+
+    function answer(quiz_id) {
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
+        }
+        return ans;
+    }
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
+        }
+        else 
+        {
+            document.getElementById(quiz_id + "-submit").value = "Try again";
+
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
+            }
+
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
+    }
+    </script>
+
+    <div class="quiz">
+    <h3 class="quiz_title">Quiz</h3>
+    <p>
+    <div class="quiz_question">What does <code>my_sqrt(16)</code> produce?</div>
+    </p>
+    <p>
+    <div class="quiz_options" title="Pick a choice.">
+
+        <input type="radio" name="669142a0-3b56-11ec-9c12-acde48001122" id="669142a0-3b56-11ec-9c12-acde48001122-1" onclick="clear_selection('669142a0-3b56-11ec-9c12-acde48001122')">
+        <label id="669142a0-3b56-11ec-9c12-acde48001122-1-label" for="669142a0-3b56-11ec-9c12-acde48001122-1">4</label><br>
+
+        <input type="radio" name="669142a0-3b56-11ec-9c12-acde48001122" id="669142a0-3b56-11ec-9c12-acde48001122-2" onclick="clear_selection('669142a0-3b56-11ec-9c12-acde48001122')">
+        <label id="669142a0-3b56-11ec-9c12-acde48001122-2-label" for="669142a0-3b56-11ec-9c12-acde48001122-2">4.0</label><br>
+
+        <input type="radio" name="669142a0-3b56-11ec-9c12-acde48001122" id="669142a0-3b56-11ec-9c12-acde48001122-3" onclick="clear_selection('669142a0-3b56-11ec-9c12-acde48001122')">
+        <label id="669142a0-3b56-11ec-9c12-acde48001122-3-label" for="669142a0-3b56-11ec-9c12-acde48001122-3">3.99999</label><br>
+
+        <input type="radio" name="669142a0-3b56-11ec-9c12-acde48001122" id="669142a0-3b56-11ec-9c12-acde48001122-4" onclick="clear_selection('669142a0-3b56-11ec-9c12-acde48001122')">
+        <label id="669142a0-3b56-11ec-9c12-acde48001122-4-label" for="669142a0-3b56-11ec-9c12-acde48001122-4">None</label><br>
+
+    </div>
+    </p>
+    <input id="669142a0-3b56-11ec-9c12-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('669142a0-3b56-11ec-9c12-acde48001122', 4, 0, 'len(\&#x27;four\&#x27;) - len(\&#x27;two\&#x27;) + 1')">
+    <span class="quiz_hint" id="669142a0-3b56-11ec-9c12-acde48001122-hint"></span>
+    </div>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Try it out for yourself by uncommenting and executing the following line:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># my_sqrt(16)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -12848,6 +12998,15 @@ approx = 3.0000000000393214
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>(Hint: a true Python programmer would use the function <a href="https://docs.python.org/3/library/math.html#math.isclose"><code>math.isclose()</code></a> instead.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><h2 id="Generating-Tests">Generating Tests<a class="anchor-link" href="#Generating-Tests">&#182;</a></h2><p>Remember that the property $\sqrt{x} \times \sqrt{x} = x$ universally holds?  We can also explicitly test this with a few values:</p>
 </div>
 </div>
@@ -12960,7 +13119,7 @@ approx = 3.0000000000393214
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0.039360108999999976
+<pre>0.025823200999999907
 </pre>
 </div>
 
@@ -13019,7 +13178,7 @@ approx = 3.0000000000393214
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>0.04481313500000006
+<pre>0.030687569999999997
 </pre>
 </div>
 
@@ -13104,7 +13263,7 @@ approx = 3.0000000000393214
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>we already know that the result is correct, and will so for every new successful computation.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>... we already know that the result is correct, and will so for every new successful computation.</p>
 </div>
 </div>
 </div>
@@ -13120,6 +13279,114 @@ approx = 3.0000000000393214
 <li><p>One has to be able to <em>afford</em> such run-time checks.  In the case of <code>my_sqrt()</code>, the check is not very expensive; but if we have to check, say, a large data structure even after a simple operation, the cost of the check may soon be prohibitive.  In practice, run-time checks will typically be disabled during production, trading reliability for efficiency.  On the other hand, a comprehensive suite of run-time checks is a great way to find errors and quickly debug them; you need to decide how many such capabilities you would still want during production.</p>
 </li>
 </ul>
+</div>
+</div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <script>
+    var bad_answers = new Map();
+
+    function answer(quiz_id) {
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
+        }
+        return ans;
+    }
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
+        }
+        else 
+        {
+            document.getElementById(quiz_id + "-submit").value = "Try again";
+
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
+            }
+
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
+    }
+    </script>
+
+    <div class="quiz">
+    <h3 class="quiz_title">Quiz</h3>
+    <p>
+    <div class="quiz_question">Does run-time checking give a guarantee that there will always be a correct result?</div>
+    </p>
+    <p>
+    <div class="quiz_options" title="Pick a choice.">
+
+        <input type="radio" name="66aef7aa-3b56-11ec-9c12-acde48001122" id="66aef7aa-3b56-11ec-9c12-acde48001122-1" onclick="clear_selection('66aef7aa-3b56-11ec-9c12-acde48001122')">
+        <label id="66aef7aa-3b56-11ec-9c12-acde48001122-1-label" for="66aef7aa-3b56-11ec-9c12-acde48001122-1">Yes</label><br>
+
+        <input type="radio" name="66aef7aa-3b56-11ec-9c12-acde48001122" id="66aef7aa-3b56-11ec-9c12-acde48001122-2" onclick="clear_selection('66aef7aa-3b56-11ec-9c12-acde48001122')">
+        <label id="66aef7aa-3b56-11ec-9c12-acde48001122-2-label" for="66aef7aa-3b56-11ec-9c12-acde48001122-2">No</label><br>
+
+    </div>
+    </p>
+    <input id="66aef7aa-3b56-11ec-9c12-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('66aef7aa-3b56-11ec-9c12-acde48001122', 4, 0, '1 ** 1 + 1 ** 1')">
+    <span class="quiz_hint" id="66aef7aa-3b56-11ec-9c12-acde48001122-hint"></span>
+    </div>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>An important limitation of run-time checks is that they ensure correctness <em>only if there is a result</em> to be checked - that is, they do <em>not</em> guarantee that there always will be one. This is an important limitation compared to <em>symbolic verification techniques</em> and program proofs, which can also guarantee that there is a result – at a much higher (often manual) effort, though.</p>
 </div>
 </div>
 </div>
@@ -13262,14 +13529,14 @@ approx = 3.0000000000393214
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_95088/1288144681.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_73325/1288144681.py&#34;, line 2, in &lt;module&gt;
     sqrt_program(&#34;-1&#34;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_95088/580839764.py&#34;, line 3, in sqrt_program
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_73325/580839764.py&#34;, line 3, in sqrt_program
     print(&#39;The root of&#39;, x, &#39;is&#39;, my_sqrt(x))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_95088/2661069967.py&#34;, line 5, in my_sqrt
-    while approx != guess:
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_95088/2661069967.py&#34;, line 5, in my_sqrt
-    while approx != guess:
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_73325/2661069967.py&#34;, line 6, in my_sqrt
+    approx = guess
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_73325/2661069967.py&#34;, line 6, in my_sqrt
+    approx = guess
   File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/ExpectError.ipynb&#34;, line 86, in check_time
     raise TimeoutError
 TimeoutError (expected)
@@ -13342,7 +13609,121 @@ TimeoutError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>But wait!  What happens if <code>sqrt_program()</code> is not invoked with a number?  Then we would try to convert a non-number string, which would also result in a runtime error:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>But wait!  What happens if <code>sqrt_program()</code> is not invoked with a number?</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <script>
+    var bad_answers = new Map();
+
+    function answer(quiz_id) {
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
+        }
+        return ans;
+    }
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
+        }
+        else 
+        {
+            document.getElementById(quiz_id + "-submit").value = "Try again";
+
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
+            }
+
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
+    }
+    </script>
+
+    <div class="quiz">
+    <h3 class="quiz_title">Quiz</h3>
+    <p>
+    <div class="quiz_question">What is the result of <code>sqrt_program('xyzzy')</code>?</div>
+    </p>
+    <p>
+    <div class="quiz_options" title="Pick a choice.">
+
+        <input type="radio" name="675c1264-3b56-11ec-9c12-acde48001122" id="675c1264-3b56-11ec-9c12-acde48001122-1" onclick="clear_selection('675c1264-3b56-11ec-9c12-acde48001122')">
+        <label id="675c1264-3b56-11ec-9c12-acde48001122-1-label" for="675c1264-3b56-11ec-9c12-acde48001122-1">0</label><br>
+
+        <input type="radio" name="675c1264-3b56-11ec-9c12-acde48001122" id="675c1264-3b56-11ec-9c12-acde48001122-2" onclick="clear_selection('675c1264-3b56-11ec-9c12-acde48001122')">
+        <label id="675c1264-3b56-11ec-9c12-acde48001122-2-label" for="675c1264-3b56-11ec-9c12-acde48001122-2">0.0</label><br>
+
+        <input type="radio" name="675c1264-3b56-11ec-9c12-acde48001122" id="675c1264-3b56-11ec-9c12-acde48001122-3" onclick="clear_selection('675c1264-3b56-11ec-9c12-acde48001122')">
+        <label id="675c1264-3b56-11ec-9c12-acde48001122-3-label" for="675c1264-3b56-11ec-9c12-acde48001122-3"><code>None</code></label><br>
+
+        <input type="radio" name="675c1264-3b56-11ec-9c12-acde48001122" id="675c1264-3b56-11ec-9c12-acde48001122-4" onclick="clear_selection('675c1264-3b56-11ec-9c12-acde48001122')">
+        <label id="675c1264-3b56-11ec-9c12-acde48001122-4-label" for="675c1264-3b56-11ec-9c12-acde48001122-4">An exception</label><br>
+
+    </div>
+    </p>
+    <input id="675c1264-3b56-11ec-9c12-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('675c1264-3b56-11ec-9c12-acde48001122', 16, 0, '16 ** 0.5')">
+    <span class="quiz_hint" id="675c1264-3b56-11ec-9c12-acde48001122-hint"></span>
+    </div>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let's try this out! When we try to convert a non-number string, this would also result in a runtime error:</p>
 </div>
 </div>
 </div>
@@ -13381,9 +13762,9 @@ TimeoutError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_95088/1336991207.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_73325/1336991207.py&#34;, line 2, in &lt;module&gt;
     sqrt_program(&#34;xyzzy&#34;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_95088/1267491679.py&#34;, line 2, in sqrt_program
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_73325/1267491679.py&#34;, line 2, in sqrt_program
     x = int(arg)
 ValueError: invalid literal for int() with base 10: &#39;xyzzy&#39; (expected)
 </pre>
@@ -13538,9 +13919,9 @@ ValueError: invalid literal for int() with base 10: &#39;xyzzy&#39; (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_95088/820411145.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_73325/820411145.py&#34;, line 2, in &lt;module&gt;
     root = my_sqrt(0)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_95088/2661069967.py&#34;, line 7, in my_sqrt
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_73325/2661069967.py&#34;, line 7, in my_sqrt
     guess = (approx + x / approx) / 2
 ZeroDivisionError: float division by zero (expected)
 </pre>
@@ -13635,9 +14016,9 @@ ZeroDivisionError: float division by zero (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_95088/305965227.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_73325/305965227.py&#34;, line 2, in &lt;module&gt;
     root = my_sqrt_fixed(-1)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_95088/3001478627.py&#34;, line 2, in my_sqrt_fixed
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_73325/3001478627.py&#34;, line 2, in my_sqrt_fixed
     assert 0 &lt;= x
 AssertionError (expected)
 </pre>
@@ -14206,7 +14587,7 @@ AssertionError (expected)
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Intro_Testing.ipynb" target=_blank)>Last change: 2021-10-19 13:49:23+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Intro_Testing.ipynb" target=_blank)>Last change: 2021-11-01 21:50:09+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -14222,7 +14603,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Intro_Testing.html">Introduction to Software Testing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/Intro_Testing.html">https://www.fuzzingbook.org/beta/html/Intro_Testing.html</a>.  Retrieved 2021-10-19 13:49:23+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Intro_Testing.html">Introduction to Software Testing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/Intro_Testing.html">https://www.fuzzingbook.org/beta/html/Intro_Testing.html</a>.  Retrieved 2021-11-01 21:50:09+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2021:Intro_Testing,
@@ -14232,9 +14613,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2021},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Intro_Testing.html}},
-    note = {Retrieved 2021-10-19 13:49:23+02:00},
+    note = {Retrieved 2021-11-01 21:50:09+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Intro_Testing.html},
-    urldate = {2021-10-19 13:49:23+02:00}
+    urldate = {2021-11-01 21:50:09+01:00}
 }
 </pre>
 </div>

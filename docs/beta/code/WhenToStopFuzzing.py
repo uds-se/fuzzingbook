@@ -3,7 +3,7 @@
 
 # "When To Stop Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2021-10-19 15:32:44+02:00
+# Last change: 2021-11-01 23:45:25+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -89,14 +89,16 @@ import string
 
 if __name__ == '__main__':
     import numpy
-    from numpy.random import choice
-    from numpy.random import shuffle
     from numpy import log
+
+import random
 
 if __name__ == '__main__':
     letters = list(string.ascii_letters[26:])  # upper-case characters
     trigrams = [str(a + b + c) for a in letters for b in letters for c in letters]
-    shuffle(trigrams)
+
+if __name__ == '__main__':
+    random.shuffle(trigrams)
 
 if __name__ == '__main__':
     trigrams[:10]
@@ -110,7 +112,7 @@ if __name__ == '__main__':
         k_book[trigram] = log(1 + 1 / i) / log(26**3 + 1)
 
 if __name__ == '__main__':
-    random_trigram = choice(list(k_book.keys()), p=list(k_book.values()))
+    random_trigram = random.choices(list(k_book.keys()), weights=list(k_book.values()))[0]
     random_trigram
 
 if __name__ == '__main__':
@@ -134,13 +136,16 @@ class EnigmaMachine(Runner):
     def reset(self):
         """Resets the key register"""
         self.msg2key = {}
-        
+
     def internal_msg2key(self, message):
         """Internal helper method. 
            Returns the trigram for an encoded message."""
-        if not message in self.msg2key:
-            # Simulating how an officer chooses a key from the Kenngruppenbuch to encode the message.
-            self.msg2key[message] = choice(list(self.k_book.keys()), p=list(self.k_book.values()))
+        if message not in self.msg2key:
+            # Simulating how an officer chooses a key from the Kenngruppenbuch
+            # to encode the message.
+            self.msg2key[message] = \
+                random.choices(list(self.k_book.keys()),
+                               weights=list(self.k_book.values()))[0]
         trigram = self.msg2key[message]
         return trigram
 
@@ -239,8 +244,6 @@ if __name__ == '__main__':
         o_trigrams, singletons)
 
 class BletchleyPark(BletchleyPark):
-    
-    
     def break_message(self, message):
         """Returning the trigram for an encoded message"""
         # For the following experiment, we want to make it practical
@@ -254,7 +257,7 @@ class BletchleyPark(BletchleyPark):
         #         break
         trigram = enigma.internal_msg2key(message)
         return trigram
-    
+
     def break_n_messages(self, n):
         """Returns how often each trigram has been observed, 
            and #trigrams discovered for each message."""
@@ -265,12 +268,12 @@ class BletchleyPark(BletchleyPark):
         cur_observed = 0
         for cur_msg in range(0, n):
             trigram = self.break_message(cur_msg)
-            
+
             observed[trigram] += 1
             if (observed[trigram] == 1):
                 cur_observed += 1
             timeseries[cur_msg] = cur_observed
-            
+
         return (observed, timeseries)
 
 if __name__ == '__main__':
@@ -347,14 +350,13 @@ if __name__ == '__main__':
             print("    %s : %d" % (trigram, observed[trigram]))
 
 class BletchleyPark(BletchleyPark):
-    
     def __init__(self, enigma):
         super().__init__(enigma)
         self.cur_attempts = 0
         self.cur_observed = 0
         self.observed = defaultdict(int)
         self.timeseries = [None] * max_attempts * 2
-    
+
     def break_message(self, message):
         """Returns the trigram for an encoded message, and
            track #trigrams observed as #attempts increases."""
@@ -366,19 +368,19 @@ class BletchleyPark(BletchleyPark):
             if outcome == self.enigma.PASS: 
                 break
         return trigram
-    
+
     def break_max_attempts(self, max_attempts):
         """Returns #messages successfully cracked after a given #attempts."""
-        cur_msg  = 0
+        cur_msg = 0
         n_messages = 0
 
         while True:
             trigram = self.break_message(cur_msg)
-            
+
             # stop when reaching max_attempts
             if self.cur_attempts >= max_attempts:
                 break
-                
+
             # update observed trigrams
             n_messages += 1
             self.observed[trigram] += 1
@@ -397,12 +399,11 @@ if __name__ == '__main__':
     original
 
 class BoostedBletchleyPark(BletchleyPark):
-    
     def break_message(self, message):
         """Returns the trigram for an encoded message, and
            track #trigrams observed as #attempts increases."""
         self.enigma.cur_msg = message
-        
+
         # boost cracking by trying observed trigrams first
         for trigram in sorted(self.prior, key=self.prior.get, reverse=True):
             self.cur_attempts += 1
@@ -410,7 +411,7 @@ class BoostedBletchleyPark(BletchleyPark):
             self.timeseries[self.cur_attempts] = self.cur_observed
             if outcome == self.enigma.PASS:
                 return trigram
-            
+
         # else fall back to normal cracking
         return super().break_message(message)
 

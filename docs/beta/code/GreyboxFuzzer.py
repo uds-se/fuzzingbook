@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2021-10-19 15:19:18+02:00
+# Last change: 2021-11-01 23:39:05+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -155,9 +155,6 @@ class Seed(object):
 
     __repr__ = __str__
 
-if __name__ == '__main__':
-    import numpy as np
-
 class PowerSchedule(object):
     def assignEnergy(self, population):
         """Assigns each seed the same energy"""
@@ -173,11 +170,9 @@ class PowerSchedule(object):
 
     def choose(self, population):
         """Choose weighted by normalized energy."""
-        import numpy as np
-
         self.assignEnergy(population)
         norm_energy = self.normalizedEnergy(population)
-        seed = np.random.choice(population, p=norm_energy)
+        seed = random.choices(population, weights=norm_energy)[0]
         return seed
 
 if __name__ == '__main__':
@@ -189,10 +184,12 @@ if __name__ == '__main__':
         "C": 0
     }
 
+if __name__ == '__main__':
     for i in range(10000):
         seed = schedule.choose(population)
         hits[seed.data] += 1
 
+if __name__ == '__main__':
     hits
 
 ### Runner and Sample Program
@@ -409,6 +406,9 @@ if __name__ == '__main__':
     end = time.time()
 
     "It took the fuzzer w/ exponential schedule %0.2f seconds to generate and execute %d inputs." % (end - start, n)
+
+if __name__ == '__main__':
+    import numpy as np
 
 if __name__ == '__main__':
     x_axis = np.arange(len(fast_schedule.path_frequency))
@@ -725,7 +725,7 @@ if __name__ == '__main__':
     y = [seed.distance for seed in directed_fuzzer.population]
     x = range(len(y))
     plt.scatter(x, y)
-    plt.ylim(0,max(y))
+    plt.ylim(0, max(y))
     plt.xlabel("Seed ID")
     plt.ylabel("Distance");
 
