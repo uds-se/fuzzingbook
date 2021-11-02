@@ -3,7 +3,7 @@
 
 # "Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2021-11-01 23:26:01+01:00
+# Last change: 2021-11-02 11:27:32+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -88,6 +88,10 @@ if __name__ == '__main__':
     print('# Fuzzing with Grammars')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('mswyS3Wok1c')
 
 if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
