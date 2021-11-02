@@ -82,8 +82,9 @@ APPENDICES = \
 	PrototypingWithPython.ipynb \
 	ExpectError.ipynb \
 	Timer.ipynb \
-	ControlFlow.ipynb \
-	RailroadDiagrams.ipynb
+	ClassDiagram.ipynb \
+	RailroadDiagrams.ipynb \
+	ControlFlow.ipynb
 
 # Additional notebooks for special pages (not to be included in distributions)
 FRONTMATTER = \
