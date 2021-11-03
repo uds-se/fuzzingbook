@@ -3,7 +3,7 @@
 
 # "Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2021-11-02 21:43:47+01:00
+# Last change: 2021-11-03 13:03:24+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -59,11 +59,11 @@ This chapter introduces _grammars_ as a simple means to specify input languages,
 Nonterminal symbols are enclosed in angle brackets (say, ``).  To generate an input string from a grammar, a _producer_ starts with the start symbol (``) and randomly chooses a random expansion for this symbol.  It continues the process until all nonterminal symbols are expanded.  The function `simple_grammar_fuzzer()` does just that:
 
 >>> [simple_grammar_fuzzer(US_PHONE_GRAMMAR) for i in range(5)]
-['(841)808-8307',
- '(370)701-5188',
- '(346)416-1780',
- '(716)955-7429',
- '(451)503-4347']
+['(692)449-5179',
+ '(519)230-7422',
+ '(613)761-0853',
+ '(979)881-3858',
+ '(810)914-5475']
 
 In practice, though, instead of `simple_grammar_fuzzer()`, you should use [the `GrammarFuzzer` class](GrammarFuzzer.ipynb) or one of its [coverage-based](GrammarCoverageFuzzer.ipynb), [probabilistic-based](ProbabilisticGrammarFuzzer.ipynb), or [generator-based](GeneratorGrammarFuzzer.ipynb) derivatives; these are more efficient, protect against infinite growth, and provide several additional features.
 
@@ -486,8 +486,7 @@ TITLE_GRAMMAR = {
                         "Principles, Techniques and Tools"],
     "<subtopic-prefix>": ["", "Tools and Techniques for "],
     "<subtopic-suffix>": [" for <reader-property> and <reader-property>",
-                          " for <software-property> and <software-property>",
-                          "; INSERT INTO TABLE IPHONE_ORDERS ...; --"],
+                          " for <software-property> and <software-property>"],
     "<reader-property>": ["Fun", "Profit"],
     "<software-property>": ["Robustness", "Reliability", "Security"],
 }

@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2021-11-02 16:43:17+01:00
+# Last change: 2021-11-03 13:10:36+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -67,59 +67,80 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>             _[cgi_decode](v)
 >>>     scf.add_trace(_, v)
 ' '
-'%\\x00'
-'%7\\x00'
-'%\\x000\\x00'
+'+\\x00'
+'+\\x00\\x00%\\x00'
 
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/1222853776.py", line 9, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
     _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/2687284210.py", line 3, in __call__
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/1425235974.py", line 42, in cgi_decode
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
+    raise ValueError("Invalid encoding")
+ValueError: Invalid encoding (expected)
+
+'+\\x00\\x00+\\x00'
+'%\\x00'
+'%8\\x00'
+
+Traceback (most recent call last):
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
+    _[cgi_decode](v)
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
+    self.result = self.fn(*self.concolic(args))
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
     raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/1222853776.py", line 9, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
     _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/2687284210.py", line 3, in __call__
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/1425235974.py", line 42, in cgi_decode
-    raise ValueError("Invalid encoding")
-ValueError: Invalid encoding (expected)
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/1425235974.py", line 42, in cgi_decode
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
     raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
 
 '%\\x009\\x00'
-'+\\x00'
-'%7e\\x00'
-'%b\\x00'
+'%\\x009\\x00'
 
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/1222853776.py", line 9, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
     _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/2687284210.py", line 3, in __call__
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/1425235974.py", line 42, in cgi_decode
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
     raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/1222853776.py", line 9, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
     _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/2687284210.py", line 3, in __call__
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_37245/1425235974.py", line 42, in cgi_decode
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
     raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
 
-''
-'%77\\x00'
+'%8F\\x00'
+
+Traceback (most recent call last):
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
+    _[cgi_decode](v)
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
+    self.result = self.fn(*self.concolic(args))
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 39, in cgi_decode
+    raise ValueError("Invalid encoding")
+ValueError: Invalid encoding (expected)
+
+'%c\\x00'
+
+Traceback (most recent call last):
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
+    _[cgi_decode](v)
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
+    self.result = self.fn(*self.concolic(args))
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
+    raise ValueError("Invalid encoding")
+ValueError: Invalid encoding (expected)
 
 
 The `SimpleConcolicFuzzer` simply explores all paths near the original path traversed by the sample input. It uses a simple mechanism to explore the paths that are near the paths that it knows about, and other than code paths, knows nothing about the input.
@@ -140,18 +161,13 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-update m7 set q=I,kn=RF where M2(L)-K*o*h*(W):!=N
-Table ('g2.z') was not found
+update WyX set p=G,E=M,H=X where s((p!=q>O))
+Invalid WHERE ('T-r(q)/F/m(J)>((p!=q>O))')
 
-select S/Lq
-Table ('t61') was not found
+select (Z+l-f*p*Y*A/o+E(Q,S)) from months
+Invalid WHERE ('((Z+l-f*p*Y*A/o+E(Q,S)))')
 
-select (yz(.>c,C)+x/Q/(n>F)-(((e)))) from X
-Table ('X') was not found
-
-
-
-
+update r set A=tUv where m==m
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
 at https://www.fuzzingbook.org/html/ConcolicFuzzer.html
