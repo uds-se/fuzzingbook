@@ -3,7 +3,7 @@
 
 # "Code Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2021-06-02 17:41:31+02:00
+# Last change: 2021-11-03 13:00:25+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -50,13 +50,13 @@ This chapter introduces a `Coverage` class allowing you to measure coverage for 
 The `trace()` method returns the coverage as a list of locations covered.  Each location comes as a pair (`function name`, `line`).
 
 >>> print(cov.trace())
-[('cgi_decode', 9), ('cgi_decode', 10), ('cgi_decode', 11), ('cgi_decode', 12), ('cgi_decode', 15), ('cgi_decode', 16), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 21), ('cgi_decode', 30), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 20), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 21), ('cgi_decode', 30), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 32), ('__exit__', 25)]
+[('cgi_decode', 9), ('cgi_decode', 10), ('cgi_decode', 11), ('cgi_decode', 12), ('cgi_decode', 8), ('cgi_decode', 15), ('cgi_decode', 16), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 21), ('cgi_decode', 30), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 20), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 21), ('cgi_decode', 30), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 32), ('__exit__', 25)]
 
 
 The `coverage()` method returns the set of locations executed at least once:
 
 >>> print(cov.coverage())
-{('cgi_decode', 12), ('cgi_decode', 21), ('cgi_decode', 31), ('cgi_decode', 20), ('cgi_decode', 30), ('cgi_decode', 11), ('cgi_decode', 32), ('cgi_decode', 10), ('cgi_decode', 9), ('cgi_decode', 19), ('__exit__', 25), ('cgi_decode', 18), ('cgi_decode', 15), ('cgi_decode', 17), ('cgi_decode', 16)}
+{('cgi_decode', 20), ('__exit__', 25), ('cgi_decode', 10), ('cgi_decode', 17), ('cgi_decode', 32), ('cgi_decode', 16), ('cgi_decode', 31), ('cgi_decode', 19), ('cgi_decode', 9), ('cgi_decode', 15), ('cgi_decode', 12), ('cgi_decode', 18), ('cgi_decode', 8), ('cgi_decode', 21), ('cgi_decode', 11), ('cgi_decode', 30)}
 
 
 

@@ -11919,8 +11919,9 @@ MathJax.Hub.Config({
 <li><a href="PrototypingWithPython.html">Prototyping with Python</a></li>
 <li><a href="ExpectError.html">Error Handling</a></li>
 <li><a href="Timer.html">Timer</a></li>
-<li><a href="ControlFlow.html">Control Flow Graph</a></li>
+<li><a href="ClassDiagram.html">Class Diagrams</a></li>
 <li><a href="RailroadDiagrams.html">Railroad Diagrams</a></li>
+<li><a href="ControlFlow.html">Control Flow Graph</a></li>
 </ul>
            <li><a href="https://www.fuzzingbook.org/html/00_Index.html">Index (beta)</a></i></li>
         </ol>
@@ -11935,7 +11936,8 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Some-Definitions">&nbsp;&bull;&nbsp;&nbsp; Some Definitions</a>
 </li><li class="has-sub"><a href="#A-Simple-Grammar-Fuzzer">&nbsp;&bull;&nbsp;&nbsp; A Simple Grammar Fuzzer</a>
 </li><li class="has-sub"><a href="#Visualizing-Grammars-as-Railroad-Diagrams">&nbsp;&bull;&nbsp;&nbsp; Visualizing Grammars as Railroad Diagrams</a>
-</li><li class="has-sub"><a href="#Some-Grammars">&nbsp;&bull;&nbsp;&nbsp; Some Grammars</a>
+<ul><li class="has-sub"><a href="#Excursion:-Implementing-`syntax_diagram()`">Excursion: Implementing `syntax_diagram()`</a>
+</ul></li><li class="has-sub"><a href="#Some-Grammars">&nbsp;&bull;&nbsp;&nbsp; Some Grammars</a>
 <ul><li class="has-sub"><a href="#A-CGI-Grammar">A CGI Grammar</a>
 </li><li class="has-sub"><a href="#A-URL-Grammar">A URL Grammar</a>
 </li><li class="has-sub"><a href="#A-Natural-Language-Grammar">A Natural Language Grammar</a>
@@ -11947,7 +11949,8 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Grammar-Shortcuts">Grammar Shortcuts</a>
 </li><li class="has-sub"><a href="#Grammar-Extensions">Grammar Extensions</a>
 </ul></li><li class="has-sub"><a href="#Checking-Grammars">&nbsp;&bull;&nbsp;&nbsp; Checking Grammars</a>
-</li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
+<ul><li class="has-sub"><a href="#Excursion:-Implementing-`is_valid_grammar()`">Excursion: Implementing `is_valid_grammar()`</a>
+</ul></li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps"><i class="fa fa-fw fa-arrows"></i> Next Steps</a>
 </li><li class="has-sub"><a href="#Background"><i class="fa fa-fw fa-mortar-board"></i> Background</a>
 </li><li class="has-sub"><a href="#Exercises"><i class="fa fa-fw fa-edit"></i> Exercises</a>
@@ -12006,6 +12009,38 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 </div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span> <span class="kn">import</span> <span class="n">YouTubeVideo</span>
+<span class="n">YouTubeVideo</span><span class="p">(</span><span class="s1">&#39;mswyS3Wok1c&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+        <iframe
+            width="640"
+            height="360"
+            src="https://www.youtube-nocookie.com/embed/mswyS3Wok1c"
+            frameborder="0"
+            allowfullscreen
+
+        ></iframe>
+
+</div>
+
 </div>
 
 <div class="input_markdown">
@@ -12176,6 +12211,125 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span> <span class="kn">import</span> <span class="n">quiz</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <script>
+    var bad_answers = new Map();
+
+    function answer(quiz_id) {
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
+        }
+        return ans;
+    }
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
+        }
+        else 
+        {
+            document.getElementById(quiz_id + "-submit").value = "Try again";
+
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
+            }
+
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
+    }
+    </script>
+
+    <div class="quiz">
+    <h3 class="quiz_title">Quiz</h3>
+    <p>
+    <div class="quiz_question">Which of these strings cannot be produced from the above <code>&lt;start&gt;</code> symbol?</div>
+    </p>
+    <p>
+    <div class="quiz_options" title="Check all that apply.">
+
+        <input type="checkbox" name="040d085a-3c9e-11ec-9952-acde48001122" id="040d085a-3c9e-11ec-9952-acde48001122-1" onclick="clear_selection('040d085a-3c9e-11ec-9952-acde48001122')">
+        <label id="040d085a-3c9e-11ec-9952-acde48001122-1-label" for="040d085a-3c9e-11ec-9952-acde48001122-1"><code>007</code></label><br>
+
+        <input type="checkbox" name="040d085a-3c9e-11ec-9952-acde48001122" id="040d085a-3c9e-11ec-9952-acde48001122-2" onclick="clear_selection('040d085a-3c9e-11ec-9952-acde48001122')">
+        <label id="040d085a-3c9e-11ec-9952-acde48001122-2-label" for="040d085a-3c9e-11ec-9952-acde48001122-2"><code>-42</code></label><br>
+
+        <input type="checkbox" name="040d085a-3c9e-11ec-9952-acde48001122" id="040d085a-3c9e-11ec-9952-acde48001122-3" onclick="clear_selection('040d085a-3c9e-11ec-9952-acde48001122')">
+        <label id="040d085a-3c9e-11ec-9952-acde48001122-3-label" for="040d085a-3c9e-11ec-9952-acde48001122-3"><code>++1</code></label><br>
+
+        <input type="checkbox" name="040d085a-3c9e-11ec-9952-acde48001122" id="040d085a-3c9e-11ec-9952-acde48001122-4" onclick="clear_selection('040d085a-3c9e-11ec-9952-acde48001122')">
+        <label id="040d085a-3c9e-11ec-9952-acde48001122-4-label" for="040d085a-3c9e-11ec-9952-acde48001122-4"><code>3.14</code></label><br>
+
+    </div>
+    </p>
+    <input id="040d085a-3c9e-11ec-9952-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('040d085a-3c9e-11ec-9952-acde48001122', 24, 1, '[27 ** (1/3), 256 ** (1/4)]')">
+    <span class="quiz_hint" id="040d085a-3c9e-11ec-9952-acde48001122-hint"></span>
+    </div>
+
+</div>
+
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -12191,6 +12345,111 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 </div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <script>
+    var bad_answers = new Map();
+
+    function answer(quiz_id) {
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
+        }
+        return ans;
+    }
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
+        }
+        else 
+        {
+            document.getElementById(quiz_id + "-submit").value = "Try again";
+
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
+            }
+
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
+    }
+    </script>
+
+    <div class="quiz">
+    <h3 class="quiz_title">Quiz</h3>
+    <p>
+    <div class="quiz_question">Which of these strings cannot be produced from the above <code>&lt;start&gt;</code> symbol?</div>
+    </p>
+    <p>
+    <div class="quiz_options" title="Pick a choice.">
+
+        <input type="radio" name="040f4016-3c9e-11ec-9952-acde48001122" id="040f4016-3c9e-11ec-9952-acde48001122-1" onclick="clear_selection('040f4016-3c9e-11ec-9952-acde48001122')">
+        <label id="040f4016-3c9e-11ec-9952-acde48001122-1-label" for="040f4016-3c9e-11ec-9952-acde48001122-1"><code>1 + 1</code></label><br>
+
+        <input type="radio" name="040f4016-3c9e-11ec-9952-acde48001122" id="040f4016-3c9e-11ec-9952-acde48001122-2" onclick="clear_selection('040f4016-3c9e-11ec-9952-acde48001122')">
+        <label id="040f4016-3c9e-11ec-9952-acde48001122-2-label" for="040f4016-3c9e-11ec-9952-acde48001122-2"><code>1+1</code></label><br>
+
+        <input type="radio" name="040f4016-3c9e-11ec-9952-acde48001122" id="040f4016-3c9e-11ec-9952-acde48001122-3" onclick="clear_selection('040f4016-3c9e-11ec-9952-acde48001122')">
+        <label id="040f4016-3c9e-11ec-9952-acde48001122-3-label" for="040f4016-3c9e-11ec-9952-acde48001122-3"><code>+1</code></label><br>
+
+        <input type="radio" name="040f4016-3c9e-11ec-9952-acde48001122" id="040f4016-3c9e-11ec-9952-acde48001122-4" onclick="clear_selection('040f4016-3c9e-11ec-9952-acde48001122')">
+        <label id="040f4016-3c9e-11ec-9952-acde48001122-4-label" for="040f4016-3c9e-11ec-9952-acde48001122-4"><code>+(1)</code></label><br>
+
+    </div>
+    </p>
+    <input id="040f4016-3c9e-11ec-9952-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('040f4016-3c9e-11ec-9952-acde48001122', 4, 0, '4 ** 0.5')">
+    <span class="quiz_hint" id="040f4016-3c9e-11ec-9952-acde48001122-hint"></span>
+    </div>
+
+</div>
+
 </div>
 
 <div class="input_markdown">
@@ -12682,7 +12941,121 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Note that this fuzzer is rather inefficient due to the large number of search and replace operations.  On the other hand, the implementation is straightforward and does the job in most cases.  For this chapter, we'll stick to it; in the <a href="GrammarFuzzer.html">next chapter</a>, we'll show how to build a more efficient one.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Note that while fuzzer does the job in most cases, it has a number of drawbacks.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <script>
+    var bad_answers = new Map();
+
+    function answer(quiz_id) {
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
+        }
+        return ans;
+    }
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
+        }
+        else 
+        {
+            document.getElementById(quiz_id + "-submit").value = "Try again";
+
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
+            }
+
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
+    }
+    </script>
+
+    <div class="quiz">
+    <h3 class="quiz_title">Quiz</h3>
+    <p>
+    <div class="quiz_question">What drawbacks does <code>simple_grammar_fuzzer()</code> have?</div>
+    </p>
+    <p>
+    <div class="quiz_options" title="Pick a choice.">
+
+        <input type="radio" name="042726b8-3c9e-11ec-9952-acde48001122" id="042726b8-3c9e-11ec-9952-acde48001122-1" onclick="clear_selection('042726b8-3c9e-11ec-9952-acde48001122')">
+        <label id="042726b8-3c9e-11ec-9952-acde48001122-1-label" for="042726b8-3c9e-11ec-9952-acde48001122-1">It has a large number of string search and replace operations</label><br>
+
+        <input type="radio" name="042726b8-3c9e-11ec-9952-acde48001122" id="042726b8-3c9e-11ec-9952-acde48001122-2" onclick="clear_selection('042726b8-3c9e-11ec-9952-acde48001122')">
+        <label id="042726b8-3c9e-11ec-9952-acde48001122-2-label" for="042726b8-3c9e-11ec-9952-acde48001122-2">It may fail to produce a string (<code>ExpansionError</code>)</label><br>
+
+        <input type="radio" name="042726b8-3c9e-11ec-9952-acde48001122" id="042726b8-3c9e-11ec-9952-acde48001122-3" onclick="clear_selection('042726b8-3c9e-11ec-9952-acde48001122')">
+        <label id="042726b8-3c9e-11ec-9952-acde48001122-3-label" for="042726b8-3c9e-11ec-9952-acde48001122-3">It often picks some symbol to expand that does not even occur in the string</label><br>
+
+        <input type="radio" name="042726b8-3c9e-11ec-9952-acde48001122" id="042726b8-3c9e-11ec-9952-acde48001122-4" onclick="clear_selection('042726b8-3c9e-11ec-9952-acde48001122')">
+        <label id="042726b8-3c9e-11ec-9952-acde48001122-4-label" for="042726b8-3c9e-11ec-9952-acde48001122-4">All of the above</label><br>
+
+    </div>
+    </p>
+    <input id="042726b8-3c9e-11ec-9952-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('042726b8-3c9e-11ec-9952-acde48001122', 16, 0, '1 &lt;&lt; 2')">
+    <span class="quiz_hint" id="042726b8-3c9e-11ec-9952-acde48001122-hint"></span>
+    </div>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Indeed, <code>simple_grammar_fuzzer()</code> is rather inefficient due to the large number of search and replace operations, and it may even fail to produce a string. On the other hand, the implementation is straightforward and does the job in most cases. For this chapter, we'll stick to it; in the <a href="GrammarFuzzer.html">next chapter</a>, we'll show how to build a more efficient one.</p>
 </div>
 </div>
 </div>
@@ -12708,11 +13081,14 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p><em>Railroad diagrams</em>, also called <em>syntax diagrams</em>, are a graphical representation of context-free grammars.  They are read left to right, following possible "rail" tracks; the sequence of symbols encountered on the track defines the language.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p><em>Railroad diagrams</em>, also called <em>syntax diagrams</em>, are a graphical representation of context-free grammars.  They are read left to right, following possible "rail" tracks; the sequence of symbols encountered on the track defines the language. To produce railroad diagrams, we implement a function <code>syntax_diagram()</code>.</p>
 </div>
 </div>
 </div>
 </div>
+
+<details id="Excursion:-Implementing-syntax_diagram()">
+<summary>Implementing <code>syntax_diagram()</code></summary>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
@@ -12729,7 +13105,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="RailroadDiagrams.html" class="import" target="_blank">RailroadDiagrams</a></span> <span class="kn">import</span> <span class="n">NonTerminal</span><span class="p">,</span> <span class="n">Terminal</span><span class="p">,</span> <span class="n">Choice</span><span class="p">,</span> <span class="n">HorizontalChoice</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Diagram</span><span class="p">,</span> <span class="n">show_diagram</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="RailroadDiagrams.html" class="import" target="_blank">RailroadDiagrams</a></span> <span class="kn">import</span> <span class="n">NonTerminal</span><span class="p">,</span> <span class="n">Terminal</span><span class="p">,</span> <span class="n">Choice</span><span class="p">,</span> <span class="n">HorizontalChoice</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn"><a href="RailroadDiagrams.html" class="import" target="_blank">RailroadDiagrams</a></span> <span class="kn">import</span> <span class="n">show_diagram</span>
 </pre></div>
 
 </div>
@@ -12743,7 +13120,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://ipython.readthedocs.io/en/stable/api/generated/IPython.display.html" class="import" target="_blank">IPython.display</a></span> <span class="kn">import</span> <span class="n">SVG</span><span class="p">,</span> <span class="n">display</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://ipython.readthedocs.io/en/stable/api/generated/IPython.display.html" class="import" target="_blank">IPython.display</a></span> <span class="kn">import</span> <span class="n">SVG</span>
 </pre></div>
 
 </div>
@@ -12795,7 +13172,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea output_execute_result">
-<svg class="railroad-diagram" height="62" viewBox="0 0 154.0 62" width="154.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 154.0 62" width="154.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -12880,7 +13257,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea output_execute_result">
-<svg class="railroad-diagram" height="62" viewBox="0 0 310.5 62" width="310.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 310.5 62" width="310.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -12992,7 +13369,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea output_execute_result">
-<svg class="railroad-diagram" height="109" viewBox="0 0 522.5 109" width="522.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="109" viewBox="0 0 522.5 109" width="522.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13089,6 +13466,17 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 
+</details>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us use <code>syntax_diagram()</code> to produce a railroad diagram of our expression grammar:</p>
+</div>
+</div>
+</div>
+</div>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -13115,7 +13503,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="62" viewBox="0 0 174.0 62" width="174.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 174.0 62" width="174.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13164,7 +13552,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 313.5 122" width="313.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 313.5 122" width="313.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13221,7 +13609,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 330.5 122" width="330.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 330.5 122" width="330.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13278,7 +13666,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="182" viewBox="0 0 347.5 182" width="347.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="182" viewBox="0 0 347.5 182" width="347.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13341,7 +13729,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 282.0 92" width="282.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 282.0 92" width="282.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13393,7 +13781,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="109" viewBox="0 0 522.5 109" width="522.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="109" viewBox="0 0 522.5 109" width="522.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13542,7 +13930,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="62" viewBox="0 0 191.0 62" width="191.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 191.0 62" width="191.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13591,7 +13979,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 282.0 92" width="282.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 282.0 92" width="282.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13643,7 +14031,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 199.5 122" width="199.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 199.5 122" width="199.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13696,7 +14084,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="62" viewBox="0 0 148.5 62" width="148.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 148.5 62" width="148.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13745,7 +14133,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="62" viewBox="0 0 364.5 62" width="364.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 364.5 62" width="364.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13796,7 +14184,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="138" viewBox="0 0 611.0 138" width="611.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="138" viewBox="0 0 611.0 138" width="611.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -13881,7 +14269,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="109" viewBox="0 0 699.5 109" width="699.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="109" viewBox="0 0 699.5 109" width="699.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14069,7 +14457,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="62" viewBox="0 0 165.5 62" width="165.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 165.5 62" width="165.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14118,7 +14506,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="62" viewBox="0 0 529.5 62" width="529.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 529.5 62" width="529.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14171,7 +14559,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="152" viewBox="0 0 182.5 152" width="182.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="152" viewBox="0 0 182.5 152" width="182.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14226,7 +14614,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="152" viewBox="0 0 453.0 152" width="453.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="152" viewBox="0 0 453.0 152" width="453.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14289,7 +14677,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 267.5 122" width="267.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 267.5 122" width="267.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14342,7 +14730,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 174.0 122" width="174.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 174.0 122" width="174.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14395,7 +14783,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 265.0 92" width="265.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 265.0 92" width="265.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14447,7 +14835,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="109" viewBox="0 0 522.5 109" width="522.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="109" viewBox="0 0 522.5 109" width="522.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14519,7 +14907,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="62" viewBox="0 0 250.5 62" width="250.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 250.5 62" width="250.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14568,7 +14956,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 205.5 122" width="205.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 205.5 122" width="205.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14622,7 +15010,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 313.5 122" width="313.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 313.5 122" width="313.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14677,7 +15065,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 239.5 92" width="239.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 239.5 92" width="239.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14729,7 +15117,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 322.0 92" width="322.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 322.0 92" width="322.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14782,7 +15170,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 271.0 92" width="271.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 271.0 92" width="271.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14932,7 +15320,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="62" viewBox="0 0 182.5 62" width="182.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 182.5 62" width="182.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -14981,7 +15369,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="62" viewBox="0 0 347.5 62" width="347.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="62" viewBox="0 0 347.5 62" width="347.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -15032,7 +15420,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 358.5 122" width="358.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 358.5 122" width="358.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -15086,7 +15474,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 233.5 122" width="233.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 233.5 122" width="233.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -15139,7 +15527,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 418.0 122" width="418.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 418.0 122" width="418.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -15194,7 +15582,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 412.0 122" width="412.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 412.0 122" width="412.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -15247,7 +15635,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 352.5 92" width="352.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 352.5 92" width="352.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -15298,7 +15686,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 634.0 92" width="634.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 634.0 92" width="634.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -15355,7 +15743,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="92" viewBox="0 0 191.0 92" width="191.0" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="92" viewBox="0 0 191.0 92" width="191.0">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -15406,7 +15794,7 @@ http://fuzzingbook.com:8080/def
 <div class="output_area">
 
 <div class="output_image output_svg output_subarea ">
-<svg class="railroad-diagram" height="122" viewBox="0 0 233.5 122" width="233.5" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" class="railroad-diagram" height="122" viewBox="0 0 233.5 122" width="233.5">
 <g transform="translate(.5 .5)">
 <style>/* <![CDATA[ */
     svg.railroad-diagram {
@@ -15495,7 +15883,15 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammars-as-Mutation-Seeds">Grammars as Mutation Seeds<a class="anchor-link" href="#Grammars-as-Mutation-Seeds">&#182;</a></h2><p>One very useful property of grammars is that they produce mostly valid inputs.  From a syntactical standpoint, the inputs are actually <em>always</em> valid, as they satisfy the constraints of the given grammar.  (Of course, one needs a valid grammar in the first place.)  However, there are also <em>semantical</em> properties that cannot be easily expressed in a grammar.  If, say, for a URL, the port range is supposed to be between 1024 and 2048, this is hard to write in a grammar.  If one has to satisfy more complex constraints, one quickly reaches the limits of what a grammar can express.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammars-as-Mutation-Seeds">Grammars as Mutation Seeds<a class="anchor-link" href="#Grammars-as-Mutation-Seeds">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>One very useful property of grammars is that they produce mostly valid inputs.  From a syntactical standpoint, the inputs are actually <em>always</em> valid, as they satisfy the constraints of the given grammar.  (Of course, one needs a valid grammar in the first place.)  However, there are also <em>semantical</em> properties that cannot be easily expressed in a grammar.  If, say, for a URL, the port range is supposed to be between 1024 and 2048, this is hard to write in a grammar.  If one has to satisfy more complex constraints, one quickly reaches the limits of what a grammar can express.</p>
 </div>
 </div>
 </div>
@@ -15694,7 +16090,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>To create a new grammar $g'$ from an existing grammar $g$, we first copy $g$ into $g'$, and then go and extend existing rules with new alternatives and/or add new symbols.  Here's an example, extending the above <code>nonterminal</code> grammar with a better rule for identifiers:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>To create a new grammar $g&#x27;$ from an existing grammar $g$, we first copy $g$ into $g&#x27;$, and then go and extend existing rules with new alternatives and/or add new symbols.  Here's an example, extending the above <code>nonterminal</code> grammar with a better rule for identifiers:</p>
 </div>
 </div>
 </div>
@@ -15941,7 +16337,9 @@ http://fuzzingbook.com:8080/def
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">nonterminal_grammar</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">nonterminal_grammar</span><span class="p">,</span>
                                      <span class="p">{</span>
-                                         <span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">:</span> <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span><span class="p">)</span> <span class="o">+</span> <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span> <span class="o">+</span> <span class="n">srange</span><span class="p">(</span><span class="s2">&quot;-_&quot;</span><span class="p">)</span>
+                                         <span class="s2">&quot;&lt;idchar&gt;&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span><span class="p">)</span> <span class="o">+</span> 
+                                                      <span class="n">srange</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">)</span> <span class="o">+</span> 
+                                                      <span class="n">srange</span><span class="p">(</span><span class="s2">&quot;-_&quot;</span><span class="p">))</span>
                                      <span class="p">}</span>
                                      <span class="p">)</span>
 </pre></div>
@@ -16186,6 +16584,18 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us implement a function <code>convert_ebnf_grammar()</code> that takes such an EBNF grammar and automatically translates it into a BNF grammar.</p>
+</div>
+</div>
+</div>
+</div>
+
+<details id="Excursion:-Implementing-convert_ebnf_grammar()">
+<summary>Implementing <code>convert_ebnf_grammar()</code></summary>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>Our aim is to convert EBNF grammars such as the ones above into a regular BNF grammar.  This is done by four rules:</p>
 <ol>
 <li>An expression <code>(content)op</code>, where <code>op</code> is one of <code>?</code>, <code>+</code>, <code>*</code>, becomes <code>&lt;new-symbol&gt;op</code>, with a new rule <code>&lt;new-symbol&gt; ::= content</code>.</li>
@@ -16233,7 +16643,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Creating-New-Symbols">Creating New Symbols<a class="anchor-link" href="#Creating-New-Symbols">&#182;</a></h4><p>First, we need a mechanism to create new symbols.  This is fairly straightforward.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h5 id="Creating-New-Symbols">Creating New Symbols<a class="anchor-link" href="#Creating-New-Symbols">&#182;</a></h5><p>First, we need a mechanism to create new symbols.  This is fairly straightforward.</p>
 </div>
 </div>
 </div>
@@ -16280,7 +16690,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Expanding-Parenthesized-Expressions">Expanding Parenthesized Expressions<a class="anchor-link" href="#Expanding-Parenthesized-Expressions">&#182;</a></h4></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h5 id="Expanding-Parenthesized-Expressions">Expanding Parenthesized Expressions<a class="anchor-link" href="#Expanding-Parenthesized-Expressions">&#182;</a></h5></div>
 </div>
 </div>
 </div>
@@ -16457,7 +16867,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Expanding-Operators">Expanding Operators<a class="anchor-link" href="#Expanding-Operators">&#182;</a></h4><p>After expanding parenthesized expressions, we now need to take care of symbols followed by operators (<code>?</code>, <code>*</code>, <code>+</code>).  As with <code>convert_ebnf_parentheses()</code>, above, we first extract all symbols followed by an operator.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h5 id="Expanding-Operators">Expanding Operators<a class="anchor-link" href="#Expanding-Operators">&#182;</a></h5><p>After expanding parenthesized expressions, we now need to take care of symbols followed by operators (<code>?</code>, <code>*</code>, <code>+</code>).  As with <code>convert_ebnf_parentheses()</code>, above, we first extract all symbols followed by an operator.</p>
 </div>
 </div>
 </div>
@@ -16591,7 +17001,7 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="All-Together">All Together<a class="anchor-link" href="#All-Together">&#182;</a></h4><p>We can combine the two, first extending parentheses and then operators:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h5 id="All-Together">All Together<a class="anchor-link" href="#All-Together">&#182;</a></h5><p>We can combine the two, first extending parentheses and then operators:</p>
 </div>
 </div>
 </div>
@@ -16609,6 +17019,17 @@ http://fuzzingbook.com:8080/def
 
 </div>
 </div></div>
+</div>
+</div>
+
+</details>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here's an example of using <code>convert_ebnf_grammar()</code>:</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -16694,7 +17115,15 @@ http://fuzzingbook.com:8080/def
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Grammar-Extensions">Grammar Extensions<a class="anchor-link" href="#Grammar-Extensions">&#182;</a></h3><p>During the course of this book, we frequently want to specify <em>additional information</em> for grammars, such as <a href="ProbabilisticGrammarFuzzer.html"><em>probabilities</em></a> or <a href="GeneratorGrammarFuzzer.html"><em>constraints</em></a>.  To support these extensions, as well as possibly others, we define an <em>annotation</em> mechanism.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Grammar-Extensions">Grammar Extensions<a class="anchor-link" href="#Grammar-Extensions">&#182;</a></h3></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>During the course of this book, we frequently want to specify <em>additional information</em> for grammars, such as <a href="ProbabilisticGrammarFuzzer.html"><em>probabilities</em></a> or <a href="GeneratorGrammarFuzzer.html"><em>constraints</em></a>.  To support these extensions, as well as possibly others, we define an <em>annotation</em> mechanism.</p>
 </div>
 </div>
 </div>
@@ -16714,6 +17143,9 @@ http://fuzzingbook.com:8080/def
 </div>
 </div>
 </div>
+
+<details id="Excursion:-Implementing-opts()">
+<summary>Implementing <code>opts()</code></summary>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
@@ -16940,6 +17372,8 @@ http://fuzzingbook.com:8080/def
 </div>
 </div>
 
+</details>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -16957,6 +17391,9 @@ http://fuzzingbook.com:8080/def
 </div>
 </div>
 </div>
+
+<details id="Excursion:-Implementing-is_valid_grammar()">
+<summary>Implementing <code>is_valid_grammar()</code></summary>
 
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
@@ -17130,10 +17567,12 @@ http://fuzzingbook.com:8080/def
 </div>
 </div>
 
+</details>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Our grammars defined above pass the test:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us make use of <code>is_valid_grammar()</code>. Our grammars defined above pass the test:</p>
 </div>
 </div>
 </div>
@@ -17285,6 +17724,225 @@ http://fuzzingbook.com:8080/def
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>From here on, we will always use <code>is_valid_grammar()</code> when defining a grammar.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <script>
+    var bad_answers = new Map();
+
+    function answer(quiz_id) {
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
+        }
+        return ans;
+    }
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
+        }
+        else 
+        {
+            document.getElementById(quiz_id + "-submit").value = "Try again";
+
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
+            }
+
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
+    }
+    </script>
+
+    <div class="quiz">
+    <h3 class="quiz_title">Quiz</h3>
+    <p>
+    <div class="quiz_question">Would a static type checker (such as <code>mypy</code>) help catching these errors?</div>
+    </p>
+    <p>
+    <div class="quiz_options" title="Pick a choice.">
+
+        <input type="radio" name="05614e82-3c9e-11ec-9952-acde48001122" id="05614e82-3c9e-11ec-9952-acde48001122-1" onclick="clear_selection('05614e82-3c9e-11ec-9952-acde48001122')">
+        <label id="05614e82-3c9e-11ec-9952-acde48001122-1-label" for="05614e82-3c9e-11ec-9952-acde48001122-1">Yes</label><br>
+
+        <input type="radio" name="05614e82-3c9e-11ec-9952-acde48001122" id="05614e82-3c9e-11ec-9952-acde48001122-2" onclick="clear_selection('05614e82-3c9e-11ec-9952-acde48001122')">
+        <label id="05614e82-3c9e-11ec-9952-acde48001122-2-label" for="05614e82-3c9e-11ec-9952-acde48001122-2">Yes, but not all</label><br>
+
+        <input type="radio" name="05614e82-3c9e-11ec-9952-acde48001122" id="05614e82-3c9e-11ec-9952-acde48001122-3" onclick="clear_selection('05614e82-3c9e-11ec-9952-acde48001122')">
+        <label id="05614e82-3c9e-11ec-9952-acde48001122-3-label" for="05614e82-3c9e-11ec-9952-acde48001122-3">No</label><br>
+
+    </div>
+    </p>
+    <input id="05614e82-3c9e-11ec-9952-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('05614e82-3c9e-11ec-9952-acde48001122', 4, 0, 'len(&quot;yes!&quot;) - len(&quot;no&quot;)')">
+    <span class="quiz_hint" id="05614e82-3c9e-11ec-9952-acde48001122-hint"></span>
+    </div>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Indeed, one could define a grammar type:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/typing.html" class="import" target="_blank">typing</a></span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>A first attempt at a grammar type would be that a grammar is a mapping of strings to lists of strings:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">SimpleGrammar</span> <span class="o">=</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>However, our <code>opts()</code> function also allows pairs that consist of strings and options, where options are mappings of strings to values:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Option</span> <span class="o">=</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Grammar</span> <span class="o">=</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Option</span><span class="p">]]]]</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>With this definition, we can ensure that all functions using grammars expect the proper type:</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">my_grammar_converter</span><span class="p">(</span><span class="n">grammar</span><span class="p">:</span> <span class="n">Grammar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Grammar</span><span class="p">:</span>
+    <span class="o">...</span>
+    <span class="k">return</span> <span class="n">grammar</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>However, such a type would not catch errors such as individual symbols being used, but not defined, or vice versa. Hence, <code>is_valid_grammar()</code> is still needed.</p>
 </div>
 </div>
 </div>
@@ -17580,9 +18238,9 @@ http://fuzzingbook.com:8080/def
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;&lt;ipython-input-1-612cec5468d3&gt;&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_16821/1271268731.py&#34;, line 2, in &lt;module&gt;
     expression_grammar_fn()
-  File &#34;&lt;ipython-input-1-f21ab929e5ee&gt;&#34;, line 3, in expression_grammar_fn
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_16821/3029408019.py&#34;, line 3, in expression_grammar_fn
     expr = &#34;&lt;term&gt; + &lt;expr&gt;&#34; | &#34;&lt;term&gt; - &lt;expr&gt;&#34;
 TypeError: unsupported operand type(s) for |: &#39;str&#39; and &#39;str&#39; (expected)
 </pre>
@@ -17925,7 +18583,7 @@ digit ::= [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2021-06-02 17:40:56+02:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Grammars.ipynb" target=_blank)>Last change: 2021-11-03 12:58:10+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -17941,7 +18599,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/Grammars.html">https://www.fuzzingbook.org/html/Grammars.html</a>.  Retrieved 2021-06-02 17:40:56+02:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Grammars.html">Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/Grammars.html">https://www.fuzzingbook.org/html/Grammars.html</a>.  Retrieved 2021-11-03 12:58:10+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2021:Grammars,
@@ -17951,9 +18609,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2021},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/html/Grammars.html}},
-    note = {Retrieved 2021-06-02 17:40:56+02:00},
+    note = {Retrieved 2021-11-03 12:58:10+01:00},
     url = {https://www.fuzzingbook.org/html/Grammars.html},
-    urldate = {2021-06-02 17:40:56+02:00}
+    urldate = {2021-11-03 12:58:10+01:00}
 }
 </pre>
 </div>

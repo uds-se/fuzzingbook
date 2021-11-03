@@ -3,7 +3,7 @@
 
 # "Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2021-06-02 17:44:10+02:00
+# Last change: 2021-11-03 13:03:24+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -90,6 +90,10 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('mswyS3Wok1c')
+
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
@@ -127,12 +131,34 @@ if __name__ == '__main__':
 
 
 
+from .bookutils import quiz
+
+if __name__ == '__main__':
+    quiz("Which of these strings cannot be produced "
+         "from the above `<start>` symbol?",
+         [
+             "`007`",
+             "`-42`",
+             "`++1`",
+             "`3.14`"
+         ], "[27 ** (1/3), 256 ** (1/4)]")
+
 ### Arithmetic Expressions
 
 if __name__ == '__main__':
     print('\n### Arithmetic Expressions')
 
 
+
+if __name__ == '__main__':
+    quiz("Which of these strings cannot be produced "
+         "from the above `<start>` symbol?",
+         [
+             "`1 + 1`",
+             "`1+1`",
+             "`+1`",
+             "`+(1)`",
+         ], "4 ** 0.5")
 
 ## Representing Grammars in Python
 ## -------------------------------
@@ -259,6 +285,16 @@ if __name__ == '__main__':
     for i in range(10):
         print(simple_grammar_fuzzer(grammar=EXPR_GRAMMAR, max_nonterminals=5))
 
+if __name__ == '__main__':
+    quiz("What drawbacks does `simple_grammar_fuzzer()` have?",
+         [
+             "It has a large number of string search and replace operations",
+             "It may fail to produce a string (`ExpansionError`)",
+             "It often picks some symbol to expand "
+             "that does not even occur in the string",
+             "All of the above"
+         ], "1 << 2")
+
 ## Visualizing Grammars as Railroad Diagrams
 ## -----------------------------------------
 
@@ -267,10 +303,18 @@ if __name__ == '__main__':
 
 
 
-from .RailroadDiagrams import NonTerminal, Terminal, Choice, HorizontalChoice, Sequence, Diagram, show_diagram
+### Excursion: Implementing `syntax_diagram()`
 
 if __name__ == '__main__':
-    from IPython.display import SVG, display
+    print('\n### Excursion: Implementing `syntax_diagram()`')
+
+
+
+from .RailroadDiagrams import NonTerminal, Terminal, Choice, HorizontalChoice, Sequence
+from .RailroadDiagrams import show_diagram
+
+if __name__ == '__main__':
+    from IPython.display import SVG
 
 def syntax_diagram_symbol(symbol):
     if is_nonterminal(symbol):
@@ -320,6 +364,13 @@ def syntax_diagram(grammar):
     for key in grammar:
         print("%s" % key[1:-1])
         display(SVG(show_diagram(syntax_diagram_alt(grammar[key]))))
+
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
 
 if __name__ == '__main__':
     syntax_diagram(EXPR_GRAMMAR)
@@ -551,7 +602,9 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     nonterminal_grammar = extend_grammar(nonterminal_grammar,
                                          {
-                                             "<idchar>": srange(string.ascii_letters) + srange(string.digits) + srange("-_")
+                                             "<idchar>": (srange(string.ascii_letters) + 
+                                                          srange(string.digits) + 
+                                                          srange("-_"))
                                          }
                                          )
 
@@ -608,10 +661,17 @@ EXPR_EBNF_GRAMMAR = {
         srange(string.digits)
 }
 
-#### Creating New Symbols
+#### Excursion: Implementing `convert_ebnf_grammar()`
 
 if __name__ == '__main__':
-    print('\n#### Creating New Symbols')
+    print('\n#### Excursion: Implementing `convert_ebnf_grammar()`')
+
+
+
+##### Creating New Symbols
+
+if __name__ == '__main__':
+    print('\n##### Creating New Symbols')
 
 
 
@@ -630,10 +690,10 @@ def new_symbol(grammar, symbol_name="<symbol>"):
 if __name__ == '__main__':
     assert new_symbol(EXPR_EBNF_GRAMMAR, '<expr>') == '<expr-1>'
 
-#### Expanding Parenthesized Expressions
+##### Expanding Parenthesized Expressions
 
 if __name__ == '__main__':
-    print('\n#### Expanding Parenthesized Expressions')
+    print('\n##### Expanding Parenthesized Expressions')
 
 
 
@@ -683,10 +743,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     convert_ebnf_parentheses({"<foo>": ["((<foo>)?)+"]})
 
-#### Expanding Operators
+##### Expanding Operators
 
 if __name__ == '__main__':
-    print('\n#### Expanding Operators')
+    print('\n##### Expanding Operators')
 
 
 
@@ -737,15 +797,22 @@ def convert_ebnf_operators(ebnf_grammar):
 if __name__ == '__main__':
     convert_ebnf_operators({"<integer>": ["<digit>+"], "<digit>": ["0"]})
 
-#### All Together
+##### All Together
 
 if __name__ == '__main__':
-    print('\n#### All Together')
+    print('\n##### All Together')
 
 
 
 def convert_ebnf_grammar(ebnf_grammar):
     return convert_ebnf_operators(convert_ebnf_parentheses(ebnf_grammar))
+
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
 
 if __name__ == '__main__':
     convert_ebnf_grammar({"<authority>": ["(<userinfo>@)?<host>(:<port>)?"]})
@@ -758,6 +825,13 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     print('\n### Grammar Extensions')
+
+
+
+#### Excursion: Implementing `opts()`
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Implementing `opts()`')
 
 
 
@@ -819,11 +893,25 @@ def set_opts(grammar, symbol, expansion, opts=None):
         repr(
             exp_string(expansion)))
 
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
 ## Checking Grammars
 ## -----------------
 
 if __name__ == '__main__':
     print('\n## Checking Grammars')
+
+
+
+### Excursion: Implementing `is_valid_grammar()`
+
+if __name__ == '__main__':
+    print('\n### Excursion: Implementing `is_valid_grammar()`')
 
 
 
@@ -927,6 +1015,13 @@ def is_valid_grammar(grammar, start_symbol=START_SYMBOL, supported_opts=None):
 
     return used_nonterminals == defined_nonterminals and len(unreachable) == 0
 
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
+
 if __name__ == '__main__':
     assert is_valid_grammar(EXPR_GRAMMAR)
     assert is_valid_grammar(CGI_GRAMMAR)
@@ -946,6 +1041,26 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     assert not is_valid_grammar({"<start>": [1, 2, 3]})
+
+if __name__ == '__main__':
+    quiz("Would a static type checker (such as `mypy`) help catching these errors?",
+         [
+             "Yes",
+             "Yes, but not all",
+             "No",
+         ], 'len("yes!") - len("no")')
+
+from typing import List, Mapping, Union, Any, Tuple
+
+SimpleGrammar = Mapping[str, List[str]]
+
+Option = Mapping[str, Any]
+
+Grammar = Mapping[str, List[Union[str, Tuple[str, Option]]]]
+
+def my_grammar_converter(grammar: Grammar) -> Grammar:
+    ...
+    return grammar
 
 ## Synopsis
 ## --------
@@ -1021,7 +1136,8 @@ JSON_EBNF_GRAMMAR = {
 
     "<element>": ["<ws><value><ws>"],
 
-    "<value>": ["<object>", "<array>", "<string>", "<number>", "true", "false", "null", "'; DROP TABLE STUDENTS"],
+    "<value>": ["<object>", "<array>", "<string>", "<number>",
+                "true", "false", "null", "'; DROP TABLE STUDENTS"],
 
     "<object>": ["{<ws>}", "{<members>}"],
 

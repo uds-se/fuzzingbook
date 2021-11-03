@@ -3,7 +3,7 @@
 
 # "Fuzzing: Breaking Things with Random Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2021-06-02 17:40:53+02:00
+# Last change: 2021-11-03 13:00:07+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -64,7 +64,6 @@ Produce strings of `min_length` to `max_length` characters
 >>> random_fuzzer = RandomFuzzer(min_length=10, max_length=20, char_start=65, char_range=26)
 >>> random_fuzzer.fuzz()
 'XGZVDDPZOOW'
-
 ### Runners
 
 A `Fuzzer` can be paired with a `Runner`, which takes the fuzzed strings as input. Its result is a class-specific _status_ and an _outcome_ (`PASS`, `FAIL`, or `UNRESOLVED`). A `PrintRunner` will simply print out the given input and return a `PASS` outcome:
@@ -81,7 +80,6 @@ A `ProgramRunner` will feed the generated input into an external program.  Its r
 >>> random_fuzzer.run(cat)
 (CompletedProcess(args='cat', returncode=0, stdout='BZOQTXFBTEOVYX', stderr=''),
  'PASS')
-
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Fuzzing: Breaking Things with Random Inputs"
@@ -101,6 +99,10 @@ if __name__ == '__main__':
     print('# Fuzzing: Breaking Things with Random Inputs')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('u833Dtfftmw')
 
 if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
@@ -149,6 +151,20 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     fuzzer(1000, ord('a'), 26)
+
+from .bookutils import quiz
+
+if __name__ == '__main__':
+    quiz("Which of these produces strings with arbitrary long decimal numbers?",
+         [
+             "`fuzzer(100, 1, 100)`",
+             "`fuzzer(100, 100, 0)`",
+             "`fuzzer(100, 10, ord('0'))`",
+             "`fuzzer(100, ord('0'), 10)`",
+         ], "1 ** (2 % 3) * 4")
+
+if __name__ == '__main__':
+    fuzzer(100, ord('0'), 10)
 
 ## Fuzzing External Programs
 ## -------------------------
@@ -212,6 +228,24 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     result.stderr
+
+if __name__ == '__main__':
+    quiz("Just for the fun of it, imagine you would test a file removal program - "
+         "say `rm -fr FILE`, where `FILE` is a string produced by `fuzzer()`. "
+         "What is the chance of `fuzzer()` (with default arguments) producing a `FILE` "
+         "argument that results in deleting all your files?",
+         [
+             "About one in a billion",
+             "About one in a million",
+             "About one in a thousand",
+             "About one in ten"
+         ], "9 ** 0.5")
+
+if __name__ == '__main__':
+    1/100 * 3/32
+
+if __name__ == '__main__':
+    3/32 * 1/32
 
 ### Long-Running Fuzzing
 
@@ -394,9 +428,9 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    secrets = ("<space for reply>" + fuzzer(100)
-         + "<secret-certificate>" + fuzzer(100)
-         + "<secret-key>" + fuzzer(100) + "<other-secrets>")
+    secrets = ("<space for reply>" + fuzzer(100) +
+               "<secret-certificate>" + fuzzer(100) +
+               "<secret-key>" + fuzzer(100) + "<other-secrets>")
 
 if __name__ == '__main__':
     uninitialized_memory_marker = "deadbeef"
@@ -529,7 +563,6 @@ class RedBlackTree:
         # Delete the element
         assert self.repOK()
 
-
 ### Static Code Checkers
 
 if __name__ == '__main__':
@@ -539,10 +572,10 @@ if __name__ == '__main__':
 
 from typing import Dict
 
-airport_codes = {
-    "YVR": "Vancouver",  # etc
-}  # type: Dict[str, str]
-
+if __name__ == '__main__':
+    airport_codes: Dict[str, str] = {
+        "YVR": "Vancouver",  # etc
+    }
 
 if __name__ == '__main__':
     airport_codes[1] = "First"
@@ -562,7 +595,9 @@ if __name__ == '__main__':
 
 
 
-class Runner(object):
+class Runner:
+    """Base class for testing inputs."""
+
     # Test outcomes
     PASS = "PASS"
     FAIL = "FAIL"
@@ -577,6 +612,8 @@ class Runner(object):
         return (inp, Runner.UNRESOLVED)
 
 class PrintRunner(Runner):
+    """Simple runner, printing the input."""
+
     def run(self, inp):
         """Print the given input"""
         print(inp)
@@ -593,12 +630,16 @@ if __name__ == '__main__':
     outcome
 
 class ProgramRunner(Runner):
+    """Test a program with inputs."""
+
     def __init__(self, program):
-        """Initialize.  `program` is a program spec as passed to `subprocess.run()`"""
+        """Initialize.
+           `program` is a program spec as passed to `subprocess.run()`"""
         self.program = program
 
     def run_process(self, inp=""):
-        """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
+        """Run the program with `inp` as input.
+           Return result of `subprocess.run()`."""
         return subprocess.run(self.program,
                               input=inp,
                               stdout=subprocess.PIPE,
@@ -606,7 +647,8 @@ class ProgramRunner(Runner):
                               universal_newlines=True)
 
     def run(self, inp=""):
-        """Run the program with `inp` as input.  Return test outcome based on result of `subprocess.run()`."""
+        """Run the program with `inp` as input.  
+           Return test outcome based on result of `subprocess.run()`."""
         result = self.run_process(inp)
 
         if result.returncode == 0:
@@ -620,7 +662,8 @@ class ProgramRunner(Runner):
 
 class BinaryProgramRunner(ProgramRunner):
     def run_process(self, inp=""):
-        """Run the program with `inp` as input.  Return result of `subprocess.run()`."""
+        """Run the program with `inp` as input.  
+           Return result of `subprocess.run()`."""
         return subprocess.run(self.program,
                               input=inp.encode(),
                               stdout=subprocess.PIPE,
@@ -637,7 +680,9 @@ if __name__ == '__main__':
 
 
 
-class Fuzzer(object):
+class Fuzzer:
+    """Base class for fuzzers."""
+
     def __init__(self):
         pass
 
@@ -659,6 +704,8 @@ class Fuzzer(object):
         return outcomes
 
 class RandomFuzzer(Fuzzer):
+    """Produce random inputs."""
+
     def __init__(self, min_length=10, max_length=100,
                  char_start=32, char_range=32):
         """Produce strings of `min_length` to `max_length` characters
@@ -720,6 +767,20 @@ if __name__ == '__main__':
     random_fuzzer = RandomFuzzer(min_length=10, max_length=20, char_start=65, char_range=26)
     random_fuzzer.fuzz()
 
+from .ClassDiagram import display_class_hierarchy
+
+if __name__ == '__main__':
+    display_class_hierarchy(RandomFuzzer,
+                            public_methods=[
+                                Fuzzer.__init__,
+                                Fuzzer.fuzz,
+                                Fuzzer.run,
+                                Fuzzer.runs,
+                                RandomFuzzer.fuzz,
+                                RandomFuzzer.__init__,
+                            ],
+        project='fuzzingbook')
+
 ### Runners
 
 if __name__ == '__main__':
@@ -734,6 +795,17 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     cat = ProgramRunner('cat')
     random_fuzzer.run(cat)
+
+if __name__ == '__main__':
+    display_class_hierarchy([ProgramRunner, PrintRunner],
+                            public_methods=[
+                                Runner.__init__,
+                                Runner.run,
+                                ProgramRunner.__init__,
+                                ProgramRunner.run,
+                                PrintRunner.run
+                            ],
+        project='fuzzingbook')
 
 ## Lessons Learned
 ## ---------------
@@ -836,11 +908,11 @@ class TroffRunner(Runner):
 
         return inp
 
-
 if __name__ == '__main__':
     random_fuzzer = RandomFuzzer(char_start=0, char_range=256, max_length=10)
     troff_runner = TroffRunner()
 
+if __name__ == '__main__':
     trials = 100000
     for i in range(trials):
         random_fuzzer.run(troff_runner)
@@ -863,7 +935,6 @@ if __name__ == '__main__':
 # import matplotlib.pyplot as plt
 # plt.bar(["\\D", "8bit", "dot"], ys)
 # plt.title("Occurrences of error classes");
-# 
 
 ### Exercise 3: Run Real Troff
 

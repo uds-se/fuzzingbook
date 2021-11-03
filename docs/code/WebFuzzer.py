@@ -3,7 +3,7 @@
 
 # "Testing Web Applications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2021-06-04 16:11:46+02:00
+# Last change: 2021-11-03 13:11:54+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -472,7 +472,7 @@ if __name__ == '__main__':
 
 
 
-from multiprocessing import Queue
+from multiprocess import Queue
 
 HTTPD_MESSAGE_QUEUE = Queue()
 
@@ -524,7 +524,7 @@ if __name__ == '__main__':
 def webbrowser(url, mute=False):
     """Download the http/https resource given by the URL"""
     import requests  # for imports
-    
+
     try:
         r = requests.get(url)
         contents = r.text
@@ -558,7 +558,7 @@ def run_httpd_forever(handler_class):
     HTTPD_MESSAGE_QUEUE.put(httpd_url)
     httpd.serve_forever()
 
-from multiprocessing import Process
+from multiprocess import Process
 
 def start_httpd(handler_class=SimpleHTTPRequestHandler):
     clear_httpd_messages()
