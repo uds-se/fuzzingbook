@@ -3,7 +3,7 @@
 
 # "When To Stop Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2021-11-02 00:13:02+01:00
+# Last change: 2021-11-02 16:50:37+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors

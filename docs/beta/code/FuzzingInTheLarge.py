@@ -3,7 +3,7 @@
 
 # "Fuzzing in the Large" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2021-11-01 23:43:41+01:00
+# Last change: 2021-11-03 10:06:02+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
