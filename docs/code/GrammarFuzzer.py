@@ -398,10 +398,11 @@ from .Fuzzer import Fuzzer
 
 class GrammarFuzzer(Fuzzer):
     def __init__(self, grammar, start_symbol=START_SYMBOL,
-                 min_nonterminals=0, max_nonterminals=10, disp=False, log=False):
+                 min_nonterminals=0, max_nonterminals=10, conv=False, disp=False, log=False):
         """Produce strings from `grammar`, starting with `start_symbol`.
         If `min_nonterminals` or `max_nonterminals` is given, use them as limits 
         for the number of nonterminals produced.  
+        If `conv` is set, convert EBNF to BNF. (Converting BNF will have no impact.)
         If `disp` is set, display the intermediate derivation trees.
         If `log` is set, show intermediate steps as text on standard output."""
         
@@ -412,6 +413,8 @@ class GrammarFuzzer(Fuzzer):
         self.disp = disp
         self.log = log
         self.check_grammar()  # Invokes is_valid_grammar()
+	self.conv_grammar()  # Invokes convert_ebnf_grammar() if conv is set
+	self.check_grammar()
 
 #### Excursion: `check_grammar()` implementation
 
@@ -427,6 +430,10 @@ class GrammarFuzzer(GrammarFuzzer):
             self.grammar,
             start_symbol=self.start_symbol,
             supported_opts=self.supported_opts())
+
+    def conv_grammar(self):
+        if self.conv:
+            self.grammar = convert_ebnf_grammar(self.grammar)
 
     def supported_opts(self):
         return set()
