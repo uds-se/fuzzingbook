@@ -1070,7 +1070,7 @@ $(DOCS_TARGET)dist/$(PROJECT)-notebooks.zip: $(FULLS) $(CHAPTERS_MAKEFILE) \
 	for file in $(EXTRAS); do \
 		$(ZIP) $(DOCS_TARGET)$(PROJECT)-notebooks.zip -d $(PROJECT)-notebooks/$$file; \
 	done
-	-$(ZIP) $(DOCS_TARGET)$(PROJECT)-notebooks.zip -d '$(PROJECT)-notebooks/data/*'
+	# -$(ZIP) $(DOCS_TARGET)$(PROJECT)-notebooks.zip -d '$(PROJECT)-notebooks/data/*'
 	mv $(DOCS_TARGET)$(PROJECT)-notebooks.zip $@
 	@echo "Created notebook distribution files in $(DOCS_TARGET)dist"
 
