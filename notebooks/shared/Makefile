@@ -1182,10 +1182,12 @@ no-synopsis:
 upload upload-dist: dist
 	@echo "Use your pypi.org password to upload"
 	cd $(DOCS_TARGET); twine upload dist/*.tar.gz
+	@echo "Use 'pip install fuzzingbook' to install"
 
 upload-test: dist
 	@echo "Use your pypi.org password to upload"
 	cd $(DOCS_TARGET); twine upload --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
+	@echo "Use 'pip install --extra-index-url https://test.pypi.org/simple/ fuzzingbook' to install"
 
 
 ## Binder services
