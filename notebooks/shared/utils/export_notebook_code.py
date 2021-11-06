@@ -171,8 +171,8 @@ def fix_imports(code: str) -> str:
 class_renamings: Dict[str, int] = {}
 current_class: Optional[str] = None
 
-RE_SUBCLASS = re.compile(r'^class ([A-Z][^(:]*)[(:]')
-RE_SUBCLASS_SELF = re.compile(r'^class ([A-Z].*)\(\1\):$', flags=re.MULTILINE)
+RE_SUBCLASS = re.compile(r'^class ([a-zA-Z][^(:]*)[(:]')
+RE_SUBCLASS_SELF = re.compile(r'^class ([a-zA-Z].*)\(\1\):$', flags=re.MULTILINE)
 
 def fix_subclass_self(code: str) -> str:
     if not mypy:
