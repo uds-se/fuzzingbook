@@ -311,7 +311,7 @@ ZIP_OPTIONS = -r
 # Default target is to build everything needed for publishing,
 # such that we can run "make -k" in a loop
 .PHONY: chapters web default
-web default: setup html code test-code test-imports test-packages slides
+web default: setup html code test-types test-code test-imports test-packages slides
 chapters: html
 
 # The book is recreated after any change to any source
@@ -917,7 +917,7 @@ check-types: test-types
 	fi
 
 .PHONY: run
-run: check-imports check-standard-imports check-package check-code
+run: check-types check-imports check-standard-imports check-package check-code
 
 # Todo checks
 check-todo todo:
@@ -1182,12 +1182,12 @@ no-synopsis:
 upload upload-dist: dist
 	@echo "Use your pypi.org password to upload"
 	cd $(DOCS_TARGET); twine upload dist/*.tar.gz
-	@echo "Use 'pip install fuzzingbook' to install"
+	@echo "Use 'pip install $(PROJECT)' to install"
 
 upload-test: dist
 	@echo "Use your pypi.org password to upload"
 	cd $(DOCS_TARGET); twine upload --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
-	@echo "Use 'pip install --extra-index-url https://test.pypi.org/simple/ fuzzingbook' to install"
+	@echo "Use 'pip install --extra-index-url https://test.pypi.org/simple/ $(PROJECT)' to install"
 
 
 ## Binder services

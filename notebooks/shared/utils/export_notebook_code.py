@@ -172,7 +172,7 @@ class_renamings: Dict[str, int] = {}
 current_class: Optional[str] = None
 
 RE_SUBCLASS = re.compile(r'^class ([a-zA-Z]\w*[^(:]*)[(:]')
-RE_SUBCLASS_SELF = re.compile(r'^class ([a-zA-Z]\w*)\s*\(\s*\1\s*\):$', flags=re.MULTILINE)
+RE_SUBCLASS_SELF = re.compile(r'^class ([a-zA-Z]\w*)\s*\(\s*\1\s*\):\s*$', flags=re.MULTILINE)
 
 def fix_subclass_self(code: str) -> str:
     if not mypy:
@@ -382,9 +382,10 @@ def export_notebook_code(notebook_name: str,
                 pass
                 
     if mypy:
+        # Ensure we get the original class names when importing
         print_utf8('\n# Original class names\n')
         for class_name in class_renamings:
-            print_utf8(f'{class_name} = {class_name}_{class_renamings[class_name]}\n')
+            print_utf8(f'{class_name} = {class_name}_{class_renamings[class_name]}  # type: ignore\n')
 
 if __name__ == '__main__':
     args = sys.argv
