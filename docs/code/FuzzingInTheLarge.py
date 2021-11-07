@@ -3,7 +3,7 @@
 
 # "Fuzzing in the Large" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2021-11-03 13:27:49+01:00
+# Last change: 2021-11-07 20:23:15+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -212,7 +212,7 @@ if __name__ == '__main__':
 
 
 
-from multiprocess import Process
+from multiprocess import Process  # type: ignore
 
 import subprocess
 
@@ -354,7 +354,7 @@ if __name__ == '__main__':
     sys.path.append('FuzzManager')
 
 if __name__ == '__main__':
-    from FTB.ProgramConfiguration import ProgramConfiguration
+    from FTB.ProgramConfiguration import ProgramConfiguration  # type: ignore
 
 if __name__ == '__main__':
     configuration = ProgramConfiguration.fromBinary('simply-buggy/simple-crash')
@@ -368,7 +368,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    from FTB.Signatures.CrashInfo import CrashInfo
+    from FTB.Signatures.CrashInfo import CrashInfo  # type: ignore
 
 if __name__ == '__main__':
     cmd = ["simply-buggy/simple-crash"]
@@ -394,7 +394,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    from Collector.Collector import Collector
+    from Collector.Collector import Collector  # type: ignore
 
 if __name__ == '__main__':
     collector = Collector()

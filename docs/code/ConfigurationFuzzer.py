@@ -3,7 +3,7 @@
 
 # "Testing Configurations" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2021-11-03 13:11:01+01:00
+# Last change: 2021-11-07 23:25:56+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -174,9 +174,9 @@ if __name__ == '__main__':
 
 
 from .Grammars import crange, srange, convert_ebnf_grammar, extend_grammar, is_valid_grammar
-from .Grammars import START_SYMBOL, new_symbol
+from .Grammars import START_SYMBOL, new_symbol, Grammar
 
-PROCESS_NUMBERS_EBNF_GRAMMAR = {
+PROCESS_NUMBERS_EBNF_GRAMMAR: Grammar = {
     "<start>": ["<operator> <integers>"],
     "<operator>": ["--sum", "--min", "--max"],
     "<integers>": ["<integer>", "<integers> <integer>"],
@@ -221,7 +221,7 @@ import sys
 
 import string
 
-def traceit(frame, event, arg):
+def trace_locals(frame, event, arg):
     if event != "call":
         return
     method_name = frame.f_code.co_name
@@ -231,11 +231,11 @@ def traceit(frame, event, arg):
     print(method_name, locals)
 
 if __name__ == '__main__':
-    sys.settrace(traceit)
+    sys.settrace(trace_locals)
     process_numbers(["--sum", "1", "2", "3"])
     sys.settrace(None)
 
-def traceit(frame, event, arg):
+def trace_options(frame, event, arg):
     if event != "call":
         return
     method_name = frame.f_code.co_name
@@ -245,7 +245,7 @@ def traceit(frame, event, arg):
     print(locals['args'])
 
 if __name__ == '__main__':
-    sys.settrace(traceit)
+    sys.settrace(trace_options)
     process_numbers(["--sum", "1", "2", "3"])
     sys.settrace(None)
 
@@ -259,7 +259,7 @@ if __name__ == '__main__':
 class ParseInterrupt(Exception):
     pass
 
-class OptionGrammarMiner(object):
+class OptionGrammarMiner:
     def __init__(self, function, log=False):
         self.function = function
         self.log = log
@@ -584,8 +584,8 @@ if __name__ == '__main__':
         invocation = "autopep8" + f.fuzz()
         print("$ " + invocation)
         args = invocation.split()
-        autopep8 = ProgramRunner(args)
-        result, outcome = autopep8.run()
+        autopep8_runner = ProgramRunner(args)
+        result, outcome = autopep8_runner.run()
         if result.stderr != "":
             print(result.stderr, end="")
 
@@ -767,12 +767,12 @@ if __name__ == '__main__':
     assert is_valid_grammar(pairwise_notedown_grammar)
 
 if __name__ == '__main__':
-    notedown_fuzzer = GrammarCoverageFuzzer(
+    notedown_pairwise_fuzzer = GrammarCoverageFuzzer(
         pairwise_notedown_grammar, max_nonterminals=4)
 
 if __name__ == '__main__':
     for i in range(10):
-        print(notedown_fuzzer.fuzz())
+        print(notedown_pairwise_fuzzer.fuzz())
 
 if __name__ == '__main__':
     for combination_length in range(1, 20):
@@ -870,6 +870,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     filename = "xmlparse.c"
 
+if __name__ == '__main__':
     open(filename, "w").write(
         """
 #if defined(_WIN32) && !defined(LOAD_LIBRARY_SEARCH_SYSTEM32)
@@ -926,23 +927,24 @@ if __name__ == '__main__':
 
 
 
-from .Grammars import new_symbol
+from .Grammars import Grammar, is_valid_grammar
 
 if __name__ == '__main__':
-    cpp_grammar = {
+    cpp_grammar: Grammar = {
         "<start>": ["cc -c<options> " + filename],
         "<options>": ["<option>", "<options><option>"],
         "<option>": []
     }
+
     for id in cpp_ids:
         s = new_symbol(cpp_grammar, "<" + id + ">")
         cpp_grammar["<option>"].append(s)
         cpp_grammar[s] = [" -D" + id]
 
-    cpp_grammar
+    assert is_valid_grammar(cpp_grammar)
 
 if __name__ == '__main__':
-    assert is_valid_grammar(cpp_grammar)
+    cpp_grammar
 
 #### Part 3: C Preprocessor Configuration Fuzzing
 

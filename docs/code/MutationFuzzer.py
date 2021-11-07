@@ -3,7 +3,7 @@
 
 # "Mutation-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2021-11-03 13:00:56+01:00
+# Last change: 2021-11-07 16:23:17+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -48,16 +48,26 @@ This chapter introduces a `MutationFuzzer` class that takes a list of _seed inpu
 >>> mutation_fuzzer = MutationFuzzer(seed=[seed_input])
 >>> [mutation_fuzzer.fuzz() for i in range(10)]
 ['http://www.google.com/search?q=fuzzing',
- 'http://www.coogle.com/searc?q=nuzzi~g',
- 'lttp://7ww.woogle$.co}/sear$ch?q=fuzzing',
- 'http://ww>> mutation_fuzzer = MutationCoverageFuzzer(seed=[seed_input])
+ 'httyp:}//www.gogle.om/search?p=fu{zing',
+ 'h4mttp://wvw..googlecom/sarch?q=fzzi/n',
+ "http://w:ww.googl'e.com/earch?q=fuzjig",
+ 'http/www.goole.com/searchO?q=fuzzi.gu',
+ 'http8/X/w.gogle.cwomsearch?q=fuzing',
+ 'ttp//www.google.comsarch?q=fUzzxij',
+ 'http:/wwv.google.com/search?q=fuzzing',
+ 'http:/www./ogla/com/search?q=fuzrin{g',
+ 'hdtp:/www$.google.comJsearch?q=fuzzing']
+
+The `MutationCoverageFuzzer` maintains a _population_ of inputs, which are then evolved in order to maximize coverage.
+
+>>> mutation_fuzzer = MutationCoverageFuzzer(seed=[seed_input])
 >>> mutation_fuzzer.runs(http_runner, trials=10000)
 >>> mutation_fuzzer.population[:5]
 ['http://www.google.com/search?q=fuzzing',
- 'http://wwlw.google.c"om/secrch?yq=fuzzin',
- 'http://wwlw.woogle.c"om/secrch)7YQ=fuzzin',
- 'http://wwlw.wooglec"om-secch7YQ=fuzzinl',
- 'http://wwVhwweoogle.c"oms72c)7YQ=fuzzin']
+ 'http://w*ww.google.cm/serc?q=fuzrmng',
+ 'http://www.gyogle.com/searchKq=fNuing',
+ 'http://sw7.googl|a.com.search=pfuzzng',
+ "http://sw7.'oogl|a.#om.rearch=pFuzTzng"]
 
 
 For more details, source, and documentation, see
@@ -108,12 +118,9 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
-if __name__ == '__main__':
-    try:
-        from urlparse import urlparse      # Python 2
-    except ImportError:
-        from urllib.parse import urlparse  # Python 3
+from urllib.parse import urlparse
 
+if __name__ == '__main__':
     urlparse("http://www.google.com/search?q=fuzzing")
 
 def http_program(url):
@@ -456,7 +463,7 @@ if __name__ == '__main__':
         mutation_fuzzer.population, http_program)
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
 if __name__ == '__main__':
     plt.plot(cumulative_coverage)

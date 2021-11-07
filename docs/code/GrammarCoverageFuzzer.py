@@ -3,7 +3,7 @@
 
 # "Grammar Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2021-11-03 13:04:35+01:00
+# Last change: 2021-11-07 22:22:14+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,36 +42,46 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
 
-This chapter introduces `GrammarCoverageFuzzer`, an efficient grammar fuzzer extending `GrammarFuzzer` from the [chapter on efficient grammar fuzzing](GrammarFuzzer.ipynb).  It strives to cover all expansions at least once.  In the following example, for instance, all digits in the area code are different, as are the digits in the line number:
+This chapter introduces `GrammarCoverageFuzzer`, an efficient grammar fuzzer extending `GrammarFuzzer` from the [chapter on efficient grammar fuzzing](GrammarFuzzer.ipynb).  It strives to _cover all expansions at least once,_ thus ensuring coverage of functionality.
 
->>> from Grammars import US_PHONE_GRAMMAR
->>> phone_fuzzer = GrammarCoverageFuzzer(US_PHONE_GRAMMAR)
->>> phone_fuzzer.fuzz()
-'(521)383-0695'
+In the following example, for instance, we use `GrammarCoverageFuzzer` to produce an expression. We see that the resulting expression covers all digits and all operators in a single expression.
+
+>>> from Grammars import EXPR_GRAMMAR
+>>> expr_fuzzer = GrammarCoverageFuzzer(EXPR_GRAMMAR)
+>>> expr_fuzzer.fuzz()
+'-(2 + 3) * 4.5 / 6 - 2.0 / +8 + 7 + 3'
 
 After fuzzing, the `expansion_coverage()` method returns a mapping of grammar expansions covered.
 
->>> phone_fuzzer.expansion_coverage()
-{' -> ',
- ' -> 0',
+>>> expr_fuzzer.expansion_coverage()
+{' -> 0',
  ' -> 1',
  ' -> 2',
  ' -> 3',
+ ' -> 4',
  ' -> 5',
  ' -> 6',
+ ' -> 7',
  ' -> 8',
  ' -> 9',
  ' -> ',
- ' -> 3',
- ' -> 5',
+ ' ->  + ',
+ ' ->  - ',
+ ' -> ()',
+ ' -> +',
+ ' -> -',
  ' -> ',
- ' -> ()-',
- ' -> '}
+ ' -> .',
+ ' -> ',
+ ' -> ',
+ ' -> ',
+ ' -> ',
+ ' ->  * ',
+ ' ->  / '}
 
 Subsequent calls to `fuzz()` will go for further coverage (i.e., covering the other area code digits, for example); a call to `reset()` clears the recored coverage, starting anew.
 
 Since such coverage in inputs also yields higher code coverage, `GrammarCoverageFuzzer` is a recommended extension to `GrammarFuzzer`.
-
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Grammar Coverage"
@@ -113,11 +123,26 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
+from .bookutils import quiz
+
+from .Fuzzer import Fuzzer
+
+from typing import Dict, List, Set, Tuple, Union, Optional
+
 from .Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
-from .Grammars import is_valid_grammar, extend_grammar
+from .Grammars import is_valid_grammar, extend_grammar, Grammar
 
 if __name__ == '__main__':
     EXPR_GRAMMAR["<factor>"]
+
+if __name__ == '__main__':
+    quiz("Which expansions of `EXPR_GRAMMAR` does the expression `1 + 2` cover?",
+         [
+             "`<start> -> <expr>`",
+             "`<integer> -> <digit><integer>`",
+             "`<integer> -> <digit>`",
+             "`<factor> -> +<factor>`"
+         ], [1, 3])
 
 ### Tracking Grammar Coverage
 
@@ -126,40 +151,74 @@ if __name__ == '__main__':
 
 
 
-from .GrammarFuzzer import GrammarFuzzer, all_terminals, nonterminals, display_tree
+from .Grammars import Grammar, Expansion
+from .GrammarFuzzer import GrammarFuzzer, all_terminals, nonterminals, \
+    display_tree, DerivationTree
 
 import random
 
 class TrackingGrammarCoverageFuzzer(GrammarFuzzer):
+    """Track grammar coverage during production"""
+
     def __init__(self, *args, **kwargs):
         # invoke superclass __init__(), passing all arguments
         super().__init__(*args, **kwargs)
         self.reset_coverage()
 
-    def reset_coverage(self):
-        self.covered_expansions = set()
+#### Keeping Track of Expansions
 
-    def expansion_coverage(self):
+if __name__ == '__main__':
+    print('\n#### Keeping Track of Expansions')
+
+
+
+class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
+    def expansion_coverage(self) -> Set[str]:
+        """Return the set of covered expansions as strings SYMBOL -> EXPANSION"""
         return self.covered_expansions
 
-def expansion_key(symbol, expansion):
-    """Convert (symbol, expansion) into a key.  `expansion` can be an expansion string or a derivation tree."""
+    def reset_coverage(self) -> None:
+        """Clear coverage info tracked so far"""
+        self.covered_expansions: Set[str] = set()
+
+def expansion_key(symbol: str, 
+                  expansion: Union[Expansion,
+                                   DerivationTree, 
+                                   List[DerivationTree]]) -> str:
+    """Convert (symbol, `expansion`) into a key "SYMBOL -> EXPRESSION". 
+      `expansion` can be an expansion string, a derivation tree,
+         or a list of derivation trees."""
+
     if isinstance(expansion, tuple):
-        expansion = expansion[0]
+        # Expansion or single derivation tree
+        expansion, _ = expansion
+
     if not isinstance(expansion, str):
+        # Derivation tree
         children = expansion
         expansion = all_terminals((symbol, children))
+
+    assert isinstance(expansion, str)
+
     return symbol + " -> " + expansion
 
 if __name__ == '__main__':
     expansion_key(START_SYMBOL, EXPR_GRAMMAR[START_SYMBOL][0])
 
 if __name__ == '__main__':
-    children = [("<expr>", None), (" + ", []), ("<term>", None)]
+    children: List[DerivationTree] = [("<expr>", None), (" + ", []), ("<term>", None)]
     expansion_key("<expr>", children)
 
+#### Computing Possible Expansions
+
+if __name__ == '__main__':
+    print('\n#### Computing Possible Expansions')
+
+
+
 class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
-    def _max_expansion_coverage(self, symbol, max_depth):
+    def _max_expansion_coverage(self, symbol: str, 
+                                max_depth: Union[int, float]) -> Set[str]:
         if max_depth <= 0:
             return set()
 
@@ -175,12 +234,16 @@ class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
 
         return expansions
 
-    def max_expansion_coverage(self, symbol=None, max_depth=float('inf')):
-        """Return set of all expansions in a grammar starting with `symbol`"""
+    def max_expansion_coverage(self, symbol: Optional[str] = None,
+                               max_depth: Union[int, float] = float('inf')) \
+            -> Set[str]:
+        """Return set of all expansions in a grammar 
+           starting with `symbol` (default: start symbol).
+           If `max_depth` is given, expand only to that depth."""
         if symbol is None:
             symbol = self.start_symbol
 
-        self._symbols_seen = set()
+        self._symbols_seen: Set[str] = set()
         cov = self._max_expansion_coverage(symbol, max_depth)
 
         if symbol == START_SYMBOL:
@@ -192,23 +255,40 @@ if __name__ == '__main__':
     expr_fuzzer = TrackingGrammarCoverageFuzzer(EXPR_GRAMMAR)
     expr_fuzzer.max_expansion_coverage()
 
+#### Tracking Expansions while Fuzzing
+
+if __name__ == '__main__':
+    print('\n#### Tracking Expansions while Fuzzing')
+
+
+
 class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
-    def add_coverage(self, symbol, new_children):
-        key = expansion_key(symbol, new_children)
+    def add_coverage(self, symbol: str,
+                     new_child: Union[Expansion, List[DerivationTree]]):
+        key = expansion_key(symbol, new_child)
 
         if self.log and key not in self.covered_expansions:
             print("Now covered:", key)
         self.covered_expansions.add(key)
 
-    def choose_node_expansion(self, node, possible_children):
+    def choose_node_expansion(self, node: DerivationTree,
+                              children_alternatives: List[List[DerivationTree]]) -> int:
         (symbol, children) = node
-        index = super().choose_node_expansion(node, possible_children)
-        self.add_coverage(symbol, possible_children[index])
+        index = super().choose_node_expansion(node, children_alternatives)
+        self.add_coverage(symbol, children_alternatives[index])
         return index
 
 class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
-    def missing_expansion_coverage(self):
+    def missing_expansion_coverage(self) -> Set[str]:
+        """Return expansions not covered yet"""
         return self.max_expansion_coverage() - self.expansion_coverage()
+
+#### Putting Things Together
+
+if __name__ == '__main__':
+    print('\n#### Putting Things Together')
+
+
 
 if __name__ == '__main__':
     digit_fuzzer = TrackingGrammarCoverageFuzzer(
@@ -230,7 +310,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     digit_fuzzer.missing_expansion_coverage()
 
-def average_length_until_full_coverage(fuzzer):
+def average_length_until_full_coverage(fuzzer: TrackingGrammarCoverageFuzzer) -> float:
     trials = 50
 
     sum = 0
@@ -259,17 +339,25 @@ if __name__ == '__main__':
 
 
 class SimpleGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
-    def choose_node_expansion(self, node, possible_children):
+    """When choosing expansions, prefer expansions not covered."""
+
+    def choose_node_expansion(self,
+                              node: DerivationTree,
+                              children_alternatives: List[List[DerivationTree]]) -> int:
+        """Return index of expansion in `children_alternatives` to be selected.
+           Picks uncovered expansions, if any."""
+
         # Prefer uncovered expansions
         (symbol, children) = node
-        uncovered_children = [c for (i, c) in enumerate(possible_children)
-                              if expansion_key(symbol, c) not in self.covered_expansions]
-        index_map = [i for (i, c) in enumerate(possible_children)
+        uncovered_children = [c for (i, c) in enumerate(children_alternatives)
+                              if expansion_key(symbol, c)
+                              not in self.covered_expansions]
+        index_map = [i for (i, c) in enumerate(children_alternatives)
                      if c in uncovered_children]
 
         if len(uncovered_children) == 0:
             # All expansions covered - use superclass method
-            return self.choose_covered_node_expansion(node, possible_children)
+            return self.choose_covered_node_expansion(node, children_alternatives)
 
         # Select from uncovered nodes
         index = self.choose_uncovered_node_expansion(node, uncovered_children)
@@ -277,13 +365,25 @@ class SimpleGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
         return index_map[index]
 
 class SimpleGrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
-    def choose_uncovered_node_expansion(self, node, possible_children):
+    def choose_uncovered_node_expansion(self,
+                                        node: DerivationTree,
+                                        children_alternatives: List[List[DerivationTree]]) \
+            -> int:
+        """Return index of expansion in _uncovered_ `children_alternatives`
+           to be selected.
+           To be overloaded in subclasses."""
         return TrackingGrammarCoverageFuzzer.choose_node_expansion(
-            self, node, possible_children)
+            self, node, children_alternatives)
 
-    def choose_covered_node_expansion(self, node, possible_children):
+    def choose_covered_node_expansion(self,
+                                      node: DerivationTree,
+                                      children_alternatives: List[List[DerivationTree]]) \
+            -> int:
+        """Return index of expansion in _covered_ `children_alternatives`
+           to be selected.
+           To be overloaded in subclasses."""
         return TrackingGrammarCoverageFuzzer.choose_node_expansion(
-            self, node, possible_children)
+            self, node, children_alternatives)
 
 if __name__ == '__main__':
     f = SimpleGrammarCoverageFuzzer(EXPR_GRAMMAR, start_symbol="<digit>")
@@ -350,6 +450,15 @@ if __name__ == '__main__':
     f.max_expansion_coverage('<integer>')
 
 if __name__ == '__main__':
+    quiz("How many productions would `f.max_expansion_coverage('<digit>')` return?",
+         [
+             "10",
+             "11",
+             "12",
+             "13"
+         ], "100 / 100")
+
+if __name__ == '__main__':
     f.max_expansion_coverage('<digit>')
 
 ### Determining yet Uncovered Children
@@ -360,19 +469,27 @@ if __name__ == '__main__':
 
 
 class GrammarCoverageFuzzer(SimpleGrammarCoverageFuzzer):
-    def _new_child_coverage(self, children, max_depth):
-        new_cov = set()
-        for (c_symbol, _) in children:
-            if c_symbol in self.grammar:
-                new_cov |= self.max_expansion_coverage(
-                    c_symbol, max_depth)
-        return new_cov
+    """Produce from grammars, aiming for coverage of all expansions."""
 
-    def new_child_coverage(self, symbol, children, max_depth=float('inf')):
-        """Return new coverage that would be obtained by expanding (symbol, children)"""
+    def new_child_coverage(self,
+                           symbol: str,
+                           children: List[DerivationTree],
+                           max_depth: Union[int, float] = float('inf')) -> Set[str]:
+        """Return new coverage that would be obtained 
+           by expanding (`symbol`, `children`)"""
+
         new_cov = self._new_child_coverage(children, max_depth)
         new_cov.add(expansion_key(symbol, children))
         new_cov -= self.expansion_coverage()   # -= is set subtraction
+        return new_cov
+
+    def _new_child_coverage(self, children: List[DerivationTree],
+                            max_depth: Union[int, float]) -> Set[str]:
+        new_cov: Set[str] = set()
+        for (c_symbol, _) in children:
+            if c_symbol in self.grammar:
+                new_cov |= self.max_expansion_coverage(c_symbol, max_depth)
+
         return new_cov
 
 if __name__ == '__main__':
@@ -381,6 +498,12 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     f.expansion_coverage()
+
+if __name__ == '__main__':
+    f.new_child_coverage("<digit>", [('0', [])])
+
+if __name__ == '__main__':
+    f.new_child_coverage("<digit>", [('2', [])])
 
 if __name__ == '__main__':
     for expansion in EXPR_GRAMMAR["<digit>"]:
@@ -394,14 +517,24 @@ if __name__ == '__main__':
 
 
 
+#### Excursion: Implementing `new_coverage()`
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Implementing `new_coverage()`')
+
+
+
 class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
-    def new_coverages(self, node, possible_children):
+    def new_coverages(self, node: DerivationTree,
+                      children_alternatives: List[List[DerivationTree]]) \
+            -> Optional[List[Set[str]]]:
         """Return coverage to be obtained for each child at minimum depth"""
+
         (symbol, children) = node
         for max_depth in range(len(self.grammar)):
             new_coverages = [
                 self.new_child_coverage(
-                    symbol, c, max_depth) for c in possible_children]
+                    symbol, c, max_depth) for c in children_alternatives]
             max_new_coverage = max(len(new_coverage)
                                    for new_coverage in new_coverages)
             if max_new_coverage > 0:
@@ -411,6 +544,13 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
         # All covered
         return None
 
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
 ### All Together
 
 if __name__ == '__main__':
@@ -418,20 +558,32 @@ if __name__ == '__main__':
 
 
 
+#### Excursion: Implementing `choose_node_expansion()`
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Implementing `choose_node_expansion()`')
+
+
+
 class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
-    def choose_node_expansion(self, node, possible_children):
+    def choose_node_expansion(self, node: DerivationTree,
+                              children_alternatives: List[List[DerivationTree]]) -> int:
+        """Choose an expansion of `node` among `children_alternatives`.
+           Return `n` such that expanding `children_alternatives[n]`
+           yields the highest additional coverage."""
+
         (symbol, children) = node
-        new_coverages = self.new_coverages(node, possible_children)
+        new_coverages = self.new_coverages(node, children_alternatives)
 
         if new_coverages is None:
             # All expansions covered - use superclass method
-            return self.choose_covered_node_expansion(node, possible_children)
+            return self.choose_covered_node_expansion(node, children_alternatives)
 
         max_new_coverage = max(len(cov) for cov in new_coverages)
 
-        children_with_max_new_coverage = [c for (i, c) in enumerate(possible_children)
+        children_with_max_new_coverage = [c for (i, c) in enumerate(children_alternatives)
                                           if len(new_coverages[i]) == max_new_coverage]
-        index_map = [i for (i, c) in enumerate(possible_children)
+        index_map = [i for (i, c) in enumerate(children_alternatives)
                      if len(new_coverages[i]) == max_new_coverage]
 
         # Select a random expansion
@@ -447,6 +599,13 @@ class GrammarCoverageFuzzer(GrammarCoverageFuzzer):
         self.covered_expansions.add(key)
 
         return index_map[new_children_index]
+
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
 
 if __name__ == '__main__':
     f = GrammarCoverageFuzzer(EXPR_GRAMMAR, min_nonterminals=3)
@@ -523,14 +682,18 @@ if __name__ == '__main__':
 from .Grammars import new_symbol, unreachable_nonterminals
 from .GrammarFuzzer import expansion_to_children
 
-def duplicate_context(grammar, symbol, expansion=None, depth=float('inf')):
+def duplicate_context(grammar: Grammar, 
+                      symbol: str,
+                      expansion: Optional[Expansion] = None, 
+                      depth: Union[float, int] = float('inf')):
     """Duplicate an expansion within a grammar.
 
-    In the given grammar, take the given expansion of the given symbol
-    (if expansion is omitted: all symbols), and replace it with a
+    In the given grammar, take the given expansion of the given `symbol`
+    (if `expansion` is omitted: all symbols), and replace it with a
     new expansion referring to a duplicate of all originally referenced rules.
 
-    If depth is given, limit duplication to `depth` references (default: unlimited)
+    If `depth` is given, limit duplication to `depth` references
+    (default: unlimited)
     """
     orig_grammar = extend_grammar(grammar)
     _duplicate_context(grammar, orig_grammar, symbol,
@@ -540,9 +703,21 @@ def duplicate_context(grammar, symbol, expansion=None, depth=float('inf')):
     for nonterminal in unreachable_nonterminals(grammar):
         del grammar[nonterminal]
 
+#### Excursion: Implementing `_duplicate_context()`
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Implementing `_duplicate_context()`')
+
+
+
 import copy
 
-def _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen):
+def _duplicate_context(grammar: Grammar,
+                       orig_grammar: Grammar,
+                       symbol: str,
+                       expansion: Optional[Expansion],
+                       depth: Union[float, int],
+                       seen: Dict[str, str]):
     for i in range(len(grammar[symbol])):
         if expansion is None or grammar[symbol][i] == expansion:
             new_expansion = ""
@@ -563,6 +738,13 @@ def _duplicate_context(grammar, orig_grammar, symbol, expansion, depth, seen):
                     new_expansion += new_s
 
             grammar[symbol][i] = new_expansion
+
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
 
 if __name__ == '__main__':
     dup_expr_grammar = extend_grammar(EXPR_GRAMMAR)
@@ -628,6 +810,13 @@ if __name__ == '__main__':
 
 
 
+#### Excursion: Creating the Plot
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Creating the Plot')
+
+
+
 from .Coverage import Coverage, cgi_decode
 
 if __name__ == '__main__':
@@ -642,7 +831,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     f = GrammarCoverageFuzzer(CGI_GRAMMAR, max_nonterminals=2)
-    coverages = {}
+    coverages: Dict[float, List[float]] = {}
 
     trials = 100
     for trial in range(trials):
@@ -669,10 +858,10 @@ if __name__ == '__main__':
 # %matplotlib inline
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
 if __name__ == '__main__':
-    import matplotlib.ticker as mtick
+    import matplotlib.ticker as mtick  # type: ignore
 
 if __name__ == '__main__':
     ax = plt.axes(label="CGI coverage")
@@ -685,6 +874,15 @@ if __name__ == '__main__':
     plt.title('Coverage of cgi_decode() vs. grammar coverage')
     plt.xlabel('grammar coverage (expansions)')
     plt.ylabel('code coverage (lines)')
+
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
+if __name__ == '__main__':
     plt.scatter(xs, ys);
 
 if __name__ == '__main__':
@@ -694,7 +892,7 @@ if __name__ == '__main__':
     np.corrcoef(xs, ys)
 
 if __name__ == '__main__':
-    from scipy.stats import spearmanr
+    from scipy.stats import spearmanr  # type: ignore
 
 if __name__ == '__main__':
     spearmanr(xs, ys)
@@ -706,11 +904,14 @@ if __name__ == '__main__':
 
 
 
+from urllib.parse import urlparse
+
+#### Excursion: Creating the Plot
+
 if __name__ == '__main__':
-    try:
-        from urlparse import urlparse      # Python 2
-    except ImportError:
-        from urllib.parse import urlparse  # Python 3
+    print('\n#### Excursion: Creating the Plot')
+
+
 
 if __name__ == '__main__':
     with Coverage() as cov_max:
@@ -721,7 +922,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     f = GrammarCoverageFuzzer(URL_GRAMMAR, max_nonterminals=2)
-    coverages = {}
+    coverages: Dict[float, List[float]] = {}
 
     trials = 100
     for trial in range(trials):
@@ -755,6 +956,15 @@ if __name__ == '__main__':
     plt.title('Coverage of urlparse() vs. grammar coverage')
     plt.xlabel('grammar coverage (expansions)')
     plt.ylabel('code coverage (lines)')
+
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
+if __name__ == '__main__':
     plt.scatter(xs, ys);
 
 if __name__ == '__main__':
@@ -792,14 +1002,38 @@ if __name__ == '__main__':
 
 
 
-from .Grammars import US_PHONE_GRAMMAR
+from .Grammars import EXPR_GRAMMAR
 
 if __name__ == '__main__':
-    phone_fuzzer = GrammarCoverageFuzzer(US_PHONE_GRAMMAR)
-    phone_fuzzer.fuzz()
+    expr_fuzzer = GrammarCoverageFuzzer(EXPR_GRAMMAR)
 
 if __name__ == '__main__':
-    phone_fuzzer.expansion_coverage()
+    expr_fuzzer.fuzz();
+
+if __name__ == '__main__':
+    expr_fuzzer.fuzz()
+
+if __name__ == '__main__':
+    expr_fuzzer.expansion_coverage()
+
+from .ClassDiagram import display_class_hierarchy
+
+if __name__ == '__main__':
+    display_class_hierarchy([GrammarCoverageFuzzer],
+                            public_methods=[
+                                Fuzzer.run,
+                                Fuzzer.runs,
+                                GrammarFuzzer.__init__,
+                                GrammarFuzzer.fuzz,
+                                GrammarFuzzer.fuzz_tree,
+                                TrackingGrammarCoverageFuzzer.max_expansion_coverage,
+                                TrackingGrammarCoverageFuzzer.missing_expansion_coverage,
+                                TrackingGrammarCoverageFuzzer.reset_coverage,
+                                GrammarCoverageFuzzer.__init__,
+                                GrammarCoverageFuzzer.fuzz,
+                                GrammarCoverageFuzzer.expansion_coverage,
+                            ],
+                            project='fuzzingbook')
 
 ## Lessons Learned
 ## ---------------
@@ -840,7 +1074,7 @@ if __name__ == '__main__':
 
 
 
-LS_EBNF_GRAMMAR = {
+LS_EBNF_GRAMMAR: Grammar = {
     '<start>': ['-<options>'],
     '<options>': ['<option>*'],
     '<option>': ['1', 'A', '@',
@@ -853,7 +1087,7 @@ if __name__ == '__main__':
 
 from .Grammars import convert_ebnf_grammar, srange
 
-LS_EBNF_GRAMMAR = {
+LS_EBNF_GRAMMAR: Grammar = {
     '<start>': ['-<options>'],
     '<options>': ['<option>*'],
     '<option>': srange("ABCFGHLOPRSTUW@abcdefghiklmnopqrstuwx1")
@@ -862,7 +1096,7 @@ LS_EBNF_GRAMMAR = {
 if __name__ == '__main__':
     assert is_valid_grammar(LS_EBNF_GRAMMAR)
 
-LS_GRAMMAR = convert_ebnf_grammar(LS_EBNF_GRAMMAR)
+LS_GRAMMAR: Grammar = convert_ebnf_grammar(LS_EBNF_GRAMMAR)
 
 from .Fuzzer import ProgramRunner
 

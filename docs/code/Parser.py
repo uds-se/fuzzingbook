@@ -3,7 +3,7 @@
 
 # "Parsing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2021-11-03 13:05:28+01:00
+# Last change: 2021-11-07 22:23:46+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -79,6 +79,20 @@ if __name__ == '__main__':
 
 
 
+if __name__ == '__main__':
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+from .Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL
+from .Grammars import is_valid_grammar, syntax_diagram, Grammar
+from .Fuzzer import Fuzzer
+from .GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
+from .ExpectError import ExpectError
+from .Timer import Timer
+
+from typing import Dict, List, Tuple, Collection
+
 ## Synopsis
 ## --------
 
@@ -140,7 +154,7 @@ if __name__ == '__main__':
 
 import string
 
-CSV_GRAMMAR = {
+CSV_GRAMMAR: Grammar = {
     '<start>': ['<csvline>'],
     '<csvline>': ['<items>'],
     '<items>': ['<item>,<items>', '<item>'],
@@ -150,24 +164,14 @@ CSV_GRAMMAR = {
 }
 
 if __name__ == '__main__':
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
-from .Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL, is_valid_grammar, syntax_diagram
-from .Fuzzer import Fuzzer
-from .GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
-
-from .ExpectError import ExpectError
-from .Timer import Timer
-
-if __name__ == '__main__':
     syntax_diagram(CSV_GRAMMAR)
+
+from typing import List
 
 if __name__ == '__main__':
     gf = GrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     trials = 1000
-    valid = []
+    valid: List[str] = []
     time = 0
     for i in range(trials):
         with Timer() as t:
@@ -185,7 +189,6 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     gf = GrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
     trials = 10
-    valid = []
     time = 0
     for i in range(trials):
         vehicle_info = gf.fuzz()
@@ -225,7 +228,6 @@ if __name__ == '__main__':
         ('<item>', [('van', [])]),
     ])
     trials = 10
-    valid = []
     time = 0
     for i in range(trials):
         vehicle_info = gf.fuzz()
@@ -253,7 +255,7 @@ if __name__ == '__main__':
 
 
 
-def parse_csv(mystring):
+def simple_parse_csv(mystring):
     children = []
     tree = (START_SYMBOL, children)
     for i, line in enumerate(mystring.split('\n')):
@@ -266,7 +268,7 @@ def lr_graph(dot):
     dot.graph_attr['rankdir'] = 'LR'
 
 if __name__ == '__main__':
-    tree = parse_csv(mystring)
+    tree = simple_parse_csv(mystring)
     display_tree(tree, graph_attr=lr_graph)
 
 if __name__ == '__main__':
@@ -284,7 +286,7 @@ def highlight_node(predicate):
     return hl_node
 
 if __name__ == '__main__':
-    tree = parse_csv(mystring)
+    tree = simple_parse_csv(mystring)
     bad_nodes = {5, 6, 7, 12, 13, 20, 22, 23, 24, 25}
 
 def hl_predicate(_d, nid, _s, _a): return nid in bad_nodes
@@ -365,7 +367,7 @@ if __name__ == '__main__':
 
 
 
-A1_GRAMMAR = {
+A1_GRAMMAR: Grammar = {
     "<start>": ["<expr>"],
     "<expr>": ["<expr>+<expr>", "<expr>-<expr>", "<integer>"],
     "<integer>": ["<digit><integer>", "<digit>"],
@@ -387,7 +389,7 @@ if __name__ == '__main__':
     assert mystring == tree_to_string(tree)
     display_tree(tree)
 
-A2_GRAMMAR = {
+A2_GRAMMAR: Grammar = {
     "<start>": ["<expr>"],
     "<expr>": ["<integer><expr_>"],
     "<expr_>": ["+<expr>", "-<expr>", ""],
@@ -418,7 +420,7 @@ if __name__ == '__main__':
 
 
 
-LR_GRAMMAR = {
+LR_GRAMMAR: Grammar = {
     '<start>': ['<A>'],
     '<A>': ['<A>a', ''],
 }
@@ -431,7 +433,7 @@ if __name__ == '__main__':
     display_tree(
         ('<start>', (('<A>', (('<A>', (('<A>', []), ('a', []))), ('a', []))), ('a', []))))
 
-RR_GRAMMAR = {
+RR_GRAMMAR: Grammar = {
     '<start>': ['<A>'],
     '<A>': ['a<A>', ''],
 }
@@ -474,7 +476,7 @@ if __name__ == '__main__':
     assert tree_to_string(tree) == mystring
     display_tree(tree)
 
-class Parser(object):
+class Parser:
     def __init__(self, grammar, **kwargs):
         self._grammar = grammar
         self._start_symbol = kwargs.get('start_symbol', START_SYMBOL)
@@ -553,9 +555,11 @@ if __name__ == '__main__':
 
 
 
+CanonicalGrammar = Dict[str, List[List[str]]]
+
 import re
 
-def single_char_tokens(grammar):
+def single_char_tokens(grammar: Grammar) -> Dict[str, List[List[Collection[str]]]]:
     g_ = {}
     for key in grammar:
         rules_ = []
@@ -570,7 +574,7 @@ def single_char_tokens(grammar):
         g_[key] = rules_
     return g_
 
-def canonical(grammar):
+def canonical(grammar: Grammar) -> CanonicalGrammar:
     def split(expansion):
         if isinstance(expansion, tuple):
             expansion = expansion[0]
@@ -583,7 +587,8 @@ def canonical(grammar):
         for k, alternatives in grammar.items()
     }
 
-CE_GRAMMAR = canonical(EXPR_GRAMMAR); CE_GRAMMAR
+CE_GRAMMAR: CanonicalGrammar = canonical(EXPR_GRAMMAR)
+CE_GRAMMAR
 
 def recurse_grammar(grammar, key, order):
     rules = sorted(grammar[key])
@@ -768,16 +773,16 @@ if __name__ == '__main__':
 
 
 
-PEG_SURPRISE = {
+PEG_SURPRISE: Grammar = {
     "<A>": ["a<A>a", "aa"]
 }
 
 if __name__ == '__main__':
     strings = []
-    for e in range(4):
+    for nn in range(4):
         f = GrammarFuzzer(PEG_SURPRISE, start_symbol='<A>')
         tree = ('<A>', None)
-        for _ in range(e):
+        for _ in range(nn):
             tree = f.expand_tree_once(tree)
         tree = f.expand_tree_with_strategy(tree, f.expand_node_min_cost)
         strings.append(tree_to_string(tree))
@@ -799,7 +804,7 @@ if __name__ == '__main__':
 
 
 
-SAMPLE_GRAMMAR = {
+SAMPLE_GRAMMAR: Grammar = {
     '<start>': ['<A><B>'],
     '<A>': ['a<B>c', 'a<A>'],
     '<B>': ['b<C>', '<D>'],
@@ -818,7 +823,7 @@ if __name__ == '__main__':
 
 
 
-class Column(object):
+class Column:
     def __init__(self, index, letter):
         self.index, self.letter = index, letter
         self.states, self._unique = [], {}
@@ -843,7 +848,7 @@ if __name__ == '__main__':
 
 
 
-class Item(object):
+class Item:
     def __init__(self, name, expr, dot):
         self.name, self.expr, self.dot = name, expr, dot
 
@@ -909,8 +914,8 @@ class State(Item):
 
 if __name__ == '__main__':
     col_0 = Column(0, None)
-    item_expr = tuple(*C_SAMPLE_GRAMMAR[START_SYMBOL])
-    start_state = State(START_SYMBOL, item_expr, 0, col_0)
+    item_tuple = tuple(*C_SAMPLE_GRAMMAR[START_SYMBOL])
+    start_state = State(START_SYMBOL, item_tuple, 0, col_0)
     col_0.add(start_state)
     start_state.at_dot()
 
@@ -929,6 +934,10 @@ if __name__ == '__main__':
 
 
 class EarleyParser(Parser):
+    def __init__(self, grammar, **kwargs):
+        super().__init__(grammar, **kwargs)
+        self.chart = []  # for type checking
+
     def chart_parse(self, words, start):
         alt = tuple(*self.cgrammar[start])
         chart = [Column(i, tok) for i, tok in enumerate([None, *words])]
@@ -1189,7 +1198,7 @@ class EarleyParser(EarleyParser):
     def extract_trees(self, forest):
         yield self.extract_a_tree(forest)
 
-A3_GRAMMAR = {
+A3_GRAMMAR: Grammar = {
     "<start>": ["<bexpr>"],
     "<bexpr>": [
         "<aexpr><gt><aexpr>", "<aexpr><lt><aexpr>", "<aexpr>=<aexpr>",
@@ -1255,14 +1264,14 @@ if __name__ == '__main__':
 
 
 
-E_GRAMMAR_1 = {
+E_GRAMMAR_1: Grammar = {
     '<start>': ['<A>', '<B>'],
     '<A>': ['a', ''],
     '<B>': ['b']
 }
 
 EPSILON = ''
-E_GRAMMAR = {
+E_GRAMMAR: Grammar = {
     '<start>': ['<S>'],
     '<S>': ['<A><A><A><A>'],
     '<A>': ['a', '<E>'],
@@ -1362,12 +1371,12 @@ if __name__ == '__main__':
     for tree in parser.parse(mystring):
         display_tree(tree)
 
-DIRECTLY_SELF_REFERRING = {
+DIRECTLY_SELF_REFERRING: Grammar = {
     '<start>': ['<query>'],
     '<query>': ['select <expr> from a'],
     "<expr>": ["<expr>", "a"],
 }
-INDIRECTLY_SELF_REFERRING = {
+INDIRECTLY_SELF_REFERRING: Grammar = {
     '<start>': ['<query>'],
     '<query>': ['select <expr> from a'],
     "<expr>": [ "<aexpr>", "a"],
@@ -1405,7 +1414,7 @@ class SimpleExtractor:
         name, paths = forest_node
         if not paths:
             return ((name, 0, 1), []), (name, [])
-        cur_path, i, l = self.choose_path(paths)
+        cur_path, i, length = self.choose_path(paths)
         child_nodes = []
         pos_nodes = []
         for s, kind, chart in cur_path:
@@ -1413,14 +1422,14 @@ class SimpleExtractor:
             postree, ntree = self.extract_a_node(f)
             child_nodes.append(ntree)
             pos_nodes.append(postree)
-        
-        return ((name, i, l), pos_nodes), (name, child_nodes)
-    
+
+        return ((name, i, length), pos_nodes), (name, child_nodes)
+
     def choose_path(self, arr):
-        l = len(arr)
-        i = random.randrange(l)
-        return arr[i], i, l
-    
+        length = len(arr)
+        i = random.randrange(length)
+        return arr[i], i, length
+
     def extract_a_tree(self):
         pos_tree, parse_tree = self.extract_a_node(self.my_forest)
         return self.parser.prune_tree(parse_tree)
@@ -2049,7 +2058,7 @@ if __name__ == '__main__':
 
 
 
-RECURSION_GRAMMAR = {
+RECURSION_GRAMMAR: Grammar = {
     "<start>": ["<A>"],
     "<A>": ["<A>", "<A>aa", "AA", "<B>"],
     "<B>": ["<C>", "<C>cc" ,"CC"],
@@ -2207,7 +2216,7 @@ class IterativeEarleyParser(IterativeEarleyParser):
         yield self.extract_a_tree(forest)
 
 if __name__ == '__main__':
-    test_cases = [
+    test_cases: List[Tuple[Grammar, str]] = [
         (A1_GRAMMAR, '1-2-3+4-5'),
         (A2_GRAMMAR, '1+2'),
         (A3_GRAMMAR, '1+2+3-6=6-1-2-3'),

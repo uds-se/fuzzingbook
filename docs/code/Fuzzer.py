@@ -3,7 +3,7 @@
 
 # "Fuzzing: Breaking Things with Random Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2021-11-03 13:00:07+01:00
+# Last change: 2021-11-07 16:21:33+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -108,6 +108,8 @@ if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
+
+from typing import Dict, Tuple, Union, List, Any
 
 from . import Intro_Testing
 
@@ -529,7 +531,7 @@ if __name__ == '__main__':
     with ExpectError():
         add_new_airport("London-Heathrow", "LHR")
 
-def add_new_airport(code, city):
+def add_new_airport(code, city):  # type: ignore
     assert code_repOK(code)
     assert airport_codes_repOK()
     airport_codes[code] = city
@@ -570,15 +572,13 @@ if __name__ == '__main__':
 
 
 
-from typing import Dict
-
 if __name__ == '__main__':
-    airport_codes: Dict[str, str] = {
+    typed_airport_codes: Dict[str, str] = {
         "YVR": "Vancouver",  # etc
     }
 
 if __name__ == '__main__':
-    airport_codes[1] = "First"
+    typed_airport_codes[1] = "First"  # type: ignore
 
 ## A Fuzzing Architecture
 ## ----------------------
@@ -595,6 +595,8 @@ if __name__ == '__main__':
 
 
 
+Outcome = str
+
 class Runner:
     """Base class for testing inputs."""
 
@@ -607,7 +609,7 @@ class Runner:
         """Initialize"""
         pass
 
-    def run(self, inp):
+    def run(self, inp: str) -> Any:
         """Run the runner with the given input"""
         return (inp, Runner.UNRESOLVED)
 
@@ -632,12 +634,12 @@ if __name__ == '__main__':
 class ProgramRunner(Runner):
     """Test a program with inputs."""
 
-    def __init__(self, program):
+    def __init__(self, program: Union[str, List[str]]):
         """Initialize.
            `program` is a program spec as passed to `subprocess.run()`"""
         self.program = program
 
-    def run_process(self, inp=""):
+    def run_process(self, inp: str = "") -> subprocess.CompletedProcess:
         """Run the program with `inp` as input.
            Return result of `subprocess.run()`."""
         return subprocess.run(self.program,
@@ -646,7 +648,7 @@ class ProgramRunner(Runner):
                               stderr=subprocess.PIPE,
                               universal_newlines=True)
 
-    def run(self, inp=""):
+    def run(self, inp: str = "") -> Tuple[subprocess.CompletedProcess, Outcome]:
         """Run the program with `inp` as input.  
            Return test outcome based on result of `subprocess.run()`."""
         result = self.run_process(inp)
@@ -661,7 +663,7 @@ class ProgramRunner(Runner):
         return (result, outcome)
 
 class BinaryProgramRunner(ProgramRunner):
-    def run_process(self, inp=""):
+    def run_process(self, inp: str = "") -> subprocess.CompletedProcess:
         """Run the program with `inp` as input.  
            Return result of `subprocess.run()`."""
         return subprocess.run(self.program,

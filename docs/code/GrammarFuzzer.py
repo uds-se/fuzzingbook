@@ -3,7 +3,7 @@
 
 # "Efficient Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2021-11-03 13:04:10+01:00
+# Last change: 2021-11-07 22:40:31+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,26 +42,29 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/GrammarFuzzer.html
 
+### Efficient Grammar Fuzzing
+
 This chapter introduces `GrammarFuzzer`, an efficient grammar fuzzer that takes a grammar to produce syntactically valid input strings.  Here's a typical usage:
 
 >>> from Grammars import US_PHONE_GRAMMAR
 >>> phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
 >>> phone_fuzzer.fuzz()
-'(785)853-4702'
+'(389)366-5865'
 
 The `GrammarFuzzer` constructor takes a number of keyword arguments to control its behavior.  `start_symbol`, for instance, allows to set the symbol that expansion starts with (instead of ``):
 
 >>> area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='')
 >>> area_fuzzer.fuzz()
-'269'
->>> import inspect
->>> print(inspect.getdoc(GrammarFuzzer.__init__))
+'511'
+
+Here's how to parameterize the `GrammarFuzzer` constructor:
+
 Produce strings from `grammar`, starting with `start_symbol`.
 If `min_nonterminals` or `max_nonterminals` is given, use them as limits 
 for the number of nonterminals produced.  
 If `disp` is set, display the intermediate derivation trees.
 If `log` is set, show intermediate steps as text on standard output.
-
+### Derivation Trees
 
 Internally, `GrammarFuzzer` makes use of [derivation trees](#Derivation-Trees), which it expands step by step.  After producing a string, the tree produced can be accessed in the `derivation_tree` attribute.
 
@@ -73,22 +76,22 @@ In the internal representation of a derivation tree, a _node_ is a pair (`symbol
  [('',
    [('(', []),
     ('',
-     [('', [('7', [])]),
+     [('', [('3', [])]),
       ('', [('8', [])]),
-      ('', [('5', [])])]),
+      ('', [('9', [])])]),
     (')', []),
     ('',
-     [('', [('8', [])]),
-      ('', [('5', [])]),
-      ('', [('3', [])])]),
+     [('', [('3', [])]),
+      ('', [('6', [])]),
+      ('', [('6', [])])]),
     ('-', []),
     ('',
-     [('', [('4', [])]),
-      ('', [('7', [])]),
-      ('', [('0', [])]),
-      ('', [('2', [])])])])])
+     [('', [('5', [])]),
+      ('', [('8', [])]),
+      ('', [('6', [])]),
+      ('', [('5', [])])])])])
 
-The chapter contains various helpers to work with derivation trees, including visualization tools.
+The chapter contains various helpers to work with derivation trees, including visualization tools – notably, `display_tree()`, above.
 
 
 For more details, source, and documentation, see
@@ -131,9 +134,14 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
+from .bookutils import quiz
+
+from typing import Tuple, List, Optional, Any, Union, Set, Callable, Dict
+
 from .bookutils import unicode_escape
 
-from .Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, simple_grammar_fuzzer, is_valid_grammar, exp_string, exp_opts
+from .Grammars import EXPR_EBNF_GRAMMAR, convert_ebnf_grammar, Grammar, Expansion
+from .Grammars import simple_grammar_fuzzer, is_valid_grammar, exp_string
 
 if __name__ == '__main__':
     expr_grammar = convert_ebnf_grammar(EXPR_EBNF_GRAMMAR)
@@ -144,6 +152,15 @@ from .ExpectError import ExpectTimeout
 if __name__ == '__main__':
     with ExpectTimeout(1):
         simple_grammar_fuzzer(grammar=expr_grammar, max_nonterminals=3)
+
+if __name__ == '__main__':
+    quiz("Why does `simple_grammar_fuzzer()` hang?",
+         [
+             "It produces an infinite number of additions",
+             "It produces an infinite number of digits",
+             "It produces an infinite number of parentheses",
+             "It produces an infinite number of signs",
+         ], '(3 * 3 * 3) ** (3 / (3 * 3))')
 
 if __name__ == '__main__':
     expr_grammar['<factor>']
@@ -233,8 +250,10 @@ if __name__ == '__main__':
 
 
 
+DerivationTree = Tuple[str, Optional[List[Any]]]
+
 if __name__ == '__main__':
-    derivation_tree = ("<start>",
+    derivation_tree: DerivationTree = ("<start>",
                        [("<expr>",
                          [("<expr>", None),
                           (" + ", []),
@@ -284,7 +303,7 @@ def display_tree(derivation_tree,
                  node_attr=default_node_attr,
                  edge_attr=default_edge_attr,
                  graph_attr=default_graph_attr):
-    
+
     # If we import display_tree, we also have to import its functions
     from graphviz import Digraph
 
@@ -318,6 +337,18 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     display_tree(derivation_tree)
+
+if __name__ == '__main__':
+    quiz("And which of these is the internal representation of `derivation_tree`?",
+        [
+            "`('<start>', [('<expr>', (['<expr> + <term>']))])`",
+            "`('<start>', [('<expr>', (['<expr>', ' + ', <term>']))])`",
+            "`" + repr(derivation_tree) + "`",
+            "`(" + repr(derivation_tree) + ", None)`"
+        ], len("eleven") - len("one"))
+
+if __name__ == '__main__':
+    derivation_tree
 
 #### Excursion: Source code and example for `display_annotated_tree()`
 
@@ -397,8 +428,14 @@ if __name__ == '__main__':
 from .Fuzzer import Fuzzer
 
 class GrammarFuzzer(Fuzzer):
-    def __init__(self, grammar, start_symbol=START_SYMBOL,
-                 min_nonterminals=0, max_nonterminals=10, disp=False, log=False):
+    """Produce strings from grammars efficiently, using derivation trees."""
+    def __init__(self, 
+                 grammar: Grammar, 
+                 start_symbol: str = START_SYMBOL,
+                 min_nonterminals: int = 0,
+                 max_nonterminals: int = 10,
+                 disp: bool = False,
+                 log: Union[bool, int] = False) -> None:
         """Produce strings from `grammar`, starting with `start_symbol`.
         If `min_nonterminals` or `max_nonterminals` is given, use them as limits 
         for the number of nonterminals produced.  
@@ -421,15 +458,17 @@ if __name__ == '__main__':
 
 
 class GrammarFuzzer(GrammarFuzzer):
-    def check_grammar(self):
+    def check_grammar(self) -> None:
+        """Check the grammar passed"""
         assert self.start_symbol in self.grammar
         assert is_valid_grammar(
             self.grammar,
             start_symbol=self.start_symbol,
             supported_opts=self.supported_opts())
 
-    def supported_opts(self):
-        return set()
+    def supported_opts(self) -> Set[str]:
+        """Set of supported options. To be overloaded in subclasses."""
+        return set()  # We don't support specific options
 
 #### End of Excursion
 
@@ -446,7 +485,36 @@ if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR)
     display_tree(f.init_tree())
 
-def expansion_to_children(expansion):
+### Picking a Children Alternative to be Expanded
+
+if __name__ == '__main__':
+    print('\n### Picking a Children Alternative to be Expanded')
+
+
+
+class GrammarFuzzer(GrammarFuzzer):
+    def choose_node_expansion(self, node: DerivationTree,
+                              children_alternatives: List[List[DerivationTree]]) -> int:
+        """Return index of expansion in `children_alternatives` to be selected.
+           'children_alternatives`: a list of possible children for `node`.
+           Defaults to random. To be overloaded in subclasses."""
+        return random.randrange(0, len(children_alternatives))
+
+### Getting a List of Possible Expansions
+
+if __name__ == '__main__':
+    print('\n### Getting a List of Possible Expansions')
+
+
+
+#### Excursion: Implementing `expansion_to_children()`
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Implementing `expansion_to_children()`')
+
+
+
+def expansion_to_children(expansion: Expansion) -> List[DerivationTree]:
     # print("Converting " + repr(expansion))
     # strings contains all substrings -- both terminals and nonterminals such
     # that ''.join(strings) == expansion
@@ -461,6 +529,13 @@ def expansion_to_children(expansion):
     return [(s, None) if is_nonterminal(s) else (s, [])
             for s in strings if len(s) > 0]
 
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
 if __name__ == '__main__':
     expansion_to_children("<term> + <expr>")
 
@@ -468,11 +543,18 @@ if __name__ == '__main__':
     expansion_to_children("")
 
 if __name__ == '__main__':
-    expansion_to_children(("+<term>", ["extra_data"]))
+    expansion_to_children(("+<term>", {"extra_data": 1234}))
 
 class GrammarFuzzer(GrammarFuzzer):
     def expansion_to_children(self, expansion):
         return expansion_to_children(expansion)
+
+### Putting Things Together
+
+if __name__ == '__main__':
+    print('\n### Putting Things Together')
+
+
 
 #### Excursion: `expand_node_randomly()` implementation
 
@@ -484,11 +566,8 @@ if __name__ == '__main__':
 import random
 
 class GrammarFuzzer(GrammarFuzzer):
-    def choose_node_expansion(self, node, possible_children):
-        """Return index of expansion in `possible_children` to be selected.  Defaults to random."""
-        return random.randrange(0, len(possible_children))
-
-    def expand_node_randomly(self, node):
+    def expand_node_randomly(self, node: DerivationTree) -> DerivationTree:
+        """Choose a random expansion for `node` and return it"""
         (symbol, children) = node
         assert children is None
 
@@ -497,12 +576,13 @@ class GrammarFuzzer(GrammarFuzzer):
 
         # Fetch the possible expansions from grammar...
         expansions = self.grammar[symbol]
-        possible_children = [self.expansion_to_children(
-            expansion) for expansion in expansions]
+        children_alternatives: List[List[DerivationTree]] = [
+            self.expansion_to_children(expansion) for expansion in expansions
+        ]
 
         # ... and select a random expansion
-        index = self.choose_node_expansion(node, possible_children)
-        chosen_children = possible_children[index]
+        index = self.choose_node_expansion(node, children_alternatives)
+        chosen_children = children_alternatives[index]
 
         # Process children (for subclasses)
         chosen_children = self.process_chosen_children(chosen_children,
@@ -512,7 +592,7 @@ class GrammarFuzzer(GrammarFuzzer):
         return (symbol, chosen_children)
 
 class GrammarFuzzer(GrammarFuzzer):
-    def expand_node(self, node):
+    def expand_node(self, node: DerivationTree) -> DerivationTree:
         return self.expand_node_randomly(node)
 
 class GrammarFuzzer(GrammarFuzzer):
@@ -530,14 +610,42 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR, log=True)
 
-    print("Before:")
-    tree = ("<integer>", None)
-    display_tree(tree)
+    print("Before expand_node_randomly():")
+    expr_tree = ("<integer>", None)
+    display_tree(expr_tree)
 
 if __name__ == '__main__':
-    print("After:")
-    tree = f.expand_node_randomly(tree)
-    display_tree(tree)
+    print("After expand_node_randomly():")
+    expr_tree = f.expand_node_randomly(expr_tree)
+    display_tree(expr_tree)
+
+if __name__ == '__main__':
+    quiz("What tree do we get if we expand the `<digit>` subtree?",
+         [
+             "We get another `<digit>` as new child of `<digit>`",
+             "We get some digit as child of `<digit>`",
+             "We get another `<digit>` as second child of `<integer>`",
+             "The entire tree becomes a single node with a digit"
+         ], 'len("2") + len("2")')
+
+if __name__ == '__main__':
+    digit_subtree = expr_tree[1][0]  # type: ignore
+    display_tree(digit_subtree)
+
+if __name__ == '__main__':
+    print("After expanding the <digit> subtree:")
+    digit_subtree = f.expand_node_randomly(digit_subtree)
+    display_tree(digit_subtree)
+
+if __name__ == '__main__':
+    quiz("Is the original `expr_tree` affected by this change?",
+         [
+             "Yes, it has also gained a new child",
+             "No, it is unchanged"
+         ], "1 ** (1 - 1)")
+
+if __name__ == '__main__':
+    display_tree(expr_tree)
 
 ## Expanding a Tree
 ## ----------------
@@ -548,7 +656,7 @@ if __name__ == '__main__':
 
 
 class GrammarFuzzer(GrammarFuzzer):
-    def possible_expansions(self, node):
+    def possible_expansions(self, node: DerivationTree) -> int:
         (symbol, children) = node
         if children is None:
             return 1
@@ -560,7 +668,7 @@ if __name__ == '__main__':
     print(f.possible_expansions(derivation_tree))
 
 class GrammarFuzzer(GrammarFuzzer):
-    def any_possible_expansions(self, node):
+    def any_possible_expansions(self, node: DerivationTree) -> bool:
         (symbol, children) = node
         if children is None:
             return True
@@ -579,12 +687,16 @@ if __name__ == '__main__':
 
 
 class GrammarFuzzer(GrammarFuzzer):
-    def choose_tree_expansion(self, tree, children):
-        """Return index of subtree in `children` to be selected for expansion.  Defaults to random."""
+    def choose_tree_expansion(self,
+                              tree: DerivationTree,
+                              children: List[DerivationTree]) -> int:
+        """Return index of subtree in `children` to be selected for expansion.
+           Defaults to random."""
         return random.randrange(0, len(children))
 
-    def expand_tree_once(self, tree):
-        """Choose an unexpanded symbol in tree; expand it.  Can be overloaded in subclasses."""
+    def expand_tree_once(self, tree: DerivationTree) -> DerivationTree:
+        """Choose an unexpanded symbol in tree; expand it.
+           Can be overloaded in subclasses."""
         (symbol, children) = tree
         if children is None:
             # Expand this node
@@ -642,12 +754,21 @@ if __name__ == '__main__':
 
 
 
+### Excursion: Implementing Cost Functions
+
+if __name__ == '__main__':
+    print('\n### Excursion: Implementing Cost Functions')
+
+
+
 class GrammarFuzzer(GrammarFuzzer):
-    def symbol_cost(self, symbol, seen=set()):
+    def symbol_cost(self, symbol: str, seen: Set[str] = set()) \
+            -> Union[int, float]:
         expansions = self.grammar[symbol]
         return min(self.expansion_cost(e, seen | {symbol}) for e in expansions)
 
-    def expansion_cost(self, expansion, seen=set()):
+    def expansion_cost(self, expansion: Expansion,
+                       seen: Set[str] = set()) -> Union[int, float]:
         symbols = nonterminals(expansion)
         if len(symbols) == 0:
             return 1  # no symbol
@@ -658,6 +779,13 @@ class GrammarFuzzer(GrammarFuzzer):
         # the value of a expansion is the sum of all expandable variables
         # inside + 1
         return sum(self.symbol_cost(s, seen) for s in symbols) + 1
+
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
 
 if __name__ == '__main__':
     f = GrammarFuzzer(EXPR_GRAMMAR)
@@ -674,25 +802,27 @@ if __name__ == '__main__':
 
 
 class GrammarFuzzer(GrammarFuzzer):
-    def expand_node_by_cost(self, node, choose=min):
+    def expand_node_by_cost(self, node: DerivationTree, choose: Callable = min):
         (symbol, children) = node
         assert children is None
 
         # Fetch the possible expansions from grammar...
         expansions = self.grammar[symbol]
 
-        possible_children_with_cost = [(self.expansion_to_children(expansion),
+        children_alternatives_with_cost = [(self.expansion_to_children(expansion),
                                         self.expansion_cost(
                                             expansion, {symbol}),
                                         expansion)
                                        for expansion in expansions]
 
         costs = [cost for (child, cost, expansion)
-                 in possible_children_with_cost]
+                 in children_alternatives_with_cost]
         chosen_cost = choose(costs)
-        children_with_chosen_cost = [child for (child, child_cost, _) in possible_children_with_cost
+        children_with_chosen_cost = [child for (child, child_cost, _) 
+                                     in children_alternatives_with_cost
                                      if child_cost == chosen_cost]
-        expansion_with_chosen_cost = [expansion for (_, child_cost, expansion) in possible_children_with_cost
+        expansion_with_chosen_cost = [expansion for (_, child_cost, expansion)
+                                      in children_alternatives_with_cost
                                       if child_cost == chosen_cost]
 
         index = self.choose_node_expansion(node, children_with_chosen_cost)
@@ -730,17 +860,17 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
-        display_tree(derivation_tree)
+    display_tree(derivation_tree)
 
 if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
-        display_tree(derivation_tree)
+    display_tree(derivation_tree)
 
 if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
-        display_tree(derivation_tree)
+    display_tree(derivation_tree)
 
 if __name__ == '__main__':
     while f.any_possible_expansions(derivation_tree):
@@ -783,17 +913,17 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
-        display_tree(derivation_tree)
+    display_tree(derivation_tree)
 
 if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
-        display_tree(derivation_tree)
+    display_tree(derivation_tree)
 
 if __name__ == '__main__':
     if f.any_possible_expansions(derivation_tree):
         derivation_tree = f.expand_tree_once(derivation_tree)
-        display_tree(derivation_tree)
+    display_tree(derivation_tree)
 
 ## Three Expansion Phases
 ## ----------------------
@@ -852,7 +982,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    initial_derivation_tree = ("<start>",
+    initial_derivation_tree: DerivationTree = ("<start>",
                        [("<expr>",
                          [("<expr>", None),
                           (" + ", []),
@@ -885,8 +1015,8 @@ if __name__ == '__main__':
 
 
 class GrammarFuzzer(GrammarFuzzer):
-    def fuzz_tree(self):
-        # Create an initial derivation tree
+    def fuzz_tree(self) -> DerivationTree:
+        """Produce a derivation tree from the grammar."""
         tree = self.init_tree()
         # print(tree)
 
@@ -898,7 +1028,8 @@ class GrammarFuzzer(GrammarFuzzer):
             display(display_tree(tree))
         return tree
 
-    def fuzz(self):
+    def fuzz(self) -> str:
+        """Produce a string from the grammar."""
         self.derivation_tree = self.fuzz_tree()
         return all_terminals(self.derivation_tree)
 
@@ -958,6 +1089,13 @@ if __name__ == '__main__':
 
 
 
+### Efficient Grammar Fuzzing
+
+if __name__ == '__main__':
+    print('\n### Efficient Grammar Fuzzing')
+
+
+
 from .Grammars import US_PHONE_GRAMMAR
 
 if __name__ == '__main__':
@@ -972,6 +1110,28 @@ import inspect
 
 if __name__ == '__main__':
     print(inspect.getdoc(GrammarFuzzer.__init__))
+
+from .ClassDiagram import display_class_hierarchy
+
+if __name__ == '__main__':
+    display_class_hierarchy([GrammarFuzzer],
+                            public_methods=[
+                                Fuzzer.__init__,
+                                Fuzzer.fuzz,
+                                Fuzzer.run,
+                                Fuzzer.runs,
+                                GrammarFuzzer.__init__,
+                                GrammarFuzzer.fuzz,
+                                GrammarFuzzer.fuzz_tree,
+                            ],
+        project='fuzzingbook')
+
+### Derivation Trees
+
+if __name__ == '__main__':
+    print('\n### Derivation Trees')
+
+
 
 if __name__ == '__main__':
     display_tree(phone_fuzzer.derivation_tree)
@@ -1035,13 +1195,16 @@ if __name__ == '__main__':
 import copy
 
 class FasterGrammarFuzzer(GrammarFuzzer):
-    def __init__(self, *args, **kwargs):
+    """Variant of `GrammarFuzzer` with memoized values"""
+
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._expansion_cache = {}
+        self._expansion_cache: Dict[Expansion, List[DerivationTree]] = {}
         self._expansion_invocations = 0
         self._expansion_invocations_cached = 0
 
-    def expansion_to_children(self, expansion):
+    def expansion_to_children(self, expansion: Expansion) \
+            -> List[DerivationTree]:
         self._expansion_invocations += 1
         if expansion in self._expansion_cache:
             self._expansion_invocations_cached += 1
@@ -1074,28 +1237,30 @@ if __name__ == '__main__':
 
 
 class EvenFasterGrammarFuzzer(GrammarFuzzer):
+    """Variant of `GrammarFuzzer` with precomputed costs"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._symbol_costs = {}
         self._expansion_costs = {}
         self.precompute_costs()
 
-    def new_symbol_cost(self, symbol, seen=set()):
+    def new_symbol_cost(self, symbol: str, seen: Set[str] = set()):
         return self._symbol_costs[symbol]
 
-    def new_expansion_cost(self, expansion, seen=set()):
+    def new_expansion_cost(self, expansion: Expansion, seen: Set[str] = set()):
         return self._expansion_costs[expansion]
 
-    def precompute_costs(self):
+    def precompute_costs(self) -> None:
         for symbol in self.grammar:
             self._symbol_costs[symbol] = super().symbol_cost(symbol)
             for expansion in self.grammar[symbol]:
-                self._expansion_costs[expansion] = super(
-                ).expansion_cost(expansion)
+                self._expansion_costs[expansion] = \
+                    super().expansion_cost(expansion)
 
         # Make sure we now call the caching methods
-        self.symbol_cost = self.new_symbol_cost
-        self.expansion_cost = self.new_expansion_cost
+        self.symbol_cost = self.new_symbol_cost  # type: ignore
+        self.expansion_cost = self.new_expansion_cost  # type: ignore
 
 if __name__ == '__main__':
     f = EvenFasterGrammarFuzzer(EXPR_GRAMMAR)
@@ -1125,7 +1290,7 @@ if __name__ == '__main__':
 
 
 class ExerciseGrammarFuzzer(GrammarFuzzer):
-    def expand_node_randomly(self, node):
+    def expand_node_randomly(self, node: DerivationTree) -> DerivationTree:
         if self.log:
             print("Expanding", all_terminals(node), "randomly by cost")
 

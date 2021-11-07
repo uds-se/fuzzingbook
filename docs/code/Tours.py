@@ -3,7 +3,7 @@
 
 # "Tours through the Book" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Tours.html
-# Last change: 2021-11-03 12:59:41+01:00
+# Last change: 2021-11-07 23:25:11+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -101,6 +101,22 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     print('\n## The Graduate Tour')
+
+
+
+## The Blackbox Tour
+## -----------------
+
+if __name__ == '__main__':
+    print('\n## The Blackbox Tour')
+
+
+
+## The Whitebox Tour
+## -----------------
+
+if __name__ == '__main__':
+    print('\n## The Whitebox Tour')
 
 
 

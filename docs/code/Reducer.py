@@ -3,7 +3,7 @@
 
 # "Reducing Failure-Inducing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2021-11-03 13:08:27+01:00
+# Last change: 2021-11-07 22:28:34+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -198,7 +198,7 @@ if __name__ == '__main__':
     input_without_first_and_fourth_quarter = failing_input[quarter_length:quarter_length * 3]
     mystery.run(input_without_first_and_fourth_quarter)
 
-class Reducer(object):
+class Reducer:
     def __init__(self, runner, log_test=False):
         """Attach reducer to the given `runner`"""
         self.runner = runner

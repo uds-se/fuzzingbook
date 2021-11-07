@@ -3,7 +3,7 @@
 
 # "Probabilistic Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2021-11-03 13:05:53+01:00
+# Last change: 2021-11-07 22:24:45+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     [(d, "%.2f" % digit_probs[d - 1]) for d in range(1, 10)]
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
 if __name__ == '__main__':
     labels = range(1, 10)
@@ -159,8 +159,11 @@ from .GrammarFuzzer import GrammarFuzzer, all_terminals, display_tree
 
 from .Grammars import is_valid_grammar, EXPR_GRAMMAR, START_SYMBOL, crange, syntax_diagram
 from .Grammars import opts, exp_string, exp_opt, set_opts
+from .Grammars import Grammar, Expansion
 
-PROBABILISTIC_EXPR_GRAMMAR = {
+from typing import List
+
+PROBABILISTIC_EXPR_GRAMMAR: Grammar = {
     "<start>":
         ["<expr>"],
 
@@ -207,10 +210,11 @@ if __name__ == '__main__':
     assert is_valid_grammar(PROBABILISTIC_EXPR_GRAMMAR, supported_opts={'prob'})
 
 if __name__ == '__main__':
-    PROBABILISTIC_EXPR_GRAMMAR["<leaddigit>"]
+    leaddigits: List[Expansion] = PROBABILISTIC_EXPR_GRAMMAR["<leaddigit>"]
+    leaddigits
 
 if __name__ == '__main__':
-    leaddigit_expansion = PROBABILISTIC_EXPR_GRAMMAR["<leaddigit>"][0]
+    leaddigit_expansion = leaddigits[0]
     leaddigit_expansion
 
 if __name__ == '__main__':
@@ -348,25 +352,25 @@ class ProbabilisticGrammarFuzzer(GrammarFuzzer):
         return super().supported_opts() | {'prob'}
 
 class ProbabilisticGrammarFuzzer(ProbabilisticGrammarFuzzer):
-    def choose_node_expansion(self, node, possible_children):
+    def choose_node_expansion(self, node, children_alternatives):
         (symbol, tree) = node
         expansions = self.grammar[symbol]
         probabilities = exp_probabilities(expansions)
 
         weights = []
-        for child in possible_children:
-            expansion = all_terminals((node, child))
-            child_weight = probabilities[expansion]
+        for children in children_alternatives:
+            expansion = all_terminals((node, children))
+            children_weight = probabilities[expansion]
             if self.log:
-                print(repr(expansion), "p =", child_weight)
-            weights.append(child_weight)
+                print(repr(expansion), "p =", children_weight)
+            weights.append(children_weight)
 
         if sum(weights) == 0:
             # No alternative (probably expanding at minimum cost)
             weights = None
 
         return random.choices(
-            range(len(possible_children)), weights=weights)[0]
+            range(len(children_alternatives)), weights=weights)[0]
 
 if __name__ == '__main__':
     natural_fuzzer = ProbabilisticGrammarFuzzer(
@@ -530,7 +534,7 @@ if __name__ == '__main__':
     tree, *_ = parser.parse("127.0.0.1")
     display_tree(tree)
 
-class ExpansionCountMiner(object):
+class ExpansionCountMiner:
     def __init__(self, parser, log=False):
         assert isinstance(parser, Parser)
         self.grammar = extend_grammar(parser.grammar())
@@ -847,7 +851,7 @@ if __name__ == '__main__':
     random_integers = [random_integer_fuzzer.fuzz() for i in range(sample_size)]
 
 if __name__ == '__main__':
-    random_counts = [random_integers.count(c) for c in crange('1', '9')]
+    random_counts = [random_integers.count(str(c)) for c in crange('1', '9')]
     random_counts
 
 if __name__ == '__main__':
@@ -862,7 +866,7 @@ if __name__ == '__main__':
     print(expected_random_counts)
 
 if __name__ == '__main__':
-    from scipy.stats import chisquare
+    from scipy.stats import chisquare  # type: ignore
 
 if __name__ == '__main__':
     chisquare(random_counts, expected_prob_counts)
@@ -937,19 +941,19 @@ if __name__ == '__main__':
 class ProbabilisticGrammarCoverageFuzzer(
         GrammarCoverageFuzzer, ProbabilisticGrammarFuzzer):
     # Choose uncovered expansions first
-    def choose_node_expansion(self, node, possible_children):
+    def choose_node_expansion(self, node, children_alternatives):
         return GrammarCoverageFuzzer.choose_node_expansion(
-            self, node, possible_children)
+            self, node, children_alternatives)
 
     # Among uncovered expansions, pick by (relative) probability
-    def choose_uncovered_node_expansion(self, node, possible_children):
+    def choose_uncovered_node_expansion(self, node, children_alternatives):
         return ProbabilisticGrammarFuzzer.choose_node_expansion(
-            self, node, possible_children)
+            self, node, children_alternatives)
 
     # For covered nodes, pick by probability, too
-    def choose_covered_node_expansion(self, node, possible_children):
+    def choose_covered_node_expansion(self, node, children_alternatives):
         return ProbabilisticGrammarFuzzer.choose_node_expansion(
-            self, node, possible_children)
+            self, node, children_alternatives)
 
 if __name__ == '__main__':
     cov_leaddigit_fuzzer = ProbabilisticGrammarCoverageFuzzer(

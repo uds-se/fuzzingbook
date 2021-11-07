@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
-# Last change: 2021-11-03 13:08:02+01:00
+# Last change: 2021-11-07 22:27:49+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -164,7 +164,7 @@ if __name__ == '__main__':
 from .Coverage import population_coverage
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
 if __name__ == '__main__':
     _, dict_cov = population_coverage(dict_fuzzer.inputs, my_parser)
@@ -201,11 +201,11 @@ if __name__ == '__main__':
 
 import string
 
-from .Grammars import is_valid_grammar, srange
+from .Grammars import is_valid_grammar, srange, Grammar
 
 XML_TOKENS = {"<id>","<text>"}
 
-XML_GRAMMAR = {
+XML_GRAMMAR: Grammar = {
     "<start>": ["<xml-tree>"],
     "<xml-tree>": ["<text>",
                    "<xml-open-tag><xml-tree><xml-close-tag>", 
@@ -308,7 +308,7 @@ if __name__ == '__main__':
 
 
 class FragmentMutator(FragmentMutator):
-    def __init__(self, parser):
+    def __init__(self, parser):  # type: ignore
         """Initialize mutators"""
         super().__init__(parser)
         self.seen_seeds = []
@@ -341,7 +341,7 @@ class FragmentMutator(FragmentMutator):
         return symbol, list(map(self.recursive_swap, children))
 
 class FragmentMutator(FragmentMutator):
-    def __init__(self, parser):
+    def __init__(self, parser):  # type: ignore
         super().__init__(parser)
         self.mutators = [self.swap_fragment]
           
@@ -377,7 +377,7 @@ class FragmentMutator(FragmentMutator):
         return symbol, list(map(self.recursive_delete, children))
 
 class FragmentMutator(FragmentMutator):
-    def __init__(self, parser):
+    def __init__(self, parser):  # type: ignore
         super().__init__(parser)
         self.mutators.append(self.delete_fragment)
     
@@ -590,9 +590,9 @@ class RegionMutator(FragmentMutator):
 if __name__ == '__main__':
     mutator = RegionMutator(parser)
     mutator.add_to_fragment_pool(invalid_seed)
-    for symbol in invalid_seed.regions:
+    for symbol in invalid_seed.regions:  # type: ignore
         print(symbol)
-        for (s, e) in invalid_seed.regions[symbol]:
+        for (s, e) in invalid_seed.regions[symbol]:  # type: ignore
             print("|-(%d,%d) : %s" % (s, e, invalid_seed.data[s:e]))
 
 class RegionMutator(RegionMutator):

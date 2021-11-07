@@ -3,7 +3,7 @@
 
 # "Testing Web Applications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2021-11-03 13:11:54+01:00
+# Last change: 2021-11-07 22:10:18+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -113,7 +113,8 @@ if __name__ == '__main__':
 
 
 
-from http.server import HTTPServer, BaseHTTPRequestHandler, HTTPStatus
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPStatus  # type: ignore
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     pass
@@ -472,7 +473,7 @@ if __name__ == '__main__':
 
 
 
-from multiprocess import Queue
+from multiprocess import Queue  # type: ignore
 
 HTTPD_MESSAGE_QUEUE = Queue()
 
@@ -868,7 +869,7 @@ class FormHTMLParser(FormHTMLParser):
         if tag == "select":
             self.select.pop()
 
-class HTMLGrammarMiner(object):
+class HTMLGrammarMiner:
     def __init__(self, html_text):
         html_parser = FormHTMLParser()
         html_parser.feed(html_text)

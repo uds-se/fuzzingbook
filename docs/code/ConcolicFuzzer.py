@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2021-11-03 13:10:36+01:00
+# Last change: 2021-11-07 22:06:24+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,77 +68,87 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>     scf.add_trace(_, v)
 ' '
 '+\\x00'
-'+\\x00\\x00%\\x00'
+'+\\x00%\\x00'
+'+\\x81\\x04\\x80!%0\\x00'
 
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1222853776.py", line 9, in 
     _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/2687284210.py", line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
-    raise ValueError("Invalid encoding")
-ValueError: Invalid encoding (expected)
-
-'+\\x00\\x00+\\x00'
-'%\\x00'
-'%8\\x00'
-
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1425235974.py", line 42, in cgi_decode
     raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1222853776.py", line 9, in 
     _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/2687284210.py", line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1425235974.py", line 42, in cgi_decode
     raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
 
-'%\\x009\\x00'
-'%\\x009\\x00'
+'+\\x81\\x04\\x80!%7\\x00'
+'+\\x81\\x04\\x80!%e\\x00'
 
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1222853776.py", line 9, in 
     _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/2687284210.py", line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1425235974.py", line 42, in cgi_decode
     raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1222853776.py", line 9, in 
     _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/2687284210.py", line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1425235974.py", line 42, in cgi_decode
     raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
 
-'%8F\\x00'
+'+\\x81\\x04\\x80!%3\\x00'
 
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1222853776.py", line 9, in 
     _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/2687284210.py", line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 39, in cgi_decode
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1425235974.py", line 42, in cgi_decode
     raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
 
-'%c\\x00'
+'+\\x81\\x04\\x80!%1\\x00'
 
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1222853776.py", line 9, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1222853776.py", line 9, in 
     _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/2687284210.py", line 3, in __call__
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/2687284210.py", line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_18671/1425235974.py", line 42, in cgi_decode
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1425235974.py", line 42, in cgi_decode
+    raise ValueError("Invalid encoding")
+ValueError: Invalid encoding (expected)
+
+'+\\x81\\x04\\x80!%A\\x00'
+
+Traceback (most recent call last):
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1222853776.py", line 9, in 
+    _[cgi_decode](v)
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/2687284210.py", line 3, in __call__
+    self.result = self.fn(*self.concolic(args))
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1425235974.py", line 42, in cgi_decode
+    raise ValueError("Invalid encoding")
+ValueError: Invalid encoding (expected)
+
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+
+Traceback (most recent call last):
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1222853776.py", line 9, in 
+    _[cgi_decode](v)
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/2687284210.py", line 3, in __call__
+    self.result = self.fn(*self.concolic(args))
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_86220/1425235974.py", line 42, in cgi_decode
     raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
 
@@ -161,13 +171,33 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-update WyX set p=G,E=M,H=X where s((p!=q>O))
-Invalid WHERE ('T-r(q)/F/m(J)>((p!=q>O))')
+update YA6e set X=H,Q=F where R/F>r
+Table ('YA6e') was not found
 
-select (Z+l-f*p*Y*A/o+E(Q,S)) from months
-Invalid WHERE ('((Z+l-f*p*Y*A/o+E(Q,S)))')
+delete from xb where d*G-B*x+Z/z>f03(_==H!=n(m))
+Table ('xb') was not found
 
-update r set A=tUv where m==m
+select (1.39),B,((v-XQ*E*G*g+t)!=2
+Column ('s') was not found
+
+delete from vehicles where -8!=h(P(UrI))>Cl(R(r)+Z,S+n,I==P)==e935
+Invalid WHERE ('-8!=h(P(UrI))>Cl(R(r)+Z,S+n,I==P)==e935')
+
+update months set a1=w,y=w,U=K where 293==M!=I
+Column ('a1') was not found
+
+insert into vehicles (R,S,r70D797gI,xU) values (',g6')
+Column ('R') was not found
+
+delete from months where (C>V*r*e+T)==s+L+P+_>1
+Invalid WHERE ('(C>V*r*e+T)==s+L+P+_>1')
+
+delete from months where Sl66MC==(W6)==(72.5)
+Invalid WHERE ('Sl66MC==(W6)==(72.5)')
+
+
+
+
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
 at https://www.fuzzingbook.org/html/ConcolicFuzzer.html
@@ -192,6 +222,8 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
+from typing import List, Callable, Dict, Tuple
+
 ## Synopsis
 ## --------
 
@@ -211,14 +243,18 @@ if __name__ == '__main__':
 def factorial(n):
     if n < 0:
         return None
+
     if n == 0:
         return 1
+
     if n == 1:
         return 1
+
     v = 1
     while n != 0:
         v = v * n
         n = n - 1
+
     return v
 
 if __name__ == '__main__':
@@ -275,7 +311,7 @@ if __name__ == '__main__':
 
 
 
-import z3
+import z3  # type: ignore
 
 if __name__ == '__main__':
     assert z3.get_version() >= (4, 8, 6, 0)
@@ -592,7 +628,7 @@ INT_BINARY_OPS = [
     # '__ror__',
 ]
 
-def make_int_binary_wrapper(fname, fun, zfun):
+def make_int_binary_wrapper(fname, fun, zfun):  # type: ignore
     def proxy(self, other):
         z, v = self._zv(other)
         z_ = zfun(self.z, z)
@@ -605,7 +641,7 @@ def make_int_binary_wrapper(fname, fun, zfun):
 
     return proxy
 
-INITIALIZER_LIST = []
+INITIALIZER_LIST: List[Callable] = []
 
 def initialize():
     for fn in INITIALIZER_LIST:
@@ -1055,7 +1091,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     _.zeval()
 
-def tstr1(s):
+def tstr1(s):  # type: ignore
     if s == 'hello world':
         return True
     else:
@@ -1603,11 +1639,12 @@ if __name__ == '__main__':
 
 
 
-def factorial(n):
+def factorial(n):  # type: ignore
     v = 1
     while n != 0:
         v *= n
         n -= 1
+
     return v
 
 def permutation(n, k):
@@ -2263,7 +2300,7 @@ def traverse_z3(p, hm):
     return p
 
 if __name__ == '__main__':
-    comparisons = {}
+    comparisons: Dict[str, Tuple] = {}
     for p in _.path:
         traverse_z3(p, comparisons)
     comparisons
@@ -2587,7 +2624,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     _.context
 
-def make_int_binary_wrapper(fname, fun, zfun):
+def make_int_binary_wrapper(fname, fun, zfun):  # type: ignore
     def proxy(self, other):
         z, v = self._zv(other)
         z_ = zfun(self.z, z)
