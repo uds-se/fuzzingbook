@@ -17,6 +17,7 @@ import io
 import html
 import urllib
 import shelve
+import dbm
 
 try:
     import nbformat
@@ -310,7 +311,23 @@ assert bibtex_unescape(r"B{\"o}hme") == 'Böhme'
 assert bibtex_unescape(r"P{\`e}zze") == 'Pèzze'
 
 LINKS_DB = 'links'
-links_db = shelve.open(LINKS_DB)
+links_db = None
+
+for sleep_time in [1, 2, 4, 8, 16, 32, 64, 128]:
+    if links_db:
+        break
+    try:
+        links_db = shelve.open(LINKS_DB)
+    except dbm.error:
+        links_db = None
+        print(f"Links database is busy; retrying in {sleep_time} seconds")
+        time.sleep(sleep_time)
+
+if links_db is None:
+    # Last attempt
+    links_db = shelve.open(LINKS_DB)
+
+
 if args.clear_link_cache:
     for link in links_db.keys():
         del links_db[link]
