@@ -3,7 +3,7 @@
 
 # "Fuzzing APIs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2021-11-03 13:11:13+01:00
+# Last change: 2021-11-07 22:30:32+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -123,7 +123,8 @@ from urllib.parse import urlparse
 if __name__ == '__main__':
     urlparse('https://www.fuzzingbook.com/html/APIFuzzer.html')
 
-from .Grammars import URL_GRAMMAR, is_valid_grammar, START_SYMBOL, new_symbol, opts, extend_grammar
+from .Grammars import URL_GRAMMAR, is_valid_grammar, START_SYMBOL
+from .Grammars import new_symbol, opts, extend_grammar, Grammar
 from .GrammarFuzzer import GrammarFuzzer, display_tree, all_terminals
 
 if __name__ == '__main__':
@@ -148,7 +149,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     eval(call)
 
-URLPARSE_GRAMMAR = {
+URLPARSE_GRAMMAR: Grammar = {
     "<call>":
         ['urlparse("<url>")']
 }
@@ -176,7 +177,7 @@ if __name__ == '__main__':
     call = urlparse_fuzzer.fuzz()
     do_call(call)
 
-URLPARSE_C_GRAMMAR = {
+URLPARSE_C_GRAMMAR: Grammar = {
     "<cfile>": ["<cheader><cfunction>"],
     "<cheader>": ['#include "urlparse.h"\n\n'],
     "<cfunction>": ["void test() {\n<calls>}\n"],
@@ -206,7 +207,7 @@ if __name__ == '__main__':
 
 from .GeneratorGrammarFuzzer import GeneratorGrammarFuzzer, ProbabilisticGeneratorGrammarFuzzer
 
-URLPARSE_ORACLE_GRAMMAR = extend_grammar(URLPARSE_GRAMMAR,
+URLPARSE_ORACLE_GRAMMAR: Grammar = extend_grammar(URLPARSE_GRAMMAR,
 {
      "<call>": [("assert urlparse('<url>').geturl() == '<url>'",
                  opts(post=lambda url_1, url_2: [None, url_1]))]
@@ -220,7 +221,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     exec(test)
 
-URLPARSE_ORACLE_GRAMMAR = extend_grammar(URLPARSE_GRAMMAR,
+URLPARSE_ORACLE_GRAMMAR: Grammar = extend_grammar(URLPARSE_GRAMMAR,
 {
      "<call>": [("result = urlparse('<scheme>://<host><path>?<params>')\n"
                  # + "print(result)\n"
@@ -284,7 +285,7 @@ from .Grammars import convert_ebnf_grammar, crange
 
 from .ProbabilisticGrammarFuzzer import ProbabilisticGrammarFuzzer
 
-INT_EBNF_GRAMMAR = {
+INT_EBNF_GRAMMAR: Grammar = {
     "<start>": ["<int>"],
     "<int>": ["<_int>"],
     "<_int>": ["(-)?<leaddigit><digit>*", "0"],
@@ -322,7 +323,7 @@ if __name__ == '__main__':
 
 
 
-FLOAT_EBNF_GRAMMAR = {
+FLOAT_EBNF_GRAMMAR: Grammar = {
     "<start>": ["<float>"],
     "<float>": [("<_float>", opts(prob=0.9)), "inf", "NaN"],
     "<_float>": ["<int>(.<digit>+)?<exp>?"],
@@ -358,7 +359,7 @@ if __name__ == '__main__':
 
 
 
-ASCII_STRING_EBNF_GRAMMAR = {
+ASCII_STRING_EBNF_GRAMMAR: Grammar = {
     "<start>": ["<ascii-string>"],
     "<ascii-string>": ['"<ascii-chars>"'],
     "<ascii-chars>": [
@@ -391,7 +392,7 @@ if __name__ == '__main__':
 
 
 
-LIST_EBNF_GRAMMAR = {
+LIST_EBNF_GRAMMAR: Grammar = {
     "<start>": ["<list>"],
     "<list>": [
         ("[]", opts(prob=0.05)),

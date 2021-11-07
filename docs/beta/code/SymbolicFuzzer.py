@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2021-10-14 18:51:07+02:00
+# Last change: 2021-11-07 16:39:41+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -48,16 +48,16 @@ This chapter provides an implementation of a symbolic fuzzing engine `AdvancedSy
 >>> for i in range(10):
 >>>     r = gcd_fuzzer.fuzz()
 >>>     print(r)
-{'a': 5, 'b': 3}
-{'a': 1, 'b': 4}
-{'a': 4, 'b': 5}
-{'a': 2, 'b': -4}
-{'a': 3, 'b': 4}
-{'a': 6, 'b': 6}
-{'a': 15, 'b': 7}
-{'a': 4, 'b': 8}
-{'a': 16, 'b': 16}
-{'a': 7, 'b': 2}
+{'a': 7, 'b': 5}
+{'a': -1, 'b': 0}
+{'a': 2, 'b': 7}
+{'a': 7, 'b': 6}
+{'a': 3, 'b': 5}
+{'a': 0, 'b': -1}
+{'a': 15, 'b': 8}
+{'a': -2, 'b': 0}
+{'a': 2, 'b': -2}
+{'a': 17, 'b': 9}
 
 
 
@@ -96,7 +96,7 @@ if __name__ == '__main__':
 
 
 
-def check_triangle(a: int, b: int, c: int) -> int:
+def check_triangle(a: int, b: int, c: int) -> str:
     if a == b:
         if a == c:
             if b == c:
@@ -126,14 +126,12 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
-from .ControlFlow import PyCFG, to_graph, gen_cfg
-
 import inspect
 
-from graphviz import Source
+from .ControlFlow import PyCFG, to_graph, gen_cfg
 
 def show_cfg(fn, **kwargs):
-    return Source(to_graph(gen_cfg(inspect.getsource(fn)), **kwargs))
+    return to_graph(gen_cfg(inspect.getsource(fn)), **kwargs)
 
 if __name__ == '__main__':
     show_cfg(check_triangle)
@@ -148,7 +146,7 @@ if __name__ == '__main__':
         '<path 6>': ([1, 2, 11, 17], 'Isosceles'),
     }
 
-import z3
+import z3  # type: ignore
 
 def get_annotations(fn):
     sig = inspect.signature(fn)
@@ -265,7 +263,7 @@ if __name__ == '__main__':
 
 
 
-class ArcCoverage(ArcCoverage):
+class VisualizedArcCoverage(ArcCoverage):
     def show_coverage(self, fn):
         src = fn if isinstance(fn, str) else inspect.getsource(fn)
         covered = set([lineno for method, lineno in self._trace])
@@ -273,7 +271,7 @@ class ArcCoverage(ArcCoverage):
             print('%s %2d: %s' % ('#' if i + 1 in covered else ' ', i + 1, s))
 
 if __name__ == '__main__':
-    with ArcCoverage() as cov:
+    with VisualizedArcCoverage() as cov:
         assert check_triangle(0, 0, 0) == 'Equilateral'
         assert check_triangle(1, 1, 0) == 'Isosceles'
         assert check_triangle(1, 2, 1) == 'Isosceles'
@@ -292,9 +290,9 @@ if __name__ == '__main__':
 
 def abs_value(x: float) -> float:
     if x < 0:
-        v: float = -x
+        v: float = -x  # type: ignore
     else:
-        v: float = x
+        v: float = x  # type: ignore
     return v
 
 if __name__ == '__main__':
@@ -567,9 +565,9 @@ def abs_max(a: float, b: float):
     a1: float = abs_value(a)
     b1: float = abs_value(b)
     if a1 > b1:
-        c: float = a1
+        c: float = a1  # type: ignore
     else:
-        c: float = b1
+        c: float = b1  # type: ignore
     return c
 
 if __name__ == '__main__':
@@ -592,7 +590,7 @@ if __name__ == '__main__':
     exec(l2_src)
 
 if __name__ == '__main__':
-    l2
+    l2  # type: ignore
 
 if __name__ == '__main__':
     b1 = z3.Real('b1')
@@ -602,10 +600,10 @@ if __name__ == '__main__':
     exec(l3_src)
 
 if __name__ == '__main__':
-    l3_
+    l3_  # type: ignore
 
 if __name__ == '__main__':
-    l3 = z3.And(l2, l3_)
+    l3 = z3.And(l2, l3_)  # type: ignore
 
 if __name__ == '__main__':
     l3
@@ -720,9 +718,13 @@ class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
 
 if __name__ == '__main__':
     symfz_ct = SimpleSymbolicFuzzer(check_triangle)
-    paths = symfz_ct.get_all_paths(symfz_ct.fnenter)
-    print(len(paths))
-    paths[1]
+    all_paths = symfz_ct.get_all_paths(symfz_ct.fnenter)
+
+if __name__ == '__main__':
+    len(all_paths)
+
+if __name__ == '__main__':
+    all_paths[1]
 
 class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
     def process(self):
@@ -760,11 +762,11 @@ class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
 
 if __name__ == '__main__':
     symfz_ct = SimpleSymbolicFuzzer(check_triangle)
-    paths = symfz_ct.get_all_paths(symfz_ct.fnenter)
-    symfz_ct.extract_constraints(paths[0])
+    all_paths = symfz_ct.get_all_paths(symfz_ct.fnenter)
+    symfz_ct.extract_constraints(all_paths[0])
 
 if __name__ == '__main__':
-    constraints = symfz_ct.extract_constraints(paths[1])
+    constraints = symfz_ct.extract_constraints(all_paths[1])
     constraints
 
 ### Fuzzing with Simple Symbolic Fuzzer
@@ -843,12 +845,12 @@ if __name__ == '__main__':
 
 def gcd(a: int, b: int) -> int:
     if a < b:
-        c: int = a
+        c: int = a  # type: ignore
         a = b
         b = c
 
     while b != 0:
-        c: int = a
+        c: int = a  # type: ignore
         a = b
         b = c % b
     return a
@@ -1196,17 +1198,21 @@ class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
 if __name__ == '__main__':
     asymfz_gcd = AdvancedSymbolicFuzzer(
         gcd, max_iter=10, max_tries=10, max_depth=10)
-    paths = asymfz_gcd.get_all_paths(asymfz_gcd.fnenter)
-    print(len(paths))
-    paths[37].get_path_to_root()
+    all_paths = asymfz_gcd.get_all_paths(asymfz_gcd.fnenter)
 
 if __name__ == '__main__':
-    for s in to_single_assignment_predicates(paths[37].get_path_to_root()):
+    len(all_paths)
+
+if __name__ == '__main__':
+    all_paths[37].get_path_to_root()
+
+if __name__ == '__main__':
+    for s in to_single_assignment_predicates(all_paths[37].get_path_to_root()):
         if s is not None:
             print(to_src(s))
 
 if __name__ == '__main__':
-    constraints = asymfz_gcd.extract_constraints(paths[37].get_path_to_root())
+    constraints = asymfz_gcd.extract_constraints(all_paths[37].get_path_to_root())
 
 if __name__ == '__main__':
     constraints
@@ -1236,7 +1242,7 @@ if __name__ == '__main__':
         print(r, "result:", repr(v))
 
 if __name__ == '__main__':
-    with ArcCoverage() as cov:
+    with VisualizedArcCoverage() as cov:
         for a, b in data:
             gcd(a, b)
 
@@ -1307,7 +1313,7 @@ def roots2(a: float, b: float, c: float) -> Tuple[float, float]:
     s: float = xb
 
     if a == 0:
-        return -c / b
+        return -c / b, -c / b  # only one solution
 
     a2: float = 2 * a
     ba2: float = b / a2
@@ -1347,8 +1353,8 @@ def roots3(a: float, b: float, c: float) -> Tuple[float, float]:
 
     if a == 0:
         if b == 0:
-            return math.inf
-        return -c / b
+            return math.inf, math.inf
+        return -c / b, -c / b  # only one solution
 
     a2: float = 2 * a
     ba2: float = b / a2
@@ -1367,6 +1373,14 @@ if __name__ == '__main__':
         v = roots3(*d)
         print(d, v)
 
+## Limitations
+## -----------
+
+if __name__ == '__main__':
+    print('\n## Limitations')
+
+
+
 ## Synopsis
 ## --------
 
@@ -1380,14 +1394,6 @@ if __name__ == '__main__':
     for i in range(10):
         r = gcd_fuzzer.fuzz()
         print(r)
-
-## Limitations
-## -----------
-
-if __name__ == '__main__':
-    print('\n## Limitations')
-
-
 
 ## Lessons Learned
 ## ---------------
@@ -1480,13 +1486,13 @@ if __name__ == '__main__':
 
 
 
-class ArcCoverage(ArcCoverage):
+class TrackingArcCoverage(ArcCoverage):
     def offsets_from_entry(self, fn):
         zero = self._trace[0][1] - 1
         return [l - zero for (f, l) in self._trace if f == fn]
 
 if __name__ == '__main__':
-    with ArcCoverage() as cov:
+    with TrackingArcCoverage() as cov:
         roots3(1, 1, 1)
 
 if __name__ == '__main__':
@@ -1494,7 +1500,7 @@ if __name__ == '__main__':
 
 class ConcolicTracer(AdvancedSymbolicFuzzer):
     def __init__(self, fn, fnargs, **kwargs):
-        with ArcCoverage() as cov:
+        with TrackingArcCoverage() as cov:
             fn(*fnargs)
         self.lines = cov.offsets_from_entry(fn.__name__)
         self.current_line = 0

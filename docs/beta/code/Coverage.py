@@ -3,7 +3,7 @@
 
 # "Code Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2021-11-03 13:00:25+01:00
+# Last change: 2021-11-07 16:22:21+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -56,7 +56,7 @@ The `trace()` method returns the coverage as a list of locations covered.  Each 
 The `coverage()` method returns the set of locations executed at least once:
 
 >>> print(cov.coverage())
-{('cgi_decode', 20), ('__exit__', 25), ('cgi_decode', 10), ('cgi_decode', 17), ('cgi_decode', 32), ('cgi_decode', 16), ('cgi_decode', 31), ('cgi_decode', 19), ('cgi_decode', 9), ('cgi_decode', 15), ('cgi_decode', 12), ('cgi_decode', 18), ('cgi_decode', 8), ('cgi_decode', 21), ('cgi_decode', 11), ('cgi_decode', 30)}
+{('cgi_decode', 20), ('cgi_decode', 10), ('cgi_decode', 16), ('cgi_decode', 19), ('cgi_decode', 9), ('cgi_decode', 32), ('cgi_decode', 12), ('cgi_decode', 31), ('cgi_decode', 15), ('cgi_decode', 21), ('__exit__', 25), ('cgi_decode', 18), ('cgi_decode', 8), ('cgi_decode', 11), ('cgi_decode', 17), ('cgi_decode', 30)}
 
 
 
@@ -236,7 +236,7 @@ if __name__ == '__main__':
 
 
 
-class Coverage(object):
+class Coverage:
     # Trace function
     def traceit(self, frame, event, arg):
         if self.original_trace_function is not None:
@@ -366,7 +366,7 @@ if __name__ == '__main__':
 # %matplotlib inline
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
 if __name__ == '__main__':
     plt.plot(cumulative_coverage)
@@ -788,11 +788,6 @@ def population_branch_coverage(population, function):
 if __name__ == '__main__':
     all_branch_coverage, cumulative_branch_coverage = population_branch_coverage(
         hundred_inputs(), cgi_decode)
-
-# %matplotlib inline
-
-if __name__ == '__main__':
-    import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     plt.plot(cumulative_branch_coverage)

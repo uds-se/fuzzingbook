@@ -3,7 +3,7 @@
 
 # "Fuzzing with Generators" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2021-11-03 13:06:23+01:00
+# Last change: 2021-11-07 22:25:38+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -123,9 +123,9 @@ if __name__ == '__main__':
     random.seed(2001)
 
 from .Grammars import EXPR_GRAMMAR, is_valid_grammar, is_nonterminal, extend_grammar
-from .Grammars import opts, exp_opt, exp_string, crange
+from .Grammars import opts, exp_opt, exp_string, crange, Grammar
 
-CHARGE_GRAMMAR = {
+CHARGE_GRAMMAR: Grammar = {
     "<start>": ["Charge <amount> to my credit card <credit-card-number>"],
     "<amount>": ["$<float>"],
     "<float>": ["<integer>.<digit><digit>"],
@@ -137,7 +137,8 @@ CHARGE_GRAMMAR = {
     "<digit-block>": ["<digit><digit><digit><digit>"],
 }
 
-assert is_valid_grammar(CHARGE_GRAMMAR)
+if __name__ == '__main__':
+    assert is_valid_grammar(CHARGE_GRAMMAR)
 
 from .GrammarFuzzer import GrammarFuzzer, all_terminals, display_tree
 
@@ -195,7 +196,7 @@ CHARGE_GRAMMAR.update({
     "<credit-card-number>": [("<digits>", opts(post=lambda digits: fix_credit_card(digits)))]
 })
 
-def luhn_checksum(s):
+def luhn_checksum(s: str) -> int:
     """Compute Luhn's check digit over a string of digits"""
     LUHN_ODD_LOOKUP = (0, 2, 4, 6, 8, 1, 3, 5, 7,
                        9)  # sum_of_digits (index * 2)
@@ -204,11 +205,11 @@ def luhn_checksum(s):
     odds = sum(LUHN_ODD_LOOKUP[int(p)] for p in s[-2::-2])
     return (evens + odds) % 10
 
-def valid_luhn_checksum(s):
+def valid_luhn_checksum(s: str) -> bool:
     """Check whether the last digit is Luhn's checksum over the earlier digits"""
     return luhn_checksum(s[:-1]) == int(s[-1])
 
-def fix_luhn_checksum(s):
+def fix_luhn_checksum(s: str) -> str:
     """Return the given string of digits, with a fixed check digit"""
     return s[:-1] + repr(luhn_checksum(s[:-1]))
 
@@ -218,10 +219,13 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     fix_luhn_checksum("123x")
 
-if __name__ == '__main__':
-    check_credit_card = valid_luhn_checksum
-    fix_credit_card = fix_luhn_checksum
+from typing import Callable
 
+if __name__ == '__main__':
+    check_credit_card: Callable[[str], bool] = valid_luhn_checksum
+    fix_credit_card: Callable[[str], str] = fix_luhn_checksum
+
+if __name__ == '__main__':
     fix_credit_card("1234567890123456")
 
 ## A Class for Integrating Constraints
@@ -562,7 +566,7 @@ from .bookutils import HTML
 if __name__ == '__main__':
     HTML("<strong>A bold text</strong>")
 
-XML_GRAMMAR = {
+XML_GRAMMAR: Grammar = {
     "<start>": ["<xml-tree>"],
     "<xml-tree>": ["<<id>><xml-content></<id>>"],
     "<xml-content>": ["Text", "<xml-tree>"],
@@ -570,7 +574,8 @@ XML_GRAMMAR = {
     "<letter>": crange('a', 'z')
 }
 
-assert is_valid_grammar(XML_GRAMMAR)
+if __name__ == '__main__':
+    assert is_valid_grammar(XML_GRAMMAR)
 
 if __name__ == '__main__':
     xml_fuzzer = GrammarFuzzer(XML_GRAMMAR)
@@ -582,7 +587,8 @@ XML_GRAMMAR.update({
                     )]
 })
 
-assert is_valid_grammar(XML_GRAMMAR)
+if __name__ == '__main__':
+    assert is_valid_grammar(XML_GRAMMAR)
 
 if __name__ == '__main__':
     xml_fuzzer = GeneratorGrammarFuzzer(XML_GRAMMAR)
@@ -624,6 +630,7 @@ if __name__ == '__main__':
                                          }
                                          )
 
+if __name__ == '__main__':
     assert is_valid_grammar(binary_expr_grammar)
 
 if __name__ == '__main__':
@@ -714,7 +721,7 @@ if __name__ == '__main__':
 
 import string
 
-VAR_GRAMMAR = {
+VAR_GRAMMAR: Grammar = {
     '<start>': ['<statements>'],
     '<statements>': ['<statement>;<statements>', '<statement>'],
     '<statement>': ['<assignment>'],
@@ -730,6 +737,9 @@ VAR_GRAMMAR = {
     '<integer>': ['<digit><integer>', '<digit>'],
     '<digit>': crange('0', '9')
 }
+
+if __name__ == '__main__':
+    assert is_valid_grammar(VAR_GRAMMAR)
 
 if __name__ == '__main__':
     g = GrammarFuzzer(VAR_GRAMMAR)
@@ -931,6 +941,8 @@ if __name__ == '__main__':
         ProbabilisticGrammarCoverageFuzzer,
         GeneratorGrammarFuzzer)
 
+import copy
+
 class ProbabilisticGeneratorGrammarCoverageFuzzer(GeneratorGrammarFuzzer,
                                                   ProbabilisticGrammarCoverageFuzzer):
     def supported_opts(self):
@@ -948,8 +960,6 @@ class ProbabilisticGeneratorGrammarCoverageFuzzer(GeneratorGrammarFuzzer,
             self).__init__(
             grammar,
             **kwargs)
-
-import copy
 
 class ProbabilisticGeneratorGrammarCoverageFuzzer(
         ProbabilisticGeneratorGrammarCoverageFuzzer):
@@ -1058,6 +1068,6 @@ if __name__ == '__main__':
 
 ATTR_GRAMMAR = {
     "<clause>": [("<xml-open>Text<xml-close>", opts(post=lambda x1, x2: [None, x1.name]))],
-    "<xml-open>": [("<<tag>>", opts(post=lambda tag: opts(name=random_name())))],
+    "<xml-open>": [("<<tag>>", opts(post=lambda tag: opts(name=...)))],
     "<xml-close>": ["</<tag>>"]
 }

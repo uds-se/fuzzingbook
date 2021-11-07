@@ -295,8 +295,11 @@ def escape_quotes(s: str) -> str:
 # JavaScript quizzes.
 def jsquiz(question: str, 
            options: List[str], 
-           correct_answer: Union[str, int, List[int], Set[int]], 
-           globals: Dict[str, Any], 
+           correct_answer: Union[str,
+                                 int, 
+                                 List[Union[str, int]],
+                                 Set[Union[str, int]]], 
+           globals: Dict[str, Any],
            title: str = "Quiz", 
            debug: bool = True) -> Any:  # should be IPython.core.display
 
@@ -305,8 +308,11 @@ def jsquiz(question: str,
         hint = correct_answer
         correct_answer = eval(correct_answer, globals)
 
-    answer_list: List[int] = []
-    if isinstance(correct_answer, list) or isinstance(correct_answer, set):
+    answer_list: List[Union[str, int]] = []
+    if isinstance(correct_answer, list):
+        answer_list = correct_answer
+        multiple_choice = True
+    elif isinstance(correct_answer, set):
         answer_list = list(correct_answer)
         multiple_choice = True
     elif isinstance(correct_answer, int) or isinstance(correct_answer, float):
@@ -463,7 +469,10 @@ def textquiz(question: str, options: List[str], correct_answer: Any, globals: Op
 
 # Entry point for all of the above.
 def quiz(question: str, options: List[str], 
-         correct_answer: Union[str, int, List[int]],
+         correct_answer: Union[str,
+                               int, 
+                               List[Union[str, int]],
+                               Set[Union[str, int]]], 
          globals: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     """Display a quiz. 
     `question` is a question string to be asked.

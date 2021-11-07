@@ -3,7 +3,7 @@
 
 # "Search-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2021-10-14 18:44:55+02:00
+# Last change: 2021-11-07 16:26:57+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -208,24 +208,21 @@ if __name__ == '__main__':
     calculate_distance(274, 153)
 
 if __name__ == '__main__':
-    from mpl_toolkits.mplot3d import Axes3D
-
-if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
 if __name__ == '__main__':
     import numpy as np
 
 # %matplotlib inline
 # 
-# x = np.outer(np.linspace(-10, 10, 30), np.ones(30))
-# y = x.copy().T
-# z = calculate_distance(x, y)
+# xx = np.outer(np.linspace(-10, 10, 30), np.ones(30))
+# yy = xx.copy().T
+# zz = calculate_distance(xx, yy)
 # 
 # fig = plt.figure()
 # ax = plt.axes(projection='3d')
 # 
-# ax.plot_surface(x, y, z, cmap=plt.cm.jet, rstride=1, cstride=1, linewidth=0);
+# ax.plot_surface(xx, yy, zz, cmap=plt.cm.jet, rstride=1, cstride=1, linewidth=0);
 
 ### Instrumentation
 
@@ -254,7 +251,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     distance = 0
 
-def test_me_instrumented(x, y):
+def test_me_instrumented(x, y):  # type: ignore
     global distance
     distance = calculate_distance(x, y)
     if x == 2 * (y + 1):
@@ -381,14 +378,11 @@ if __name__ == '__main__':
     data = plotting_hillclimber(get_fitness)
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
-
-if __name__ == '__main__':
     fig = plt.figure()
     ax = plt.axes()
 
-    x = range(len(data))
-    ax.plot(x, data);
+    xs = range(len(data))
+    ax.plot(xs, data);
 
 def test_me2(x, y):
     if(x * x == y * y * (x % 20)):
@@ -411,20 +405,15 @@ def bad_fitness(x, y):
     return fitness
 
 if __name__ == '__main__':
-    from mpl_toolkits.mplot3d import Axes3D
-
-from math import exp, tan
-
-if __name__ == '__main__':
-    x = np.outer(np.linspace(-10, 10, 30), np.ones(30))
-    y = x.copy().T
-    z = abs(x * x - y * y * (x % 20))
+    xx = np.outer(np.linspace(-10, 10, 30), np.ones(30))
+    yy = xx.copy().T
+    zz = abs(xx * xx - yy * yy * (xx % 20))
 
 if __name__ == '__main__':
     fig = plt.figure()
     ax = plt.axes(projection='3d')
 
-    ax.plot_surface(x, y, z, cmap=plt.cm.jet, rstride=1, cstride=1, linewidth=0);
+    ax.plot_surface(xx, yy, zz, cmap=plt.cm.jet, rstride=1, cstride=1, linewidth=0);
 
 def restarting_hillclimber(fitness_function):
     data = []
@@ -470,8 +459,8 @@ if __name__ == '__main__':
     fig = plt.figure()
     ax = plt.axes()
 
-    x = range(len(data))
-    ax.plot(x, data);
+    xs = range(len(data))
+    ax.plot(xs, data);
 
 MAX = 100000
 MIN = -MAX
@@ -621,7 +610,7 @@ def update_maps(condition_num, d_true, d_false):
     else:
         distances_false[condition_num] = d_false
 
-def evaluate_condition(num, op, lhs, rhs):
+def evaluate_condition(num, op, lhs, rhs):  # type: ignore
     distance_true = 0
     distance_false = 0
 
@@ -723,9 +712,14 @@ def create_instrumented_function(f):
     code = compile(node, filename="<ast>", mode="exec")
     exec(code, current_module.__dict__)
 
+from typing import Dict
+
 if __name__ == '__main__':
-    distances_true = {}
-    distances_false = {}
+    distances_true: Dict[int, int] = {}
+    distances_false: Dict[int, int] = {}
+
+def cgi_decode_instrumented(s: str) -> str:
+    return ""  # make mypy happy
 
 if __name__ == '__main__':
     create_instrumented_function(cgi_decode)
@@ -759,9 +753,9 @@ if __name__ == '__main__':
     fig = plt.figure()
     ax = plt.axes()
 
-    x = range(100)
-    y = [value / (value + 1.0) for value in x]
-    ax.plot(x, y);
+    xs = range(100)
+    ys = [value / (value + 1.0) for value in xs]
+    ax.plot(xs, ys);
 
 def get_fitness_cgi(x):
     # Reset any distance values from previous executions

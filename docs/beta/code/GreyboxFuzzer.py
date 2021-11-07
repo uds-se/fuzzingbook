@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2021-11-03 13:03:01+01:00
+# Last change: 2021-11-07 16:26:11+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -92,7 +92,7 @@ if __name__ == '__main__':
 import random
 from .Coverage import population_coverage
 
-class Mutator(object):
+class Mutator:
     def __init__(self):
         self.mutators = [
             self.delete_random_character,
@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
 
 
-class Seed(object):    
+class Seed:    
     def __init__(self, data):
         """Set seed data"""
         self.data = data
@@ -155,7 +155,10 @@ class Seed(object):
 
     __repr__ = __str__
 
-class PowerSchedule(object):
+class PowerSchedule:
+    def __init__(self):
+        self.path_frequency = {}  # make mypy happy
+
     def assignEnergy(self, population):
         """Assigns each seed the same energy"""
         for seed in population:
@@ -344,7 +347,7 @@ if __name__ == '__main__':
 # %matplotlib inline
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
 if __name__ == '__main__':
     line_bb, = plt.plot(blackbox_coverage, label="Blackbox")
@@ -548,6 +551,12 @@ if __name__ == '__main__':
 
 from .ControlFlow import generate_maze_code
 
+def maze(s: str) -> str:
+    return ""  # Will be overwritten by exec()
+
+def target_tile() -> str:
+    return ' '  # Will be overwritten by exec()
+
 if __name__ == '__main__':
     maze_code = generate_maze_code(maze_string)
 
@@ -648,7 +657,8 @@ if __name__ == '__main__':
     target = target_tile()
     target
 
-import networkx as nx
+import networkx as nx  # type: ignore
+
 from .ControlFlow import get_callgraph
 
 if __name__ == '__main__':

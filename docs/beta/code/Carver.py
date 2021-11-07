@@ -3,7 +3,7 @@
 
 # "Carving Unit Tests" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Carver.html
-# Last change: 2021-11-03 13:11:32+01:00
+# Last change: 2021-11-07 22:09:36+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -75,19 +75,19 @@ The `CallGrammarMiner` class turns a list of carved executions into a grammar.
 >>> my_sqrt_grammar
 {'': [''],
  '': [''],
- '': ['4', '2'],
+ '': ['2', '4'],
  '': ['my_sqrt()']}
 
 This grammar can be used to synthesize calls.
 
 >>> fuzzer = GrammarCoverageFuzzer(my_sqrt_grammar)
 >>> fuzzer.fuzz()
-'my_sqrt(2)'
+'my_sqrt(4)'
 
 These calls can be executed in isolation, effectively extracting unit tests from system tests:
 
 >>> eval(fuzzer.fuzz())
-2.0
+1.414213562373095
 
 
 For more details, source, and documentation, see
@@ -192,7 +192,7 @@ if __name__ == '__main__':
 
 import sys
 
-class Carver(object):
+class Carver:
     def __init__(self, log=False):
         self._log = log
         self.reset()
@@ -486,9 +486,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     power_carver.arguments("power")
 
-from .Grammars import START_SYMBOL, is_valid_grammar, new_symbol, extend_grammar
+from .Grammars import START_SYMBOL, is_valid_grammar, new_symbol
+from .Grammars import extend_grammar, Grammar
 
-POWER_GRAMMAR = {
+POWER_GRAMMAR: Grammar = {
     "<start>": ["power(<x>, <y>)"],
     "<x>": ["1", "3"],
     "<y>": ["2", "4"]
@@ -509,7 +510,7 @@ if __name__ == '__main__':
 
 
 
-class CallGrammarMiner(object):
+class CallGrammarMiner:
     def __init__(self, carver, log=False):
         self.carver = carver
         self.log = log

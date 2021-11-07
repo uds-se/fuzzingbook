@@ -3,7 +3,7 @@
 
 # "Mutation Analysis" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationAnalysis.html
-# Last change: 2021-10-14 18:45:08+02:00
+# Last change: 2021-11-07 12:46:23+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -50,13 +50,20 @@ This chapter introduces two methods of running *mutation analysis* on subject pr
 >>>         assert gcd(0, 1) == 1, "Mirror"
 >>> mutant.pm.score()
 ->	gcd_1
-	gcd_2
-	gcd_3
+ local variable 'c' referenced before assignment
+
+->	gcd_2
+ Mirror
+
+->	gcd_3
 	gcd_4
+	gcd_5
+	gcd_6
+	gcd_7
  Minimal
 
 
-0.25
+0.42857142857142855
 
 The second class `MuProgramAnalyzer` targets standalone programs with test suites. Given a program `gcd` whose source code is provided in `gcd_src` and the test suite is provided by `TestGCD`, one can evaluate the mutation score of `TestGCD` as follows:
 
@@ -73,7 +80,7 @@ The second class `MuProgramAnalyzer` targets standalone programs with test suite
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_97830/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -85,7 +92,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_97830/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -97,7 +104,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_97830/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -109,7 +116,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_97830/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -121,7 +128,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_97830/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -133,7 +140,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_97830/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -145,7 +152,7 @@ FAILED (failures=1)
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_51289/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_97830/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
@@ -194,11 +201,11 @@ if __name__ == '__main__':
 
 
 
-def ineffective_test():
+def ineffective_test_1():
     execute_the_program_as_a_whole()
     assert True
 
-def ineffective_test():
+def ineffective_test_2():
     try:
         execute_the_program_as_a_whole()
     except:
@@ -257,7 +264,7 @@ from .Coverage import Coverage
 
 import inspect
 
-class Coverage(Coverage):
+class VisualCoverage(Coverage):
     def show_coverage(self, fn):
         src = inspect.getsource(fn)
         name = fn.__name__
@@ -267,7 +274,7 @@ class Coverage(Coverage):
             print('%s %2d: %s' % ('#' if i + 1 in covered else ' ', i + 1, s))
 
 if __name__ == '__main__':
-    with Coverage() as cov:
+    with VisualCoverage() as cov:
         strong_oracle(triangle)
 
 if __name__ == '__main__':
@@ -283,7 +290,7 @@ def weak_oracle(fn):
     assert fn(1, 2, 3) != 'Equilateral'
 
 if __name__ == '__main__':
-    with Coverage() as cov:
+    with VisualCoverage() as cov:
         weak_oracle(triangle)
 
 if __name__ == '__main__':
@@ -570,6 +577,7 @@ def gcd(a, b):
         c = a
         a = b
         b = c % b
+
     return a
 
 if __name__ == '__main__':
@@ -577,6 +585,8 @@ if __name__ == '__main__':
         with mutant:
             assert gcd(1, 0) == 1, "Minimal"
             assert gcd(0, 1) == 1, "Mirror"
+
+if __name__ == '__main__':
     mutant.pm.score()
 
 ## Mutator for Modules and Test Suites
@@ -630,7 +640,7 @@ if __name__ == '__main__':
     runner.run(suite(StrongShapeTest))
 
 if __name__ == '__main__':
-    with Coverage() as cov:
+    with VisualCoverage() as cov:
         suite(StrongShapeTest).run(unittest.TestResult())
 
 if __name__ == '__main__':
@@ -649,7 +659,7 @@ class WeakShapeTest(unittest.TestCase):
         assert shape.triangle(1, 2, 3) != 'Equilateral'
 
 if __name__ == '__main__':
-    with Coverage() as cov:
+    with VisualCoverage() as cov:
         suite(WeakShapeTest).run(unittest.TestResult())
 
 if __name__ == '__main__':
@@ -842,7 +852,7 @@ def new_gcd(a, b):
         a, b = b, a % b
     return a
 
-def gcd(a, b):
+def mutated_gcd(a, b):
     if a < b:
         a, b = b, a
     else:

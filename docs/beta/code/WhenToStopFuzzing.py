@@ -3,7 +3,7 @@
 
 # "When To Stop Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2021-11-03 13:29:31+01:00
+# Last change: 2021-11-07 16:14:37+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -67,8 +67,11 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
+from typing import Dict
+
 from . import Fuzzer
-from . import Coverage
+
+from .Coverage import Coverage, cgi_decode
 
 ## The Enigma Machine
 ## ------------------
@@ -136,6 +139,7 @@ class EnigmaMachine(Runner):
     def reset(self):
         """Resets the key register"""
         self.msg2key = {}
+        self.cur_msg = ""
 
     def internal_msg2key(self, message):
         """Internal helper method. 
@@ -171,7 +175,7 @@ if __name__ == '__main__':
     enigma.cur_msg = "BrEaK mE. L0Lzz"
     enigma.run("AAA")
 
-class BletchleyPark(object):
+class BletchleyPark:
     def __init__(self, enigma):
         self.enigma = enigma
         self.enigma.reset()
@@ -221,7 +225,7 @@ if __name__ == '__main__':
     n = 100  # messages to crack
 
 if __name__ == '__main__':
-    observed = defaultdict(int)
+    observed: Dict[str, int] = defaultdict(int)
     for msg in range(0, n):
         trigram = bletchley.break_message(msg)
         observed[trigram] += 1
@@ -309,7 +313,7 @@ if __name__ == '__main__':
 # %matplotlib inline
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
 if __name__ == '__main__':
     frequencies = [v for k, v in observed.items() if int(v) > 0]
@@ -345,7 +349,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     print("Trigram : Frequency")
-    for trigram in sorted(observed, key=observed.get, reverse=True):
+    for trigram in sorted(observed, key=observed.get, reverse=True):  # type: ignore
         if observed[trigram] > 10:
             print("    %s : %d" % (trigram, observed[trigram]))
 
@@ -399,6 +403,10 @@ if __name__ == '__main__':
     original
 
 class BoostedBletchleyPark(BletchleyPark):
+    def __init__(self, enigma, prior):
+        super().__init__(enigma)
+        self.prior = prior
+
     def break_message(self, message):
         """Returns the trigram for an encoded message, and
            track #trigrams observed as #attempts increases."""
@@ -416,8 +424,7 @@ class BoostedBletchleyPark(BletchleyPark):
         return super().break_message(message)
 
 if __name__ == '__main__':
-    boostedBletchley = BoostedBletchleyPark(enigma)
-    boostedBletchley.prior = observed
+    boostedBletchley = BoostedBletchleyPark(enigma, prior=observed)
     boosted = boostedBletchley.break_max_attempts(max_attempts)
     boosted
 
@@ -838,12 +845,12 @@ if __name__ == '__main__':
 
 from .Fuzzer import RandomFuzzer
 from html.parser import HTMLParser
-...
+...;
 
 if __name__ == '__main__':
     trials = 2000  # increase to 10000 for better convergences. Will take a while..
 
-def my_parser(inp):
+def html_parser(inp):
     parser = HTMLParser()  # resets the HTMLParser object for every fuzz input
     parser.feed(inp)
 
@@ -909,16 +916,15 @@ if __name__ == '__main__':
                 discoveries += 1
         emp_timeseries.append(discoveries / repeats)
 
-# %matplotlib inline
-# import matplotlib.pyplot as plt
-# line_emp, = plt.semilogy(emp_timeseries, label="Empirical")
-# line_gt, = plt.semilogy(gt_timeseries, label="Good-Turing")
-# plt.legend(handles=[line_emp, line_gt])
-# plt.xticks(range(0, measurements + 1, int(measurements / 5)),
-#            range(0, trials + 1, int(trials / 5)))
-# plt.xlabel('# of fuzz inputs')
-# plt.ylabel('discovery probability')
-# plt.title('Discovery Probability Over Time');
+if __name__ == '__main__':
+    line_emp, = plt.semilogy(emp_timeseries, label="Empirical")
+    line_gt, = plt.semilogy(gt_timeseries, label="Good-Turing")
+    plt.legend(handles=[line_emp, line_gt])
+    plt.xticks(range(0, measurements + 1, int(measurements / 5)),
+               range(0, trials + 1, int(trials / 5)))
+    plt.xlabel('# of fuzz inputs')
+    plt.ylabel('discovery probability')
+    plt.title('Discovery Probability Over Time');
 
 ### Exercise 2: Extrapolate and Evaluate Statement Coverage
 

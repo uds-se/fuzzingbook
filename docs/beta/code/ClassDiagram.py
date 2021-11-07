@@ -3,7 +3,7 @@
 
 # "Class Diagrams" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ClassDiagram.html
-# Last change: 2021-11-02 12:04:46+01:00
+# Last change: 2021-11-07 13:06:08+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -419,7 +419,7 @@ def display_class_hierarchy(classes: Union[Type, List[Type]],
 `include_methods`: if True, include all methods (default)
 `include_legend`: if True, include a legend (default)
     """
-    from graphviz import Digraph
+    from graphviz import Digraph  # type: ignore
 
     if project == 'debuggingbook':
         CLASS_FONT = 'Raleway, Helvetica, Arial, sans-serif'

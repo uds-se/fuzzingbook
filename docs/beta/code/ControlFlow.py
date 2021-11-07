@@ -3,7 +3,7 @@
 
 # "Control Flow Graph" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2021-10-18 13:42:06+02:00
+# Last change: 2021-11-07 13:06:54+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -183,26 +183,6 @@ class CFGNode(dict):
             'at': self.lineno(),
             'ast': self.source()
         }
-
-REGISTRY_IDX = 0
-
-REGISTRY = {}
-
-def get_registry_idx():
-    global REGISTRY_IDX
-    v = REGISTRY_IDX
-    REGISTRY_IDX += 1
-    return v
-
-def reset_registry():
-    global REGISTRY_IDX
-    global REGISTRY
-    REGISTRY_IDX = 0
-    REGISTRY = {}
-
-def register_node(node):
-    node.rid = get_registry_idx()
-    REGISTRY[node.rid] = node
 
 ### PyCFG
 
@@ -859,7 +839,8 @@ if __name__ == '__main__':
 
 
 import os
-import networkx as nx
+
+import networkx as nx  # type: ignore
 
 ### Call Graph Helpers
 
@@ -913,6 +894,12 @@ if __name__ == '__main__':
 |     |#|
 +-----+-+
 """
+
+def maze(s: str) -> str:
+    return ""  # Will be overwritten by exec()
+
+def target_tile() -> str:
+    return ' '  # Will be overwritten by exec()
 
 def generate_print_maze(maze_string):
     return """

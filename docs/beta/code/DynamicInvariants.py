@@ -3,7 +3,7 @@
 
 # "Mining Function Specifications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2021-10-14 18:51:34+02:00
+# Last change: 2021-11-07 22:07:32+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -49,26 +49,26 @@ This chapter provides two classes that automatically extract specifications from
 
 Both work by _observing_ a function and its invocations within a `with` clause.  Here is an example for the type annotator:
 
->>> def sum2(a, b):
+>>> def sum(a, b):
 >>>     return a + b
 >>> with TypeAnnotator() as type_annotator:
->>>     sum2(1, 2)
->>>     sum2(-4, -5)
->>>     sum2(0, 0)
+>>>     sum(1, 2)
+>>>     sum(-4, -5)
+>>>     sum(0, 0)
 
 The `typed_functions()` method will return a representation of `sum2()` annotated with types observed during execution.
 
 >>> print(type_annotator.typed_functions())
-def sum2(a: int, b: int) -> int:
+def sum(a: int, b: int) -> int:
     return a + b
 
 
 The invariant annotator works in a similar fashion:
 
 >>> with InvariantAnnotator() as inv_annotator:
->>>     sum2(1, 2)
->>>     sum2(-4, -5)
->>>     sum2(0, 0)
+>>>     sum(1, 2)
+>>>     sum(-4, -5)
+>>>     sum(0, 0)
 
 The `functions_with_invariants()` method will return a representation of `sum2()` annotated with inferred pre- and postconditions that all hold for the observed values.
 
@@ -80,7 +80,7 @@ The `functions_with_invariants()` method will return a representation of `sum2()
 @postcondition(lambda return_value, b, a: isinstance(return_value, int))
 @postcondition(lambda return_value, b, a: return_value == a + b)
 @postcondition(lambda return_value, b, a: return_value == b + a)
-def sum2(a, b):
+def sum(a, b):
     return a + b
 
 
@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
 
 
-def my_sqrt(x):
+def any_sqrt(x):
     assert x >= 0  # Precondition
     
     ...
@@ -262,7 +262,7 @@ if __name__ == '__main__':
 
 import sys
 
-class Tracker(object):
+class Tracker:
     def __init__(self, log=False):
         self._log = log
         self.reset()
@@ -408,7 +408,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     type(my_sqrt_return_value)
 
-def my_sqrt_annotated(x: int) -> float:
+def my_sqrt_annotated(x: float) -> float:
     return my_sqrt(x)
 
 if __name__ == '__main__':
@@ -423,7 +423,6 @@ if __name__ == '__main__':
 
 import ast
 import inspect
-
 
 if __name__ == '__main__':
     my_sqrt_source = inspect.getsource(my_sqrt)
@@ -1248,7 +1247,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     with ExpectError():
-        my_sqrt_negative(2.0)
+        my_sqrt_negative(2.0)  # type: ignore
 
 ## Mining Specifications from Generated Tests
 ## ------------------------------------------
@@ -1257,9 +1256,6 @@ if __name__ == '__main__':
     print('\n## Mining Specifications from Generated Tests')
 
 
-
-def sum2(a, b):
-    return a + b
 
 if __name__ == '__main__':
     with InvariantAnnotator() as annotator:
@@ -1275,9 +1271,10 @@ if __name__ == '__main__':
     print_content(annotator.functions_with_invariants(), '.py')
 
 from .GrammarFuzzer import GrammarFuzzer  # minor dependency
-from .Grammars import is_valid_grammar, crange, convert_ebnf_grammar  # minor dependency
+from .Grammars import is_valid_grammar, crange  # minor dependency
+from .Grammars import convert_ebnf_grammar, Grammar  # minor dependency
 
-SUM2_EBNF_GRAMMAR = {
+SUM2_EBNF_GRAMMAR: Grammar = {
     "<start>": ["<sum2>"],
     "<sum2>": ["sum2(<int>, <int>)"],
     "<int>": ["<_int>"],
@@ -1286,7 +1283,8 @@ SUM2_EBNF_GRAMMAR = {
     "<digit>": crange('0', '9')
 }
 
-assert is_valid_grammar(SUM2_EBNF_GRAMMAR)
+if __name__ == '__main__':
+    assert is_valid_grammar(SUM2_EBNF_GRAMMAR)
 
 if __name__ == '__main__':
     sum2_grammar =  convert_ebnf_grammar(SUM2_EBNF_GRAMMAR)
@@ -1310,23 +1308,23 @@ if __name__ == '__main__':
 
 
 
-def sum2(a, b):
+def sum(a, b):
     return a + b
 
 if __name__ == '__main__':
     with TypeAnnotator() as type_annotator:
-        sum2(1, 2)
-        sum2(-4, -5)
-        sum2(0, 0)
+        sum(1, 2)
+        sum(-4, -5)
+        sum(0, 0)
 
 if __name__ == '__main__':
     print(type_annotator.typed_functions())
 
 if __name__ == '__main__':
     with InvariantAnnotator() as inv_annotator:
-        sum2(1, 2)
-        sum2(-4, -5)
-        sum2(0, 0)
+        sum(1, 2)
+        sum(-4, -5)
+        sum(0, 0)
 
 if __name__ == '__main__':
     print(inv_annotator.functions_with_invariants())
@@ -1387,8 +1385,8 @@ def my_sqrt_with_local_types(x: Union[int, float]) -> float:
     approx: Optional[float] = None
     guess: float = x / 2
     while approx != guess:
-        approx: float = guess
-        guess: float = (approx + x / approx) / 2
+        approx = guess
+        guess = (approx + x / approx) / 2
     return approx
 
 ### Exercise 3: Verbose Invariant Checkers
@@ -1406,7 +1404,7 @@ if __name__ == '__main__':
     with ExpectError():
         remove_first_char('')
 
-def condition(precondition=None, postcondition=None, doc='Unknown'):
+def verbose_condition(precondition=None, postcondition=None, doc='Unknown'):
     def decorator(func):
         @functools.wraps(func) # preserves name, docstring, etc
         def wrapper(*args, **kwargs):
@@ -1421,13 +1419,13 @@ def condition(precondition=None, postcondition=None, doc='Unknown'):
         return wrapper
     return decorator
 
-def precondition(check, **kwargs):
-    return condition(precondition=check, doc=kwargs.get('doc', 'Unknown'))
+def verbose_precondition(check, **kwargs):  # type: ignore
+    return verbose_condition(precondition=check, doc=kwargs.get('doc', 'Unknown'))
 
-def postcondition(check, **kwargs):
-    return condition(postcondition=check, doc=kwargs.get('doc', 'Unknown'))
+def verbose_postcondition(check, **kwargs):  # type: ignore
+    return verbose_condition(postcondition=check, doc=kwargs.get('doc', 'Unknown'))
 
-@precondition(lambda s: len(s) > 0, doc="len(s) > 0")
+@verbose_precondition(lambda s: len(s) > 0, doc="len(s) > 0")  # type: ignore
 def remove_first_char(s):
     return s[1:]
 
@@ -1445,7 +1443,7 @@ class InvariantAnnotator(InvariantAnnotator):
             if inv.find(RETURN_VALUE) >= 0:
                 continue  # Postcondition
 
-            cond = "@precondition(lambda " + self.params(function_name) + ": " + inv + ', doc=' + repr(inv) + ")"
+            cond = "@verbose_precondition(lambda " + self.params(function_name) + ": " + inv + ', doc=' + repr(inv) + ")"
             conditions.append(cond)
 
         return conditions
@@ -1458,7 +1456,7 @@ class InvariantAnnotator(InvariantAnnotator):
             if inv.find(RETURN_VALUE) < 0:
                 continue  # Precondition
 
-            cond = ("@postcondition(lambda " + 
+            cond = ("@verbose_postcondition(lambda " + 
                 RETURN_VALUE + ", " + self.params(function_name) + ": " + inv + ', doc=' + repr(inv) + ")")
             conditions.append(cond)
 

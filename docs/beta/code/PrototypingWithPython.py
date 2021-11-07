@@ -3,7 +3,7 @@
 
 # "Prototyping with Python" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/PrototypingWithPython.html
-# Last change: 2021-10-14 18:59:36+02:00
+# Last change: 2021-11-07 13:05:18+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -194,7 +194,7 @@ if __name__ == '__main__':
 
 
 
-import z3
+import z3  # type: ignore
 
 if __name__ == '__main__':
     a = z3.Int('a')
@@ -287,7 +287,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     x = 42
-    x = "a string"
+    x = "a string"  # type: ignore
 
 if __name__ == '__main__':
     p1, p2 = True, False

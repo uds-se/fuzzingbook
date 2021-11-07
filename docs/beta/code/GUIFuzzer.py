@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2021-11-03 13:13:05+01:00
+# Last change: 2021-11-07 22:11:55+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -391,7 +391,7 @@ if __name__ == '__main__':
 
 
 
-class GUIGrammarMiner(object):
+class GUIGrammarMiner:
     def __init__(self, driver, stay_on_host=True):
         self.driver = driver
         self.stay_on_host = stay_on_host
@@ -582,14 +582,14 @@ from .Grammars import new_symbol
 
 from .Grammars import nonterminals, START_SYMBOL
 from .Grammars import extend_grammar, unreachable_nonterminals, opts, crange, srange
-from .Grammars import syntax_diagram, is_valid_grammar
+from .Grammars import syntax_diagram, is_valid_grammar, Grammar
 
 class GUIGrammarMiner(GUIGrammarMiner):
     START_STATE = "<state>"
     UNEXPLORED_STATE = "<unexplored>"
     FINAL_STATE = "<end>"
 
-    GUI_GRAMMAR = ({
+    GUI_GRAMMAR: Grammar = ({
         START_SYMBOL: [START_STATE],
         UNEXPLORED_STATE: [""],
         FINAL_STATE: [""],
@@ -613,7 +613,7 @@ class GUIGrammarMiner(GUIGrammarMiner):
         # Use a fixed password in case we need to repeat it
         "<password>": ["abcABC.123"],
         
-        "<hidden>": "<string>",
+        "<hidden>": ["<string>"],
     })
 
 if __name__ == '__main__':
@@ -1059,7 +1059,7 @@ class GUICoverageFuzzer(GUIFuzzer, GrammarCoverageFuzzer):
         GUIFuzzer.__init__(self, *args, **kwargs)
         self.reset_coverage()
 
-class GUICoverageFuzzer(GUICoverageFuzzer):            
+class GUICoverageFuzzer(GUICoverageFuzzer):
     def explore_all(self, runner, max_actions=100):
         actions = 0
         while GUIGrammarMiner.UNEXPLORED_STATE in self.grammar and actions < max_actions:
