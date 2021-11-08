@@ -3,7 +3,7 @@
 
 # "Efficient Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2021-11-07 22:40:31+01:00
+# Last change: 2021-11-08 11:15:31+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -49,13 +49,13 @@ This chapter introduces `GrammarFuzzer`, an efficient grammar fuzzer that takes 
 >>> from Grammars import US_PHONE_GRAMMAR
 >>> phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
 >>> phone_fuzzer.fuzz()
-'(389)366-5865'
+'(846)850-3559'
 
 The `GrammarFuzzer` constructor takes a number of keyword arguments to control its behavior.  `start_symbol`, for instance, allows to set the symbol that expansion starts with (instead of ``):
 
 >>> area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='')
 >>> area_fuzzer.fuzz()
-'511'
+'331'
 
 Here's how to parameterize the `GrammarFuzzer` constructor:
 
@@ -76,20 +76,20 @@ In the internal representation of a derivation tree, a _node_ is a pair (`symbol
  [('',
    [('(', []),
     ('',
-     [('', [('3', [])]),
-      ('', [('8', [])]),
-      ('', [('9', [])])]),
+     [('', [('8', [])]),
+      ('', [('4', [])]),
+      ('', [('6', [])])]),
     (')', []),
     ('',
-     [('', [('3', [])]),
-      ('', [('6', [])]),
-      ('', [('6', [])])]),
+     [('', [('8', [])]),
+      ('', [('5', [])]),
+      ('', [('0', [])])]),
     ('-', []),
     ('',
-     [('', [('5', [])]),
-      ('', [('8', [])]),
-      ('', [('6', [])]),
-      ('', [('5', [])])])])])
+     [('', [('3', [])]),
+      ('', [('5', [])]),
+      ('', [('5', [])]),
+      ('', [('9', [])])])])])
 
 The chapter contains various helpers to work with derivation trees, including visualization tools – notably, `display_tree()`, above.
 
@@ -112,6 +112,10 @@ if __name__ == '__main__':
     print('# Efficient Grammar Fuzzing')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('84k8AO_3ChY')
 
 ## Synopsis
 ## --------
@@ -429,8 +433,9 @@ from .Fuzzer import Fuzzer
 
 class GrammarFuzzer(Fuzzer):
     """Produce strings from grammars efficiently, using derivation trees."""
-    def __init__(self, 
-                 grammar: Grammar, 
+
+    def __init__(self,
+                 grammar: Grammar,
                  start_symbol: str = START_SYMBOL,
                  min_nonterminals: int = 0,
                  max_nonterminals: int = 10,
@@ -441,7 +446,7 @@ class GrammarFuzzer(Fuzzer):
         for the number of nonterminals produced.  
         If `disp` is set, display the intermediate derivation trees.
         If `log` is set, show intermediate steps as text on standard output."""
-        
+
         self.grammar = grammar
         self.start_symbol = start_symbol
         self.min_nonterminals = min_nonterminals
@@ -810,10 +815,9 @@ class GrammarFuzzer(GrammarFuzzer):
         expansions = self.grammar[symbol]
 
         children_alternatives_with_cost = [(self.expansion_to_children(expansion),
-                                        self.expansion_cost(
-                                            expansion, {symbol}),
-                                        expansion)
-                                       for expansion in expansions]
+                                            self.expansion_cost(expansion, {symbol}),
+                                            expansion)
+                                           for expansion in expansions]
 
         costs = [cost for (child, cost, expansion)
                  in children_alternatives_with_cost]

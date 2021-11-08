@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2021-11-07 22:11:55+01:00
+# Last change: 2021-11-08 11:02:39+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
