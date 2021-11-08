@@ -179,7 +179,10 @@ def draw_notebook_dependencies(notebooks,
     dot.format = format
     dot.render('depend')
     os.system('cat depend.' + format)
-    os.remove('depend')
+    try:
+        os.remove('depend')
+    except FileNotFoundError:
+        pass
     os.remove('depend.' + format)
 
 
