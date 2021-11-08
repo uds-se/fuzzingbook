@@ -423,11 +423,11 @@ endif
 # So we simply copy them instead
 ifeq ($(origin CI),environment)
 $(FULL_NOTEBOOKS)/Tracking.ipynb: $(NOTEBOOKS)/Tracking.ipynb
-	cp -pr $< $@
+	cp -r $< $@
 $(FULL_NOTEBOOKS)/GUIFuzzer.ipynb: $(NOTEBOOKS)/GUIFuzzer.ipynb
-	cp -pr $< $@
+	cp -r $< $@
 $(FULL_NOTEBOOKS)/FuzzingInTheLarge.ipynb: $(NOTEBOOKS)/FuzzingInTheLarge.ipynb
-	cp -pr $< $@
+	cp -r $< $@
 endif
 
 $(FULL_NOTEBOOKS)/%.ipynb: $(NOTEBOOKS)/%.ipynb $(DEPEND_TARGET)%.makefile $(ADD_METADATA) $(NBAUTOSLIDE) $(NBSYNOPSIS)
@@ -453,7 +453,7 @@ $(FULL_NOTEBOOKS)/$(UTILS):
 $(FULL_NOTEBOOKS)/$(UTILS)/%: $(SHARED)$(UTILS)/%
 	@test -d $(FULL_NOTEBOOKS)/$(UTILS) || \
 		$(MKDIR) $(FULL_NOTEBOOKS)/$(UTILS)
-	cp -pr $< $@
+	cp -r $< $@
 
 
 
@@ -490,7 +490,7 @@ POST_TEX = utils/post_tex
 $(PDF_TARGET)%.tex:	$(RENDERED_NOTEBOOKS)/%.ipynb $(BIB) $(PUBLISH_PLUGINS) $(SHARED)$(ADD_METADATA) $(SHARED)$(POST_TEX)
 	$(eval TMPDIR := $(shell mktemp -d))
 	$(PYTHON) $(ADD_METADATA) --project $(PROJECT) --titlepage $< > $(TMPDIR)/$(notdir $<)
-	cp -pr $(NOTEBOOKS)/PICS $(BIB) $(TMPDIR)
+	cp -r $(NOTEBOOKS)/PICS $(BIB) $(TMPDIR)
 	$(CONVERT_TO_TEX) $(TMPDIR)/$(notdir $<)
 	$(POST_TEX) $@ > $@~ && mv $@~ $@
 	@-$(RM) -fr $(TMPDIR)
@@ -993,7 +993,7 @@ publish-html-setup:
 	
 $(DOCS_TARGET)html/%: $(HTML_TARGET)%
 	$(RM) -r $@
-	cp -pr $< $@
+	cp -r $< $@
 
 # Add/update Python code on Web pages
 .PHONY: publish-code publish-code-setup
@@ -1016,10 +1016,10 @@ publish-code-setup:
 		|| $(MKDIR) $(DOCS_TARGET)code/$(UTILS)
 	
 $(DOCS_TARGET)code/%: $(CODE_TARGET)%
-	cp -pr $< $@
+	cp -r $< $@
 
 $(DOCS_TARGET)code/requirements.txt: requirements.txt
-	cp -pr $< $@
+	cp -r $< $@
 
 .PHONY: dist publish-dist
 dist publish-dist: publish-code toc \
@@ -1089,7 +1089,7 @@ publish-slides-setup:
 
 $(DOCS_TARGET)slides/%: $(SLIDES_TARGET)%
 	-rm -fr $@
-	cp -pr $< $@
+	cp -r $< $@
 
 
 # Add/update notebooks on Web pages
@@ -1112,12 +1112,12 @@ publish-notebooks-setup:
 		|| $(MKDIR) $(DOCS_TARGET)notebooks/$(UTILS)
 
 $(DOCS_TARGET)notebooks/%: $(FULL_NOTEBOOKS)/%
-	cp -pr $< $@
+	cp -r $< $@
 
 $(DOCS_TARGET)notebooks/requirements.txt: requirements.txt
-	cp -pr $< $@
+	cp -r $< $@
 $(DOCS_TARGET)notebooks/LICENSE,md: LICENSE.md
-	cp -pr $< $@
+	cp -r $< $@
 
 
 .PHONY: publish-index
