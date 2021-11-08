@@ -626,7 +626,7 @@ endif
 # Reconstructing the reveal.js dir
 .PHONY: reveal.js
 $(REVEAL_JS) reveal.js: .FORCE
-	@-test -d "$@" || (cd $(SLIDES_TARGET); \
+	@-test -d "$(REVEAL_JS)" || (cd $(SLIDES_TARGET); \
 		git submodule add https://github.com/hakimel/reveal.js.git)
 	@git submodule update --remote
 
