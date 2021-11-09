@@ -3,7 +3,7 @@
 
 # "Class Diagrams" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ClassDiagram.html
-# Last change: 2021-11-07 13:06:08+01:00
+# Last change: 2021-11-08 18:42:37+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -136,11 +136,13 @@ class B_Class(A_Class):
         `bartender` is an optional attribute."""
         pass
 
+SomeType = List[Optional[Union[str, int]]]
+
 class C_Class:
     """A class injecting some method"""
 
-    def qux(self) -> None:
-        pass
+    def qux(self, arg: SomeType) -> SomeType:
+        return arg
 
 class D_Class(B_Class, C_Class):
     """A subclass inheriting from multiple superclasses.
@@ -408,6 +410,7 @@ def display_class_hierarchy(classes: Union[Type, List[Type]],
                             include_methods: bool = True,
                             include_class_vars: bool =True,
                             include_legend: bool = True,
+                            types: Dict[str, Any] = {},
                             project: str = 'fuzzingbook',
                             log: bool = False) -> Any:
     """Visualize a class hierarchy.
@@ -418,6 +421,7 @@ def display_class_hierarchy(classes: Union[Type, List[Type]],
   (Default: all classes with an abstract method)
 `include_methods`: if True, include all methods (default)
 `include_legend`: if True, include a legend (default)
+`types`: type names with definitions, to be used in docs
     """
     from graphviz import Digraph  # type: ignore
 
@@ -541,9 +545,18 @@ def display_class_hierarchy(classes: Union[Type, List[Type]],
 
                 overloaded = is_overloaded(name, f)
 
-                method_doc = escape(name + str(inspect.signature(f)))
+                sig = str(inspect.signature(f))
+                # replace 'List[Union[...]]' by the actual type def
+                for tp in types:
+                    tp_def = str(types[tp]).replace('typing.', '')
+                    sig = sig.replace(tp_def, tp)
+
+                method_doc = escape(name + sig)
                 if docstring(f):
                     method_doc += ":&#x0a;" + escape_doc(docstring(f))
+
+                if log:
+                    print(f"    Method doc: {method_doc}")
 
                 # Tooltips are only shown if a href is present, too
                 tooltip = f' tooltip="{method_doc}"'
@@ -645,17 +658,20 @@ def display_class_hierarchy(classes: Union[Type, List[Type]],
     return dot
 
 if __name__ == '__main__':
-    display_class_hierarchy(D_Class, project='debuggingbook', log=True)
+    display_class_hierarchy(D_Class, types={'SomeType': SomeType},
+                            project='debuggingbook', log=True)
 
 if __name__ == '__main__':
-    display_class_hierarchy(D_Class, project='fuzzingbook')
+    display_class_hierarchy(D_Class, types={'SomeType': SomeType},
+                            project='fuzzingbook')
 
 if __name__ == '__main__':
     display_class_hierarchy([A_Class, B_Class],
                             abstract_classes=[A_Class],
                             public_methods=[
                                 A_Class.quux,
-                            ], log=True)
+                            ],
+                            log=True)
 
 ## Synopsis
 ## --------

@@ -3,7 +3,7 @@
 
 # "Grammar Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2021-11-08 11:17:13+01:00
+# Last change: 2021-11-09 13:27:39+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -131,7 +131,7 @@ from .bookutils import quiz
 
 from .Fuzzer import Fuzzer
 
-from typing import Dict, List, Set, Tuple, Union, Optional
+from typing import Dict, List, Set, Union, Optional
 
 from .Grammars import EXPR_GRAMMAR, CGI_GRAMMAR, URL_GRAMMAR, START_SYMBOL
 from .Grammars import is_valid_grammar, extend_grammar, Grammar
@@ -164,7 +164,7 @@ import random
 class TrackingGrammarCoverageFuzzer(GrammarFuzzer):
     """Track grammar coverage during production"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         # invoke superclass __init__(), passing all arguments
         super().__init__(*args, **kwargs)
         self.reset_coverage()
@@ -268,7 +268,7 @@ if __name__ == '__main__':
 
 class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
     def add_coverage(self, symbol: str,
-                     new_child: Union[Expansion, List[DerivationTree]]):
+                     new_child: Union[Expansion, List[DerivationTree]]) -> None:
         key = expansion_key(symbol, new_child)
 
         if self.log and key not in self.covered_expansions:
@@ -276,7 +276,8 @@ class TrackingGrammarCoverageFuzzer(TrackingGrammarCoverageFuzzer):
         self.covered_expansions.add(key)
 
     def choose_node_expansion(self, node: DerivationTree,
-                              children_alternatives: List[List[DerivationTree]]) -> int:
+                              children_alternatives: 
+                              List[List[DerivationTree]]) -> int:
         (symbol, children) = node
         index = super().choose_node_expansion(node, children_alternatives)
         self.add_coverage(symbol, children_alternatives[index])
@@ -721,7 +722,9 @@ def _duplicate_context(grammar: Grammar,
                        symbol: str,
                        expansion: Optional[Expansion],
                        depth: Union[float, int],
-                       seen: Dict[str, str]):
+                       seen: Dict[str, str]) -> None:
+    """Helper function for `duplicate_context()`"""
+
     for i in range(len(grammar[symbol])):
         if expansion is None or grammar[symbol][i] == expansion:
             new_expansion = ""
@@ -1037,6 +1040,11 @@ if __name__ == '__main__':
                                 GrammarCoverageFuzzer.fuzz,
                                 GrammarCoverageFuzzer.expansion_coverage,
                             ],
+                            types={
+                                'DerivationTree': DerivationTree,
+                                'Expansion': Expansion,
+                                'Grammar': Grammar
+                            },
                             project='fuzzingbook')
 
 ## Lessons Learned

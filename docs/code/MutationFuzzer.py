@@ -3,7 +3,7 @@
 
 # "Mutation-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2021-11-07 16:23:17+01:00
+# Last change: 2021-11-09 14:02:37+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors

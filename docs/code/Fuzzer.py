@@ -3,7 +3,7 @@
 
 # "Fuzzing: Breaking Things with Random Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2021-11-07 16:21:33+01:00
+# Last change: 2021-11-09 14:01:19+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -139,7 +139,7 @@ if __name__ == '__main__':
 
 import random
 
-def fuzzer(max_length=100, char_start=32, char_range=32):
+def fuzzer(max_length: int = 100, char_start: int = 32, char_range: int = 32) -> str:
     """A string of up to `max_length` characters
        in the range [`char_start`, `char_start` + `char_range`]"""
     string_length = random.randrange(0, max_length + 1)
@@ -439,7 +439,7 @@ if __name__ == '__main__':
     while len(secrets) < 2048:
         secrets += uninitialized_memory_marker
 
-def heartbeat(reply, length, memory):
+def heartbeat(reply: str, length: int, memory: str) -> str:
     # Store reply in memory
     memory = reply + memory[len(reply):]
 
@@ -475,7 +475,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    airport_codes = {
+    airport_codes: Dict[str, str] = {
         "YVR": "Vancouver",
         "JFK": "New York-JFK",
         "CDG": "Paris-Charles de Gaulle",
@@ -486,14 +486,13 @@ if __name__ == '__main__':
         "AKL": "Auckland"
     }  # plus many more
 
-
 if __name__ == '__main__':
     airport_codes["YVR"]
 
 if __name__ == '__main__':
     "AKL" in airport_codes
 
-def code_repOK(code):
+def code_repOK(code: str) -> bool:
     assert len(code) == 3, "Airport code must have three characters: " + repr(code)
     for c in code:
         assert c.isalpha(), "Non-letter in airport code: " + repr(code)
@@ -519,7 +518,7 @@ if __name__ == '__main__':
     with ExpectError():
         assert airport_codes_repOK()
 
-def add_new_airport(code, city):
+def add_new_airport(code: str, city: str) -> None:
     assert code_repOK(code)
     airport_codes[code] = city
 
@@ -531,7 +530,7 @@ if __name__ == '__main__':
     with ExpectError():
         add_new_airport("London-Heathrow", "LHR")
 
-def add_new_airport(code, city):  # type: ignore
+def add_new_airport_2(code: str, city: str) -> None:
     assert code_repOK(code)
     assert airport_codes_repOK()
     airport_codes[code] = city
@@ -539,7 +538,7 @@ def add_new_airport(code, city):  # type: ignore
 
 if __name__ == '__main__':
     with ExpectError():
-        add_new_airport("IST", "Istanbul Yeni Havalimanı")
+        add_new_airport_2("IST", "Istanbul Yeni Havalimanı")
 
 class RedBlackTree:
     def repOK(self):
@@ -557,12 +556,12 @@ class RedBlackTree:
 
     def add_element(self, elem):
         assert self.repOK()
-        # Add the element
+        ...  # Add the element
         assert self.repOK()
 
     def delete_element(self, elem):
         assert self.repOK()
-        # Delete the element
+        ...  # Delete the element
         assert self.repOK()
 
 ### Static Code Checkers
@@ -605,7 +604,7 @@ class Runner:
     FAIL = "FAIL"
     UNRESOLVED = "UNRESOLVED"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize"""
         pass
 
@@ -616,7 +615,7 @@ class Runner:
 class PrintRunner(Runner):
     """Simple runner, printing the input."""
 
-    def run(self, inp):
+    def run(self, inp) -> Any:
         """Print the given input"""
         print(inp)
         return (inp, Runner.UNRESOLVED)
@@ -634,7 +633,7 @@ if __name__ == '__main__':
 class ProgramRunner(Runner):
     """Test a program with inputs."""
 
-    def __init__(self, program: Union[str, List[str]]):
+    def __init__(self, program: Union[str, List[str]]) -> None:
         """Initialize.
            `program` is a program spec as passed to `subprocess.run()`"""
         self.program = program
@@ -685,31 +684,34 @@ if __name__ == '__main__':
 class Fuzzer:
     """Base class for fuzzers."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def fuzz(self):
+    def fuzz(self) -> str:
         """Return fuzz input"""
         return ""
 
-    def run(self, runner=Runner()):
+    def run(self, runner: Runner = Runner()) \
+            -> Tuple[subprocess.CompletedProcess, Outcome]:
         """Run `runner` with fuzz input"""
         return runner.run(self.fuzz())
 
-    def runs(self, runner=PrintRunner(), trials=10):
+    def runs(self, runner: Runner = PrintRunner(), trials: int = 10) \
+            -> List[Tuple[subprocess.CompletedProcess, Outcome]]:
         """Run `runner` with fuzz input, `trials` times"""
         # Note: the list comprehension below does not invoke self.run() for subclasses
         # return [self.run(runner) for i in range(trials)]
         outcomes = []
         for i in range(trials):
             outcomes.append(self.run(runner))
+
         return outcomes
 
 class RandomFuzzer(Fuzzer):
     """Produce random inputs."""
 
-    def __init__(self, min_length=10, max_length=100,
-                 char_start=32, char_range=32):
+    def __init__(self, min_length: int = 10, max_length: int = 100,
+                 char_start: int = 32, char_range: int = 32) -> None:
         """Produce strings of `min_length` to `max_length` characters
            in the range [`char_start`, `char_start` + `char_range`]"""
         self.min_length = min_length
@@ -717,7 +719,7 @@ class RandomFuzzer(Fuzzer):
         self.char_start = char_start
         self.char_range = char_range
 
-    def fuzz(self):
+    def fuzz(self) -> str:
         string_length = random.randrange(self.min_length, self.max_length + 1)
         out = ""
         for i in range(0, string_length):
