@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2021-11-07 16:39:41+01:00
+# Last change: 2021-11-09 13:38:02+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -56,8 +56,8 @@ This chapter provides an implementation of a symbolic fuzzing engine `AdvancedSy
 {'a': 0, 'b': -1}
 {'a': 15, 'b': 8}
 {'a': -2, 'b': 0}
-{'a': 2, 'b': -2}
-{'a': 17, 'b': 9}
+{'a': 9533, 'b': -9533}
+{'a': 12, 'b': 11}
 
 
 

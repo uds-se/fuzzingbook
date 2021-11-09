@@ -3,7 +3,7 @@
 
 # "Efficient Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2021-11-08 11:15:31+01:00
+# Last change: 2021-11-09 13:26:40+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -49,13 +49,13 @@ This chapter introduces `GrammarFuzzer`, an efficient grammar fuzzer that takes 
 >>> from Grammars import US_PHONE_GRAMMAR
 >>> phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
 >>> phone_fuzzer.fuzz()
-'(846)850-3559'
+'(261)406-1134'
 
 The `GrammarFuzzer` constructor takes a number of keyword arguments to control its behavior.  `start_symbol`, for instance, allows to set the symbol that expansion starts with (instead of ``):
 
 >>> area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='')
 >>> area_fuzzer.fuzz()
-'331'
+'734'
 
 Here's how to parameterize the `GrammarFuzzer` constructor:
 
@@ -76,20 +76,20 @@ In the internal representation of a derivation tree, a _node_ is a pair (`symbol
  [('',
    [('(', []),
     ('',
-     [('', [('8', [])]),
-      ('', [('4', [])]),
-      ('', [('6', [])])]),
+     [('', [('2', [])]),
+      ('', [('6', [])]),
+      ('', [('1', [])])]),
     (')', []),
     ('',
-     [('', [('8', [])]),
-      ('', [('5', [])]),
-      ('', [('0', [])])]),
+     [('', [('4', [])]),
+      ('', [('0', [])]),
+      ('', [('6', [])])]),
     ('-', []),
     ('',
-     [('', [('3', [])]),
-      ('', [('5', [])]),
-      ('', [('5', [])]),
-      ('', [('9', [])])])])])
+     [('', [('1', [])]),
+      ('', [('1', [])]),
+      ('', [('3', [])]),
+      ('', [('4', [])])])])])
 
 The chapter contains various helpers to work with derivation trees, including visualization tools – notably, `display_tree()`, above.
 
@@ -278,7 +278,7 @@ if __name__ == '__main__':
 
 import re
 
-def dot_escape(s):
+def dot_escape(s: str) -> str:
     """Return s in a form suitable for dot"""
     s = re.sub(r'([^a-zA-Z0-9" ])', r"\\\1", s)
     return s
@@ -301,12 +301,12 @@ def default_edge_attr(dot, start_node, stop_node):
 def default_graph_attr(dot):
     dot.attr('node', shape='plain')
 
-def display_tree(derivation_tree,
-                 log=False,
-                 extract_node=extract_node,
-                 node_attr=default_node_attr,
-                 edge_attr=default_edge_attr,
-                 graph_attr=default_graph_attr):
+def display_tree(derivation_tree: DerivationTree,
+                 log: bool = False,
+                 extract_node: Callable = extract_node,
+                 node_attr: Callable = default_node_attr,
+                 edge_attr: Callable = default_edge_attr,
+                 graph_attr: Callable = default_graph_attr) -> Any:
 
     # If we import display_tree, we also have to import its functions
     from graphviz import Digraph
@@ -361,14 +361,19 @@ if __name__ == '__main__':
 
 
 
-def display_annotated_tree(tree, a_nodes, a_edges, log=False):
+def display_annotated_tree(tree: DerivationTree,
+                           a_nodes: Dict[int, str],
+                           a_edges: Dict[Tuple[int, int], str],
+                           log: bool = False):
     def graph_attr(dot):
         dot.attr('node', shape='plain')
         dot.graph_attr['rankdir'] = 'LR'
 
     def annotate_node(dot, nid, symbol, ann):
         if nid in a_nodes:
-            dot.node(repr(nid), "%s (%s)" % (dot_escape(unicode_escape(symbol)), a_nodes[nid]))
+            dot.node(repr(nid), 
+                     "%s (%s)" % (dot_escape(unicode_escape(symbol)),
+                                  a_nodes[nid]))
         else:
             dot.node(repr(nid), dot_escape(unicode_escape(symbol)))
 
@@ -380,9 +385,9 @@ def display_annotated_tree(tree, a_nodes, a_edges, log=False):
             dot.edge(repr(start_node), repr(stop_node))
 
     return display_tree(tree, log=log,
-                 node_attr=annotate_node,
-                 edge_attr=annotate_edge,
-                 graph_attr=graph_attr)
+                        node_attr=annotate_node,
+                        edge_attr=annotate_edge,
+                        graph_attr=graph_attr)
 
 if __name__ == '__main__':
     display_annotated_tree(derivation_tree, {3: 'plus'}, {(1, 3): 'op'}, log=False)
@@ -394,7 +399,7 @@ if __name__ == '__main__':
 
 
 
-def all_terminals(tree):
+def all_terminals(tree: DerivationTree) -> str:
     (symbol, children) = tree
     if children is None:
         # This is a nonterminal symbol not expanded yet
@@ -411,7 +416,7 @@ def all_terminals(tree):
 if __name__ == '__main__':
     all_terminals(derivation_tree)
 
-def tree_to_string(tree):
+def tree_to_string(tree: DerivationTree) -> str:
     symbol, children, *_ = tree
     if children:
         return ''.join(tree_to_string(c) for c in children)
@@ -483,7 +488,7 @@ if __name__ == '__main__':
 
 
 class GrammarFuzzer(GrammarFuzzer):
-    def init_tree(self):
+    def init_tree(self) -> DerivationTree:
         return (self.start_symbol, None)
 
 if __name__ == '__main__':
@@ -551,7 +556,7 @@ if __name__ == '__main__':
     expansion_to_children(("+<term>", {"extra_data": 1234}))
 
 class GrammarFuzzer(GrammarFuzzer):
-    def expansion_to_children(self, expansion):
+    def expansion_to_children(self, expansion: Expansion) -> List[DerivationTree]:
         return expansion_to_children(expansion)
 
 ### Putting Things Together
@@ -601,7 +606,9 @@ class GrammarFuzzer(GrammarFuzzer):
         return self.expand_node_randomly(node)
 
 class GrammarFuzzer(GrammarFuzzer):
-    def process_chosen_children(self, chosen_children, expansion):
+    def process_chosen_children(self,
+                                chosen_children: List[DerivationTree],
+                                expansion: Expansion) -> List[DerivationTree]:
         """Process children after selection.  By default, does nothing."""
         return chosen_children
 
@@ -807,7 +814,8 @@ if __name__ == '__main__':
 
 
 class GrammarFuzzer(GrammarFuzzer):
-    def expand_node_by_cost(self, node: DerivationTree, choose: Callable = min):
+    def expand_node_by_cost(self, node: DerivationTree, 
+                            choose: Callable = min) -> DerivationTree:
         (symbol, children) = node
         assert children is None
 
@@ -847,14 +855,14 @@ if __name__ == '__main__':
 
 
 class GrammarFuzzer(GrammarFuzzer):
-    def expand_node_min_cost(self, node):
+    def expand_node_min_cost(self, node: DerivationTree) -> DerivationTree:
         if self.log:
             print("Expanding", all_terminals(node), "at minimum cost")
 
         return self.expand_node_by_cost(node, min)
 
 class GrammarFuzzer(GrammarFuzzer):
-    def expand_node(self, node):
+    def expand_node(self, node: DerivationTree) -> DerivationTree:
         return self.expand_node_min_cost(node)
 
 if __name__ == '__main__':
@@ -892,14 +900,14 @@ if __name__ == '__main__':
 
 
 class GrammarFuzzer(GrammarFuzzer):
-    def expand_node_max_cost(self, node):
+    def expand_node_max_cost(self, node: DerivationTree) -> DerivationTree:
         if self.log:
             print("Expanding", all_terminals(node), "at maximum cost")
 
         return self.expand_node_by_cost(node, max)
 
 class GrammarFuzzer(GrammarFuzzer):
-    def expand_node(self, node):
+    def expand_node(self, node: DerivationTree) -> DerivationTree:
         return self.expand_node_max_cost(node)
 
 if __name__ == '__main__':
@@ -945,7 +953,7 @@ if __name__ == '__main__':
 
 
 class GrammarFuzzer(GrammarFuzzer):
-    def log_tree(self, tree):
+    def log_tree(self, tree: DerivationTree) -> None:
         """Output a tree if self.log is set; if self.display is also set, show the tree structure"""
         if self.log:
             print("Tree:", all_terminals(tree))
@@ -953,10 +961,12 @@ class GrammarFuzzer(GrammarFuzzer):
                 display(display_tree(tree))
             # print(self.possible_expansions(tree), "possible expansion(s) left")
 
-    def expand_tree_with_strategy(self, tree, expand_node_method, limit=None):
+    def expand_tree_with_strategy(self, tree: DerivationTree,
+                                  expand_node_method: Callable,
+                                  limit: Optional[int] = None):
         """Expand tree using `expand_node_method` as node expansion function
         until the number of possible expansions reaches `limit`."""
-        self.expand_node = expand_node_method
+        self.expand_node = expand_node_method  # type: ignore
         while ((limit is None
                 or self.possible_expansions(tree) < limit)
                and self.any_possible_expansions(tree)):
@@ -964,7 +974,7 @@ class GrammarFuzzer(GrammarFuzzer):
             self.log_tree(tree)
         return tree
 
-    def expand_tree(self, tree):
+    def expand_tree(self, tree: DerivationTree) -> DerivationTree:
         """Expand `tree` in a three-phase strategy until all expansions are complete."""
         self.log_tree(tree)
         tree = self.expand_tree_with_strategy(
@@ -1128,7 +1138,12 @@ if __name__ == '__main__':
                                 GrammarFuzzer.fuzz,
                                 GrammarFuzzer.fuzz_tree,
                             ],
-        project='fuzzingbook')
+                            types={
+                                'DerivationTree': DerivationTree,
+                                'Expansion': Expansion,
+                                'Grammar': Grammar
+                            },
+                            project='fuzzingbook')
 
 ### Derivation Trees
 
@@ -1243,16 +1258,18 @@ if __name__ == '__main__':
 class EvenFasterGrammarFuzzer(GrammarFuzzer):
     """Variant of `GrammarFuzzer` with precomputed costs"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._symbol_costs = {}
-        self._expansion_costs = {}
+        self._symbol_costs: Dict[str, Union[int, float]] = {}
+        self._expansion_costs: Dict[Expansion, Union[int, float]] = {}
         self.precompute_costs()
 
-    def new_symbol_cost(self, symbol: str, seen: Set[str] = set()):
+    def new_symbol_cost(self, symbol: str,
+                        seen: Set[str] = set()) -> Union[int, float]:
         return self._symbol_costs[symbol]
 
-    def new_expansion_cost(self, expansion: Expansion, seen: Set[str] = set()):
+    def new_expansion_cost(self, expansion: Expansion,
+                           seen: Set[str] = set()) -> Union[int, float]:
         return self._expansion_costs[expansion]
 
     def precompute_costs(self) -> None:
