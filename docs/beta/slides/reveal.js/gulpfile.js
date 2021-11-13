@@ -30,7 +30,7 @@ const banner = `/*!
 * ${pkg.homepage}
 * MIT licensed
 *
-* Copyright (C) 2020 Hakim El Hattab, https://hakim.se
+* Copyright (C) 2011-2021 Hakim El Hattab, https://hakim.se
 */\n`
 
 // Prevents warnings from opening too many test pages
@@ -295,7 +295,7 @@ gulp.task('serve', () => {
 
     gulp.watch(['*.html', '*.md'], gulp.series('reload'))
 
-    gulp.watch(['js/**'], gulp.series('js', 'reload', 'test'))
+    gulp.watch(['js/**'], gulp.series('js', 'reload', 'eslint'))
 
     gulp.watch(['plugin/**/plugin.js'], gulp.series('plugins', 'reload'))
 

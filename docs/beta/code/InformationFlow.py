@@ -3,7 +3,7 @@
 
 # "Tracking Information Flow" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2021-11-09 13:36:00+01:00
+# Last change: 2021-11-13 19:27:15+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -1584,39 +1584,45 @@ if __name__ == '__main__':
     print(secret.origin)
 
 if __name__ == '__main__':
-    s = heartbeat('hello', 5, memory=secret)
-    s
+    hello_s = heartbeat('hello', 5, memory=secret)
+    hello_s
 
 if __name__ == '__main__':
-    print(s.origin)
+    assert isinstance(hello_s, ostr)
 
 if __name__ == '__main__':
-    assert s.origin == [ostr.UNKNOWN_ORIGIN] * len(s)
+    print(hello_s.origin)
 
 if __name__ == '__main__':
-    assert all(origin == ostr.UNKNOWN_ORIGIN for origin in s.origin)
+    assert hello_s.origin == [ostr.UNKNOWN_ORIGIN] * len(hello_s)
 
 if __name__ == '__main__':
-    assert not any(origin >= SECRET_ORIGIN for origin in s.origin)
+    assert all(origin == ostr.UNKNOWN_ORIGIN for origin in hello_s.origin)
 
 if __name__ == '__main__':
-    s = heartbeat('hello', 32, memory=secret)
-    s
+    assert not any(origin >= SECRET_ORIGIN for origin in hello_s.origin)
 
 if __name__ == '__main__':
-    print(s.origin)
+    hello_s = heartbeat('hello', 32, memory=secret)
+    hello_s
+
+if __name__ == '__main__':
+    assert isinstance(hello_s, ostr)
+
+if __name__ == '__main__':
+    print(hello_s.origin)
 
 if __name__ == '__main__':
     with ExpectError():
-        assert s.origin == [ostr.UNKNOWN_ORIGIN] * len(s)
+        assert hello_s.origin == [ostr.UNKNOWN_ORIGIN] * len(hello_s)
 
 if __name__ == '__main__':
     with ExpectError():
-        assert all(origin == ostr.UNKNOWN_ORIGIN for origin in s.origin)
+        assert all(origin == ostr.UNKNOWN_ORIGIN for origin in hello_s.origin)
 
 if __name__ == '__main__':
     with ExpectError():
-        assert not any(origin >= SECRET_ORIGIN for origin in s.origin)
+        assert not any(origin >= SECRET_ORIGIN for origin in hello_s.origin)
 
 ## Taint-Directed Fuzzing
 ## ----------------------
@@ -1984,18 +1990,21 @@ if __name__ == '__main__':
 
 
 class tint(tint):
-    def __repr__(self):
+    def __repr__(self) -> tstr:
         s = int.__repr__(self)
         return tstr(s, taint=self.taint)
 
 class tint(tint):
-    def __str__(self):
+    def __str__(self) -> tstr:
         return tstr(int.__str__(self), taint=self.taint)
 
 if __name__ == '__main__':
     x = tint(42, taint='SECRET')
-    s = repr(x)
-    assert s.taint == 'SECRET'
+    x_s = repr(x)
+
+if __name__ == '__main__':
+    assert isinstance(x_s, tstr)
+    assert x_s.taint == 'SECRET'
 
 #### Part 4: Passing taints from strings to integers
 
