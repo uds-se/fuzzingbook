@@ -11928,34 +11928,23 @@ MathJax.Hub.Config({
      </li>
      <li class="has-sub"><a href="#"><span title="Parsing Inputs"><i class="fa fa-fw fa-list-ul"></i></span> <span class="menu_2">Parsing Inputs</span></a>
            <ul><li class="has-sub"><a href="#Synopsis"><i class="fa fa-fw fa-map"></i> Synopsis</a>
-</li><li class="has-sub"><a href="#Fuzzing-a-Simple-Program">&nbsp;&bull;&nbsp;&nbsp; Fuzzing a Simple Program</a>
+</li><li class="has-sub"><a href="#Why-Parsing-for-Fuzzing?">&nbsp;&bull;&nbsp;&nbsp; Why Parsing for Fuzzing?</a>
 </li><li class="has-sub"><a href="#Using-a-Parser">&nbsp;&bull;&nbsp;&nbsp; Using a Parser</a>
 </li><li class="has-sub"><a href="#An-Ad-Hoc-Parser">&nbsp;&bull;&nbsp;&nbsp; An Ad Hoc Parser</a>
-</li><li class="has-sub"><a href="#Grammars">&nbsp;&bull;&nbsp;&nbsp; Grammars</a>
-</li><li class="has-sub"><a href="#Parsing-Expression-Grammars">&nbsp;&bull;&nbsp;&nbsp; Parsing Expression Grammars</a>
+</li><li class="has-sub"><a href="#Grammars-in-Parsing">&nbsp;&bull;&nbsp;&nbsp; Grammars in Parsing</a>
+<ul><li class="has-sub"><a href="#Excursion:-Grammars-and-Derivation-Trees">Excursion: Grammars and Derivation Trees</a>
+</li><li class="has-sub"><a href="#Excursion:-Recursion">Excursion: Recursion</a>
+</ul></li><li class="has-sub"><a href="#A-Parser-Class">&nbsp;&bull;&nbsp;&nbsp; A Parser Class</a>
+<ul><li class="has-sub"><a href="#Excursion:-Canonical-Grammars">Excursion: Canonical Grammars</a>
+</ul></li><li class="has-sub"><a href="#Parsing-Expression-Grammars">&nbsp;&bull;&nbsp;&nbsp; Parsing Expression Grammars</a>
 <ul><li class="has-sub"><a href="#The-Packrat-Parser-for-Predicate-Expression-Grammars">The Packrat Parser for Predicate Expression Grammars</a>
-</li><li class="has-sub"><a href="#The-Parser">The Parser</a>
+</li><li class="has-sub"><a href="#Excursion:-Implementing-`PEGParser`">Excursion: Implementing `PEGParser`</a>
 </ul></li><li class="has-sub"><a href="#Parsing-Context-Free-Grammars">&nbsp;&bull;&nbsp;&nbsp; Parsing Context-Free Grammars</a>
 <ul><li class="has-sub"><a href="#Problems-with-PEG">Problems with PEG</a>
 </li><li class="has-sub"><a href="#The-Earley-Parser">The Earley Parser</a>
-</li><li class="has-sub"><a href="#Columns">Columns</a>
-</li><li class="has-sub"><a href="#Items">Items</a>
-</li><li class="has-sub"><a href="#States">States</a>
-</li><li class="has-sub"><a href="#The-Parsing-Algorithm">The Parsing Algorithm</a>
-</li><li class="has-sub"><a href="#Predicting-States">Predicting States</a>
-</li><li class="has-sub"><a href="#Scanning-Tokens">Scanning Tokens</a>
-</li><li class="has-sub"><a href="#Completing-Processing">Completing Processing</a>
-</li><li class="has-sub"><a href="#Filling-the-Chart">Filling the Chart</a>
-</li><li class="has-sub"><a href="#The-Parse-Method">The Parse Method</a>
-</li><li class="has-sub"><a href="#Parsing-Paths">Parsing Paths</a>
-</li><li class="has-sub"><a href="#Parsing-Forests">Parsing Forests</a>
-</li><li class="has-sub"><a href="#Extracting-Trees">Extracting Trees</a>
-</li><li class="has-sub"><a href="#Ambiguous-Parsing">Ambiguous Parsing</a>
-</li><li class="has-sub"><a href="#The-Aycock-Epsilon-Fix">The Aycock Epsilon Fix</a>
-</li><li class="has-sub"><a href="#Tree-Extractor">Tree Extractor</a>
-</li><li class="has-sub"><a href="#More-Earley-Parsing">More Earley Parsing</a>
-</ul></li><li class="has-sub"><a href="#Testing-the-Parsers">&nbsp;&bull;&nbsp;&nbsp; Testing the Parsers</a>
-</li><li class="has-sub"><a href="#Background"><i class="fa fa-fw fa-mortar-board"></i> Background</a>
+</li><li class="has-sub"><a href="#Excursion:-Implementing-`EarleyParser`">Excursion: Implementing `EarleyParser`</a>
+</li><li class="has-sub"><a href="#Excursion:-Testing-the-Parsers">Excursion: Testing the Parsers</a>
+</ul></li><li class="has-sub"><a href="#Background"><i class="fa fa-fw fa-mortar-board"></i> Background</a>
 </li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps"><i class="fa fa-fw fa-arrows"></i> Next Steps</a>
 </li><li class="has-sub"><a href="#Exercises"><i class="fa fa-fw fa-edit"></i> Exercises</a>
@@ -12040,53 +12029,6 @@ is also required.</li>
 </ul>
 </div>
 </div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">RE_NONTERMINAL</span>
-<span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">syntax_diagram</span><span class="p">,</span> <span class="n">Grammar</span>
-<span class="kn">from</span> <span class="nn"><a href="Fuzzer.html" class="import" target="_blank">Fuzzer</a></span> <span class="kn">import</span> <span class="n">Fuzzer</span>
-<span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="kn">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">FasterGrammarFuzzer</span><span class="p">,</span> <span class="n">display_tree</span><span class="p">,</span> <span class="n">tree_to_string</span><span class="p">,</span> <span class="n">dot_escape</span>
-<span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="kn">import</span> <span class="n">ExpectError</span>
-<span class="kn">from</span> <span class="nn"><a href="Timer.html" class="import" target="_blank">Timer</a></span> <span class="kn">import</span> <span class="n">Timer</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/typing.html" class="import" target="_blank">typing</a></span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Collection</span>
-</pre></div>
-
-</div>
-</div></div>
 </div>
 </div>
 
@@ -12429,8 +12371,301 @@ is also required.</li>
 </svg>
 </p>
 <p>These derivation trees can then be used for test generation, notably for mutating and recombining existing inputs.</p>
+<p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.1 (20210923.0004)
+ -->
+<!-- Pages: 1 -->
+<svg width="383pt" height="350pt"
+ viewBox="0.00 0.00 382.50 350.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 346)">
+<g id="a_graph0"><a xlink:title="PEGParser class hierarchy">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-346 378.5,-346 378.5,4 -4,4"/>
+</a>
+</g>
+<!-- PEGParser -->
+<g id="node1" class="node">
+<title>PEGParser</title>
+<g id="a_node1"><a xlink:href="#" xlink:title="class PEGParser:&#10;Packrat parser for Parsing Expression Grammars (PEGs).">
+<polygon fill="none" stroke="black" points="0,-61 0,-125 101,-125 101,-61 0,-61"/>
+<text text-anchor="start" x="18" y="-110.8" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">PEGParser</text>
+<polyline fill="none" stroke="black" points="0,-102 101,-102 "/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="PEGParser">
+<g id="a_node1_1"><a xlink:href="#" xlink:title="parse_prefix(self, text):&#10;Return pair (cursor, forest) for longest prefix of text.&#10;To be defined in subclasses.">
+<text text-anchor="start" x="8.5" y="-90.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">parse_prefix()</text>
+</a>
+</g>
+<g id="a_node1_2"><a xlink:href="#" xlink:title="unify_rule(self, rule, text, at)">
+<text text-anchor="start" x="8.5" y="-78.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">unify_rule()</text>
+</a>
+</g>
+<g id="a_node1_3"><a xlink:href="#" xlink:title="unify_key(self, key, text, at=0)">
+<text text-anchor="start" x="8.5" y="-67.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">unify_key()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- Parser -->
+<g id="node2" class="node">
+<title>Parser</title>
+<g id="a_node2"><a xlink:href="#" xlink:title="class Parser:&#10;Base class for parsing.">
+<polygon fill="none" stroke="black" points="64,-222.5 64,-341.5 165,-341.5 165,-222.5 64,-222.5"/>
+<text text-anchor="start" x="94.5" y="-327.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Parser</text>
+<polyline fill="none" stroke="black" points="64,-318.5 165,-318.5 "/>
+<g id="a_node2_4"><a xlink:href="#" xlink:title="Parser">
+<g id="a_node2_5"><a xlink:href="#" xlink:title="__init__(self, grammar, **kwargs):&#10;Constructor.&#10;`grammar` is the grammar to be used for parsing.&#10;Keyword arguments:&#10;`start_symbol` is the start symbol (default: &#39;&lt;start&gt;&#39;).&#10;`log` enables logging (default: False).&#10;`coalesce` defines if tokens should be coalesced (default: True).&#10;`tokens`, if set, is a set of tokens to be used.">
+<text text-anchor="start" x="72.5" y="-307.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node2_6"><a xlink:href="#" xlink:title="grammar(self) &#45;&gt; Grammar:&#10;Return the grammar of this parser.">
+<text text-anchor="start" x="72.5" y="-296.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">grammar()</text>
+</a>
+</g>
+<g id="a_node2_7"><a xlink:href="#" xlink:title="parse(self, text: str) &#45;&gt; Iterable[DerivationTree]:&#10;Parse `text` using the grammar.&#10;Return an iterable of parse trees.">
+<text text-anchor="start" x="72.5" y="-285.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">parse()</text>
+</a>
+</g>
+<g id="a_node2_8"><a xlink:href="#" xlink:title="start_symbol(self) &#45;&gt; str:&#10;Return the start symbol of this parser.">
+<text text-anchor="start" x="72.5" y="-274.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">start_symbol()</text>
+</a>
+</g>
+<g id="a_node2_9"><a xlink:href="#" xlink:title="coalesce(self, children: List[DerivationTree]) &#45;&gt; List[DerivationTree]">
+<text text-anchor="start" x="72.5" y="-262.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">coalesce()</text>
+</a>
+</g>
+<g id="a_node2_10"><a xlink:href="#" xlink:title="parse_on(self, text: str, start_symbol: str) &#45;&gt; Generator">
+<text text-anchor="start" x="72.5" y="-251.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">parse_on()</text>
+</a>
+</g>
+<g id="a_node2_11"><a xlink:href="#" xlink:title="parse_prefix(self, text: str) &#45;&gt; Tuple[int, Iterable[DerivationTree]]:&#10;Return pair (cursor, forest) for longest prefix of text.&#10;To be defined in subclasses.">
+<text text-anchor="start" x="72.5" y="-241.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">parse_prefix()</text>
+</a>
+</g>
+<g id="a_node2_12"><a xlink:href="#" xlink:title="prune_tree(self, tree)">
+<text text-anchor="start" x="72.5" y="-229.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">prune_tree()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- PEGParser&#45;&gt;Parser -->
+<g id="edge1" class="edge">
+<title>PEGParser&#45;&gt;Parser</title>
+<path fill="none" stroke="black" d="M61.21,-125.3C69.37,-149.13 80.9,-182.83 91.15,-212.78"/>
+<polygon fill="none" stroke="black" points="87.88,-214.03 94.43,-222.36 94.5,-211.76 87.88,-214.03"/>
+</g>
+<!-- EarleyParser -->
+<g id="node3" class="node">
+<title>EarleyParser</title>
+<g id="a_node3"><a xlink:href="#" xlink:title="class EarleyParser:&#10;Earley Parser. This parser can parse any context&#45;free grammar.">
+<polygon fill="none" stroke="black" points="119,-0.5 119,-185.5 238,-185.5 238,-0.5 119,-0.5"/>
+<text text-anchor="start" x="139" y="-171.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">EarleyParser</text>
+<polyline fill="none" stroke="black" points="119,-162.5 238,-162.5 "/>
+<g id="a_node3_13"><a xlink:href="#" xlink:title="EarleyParser">
+<g id="a_node3_14"><a xlink:href="#" xlink:title="__init__(self, grammar, **kwargs):&#10;Constructor.&#10;`grammar` is the grammar to be used for parsing.&#10;Keyword arguments:&#10;`start_symbol` is the start symbol (default: &#39;&lt;start&gt;&#39;).&#10;`log` enables logging (default: False).&#10;`coalesce` defines if tokens should be coalesced (default: True).&#10;`tokens`, if set, is a set of tokens to be used.">
+<text text-anchor="start" x="127.5" y="-151.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node3_15"><a xlink:href="#" xlink:title="chart_parse(self, words, start)">
+<text text-anchor="start" x="127.5" y="-139.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">chart_parse()</text>
+</a>
+</g>
+<g id="a_node3_16"><a xlink:href="#" xlink:title="complete(self, col, state)">
+<text text-anchor="start" x="127.5" y="-128.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">complete()</text>
+</a>
+</g>
+<g id="a_node3_17"><a xlink:href="#" xlink:title="earley_complete(self, col, state)">
+<text text-anchor="start" x="127.5" y="-117.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">earley_complete()</text>
+</a>
+</g>
+<g id="a_node3_18"><a xlink:href="#" xlink:title="extract_a_tree(self, forest_node)">
+<text text-anchor="start" x="127.5" y="-106.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">extract_a_tree()</text>
+</a>
+</g>
+<g id="a_node3_19"><a xlink:href="#" xlink:title="extract_trees(self, forest_node)">
+<text text-anchor="start" x="127.5" y="-95.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">extract_trees()</text>
+</a>
+</g>
+<g id="a_node3_20"><a xlink:href="#" xlink:title="fill_chart(self, chart)">
+<text text-anchor="start" x="127.5" y="-84.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">fill_chart()</text>
+</a>
+</g>
+<g id="a_node3_21"><a xlink:href="#" xlink:title="forest(self, s, kind, chart)">
+<text text-anchor="start" x="127.5" y="-73.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">forest()</text>
+</a>
+</g>
+<g id="a_node3_22"><a xlink:href="#" xlink:title="parse(self, text):&#10;Parse `text` using the grammar.&#10;Return an iterable of parse trees.">
+<text text-anchor="start" x="127.5" y="-63.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">parse()</text>
+</a>
+</g>
+<g id="a_node3_23"><a xlink:href="#" xlink:title="parse_forest(self, chart, state)">
+<text text-anchor="start" x="127.5" y="-51.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">parse_forest()</text>
+</a>
+</g>
+<g id="a_node3_24"><a xlink:href="#" xlink:title="parse_paths(self, named_expr, chart, frm, til)">
+<text text-anchor="start" x="127.5" y="-40.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">parse_paths()</text>
+</a>
+</g>
+<g id="a_node3_25"><a xlink:href="#" xlink:title="parse_prefix(self, text):&#10;Return pair (cursor, forest) for longest prefix of text.&#10;To be defined in subclasses.">
+<text text-anchor="start" x="127.5" y="-30.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">parse_prefix()</text>
+</a>
+</g>
+<g id="a_node3_26"><a xlink:href="#" xlink:title="predict(self, col, sym, state)">
+<text text-anchor="start" x="127.5" y="-18.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">predict()</text>
+</a>
+</g>
+<g id="a_node3_27"><a xlink:href="#" xlink:title="scan(self, col, state, letter)">
+<text text-anchor="start" x="127.5" y="-7.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">scan()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- EarleyParser&#45;&gt;Parser -->
+<g id="edge2" class="edge">
+<title>EarleyParser&#45;&gt;Parser</title>
+<path fill="none" stroke="black" d="M147.16,-185.58C144.02,-194.76 140.87,-203.96 137.83,-212.83"/>
+<polygon fill="none" stroke="black" points="134.51,-211.71 134.59,-222.31 141.14,-213.98 134.51,-211.71"/>
+</g>
+<!-- Legend -->
+<g id="node4" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="256.5" y="-110.5" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="256.5" y="-100.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="262.5" y="-100.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="256.5" y="-90.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="262.5" y="-90.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="256.5" y="-80.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="262.5" y="-80.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="256.5" y="-71.3" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+</p>
 </div>
 </div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/typing.html" class="import" target="_blank">typing</a></span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">cast</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Fuzzer.html" class="import" target="_blank">Fuzzer</a></span> <span class="kn">import</span> <span class="n">Fuzzer</span>  <span class="c1"># minor dependendcy</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">EXPR_GRAMMAR</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">RE_NONTERMINAL</span>
+<span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">syntax_diagram</span><span class="p">,</span> <span class="n">Grammar</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="kn">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">display_tree</span><span class="p">,</span> <span class="n">tree_to_string</span><span class="p">,</span> <span class="n">dot_escape</span>
+<span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="kn">import</span> <span class="n">DerivationTree</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="kn">import</span> <span class="n">ExpectError</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://ipython.readthedocs.io/en/stable/api/generated/IPython.display.html" class="import" target="_blank">IPython.display</a></span> <span class="kn">import</span> <span class="n">display</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Timer.html" class="import" target="_blank">Timer</a></span> <span class="kn">import</span> <span class="n">Timer</span>
+</pre></div>
+
+</div>
+</div></div>
 </div>
 </div>
 
@@ -12439,7 +12674,7 @@ is also required.</li>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Fuzzing-a-Simple-Program">Fuzzing a Simple Program<a class="anchor-link" href="#Fuzzing-a-Simple-Program">&#182;</a></h2></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Why-Parsing-for-Fuzzing?">Why Parsing for Fuzzing?<a class="anchor-link" href="#Why-Parsing-for-Fuzzing?">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -12447,7 +12682,7 @@ is also required.</li>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Here is a simple program that accepts a CSV file of vehicle details and processes this information.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Why would one want to parse existing inputs in order to fuzz? Let us illustrate the problem with an example. Here is a simple program that accepts a CSV file of vehicle details and processes this information.</p>
 </div>
 </div>
 </div>
@@ -13176,20 +13411,6 @@ It is an old but reliable model!
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/typing.html" class="import" target="_blank">typing</a></span> <span class="kn">import</span> <span class="n">List</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">gf</span> <span class="o">=</span> <span class="n">GrammarFuzzer</span><span class="p">(</span><span class="n">CSV_GRAMMAR</span><span class="p">,</span> <span class="n">min_nonterminals</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <span class="n">trials</span> <span class="o">=</span> <span class="mi">1000</span>
 <span class="n">valid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -13217,7 +13438,7 @@ It is an old but reliable model!
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>0 valid strings, that is GrammarFuzzer generated 0.000000% valid entries from 1000 inputs
-Total time of 7.052583 seconds
+Total time of 6.524935 seconds
 </pre>
 </div>
 
@@ -13457,8 +13678,8 @@ Indeed, the reason is that the grammar itself does not capture the complete info
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">simple_parse_csv</span><span class="p">(</span><span class="n">mystring</span><span class="p">):</span>
-    <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">simple_parse_csv</span><span class="p">(</span><span class="n">mystring</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DerivationTree</span><span class="p">:</span>
+    <span class="n">children</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DerivationTree</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">tree</span> <span class="o">=</span> <span class="p">(</span><span class="n">START_SYMBOL</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mystring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)):</span>
         <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">&quot;record </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span><span class="p">,</span> <span class="p">[(</span><span class="n">cell</span><span class="p">,</span> <span class="p">[])</span>
@@ -14474,7 +14695,7 @@ air, moon roof, loaded&#34;,4799.00
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>It is here that <em>formal parsers</em> shine. The main idea is that, any given set of strings belong to a language, and these languages can be specified by their grammars (as we saw in the <a href="Grammars.html">chapter on grammars</a>). The great thing about grammars is that they can be <em>composed</em>. That is, one can introduce finer and finer details into an internal structure without affecting the external structure, and similarly, one can change the external structure without much impact on the internal structure. We briefly describe grammars in the next section.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>It is here that <em>formal parsers</em> shine. The main idea is that, any given set of strings belong to a language, and these languages can be specified by their grammars (as we saw in the <a href="Grammars.html">chapter on grammars</a>). The great thing about grammars is that they can be <em>composed</em>. That is, one can introduce finer and finer details into an internal structure without affecting the external structure, and similarly, one can change the external structure without much impact on the internal structure.</p>
 </div>
 </div>
 </div>
@@ -14483,7 +14704,19 @@ air, moon roof, loaded&#34;,4799.00
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammars">Grammars<a class="anchor-link" href="#Grammars">&#182;</a></h2><p>A grammar, as you have read from the <a href="Grammars.html">chapter on grammars</a> is a set of <em>rules</em> that explain how the start symbol can be expanded. Each rule has a name, also called a <em>nonterminal</em>, and a set of <em>alternative choices</em> in how the nonterminal can be expanded.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Grammars-in-Parsing">Grammars in Parsing<a class="anchor-link" href="#Grammars-in-Parsing">&#182;</a></h2><p>We briefly describe grammars in the context of parsing.</p>
+</div>
+</div>
+</div>
+</div>
+
+<details id="Excursion:-Grammars-and-Derivation-Trees">
+<summary>Grammars and Derivation Trees</summary>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>A grammar, as you have read from the <a href="Grammars.html">chapter on grammars</a> is a set of <em>rules</em> that explain how the start symbol can be expanded. Each rule has a name, also called a <em>nonterminal</em>, and a set of <em>alternative choices</em> in how the nonterminal can be expanded.</p>
 </div>
 </div>
 </div>
@@ -15531,7 +15764,20 @@ second grammar <code>A2_GRAMMAR</code> does not have left recursion in the
 nonterminals in any of its productions, but contains <em>epsilon</em> productions.
 (An epsilon production is a production that has empty string in its right
 hand side.)</p>
-<p>You would have noticed that we reuse the term <code>&lt;expr&gt;</code> in its own definition. Using the same nonterminal in its own definition is called <em>recursion</em>. There are two specific kinds of recursion one should be aware of in parsing, as we see in the next section.</p>
+</div>
+</div>
+</div>
+</div>
+
+</details>
+
+<details id="Excursion:-Recursion">
+<summary>Recursion</summary>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>You would have noticed that we reuse the term <code>&lt;expr&gt;</code> in its own definition. Using the same nonterminal in its own definition is called <em>recursion</em>. There are two specific kinds of recursion one should be aware of in parsing, as we see in the next section.</p>
 </div>
 </div>
 </div>
@@ -15688,7 +15934,8 @@ any of its productions is itself.</p>
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s1">&#39;aaaaaa&#39;</span>
 <span class="n">display_tree</span><span class="p">(</span>
-    <span class="p">(</span><span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">,</span> <span class="p">((</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">((</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">((</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[]))),</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[]))),</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[]))))</span>
+    <span class="p">(</span><span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[])]),</span> <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[])]),</span>
+                 <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[])]))</span>
 </pre></div>
 
 </div>
@@ -15944,8 +16191,9 @@ language as that of <code>LR_GRAMMAR</code>.</p>
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">display_tree</span><span class="p">((</span><span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">,</span> <span class="p">((</span>
-    <span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">((</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="p">(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">((</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="p">(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">((</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="p">(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">[]))))))),)))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">display_tree</span><span class="p">((</span><span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">[</span>
+                  <span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="p">(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="p">(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="p">[]),</span> <span class="p">(</span><span class="s1">&#39;&lt;A&gt;&#39;</span><span class="p">,</span> <span class="p">[])])])])]</span>
+             <span class="p">))</span>
 </pre></div>
 
 </div>
@@ -16524,6 +16772,16 @@ in two ways as we see below using the <code>A1_GRAMMAR</code></p>
 </div>
 </div>
 
+</details>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Parser-Class">A Parser Class<a class="anchor-link" href="#A-Parser-Class">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -16554,30 +16812,48 @@ in two ways as we see below using the <code>A1_GRAMMAR</code></p>
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Parser</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">grammar</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;start_symbol&#39;</span><span class="p">,</span> <span class="n">START_SYMBOL</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">coalesce_tokens</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;coalesce&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tokens&#39;</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
+    <span class="sd">&quot;&quot;&quot;Base class for parsing.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">:</span> <span class="n">Grammar</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">start_symbol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">START_SYMBOL</span><span class="p">,</span>
+                 <span class="n">log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">coalesce</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">tokens</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+<span class="sd">           `grammar` is the grammar to be used for parsing.</span>
+<span class="sd">           Keyword arguments:</span>
+<span class="sd">           `start_symbol` is the start symbol (default: &#39;&lt;start&gt;&#39;).</span>
+<span class="sd">           `log` enables logging (default: False).</span>
+<span class="sd">           `coalesce` defines if tokens should be coalesced (default: True).</span>
+<span class="sd">           `tokens`, if set, is a set of tokens to be used.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span> <span class="o">=</span> <span class="n">grammar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span> <span class="o">=</span> <span class="n">start_symbol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coalesce_tokens</span> <span class="o">=</span> <span class="n">coalesce</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">tokens</span>
+
+    <span class="k">def</span> <span class="nf">grammar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Grammar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the grammar of this parser.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span>
 
-    <span class="k">def</span> <span class="nf">start_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">start_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the start symbol of this parser.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span>
 
-    <span class="k">def</span> <span class="nf">parse_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return pair (cursor, forest) for longest prefix of text&quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">parse_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">DerivationTree</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Return pair (cursor, forest) for longest prefix of text. </span>
+<span class="sd">           To be defined in subclasses.&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
-    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">DerivationTree</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Parse `text` using the grammar. </span>
+<span class="sd">           Return an iterable of parse trees.&quot;&quot;&quot;</span>
         <span class="n">cursor</span><span class="p">,</span> <span class="n">forest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_prefix</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">cursor</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s2">&quot;at &quot;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">cursor</span><span class="p">:]))</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">prune_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">forest</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">parse_on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">start_symbol</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parse_on</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
         <span class="n">old_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span> <span class="o">=</span> <span class="n">start_symbol</span>
@@ -16585,9 +16861,9 @@ in two ways as we see below using the <code>A1_GRAMMAR</code></p>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_start_symbol</span> <span class="o">=</span> <span class="n">old_start</span>
 
-    <span class="k">def</span> <span class="nf">coalesce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">coalesce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">children</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DerivationTree</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">DerivationTree</span><span class="p">]:</span>
         <span class="n">last</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">new_lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">new_lst</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DerivationTree</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">cn</span><span class="p">,</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">cn</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grammar</span><span class="p">:</span>
                 <span class="n">last</span> <span class="o">+=</span> <span class="n">cn</span>
@@ -16600,10 +16876,12 @@ in two ways as we see below using the <code>A1_GRAMMAR</code></p>
             <span class="n">new_lst</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">last</span><span class="p">,</span> <span class="p">[]))</span>
         <span class="k">return</span> <span class="n">new_lst</span>
 
-    <span class="k">def</span> <span class="nf">prune_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">prune_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">DerivationTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DerivationTree</span><span class="p">:</span>
         <span class="n">name</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">children</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">coalesce_tokens</span><span class="p">:</span>
-            <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coalesce</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">List</span><span class="p">[</span><span class="n">DerivationTree</span><span class="p">],</span> <span class="n">children</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[(</span><span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">),</span> <span class="p">[])])</span>
         <span class="k">else</span><span class="p">:</span>
@@ -16615,86 +16893,8 @@ in two ways as we see below using the <code>A1_GRAMMAR</code></p>
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Parsing-Expression-Grammars">Parsing Expression Grammars<a class="anchor-link" href="#Parsing-Expression-Grammars">&#182;</a></h2><p>A <em><a href="http://bford.info/pub/lang/peg">Parsing Expression Grammar</a></em> (<em>PEG</em>) [<a href="https://doi.org/10.1145/982962.964011">Ford <em>et al</em>, 2004</a>] is a type of <em>recognition based formal grammar</em> that specifies the sequence of steps to take to parse a given string.
-A <em>parsing expression grammar</em> is very similar to a <em>context-free grammar</em> (<em>CFG</em>) such as the ones we saw in the <a href="Grammars.html">chapter on grammars</a>. As in a CFG, a parsing expression grammar is represented by a set of nonterminals and corresponding alternatives representing how to match each. For example, here is a PEG that matches <code>a</code> or <code>b</code>.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PEG1</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">]</span>
-<span class="p">}</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>However, unlike the <em>CFG</em>, the alternatives represent <em>ordered choice</em>. That is, rather than choosing all rules that can potentially match, we stop at the first match that succeed. For example, the below <em>PEG</em> can match <code>ab</code> but not <code>abc</code> unlike a <em>CFG</em> which will match both. (We call the sequence of ordered choice expressions <em>choice expressions</em>  rather than alternatives to make the distinction from <em>CFG</em> clear.)</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_code">
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-<div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PEG2</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ab&#39;</span><span class="p">,</span> <span class="s1">&#39;abc&#39;</span><span class="p">]</span>
-<span class="p">}</span>
-</pre></div>
-
-</div>
-</div></div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Each choice in a <em>choice expression</em> represents a rule on how to satisfy that particular choice. The choice is a sequence of symbols (terminals and nonterminals) that are matched against a given text as in a <em>CFG</em>.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Beyond the syntax of grammar definitions we have seen so far, a <em>PEG</em> can also contain a few additional elements. See the exercises at the end of the chapter for additional information.</p>
-<p>The PEGs model the typical practice in handwritten recursive descent parsers, and hence it may be considered more intuitive to understand. We look at parsers for PEGs next.</p>
-</div>
-</div>
-</div>
-</div>
-
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="The-Packrat-Parser-for-Predicate-Expression-Grammars">The Packrat Parser for Predicate Expression Grammars<a class="anchor-link" href="#The-Packrat-Parser-for-Predicate-Expression-Grammars">&#182;</a></h3><p>Short of hand rolling a parser, <em>Packrat</em> parsing is one of the simplest parsing techniques, and is one of the techniques for parsing PEGs.
-The <em>Packrat</em> parser is so named because it tries to cache all results from simpler problems in the hope that these solutions can be used to avoid re-computation later. We develop a minimal <em>Packrat</em> parser next.</p>
-<p>But before that, we need to implement a few supporting tools.</p>
-</div>
-</div>
-</div>
-</div>
+<details id="Excursion:-Canonical-Grammars">
+<summary>Canonical Grammars</summary>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
@@ -17061,10 +17261,92 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 </div>
 </div>
 
+</details>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="The-Parser">The Parser<a class="anchor-link" href="#The-Parser">&#182;</a></h3><p>We derive from the <code>Parser</code> base class first, and we accept the text to be parsed in the <code>parse()</code> method, which in turn calls <code>unify_key()</code> with the <code>start_symbol</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Parsing-Expression-Grammars">Parsing Expression Grammars<a class="anchor-link" href="#Parsing-Expression-Grammars">&#182;</a></h2><p>A <em><a href="http://bford.info/pub/lang/peg">Parsing Expression Grammar</a></em> (<em>PEG</em>) [<a href="https://doi.org/10.1145/982962.964011">Ford <em>et al</em>, 2004</a>] is a type of <em>recognition based formal grammar</em> that specifies the sequence of steps to take to parse a given string.
+A <em>parsing expression grammar</em> is very similar to a <em>context-free grammar</em> (<em>CFG</em>) such as the ones we saw in the <a href="Grammars.html">chapter on grammars</a>. As in a CFG, a parsing expression grammar is represented by a set of nonterminals and corresponding alternatives representing how to match each. For example, here is a PEG that matches <code>a</code> or <code>b</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PEG1</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>However, unlike the <em>CFG</em>, the alternatives represent <em>ordered choice</em>. That is, rather than choosing all rules that can potentially match, we stop at the first match that succeed. For example, the below <em>PEG</em> can match <code>ab</code> but not <code>abc</code> unlike a <em>CFG</em> which will match both. (We call the sequence of ordered choice expressions <em>choice expressions</em>  rather than alternatives to make the distinction from <em>CFG</em> clear.)</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PEG2</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ab&#39;</span><span class="p">,</span> <span class="s1">&#39;abc&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Each choice in a <em>choice expression</em> represents a rule on how to satisfy that particular choice. The choice is a sequence of symbols (terminals and nonterminals) that are matched against a given text as in a <em>CFG</em>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Beyond the syntax of grammar definitions we have seen so far, a <em>PEG</em> can also contain a few additional elements. See the exercises at the end of the chapter for additional information.</p>
+<p>The PEGs model the typical practice in handwritten recursive descent parsers, and hence it may be considered more intuitive to understand.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="The-Packrat-Parser-for-Predicate-Expression-Grammars">The Packrat Parser for Predicate Expression Grammars<a class="anchor-link" href="#The-Packrat-Parser-for-Predicate-Expression-Grammars">&#182;</a></h3><p>Short of hand rolling a parser, <em>Packrat</em> parsing is one of the simplest parsing techniques, and is one of the techniques for parsing PEGs.
+The <em>Packrat</em> parser is so named because it tries to cache all results from simpler problems in the hope that these solutions can be used to avoid re-computation later. We develop a minimal <em>Packrat</em> parser next.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We derive from the <code>Parser</code> base class first, and we accept the text to be parsed in the <code>parse()</code> method, which in turn calls <code>unify_key()</code> with the <code>start_symbol</code>.</p>
 <p><strong>Note.</strong> While our PEG parser can produce only a single unambiguous parse tree, other parsers can produce multiple parses for ambiguous grammars. Hence, we return a list of trees (in this case with a single element).</p>
 </div>
 </div>
@@ -17088,6 +17370,9 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 </div>
 </div>
 
+<details id="Excursion:-Implementing-PEGParser">
+<summary>Implementing <code>PEGParser</code></summary>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -17105,6 +17390,8 @@ The <em>Packrat</em> parser is so named because it tries to cache all results fr
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PEGParser</span><span class="p">(</span><span class="n">PEGParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Packrat parser for Parsing Expression Grammars (PEGs).&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">unify_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">at</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;unify_key: </span><span class="si">%s</span><span class="s2"> with </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="n">at</span><span class="p">:])))</span>
@@ -17450,6 +17737,8 @@ unify_key: &#39;2&#39; with &#39;2&#39;
 </div>
 </div>
 
+</details>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -17469,12 +17758,301 @@ unify_key: &#39;2&#39; with &#39;2&#39;
 <span class="n">peg</span> <span class="o">=</span> <span class="n">PEGParser</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">peg</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">):</span>
     <span class="k">assert</span> <span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="o">==</span> <span class="n">mystring</span>
-    <span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
 </pre></div>
 
 </div>
 </div></div>
 </div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.1 (20210923.0004)
+ -->
+<!-- Pages: 1 -->
+<svg width="202pt" height="584pt"
+ viewBox="0.00 0.00 202.00 584.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 580)">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-580 198,-580 198,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="74.5" y="-564.8" font-family="Times,serif" font-size="14.00">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="74.5" y="-513.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="black" d="M74.5,-560.69C74.5,-554.18 74.5,-544.1 74.5,-535.43"/>
+<polygon fill="black" stroke="black" points="78,-535.26 74.5,-525.26 71,-535.26 78,-535.26"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="27.5" y="-462.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="black" d="M67.96,-509.69C61.02,-502.45 49.84,-490.79 40.99,-481.57"/>
+<polygon fill="black" stroke="black" points="43.43,-479.05 33.98,-474.26 38.38,-483.9 43.43,-479.05"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="74.5" y="-462.8" font-family="Times,serif" font-size="14.00"> + </text>
+</g>
+<!-- 1&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>1&#45;&gt;7</title>
+<path fill="none" stroke="black" d="M74.5,-509.69C74.5,-503.18 74.5,-493.1 74.5,-484.43"/>
+<polygon fill="black" stroke="black" points="78,-484.26 74.5,-474.26 71,-484.26 78,-484.26"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="120.5" y="-462.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 1&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>1&#45;&gt;8</title>
+<path fill="none" stroke="black" d="M80.9,-509.69C87.69,-502.45 98.63,-490.79 107.29,-481.57"/>
+<polygon fill="black" stroke="black" points="109.87,-483.94 114.16,-474.26 104.76,-479.15 109.87,-483.94"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="27.5" y="-411.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="black" d="M27.5,-458.69C27.5,-452.18 27.5,-442.1 27.5,-433.43"/>
+<polygon fill="black" stroke="black" points="31,-433.26 27.5,-423.26 24,-433.26 31,-433.26"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="27.5" y="-360.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="black" d="M27.5,-407.69C27.5,-401.18 27.5,-391.1 27.5,-382.43"/>
+<polygon fill="black" stroke="black" points="31,-382.26 27.5,-372.26 24,-382.26 31,-382.26"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="27.5" y="-309.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="black" d="M27.5,-356.69C27.5,-350.18 27.5,-340.1 27.5,-331.43"/>
+<polygon fill="black" stroke="black" points="31,-331.26 27.5,-321.26 24,-331.26 31,-331.26"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="27.5" y="-258.8" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="black" d="M27.5,-305.69C27.5,-299.18 27.5,-289.1 27.5,-280.43"/>
+<polygon fill="black" stroke="black" points="31,-280.26 27.5,-270.26 24,-280.26 31,-280.26"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="120.5" y="-411.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="black" d="M120.5,-458.69C120.5,-452.18 120.5,-442.1 120.5,-433.43"/>
+<polygon fill="black" stroke="black" points="124,-433.26 120.5,-423.26 117,-433.26 124,-433.26"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="120.5" y="-360.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="black" d="M120.5,-407.69C120.5,-401.18 120.5,-391.1 120.5,-382.43"/>
+<polygon fill="black" stroke="black" points="124,-382.26 120.5,-372.26 117,-382.26 124,-382.26"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="79.5" y="-309.8" font-family="Times,serif" font-size="14.00">(</text>
+</g>
+<!-- 10&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>10&#45;&gt;11</title>
+<path fill="none" stroke="black" d="M114.8,-356.69C108.07,-348.64 96.77,-335.14 88.77,-325.58"/>
+<polygon fill="black" stroke="black" points="91.27,-323.11 82.17,-317.69 85.9,-327.6 91.27,-323.11"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="120.5" y="-309.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 10&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>10&#45;&gt;12</title>
+<path fill="none" stroke="black" d="M120.5,-356.69C120.5,-350.18 120.5,-340.1 120.5,-331.43"/>
+<polygon fill="black" stroke="black" points="124,-331.26 120.5,-321.26 117,-331.26 124,-331.26"/>
+</g>
+<!-- 24 -->
+<g id="node25" class="node">
+<title>24</title>
+<text text-anchor="middle" x="161.5" y="-309.8" font-family="Times,serif" font-size="14.00">)</text>
+</g>
+<!-- 10&#45;&gt;24 -->
+<g id="edge24" class="edge">
+<title>10&#45;&gt;24</title>
+<path fill="none" stroke="black" d="M126.2,-356.69C132.93,-348.64 144.23,-335.14 152.23,-325.58"/>
+<polygon fill="black" stroke="black" points="155.1,-327.6 158.83,-317.69 149.73,-323.11 155.1,-327.6"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="120.5" y="-258.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="black" d="M120.5,-305.69C120.5,-299.18 120.5,-289.1 120.5,-280.43"/>
+<polygon fill="black" stroke="black" points="124,-280.26 120.5,-270.26 117,-280.26 124,-280.26"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="70.5" y="-207.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 13&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>13&#45;&gt;14</title>
+<path fill="none" stroke="black" d="M113.55,-254.69C106.08,-247.37 94.03,-235.56 84.57,-226.29"/>
+<polygon fill="black" stroke="black" points="86.99,-223.75 77.39,-219.26 82.09,-228.75 86.99,-223.75"/>
+</g>
+<!-- 18 -->
+<g id="node19" class="node">
+<title>18</title>
+<text text-anchor="middle" x="120.5" y="-207.8" font-family="Times,serif" font-size="14.00"> * </text>
+</g>
+<!-- 13&#45;&gt;18 -->
+<g id="edge18" class="edge">
+<title>13&#45;&gt;18</title>
+<path fill="none" stroke="black" d="M120.5,-254.69C120.5,-248.18 120.5,-238.1 120.5,-229.43"/>
+<polygon fill="black" stroke="black" points="124,-229.26 120.5,-219.26 117,-229.26 124,-229.26"/>
+</g>
+<!-- 19 -->
+<g id="node20" class="node">
+<title>19</title>
+<text text-anchor="middle" x="166.5" y="-207.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 13&#45;&gt;19 -->
+<g id="edge19" class="edge">
+<title>13&#45;&gt;19</title>
+<path fill="none" stroke="black" d="M126.9,-254.69C133.69,-247.45 144.63,-235.79 153.29,-226.57"/>
+<polygon fill="black" stroke="black" points="155.87,-228.94 160.16,-219.26 150.76,-224.15 155.87,-228.94"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="70.5" y="-156.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="black" d="M70.5,-203.69C70.5,-197.18 70.5,-187.1 70.5,-178.43"/>
+<polygon fill="black" stroke="black" points="74,-178.26 70.5,-168.26 67,-178.26 74,-178.26"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="70.5" y="-105.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 15&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>15&#45;&gt;16</title>
+<path fill="none" stroke="black" d="M70.5,-152.69C70.5,-146.18 70.5,-136.1 70.5,-127.43"/>
+<polygon fill="black" stroke="black" points="74,-127.26 70.5,-117.26 67,-127.26 74,-127.26"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+<text text-anchor="middle" x="70.5" y="-54.8" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+<!-- 16&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>16&#45;&gt;17</title>
+<path fill="none" stroke="black" d="M70.5,-101.69C70.5,-95.18 70.5,-85.1 70.5,-76.43"/>
+<polygon fill="black" stroke="black" points="74,-76.26 70.5,-66.26 67,-76.26 74,-76.26"/>
+</g>
+<!-- 20 -->
+<g id="node21" class="node">
+<title>20</title>
+<text text-anchor="middle" x="166.5" y="-156.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 19&#45;&gt;20 -->
+<g id="edge20" class="edge">
+<title>19&#45;&gt;20</title>
+<path fill="none" stroke="black" d="M166.5,-203.69C166.5,-197.18 166.5,-187.1 166.5,-178.43"/>
+<polygon fill="black" stroke="black" points="170,-178.26 166.5,-168.26 163,-178.26 170,-178.26"/>
+</g>
+<!-- 21 -->
+<g id="node22" class="node">
+<title>21</title>
+<text text-anchor="middle" x="166.5" y="-105.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 20&#45;&gt;21 -->
+<g id="edge21" class="edge">
+<title>20&#45;&gt;21</title>
+<path fill="none" stroke="black" d="M166.5,-152.69C166.5,-146.18 166.5,-136.1 166.5,-127.43"/>
+<polygon fill="black" stroke="black" points="170,-127.26 166.5,-117.26 163,-127.26 170,-127.26"/>
+</g>
+<!-- 22 -->
+<g id="node23" class="node">
+<title>22</title>
+<text text-anchor="middle" x="166.5" y="-54.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 21&#45;&gt;22 -->
+<g id="edge22" class="edge">
+<title>21&#45;&gt;22</title>
+<path fill="none" stroke="black" d="M166.5,-101.69C166.5,-95.18 166.5,-85.1 166.5,-76.43"/>
+<polygon fill="black" stroke="black" points="170,-76.26 166.5,-66.26 163,-76.26 170,-76.26"/>
+</g>
+<!-- 23 -->
+<g id="node24" class="node">
+<title>23</title>
+<text text-anchor="middle" x="166.5" y="-3.8" font-family="Times,serif" font-size="14.00">3</text>
+</g>
+<!-- 22&#45;&gt;23 -->
+<g id="edge23" class="edge">
+<title>22&#45;&gt;23</title>
+<path fill="none" stroke="black" d="M166.5,-50.69C166.5,-44.18 166.5,-34.1 166.5,-25.43"/>
+<polygon fill="black" stroke="black" points="170,-25.26 166.5,-15.26 163,-25.26 170,-25.26"/>
+</g>
+</g>
+</svg>
+
+</div>
+
 </div>
 
 <div class="input_code">
@@ -17486,12 +18064,378 @@ unify_key: &#39;2&#39; with &#39;2&#39;
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s2">&quot;1 * (2 + 3.35)&quot;</span>
 <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">peg</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">):</span>
     <span class="k">assert</span> <span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="o">==</span> <span class="n">mystring</span>
-    <span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
 </pre></div>
 
 </div>
 </div></div>
 </div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.1 (20210923.0004)
+ -->
+<!-- Pages: 1 -->
+<svg width="307pt" height="635pt"
+ viewBox="0.00 0.00 307.00 635.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 631)">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-631 303,-631 303,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="77.5" y="-615.8" font-family="Times,serif" font-size="14.00">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="77.5" y="-564.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="black" d="M77.5,-611.69C77.5,-605.18 77.5,-595.1 77.5,-586.43"/>
+<polygon fill="black" stroke="black" points="81,-586.26 77.5,-576.26 74,-586.26 81,-586.26"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="77.5" y="-513.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="black" d="M77.5,-560.69C77.5,-554.18 77.5,-544.1 77.5,-535.43"/>
+<polygon fill="black" stroke="black" points="81,-535.26 77.5,-525.26 74,-535.26 81,-535.26"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="27.5" y="-462.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="black" d="M70.55,-509.69C63.08,-502.37 51.03,-490.56 41.57,-481.29"/>
+<polygon fill="black" stroke="black" points="43.99,-478.75 34.39,-474.26 39.09,-483.75 43.99,-478.75"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="77.5" y="-462.8" font-family="Times,serif" font-size="14.00"> * </text>
+</g>
+<!-- 2&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>2&#45;&gt;7</title>
+<path fill="none" stroke="black" d="M77.5,-509.69C77.5,-503.18 77.5,-493.1 77.5,-484.43"/>
+<polygon fill="black" stroke="black" points="81,-484.26 77.5,-474.26 74,-484.26 81,-484.26"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="123.5" y="-462.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 2&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>2&#45;&gt;8</title>
+<path fill="none" stroke="black" d="M83.9,-509.69C90.69,-502.45 101.63,-490.79 110.29,-481.57"/>
+<polygon fill="black" stroke="black" points="112.87,-483.94 117.16,-474.26 107.76,-479.15 112.87,-483.94"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="27.5" y="-411.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="black" d="M27.5,-458.69C27.5,-452.18 27.5,-442.1 27.5,-433.43"/>
+<polygon fill="black" stroke="black" points="31,-433.26 27.5,-423.26 24,-433.26 31,-433.26"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="27.5" y="-360.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="black" d="M27.5,-407.69C27.5,-401.18 27.5,-391.1 27.5,-382.43"/>
+<polygon fill="black" stroke="black" points="31,-382.26 27.5,-372.26 24,-382.26 31,-382.26"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="27.5" y="-309.8" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="black" d="M27.5,-356.69C27.5,-350.18 27.5,-340.1 27.5,-331.43"/>
+<polygon fill="black" stroke="black" points="31,-331.26 27.5,-321.26 24,-331.26 31,-331.26"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="123.5" y="-411.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="black" d="M123.5,-458.69C123.5,-452.18 123.5,-442.1 123.5,-433.43"/>
+<polygon fill="black" stroke="black" points="127,-433.26 123.5,-423.26 120,-433.26 127,-433.26"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="82.5" y="-360.8" font-family="Times,serif" font-size="14.00">(</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="black" d="M117.8,-407.69C111.07,-399.64 99.77,-386.14 91.77,-376.58"/>
+<polygon fill="black" stroke="black" points="94.27,-374.11 85.17,-368.69 88.9,-378.6 94.27,-374.11"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="123.5" y="-360.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 9&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>9&#45;&gt;11</title>
+<path fill="none" stroke="black" d="M123.5,-407.69C123.5,-401.18 123.5,-391.1 123.5,-382.43"/>
+<polygon fill="black" stroke="black" points="127,-382.26 123.5,-372.26 120,-382.26 127,-382.26"/>
+</g>
+<!-- 31 -->
+<g id="node32" class="node">
+<title>31</title>
+<text text-anchor="middle" x="164.5" y="-360.8" font-family="Times,serif" font-size="14.00">)</text>
+</g>
+<!-- 9&#45;&gt;31 -->
+<g id="edge31" class="edge">
+<title>9&#45;&gt;31</title>
+<path fill="none" stroke="black" d="M129.2,-407.69C135.93,-399.64 147.23,-386.14 155.23,-376.58"/>
+<polygon fill="black" stroke="black" points="158.1,-378.6 161.83,-368.69 152.73,-374.11 158.1,-378.6"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="75.5" y="-309.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 11&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>11&#45;&gt;12</title>
+<path fill="none" stroke="black" d="M116.83,-356.69C109.73,-349.45 98.32,-337.79 89.28,-328.57"/>
+<polygon fill="black" stroke="black" points="91.62,-325.95 82.12,-321.26 86.62,-330.85 91.62,-325.95"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+<text text-anchor="middle" x="123.5" y="-309.8" font-family="Times,serif" font-size="14.00"> + </text>
+</g>
+<!-- 11&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>11&#45;&gt;17</title>
+<path fill="none" stroke="black" d="M123.5,-356.69C123.5,-350.18 123.5,-340.1 123.5,-331.43"/>
+<polygon fill="black" stroke="black" points="127,-331.26 123.5,-321.26 120,-331.26 127,-331.26"/>
+</g>
+<!-- 18 -->
+<g id="node19" class="node">
+<title>18</title>
+<text text-anchor="middle" x="170.5" y="-309.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 11&#45;&gt;18 -->
+<g id="edge18" class="edge">
+<title>11&#45;&gt;18</title>
+<path fill="none" stroke="black" d="M130.04,-356.69C136.98,-349.45 148.16,-337.79 157.01,-328.57"/>
+<polygon fill="black" stroke="black" points="159.62,-330.9 164.02,-321.26 154.57,-326.05 159.62,-330.9"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="75.5" y="-258.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="black" d="M75.5,-305.69C75.5,-299.18 75.5,-289.1 75.5,-280.43"/>
+<polygon fill="black" stroke="black" points="79,-280.26 75.5,-270.26 72,-280.26 79,-280.26"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="70.5" y="-207.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 13&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>13&#45;&gt;14</title>
+<path fill="none" stroke="black" d="M74.8,-254.69C74.14,-248.18 73.11,-238.1 72.23,-229.43"/>
+<polygon fill="black" stroke="black" points="75.69,-228.85 71.19,-219.26 68.72,-229.56 75.69,-228.85"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="59.5" y="-156.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="black" d="M68.97,-203.69C67.49,-197.1 65.2,-186.87 63.23,-178.14"/>
+<polygon fill="black" stroke="black" points="66.62,-177.25 61.02,-168.26 59.79,-178.78 66.62,-177.25"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="59.5" y="-105.8" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+<!-- 15&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>15&#45;&gt;16</title>
+<path fill="none" stroke="black" d="M59.5,-152.69C59.5,-146.18 59.5,-136.1 59.5,-127.43"/>
+<polygon fill="black" stroke="black" points="63,-127.26 59.5,-117.26 56,-127.26 63,-127.26"/>
+</g>
+<!-- 19 -->
+<g id="node20" class="node">
+<title>19</title>
+<text text-anchor="middle" x="170.5" y="-258.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 18&#45;&gt;19 -->
+<g id="edge19" class="edge">
+<title>18&#45;&gt;19</title>
+<path fill="none" stroke="black" d="M170.5,-305.69C170.5,-299.18 170.5,-289.1 170.5,-280.43"/>
+<polygon fill="black" stroke="black" points="174,-280.26 170.5,-270.26 167,-280.26 174,-280.26"/>
+</g>
+<!-- 20 -->
+<g id="node21" class="node">
+<title>20</title>
+<text text-anchor="middle" x="173.5" y="-207.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 19&#45;&gt;20 -->
+<g id="edge20" class="edge">
+<title>19&#45;&gt;20</title>
+<path fill="none" stroke="black" d="M170.92,-254.69C171.32,-248.18 171.93,-238.1 172.46,-229.43"/>
+<polygon fill="black" stroke="black" points="175.97,-229.45 173.09,-219.26 168.98,-229.02 175.97,-229.45"/>
+</g>
+<!-- 21 -->
+<g id="node22" class="node">
+<title>21</title>
+<text text-anchor="middle" x="126.5" y="-156.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 20&#45;&gt;21 -->
+<g id="edge21" class="edge">
+<title>20&#45;&gt;21</title>
+<path fill="none" stroke="black" d="M166.96,-203.69C160.02,-196.45 148.84,-184.79 139.99,-175.57"/>
+<polygon fill="black" stroke="black" points="142.43,-173.05 132.98,-168.26 137.38,-177.9 142.43,-173.05"/>
+</g>
+<!-- 24 -->
+<g id="node25" class="node">
+<title>24</title>
+<text text-anchor="middle" x="174.5" y="-156.8" font-family="Times,serif" font-size="14.00">.</text>
+</g>
+<!-- 20&#45;&gt;24 -->
+<g id="edge24" class="edge">
+<title>20&#45;&gt;24</title>
+<path fill="none" stroke="black" d="M173.64,-203.69C173.77,-197.18 173.98,-187.1 174.15,-178.43"/>
+<polygon fill="black" stroke="black" points="177.66,-178.32 174.36,-168.26 170.66,-178.18 177.66,-178.32"/>
+</g>
+<!-- 25 -->
+<g id="node26" class="node">
+<title>25</title>
+<text text-anchor="middle" x="222.5" y="-156.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 20&#45;&gt;25 -->
+<g id="edge25" class="edge">
+<title>20&#45;&gt;25</title>
+<path fill="none" stroke="black" d="M180.31,-203.69C187.55,-196.45 199.21,-184.79 208.43,-175.57"/>
+<polygon fill="black" stroke="black" points="211.15,-177.8 215.74,-168.26 206.2,-172.85 211.15,-177.8"/>
+</g>
+<!-- 22 -->
+<g id="node23" class="node">
+<title>22</title>
+<text text-anchor="middle" x="126.5" y="-105.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 21&#45;&gt;22 -->
+<g id="edge22" class="edge">
+<title>21&#45;&gt;22</title>
+<path fill="none" stroke="black" d="M126.5,-152.69C126.5,-146.18 126.5,-136.1 126.5,-127.43"/>
+<polygon fill="black" stroke="black" points="130,-127.26 126.5,-117.26 123,-127.26 130,-127.26"/>
+</g>
+<!-- 23 -->
+<g id="node24" class="node">
+<title>23</title>
+<text text-anchor="middle" x="126.5" y="-54.8" font-family="Times,serif" font-size="14.00">3</text>
+</g>
+<!-- 22&#45;&gt;23 -->
+<g id="edge23" class="edge">
+<title>22&#45;&gt;23</title>
+<path fill="none" stroke="black" d="M126.5,-101.69C126.5,-95.18 126.5,-85.1 126.5,-76.43"/>
+<polygon fill="black" stroke="black" points="130,-76.26 126.5,-66.26 123,-76.26 130,-76.26"/>
+</g>
+<!-- 26 -->
+<g id="node27" class="node">
+<title>26</title>
+<text text-anchor="middle" x="204.5" y="-105.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 25&#45;&gt;26 -->
+<g id="edge26" class="edge">
+<title>25&#45;&gt;26</title>
+<path fill="none" stroke="black" d="M220,-152.69C217.55,-146.03 213.74,-135.65 210.51,-126.85"/>
+<polygon fill="black" stroke="black" points="213.72,-125.44 206.98,-117.26 207.14,-127.85 213.72,-125.44"/>
+</g>
+<!-- 28 -->
+<g id="node29" class="node">
+<title>28</title>
+<text text-anchor="middle" x="271.5" y="-105.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 25&#45;&gt;28 -->
+<g id="edge28" class="edge">
+<title>25&#45;&gt;28</title>
+<path fill="none" stroke="black" d="M229.31,-152.69C236.55,-145.45 248.21,-133.79 257.43,-124.57"/>
+<polygon fill="black" stroke="black" points="260.15,-126.8 264.74,-117.26 255.2,-121.85 260.15,-126.8"/>
+</g>
+<!-- 27 -->
+<g id="node28" class="node">
+<title>27</title>
+<text text-anchor="middle" x="204.5" y="-54.8" font-family="Times,serif" font-size="14.00">3</text>
+</g>
+<!-- 26&#45;&gt;27 -->
+<g id="edge27" class="edge">
+<title>26&#45;&gt;27</title>
+<path fill="none" stroke="black" d="M204.5,-101.69C204.5,-95.18 204.5,-85.1 204.5,-76.43"/>
+<polygon fill="black" stroke="black" points="208,-76.26 204.5,-66.26 201,-76.26 208,-76.26"/>
+</g>
+<!-- 29 -->
+<g id="node30" class="node">
+<title>29</title>
+<text text-anchor="middle" x="271.5" y="-54.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 28&#45;&gt;29 -->
+<g id="edge29" class="edge">
+<title>28&#45;&gt;29</title>
+<path fill="none" stroke="black" d="M271.5,-101.69C271.5,-95.18 271.5,-85.1 271.5,-76.43"/>
+<polygon fill="black" stroke="black" points="275,-76.26 271.5,-66.26 268,-76.26 275,-76.26"/>
+</g>
+<!-- 30 -->
+<g id="node31" class="node">
+<title>30</title>
+<text text-anchor="middle" x="271.5" y="-3.8" font-family="Times,serif" font-size="14.00">5</text>
+</g>
+<!-- 29&#45;&gt;30 -->
+<g id="edge30" class="edge">
+<title>29&#45;&gt;30</title>
+<path fill="none" stroke="black" d="M271.5,-50.69C271.5,-44.18 271.5,-34.1 271.5,-25.43"/>
+<polygon fill="black" stroke="black" points="275,-25.26 271.5,-15.26 268,-25.26 275,-25.26"/>
+</g>
+</g>
+</svg>
+
+</div>
+
 </div>
 
 <div class="input_markdown">
@@ -17620,9 +18564,9 @@ aaaaaaaa
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_38668/3226632005.py&#34;, line 4, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_9947/3226632005.py&#34;, line 4, in &lt;module&gt;
     for tree in peg.parse(s):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_38668/830947810.py&#34;, line 22, in parse
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_9947/2022555909.py&#34;, line 40, in parse
     raise SyntaxError(&#34;at &#34; + repr(text[cursor:]))
 SyntaxError: at &#39;aa&#39; (expected)
 </pre>
@@ -17685,6 +18629,18 @@ SyntaxError: at &#39;aa&#39; (expected)
 </div>
 </div>
 </div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us implement a class <code>EarleyParser</code>, again derived from <code>Parser</code> which implements an Earley parser.</p>
+</div>
+</div>
+</div>
+</div>
+
+<details id="Excursion:-Implementing-EarleyParser">
+<summary>Implementing <code>EarleyParser</code></summary>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
@@ -18096,7 +19052,7 @@ SyntaxError: at &#39;aa&#39; (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Columns">Columns<a class="anchor-link" href="#Columns">&#182;</a></h3><p>We define the <code>Column</code> first. The <code>Column</code> is initialized by its own <code>index</code> in the input string, and the <code>letter</code> at that index. Internally, we also keep track of the states that are added to the column as the parsing progresses.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Columns">Columns<a class="anchor-link" href="#Columns">&#182;</a></h4><p>We define the <code>Column</code> first. The <code>Column</code> is initialized by its own <code>index</code> in the input string, and the <code>letter</code> at that index. Internally, we also keep track of the states that are added to the column as the parsing progresses.</p>
 </div>
 </div>
 </div>
@@ -18156,7 +19112,7 @@ SyntaxError: at &#39;aa&#39; (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Items">Items<a class="anchor-link" href="#Items">&#182;</a></h3><p>An item represents a <em>parse in progress for a specific rule.</em> Hence the item contains the name of the nonterminal, and the corresponding alternative expression (<code>expr</code>) which together form the rule, and the current position of parsing in this expression -- <code>dot</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Items">Items<a class="anchor-link" href="#Items">&#182;</a></h4><p>An item represents a <em>parse in progress for a specific rule.</em> Hence the item contains the name of the nonterminal, and the corresponding alternative expression (<code>expr</code>) which together form the rule, and the current position of parsing in this expression -- <code>dot</code>.</p>
 <p><strong>Note.</strong> If you are familiar with <a href="https://en.wikipedia.org/wiki/LR_parser">LR parsing</a>, you will notice that an item is simply an <code>LR0</code> item.</p>
 </div>
 </div>
@@ -18325,7 +19281,7 @@ SyntaxError: at &#39;aa&#39; (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="States">States<a class="anchor-link" href="#States">&#182;</a></h3><p>For <code>Earley</code> parsing, the state of the parsing is simply one <code>Item</code> along with some meta information such as the starting <code>s_col</code>  and ending column <code>e_col</code> for each state. Hence we inherit from <code>Item</code> to create a <code>State</code>.
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="States">States<a class="anchor-link" href="#States">&#182;</a></h4><p>For <code>Earley</code> parsing, the state of the parsing is simply one <code>Item</code> along with some meta information such as the starting <code>s_col</code>  and ending column <code>e_col</code> for each state. Hence we inherit from <code>Item</code> to create a <code>State</code>.
 Since we are interested in comparing states, we define <code>hash()</code> and <code>eq()</code> with the corresponding methods.</p>
 </div>
 </div>
@@ -18450,7 +19406,7 @@ Since we are interested in comparing states, we define <code>hash()</code> and <
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="The-Parsing-Algorithm">The Parsing Algorithm<a class="anchor-link" href="#The-Parsing-Algorithm">&#182;</a></h3></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="The-Parsing-Algorithm">The Parsing Algorithm<a class="anchor-link" href="#The-Parsing-Algorithm">&#182;</a></h4></div>
 </div>
 </div>
 </div>
@@ -18483,9 +19439,11 @@ Since we are interested in comparing states, we define <code>hash()</code> and <
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EarleyParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Earley Parser. This parser can parse any context-free grammar.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grammar</span><span class="p">:</span> <span class="n">Grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">grammar</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">chart</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># for type checking</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chart</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># for type checking</span>
 
     <span class="k">def</span> <span class="nf">chart_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">words</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
         <span class="n">alt</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">cgrammar</span><span class="p">[</span><span class="n">start</span><span class="p">])</span>
@@ -18511,7 +19469,7 @@ Since we are interested in comparing states, we define <code>hash()</code> and <
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Predicting-States">Predicting States<a class="anchor-link" href="#Predicting-States">&#182;</a></h3><p>We have already seeded <code>chart[0]</code> with a state <code>[&lt;A&gt;,&lt;B&gt;]</code> with <code>dot</code> at <code>0</code>. Next, given that <code>&lt;A&gt;</code> is a nonterminal, we <code>predict</code> the possible parse continuations of this state. That is, it could be either <code>a &lt;B&gt; c</code> or <code>A &lt;A&gt;</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Predicting-States">Predicting States<a class="anchor-link" href="#Predicting-States">&#182;</a></h4><p>We have already seeded <code>chart[0]</code> with a state <code>[&lt;A&gt;,&lt;B&gt;]</code> with <code>dot</code> at <code>0</code>. Next, given that <code>&lt;A&gt;</code> is a nonterminal, we <code>predict</code> the possible parse continuations of this state. That is, it could be either <code>a &lt;B&gt; c</code> or <code>A &lt;A&gt;</code>.</p>
 <p>The general idea of <code>predict()</code> is as follows: Say you have a state with name <code>&lt;A&gt;</code> from the above grammar, and expression containing <code>[a,&lt;B&gt;,c]</code>. Imagine that you have seen <code>a</code> already, which means that the <code>dot</code> will be on <code>&lt;B&gt;</code>. Below, is a representation of our parse status. The left hand side of ● represents the portion already parsed (<code>a</code>), and the right hand side represents the portion yet to be parsed (<code>&lt;B&gt; c</code>).</p>
 
 <pre><code>&lt;A&gt;: a  ●  &lt;B&gt; c</code></pre>
@@ -18649,7 +19607,7 @@ Since we are interested in comparing states, we define <code>hash()</code> and <
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Scanning-Tokens">Scanning Tokens<a class="anchor-link" href="#Scanning-Tokens">&#182;</a></h3><p>What if rather than a nonterminal, the state contained a terminal symbol such as a letter? In that case, we are ready to make some progress. For example, consider the second state:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Scanning-Tokens">Scanning Tokens<a class="anchor-link" href="#Scanning-Tokens">&#182;</a></h4><p>What if rather than a nonterminal, the state contained a terminal symbol such as a letter? In that case, we are ready to make some progress. For example, consider the second state:</p>
 
 <pre><code>&lt;B&gt;: ● b c</code></pre>
 <p>We <code>scan</code> the next column's letter. Say the next token is <code>b</code>.
@@ -18756,7 +19714,7 @@ If the letter matches what we have, then create a new state by advancing the cur
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Completing-Processing">Completing Processing<a class="anchor-link" href="#Completing-Processing">&#182;</a></h3><p>When we advance, what if we actually <code>complete()</code> the processing of the current rule? If so, we want to update not just this state, but also all the <em>parent</em> states from which this state was derived.
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Completing-Processing">Completing Processing<a class="anchor-link" href="#Completing-Processing">&#182;</a></h4><p>When we advance, what if we actually <code>complete()</code> the processing of the current rule? If so, we want to update not just this state, but also all the <em>parent</em> states from which this state was derived.
 For example, say we have states as below.</p>
 
 <pre><code>&lt;A&gt;: a ● &lt;B&gt; c
@@ -18981,7 +19939,7 @@ For example, say we have states as below.</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Filling-the-Chart">Filling the Chart<a class="anchor-link" href="#Filling-the-Chart">&#182;</a></h3><p>The main driving loop in <code>fill_chart()</code> essentially calls these operations in order. We loop over each column in order.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Filling-the-Chart">Filling the Chart<a class="anchor-link" href="#Filling-the-Chart">&#182;</a></h4><p>The main driving loop in <code>fill_chart()</code> essentially calls these operations in order. We loop over each column in order.</p>
 <ul>
 <li>For each column, fetch one state in the column at a time, and check if the state is <code>finished</code>. <ul>
 <li>If it is, then we <code>complete()</code> all the parent states depending on this state. </li>
@@ -19092,9 +20050,9 @@ d chart[4]
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">last_col</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">last_col</span><span class="o">.</span><span class="n">states</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">last_col</span><span class="o">.</span><span class="n">states</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">state</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -19123,7 +20081,7 @@ d chart[4]
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="The-Parse-Method">The Parse Method<a class="anchor-link" href="#The-Parse-Method">&#182;</a></h3><p>For determining how far we have managed to parse, we simply look for the last index from <code>chart_parse()</code> where the <code>start_symbol</code> was found.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="The-Parse-Method">The Parse Method<a class="anchor-link" href="#The-Parse-Method">&#182;</a></h4><p>For determining how far we have managed to parse, we simply look for the last index from <code>chart_parse()</code> where the <code>start_symbol</code> was found.</p>
 </div>
 </div>
 </div>
@@ -19231,7 +20189,7 @@ d chart[4]
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Parsing-Paths">Parsing Paths<a class="anchor-link" href="#Parsing-Paths">&#182;</a></h3><p>The <code>parse_paths()</code> method tries to unify the given expression in <code>named_expr</code> with the parsed string. For that, it extracts the last symbol in <code>named_expr</code> and checks if it is a terminal symbol. If it is, then it checks the chart at <code>til</code> to see if the letter corresponding to the position matches the terminal symbol. If it does, extend our start index by the length of the symbol.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Parsing-Paths">Parsing Paths<a class="anchor-link" href="#Parsing-Paths">&#182;</a></h4><p>The <code>parse_paths()</code> method tries to unify the given expression in <code>named_expr</code> with the parsed string. For that, it extracts the last symbol in <code>named_expr</code> and checks if it is a terminal symbol. If it is, then it checks the chart at <code>til</code> to see if the letter corresponding to the position matches the terminal symbol. If it does, extend our start index by the length of the symbol.</p>
 <p>If the symbol was a nonterminal symbol, then we retrieve the parsed states at the current end column index (<code>til</code>) that correspond to the nonterminal symbol, and collect the start index. These are the end column indexes for the remaining expression.</p>
 <p>Given our list of start indexes, we obtain the parse paths from the remaining expression. If we can obtain any, then we return the parse paths. If not, we return an empty list.</p>
 </div>
@@ -19321,7 +20279,7 @@ d chart[4]
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Parsing-Forests">Parsing Forests<a class="anchor-link" href="#Parsing-Forests">&#182;</a></h3><p>The <code>parse_forest()</code> method takes the state which represents the completed parse, and determines the possible ways that its expressions corresponded to the parsed expression. For example, say we are parsing <code>1+2+3</code>, and the state has <code>[&lt;expr&gt;,+,&lt;expr&gt;]</code> in <code>expr</code>. It could have been parsed as either <code>[{&lt;expr&gt;:1+2},+,{&lt;expr&gt;:3}]</code> or <code>[{&lt;expr&gt;:1},+,{&lt;expr&gt;:2+3}]</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Parsing-Forests">Parsing Forests<a class="anchor-link" href="#Parsing-Forests">&#182;</a></h4><p>The <code>parse_forest()</code> method takes the state which represents the completed parse, and determines the possible ways that its expressions corresponded to the parsed expression. For example, say we are parsing <code>1+2+3</code>, and the state has <code>[&lt;expr&gt;,+,&lt;expr&gt;]</code> in <code>expr</code>. It could have been parsed as either <code>[{&lt;expr&gt;:1+2},+,{&lt;expr&gt;:3}]</code> or <code>[{&lt;expr&gt;:1},+,{&lt;expr&gt;:2+3}]</code>.</p>
 </div>
 </div>
 </div>
@@ -19369,20 +20327,20 @@ d chart[4]
 
 <div class="output_text output_subarea output_execute_result">
 <pre>(&#39;&lt;start&gt;&#39;,
- [[(&lt;__main__.State at 0x10f9b30a0&gt;,
+ [[(&lt;__main__.State at 0x10d2beb80&gt;,
     &#39;n&#39;,
-    [&lt;__main__.Column at 0x10f985df0&gt;,
-     &lt;__main__.Column at 0x10f985d00&gt;,
-     &lt;__main__.Column at 0x10f985550&gt;,
-     &lt;__main__.Column at 0x10f985400&gt;,
-     &lt;__main__.Column at 0x10f985be0&gt;]),
-   (&lt;__main__.State at 0x10f9922e0&gt;,
+    [&lt;__main__.Column at 0x10d2bed60&gt;,
+     &lt;__main__.Column at 0x10d2beb50&gt;,
+     &lt;__main__.Column at 0x10d2be0d0&gt;,
+     &lt;__main__.Column at 0x10d2be460&gt;,
+     &lt;__main__.Column at 0x10d2bee20&gt;]),
+   (&lt;__main__.State at 0x10d3e1940&gt;,
     &#39;n&#39;,
-    [&lt;__main__.Column at 0x10f985df0&gt;,
-     &lt;__main__.Column at 0x10f985d00&gt;,
-     &lt;__main__.Column at 0x10f985550&gt;,
-     &lt;__main__.Column at 0x10f985400&gt;,
-     &lt;__main__.Column at 0x10f985be0&gt;])]])
+    [&lt;__main__.Column at 0x10d2bed60&gt;,
+     &lt;__main__.Column at 0x10d2beb50&gt;,
+     &lt;__main__.Column at 0x10d2be0d0&gt;,
+     &lt;__main__.Column at 0x10d2be460&gt;,
+     &lt;__main__.Column at 0x10d2bee20&gt;])]])
 </pre>
 </div>
 
@@ -19391,7 +20349,7 @@ d chart[4]
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Extracting-Trees">Extracting Trees<a class="anchor-link" href="#Extracting-Trees">&#182;</a></h3></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Extracting-Trees">Extracting Trees<a class="anchor-link" href="#Extracting-Trees">&#182;</a></h4></div>
 </div>
 </div>
 </div>
@@ -19929,7 +20887,7 @@ d chart[4]
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Ambiguous-Parsing">Ambiguous Parsing<a class="anchor-link" href="#Ambiguous-Parsing">&#182;</a></h3></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Ambiguous-Parsing">Ambiguous Parsing<a class="anchor-link" href="#Ambiguous-Parsing">&#182;</a></h4></div>
 </div>
 </div>
 </div>
@@ -19969,11 +20927,11 @@ d chart[4]
         <span class="n">name</span><span class="p">,</span> <span class="n">paths</span> <span class="o">=</span> <span class="n">forest_node</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
             <span class="k">yield</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
             <span class="n">ptrees</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_trees</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forest</span><span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">path</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">I</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">ptrees</span><span class="p">):</span>
-                <span class="k">yield</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> 
+                <span class="k">yield</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -20052,7 +21010,7 @@ d chart[4]
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="The-Aycock-Epsilon-Fix">The Aycock Epsilon Fix<a class="anchor-link" href="#The-Aycock-Epsilon-Fix">&#182;</a></h3><p>While parsing, one often requires to know whether a given nonterminal can derive an empty string. For example, in the following grammar A can derive an empty string, while B can't. The nonterminals that can derive an empty string are called <em>nullable</em> nonterminals. For example, in the below grammar <code>E_GRAMMAR_1</code>,  <code>&lt;A&gt;</code> is <em>nullable</em>, and since <code>&lt;A&gt;</code> is one of the alternatives of <code>&lt;start&gt;</code>, <code>&lt;start&gt;</code> is also <em>nullable</em>. But <code>&lt;B&gt;</code> is not <em>nullable</em>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="The-Aycock-Epsilon-Fix">The Aycock Epsilon Fix<a class="anchor-link" href="#The-Aycock-Epsilon-Fix">&#182;</a></h4><p>While parsing, one often requires to know whether a given nonterminal can derive an empty string. For example, in the following grammar A can derive an empty string, while B can't. The nonterminals that can derive an empty string are called <em>nullable</em> nonterminals. For example, in the below grammar <code>E_GRAMMAR_1</code>,  <code>&lt;A&gt;</code> is <em>nullable</em>, and since <code>&lt;A&gt;</code> is one of the alternatives of <code>&lt;start&gt;</code>, <code>&lt;start&gt;</code> is also <em>nullable</em>. But <code>&lt;B&gt;</code> is not <em>nullable</em>.</p>
 </div>
 </div>
 </div>
@@ -20358,7 +21316,7 @@ d chart[4]
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Fixpoint">Fixpoint<a class="anchor-link" href="#Fixpoint">&#182;</a></h4><p>A <code>fixpoint</code> of a function is an element in the function's domain such that it is mapped to itself. For example, 1 is a <code>fixpoint</code> of square root because <code>squareroot(1) == 1</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h5 id="Fixpoint">Fixpoint<a class="anchor-link" href="#Fixpoint">&#182;</a></h5><p>A <code>fixpoint</code> of a function is an element in the function's domain such that it is mapped to itself. For example, 1 is a <code>fixpoint</code> of square root because <code>squareroot(1) == 1</code>.</p>
 <p>(We use <code>str</code> rather than <code>hash</code> to check for equality in <code>fixpoint</code> because the data structure <code>set</code>, which we would like to use as an argument has a good string representation but is not hashable).</p>
 </div>
 </div>
@@ -20442,7 +21400,7 @@ d chart[4]
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Nullable">Nullable<a class="anchor-link" href="#Nullable">&#182;</a></h4><p>Similarly, we can define <code>nullable</code> using <code>fixpoint</code>. We essentially provide the definition of a single intermediate step. That is, assuming that <code>nullables</code> contain the current <code>nullable</code> nonterminals, we iterate over the grammar looking for productions which are <code>nullable</code> -- that is, productions where the entire sequence can yield an empty string on some expansion.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h5 id="Nullable">Nullable<a class="anchor-link" href="#Nullable">&#182;</a></h5><p>Similarly, we can define <code>nullable</code> using <code>fixpoint</code>. We essentially provide the definition of a single intermediate step. That is, assuming that <code>nullables</code> contain the current <code>nullable</code> nonterminals, we iterate over the grammar looking for productions which are <code>nullable</code> -- that is, productions where the entire sequence can yield an empty string on some expansion.</p>
 </div>
 </div>
 </div>
@@ -20560,8 +21518,8 @@ d chart[4]
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;S&gt;&#39;}
-E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
+<pre>E_GRAMMAR {&#39;&#39;, &#39;&lt;E&gt;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;S&gt;&#39;, &#39;&lt;A&gt;&#39;}
+E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;start&gt;&#39;, &#39;&lt;A&gt;&#39;}
 </pre>
 </div>
 
@@ -20639,8 +21597,8 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
 <span class="n">INDIRECTLY_SELF_REFERRING</span><span class="p">:</span> <span class="n">Grammar</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;query&gt;&#39;</span><span class="p">],</span>
     <span class="s1">&#39;&lt;query&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;select &lt;expr&gt; from a&#39;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;&lt;aexpr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;aexpr&gt;&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;aexpr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;aexpr&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">],</span>
 <span class="p">}</span>
 </pre></div>
 
@@ -20663,7 +21621,7 @@ E_GRAMMAR_1 {&#39;&#39;, &#39;&lt;A&gt;&#39;, &#39;&lt;start&gt;&#39;}
         <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">forest</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">RecursionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Recursion error&quot;</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Recursion error&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -20695,7 +21653,7 @@ Recursion error maximum recursion depth exceeded
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tree-Extractor">Tree Extractor<a class="anchor-link" href="#Tree-Extractor">&#182;</a></h3></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Tree-Extractor">Tree Extractor<a class="anchor-link" href="#Tree-Extractor">&#182;</a></h4></div>
 </div>
 </div>
 </div>
@@ -20895,6 +21853,7 @@ select a from a
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">(</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_i</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span><span class="p">),</span>
                                  <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">next</span><span class="p">))</span>
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">repr</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chosen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total</span><span class="p">))</span>
 
@@ -20935,7 +21894,7 @@ select a from a
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EnhancedExtractor</span><span class="p">(</span><span class="n">SimpleExtractor</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span> <span class="o">=</span> <span class="n">ChoiceNode</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">ChoiceNode</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -21161,7 +22120,717 @@ That procedure increments the last choice, which bubbles up to the next choice t
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="More-Earley-Parsing">More Earley Parsing<a class="anchor-link" href="#More-Earley-Parsing">&#182;</a></h3><p>A number of other optimizations exist for Earley parsers. A fast industrial strength Earley parser implementation is the <a href="https://jeffreykegler.github.io/Marpa-web-site/">Marpa parser</a>. Further, Earley parsing need not be restricted to character data. One may also parse streams (audio and video streams) [Qi <em>et al</em>, 2018] using a generalized Earley parser.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="More-Earley-Parsing">More Earley Parsing<a class="anchor-link" href="#More-Earley-Parsing">&#182;</a></h4><p>A number of other optimizations exist for Earley parsers. A fast industrial strength Earley parser implementation is the <a href="https://jeffreykegler.github.io/Marpa-web-site/">Marpa parser</a>. Further, Earley parsing need not be restricted to character data. One may also parse streams (audio and video streams) [Qi <em>et al</em>, 2018] using a generalized Earley parser.</p>
+</div>
+</div>
+</div>
+</div>
+
+</details>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here are a few examples of the Earley parser in action.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s2">&quot;1 + (2 * 3)&quot;</span>
+<span class="n">earley</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">earley</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="o">==</span> <span class="n">mystring</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.1 (20210923.0004)
+ -->
+<!-- Pages: 1 -->
+<svg width="202pt" height="584pt"
+ viewBox="0.00 0.00 202.00 584.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 580)">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-580 198,-580 198,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="74.5" y="-564.8" font-family="Times,serif" font-size="14.00">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="74.5" y="-513.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="black" d="M74.5,-560.69C74.5,-554.18 74.5,-544.1 74.5,-535.43"/>
+<polygon fill="black" stroke="black" points="78,-535.26 74.5,-525.26 71,-535.26 78,-535.26"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="27.5" y="-462.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="black" d="M67.96,-509.69C61.02,-502.45 49.84,-490.79 40.99,-481.57"/>
+<polygon fill="black" stroke="black" points="43.43,-479.05 33.98,-474.26 38.38,-483.9 43.43,-479.05"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="74.5" y="-462.8" font-family="Times,serif" font-size="14.00"> + </text>
+</g>
+<!-- 1&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>1&#45;&gt;7</title>
+<path fill="none" stroke="black" d="M74.5,-509.69C74.5,-503.18 74.5,-493.1 74.5,-484.43"/>
+<polygon fill="black" stroke="black" points="78,-484.26 74.5,-474.26 71,-484.26 78,-484.26"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="120.5" y="-462.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 1&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>1&#45;&gt;8</title>
+<path fill="none" stroke="black" d="M80.9,-509.69C87.69,-502.45 98.63,-490.79 107.29,-481.57"/>
+<polygon fill="black" stroke="black" points="109.87,-483.94 114.16,-474.26 104.76,-479.15 109.87,-483.94"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="27.5" y="-411.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="black" d="M27.5,-458.69C27.5,-452.18 27.5,-442.1 27.5,-433.43"/>
+<polygon fill="black" stroke="black" points="31,-433.26 27.5,-423.26 24,-433.26 31,-433.26"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="27.5" y="-360.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="black" d="M27.5,-407.69C27.5,-401.18 27.5,-391.1 27.5,-382.43"/>
+<polygon fill="black" stroke="black" points="31,-382.26 27.5,-372.26 24,-382.26 31,-382.26"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="27.5" y="-309.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="black" d="M27.5,-356.69C27.5,-350.18 27.5,-340.1 27.5,-331.43"/>
+<polygon fill="black" stroke="black" points="31,-331.26 27.5,-321.26 24,-331.26 31,-331.26"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="27.5" y="-258.8" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="black" d="M27.5,-305.69C27.5,-299.18 27.5,-289.1 27.5,-280.43"/>
+<polygon fill="black" stroke="black" points="31,-280.26 27.5,-270.26 24,-280.26 31,-280.26"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="120.5" y="-411.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="black" d="M120.5,-458.69C120.5,-452.18 120.5,-442.1 120.5,-433.43"/>
+<polygon fill="black" stroke="black" points="124,-433.26 120.5,-423.26 117,-433.26 124,-433.26"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="120.5" y="-360.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="black" d="M120.5,-407.69C120.5,-401.18 120.5,-391.1 120.5,-382.43"/>
+<polygon fill="black" stroke="black" points="124,-382.26 120.5,-372.26 117,-382.26 124,-382.26"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="79.5" y="-309.8" font-family="Times,serif" font-size="14.00">(</text>
+</g>
+<!-- 10&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>10&#45;&gt;11</title>
+<path fill="none" stroke="black" d="M114.8,-356.69C108.07,-348.64 96.77,-335.14 88.77,-325.58"/>
+<polygon fill="black" stroke="black" points="91.27,-323.11 82.17,-317.69 85.9,-327.6 91.27,-323.11"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="120.5" y="-309.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 10&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>10&#45;&gt;12</title>
+<path fill="none" stroke="black" d="M120.5,-356.69C120.5,-350.18 120.5,-340.1 120.5,-331.43"/>
+<polygon fill="black" stroke="black" points="124,-331.26 120.5,-321.26 117,-331.26 124,-331.26"/>
+</g>
+<!-- 24 -->
+<g id="node25" class="node">
+<title>24</title>
+<text text-anchor="middle" x="161.5" y="-309.8" font-family="Times,serif" font-size="14.00">)</text>
+</g>
+<!-- 10&#45;&gt;24 -->
+<g id="edge24" class="edge">
+<title>10&#45;&gt;24</title>
+<path fill="none" stroke="black" d="M126.2,-356.69C132.93,-348.64 144.23,-335.14 152.23,-325.58"/>
+<polygon fill="black" stroke="black" points="155.1,-327.6 158.83,-317.69 149.73,-323.11 155.1,-327.6"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="120.5" y="-258.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="black" d="M120.5,-305.69C120.5,-299.18 120.5,-289.1 120.5,-280.43"/>
+<polygon fill="black" stroke="black" points="124,-280.26 120.5,-270.26 117,-280.26 124,-280.26"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="70.5" y="-207.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 13&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>13&#45;&gt;14</title>
+<path fill="none" stroke="black" d="M113.55,-254.69C106.08,-247.37 94.03,-235.56 84.57,-226.29"/>
+<polygon fill="black" stroke="black" points="86.99,-223.75 77.39,-219.26 82.09,-228.75 86.99,-223.75"/>
+</g>
+<!-- 18 -->
+<g id="node19" class="node">
+<title>18</title>
+<text text-anchor="middle" x="120.5" y="-207.8" font-family="Times,serif" font-size="14.00"> * </text>
+</g>
+<!-- 13&#45;&gt;18 -->
+<g id="edge18" class="edge">
+<title>13&#45;&gt;18</title>
+<path fill="none" stroke="black" d="M120.5,-254.69C120.5,-248.18 120.5,-238.1 120.5,-229.43"/>
+<polygon fill="black" stroke="black" points="124,-229.26 120.5,-219.26 117,-229.26 124,-229.26"/>
+</g>
+<!-- 19 -->
+<g id="node20" class="node">
+<title>19</title>
+<text text-anchor="middle" x="166.5" y="-207.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 13&#45;&gt;19 -->
+<g id="edge19" class="edge">
+<title>13&#45;&gt;19</title>
+<path fill="none" stroke="black" d="M126.9,-254.69C133.69,-247.45 144.63,-235.79 153.29,-226.57"/>
+<polygon fill="black" stroke="black" points="155.87,-228.94 160.16,-219.26 150.76,-224.15 155.87,-228.94"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="70.5" y="-156.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="black" d="M70.5,-203.69C70.5,-197.18 70.5,-187.1 70.5,-178.43"/>
+<polygon fill="black" stroke="black" points="74,-178.26 70.5,-168.26 67,-178.26 74,-178.26"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="70.5" y="-105.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 15&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>15&#45;&gt;16</title>
+<path fill="none" stroke="black" d="M70.5,-152.69C70.5,-146.18 70.5,-136.1 70.5,-127.43"/>
+<polygon fill="black" stroke="black" points="74,-127.26 70.5,-117.26 67,-127.26 74,-127.26"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+<text text-anchor="middle" x="70.5" y="-54.8" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+<!-- 16&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>16&#45;&gt;17</title>
+<path fill="none" stroke="black" d="M70.5,-101.69C70.5,-95.18 70.5,-85.1 70.5,-76.43"/>
+<polygon fill="black" stroke="black" points="74,-76.26 70.5,-66.26 67,-76.26 74,-76.26"/>
+</g>
+<!-- 20 -->
+<g id="node21" class="node">
+<title>20</title>
+<text text-anchor="middle" x="166.5" y="-156.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 19&#45;&gt;20 -->
+<g id="edge20" class="edge">
+<title>19&#45;&gt;20</title>
+<path fill="none" stroke="black" d="M166.5,-203.69C166.5,-197.18 166.5,-187.1 166.5,-178.43"/>
+<polygon fill="black" stroke="black" points="170,-178.26 166.5,-168.26 163,-178.26 170,-178.26"/>
+</g>
+<!-- 21 -->
+<g id="node22" class="node">
+<title>21</title>
+<text text-anchor="middle" x="166.5" y="-105.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 20&#45;&gt;21 -->
+<g id="edge21" class="edge">
+<title>20&#45;&gt;21</title>
+<path fill="none" stroke="black" d="M166.5,-152.69C166.5,-146.18 166.5,-136.1 166.5,-127.43"/>
+<polygon fill="black" stroke="black" points="170,-127.26 166.5,-117.26 163,-127.26 170,-127.26"/>
+</g>
+<!-- 22 -->
+<g id="node23" class="node">
+<title>22</title>
+<text text-anchor="middle" x="166.5" y="-54.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 21&#45;&gt;22 -->
+<g id="edge22" class="edge">
+<title>21&#45;&gt;22</title>
+<path fill="none" stroke="black" d="M166.5,-101.69C166.5,-95.18 166.5,-85.1 166.5,-76.43"/>
+<polygon fill="black" stroke="black" points="170,-76.26 166.5,-66.26 163,-76.26 170,-76.26"/>
+</g>
+<!-- 23 -->
+<g id="node24" class="node">
+<title>23</title>
+<text text-anchor="middle" x="166.5" y="-3.8" font-family="Times,serif" font-size="14.00">3</text>
+</g>
+<!-- 22&#45;&gt;23 -->
+<g id="edge23" class="edge">
+<title>22&#45;&gt;23</title>
+<path fill="none" stroke="black" d="M166.5,-50.69C166.5,-44.18 166.5,-34.1 166.5,-25.43"/>
+<polygon fill="black" stroke="black" points="170,-25.26 166.5,-15.26 163,-25.26 170,-25.26"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">mystring</span> <span class="o">=</span> <span class="s2">&quot;1 * (2 + 3.35)&quot;</span>
+<span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">earley</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">mystring</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">tree_to_string</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="o">==</span> <span class="n">mystring</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">display_tree</span><span class="p">(</span><span class="n">tree</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_image output_svg output_subarea ">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.1 (20210923.0004)
+ -->
+<!-- Pages: 1 -->
+<svg width="307pt" height="635pt"
+ viewBox="0.00 0.00 307.00 635.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 631)">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-631 303,-631 303,4 -4,4"/>
+<!-- 0 -->
+<g id="node1" class="node">
+<title>0</title>
+<text text-anchor="middle" x="77.5" y="-615.8" font-family="Times,serif" font-size="14.00">&lt;start&gt;</text>
+</g>
+<!-- 1 -->
+<g id="node2" class="node">
+<title>1</title>
+<text text-anchor="middle" x="77.5" y="-564.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 0&#45;&gt;1 -->
+<g id="edge1" class="edge">
+<title>0&#45;&gt;1</title>
+<path fill="none" stroke="black" d="M77.5,-611.69C77.5,-605.18 77.5,-595.1 77.5,-586.43"/>
+<polygon fill="black" stroke="black" points="81,-586.26 77.5,-576.26 74,-586.26 81,-586.26"/>
+</g>
+<!-- 2 -->
+<g id="node3" class="node">
+<title>2</title>
+<text text-anchor="middle" x="77.5" y="-513.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge2" class="edge">
+<title>1&#45;&gt;2</title>
+<path fill="none" stroke="black" d="M77.5,-560.69C77.5,-554.18 77.5,-544.1 77.5,-535.43"/>
+<polygon fill="black" stroke="black" points="81,-535.26 77.5,-525.26 74,-535.26 81,-535.26"/>
+</g>
+<!-- 3 -->
+<g id="node4" class="node">
+<title>3</title>
+<text text-anchor="middle" x="27.5" y="-462.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge3" class="edge">
+<title>2&#45;&gt;3</title>
+<path fill="none" stroke="black" d="M70.55,-509.69C63.08,-502.37 51.03,-490.56 41.57,-481.29"/>
+<polygon fill="black" stroke="black" points="43.99,-478.75 34.39,-474.26 39.09,-483.75 43.99,-478.75"/>
+</g>
+<!-- 7 -->
+<g id="node8" class="node">
+<title>7</title>
+<text text-anchor="middle" x="77.5" y="-462.8" font-family="Times,serif" font-size="14.00"> * </text>
+</g>
+<!-- 2&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>2&#45;&gt;7</title>
+<path fill="none" stroke="black" d="M77.5,-509.69C77.5,-503.18 77.5,-493.1 77.5,-484.43"/>
+<polygon fill="black" stroke="black" points="81,-484.26 77.5,-474.26 74,-484.26 81,-484.26"/>
+</g>
+<!-- 8 -->
+<g id="node9" class="node">
+<title>8</title>
+<text text-anchor="middle" x="123.5" y="-462.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 2&#45;&gt;8 -->
+<g id="edge8" class="edge">
+<title>2&#45;&gt;8</title>
+<path fill="none" stroke="black" d="M83.9,-509.69C90.69,-502.45 101.63,-490.79 110.29,-481.57"/>
+<polygon fill="black" stroke="black" points="112.87,-483.94 117.16,-474.26 107.76,-479.15 112.87,-483.94"/>
+</g>
+<!-- 4 -->
+<g id="node5" class="node">
+<title>4</title>
+<text text-anchor="middle" x="27.5" y="-411.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge4" class="edge">
+<title>3&#45;&gt;4</title>
+<path fill="none" stroke="black" d="M27.5,-458.69C27.5,-452.18 27.5,-442.1 27.5,-433.43"/>
+<polygon fill="black" stroke="black" points="31,-433.26 27.5,-423.26 24,-433.26 31,-433.26"/>
+</g>
+<!-- 5 -->
+<g id="node6" class="node">
+<title>5</title>
+<text text-anchor="middle" x="27.5" y="-360.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 4&#45;&gt;5 -->
+<g id="edge5" class="edge">
+<title>4&#45;&gt;5</title>
+<path fill="none" stroke="black" d="M27.5,-407.69C27.5,-401.18 27.5,-391.1 27.5,-382.43"/>
+<polygon fill="black" stroke="black" points="31,-382.26 27.5,-372.26 24,-382.26 31,-382.26"/>
+</g>
+<!-- 6 -->
+<g id="node7" class="node">
+<title>6</title>
+<text text-anchor="middle" x="27.5" y="-309.8" font-family="Times,serif" font-size="14.00">1</text>
+</g>
+<!-- 5&#45;&gt;6 -->
+<g id="edge6" class="edge">
+<title>5&#45;&gt;6</title>
+<path fill="none" stroke="black" d="M27.5,-356.69C27.5,-350.18 27.5,-340.1 27.5,-331.43"/>
+<polygon fill="black" stroke="black" points="31,-331.26 27.5,-321.26 24,-331.26 31,-331.26"/>
+</g>
+<!-- 9 -->
+<g id="node10" class="node">
+<title>9</title>
+<text text-anchor="middle" x="123.5" y="-411.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 8&#45;&gt;9 -->
+<g id="edge9" class="edge">
+<title>8&#45;&gt;9</title>
+<path fill="none" stroke="black" d="M123.5,-458.69C123.5,-452.18 123.5,-442.1 123.5,-433.43"/>
+<polygon fill="black" stroke="black" points="127,-433.26 123.5,-423.26 120,-433.26 127,-433.26"/>
+</g>
+<!-- 10 -->
+<g id="node11" class="node">
+<title>10</title>
+<text text-anchor="middle" x="82.5" y="-360.8" font-family="Times,serif" font-size="14.00">(</text>
+</g>
+<!-- 9&#45;&gt;10 -->
+<g id="edge10" class="edge">
+<title>9&#45;&gt;10</title>
+<path fill="none" stroke="black" d="M117.8,-407.69C111.07,-399.64 99.77,-386.14 91.77,-376.58"/>
+<polygon fill="black" stroke="black" points="94.27,-374.11 85.17,-368.69 88.9,-378.6 94.27,-374.11"/>
+</g>
+<!-- 11 -->
+<g id="node12" class="node">
+<title>11</title>
+<text text-anchor="middle" x="123.5" y="-360.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 9&#45;&gt;11 -->
+<g id="edge11" class="edge">
+<title>9&#45;&gt;11</title>
+<path fill="none" stroke="black" d="M123.5,-407.69C123.5,-401.18 123.5,-391.1 123.5,-382.43"/>
+<polygon fill="black" stroke="black" points="127,-382.26 123.5,-372.26 120,-382.26 127,-382.26"/>
+</g>
+<!-- 31 -->
+<g id="node32" class="node">
+<title>31</title>
+<text text-anchor="middle" x="164.5" y="-360.8" font-family="Times,serif" font-size="14.00">)</text>
+</g>
+<!-- 9&#45;&gt;31 -->
+<g id="edge31" class="edge">
+<title>9&#45;&gt;31</title>
+<path fill="none" stroke="black" d="M129.2,-407.69C135.93,-399.64 147.23,-386.14 155.23,-376.58"/>
+<polygon fill="black" stroke="black" points="158.1,-378.6 161.83,-368.69 152.73,-374.11 158.1,-378.6"/>
+</g>
+<!-- 12 -->
+<g id="node13" class="node">
+<title>12</title>
+<text text-anchor="middle" x="75.5" y="-309.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 11&#45;&gt;12 -->
+<g id="edge12" class="edge">
+<title>11&#45;&gt;12</title>
+<path fill="none" stroke="black" d="M116.83,-356.69C109.73,-349.45 98.32,-337.79 89.28,-328.57"/>
+<polygon fill="black" stroke="black" points="91.62,-325.95 82.12,-321.26 86.62,-330.85 91.62,-325.95"/>
+</g>
+<!-- 17 -->
+<g id="node18" class="node">
+<title>17</title>
+<text text-anchor="middle" x="123.5" y="-309.8" font-family="Times,serif" font-size="14.00"> + </text>
+</g>
+<!-- 11&#45;&gt;17 -->
+<g id="edge17" class="edge">
+<title>11&#45;&gt;17</title>
+<path fill="none" stroke="black" d="M123.5,-356.69C123.5,-350.18 123.5,-340.1 123.5,-331.43"/>
+<polygon fill="black" stroke="black" points="127,-331.26 123.5,-321.26 120,-331.26 127,-331.26"/>
+</g>
+<!-- 18 -->
+<g id="node19" class="node">
+<title>18</title>
+<text text-anchor="middle" x="170.5" y="-309.8" font-family="Times,serif" font-size="14.00">&lt;expr&gt;</text>
+</g>
+<!-- 11&#45;&gt;18 -->
+<g id="edge18" class="edge">
+<title>11&#45;&gt;18</title>
+<path fill="none" stroke="black" d="M130.04,-356.69C136.98,-349.45 148.16,-337.79 157.01,-328.57"/>
+<polygon fill="black" stroke="black" points="159.62,-330.9 164.02,-321.26 154.57,-326.05 159.62,-330.9"/>
+</g>
+<!-- 13 -->
+<g id="node14" class="node">
+<title>13</title>
+<text text-anchor="middle" x="75.5" y="-258.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 12&#45;&gt;13 -->
+<g id="edge13" class="edge">
+<title>12&#45;&gt;13</title>
+<path fill="none" stroke="black" d="M75.5,-305.69C75.5,-299.18 75.5,-289.1 75.5,-280.43"/>
+<polygon fill="black" stroke="black" points="79,-280.26 75.5,-270.26 72,-280.26 79,-280.26"/>
+</g>
+<!-- 14 -->
+<g id="node15" class="node">
+<title>14</title>
+<text text-anchor="middle" x="70.5" y="-207.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 13&#45;&gt;14 -->
+<g id="edge14" class="edge">
+<title>13&#45;&gt;14</title>
+<path fill="none" stroke="black" d="M74.8,-254.69C74.14,-248.18 73.11,-238.1 72.23,-229.43"/>
+<polygon fill="black" stroke="black" points="75.69,-228.85 71.19,-219.26 68.72,-229.56 75.69,-228.85"/>
+</g>
+<!-- 15 -->
+<g id="node16" class="node">
+<title>15</title>
+<text text-anchor="middle" x="59.5" y="-156.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 14&#45;&gt;15 -->
+<g id="edge15" class="edge">
+<title>14&#45;&gt;15</title>
+<path fill="none" stroke="black" d="M68.97,-203.69C67.49,-197.1 65.2,-186.87 63.23,-178.14"/>
+<polygon fill="black" stroke="black" points="66.62,-177.25 61.02,-168.26 59.79,-178.78 66.62,-177.25"/>
+</g>
+<!-- 16 -->
+<g id="node17" class="node">
+<title>16</title>
+<text text-anchor="middle" x="59.5" y="-105.8" font-family="Times,serif" font-size="14.00">2</text>
+</g>
+<!-- 15&#45;&gt;16 -->
+<g id="edge16" class="edge">
+<title>15&#45;&gt;16</title>
+<path fill="none" stroke="black" d="M59.5,-152.69C59.5,-146.18 59.5,-136.1 59.5,-127.43"/>
+<polygon fill="black" stroke="black" points="63,-127.26 59.5,-117.26 56,-127.26 63,-127.26"/>
+</g>
+<!-- 19 -->
+<g id="node20" class="node">
+<title>19</title>
+<text text-anchor="middle" x="170.5" y="-258.8" font-family="Times,serif" font-size="14.00">&lt;term&gt;</text>
+</g>
+<!-- 18&#45;&gt;19 -->
+<g id="edge19" class="edge">
+<title>18&#45;&gt;19</title>
+<path fill="none" stroke="black" d="M170.5,-305.69C170.5,-299.18 170.5,-289.1 170.5,-280.43"/>
+<polygon fill="black" stroke="black" points="174,-280.26 170.5,-270.26 167,-280.26 174,-280.26"/>
+</g>
+<!-- 20 -->
+<g id="node21" class="node">
+<title>20</title>
+<text text-anchor="middle" x="173.5" y="-207.8" font-family="Times,serif" font-size="14.00">&lt;factor&gt;</text>
+</g>
+<!-- 19&#45;&gt;20 -->
+<g id="edge20" class="edge">
+<title>19&#45;&gt;20</title>
+<path fill="none" stroke="black" d="M170.92,-254.69C171.32,-248.18 171.93,-238.1 172.46,-229.43"/>
+<polygon fill="black" stroke="black" points="175.97,-229.45 173.09,-219.26 168.98,-229.02 175.97,-229.45"/>
+</g>
+<!-- 21 -->
+<g id="node22" class="node">
+<title>21</title>
+<text text-anchor="middle" x="126.5" y="-156.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 20&#45;&gt;21 -->
+<g id="edge21" class="edge">
+<title>20&#45;&gt;21</title>
+<path fill="none" stroke="black" d="M166.96,-203.69C160.02,-196.45 148.84,-184.79 139.99,-175.57"/>
+<polygon fill="black" stroke="black" points="142.43,-173.05 132.98,-168.26 137.38,-177.9 142.43,-173.05"/>
+</g>
+<!-- 24 -->
+<g id="node25" class="node">
+<title>24</title>
+<text text-anchor="middle" x="174.5" y="-156.8" font-family="Times,serif" font-size="14.00">.</text>
+</g>
+<!-- 20&#45;&gt;24 -->
+<g id="edge24" class="edge">
+<title>20&#45;&gt;24</title>
+<path fill="none" stroke="black" d="M173.64,-203.69C173.77,-197.18 173.98,-187.1 174.15,-178.43"/>
+<polygon fill="black" stroke="black" points="177.66,-178.32 174.36,-168.26 170.66,-178.18 177.66,-178.32"/>
+</g>
+<!-- 25 -->
+<g id="node26" class="node">
+<title>25</title>
+<text text-anchor="middle" x="222.5" y="-156.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 20&#45;&gt;25 -->
+<g id="edge25" class="edge">
+<title>20&#45;&gt;25</title>
+<path fill="none" stroke="black" d="M180.31,-203.69C187.55,-196.45 199.21,-184.79 208.43,-175.57"/>
+<polygon fill="black" stroke="black" points="211.15,-177.8 215.74,-168.26 206.2,-172.85 211.15,-177.8"/>
+</g>
+<!-- 22 -->
+<g id="node23" class="node">
+<title>22</title>
+<text text-anchor="middle" x="126.5" y="-105.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 21&#45;&gt;22 -->
+<g id="edge22" class="edge">
+<title>21&#45;&gt;22</title>
+<path fill="none" stroke="black" d="M126.5,-152.69C126.5,-146.18 126.5,-136.1 126.5,-127.43"/>
+<polygon fill="black" stroke="black" points="130,-127.26 126.5,-117.26 123,-127.26 130,-127.26"/>
+</g>
+<!-- 23 -->
+<g id="node24" class="node">
+<title>23</title>
+<text text-anchor="middle" x="126.5" y="-54.8" font-family="Times,serif" font-size="14.00">3</text>
+</g>
+<!-- 22&#45;&gt;23 -->
+<g id="edge23" class="edge">
+<title>22&#45;&gt;23</title>
+<path fill="none" stroke="black" d="M126.5,-101.69C126.5,-95.18 126.5,-85.1 126.5,-76.43"/>
+<polygon fill="black" stroke="black" points="130,-76.26 126.5,-66.26 123,-76.26 130,-76.26"/>
+</g>
+<!-- 26 -->
+<g id="node27" class="node">
+<title>26</title>
+<text text-anchor="middle" x="204.5" y="-105.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 25&#45;&gt;26 -->
+<g id="edge26" class="edge">
+<title>25&#45;&gt;26</title>
+<path fill="none" stroke="black" d="M220,-152.69C217.55,-146.03 213.74,-135.65 210.51,-126.85"/>
+<polygon fill="black" stroke="black" points="213.72,-125.44 206.98,-117.26 207.14,-127.85 213.72,-125.44"/>
+</g>
+<!-- 28 -->
+<g id="node29" class="node">
+<title>28</title>
+<text text-anchor="middle" x="271.5" y="-105.8" font-family="Times,serif" font-size="14.00">&lt;integer&gt;</text>
+</g>
+<!-- 25&#45;&gt;28 -->
+<g id="edge28" class="edge">
+<title>25&#45;&gt;28</title>
+<path fill="none" stroke="black" d="M229.31,-152.69C236.55,-145.45 248.21,-133.79 257.43,-124.57"/>
+<polygon fill="black" stroke="black" points="260.15,-126.8 264.74,-117.26 255.2,-121.85 260.15,-126.8"/>
+</g>
+<!-- 27 -->
+<g id="node28" class="node">
+<title>27</title>
+<text text-anchor="middle" x="204.5" y="-54.8" font-family="Times,serif" font-size="14.00">3</text>
+</g>
+<!-- 26&#45;&gt;27 -->
+<g id="edge27" class="edge">
+<title>26&#45;&gt;27</title>
+<path fill="none" stroke="black" d="M204.5,-101.69C204.5,-95.18 204.5,-85.1 204.5,-76.43"/>
+<polygon fill="black" stroke="black" points="208,-76.26 204.5,-66.26 201,-76.26 208,-76.26"/>
+</g>
+<!-- 29 -->
+<g id="node30" class="node">
+<title>29</title>
+<text text-anchor="middle" x="271.5" y="-54.8" font-family="Times,serif" font-size="14.00">&lt;digit&gt;</text>
+</g>
+<!-- 28&#45;&gt;29 -->
+<g id="edge29" class="edge">
+<title>28&#45;&gt;29</title>
+<path fill="none" stroke="black" d="M271.5,-101.69C271.5,-95.18 271.5,-85.1 271.5,-76.43"/>
+<polygon fill="black" stroke="black" points="275,-76.26 271.5,-66.26 268,-76.26 275,-76.26"/>
+</g>
+<!-- 30 -->
+<g id="node31" class="node">
+<title>30</title>
+<text text-anchor="middle" x="271.5" y="-3.8" font-family="Times,serif" font-size="14.00">5</text>
+</g>
+<!-- 29&#45;&gt;30 -->
+<g id="edge30" class="edge">
+<title>29&#45;&gt;30</title>
+<path fill="none" stroke="black" d="M271.5,-50.69C271.5,-44.18 271.5,-34.1 271.5,-25.43"/>
+<polygon fill="black" stroke="black" points="275,-25.26 271.5,-15.26 268,-25.26 275,-25.26"/>
+</g>
+</g>
+</svg>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>In contrast to the <code>PEGParser</code>, above, the <code>EarleyParser</code> can handle arbitrary context-free grammars.</p>
 </div>
 </div>
 </div>
@@ -21170,7 +22839,7 @@ That procedure increments the last choice, which bubbles up to the next choice t
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Testing-the-Parsers">Testing the Parsers<a class="anchor-link" href="#Testing-the-Parsers">&#182;</a></h2><p>While we have defined two parser variants, it would be nice to have some confirmation that our parses work well. While it is possible to formally prove that they work, it is much more satisfying to generate random grammars, their corresponding strings, and parse them using the same grammar.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Excursion:-Testing-the-Parsers">Excursion: Testing the Parsers<a class="anchor-link" href="#Excursion:-Testing-the-Parsers">&#182;</a></h3><p>While we have defined two parser variants, it would be nice to have some confirmation that our parses work well. While it is possible to formally prove that they work, it is much more satisfying to generate random grammars, their corresponding strings, and parse them using the same grammar.</p>
 </div>
 </div>
 </div>
@@ -21803,6 +23472,8 @@ joa
 </div>
 </div>
 
+</details>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -22202,7 +23873,7 @@ in further and further earlier columns (as shown below):</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">earley_complete</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">deterministic_reduction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="bp">NotImplemented</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 </pre></div>
 
 </div>
@@ -22285,7 +23956,7 @@ in further and further earlier columns (as shown below):</p>
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">RECURSION_GRAMMAR</span><span class="p">:</span> <span class="n">Grammar</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;A&gt;&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;A&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;A&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;A&gt;aa&quot;</span><span class="p">,</span> <span class="s2">&quot;AA&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;B&gt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;B&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;C&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;C&gt;cc&quot;</span> <span class="p">,</span><span class="s2">&quot;CC&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;&lt;B&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;C&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;C&gt;cc&quot;</span><span class="p">,</span> <span class="s2">&quot;CC&quot;</span><span class="p">],</span>
     <span class="s2">&quot;&lt;C&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;B&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;B&gt;bb&quot;</span><span class="p">,</span> <span class="s2">&quot;BB&quot;</span><span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
@@ -22687,7 +24358,7 @@ It should result in the following table:</p>
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2021-11-07 16:08:26+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Parser.ipynb" target=_blank)>Last change: 2021-11-13 19:20:12+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -22703,7 +24374,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Parser.html">Parsing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/Parser.html">https://www.fuzzingbook.org/html/Parser.html</a>.  Retrieved 2021-11-07 16:08:26+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Parser.html">Parsing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/Parser.html">https://www.fuzzingbook.org/html/Parser.html</a>.  Retrieved 2021-11-13 19:20:12+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2021:Parser,
@@ -22713,9 +24384,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2021},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/html/Parser.html}},
-    note = {Retrieved 2021-11-07 16:08:26+01:00},
+    note = {Retrieved 2021-11-13 19:20:12+01:00},
     url = {https://www.fuzzingbook.org/html/Parser.html},
-    urldate = {2021-11-07 16:08:26+01:00}
+    urldate = {2021-11-13 19:20:12+01:00}
 }
 </pre>
 </div>

@@ -3,7 +3,7 @@
 
 # "Parsing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2021-11-09 13:28:48+01:00
+# Last change: 2021-11-13 19:22:59+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -59,7 +59,6 @@ Then, use the `parse()` method to retrieve a list of possible derivation trees:
 >>> display_tree(tree)
 These derivation trees can then be used for test generation, notably for mutating and recombining existing inputs.
 
-
 For more details, source, and documentation, see
 "The Fuzzing Book - Parsing Inputs"
 at https://www.fuzzingbook.org/html/Parser.html
@@ -79,20 +78,6 @@ if __name__ == '__main__':
 
 
 
-if __name__ == '__main__':
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
-from .Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL
-from .Grammars import is_valid_grammar, syntax_diagram, Grammar
-from .Fuzzer import Fuzzer
-from .GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, display_tree, tree_to_string, dot_escape
-from .ExpectError import ExpectError
-from .Timer import Timer
-
-from typing import Dict, List, Tuple, Collection
-
 ## Synopsis
 ## --------
 
@@ -101,11 +86,33 @@ if __name__ == '__main__':
 
 
 
-## Fuzzing a Simple Program
+if __name__ == '__main__':
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+from typing import Dict, List, Tuple, Collection, Set, Iterable, Generator, cast
+
+from .Fuzzer import Fuzzer  # minor dependendcy
+
+from .Grammars import EXPR_GRAMMAR, START_SYMBOL, RE_NONTERMINAL
+from .Grammars import is_valid_grammar, syntax_diagram, Grammar
+
+from .GrammarFuzzer import GrammarFuzzer, display_tree, tree_to_string, dot_escape
+from .GrammarFuzzer import DerivationTree
+
+from .ExpectError import ExpectError
+
+if __name__ == '__main__':
+    from IPython.display import display
+
+from .Timer import Timer
+
+## Why Parsing for Fuzzing?
 ## ------------------------
 
 if __name__ == '__main__':
-    print('\n## Fuzzing a Simple Program')
+    print('\n## Why Parsing for Fuzzing?')
 
 
 
@@ -165,8 +172,6 @@ CSV_GRAMMAR: Grammar = {
 
 if __name__ == '__main__':
     syntax_diagram(CSV_GRAMMAR)
-
-from typing import List
 
 if __name__ == '__main__':
     gf = GrammarFuzzer(CSV_GRAMMAR, min_nonterminals=4)
@@ -255,8 +260,8 @@ if __name__ == '__main__':
 
 
 
-def simple_parse_csv(mystring):
-    children = []
+def simple_parse_csv(mystring: str) -> DerivationTree:
+    children: List[DerivationTree] = []
     tree = (START_SYMBOL, children)
     for i, line in enumerate(mystring.split('\n')):
         children.append(("record %d" % i, [(cell, [])
@@ -359,11 +364,18 @@ if __name__ == '__main__':
     bad_nodes = {5, 6, 7, 8, 9, 10}
     display_tree(tree, node_attr=highlight_err_node, graph_attr=lr_graph)
 
-## Grammars
-## --------
+## Grammars in Parsing
+## -------------------
 
 if __name__ == '__main__':
-    print('\n## Grammars')
+    print('\n## Grammars in Parsing')
+
+
+
+### Excursion: Grammars and Derivation Trees
+
+if __name__ == '__main__':
+    print('\n### Excursion: Grammars and Derivation Trees')
 
 
 
@@ -413,6 +425,20 @@ if __name__ == '__main__':
     assert mystring == tree_to_string(tree)
     display_tree(tree)
 
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
+
+### Excursion: Recursion
+
+if __name__ == '__main__':
+    print('\n### Excursion: Recursion')
+
+
+
 #### Recursion
 
 if __name__ == '__main__':
@@ -431,7 +457,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     mystring = 'aaaaaa'
     display_tree(
-        ('<start>', (('<A>', (('<A>', (('<A>', []), ('a', []))), ('a', []))), ('a', []))))
+        ('<start>', [('<A>', [('<A>', [('<A>', []), ('a', [])]), ('a', [])]),
+                     ('a', [])]))
 
 RR_GRAMMAR: Grammar = {
     '<start>': ['<A>'],
@@ -442,8 +469,9 @@ if __name__ == '__main__':
     syntax_diagram(RR_GRAMMAR)
 
 if __name__ == '__main__':
-    display_tree(('<start>', ((
-        '<A>', (('a', []), ('<A>', (('a', []), ('<A>', (('a', []), ('<A>', []))))))),)))
+    display_tree(('<start>', [('<A>', [
+                      ('a', []), ('<A>', [('a', []), ('<A>', [('a', []), ('<A>', [])])])])]
+                 ))
 
 #### Ambiguity
 
@@ -476,31 +504,64 @@ if __name__ == '__main__':
     assert tree_to_string(tree) == mystring
     display_tree(tree)
 
-class Parser:
-    def __init__(self, grammar, **kwargs):
-        self._grammar = grammar
-        self._start_symbol = kwargs.get('start_symbol', START_SYMBOL)
-        self.log = kwargs.get('log', False)
-        self.coalesce_tokens = kwargs.get('coalesce', True)
-        self.tokens = kwargs.get('tokens', set())
+### End of Excursion
 
-    def grammar(self):
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
+
+## A Parser Class
+## --------------
+
+if __name__ == '__main__':
+    print('\n## A Parser Class')
+
+
+
+class Parser:
+    """Base class for parsing."""
+
+    def __init__(self, grammar: Grammar, *,
+                 start_symbol: str = START_SYMBOL,
+                 log: bool = False,
+                 coalesce: bool = True,
+                 tokens: Set[str] = set()) -> None:
+        """Constructor.
+           `grammar` is the grammar to be used for parsing.
+           Keyword arguments:
+           `start_symbol` is the start symbol (default: '<start>').
+           `log` enables logging (default: False).
+           `coalesce` defines if tokens should be coalesced (default: True).
+           `tokens`, if set, is a set of tokens to be used."""
+        self._grammar = grammar
+        self._start_symbol = start_symbol
+        self.log = log
+        self.coalesce_tokens = coalesce
+        self.tokens = tokens
+
+    def grammar(self) -> Grammar:
+        """Return the grammar of this parser."""
         return self._grammar
 
-    def start_symbol(self):
+    def start_symbol(self) -> str:
+        """Return the start symbol of this parser."""
         return self._start_symbol
 
-    def parse_prefix(self, text):
-        """Return pair (cursor, forest) for longest prefix of text"""
-        raise NotImplemented()
+    def parse_prefix(self, text: str) -> Tuple[int, Iterable[DerivationTree]]:
+        """Return pair (cursor, forest) for longest prefix of text. 
+           To be defined in subclasses."""
+        raise NotImplementedError
 
-    def parse(self, text):
+    def parse(self, text: str) -> Iterable[DerivationTree]:
+        """Parse `text` using the grammar. 
+           Return an iterable of parse trees."""
         cursor, forest = self.parse_prefix(text)
         if cursor < len(text):
             raise SyntaxError("at " + repr(text[cursor:]))
         return [self.prune_tree(tree) for tree in forest]
 
-    def parse_on(self, text, start_symbol):
+    def parse_on(self, text: str, start_symbol: str) -> Generator:
         old_start = self._start_symbol
         try:
             self._start_symbol = start_symbol
@@ -508,9 +569,9 @@ class Parser:
         finally:
             self._start_symbol = old_start
 
-    def coalesce(self, children):
+    def coalesce(self, children: List[DerivationTree]) -> List[DerivationTree]:
         last = ''
-        new_lst = []
+        new_lst: List[DerivationTree] = []
         for cn, cc in children:
             if cn not in self._grammar:
                 last += cn
@@ -523,35 +584,21 @@ class Parser:
             new_lst.append((last, []))
         return new_lst
 
-    def prune_tree(self, tree):
+    def prune_tree(self, tree: DerivationTree) -> DerivationTree:
         name, children = tree
+        assert isinstance(children, list)
+
         if self.coalesce_tokens:
-            children = self.coalesce(children)
+            children = self.coalesce(cast(List[DerivationTree], children))
         if name in self.tokens:
             return (name, [(tree_to_string(tree), [])])
         else:
             return (name, [self.prune_tree(c) for c in children])
 
-## Parsing Expression Grammars
-## ---------------------------
+### Excursion: Canonical Grammars
 
 if __name__ == '__main__':
-    print('\n## Parsing Expression Grammars')
-
-
-
-PEG1 = {
-    '<start>': ['a', 'b']
-}
-
-PEG2 = {
-    '<start>': ['ab', 'abc']
-}
-
-### The Packrat Parser for Predicate Expression Grammars
-
-if __name__ == '__main__':
-    print('\n### The Packrat Parser for Predicate Expression Grammars')
+    print('\n### Excursion: Canonical Grammars')
 
 
 
@@ -653,10 +700,33 @@ class Parser(Parser):
         else:
             return (name, [self.prune_tree(c) for c in children])
 
-### The Parser
+### End of Excursion
 
 if __name__ == '__main__':
-    print('\n### The Parser')
+    print('\n### End of Excursion')
+
+
+
+## Parsing Expression Grammars
+## ---------------------------
+
+if __name__ == '__main__':
+    print('\n## Parsing Expression Grammars')
+
+
+
+PEG1 = {
+    '<start>': ['a', 'b']
+}
+
+PEG2 = {
+    '<start>': ['ab', 'abc']
+}
+
+### The Packrat Parser for Predicate Expression Grammars
+
+if __name__ == '__main__':
+    print('\n### The Packrat Parser for Predicate Expression Grammars')
 
 
 
@@ -664,6 +734,13 @@ class PEGParser(Parser):
     def parse_prefix(self, text):
         cursor, tree = self.unify_key(self.start_symbol(), text, 0)
         return cursor, [tree]
+
+### Excursion: Implementing `PEGParser`
+
+if __name__ == '__main__':
+    print('\n### Excursion: Implementing `PEGParser`')
+
+
 
 #### Unify Key
 
@@ -673,6 +750,8 @@ if __name__ == '__main__':
 
 
 class PEGParser(PEGParser):
+    """Packrat parser for Parsing Expression Grammars (PEGs)."""
+
     def unify_key(self, key, text, at=0):
         if self.log:
             print("unify_key: %s with %s" % (repr(key), repr(text[at:])))
@@ -745,18 +824,25 @@ class PEGParser(PEGParser):
                 return (to, (key, res))
         return 0, None
 
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
+
 if __name__ == '__main__':
     mystring = "1 + (2 * 3)"
     peg = PEGParser(EXPR_GRAMMAR)
     for tree in peg.parse(mystring):
         assert tree_to_string(tree) == mystring
-        display_tree(tree)
+        display(display_tree(tree))
 
 if __name__ == '__main__':
     mystring = "1 * (2 + 3.35)"
     for tree in peg.parse(mystring):
         assert tree_to_string(tree) == mystring
-        display_tree(tree)
+        display(display_tree(tree))
 
 ## Parsing Context-Free Grammars
 ## -----------------------------
@@ -804,6 +890,13 @@ if __name__ == '__main__':
 
 
 
+### Excursion: Implementing `EarleyParser`
+
+if __name__ == '__main__':
+    print('\n### Excursion: Implementing `EarleyParser`')
+
+
+
 SAMPLE_GRAMMAR: Grammar = {
     '<start>': ['<A><B>'],
     '<A>': ['a<B>c', 'a<A>'],
@@ -816,10 +909,10 @@ C_SAMPLE_GRAMMAR = canonical(SAMPLE_GRAMMAR)
 if __name__ == '__main__':
     syntax_diagram(SAMPLE_GRAMMAR)
 
-### Columns
+#### Columns
 
 if __name__ == '__main__':
-    print('\n### Columns')
+    print('\n#### Columns')
 
 
 
@@ -841,10 +934,10 @@ class Column(Column):
         state.e_col = self
         return self._unique[state]
 
-### Items
+#### Items
 
 if __name__ == '__main__':
-    print('\n### Items')
+    print('\n#### Items')
 
 
 
@@ -876,10 +969,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     another_item.finished()
 
-### States
+#### States
 
 if __name__ == '__main__':
-    print('\n### States')
+    print('\n#### States')
 
 
 
@@ -926,17 +1019,19 @@ if __name__ == '__main__':
     for s in col_0.states:
         print(s)
 
-### The Parsing Algorithm
+#### The Parsing Algorithm
 
 if __name__ == '__main__':
-    print('\n### The Parsing Algorithm')
+    print('\n#### The Parsing Algorithm')
 
 
 
 class EarleyParser(Parser):
-    def __init__(self, grammar, **kwargs):
+    """Earley Parser. This parser can parse any context-free grammar."""
+
+    def __init__(self, grammar: Grammar, **kwargs) -> None:
         super().__init__(grammar, **kwargs)
-        self.chart = []  # for type checking
+        self.chart: List = []  # for type checking
 
     def chart_parse(self, words, start):
         alt = tuple(*self.cgrammar[start])
@@ -944,10 +1039,10 @@ class EarleyParser(Parser):
         chart[0].add(State(start, alt, 0, chart[0]))
         return self.fill_chart(chart)
 
-### Predicting States
+#### Predicting States
 
 if __name__ == '__main__':
-    print('\n### Predicting States')
+    print('\n#### Predicting States')
 
 
 
@@ -971,10 +1066,10 @@ if __name__ == '__main__':
     for s in ep.chart[0].states:
         print(s)
 
-### Scanning Tokens
+#### Scanning Tokens
 
 if __name__ == '__main__':
-    print('\n### Scanning Tokens')
+    print('\n#### Scanning Tokens')
 
 
 
@@ -997,10 +1092,10 @@ if __name__ == '__main__':
     for s in ep.chart[1].states:
         print(s)
 
-### Completing Processing
+#### Completing Processing
 
 if __name__ == '__main__':
-    print('\n### Completing Processing')
+    print('\n#### Completing Processing')
 
 
 
@@ -1054,10 +1149,10 @@ if __name__ == '__main__':
     for s in ep.chart[2].states:
         print(s)
 
-### Filling the Chart
+#### Filling the Chart
 
 if __name__ == '__main__':
-    print('\n### Filling the Chart')
+    print('\n#### Filling the Chart')
 
 
 
@@ -1085,14 +1180,14 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     last_col = columns[-1]
-    for s in last_col.states:
-        if s.name == '<start>':
-            print(s)
+    for state in last_col.states:
+        if state.name == '<start>':
+            print(state)
 
-### The Parse Method
+#### The Parse Method
 
 if __name__ == '__main__':
-    print('\n### The Parse Method')
+    print('\n#### The Parse Method')
 
 
 
@@ -1124,10 +1219,10 @@ class EarleyParser(EarleyParser):
         for tree in self.extract_trees(forest):
             yield self.prune_tree(tree)
 
-### Parsing Paths
+#### Parsing Paths
 
 if __name__ == '__main__':
-    print('\n### Parsing Paths')
+    print('\n#### Parsing Paths')
 
 
 
@@ -1159,10 +1254,10 @@ if __name__ == '__main__':
     for path in paths:
         print([list(str(s_) for s_ in s) for s in path])
 
-### Parsing Forests
+#### Parsing Forests
 
 if __name__ == '__main__':
-    print('\n### Parsing Forests')
+    print('\n#### Parsing Forests')
 
 
 
@@ -1181,10 +1276,10 @@ if __name__ == '__main__':
     result = ep.parse_forest(columns, last_states[0])
     result
 
-### Extracting Trees
+#### Extracting Trees
 
 if __name__ == '__main__':
-    print('\n### Extracting Trees')
+    print('\n#### Extracting Trees')
 
 
 
@@ -1222,10 +1317,10 @@ if __name__ == '__main__':
         assert tree_to_string(tree) == mystring
         display_tree(tree)
 
-### Ambiguous Parsing
+#### Ambiguous Parsing
 
 if __name__ == '__main__':
-    print('\n### Ambiguous Parsing')
+    print('\n#### Ambiguous Parsing')
 
 
 
@@ -1236,11 +1331,11 @@ class EarleyParser(EarleyParser):
         name, paths = forest_node
         if not paths:
             yield (name, [])
-        results = []
+
         for path in paths:
             ptrees = [self.extract_trees(self.forest(*p)) for p in path]
             for p in I.product(*ptrees):
-                yield (name, p) 
+                yield (name, p)
 
 if __name__ == '__main__':
     mystring = '1+2'
@@ -1257,10 +1352,10 @@ if __name__ == '__main__':
         for tree in parser.parse(s):
             assert tree_to_string(tree) == s
 
-### The Aycock Epsilon Fix
+#### The Aycock Epsilon Fix
 
 if __name__ == '__main__':
-    print('\n### The Aycock Epsilon Fix')
+    print('\n#### The Aycock Epsilon Fix')
 
 
 
@@ -1287,10 +1382,10 @@ if __name__ == '__main__':
     with ExpectError():
         trees = parser.parse(mystring)
 
-#### Fixpoint
+##### Fixpoint
 
 if __name__ == '__main__':
-    print('\n#### Fixpoint')
+    print('\n##### Fixpoint')
 
 
 
@@ -1315,10 +1410,10 @@ def my_sqrt(x):
 if __name__ == '__main__':
     my_sqrt(2)
 
-#### Nullable
+##### Nullable
 
 if __name__ == '__main__':
-    print('\n#### Nullable')
+    print('\n##### Nullable')
 
 
 
@@ -1379,8 +1474,8 @@ DIRECTLY_SELF_REFERRING: Grammar = {
 INDIRECTLY_SELF_REFERRING: Grammar = {
     '<start>': ['<query>'],
     '<query>': ['select <expr> from a'],
-    "<expr>": [ "<aexpr>", "a"],
-    "<aexpr>": [ "<expr>"],
+    "<expr>": ["<aexpr>", "a"],
+    "<aexpr>": ["<expr>"],
 }
 
 if __name__ == '__main__':
@@ -1392,12 +1487,12 @@ if __name__ == '__main__':
             for tree in forest:
                 print(tree_to_string(tree))
         except RecursionError as e:
-             print("Recursion error",e)
+            print("Recursion error", e)
 
-### Tree Extractor
+#### Tree Extractor
 
 if __name__ == '__main__':
-    print('\n### Tree Extractor')
+    print('\n#### Tree Extractor')
 
 
 
@@ -1462,6 +1557,7 @@ class ChoiceNode:
     def __str__(self):
         return '%d(%s/%s %s)' % (self._i, str(self._chosen),
                                  str(self._total), str(self.next))
+
     def __repr__(self):
         return repr((self._i, self._chosen, self._total))
 
@@ -1474,14 +1570,14 @@ class ChoiceNode:
                 return None
             return self._p.increment()
         return self
-    
+
     def finished(self):
         return self._chosen >= self._total
 
 class EnhancedExtractor(SimpleExtractor):
     def __init__(self, parser, text):
         super().__init__(parser, text)
-        self.choices = choices = ChoiceNode(None, 1)
+        self.choices = ChoiceNode(None, 1)
 
 class EnhancedExtractor(EnhancedExtractor):
     def choose_path(self, arr, choices):
@@ -1556,18 +1652,37 @@ if __name__ == '__main__':
         s = tree_to_string(t)
         assert s == istring
 
-### More Earley Parsing
+#### More Earley Parsing
 
 if __name__ == '__main__':
-    print('\n### More Earley Parsing')
+    print('\n#### More Earley Parsing')
 
 
 
-## Testing the Parsers
-## -------------------
+### End of Excursion
 
 if __name__ == '__main__':
-    print('\n## Testing the Parsers')
+    print('\n### End of Excursion')
+
+
+
+if __name__ == '__main__':
+    mystring = "1 + (2 * 3)"
+    earley = EarleyParser(EXPR_GRAMMAR)
+    for tree in earley.parse(mystring):
+        assert tree_to_string(tree) == mystring
+        display(display_tree(tree))
+
+if __name__ == '__main__':
+    mystring = "1 * (2 + 3.35)"
+    for tree in earley.parse(mystring):
+        assert tree_to_string(tree) == mystring
+        display(display_tree(tree))
+
+### Excursion: Testing the Parsers
+
+if __name__ == '__main__':
+    print('\n### Excursion: Testing the Parsers')
 
 
 
@@ -1618,13 +1733,13 @@ def make_grammar(num_symbols=3, num_alts=3):
         grammar[name] = expansions
 
     grammar[START_SYMBOL] = [name]
-    
+
     # Remove unused parts
     for nonterminal in unreachable_nonterminals(grammar):
         del grammar[nonterminal]
-    
+
     assert is_valid_grammar(grammar)
-    
+
     return grammar
 
 if __name__ == '__main__':
@@ -1641,6 +1756,13 @@ if __name__ == '__main__':
         for tree in parser.parse(s):
             assert tree_to_string(tree) == s
             display_tree(tree)
+
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
 
 ## Background
 ## ----------
@@ -1667,6 +1789,22 @@ if __name__ == '__main__':
     trees = us_phone_parser.parse("(555)987-6543")
     tree = list(trees)[0]
     display_tree(tree)
+
+from .ClassDiagram import display_class_hierarchy
+
+if __name__ == '__main__':
+    display_class_hierarchy([PEGParser, EarleyParser],
+                            public_methods=[
+                                Parser.parse,
+                                Parser.__init__,
+                                Parser.grammar,
+                                Parser.start_symbol
+                            ],
+                            types={
+                                'DerivationTree': DerivationTree,
+                                'Grammar': Grammar
+                            },
+                            project='fuzzingbook')
 
 ## Lessons Learned
 ## ---------------
@@ -1788,7 +1926,7 @@ class LeoParser(EarleyParser):
             self.earley_complete(col, state)
 
     def deterministic_reduction(self, state):
-        raise NotImplemented()
+        raise NotImplementedError
 
 class Column(Column):
     def __init__(self, index, letter):
@@ -2061,7 +2199,7 @@ if __name__ == '__main__':
 RECURSION_GRAMMAR: Grammar = {
     "<start>": ["<A>"],
     "<A>": ["<A>", "<A>aa", "AA", "<B>"],
-    "<B>": ["<C>", "<C>cc" ,"CC"],
+    "<B>": ["<C>", "<C>cc", "CC"],
     "<C>": ["<B>", "<B>bb", "BB"]
 }
 
@@ -2082,7 +2220,7 @@ class FilteredLeoParser(LeoParser):
     def parse_forest(self, chart, state, seen=None):
         if isinstance(state, TState):
             self.expand_tstate(state.back(), state.e_col)
-        
+
         def was_seen(chain, s):
             if isinstance(s, str):
                 return False
@@ -2175,11 +2313,11 @@ class IterativeEarleyParser(EarleyParser):
 
             starts = None
             if var not in self.cgrammar:
-                starts = ([(var, til - len(var),
-                        't')] if til > 0 and chart[til].letter == var else [])
+                starts = ([(var, til - len(var), 't')]
+                          if til > 0 and chart[til].letter == var else [])
             else:
                 starts = [(s, s.s_col.index, 'n') for s in chart[til].states
-                      if s.finished() and s.name == var]
+                          if s.finished() and s.name == var]
 
             for s, start, k in starts:
                 iter_paths(path_prefix, s, start, k, expr)
@@ -2231,7 +2369,7 @@ if __name__ == '__main__':
 
     for i, (grammar, text) in enumerate(test_cases):
         print(i, text)
-        tree, *_ =  IterativeEarleyParser(grammar).parse(text)
+        tree, *_ = IterativeEarleyParser(grammar).parse(text)
         assert text == tree_to_string(tree)
 
 ### Exercise 8: First Set of a Nonterminal
