@@ -3,7 +3,7 @@
 
 # "Fuzzing with Generators" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2021-11-13 17:40:38+01:00
+# Last change: 2021-11-16 14:34:25+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -99,6 +99,10 @@ if __name__ == '__main__':
     print('# Fuzzing with Generators')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('oeMxtboPD_s')
 
 ## Synopsis
 ## --------

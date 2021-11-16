@@ -3,7 +3,7 @@
 
 # "Probabilistic Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2021-11-13 19:23:25+01:00
+# Last change: 2021-11-16 14:33:56+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -88,6 +88,10 @@ if __name__ == '__main__':
     print('# Probabilistic Grammar Fuzzing')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('XzJqzawOubo')
 
 ## Synopsis
 ## --------
