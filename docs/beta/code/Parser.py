@@ -3,7 +3,7 @@
 
 # "Parsing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2021-11-13 19:22:59+01:00
+# Last change: 2021-11-16 14:33:31+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -44,8 +44,8 @@ but before you do so, _read_ it and _interact_ with it at:
 
 This chapter introduces `Parser` classes, parsing a string into a _derivation tree_ as introduced in the [chapter on efficient grammar fuzzing](GrammarFuzzer.ipynb).  Two important parser classes are provided:
 
-* [Parsing Expression Grammar parsers](#Parsing-Expression-Grammars) (`PEGParser`), which are very efficient, but limited to specific grammar structure; and
-* [Earley parsers](#Parsing-Context-Free-Grammars) (`EarleyParser`), which accept any kind of context-free grammars.
+* [Parsing Expression Grammar parsers](#Parsing-Expression-Grammars) (`PEGParser`). These are very efficient, but limited to specific grammar structure. Notably, the alternatives represent *ordered choice*. That is, rather than choosing all rules that can potentially match, we stop at the first match that succeed.
+* [Earley parsers](#Parsing-Context-Free-Grammars) (`EarleyParser`). These accept any kind of context-free grammars, and explore all parsing alternatives (if any).
 
 Using any of these is fairly easy, though.  First, instantiate them with a grammar:
 
@@ -77,6 +77,10 @@ if __name__ == '__main__':
     print('# Parsing Inputs')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('2yS9EfBEirE')
 
 ## Synopsis
 ## --------
