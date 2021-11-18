@@ -3,7 +3,7 @@
 
 # "Probabilistic Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2021-11-16 14:33:56+01:00
+# Last change: 2021-11-18 11:28:37+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -44,7 +44,7 @@ but before you do so, _read_ it and _interact_ with it at:
 
 A _probabilistic_ grammar allows to attach individual _probabilities_ to production rules.  To set the probability of an individual expansion `S` to the value `X` (between 0 and 1), replace it with a pair
 
-(opts(S, prob=X))
+(S, opts(prob=X))
 
 
 If we want to ensure that 90% of phone numbers generated have an area code starting with `9`, we can write:
