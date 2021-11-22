@@ -3,7 +3,7 @@
 
 # "Code Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2021-11-09 14:01:53+01:00
+# Last change: 2021-11-22 13:24:34+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,23 +42,65 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/Coverage.html
 
-This chapter introduces a `Coverage` class allowing you to measure coverage for Python programs.  Its typical usage is in conjunction with a `with` clause:
+This chapter introduces a `Coverage` class allowing you to measure coverage for Python programs. Within the context of this book, we use coverage information to guide fuzzing towards uncovered locations.
+
+The typical usage of the `Coverage` class is in conjunction with a `with` clause:
 
 >>> with Coverage() as cov:
 >>>     cgi_decode("a+b")
 
-The `trace()` method returns the coverage as a list of locations covered.  Each location comes as a pair (`function name`, `line`).
+The `trace()` method returns the _trace_ – that is, the list of locations executed in order. Each location comes as a pair (`function name`, `line`).
 
->>> print(cov.trace())
-[('cgi_decode', 9), ('cgi_decode', 10), ('cgi_decode', 11), ('cgi_decode', 12), ('cgi_decode', 8), ('cgi_decode', 15), ('cgi_decode', 16), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 21), ('cgi_decode', 30), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 20), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 18), ('cgi_decode', 19), ('cgi_decode', 21), ('cgi_decode', 30), ('cgi_decode', 31), ('cgi_decode', 17), ('cgi_decode', 32), ('__exit__', 25)]
+>>> cov.trace()
+[('cgi_decode', 9),
+ ('cgi_decode', 10),
+ ('cgi_decode', 11),
+ ('cgi_decode', 12),
+ ('cgi_decode', 8),
+ ('cgi_decode', 15),
+ ('cgi_decode', 16),
+ ('cgi_decode', 17),
+ ('cgi_decode', 18),
+ ('cgi_decode', 19),
+ ('cgi_decode', 21),
+ ('cgi_decode', 30),
+ ('cgi_decode', 31),
+ ('cgi_decode', 17),
+ ('cgi_decode', 18),
+ ('cgi_decode', 19),
+ ('cgi_decode', 20),
+ ('cgi_decode', 31),
+ ('cgi_decode', 17),
+ ('cgi_decode', 18),
+ ('cgi_decode', 19),
+ ('cgi_decode', 21),
+ ('cgi_decode', 30),
+ ('cgi_decode', 31),
+ ('cgi_decode', 17),
+ ('cgi_decode', 32),
+ ('__exit__', 36)]
 
+The `coverage()` method returns the _coverage_, that is, the set of locations in the trace executed at least once:
 
-The `coverage()` method returns the set of locations executed at least once:
+>>> cov.coverage()
+{('__exit__', 36),
+ ('cgi_decode', 8),
+ ('cgi_decode', 9),
+ ('cgi_decode', 10),
+ ('cgi_decode', 11),
+ ('cgi_decode', 12),
+ ('cgi_decode', 15),
+ ('cgi_decode', 16),
+ ('cgi_decode', 17),
+ ('cgi_decode', 18),
+ ('cgi_decode', 19),
+ ('cgi_decode', 20),
+ ('cgi_decode', 21),
+ ('cgi_decode', 30),
+ ('cgi_decode', 31),
+ ('cgi_decode', 32)}
 
->>> print(cov.coverage())
-{('cgi_decode', 18), ('cgi_decode', 8), ('__exit__', 25), ('cgi_decode', 11), ('cgi_decode', 17), ('cgi_decode', 30), ('cgi_decode', 20), ('cgi_decode', 10), ('cgi_decode', 16), ('cgi_decode', 19), ('cgi_decode', 9), ('cgi_decode', 32), ('cgi_decode', 12), ('cgi_decode', 31), ('cgi_decode', 15), ('cgi_decode', 21)}
-
-
+Coverage sets can be subject to set operations, such as _intersection_ (which locations are covered in multiple executions) and _difference_ (which locations are covered in run _a_, but not _b_). The chapter also discusses how to obtain such coverage from C programs.
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Code Coverage"
@@ -87,6 +129,13 @@ if __name__ == '__main__':
 
 
 
+if __name__ == '__main__':
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+from typing import Any, Optional, Callable, List, Type, Set, Tuple
+
 ## A CGI Decoder
 ## -------------
 
@@ -95,9 +144,9 @@ if __name__ == '__main__':
 
 
 
-def cgi_decode(s):
+def cgi_decode(s: str) -> str:
     """Decode the CGI-encoded string `s`:
-       * replace "+" by " "
+       * replace '+' by ' '
        * replace "%xx" by the character with hex number xx.
        Return the decoded string.  Raise `ValueError` for invalid inputs."""
 
@@ -169,20 +218,24 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     cgi_decode("a+b")
 
+from types import FrameType, TracebackType
+
 if __name__ == '__main__':
     coverage = []
 
-def traceit(frame, event, arg):
-    if event == "line":
+def traceit(frame: FrameType, event: str, arg: Any) -> Optional[Callable]:
+    """Trace program execution. To be passed to sys.settrace()."""
+    if event == 'line':
         global coverage
         function_name = frame.f_code.co_name
         lineno = frame.f_lineno
         coverage.append(lineno)
+
     return traceit
 
 import sys
 
-def cgi_decode_traced(s):
+def cgi_decode_traced(s: str) -> None:
     global coverage
     coverage = []
     sys.settrace(traceit)  # Turn on
@@ -227,6 +280,7 @@ if __name__ == '__main__':
             print("  ", end="")
         print("%2d  " % lineno, end="")
         print_content(cgi_decode_lines[lineno], '.py')
+        print()
 
 ## A Coverage Class
 ## ----------------
@@ -236,9 +290,24 @@ if __name__ == '__main__':
 
 
 
+Location = Tuple[str, int]
+
 class Coverage:
+    """Track coverage within a `with` block. Use as
+    ```
+    with Coverage() as cov:
+        function_to_be_traced()
+    c = cov.coverage()
+    ```
+    """
+
+    def __init__(self) -> None:
+        """Constructor"""
+        self._trace: List[Location] = []
+
     # Trace function
-    def traceit(self, frame, event, arg):
+    def traceit(self, frame: FrameType, event: str, arg: Any) -> Optional[Callable]:
+        """Tracing function. To be overloaded in subclasses."""
         if self.original_trace_function is not None:
             self.original_trace_function(frame, event, arg)
 
@@ -249,24 +318,23 @@ class Coverage:
 
         return self.traceit
 
-    def __init__(self):
-        self._trace = []
-
-    # Start of `with` block
-    def __enter__(self):
+    def __enter__(self) -> Any:
+        """Start of `with` block. Turn on tracing."""
         self.original_trace_function = sys.gettrace()
         sys.settrace(self.traceit)
         return self
 
-    # End of `with` block
-    def __exit__(self, exc_type, exc_value, tb):
+    def __exit__(self, exc_type: Type, exc_value: BaseException, 
+                 tb: TracebackType) -> Optional[bool]:
+        """End of `with` block. Turn off tracing."""
         sys.settrace(self.original_trace_function)
+        return None  # default: pass all exceptions
 
-    def trace(self):
+    def trace(self) -> List[Location]:
         """The list of executed lines, as (function_name, line_number) pairs"""
         return self._trace
 
-    def coverage(self):
+    def coverage(self) -> Set[Location]:
         """The set of executed lines, as (function_name, line_number) pairs"""
         return set(self.trace())
 
@@ -293,18 +361,13 @@ if __name__ == '__main__':
     cov_plus.coverage() - cov_standard.coverage()
 
 if __name__ == '__main__':
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
-if __name__ == '__main__':
     with Coverage() as cov_max:
         cgi_decode('+')
         cgi_decode('%20')
         cgi_decode('abc')
         try:
             cgi_decode('%?a')
-        except:
+        except Exception:
             pass
 
 if __name__ == '__main__':
@@ -338,9 +401,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     trials = 100
 
-def population_coverage(population, function):
-    cumulative_coverage = []
-    all_coverage = set()
+def population_coverage(population: List[str], function: Callable) \
+        -> Tuple[Set[Location], List[int]]:
+    cumulative_coverage: List[int] = []
+    all_coverage: Set[Location] = set()
 
     for s in population:
         with Coverage() as cov:
@@ -353,15 +417,15 @@ def population_coverage(population, function):
 
     return all_coverage, cumulative_coverage
 
-def hundred_inputs():
+def hundred_inputs() -> List[str]:
     population = []
     for i in range(trials):
         population.append(fuzzer())
     return population
 
 if __name__ == '__main__':
-    all_coverage, cumulative_coverage = population_coverage(
-        hundred_inputs(), cgi_decode)
+    all_coverage, cumulative_coverage = \
+        population_coverage(hundred_inputs(), cgi_decode)
 
 # %matplotlib inline
 
@@ -558,10 +622,24 @@ if __name__ == '__main__':
         cgi_decode("a+b")
 
 if __name__ == '__main__':
-    print(cov.trace())
+    cov.trace()
 
 if __name__ == '__main__':
-    print(cov.coverage())
+    cov.coverage()
+
+from .ClassDiagram import display_class_hierarchy
+
+if __name__ == '__main__':
+    display_class_hierarchy(Coverage,
+                            public_methods=[
+                                Coverage.__init__,
+                                Coverage.__enter__,
+                                Coverage.__exit__,
+                                Coverage.coverage,
+                                Coverage.trace,
+                            ],
+                            types={'Location': Location},
+                            project='fuzzingbook')
 
 ## Lessons Learned
 ## ---------------
@@ -602,10 +680,10 @@ if __name__ == '__main__':
 
 
 
-### Exercise 1: Fixing cgi_decode
+### Exercise 1: Fixing `cgi_decode()`
 
 if __name__ == '__main__':
-    print('\n### Exercise 1: Fixing cgi_decode')
+    print('\n### Exercise 1: Fixing `cgi_decode()`')
 
 
 

@@ -3,7 +3,7 @@
 
 # "Mutation-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2021-11-09 14:02:37+01:00
+# Last change: 2021-11-22 13:25:19+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -48,15 +48,15 @@ This chapter introduces a `MutationFuzzer` class that takes a list of _seed inpu
 >>> mutation_fuzzer = MutationFuzzer(seed=[seed_input])
 >>> [mutation_fuzzer.fuzz() for i in range(10)]
 ['http://www.google.com/search?q=fuzzing',
- 'httyp:}//www.gogle.om/search?p=fu{zing',
- 'h4mttp://wvw..googlecom/sarch?q=fzzi/n',
- "http://w:ww.googl'e.com/earch?q=fuzjig",
- 'http/www.goole.com/searchO?q=fuzzi.gu',
- 'http8/X/w.gogle.cwomsearch?q=fuzing',
- 'ttp//www.google.comsarch?q=fUzzxij',
- 'http:/wwv.google.com/search?q=fuzzing',
- 'http:/www./ogla/com/search?q=fuzrin{g',
- 'hdtp:/www$.google.comJsearch?q=fuzzing']
+ 'http://wwBw.google.com/searh?q=fuzzing',
+ 'http8//wswgoRogle.am/secch?qU=fuzzing',
+ 'ittp://www.googLe.com/serch?q=fuzzingZ',
+ 'httP://wgw.google.com/seasch?Q=fuxzanmgY',
+ 'http://www.google.cxcom/search?q=fuzzing',
+ 'hFttp://ww.-g\x7fog+le.com/s%arch?q=f-uzz#ing',
+ 'http://www\x0egoogle.com/seaNrch?q=fuZzing',
+ 'http//www.Ygooge.comsarch?q=fuz~Ijg',
+ 'http8//ww.goog5le.com/sezarc?q=fuzzing']
 
 The `MutationCoverageFuzzer` maintains a _population_ of inputs, which are then evolved in order to maximize coverage.
 
@@ -64,10 +64,10 @@ The `MutationCoverageFuzzer` maintains a _population_ of inputs, which are then 
 >>> mutation_fuzzer.runs(http_runner, trials=10000)
 >>> mutation_fuzzer.population[:5]
 ['http://www.google.com/search?q=fuzzing',
- 'http://w*ww.google.cm/serc?q=fuzrmng',
- 'http://www.gyogle.com/searchKq=fNuing',
- 'http://sw7.googl|a.com.search=pfuzzng',
- "http://sw7.'oogl|a.#om.rearch=pFuzTzng"]
+ 'http://wwv.oogle>co/search7Eq=fuzing',
+ 'http://wwv\x0eOogleb>co/seakh7Eq\x1d;fuzing',
+ 'http://wwv\x0eoglebkooqeakh7Eq\x1d;fuzing',
+ 'http://wwv\x0eoglekol=oekh7Eq\x1d\x1bf~ing']
 
 
 For more details, source, and documentation, see
