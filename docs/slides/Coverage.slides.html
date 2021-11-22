@@ -15316,6 +15316,21 @@ div.jp-OutputPrompt {
 <h1 id="Code-Coverage">Code Coverage<a class="anchor-link" href="#Code-Coverage">&#182;</a></h1><p>In the <a href="Fuzzer.slides.html">previous chapter</a>, we introduced <em>basic fuzzing</em> – that is, generating random inputs to test programs.  How do we measure the effectiveness of these tests?  One way would be to check the number (and seriousness) of bugs found; but if bugs are scarce, we need a <em>proxy for the likelihood of a test to uncover a bug.</em>  In this chapter, we introduce the concept of <em>code coverage</em>, measuring which parts of a program are actually executed during a test run.  Measuring such coverage is also crucial for test generators that attempt to cover as much code as possible.</p>
 
 </div>
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
 </div></section></section><section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
@@ -15331,12 +15346,12 @@ div.jp-OutputPrompt {
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[1]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">cgi_decode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">cgi_decode</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Decode the CGI-encoded string `s`:</span>
-<span class="sd">       * replace &quot;+&quot; by &quot; &quot;</span>
+<span class="sd">       * replace &#39;+&#39; by &#39; &#39;</span>
 <span class="sd">       * replace &quot;%xx&quot; by the character with hex number xx.</span>
 <span class="sd">       Return the decoded string.  Raise `ValueError` for invalid inputs.&quot;&quot;&quot;</span>
 
@@ -15382,7 +15397,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode</span><span class="p">(</span><span class="s2">&quot;Hello+world&quot;</span><span class="p">)</span>
@@ -15401,7 +15416,7 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[2]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
 
 
 
@@ -15438,7 +15453,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39; &#39;</span>
@@ -15508,7 +15523,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode</span><span class="p">(</span><span class="s2">&quot;a+b&quot;</span><span class="p">)</span>
@@ -15527,7 +15542,7 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
 
 
 
@@ -15567,7 +15582,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">coverage</span> <span class="o">=</span> <span class="p">[]</span>
@@ -15581,15 +15596,17 @@ div.jp-OutputPrompt {
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s2">&quot;line&quot;</span><span class="p">:</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="n">frame</span><span class="p">:</span> <span class="n">FrameType</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Trace program execution. To be passed to sys.settrace().&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">event</span> <span class="o">==</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span>
         <span class="k">global</span> <span class="n">coverage</span>
         <span class="n">function_name</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
         <span class="n">lineno</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_lineno</span>
         <span class="n">coverage</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lineno</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">traceit</span>
 </pre></div>
 
@@ -15607,10 +15624,10 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">cgi_decode_traced</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">cgi_decode_traced</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">global</span> <span class="n">coverage</span>
     <span class="n">coverage</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="n">traceit</span><span class="p">)</span>  <span class="c1"># Turn on</span>
@@ -15632,7 +15649,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_traced</span><span class="p">(</span><span class="s2">&quot;a+b&quot;</span><span class="p">)</span>
@@ -15674,7 +15691,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[11]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_code</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">cgi_decode</span><span class="p">)</span>
@@ -15694,7 +15711,7 @@ div.jp-OutputPrompt {
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[13]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_content</span><span class="p">(</span><span class="n">cgi_decode_code</span><span class="p">[:</span><span class="mi">300</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="s2">&quot;.py&quot;</span><span class="p">)</span>
@@ -15717,15 +15734,14 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">cgi_decode</span>(s):
+<pre><span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">cgi_decode</span>(s: <span class="ansi-cyan-fg">str</span>) -&gt; <span class="ansi-cyan-fg">str</span>:
     <span class="ansi-yellow-fg">&#34;&#34;&#34;Decode the CGI-encoded string `s`:</span>
-<span class="ansi-yellow-fg">       * replace &#34;+&#34; by &#34; &#34;</span>
+<span class="ansi-yellow-fg">       * replace &#39;+&#39; by &#39; &#39;</span>
 <span class="ansi-yellow-fg">       * replace &#34;%xx&#34; by the character with hex number xx.</span>
 <span class="ansi-yellow-fg">       Return the decoded string.  Raise `ValueError` for invalid inputs.&#34;&#34;&#34;</span>
 
     <span class="ansi-white-fg"># Mapping of hex digits to their integer values</span>
-    hex_values = {
-  ...</pre>
+    hex_v...</pre>
 </div>
 </div>
 
@@ -15742,7 +15758,7 @@ div.jp-OutputPrompt {
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[14]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">cgi_decode_code</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
@@ -15762,7 +15778,7 @@ div.jp-OutputPrompt {
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -15781,13 +15797,13 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[18]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>&#39;def cgi_decode(s):&#39;</pre>
+<pre>&#39;def cgi_decode(s: str) -&gt; str:&#39;</pre>
 </div>
 
 </div>
@@ -15805,7 +15821,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_lines</span><span class="p">[</span><span class="mi">9</span><span class="p">:</span><span class="mi">13</span><span class="p">]</span>
@@ -15824,7 +15840,7 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[16]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[19]:</div>
 
 
 
@@ -15851,7 +15867,7 @@ div.jp-OutputPrompt {
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_decode_lines</span><span class="p">[</span><span class="mi">15</span><span class="p">]</span>
@@ -15870,7 +15886,7 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[17]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[20]:</div>
 
 
 
@@ -15894,7 +15910,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">covered_lines</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">coverage</span><span class="p">)</span>
@@ -15936,7 +15952,7 @@ div.jp-OutputPrompt {
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">lineno</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cgi_decode_lines</span><span class="p">)):</span>
@@ -15946,6 +15962,7 @@ div.jp-OutputPrompt {
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%2d</span><span class="s2">  &quot;</span> <span class="o">%</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">print_content</span><span class="p">(</span><span class="n">cgi_decode_lines</span><span class="p">[</span><span class="n">lineno</span><span class="p">],</span> <span class="s1">&#39;.py&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
 </pre></div>
 
      </div>
@@ -15965,7 +15982,39 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>#  1  <span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">cgi_decode</span>(s):#  2      <span class="ansi-yellow-fg">&#34;&#34;&#34;</span><span class="ansi-yellow-fg">Decode the CGI-encoded string `s`:</span>#  3         * replace <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">+</span><span class="ansi-yellow-fg">&#34;</span> by <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg"> </span><span class="ansi-yellow-fg">&#34;</span>#  4         * replace <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">%x</span><span class="ansi-yellow-fg">x</span><span class="ansi-yellow-fg">&#34;</span> by the character <span class="ansi-blue-fg">with</span> <span class="ansi-cyan-fg">hex</span> number xx.#  5         Return the decoded string.  Raise <span class="ansi-red-intense-fg ansi-underline">`</span><span class="ansi-cyan-fg">ValueError</span><span class="ansi-red-intense-fg ansi-underline">`</span> <span class="ansi-blue-fg">for</span> invalid inputs.<span class="ansi-yellow-fg">&#34;&#34;&#34;</span>#  6  #  7      <span class="ansi-white-fg"># Mapping of hex digits to their integer values</span>   8      hex_values = {   9          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">0</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">0</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">1</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">1</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">2</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">2</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">3</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">3</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">4</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">4</span>,  10          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">5</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">5</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">6</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">6</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">7</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">7</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">8</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">8</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">9</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">9</span>,  11          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">a</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">10</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">b</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">11</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">c</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">12</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">d</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">13</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">e</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">14</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">15</span>,  12          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">A</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">10</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">B</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">11</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">C</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">12</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">D</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">13</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">E</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">14</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">F</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">15</span>,# 13      }# 14    15      t = <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">&#34;</span>  16      i = <span class="ansi-blue-fg">0</span>  17      <span class="ansi-blue-fg">while</span> i &lt; <span class="ansi-cyan-fg">len</span>(s):  18          c = s[i]  19          <span class="ansi-blue-fg">if</span> c == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">+</span><span class="ansi-yellow-fg">&#39;</span>:  20              t += <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-yellow-fg">&#39;</span>  21          <span class="ansi-blue-fg">elif</span> c == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">%</span><span class="ansi-yellow-fg">&#39;</span>:# 22              digit_high, digit_low = s[i + <span class="ansi-blue-fg">1</span>], s[i + <span class="ansi-blue-fg">2</span>]# 23              i += <span class="ansi-blue-fg">2</span># 24              <span class="ansi-blue-fg">if</span> digit_high <span class="ansi-magenta-fg">in</span> hex_values <span class="ansi-magenta-fg">and</span> digit_low <span class="ansi-magenta-fg">in</span> hex_values:# 25                  v = hex_values[digit_high] * <span class="ansi-blue-fg">16</span> + hex_values[digit_low]# 26                  t += <span class="ansi-cyan-fg">chr</span>(v)# 27              <span class="ansi-blue-fg">else</span>:# 28                  <span class="ansi-blue-fg">raise</span> <span class="ansi-cyan-fg">ValueError</span>(<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Invalid encoding</span><span class="ansi-yellow-fg">&#34;</span>)# 29          <span class="ansi-blue-fg">else</span>:  30              t += c  31          i += <span class="ansi-blue-fg">1</span>  32      <span class="ansi-blue-fg">return</span> t</pre>
+<pre>#  1  <span class="ansi-blue-fg">def</span> <span class="ansi-green-fg">cgi_decode</span>(s: <span class="ansi-cyan-fg">str</span>) -&gt; <span class="ansi-cyan-fg">str</span>:
+#  2      <span class="ansi-yellow-fg">&#34;&#34;&#34;</span><span class="ansi-yellow-fg">Decode the CGI-encoded string `s`:</span>
+#  3         * replace <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">+</span><span class="ansi-yellow-fg">&#39;</span> by <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-yellow-fg">&#39;</span>
+#  4         * replace <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">%x</span><span class="ansi-yellow-fg">x</span><span class="ansi-yellow-fg">&#34;</span> by the character <span class="ansi-blue-fg">with</span> <span class="ansi-cyan-fg">hex</span> number xx.
+#  5         Return the decoded string.  Raise <span class="ansi-red-intense-fg ansi-underline">`</span><span class="ansi-cyan-fg">ValueError</span><span class="ansi-red-intense-fg ansi-underline">`</span> <span class="ansi-blue-fg">for</span> invalid inputs.<span class="ansi-yellow-fg">&#34;&#34;&#34;</span>
+#  6  
+#  7      <span class="ansi-white-fg"># Mapping of hex digits to their integer values</span>
+   8      hex_values = {
+   9          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">0</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">0</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">1</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">1</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">2</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">2</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">3</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">3</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">4</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">4</span>,
+  10          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">5</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">5</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">6</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">6</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">7</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">7</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">8</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">8</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">9</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">9</span>,
+  11          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">a</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">10</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">b</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">11</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">c</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">12</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">d</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">13</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">e</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">14</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">f</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">15</span>,
+  12          <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">A</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">10</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">B</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">11</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">C</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">12</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">D</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">13</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">E</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">14</span>, <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">F</span><span class="ansi-yellow-fg">&#39;</span>: <span class="ansi-blue-fg">15</span>,
+# 13      }
+# 14  
+  15      t = <span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">&#34;</span>
+  16      i = <span class="ansi-blue-fg">0</span>
+  17      <span class="ansi-blue-fg">while</span> i &lt; <span class="ansi-cyan-fg">len</span>(s):
+  18          c = s[i]
+  19          <span class="ansi-blue-fg">if</span> c == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">+</span><span class="ansi-yellow-fg">&#39;</span>:
+  20              t += <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg"> </span><span class="ansi-yellow-fg">&#39;</span>
+  21          <span class="ansi-blue-fg">elif</span> c == <span class="ansi-yellow-fg">&#39;</span><span class="ansi-yellow-fg">%</span><span class="ansi-yellow-fg">&#39;</span>:
+# 22              digit_high, digit_low = s[i + <span class="ansi-blue-fg">1</span>], s[i + <span class="ansi-blue-fg">2</span>]
+# 23              i += <span class="ansi-blue-fg">2</span>
+# 24              <span class="ansi-blue-fg">if</span> digit_high <span class="ansi-magenta-fg">in</span> hex_values <span class="ansi-magenta-fg">and</span> digit_low <span class="ansi-magenta-fg">in</span> hex_values:
+# 25                  v = hex_values[digit_high] * <span class="ansi-blue-fg">16</span> + hex_values[digit_low]
+# 26                  t += <span class="ansi-cyan-fg">chr</span>(v)
+# 27              <span class="ansi-blue-fg">else</span>:
+# 28                  <span class="ansi-blue-fg">raise</span> <span class="ansi-cyan-fg">ValueError</span>(<span class="ansi-yellow-fg">&#34;</span><span class="ansi-yellow-fg">Invalid encoding</span><span class="ansi-yellow-fg">&#34;</span>)
+# 29          <span class="ansi-blue-fg">else</span>:
+  30              t += c
+  31          i += <span class="ansi-blue-fg">1</span>
+  32      <span class="ansi-blue-fg">return</span> t
+</pre>
 </div>
 </div>
 
@@ -16006,15 +16055,42 @@ div.jp-OutputPrompt {
 <p>Here's the full implementation with all its bells and whistles.  You don't have to get everything; it suffices that you know how to use it:</p>
 
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Location</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Coverage</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Track coverage within a `with` block. Use as</span>
+<span class="sd">    ```</span>
+<span class="sd">    with Coverage() as cov:</span>
+<span class="sd">        function_to_be_traced()</span>
+<span class="sd">    c = cov.coverage()</span>
+<span class="sd">    ```</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Constructor&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Location</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
     <span class="c1"># Trace function</span>
-    <span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">traceit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="n">FrameType</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Tracing function. To be overloaded in subclasses.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_trace_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">original_trace_function</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
 
@@ -16025,24 +16101,23 @@ div.jp-OutputPrompt {
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceit</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="c1"># Start of `with` block</span>
-    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Start of `with` block. Turn on tracing.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">original_trace_function</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">gettrace</span><span class="p">()</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceit</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="c1"># End of `with` block</span>
-    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">:</span> <span class="ne">BaseException</span><span class="p">,</span> 
+                 <span class="n">tb</span><span class="p">:</span> <span class="n">TracebackType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;End of `with` block. Turn off tracing.&quot;&quot;&quot;</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">settrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_trace_function</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># default: pass all exceptions</span>
 
-    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Location</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;The list of executed lines, as (function_name, line_number) pairs&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span>
 
-    <span class="k">def</span> <span class="nf">coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">coverage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Location</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;The set of executed lines, as (function_name, line_number) pairs&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">())</span>
 </pre></div>
@@ -16061,7 +16136,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[21]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
@@ -16087,7 +16162,7 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>{(&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 8), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 21)}
+<pre>{(&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 8), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 9), (&#39;__exit__&#39;, 36), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 21)}
 </pre>
 </div>
 </div>
@@ -16111,7 +16186,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[26]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_plus</span><span class="p">:</span>
@@ -16135,7 +16210,7 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[22]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[26]:</div>
 
 
 
@@ -16165,7 +16240,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[27]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_max</span><span class="p">:</span>
@@ -16174,7 +16249,7 @@ div.jp-OutputPrompt {
     <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;abc&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;%?a&#39;</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
         <span class="k">pass</span>
 </pre></div>
 
@@ -16192,7 +16267,7 @@ div.jp-OutputPrompt {
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[28]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">cov_plus</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -16211,7 +16286,7 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[25]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[28]:</div>
 
 
 
@@ -16246,7 +16321,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[27]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[30]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sample</span> <span class="o">=</span> <span class="n">fuzzer</span><span class="p">()</span>
@@ -16266,7 +16341,7 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[27]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[30]:</div>
 
 
 
@@ -16290,7 +16365,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[28]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_fuzz</span><span class="p">:</span>
@@ -16314,13 +16389,13 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[28]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[31]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>{(&#39;__exit__&#39;, 25),
+<pre>{(&#39;__exit__&#39;, 36),
  (&#39;cgi_decode&#39;, 8),
  (&#39;cgi_decode&#39;, 9),
  (&#39;cgi_decode&#39;, 10),
@@ -16355,7 +16430,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[29]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[32]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">cov_fuzz</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -16374,7 +16449,7 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[29]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[32]:</div>
 
 
 
@@ -16402,7 +16477,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[30]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[33]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">trials</span> <span class="o">=</span> <span class="mi">100</span>
@@ -16416,12 +16491,13 @@ div.jp-OutputPrompt {
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[34]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">population_coverage</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
-    <span class="n">cumulative_coverage</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">all_coverage</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">population_coverage</span><span class="p">(</span><span class="n">population</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="n">Location</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+    <span class="n">cumulative_coverage</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_coverage</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Location</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">population</span><span class="p">:</span>
         <span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
@@ -16449,10 +16525,10 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[32]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[35]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">hundred_inputs</span><span class="p">():</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">hundred_inputs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="n">population</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
         <span class="n">population</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fuzzer</span><span class="p">())</span>
@@ -16473,11 +16549,11 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[33]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[36]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_coverage</span><span class="p">,</span> <span class="n">cumulative_coverage</span> <span class="o">=</span> <span class="n">population_coverage</span><span class="p">(</span>
-    <span class="n">hundred_inputs</span><span class="p">(),</span> <span class="n">cgi_decode</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_coverage</span><span class="p">,</span> <span class="n">cumulative_coverage</span> <span class="o">=</span> \
+    <span class="n">population_coverage</span><span class="p">(</span><span class="n">hundred_inputs</span><span class="p">(),</span> <span class="n">cgi_decode</span><span class="p">)</span>
 </pre></div>
 
      </div>
@@ -16488,7 +16564,7 @@ div.jp-OutputPrompt {
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[36]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[39]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_coverage</span><span class="p">)</span>
@@ -16510,7 +16586,7 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[36]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[39]:</div>
 
 
 
@@ -16550,7 +16626,7 @@ div.jp-OutputPrompt {
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[37]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[40]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="mi">100</span>
@@ -16577,7 +16653,7 @@ div.jp-OutputPrompt {
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[38]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[41]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">average_coverage</span><span class="p">)</span>
@@ -16599,7 +16675,7 @@ div.jp-OutputPrompt {
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[38]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[41]:</div>
 
 
 
@@ -16660,7 +16736,7 @@ Hello World
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[39]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[42]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
@@ -16687,7 +16763,7 @@ Hello World
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[40]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[43]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">+=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
@@ -16724,7 +16800,7 @@ Hello World
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[41]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[44]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">+=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
@@ -16765,7 +16841,7 @@ Hello World
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[42]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[45]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">+=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
@@ -16802,7 +16878,7 @@ Hello World
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[43]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[46]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;cgi_decode.c&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -16823,7 +16899,7 @@ Hello World
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[45]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[48]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">print_file</span><span class="p">(</span><span class="s2">&quot;cgi_decode.c&quot;</span><span class="p">)</span>
@@ -16923,7 +16999,7 @@ Hello World
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[46]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[49]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>cc --coverage -o cgi_decode cgi_decode.c
@@ -16943,7 +17019,7 @@ Hello World
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[47]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[50]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>./cgi_decode <span class="s1">&#39;Send+mail+to+me%40fuzzingbook.org&#39;</span>
@@ -16984,7 +17060,7 @@ Hello World
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[48]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[51]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="o">!</span>gcov cgi_decode.c
@@ -17028,7 +17104,7 @@ Creating &#39;cgi_decode.c.gcov&#39;
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[49]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[52]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">lines</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;cgi_decode.c.gcov&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
@@ -17090,7 +17166,7 @@ Creating &#39;cgi_decode.c.gcov&#39;
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[50]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[53]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">read_gcov_coverage</span><span class="p">(</span><span class="n">c_file</span><span class="p">):</span>
@@ -17115,7 +17191,7 @@ Creating &#39;cgi_decode.c.gcov&#39;
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[51]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[54]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">coverage</span> <span class="o">=</span> <span class="n">read_gcov_coverage</span><span class="p">(</span><span class="s1">&#39;cgi_decode.c&#39;</span><span class="p">)</span>
@@ -17129,7 +17205,7 @@ Creating &#39;cgi_decode.c.gcov&#39;
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[52]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[55]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">coverage</span><span class="p">)[:</span><span class="mi">5</span><span class="p">]</span>
@@ -17148,17 +17224,17 @@ Creating &#39;cgi_decode.c.gcov&#39;
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[52]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[55]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>[(&#39;cgi_decode.c&#39;, 12),
- (&#39;cgi_decode.c&#39;, 15),
- (&#39;cgi_decode.c&#39;, 24),
- (&#39;cgi_decode.c&#39;, 27),
- (&#39;cgi_decode.c&#39;, 30)]</pre>
+<pre>[(&#39;cgi_decode.c&#39;, 43),
+ (&#39;cgi_decode.c&#39;, 52),
+ (&#39;cgi_decode.c&#39;, 55),
+ (&#39;cgi_decode.c&#39;, 12),
+ (&#39;cgi_decode.c&#39;, 15)]</pre>
 </div>
 
 </div>
@@ -17188,7 +17264,7 @@ Creating &#39;cgi_decode.c.gcov&#39;
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[53]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[56]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">ExpectError</span> <span class="kn">import</span> <span class="n">ExpectError</span>
@@ -17202,7 +17278,7 @@ Creating &#39;cgi_decode.c.gcov&#39;
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[54]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[57]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -17232,9 +17308,9 @@ Creating &#39;cgi_decode.c.gcov&#39;
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52675/2238772797.py&#34;, line 5, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_67953/2238772797.py&#34;, line 5, in &lt;module&gt;
     cgi_decode(s)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52675/2739410130.py&#34;, line 22, in cgi_decode
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_67953/1071239422.py&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
 IndexError: string index out of range (expected)
 </pre>
@@ -17254,7 +17330,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[55]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[58]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span>
@@ -17273,7 +17349,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[55]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[58]:</div>
 
 
 
@@ -17314,13 +17390,19 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 </div></div></section></section><section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><p>This chapter introduces a <code>Coverage</code> class allowing you to measure coverage for Python programs.  Its typical usage is in conjunction with a <code>with</code> clause:</p>
+<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><p>This chapter introduces a <code>Coverage</code> class allowing you to measure coverage for Python programs. Within the context of this book, we use coverage information to guide fuzzing towards uncovered locations.</p>
 
 </div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div><div class="fragment">
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>The typical usage of the <code>Coverage</code> class is in conjunction with a <code>with</code> clause:</p>
+
+</div>
+</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[56]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[59]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
@@ -17335,57 +17417,16 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 </div></div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>The <code>trace()</code> method returns the coverage as a list of locations covered.  Each location comes as a pair (<code>function name</code>, <code>line</code>).</p>
-
-</div>
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[57]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">cov</span><span class="o">.</span><span class="n">trace</span><span class="p">())</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-
-
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>[(&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 8), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25)]
-</pre>
-</div>
-</div>
-
-</div>
-
-</div>
-
-</div></div><div class="fragment">
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>The <code>coverage()</code> method returns the set of locations executed at least once:</p>
+<p>The <code>trace()</code> method returns the <em>trace</em> – that is, the list of locations executed in order. Each location comes as a pair (<code>function name</code>, <code>line</code>).</p>
 
 </div>
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[58]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[60]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">())</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov</span><span class="o">.</span><span class="n">trace</span><span class="p">()</span>
 </pre></div>
 
      </div>
@@ -17401,13 +17442,230 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[60]:</div>
 
 
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>{(&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 8), (&#39;__exit__&#39;, 25), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 21)}
-</pre>
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>[(&#39;cgi_decode&#39;, 9),
+ (&#39;cgi_decode&#39;, 10),
+ (&#39;cgi_decode&#39;, 11),
+ (&#39;cgi_decode&#39;, 12),
+ (&#39;cgi_decode&#39;, 8),
+ (&#39;cgi_decode&#39;, 15),
+ (&#39;cgi_decode&#39;, 16),
+ (&#39;cgi_decode&#39;, 17),
+ (&#39;cgi_decode&#39;, 18),
+ (&#39;cgi_decode&#39;, 19),
+ (&#39;cgi_decode&#39;, 21),
+ (&#39;cgi_decode&#39;, 30),
+ (&#39;cgi_decode&#39;, 31),
+ (&#39;cgi_decode&#39;, 17),
+ (&#39;cgi_decode&#39;, 18),
+ (&#39;cgi_decode&#39;, 19),
+ (&#39;cgi_decode&#39;, 20),
+ (&#39;cgi_decode&#39;, 31),
+ (&#39;cgi_decode&#39;, 17),
+ (&#39;cgi_decode&#39;, 18),
+ (&#39;cgi_decode&#39;, 19),
+ (&#39;cgi_decode&#39;, 21),
+ (&#39;cgi_decode&#39;, 30),
+ (&#39;cgi_decode&#39;, 31),
+ (&#39;cgi_decode&#39;, 17),
+ (&#39;cgi_decode&#39;, 32),
+ (&#39;__exit__&#39;, 36)]</pre>
 </div>
+
+</div>
+
+</div>
+
+</div>
+
+</div></section><section>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>The <code>coverage()</code> method returns the <em>coverage</em>, that is, the set of locations in the trace executed at least once:</p>
+
+</div>
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[61]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[61]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>{(&#39;__exit__&#39;, 36),
+ (&#39;cgi_decode&#39;, 8),
+ (&#39;cgi_decode&#39;, 9),
+ (&#39;cgi_decode&#39;, 10),
+ (&#39;cgi_decode&#39;, 11),
+ (&#39;cgi_decode&#39;, 12),
+ (&#39;cgi_decode&#39;, 15),
+ (&#39;cgi_decode&#39;, 16),
+ (&#39;cgi_decode&#39;, 17),
+ (&#39;cgi_decode&#39;, 18),
+ (&#39;cgi_decode&#39;, 19),
+ (&#39;cgi_decode&#39;, 20),
+ (&#39;cgi_decode&#39;, 21),
+ (&#39;cgi_decode&#39;, 30),
+ (&#39;cgi_decode&#39;, 31),
+ (&#39;cgi_decode&#39;, 32)}</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div></section><section>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p>Coverage sets can be subject to set operations, such as <em>intersection</em> (which locations are covered in multiple executions) and <em>difference</em> (which locations are covered in run <em>a</em>, but not <em>b</em>). The chapter also discusses how to obtain such coverage from C programs.</p>
+
+</div>
+</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[62]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># ignore</span>
+<span class="kn">from</span> <span class="nn">ClassDiagram</span> <span class="kn">import</span> <span class="n">display_class_hierarchy</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[63]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+     <div class="CodeMirror cm-s-jupyter">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># ignore</span>
+<span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">Coverage</span><span class="p">,</span>
+                        <span class="n">public_methods</span><span class="o">=</span><span class="p">[</span>
+                            <span class="n">Coverage</span><span class="o">.</span><span class="fm">__init__</span><span class="p">,</span>
+                            <span class="n">Coverage</span><span class="o">.</span><span class="fm">__enter__</span><span class="p">,</span>
+                            <span class="n">Coverage</span><span class="o">.</span><span class="fm">__exit__</span><span class="p">,</span>
+                            <span class="n">Coverage</span><span class="o">.</span><span class="n">coverage</span><span class="p">,</span>
+                            <span class="n">Coverage</span><span class="o">.</span><span class="n">trace</span><span class="p">,</span>
+                        <span class="p">],</span>
+                        <span class="n">types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Location&#39;</span><span class="p">:</span> <span class="n">Location</span><span class="p">},</span>
+                        <span class="n">project</span><span class="o">=</span><span class="s1">&#39;fuzzingbook&#39;</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[63]:</div>
+
+
+
+<div class="jp-RenderedSVG jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="image/svg+xml">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.3 (20211023.0002)
+ -->
+<!-- Pages: 1 -->
+<svg width="228pt" height="106pt"
+ viewBox="0.00 0.00 227.50 106.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 102)">
+<g id="a_graph0"><a xlink:title="Coverage class hierarchy">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-102 223.5,-102 223.5,4 -4,4"/>
+</a>
+</g>
+<!-- Coverage -->
+<g id="node1" class="node">
+<title>Coverage</title>
+<g id="a_node1"><a xlink:href="#" xlink:title="class Coverage:&#10;Track coverage within a `with` block. Use as&#10;```&#10;with Coverage() as cov:&#10;function_to_be_traced()&#10;c = cov.coverage()&#10;```">
+<polygon fill="none" stroke="black" points="0,-0.5 0,-97.5 83,-97.5 83,-0.5 0,-0.5"/>
+<text text-anchor="start" x="13" y="-83.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Coverage</text>
+<polyline fill="none" stroke="black" points="0,-74.5 83,-74.5 "/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="Coverage">
+<g id="a_node1_1"><a xlink:href="#" xlink:title="__enter__(self) &#45;&gt; Any:&#10;Start of `with` block. Turn on tracing.">
+<text text-anchor="start" x="8.5" y="-63.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__enter__()</text>
+</a>
+</g>
+<g id="a_node1_2"><a xlink:href="#" xlink:title="__exit__(self, exc_type: Type, exc_value: BaseException, tb: traceback) &#45;&gt; Optional[bool]:&#10;End of `with` block. Turn off tracing.">
+<text text-anchor="start" x="8.5" y="-52.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__exit__()</text>
+</a>
+</g>
+<g id="a_node1_3"><a xlink:href="#" xlink:title="__init__(self) &#45;&gt; None:&#10;Constructor">
+<text text-anchor="start" x="8.5" y="-41.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node1_4"><a xlink:href="#" xlink:title="coverage(self) &#45;&gt; Set[Location]:&#10;The set of executed lines, as (function_name, line_number) pairs">
+<text text-anchor="start" x="8.5" y="-30.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">coverage()</text>
+</a>
+</g>
+<g id="a_node1_5"><a xlink:href="#" xlink:title="trace(self) &#45;&gt; List[Location]:&#10;The list of executed lines, as (function_name, line_number) pairs">
+<text text-anchor="start" x="8.5" y="-19.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">trace()</text>
+</a>
+</g>
+<g id="a_node1_6"><a xlink:href="#" xlink:title="traceit(self, frame: frame, event: str, arg: Any) &#45;&gt; Optional[Callable]:&#10;Tracing function. To be overloaded in subclasses.">
+<text text-anchor="start" x="8.5" y="-8.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">traceit()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- Legend -->
+<g id="node2" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="101.5" y="-66.5" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="101.5" y="-56.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="107.5" y="-56.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="101.5" y="-46.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="107.5" y="-46.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="101.5" y="-36.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="107.5" y="-36.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="101.5" y="-27.3" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+
+</div>
+
 </div>
 
 </div>
@@ -17438,7 +17696,7 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 </div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Exercise-1:-Fixing-cgi_decode">Exercise 1: Fixing cgi_decode<a class="anchor-link" href="#Exercise-1:-Fixing-cgi_decode">&#182;</a></h3><p>Create an appropriate test to reproduce the <code>IndexError</code> discussed above.  Fix <code>cgi_decode()</code> to prevent the bug.  Show that your test (and additional <code>fuzzer()</code> runs) no longer expose the bug.  Do the same for the C variant.</p>
+<h3 id="Exercise-1:-Fixing-cgi_decode()">Exercise 1: Fixing <code>cgi_decode()</code><a class="anchor-link" href="#Exercise-1:-Fixing-cgi_decode()">&#182;</a></h3><p>Create an appropriate test to reproduce the <code>IndexError</code> discussed above.  Fix <code>cgi_decode()</code> to prevent the bug.  Show that your test (and additional <code>fuzzer()</code> runs) no longer expose the bug.  Do the same for the C variant.</p>
 
 </div>
 </div></section><section>
@@ -17450,7 +17708,7 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[61]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[66]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -17475,9 +17733,9 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52675/1102034435.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_67953/1102034435.py&#34;, line 2, in &lt;module&gt;
     assert cgi_decode(&#39;%&#39;) == &#39;%&#39;
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52675/2739410130.py&#34;, line 22, in cgi_decode
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_67953/1071239422.py&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
 IndexError: string index out of range (expected)
 </pre>
@@ -17491,7 +17749,7 @@ IndexError: string index out of range (expected)
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[62]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[67]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
@@ -17516,9 +17774,9 @@ IndexError: string index out of range (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52675/2291699482.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_67953/2291699482.py&#34;, line 2, in &lt;module&gt;
     assert cgi_decode(&#39;%4&#39;) == &#39;%4&#39;
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52675/2739410130.py&#34;, line 22, in cgi_decode
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_67953/1071239422.py&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
 IndexError: string index out of range (expected)
 </pre>
@@ -17532,7 +17790,7 @@ IndexError: string index out of range (expected)
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[63]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[68]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">cgi_decode</span><span class="p">(</span><span class="s1">&#39;%40&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span>
@@ -17552,7 +17810,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[64]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[69]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fixed_cgi_decode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
@@ -17597,7 +17855,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[65]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[70]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span>
@@ -17611,7 +17869,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[66]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[71]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%4&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;%4&#39;</span>
@@ -17625,7 +17883,7 @@ IndexError: string index out of range (expected)
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[67]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[72]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">fixed_cgi_decode</span><span class="p">(</span><span class="s1">&#39;%40&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span>
@@ -17645,7 +17903,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[68]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[73]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">trials</span><span class="p">):</span>
@@ -17670,7 +17928,7 @@ IndexError: string index out of range (expected)
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[69]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[74]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cgi_c_code</span> <span class="o">=</span> <span class="n">cgi_c_code</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
@@ -17717,7 +17975,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[70]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[75]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">Coverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
@@ -17739,7 +17997,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[70]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[75]:</div>
 
 
 
@@ -17780,7 +18038,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[71]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[76]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">branch_coverage</span><span class="p">(</span><span class="n">trace</span><span class="p">):</span>
@@ -17802,7 +18060,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[72]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[77]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">branch_coverage</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
@@ -17821,7 +18079,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[72]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[77]:</div>
 
 
 
@@ -17843,7 +18101,7 @@ IndexError: string index out of range (expected)
  ((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)),
  ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)),
  ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17)),
- ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25))}</pre>
+ ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 36))}</pre>
 </div>
 
 </div>
@@ -17861,7 +18119,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[73]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[78]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">BranchCoverage</span><span class="p">(</span><span class="n">Coverage</span><span class="p">):</span>
@@ -17897,7 +18155,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[74]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[79]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov</span><span class="p">:</span>
@@ -17923,7 +18181,7 @@ IndexError: string index out of range (expected)
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>{((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25)), ((&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11)), ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21)), ((&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32)), ((&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10)), ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18)), ((&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)), ((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20)), ((&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 8)), ((&#39;cgi_decode&#39;, 8), (&#39;cgi_decode&#39;, 15)), ((&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12))}
+<pre>{((&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)), ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32)), ((&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21)), ((&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19)), ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 36)), ((&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 8), (&#39;cgi_decode&#39;, 15)), ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11)), ((&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 8)), ((&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18)), ((&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12))}
 </pre>
 </div>
 </div>
@@ -17935,7 +18193,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[75]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[80]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_plus</span><span class="p">:</span>
@@ -17959,7 +18217,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[75]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[80]:</div>
 
 
 
@@ -17978,7 +18236,7 @@ IndexError: string index out of range (expected)
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[76]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[81]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_max</span><span class="p">:</span>
@@ -17999,7 +18257,7 @@ IndexError: string index out of range (expected)
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[77]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[82]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">cov_plus</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -18018,7 +18276,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[77]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[82]:</div>
 
 
 
@@ -18031,7 +18289,7 @@ IndexError: string index out of range (expected)
  ((&#39;cgi_decode&#39;, 24), (&#39;cgi_decode&#39;, 28)),
  ((&#39;cgi_decode&#39;, 25), (&#39;cgi_decode&#39;, 26)),
  ((&#39;cgi_decode&#39;, 26), (&#39;cgi_decode&#39;, 31)),
- ((&#39;cgi_decode&#39;, 28), (&#39;__exit__&#39;, 25)),
+ ((&#39;cgi_decode&#39;, 28), (&#39;__exit__&#39;, 36)),
  ((&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 9))}</pre>
 </div>
 
@@ -18044,7 +18302,7 @@ IndexError: string index out of range (expected)
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[78]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[83]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">sample</span>
@@ -18063,7 +18321,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[78]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[83]:</div>
 
 
 
@@ -18081,7 +18339,7 @@ IndexError: string index out of range (expected)
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[79]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[84]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">BranchCoverage</span><span class="p">()</span> <span class="k">as</span> <span class="n">cov_fuzz</span><span class="p">:</span>
@@ -18105,7 +18363,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[79]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[84]:</div>
 
 
 
@@ -18128,7 +18386,7 @@ IndexError: string index out of range (expected)
  ((&#39;cgi_decode&#39;, 22), (&#39;cgi_decode&#39;, 23)),
  ((&#39;cgi_decode&#39;, 23), (&#39;cgi_decode&#39;, 24)),
  ((&#39;cgi_decode&#39;, 24), (&#39;cgi_decode&#39;, 28)),
- ((&#39;cgi_decode&#39;, 28), (&#39;__exit__&#39;, 25)),
+ ((&#39;cgi_decode&#39;, 28), (&#39;__exit__&#39;, 36)),
  ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)),
  ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17))}</pre>
 </div>
@@ -18142,7 +18400,7 @@ IndexError: string index out of range (expected)
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[80]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[85]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">cov_fuzz</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -18161,7 +18419,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[80]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[85]:</div>
 
 
 
@@ -18183,7 +18441,7 @@ IndexError: string index out of range (expected)
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[81]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[86]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">population_branch_coverage</span><span class="p">(</span><span class="n">population</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
@@ -18210,7 +18468,7 @@ IndexError: string index out of range (expected)
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[82]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[87]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_branch_coverage</span><span class="p">,</span> <span class="n">cumulative_branch_coverage</span> <span class="o">=</span> <span class="n">population_branch_coverage</span><span class="p">(</span>
@@ -18225,7 +18483,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[83]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[88]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cumulative_branch_coverage</span><span class="p">)</span>
@@ -18247,7 +18505,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[83]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[88]:</div>
 
 
 
@@ -18281,7 +18539,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[84]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[89]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">())</span>
@@ -18300,7 +18558,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[84]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[89]:</div>
 
 
 
@@ -18318,7 +18576,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[85]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[90]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">all_branch_coverage</span> <span class="o">-</span> <span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span>
@@ -18337,14 +18595,14 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[85]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[90]:</div>
 
 
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>{((&#39;cgi_decode&#39;, 22), (&#39;__exit__&#39;, 25)),
- ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 25))}</pre>
+<pre>{((&#39;cgi_decode&#39;, 22), (&#39;__exit__&#39;, 36)),
+ ((&#39;cgi_decode&#39;, 32), (&#39;__exit__&#39;, 36))}</pre>
 </div>
 
 </div>
@@ -18362,7 +18620,7 @@ IndexError: string index out of range (expected)
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[86]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[91]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cov_max</span><span class="o">.</span><span class="n">coverage</span><span class="p">()</span> <span class="o">-</span> <span class="n">all_branch_coverage</span>
@@ -18381,7 +18639,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[86]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[91]:</div>
 
 
 
@@ -18417,7 +18675,7 @@ IndexError: string index out of range (expected)
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[87]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[92]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">runs</span> <span class="o">=</span> <span class="mi">100</span>
@@ -18445,7 +18703,7 @@ IndexError: string index out of range (expected)
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[88]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[93]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">average_coverage</span><span class="p">)</span>
@@ -18467,7 +18725,7 @@ IndexError: string index out of range (expected)
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[88]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[93]:</div>
 
 
 
