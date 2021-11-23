@@ -3,7 +3,7 @@
 
 # "Probabilistic Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2021-11-22 13:30:43+01:00
+# Last change: 2021-11-23 20:33:34+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -62,11 +62,11 @@ A `ProbabilisticGrammarFuzzer` will extract and interpret these options.  Here i
 
 >>> probabilistic_us_phone_fuzzer = ProbabilisticGrammarFuzzer(PROBABILISTIC_US_PHONE_GRAMMAR)
 >>> [probabilistic_us_phone_fuzzer.fuzz() for i in range(5)]
-['(968)945-4707',
- '(968)930-9032',
- '(990)929-4995',
- '(902)924-9181',
- '(907)977-7491']
+['(918)925-2501',
+ '(981)925-0792',
+ '(934)995-5029',
+ '(955)999-7801',
+ '(964)927-0877']
 
 As you can see, the large majority of area codes now starts with `9`.
 
