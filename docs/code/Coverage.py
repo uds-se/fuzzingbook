@@ -3,7 +3,7 @@
 
 # "Code Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2021-11-22 13:24:34+01:00
+# Last change: 2021-11-23 20:28:51+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -49,6 +49,44 @@ The typical usage of the `Coverage` class is in conjunction with a `with` clause
 >>> with Coverage() as cov:
 >>>     cgi_decode("a+b")
 
+Printing out a coverage object shows the covered functions, with covered lines prefixed as `#`:
+
+>>> print(cov)
+#  1  def cgi_decode(s: str) -> str:
+#  2      """Decode the CGI-encoded string `s`:
+#  3         * replace '+' by ' '
+#  4         * replace "%xx" by the character with hex number xx.
+#  5         Return the decoded string.  Raise `ValueError` for invalid inputs."""
+#  6  
+#  7      # Mapping of hex digits to their integer values
+   8      hex_values = {
+   9          '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
+  10          '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+  11          'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
+  12          'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
+# 13      }
+# 14  
+  15      t = ""
+  16      i = 0
+  17      while i < len(s):
+  18          c = s[i]
+  19          if c == '+':
+  20              t += ' '
+  21          elif c == '%':
+# 22              digit_high, digit_low = s[i + 1], s[i + 2]
+# 23              i += 2
+# 24              if digit_high in hex_values and digit_low in hex_values:
+# 25                  v = hex_values[digit_high] * 16 + hex_values[digit_low]
+# 26                  t += chr(v)
+# 27              else:
+# 28                  raise ValueError("Invalid encoding")
+# 29          else:
+  30              t += c
+  31          i += 1
+  32      return t
+
+
+
 The `trace()` method returns the _trace_ – that is, the list of locations executed in order. Each location comes as a pair (`function name`, `line`).
 
 >>> cov.trace()
@@ -77,14 +115,12 @@ The `trace()` method returns the _trace_ – that is, the list of locations exe
  ('cgi_decode', 30),
  ('cgi_decode', 31),
  ('cgi_decode', 17),
- ('cgi_decode', 32),
- ('__exit__', 36)]
+ ('cgi_decode', 32)]
 
 The `coverage()` method returns the _coverage_, that is, the set of locations in the trace executed at least once:
 
 >>> cov.coverage()
-{('__exit__', 36),
- ('cgi_decode', 8),
+{('cgi_decode', 8),
  ('cgi_decode', 9),
  ('cgi_decode', 10),
  ('cgi_decode', 11),
@@ -100,7 +136,9 @@ The `coverage()` method returns the _coverage_, that is, the set of locations in
  ('cgi_decode', 31),
  ('cgi_decode', 32)}
 
-Coverage sets can be subject to set operations, such as _intersection_ (which locations are covered in multiple executions) and _difference_ (which locations are covered in run _a_, but not _b_). The chapter also discusses how to obtain such coverage from C programs.
+Coverage sets can be subject to set operations, such as _intersection_ (which locations are covered in multiple executions) and _difference_ (which locations are covered in run _a_, but not _b_).
+
+The chapter also discusses how to obtain such coverage from C programs.
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Code Coverage"
@@ -120,6 +158,12 @@ if __name__ == '__main__':
     print('# Code Coverage')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+
+if __name__ == '__main__':
+    YouTubeVideo('2lfgI9KdARs')
 
 ## Synopsis
 ## --------
@@ -314,7 +358,8 @@ class Coverage:
         if event == "line":
             function_name = frame.f_code.co_name
             lineno = frame.f_lineno
-            self._trace.append((function_name, lineno))
+            if function_name != '__exit__':  # avoid tracing ourselves:
+                self._trace.append((function_name, lineno))
 
         return self.traceit
 
@@ -338,11 +383,41 @@ class Coverage:
         """The set of executed lines, as (function_name, line_number) pairs"""
         return set(self.trace())
 
+    def function_names(self) -> Set[str]:
+        """The set of function names seen"""
+        return set(function_name for (function_name, line_number) in self.coverage())
+
+    def __repr__(self) -> str:
+        """Return a string representation of this object.
+           Show covered (and uncovered) program code"""
+        t = ""
+        for function_name in self.function_names():
+            # Similar code as in the example above
+            try:
+                fun = eval(function_name)
+            except Exception as exc:
+                t += f"Skipping {function_name}: {exc}"
+                continue
+
+            source_lines, start_line_number = inspect.getsourcelines(fun)
+            for lineno in range(start_line_number, start_line_number + len(source_lines)):
+                if lineno not in covered_lines:
+                    t += "# "
+                else:
+                    t += "  "
+                t += "%2d  " % lineno
+                t += source_lines[lineno - start_line_number]
+
+        return t
+
 if __name__ == '__main__':
     with Coverage() as cov:
         cgi_decode("a+b")
 
     print(cov.coverage())
+
+if __name__ == '__main__':
+    print(cov)
 
 ## Comparing Coverage
 ## ------------------
@@ -622,6 +697,9 @@ if __name__ == '__main__':
         cgi_decode("a+b")
 
 if __name__ == '__main__':
+    print(cov)
+
+if __name__ == '__main__':
     cov.trace()
 
 if __name__ == '__main__':
@@ -637,6 +715,8 @@ if __name__ == '__main__':
                                 Coverage.__exit__,
                                 Coverage.coverage,
                                 Coverage.trace,
+                                Coverage.function_names,
+                                Coverage.__repr__,
                             ],
                             types={'Location': Location},
                             project='fuzzingbook')
@@ -856,7 +936,7 @@ def population_branch_coverage(population, function):
         with BranchCoverage() as cov:
             try:
                 function(s)
-            except:
+            except Exception:
                 pass
         all_coverage |= cov.coverage()
         cumulative_coverage.append(len(all_coverage))
@@ -905,7 +985,6 @@ if __name__ == '__main__':
     average_coverage = []
     for i in range(trials):
         average_coverage.append(sum_coverage[i] / runs)
-
 
 if __name__ == '__main__':
     plt.plot(average_coverage)
