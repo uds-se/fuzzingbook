@@ -3,7 +3,7 @@
 
 # "Mining Input Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarMiner.html
-# Last change: 2021-11-23 20:36:25+01:00
+# Last change: 2021-12-01 09:02:45+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -59,16 +59,16 @@ We extract the input grammar for `url_parse()` using `recover_grammar()`:
 {'': [''],
  '': [':'],
  '': ['https', 'http'],
- '': ['///',
-  '//'],
- '': ['user:pass@www.google.com:80',
+ '': ['//',
+  '///'],
+ '': ['www.fuzzingbook.org',
   'www.cispa.saarland:80',
-  'www.fuzzingbook.org'],
- '': ['/#',
-  '#'],
+  'user:pass@www.google.com:80'],
+ '': ['#',
+  '/#'],
  '': ['/?'],
  '': ['q=path'],
- '': ['News', 'ref']}
+ '': ['ref', 'News']}
 
 The names of nonterminals are a bit technical; but the grammar nicely represents the structure of the input; for instance, the different schemes (`"http"`, `"https"`) are all identified:
 
@@ -87,11 +87,11 @@ The grammar can be immediately used for fuzzing, producing arbitrary combination
 >>> from GrammarCoverageFuzzer import GrammarCoverageFuzzer
 >>> fuzzer = GrammarCoverageFuzzer(grammar)
 >>> [fuzzer.fuzz() for i in range(5)]
-['https://www.cispa.saarland:80/',
- 'http://user:pass@www.google.com:80/?q=path#ref',
- 'https://www.fuzzingbook.org/#News',
- 'https://user:pass@www.google.com:80/?q=path#News',
- 'http://user:pass@www.google.com:80/#ref']
+['https://www.fuzzingbook.org/',
+ 'http://user:pass@www.google.com:80/#News',
+ 'http://www.cispa.saarland:80/?q=path#ref',
+ 'http://www.cispa.saarland:80/#ref',
+ 'http://user:pass@www.google.com:80/']
 
 Being able to automatically extract a grammar and to use this grammar for fuzzing makes for very effective test generation with a minimum of manual work.
 
@@ -115,6 +115,10 @@ if __name__ == '__main__':
 
 
 
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo("KsqwszWnAmM")
+
 ## Synopsis
 ## --------
 
@@ -136,7 +140,8 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
-from typing import List, Tuple
+from typing import List, Tuple, Callable, Any
+from collections.abc import Iterable
 
 from .Parser import process_inventory, process_vehicle, process_car, process_van, lr_graph  # minor dependency
 
@@ -352,10 +357,11 @@ if __name__ == '__main__':
 
 
 
-from .Grammars import START_SYMBOL, syntax_diagram, is_nonterminal
+from .Grammars import START_SYMBOL, syntax_diagram, \
+    is_nonterminal, Grammar
 
-from .GrammarFuzzer import GrammarFuzzer, FasterGrammarFuzzer, \
-    display_tree, tree_to_string, DerivationTree
+from .GrammarFuzzer import GrammarFuzzer, display_tree, \
+    DerivationTree
 
 if __name__ == '__main__':
     derivation_tree: DerivationTree = (START_SYMBOL, [("1997,van,Ford,E350", [])])
@@ -622,12 +628,15 @@ class GrammarMiner(GrammarMiner):
     def create_tree_miner(self, *args):
         return TreeMiner(*args)
 
-def recover_grammar(fn, inputs, **kwargs):
+def recover_grammar(fn: Callable, inputs: Iterable[str], 
+                    **kwargs: Any) -> Grammar:
     miner = GrammarMiner()
+
     for inputstr in inputs:
         with Tracer(inputstr, **kwargs) as tracer:
             fn(tracer.my_input)
         miner.update_grammar(tracer.my_input, tracer.trace)
+
     return readable(miner.grammar)
 
 #### Example 1. Recovering the Inventory Grammar
