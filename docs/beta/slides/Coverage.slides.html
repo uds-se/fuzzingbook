@@ -16185,7 +16185,7 @@ div.jp-OutputPrompt {
 
             <span class="n">source_lines</span><span class="p">,</span> <span class="n">start_line_number</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getsourcelines</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">lineno</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_line_number</span><span class="p">,</span> <span class="n">start_line_number</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">source_lines</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="n">lineno</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">covered_lines</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="n">lineno</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">():</span>
                     <span class="n">t</span> <span class="o">+=</span> <span class="s2">&quot;# &quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">t</span> <span class="o">+=</span> <span class="s2">&quot;  &quot;</span>
@@ -16235,7 +16235,7 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>{(&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 32), (&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 8), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 16)}
+<pre>{(&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 8), (&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 32)}
 </pre>
 </div>
 </div>
@@ -16282,38 +16282,38 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>#  1  def cgi_decode(s: str) -&gt; str:
-#  2      &#34;&#34;&#34;Decode the CGI-encoded string `s`:
-#  3         * replace &#39;+&#39; by &#39; &#39;
-#  4         * replace &#34;%xx&#34; by the character with hex number xx.
-#  5         Return the decoded string.  Raise `ValueError` for invalid inputs.&#34;&#34;&#34;
-#  6  
-#  7      # Mapping of hex digits to their integer values
-   8      hex_values = {
-   9          &#39;0&#39;: 0, &#39;1&#39;: 1, &#39;2&#39;: 2, &#39;3&#39;: 3, &#39;4&#39;: 4,
-  10          &#39;5&#39;: 5, &#39;6&#39;: 6, &#39;7&#39;: 7, &#39;8&#39;: 8, &#39;9&#39;: 9,
-  11          &#39;a&#39;: 10, &#39;b&#39;: 11, &#39;c&#39;: 12, &#39;d&#39;: 13, &#39;e&#39;: 14, &#39;f&#39;: 15,
-  12          &#39;A&#39;: 10, &#39;B&#39;: 11, &#39;C&#39;: 12, &#39;D&#39;: 13, &#39;E&#39;: 14, &#39;F&#39;: 15,
-# 13      }
-# 14  
-  15      t = &#34;&#34;
-  16      i = 0
-  17      while i &lt; len(s):
-  18          c = s[i]
-  19          if c == &#39;+&#39;:
-  20              t += &#39; &#39;
-  21          elif c == &#39;%&#39;:
-# 22              digit_high, digit_low = s[i + 1], s[i + 2]
-# 23              i += 2
-# 24              if digit_high in hex_values and digit_low in hex_values:
-# 25                  v = hex_values[digit_high] * 16 + hex_values[digit_low]
-# 26                  t += chr(v)
-# 27              else:
-# 28                  raise ValueError(&#34;Invalid encoding&#34;)
-# 29          else:
-  30              t += c
-  31          i += 1
-  32      return t
+<pre>   1  def cgi_decode(s: str) -&gt; str:
+   2      &#34;&#34;&#34;Decode the CGI-encoded string `s`:
+   3         * replace &#39;+&#39; by &#39; &#39;
+   4         * replace &#34;%xx&#34; by the character with hex number xx.
+   5         Return the decoded string.  Raise `ValueError` for invalid inputs.&#34;&#34;&#34;
+   6  
+   7      # Mapping of hex digits to their integer values
+#  8      hex_values = {
+#  9          &#39;0&#39;: 0, &#39;1&#39;: 1, &#39;2&#39;: 2, &#39;3&#39;: 3, &#39;4&#39;: 4,
+# 10          &#39;5&#39;: 5, &#39;6&#39;: 6, &#39;7&#39;: 7, &#39;8&#39;: 8, &#39;9&#39;: 9,
+# 11          &#39;a&#39;: 10, &#39;b&#39;: 11, &#39;c&#39;: 12, &#39;d&#39;: 13, &#39;e&#39;: 14, &#39;f&#39;: 15,
+# 12          &#39;A&#39;: 10, &#39;B&#39;: 11, &#39;C&#39;: 12, &#39;D&#39;: 13, &#39;E&#39;: 14, &#39;F&#39;: 15,
+  13      }
+  14  
+# 15      t = &#34;&#34;
+# 16      i = 0
+# 17      while i &lt; len(s):
+# 18          c = s[i]
+# 19          if c == &#39;+&#39;:
+# 20              t += &#39; &#39;
+# 21          elif c == &#39;%&#39;:
+  22              digit_high, digit_low = s[i + 1], s[i + 2]
+  23              i += 2
+  24              if digit_high in hex_values and digit_low in hex_values:
+  25                  v = hex_values[digit_high] * 16 + hex_values[digit_low]
+  26                  t += chr(v)
+  27              else:
+  28                  raise ValueError(&#34;Invalid encoding&#34;)
+  29          else:
+# 30              t += c
+# 31          i += 1
+# 32      return t
 
 </pre>
 </div>
@@ -17375,11 +17375,11 @@ Creating &#39;cgi_decode.c.gcov&#39;
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>[(&#39;cgi_decode.c&#39;, 27),
- (&#39;cgi_decode.c&#39;, 33),
+<pre>[(&#39;cgi_decode.c&#39;, 24),
  (&#39;cgi_decode.c&#39;, 30),
- (&#39;cgi_decode.c&#39;, 45),
- (&#39;cgi_decode.c&#39;, 48)]</pre>
+ (&#39;cgi_decode.c&#39;, 33),
+ (&#39;cgi_decode.c&#39;, 48),
+ (&#39;cgi_decode.c&#39;, 45)]</pre>
 </div>
 
 </div>
@@ -17453,9 +17453,9 @@ Creating &#39;cgi_decode.c.gcov&#39;
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_2974/2238772797.py&#34;, line 5, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_41229/2238772797.py&#34;, line 5, in &lt;module&gt;
     cgi_decode(s)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_2974/1071239422.py&#34;, line 22, in cgi_decode
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_41229/1071239422.py&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
 IndexError: string index out of range (expected)
 </pre>
@@ -17591,38 +17591,38 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>#  1  def cgi_decode(s: str) -&gt; str:
-#  2      &#34;&#34;&#34;Decode the CGI-encoded string `s`:
-#  3         * replace &#39;+&#39; by &#39; &#39;
-#  4         * replace &#34;%xx&#34; by the character with hex number xx.
-#  5         Return the decoded string.  Raise `ValueError` for invalid inputs.&#34;&#34;&#34;
-#  6  
-#  7      # Mapping of hex digits to their integer values
-   8      hex_values = {
-   9          &#39;0&#39;: 0, &#39;1&#39;: 1, &#39;2&#39;: 2, &#39;3&#39;: 3, &#39;4&#39;: 4,
-  10          &#39;5&#39;: 5, &#39;6&#39;: 6, &#39;7&#39;: 7, &#39;8&#39;: 8, &#39;9&#39;: 9,
-  11          &#39;a&#39;: 10, &#39;b&#39;: 11, &#39;c&#39;: 12, &#39;d&#39;: 13, &#39;e&#39;: 14, &#39;f&#39;: 15,
-  12          &#39;A&#39;: 10, &#39;B&#39;: 11, &#39;C&#39;: 12, &#39;D&#39;: 13, &#39;E&#39;: 14, &#39;F&#39;: 15,
-# 13      }
-# 14  
-  15      t = &#34;&#34;
-  16      i = 0
-  17      while i &lt; len(s):
-  18          c = s[i]
-  19          if c == &#39;+&#39;:
-  20              t += &#39; &#39;
-  21          elif c == &#39;%&#39;:
-# 22              digit_high, digit_low = s[i + 1], s[i + 2]
-# 23              i += 2
-# 24              if digit_high in hex_values and digit_low in hex_values:
-# 25                  v = hex_values[digit_high] * 16 + hex_values[digit_low]
-# 26                  t += chr(v)
-# 27              else:
-# 28                  raise ValueError(&#34;Invalid encoding&#34;)
-# 29          else:
-  30              t += c
-  31          i += 1
-  32      return t
+<pre>   1  def cgi_decode(s: str) -&gt; str:
+   2      &#34;&#34;&#34;Decode the CGI-encoded string `s`:
+   3         * replace &#39;+&#39; by &#39; &#39;
+   4         * replace &#34;%xx&#34; by the character with hex number xx.
+   5         Return the decoded string.  Raise `ValueError` for invalid inputs.&#34;&#34;&#34;
+   6  
+   7      # Mapping of hex digits to their integer values
+#  8      hex_values = {
+#  9          &#39;0&#39;: 0, &#39;1&#39;: 1, &#39;2&#39;: 2, &#39;3&#39;: 3, &#39;4&#39;: 4,
+# 10          &#39;5&#39;: 5, &#39;6&#39;: 6, &#39;7&#39;: 7, &#39;8&#39;: 8, &#39;9&#39;: 9,
+# 11          &#39;a&#39;: 10, &#39;b&#39;: 11, &#39;c&#39;: 12, &#39;d&#39;: 13, &#39;e&#39;: 14, &#39;f&#39;: 15,
+# 12          &#39;A&#39;: 10, &#39;B&#39;: 11, &#39;C&#39;: 12, &#39;D&#39;: 13, &#39;E&#39;: 14, &#39;F&#39;: 15,
+  13      }
+  14  
+# 15      t = &#34;&#34;
+# 16      i = 0
+# 17      while i &lt; len(s):
+# 18          c = s[i]
+# 19          if c == &#39;+&#39;:
+# 20              t += &#39; &#39;
+# 21          elif c == &#39;%&#39;:
+  22              digit_high, digit_low = s[i + 1], s[i + 2]
+  23              i += 2
+  24              if digit_high in hex_values and digit_low in hex_values:
+  25                  v = hex_values[digit_high] * 16 + hex_values[digit_low]
+  26                  t += chr(v)
+  27              else:
+  28                  raise ValueError(&#34;Invalid encoding&#34;)
+  29          else:
+# 30              t += c
+# 31          i += 1
+# 32      return t
 
 </pre>
 </div>
@@ -17965,9 +17965,9 @@ In the C implementation, the problem is actually much worse.  If the <code>'%'</
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_2974/1102034435.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_41229/1102034435.py&#34;, line 2, in &lt;module&gt;
     assert cgi_decode(&#39;%&#39;) == &#39;%&#39;
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_2974/1071239422.py&#34;, line 22, in cgi_decode
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_41229/1071239422.py&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
 IndexError: string index out of range (expected)
 </pre>
@@ -18006,9 +18006,9 @@ IndexError: string index out of range (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_2974/2291699482.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_41229/2291699482.py&#34;, line 2, in &lt;module&gt;
     assert cgi_decode(&#39;%4&#39;) == &#39;%4&#39;
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_2974/1071239422.py&#34;, line 22, in cgi_decode
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_41229/1071239422.py&#34;, line 22, in cgi_decode
     digit_high, digit_low = s[i + 1], s[i + 2]
 IndexError: string index out of range (expected)
 </pre>
@@ -18412,7 +18412,7 @@ IndexError: string index out of range (expected)
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>{((&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11)), ((&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19)), ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21)), ((&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)), ((&#39;cgi_decode&#39;, 8), (&#39;cgi_decode&#39;, 15)), ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32)), ((&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20)), ((&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12)), ((&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18)), ((&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 8))}
+<pre>{((&#39;cgi_decode&#39;, 18), (&#39;cgi_decode&#39;, 19)), ((&#39;cgi_decode&#39;, 16), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 20), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 15), (&#39;cgi_decode&#39;, 16)), ((&#39;cgi_decode&#39;, 21), (&#39;cgi_decode&#39;, 30)), ((&#39;cgi_decode&#39;, 30), (&#39;cgi_decode&#39;, 31)), ((&#39;cgi_decode&#39;, 31), (&#39;cgi_decode&#39;, 17)), ((&#39;cgi_decode&#39;, 12), (&#39;cgi_decode&#39;, 8)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 20)), ((&#39;cgi_decode&#39;, 8), (&#39;cgi_decode&#39;, 15)), ((&#39;cgi_decode&#39;, 9), (&#39;cgi_decode&#39;, 10)), ((&#39;cgi_decode&#39;, 11), (&#39;cgi_decode&#39;, 12)), ((&#39;cgi_decode&#39;, 19), (&#39;cgi_decode&#39;, 21)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 32)), ((&#39;cgi_decode&#39;, 17), (&#39;cgi_decode&#39;, 18)), ((&#39;cgi_decode&#39;, 10), (&#39;cgi_decode&#39;, 11))}
 </pre>
 </div>
 </div>

@@ -12039,7 +12039,7 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 <li><strong>Seed</strong>. A <em>seed</em> is an input that is used by the fuzzer to generate new inputs by applying a sequence of mutations.</li>
 <li><strong>Mutator</strong>. A <em>mutator</em> implements a set of mutation operators that applied to an input produce a slightly modified input.</li>
 <li><strong>PowerSchedule</strong>. A <em>power schedule</em> assigns <em>energy</em> to a seed. A seed with higher energy is fuzzed more often throughout the fuzzing campaign.</li>
-<li><strong>MutationFuzzer</strong>. Our <em>mutational blackbox fuzzer</em> generates inputs by mutating seeds in an initial population of inputs.</li>
+<li><strong>AdvancedMutationFuzzer</strong>. Our <em>mutational blackbox fuzzer</em> generates inputs by mutating seeds in an initial population of inputs.</li>
 <li><strong>GreyboxFuzzer</strong>. Our <em>greybox fuzzer</em> dynamically adds inputs to the population of seeds that increased coverage.</li>
 <li><strong>FunctionCoverageRunner</strong>. Our <em>function coverage runner</em> collects coverage information for the execution of a given Python function.</li>
 </ul>
@@ -12069,7 +12069,8 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GreyboxFuzzer.html" class="import" target="_blank">GreyboxFuzzer</a></span> <span class="kn">import</span> <span class="n">Mutator</span><span class="p">,</span> <span class="n">Seed</span><span class="p">,</span> <span class="n">PowerSchedule</span><span class="p">,</span> <span class="n">MutationFuzzer</span><span class="p">,</span> <span class="n">GreyboxFuzzer</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GreyboxFuzzer.html" class="import" target="_blank">GreyboxFuzzer</a></span> <span class="kn">import</span> <span class="n">Mutator</span><span class="p">,</span> <span class="n">Seed</span><span class="p">,</span> <span class="n">PowerSchedule</span>
+<span class="kn">from</span> <span class="nn"><a href="GreyboxFuzzer.html" class="import" target="_blank">GreyboxFuzzer</a></span> <span class="kn">import</span> <span class="n">AdvancedMutationFuzzer</span><span class="p">,</span> <span class="n">GreyboxFuzzer</span>
 <span class="kn">from</span> <span class="nn"><a href="MutationFuzzer.html" class="import" target="_blank">MutationFuzzer</a></span> <span class="kn">import</span> <span class="n">FunctionCoverageRunner</span>
 </pre></div>
 
@@ -12233,11 +12234,11 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[(&#39;goahead&#39;, 166),
+<pre>[(&#39;goahead&#39;, 138),
+ (&#39;goahead&#39;, 147),
  (&#39;handle_data&#39;, 447),
- (&#39;__init__&#39;, 92),
- (&#39;reset&#39;, 97),
- (&#39;reset&#39;, 100)]
+ (&#39;updatepos&#39;, 52),
+ (&#39;goahead&#39;, 162)]
 </pre>
 </div>
 
@@ -12293,7 +12294,7 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;It took the fuzzer 0.97 seconds to generate and execute 5000 inputs.&#39;
+<pre>&#39;It took the fuzzer 0.79 seconds to generate and execute 5000 inputs.&#39;
 </pre>
 </div>
 
@@ -12389,7 +12390,7 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;It took the fuzzer 6.38 seconds to generate and execute 5000 inputs.&#39;
+<pre>&#39;It took the fuzzer 4.58 seconds to generate and execute 5000 inputs.&#39;
 </pre>
 </div>
 
@@ -12933,10 +12934,29 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>&lt;start&gt;
+|-&lt;html&gt;&lt;header&gt;&lt;title&gt;Hello&lt;/title&gt;&lt;/header&gt;&lt;body&gt;World&lt;br/&gt;&lt;/body&gt;&lt;/html&gt;
 &lt;xml-tree&gt;
+|-&lt;html&gt;&lt;header&gt;&lt;title&gt;Hello&lt;/title&gt;&lt;/header&gt;&lt;body&gt;World&lt;br/&gt;&lt;/body&gt;&lt;/html&gt;
+|-&lt;header&gt;&lt;title&gt;Hello&lt;/title&gt;&lt;/header&gt;&lt;body&gt;World&lt;br/&gt;&lt;/body&gt;
+|-&lt;header&gt;&lt;title&gt;Hello&lt;/title&gt;&lt;/header&gt;
+|-&lt;title&gt;Hello&lt;/title&gt;
+|-Hello
+|-&lt;body&gt;World&lt;br/&gt;&lt;/body&gt;
+|-World&lt;br/&gt;
+|-World
+|-&lt;br/&gt;
 &lt;xml-open-tag&gt;
+|-&lt;html&gt;
+|-&lt;header&gt;
+|-&lt;title&gt;
+|-&lt;body&gt;
 &lt;xml-openclose-tag&gt;
+|-&lt;br/&gt;
 &lt;xml-close-tag&gt;
+|-&lt;/title&gt;
+|-&lt;/header&gt;
+|-&lt;/body&gt;
+|-&lt;/html&gt;
 &lt;xml-attribute&gt;
 &lt;id&gt;
 &lt;text&gt;
@@ -13228,7 +13248,7 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LangFuzzer</span><span class="p">(</span><span class="n">MutationFuzzer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">LangFuzzer</span><span class="p">(</span><span class="n">AdvancedMutationFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">create_candidate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns an input generated by fuzzing a seed in the population&quot;&quot;&quot;</span>
         <span class="n">candidate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="o">.</span><span class="n">choose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">population</span><span class="p">)</span>
@@ -13280,7 +13300,7 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;It took LangFuzzer 33.30 seconds to generate and execute 300 inputs.&#39;
+<pre>&#39;It took LangFuzzer 27.42 seconds to generate and execute 300 inputs.&#39;
 </pre>
 </div>
 
@@ -13305,7 +13325,7 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 <span class="n">mutator</span> <span class="o">=</span> <span class="n">Mutator</span><span class="p">()</span>
 <span class="n">schedule</span> <span class="o">=</span> <span class="n">PowerSchedule</span><span class="p">()</span>
 
-<span class="n">blackFuzzer</span> <span class="o">=</span> <span class="n">MutationFuzzer</span><span class="p">([</span><span class="n">valid_seed</span><span class="o">.</span><span class="n">data</span><span class="p">],</span> <span class="n">mutator</span><span class="p">,</span> <span class="n">schedule</span><span class="p">)</span>
+<span class="n">blackFuzzer</span> <span class="o">=</span> <span class="n">AdvancedMutationFuzzer</span><span class="p">([</span><span class="n">valid_seed</span><span class="o">.</span><span class="n">data</span><span class="p">],</span> <span class="n">mutator</span><span class="p">,</span> <span class="n">schedule</span><span class="p">)</span>
 
 <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="n">blackFuzzer</span><span class="o">.</span><span class="n">runs</span><span class="p">(</span><span class="n">runner</span><span class="p">,</span> <span class="n">trials</span> <span class="o">=</span> <span class="n">n</span><span class="p">)</span>
@@ -13322,7 +13342,7 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;It took a blackbox fuzzer 0.20 seconds to generate and execute 300 inputs.&#39;
+<pre>&#39;It took a blackbox fuzzer 0.17 seconds to generate and execute 300 inputs.&#39;
 </pre>
 </div>
 
@@ -13356,7 +13376,7 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;During this fuzzing campaign, the blackbox fuzzer covered 101 statements.&#39;
+<pre>&#39;During this fuzzing campaign, the blackbox fuzzer covered 92 statements.&#39;
 </pre>
 </div>
 
@@ -13450,7 +13470,7 @@ In this chapter, we encode file formats as [grammars](Grammars.ipynb) and make t
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>From the 300 generated inputs, 136 (45.33%) can be parsed.
+<pre>From the 300 generated inputs, 144 (48.00%) can be parsed.
 In total, 91 statements are covered.
 </pre>
 </div>
@@ -13483,7 +13503,7 @@ In total, 91 statements are covered.
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>From the 300 generated inputs, 17 (5.67%) can be parsed.
+<pre>From the 300 generated inputs, 26 (8.67%) can be parsed.
 In total, 158 statements are covered.
 </pre>
 </div>
@@ -13580,7 +13600,7 @@ In total, 158 statements are covered.
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;It took the greybox grammar fuzzer 1.34 seconds to generate and execute 300 inputs.&#39;
+<pre>&#39;It took the greybox grammar fuzzer 1.68 seconds to generate and execute 300 inputs.&#39;
 </pre>
 </div>
 
@@ -13603,8 +13623,8 @@ In total, 158 statements are covered.
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>From the 300 generated inputs, 0 (0.00%) can be parsed.
-In total, 170 statements are covered.
+<pre>From the 300 generated inputs, 2 (0.67%) can be parsed.
+In total, 165 statements are covered.
 </pre>
 </div>
 
@@ -14026,8 +14046,10 @@ l chart[42]
 |-(18,20) : ld
 |-(16,19) : orl
 |-(15,17) : Wo
+|-(12,29) : &lt;i&gt;World&lt;/i&gt;&lt;br/&gt;
 |-(17,19) : rl
 |-(15,20) : World
+|-(24,29) : &lt;br/&gt;
 |-(15,19) : Worl
 |-(16,18) : or
 |-(15,18) : Wor
@@ -14036,6 +14058,7 @@ l chart[42]
 |-(12,15) : &lt;i&gt;
 |-(0,6) : &lt;html&gt;
 &lt;xml-openclose-tag&gt;
+|-(24,29) : &lt;br/&gt;
 &lt;xml-close-tag&gt;
 |-(20,24) : &lt;/i&gt;
 &lt;xml-attribute&gt;
@@ -14161,7 +14184,7 @@ l chart[42]
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;html&gt;&lt;body&gt;&lt;i&gt;World&lt;/i&gt;&gt;/body&gt;&lt;/html&gt;
+<pre>&lt;html&gt;&lt;body&gt;&lt;i&gt;World&lt;/b&gt;&lt;br/&gt;&gt;/body&gt;&lt;/html&gt;
 </pre>
 </div>
 
@@ -14216,7 +14239,7 @@ You can execute your own code by opening this chapter as Jupyter notebook.</p>
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;It took the structural greybox fuzzer with region mutator 17.89 seconds to generate and execute 300 inputs.&#39;
+<pre>&#39;It took the structural greybox fuzzer with region mutator 9.93 seconds to generate and execute 300 inputs.&#39;
 </pre>
 </div>
 
@@ -14274,9 +14297,9 @@ You can execute your own code by opening this chapter as Jupyter notebook.</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>From the 300 generated inputs, 0 (0.00%) can be parsed.
-In total, 161 statements are covered.
-On average, 12.1% of a seed in the population can be successfully parsed.
+<pre>From the 300 generated inputs, 2 (0.67%) can be parsed.
+In total, 163 statements are covered.
+On average, 13.1% of a seed in the population can be successfully parsed.
 </pre>
 </div>
 
@@ -14480,7 +14503,7 @@ On average, 12.1% of a seed in the population can be successfully parsed.
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&#39;It took AFLSmart 12.31 seconds to generate and execute 300 inputs.&#39;
+<pre>&#39;It took AFLSmart 25.64 seconds to generate and execute 300 inputs.&#39;
 </pre>
 </div>
 
@@ -14503,9 +14526,9 @@ On average, 12.1% of a seed in the population can be successfully parsed.
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>From the 300 generated inputs, 5 (1.67%) can be parsed.
-In total, 163 statements are covered.
-On average, 15.0% of a seed in the population can be successfully parsed.
+<pre>From the 300 generated inputs, 35 (11.67%) can be parsed.
+In total, 156 statements are covered.
+On average, 25.5% of a seed in the population can be successfully parsed.
 </pre>
 </div>
 
@@ -14612,7 +14635,7 @@ On average, 15.0% of a seed in the population can be successfully parsed.
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GreyboxGrammarFuzzer.ipynb" target=_blank)>Last change: 2021-11-07 15:08:08+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/GreyboxGrammarFuzzer.ipynb" target=_blank)>Last change: 2021-12-07 15:15:25+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -14628,7 +14651,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GreyboxGrammarFuzzer.html">Greybox Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/GreyboxGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/GreyboxGrammarFuzzer.html</a>.  Retrieved 2021-11-07 15:08:08+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/GreyboxGrammarFuzzer.html">Greybox Fuzzing with Grammars</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/GreyboxGrammarFuzzer.html">https://www.fuzzingbook.org/beta/html/GreyboxGrammarFuzzer.html</a>.  Retrieved 2021-12-07 15:15:25+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2021:GreyboxGrammarFuzzer,
@@ -14638,9 +14661,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2021},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/GreyboxGrammarFuzzer.html}},
-    note = {Retrieved 2021-11-07 15:08:08+01:00},
+    note = {Retrieved 2021-12-07 15:15:25+01:00},
     url = {https://www.fuzzingbook.org/beta/html/GreyboxGrammarFuzzer.html},
-    urldate = {2021-11-07 15:08:08+01:00}
+    urldate = {2021-12-07 15:15:25+01:00}
 }
 </pre>
 </div>
