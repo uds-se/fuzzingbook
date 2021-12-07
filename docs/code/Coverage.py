@@ -3,7 +3,7 @@
 
 # "Code Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2021-11-23 20:28:51+01:00
+# Last change: 2021-12-07 13:32:28+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -52,38 +52,38 @@ The typical usage of the `Coverage` class is in conjunction with a `with` clause
 Printing out a coverage object shows the covered functions, with covered lines prefixed as `#`:
 
 >>> print(cov)
-#  1  def cgi_decode(s: str) -> str:
-#  2      """Decode the CGI-encoded string `s`:
-#  3         * replace '+' by ' '
-#  4         * replace "%xx" by the character with hex number xx.
-#  5         Return the decoded string.  Raise `ValueError` for invalid inputs."""
-#  6  
-#  7      # Mapping of hex digits to their integer values
-   8      hex_values = {
-   9          '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
-  10          '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
-  11          'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
-  12          'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
-# 13      }
-# 14  
-  15      t = ""
-  16      i = 0
-  17      while i < len(s):
-  18          c = s[i]
-  19          if c == '+':
-  20              t += ' '
-  21          elif c == '%':
-# 22              digit_high, digit_low = s[i + 1], s[i + 2]
-# 23              i += 2
-# 24              if digit_high in hex_values and digit_low in hex_values:
-# 25                  v = hex_values[digit_high] * 16 + hex_values[digit_low]
-# 26                  t += chr(v)
-# 27              else:
-# 28                  raise ValueError("Invalid encoding")
-# 29          else:
-  30              t += c
-  31          i += 1
-  32      return t
+   1  def cgi_decode(s: str) -> str:
+   2      """Decode the CGI-encoded string `s`:
+   3         * replace '+' by ' '
+   4         * replace "%xx" by the character with hex number xx.
+   5         Return the decoded string.  Raise `ValueError` for invalid inputs."""
+   6  
+   7      # Mapping of hex digits to their integer values
+#  8      hex_values = {
+#  9          '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
+# 10          '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+# 11          'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
+# 12          'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
+  13      }
+  14  
+# 15      t = ""
+# 16      i = 0
+# 17      while i < len(s):
+# 18          c = s[i]
+# 19          if c == '+':
+# 20              t += ' '
+# 21          elif c == '%':
+  22              digit_high, digit_low = s[i + 1], s[i + 2]
+  23              i += 2
+  24              if digit_high in hex_values and digit_low in hex_values:
+  25                  v = hex_values[digit_high] * 16 + hex_values[digit_low]
+  26                  t += chr(v)
+  27              else:
+  28                  raise ValueError("Invalid encoding")
+  29          else:
+# 30              t += c
+# 31          i += 1
+# 32      return t
 
 
 
@@ -401,7 +401,7 @@ class Coverage:
 
             source_lines, start_line_number = inspect.getsourcelines(fun)
             for lineno in range(start_line_number, start_line_number + len(source_lines)):
-                if lineno not in covered_lines:
+                if (function_name, lineno) in self.trace():
                     t += "# "
                 else:
                     t += "  "
@@ -810,7 +810,6 @@ def fixed_cgi_decode(s):
             t += c
         i += 1
     return t
-
 
 if __name__ == '__main__':
     assert fixed_cgi_decode('%') == '%'
