@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2021-12-08 13:42:19+01:00
+# Last change: 2021-12-08 14:55:30+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,27 +68,25 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- uhtt,p://www.goocle.cnm/3arch?q=fuzzn',
- rhCtp:k/ww.ges=fu~,#zu~`-,
- lttp://www.google.comsarc!h?q=fuzzing,
- lttpN:'www.goog!`de.comarc!h?q=fuzz5ing,
- 1zH|C.tpk/s.e<>`C`om/fsah>s=g2~#zu`/,
- lPNwu{;g/g!``3ec(oMar?efuhzing,
- ?1zH|Gi.pk/s.<>2K`C`oM/fRsahs=g~zu`M[/,
- lN2wu{;gg!``ec(oMarefuhziNg,
- Glt|atBr^;'ww.goog#U1d%\cnearc!L?3a=dz{5ing,
- lN2wu{:gg!``ec(/Ma[re:fuhziNg,
- 1dzHjxC.ttki/sf,e,>`C`Om/Fsahg>=g"~zu`/,
- NtIpN8gfws.ogdCyIQac`q=bzz5iTn,
- rhCtp:k/ww.ges=~,#zu~`-,
- ltp2://www.ggle.comqarc-1hq=fuzzn%,
- t>;:q!gvwgmg.oqrc-1lq
- *nze:6%,
- l=vN2wut
- :g``ec(na[zSe8fU(iNg,
- http:GA//>www.gongle.co/search?1fzzing,
- t?;:2q$!gdvSgkeur/1lu*#E/n%e6%,
- yltvp:www.go(ogl]e.`osarcN!N`q=fzzi]
+ htt://wsw.coo7Wgl%{e.m/ceavchqfuzjifXg,
+ Qhtt:Rcmi3WG{m.VceyvhqFu~*iF?Hg,
+ t:rgmq#Ginc%Xy4jqF*,
+ tpp*//?wwwt.gooLgm.`o$m/sarhqfu@zuz{ilc,
+ htt://wsw.coo7Wgl%{e.m-ceavch_qfuzj9ifg,
+ http;//www.google.com/3earch?q=fqz~ing,
+ h1tt:/wsw.coo7Wgl%{eR.m-ceavch_quzj9ifg,
+ t*//$wsw.7gl%{m/cevchqfujiXc,
+ h|t$p+//ww/gogleco=m./sacx=fuz_zsi:gg,
+ http:/.www.goow,e&coM/seargh'?Q=fuzzing,
+ htt;//wsw.coo7AWgl%{e.m-ceavch_qfuzj9ifg,
+ @91vGt?wsw.coo7Wgl%{uR.mt/ceavch_q6uzGjR9ifG,
+ ht4//wsw.#oo7Wgh%Yem-ceavch}9ifg,
+ jtt/'ww>com/7Wg(!{em/ceavhQf]*5zjifXg,
+ hvtp7://www.googm.co-/Search?=fuzing,
+ http://ww.gnolecom/sdarah?q=fuzQzin#g,
+ )hTtp://ww.gn!olecom/sdarah?q=fu.zQzin#g,
+ htt://wsw.coo7Wg|%{e.m/ceavhqfuzjifXg,
+ htt?p;//www./goog*le.com/3e:azrc7h?Q=fqz~kng]
 
 Besides the simple `PowerSchedule`, we can have advanced power schedules.
 
@@ -120,19 +118,19 @@ if __name__ == '__main__':
     from .bookutils import YouTubeVideo
     YouTubeVideo('6Dwc55FnHBg')
 
-if __name__ == '__main__':
-    # We use the same fixed seed as the notebook to ensure consistency
-    import random
-    random.seed(2001)
-
-from typing import List, Set, Any, Tuple, Dict, Union
-from collections.abc import Sequence
-
 ## Synopsis
 ## --------
 
 if __name__ == '__main__':
     print('\n## Synopsis')
+
+
+
+## AFL: An Effective Greybox Fuzzer
+## --------------------------------
+
+if __name__ == '__main__':
+    print('\n## AFL: An Effective Greybox Fuzzer')
 
 
 
@@ -144,21 +142,23 @@ if __name__ == '__main__':
 
 
 
-### Background
+### Mutators
 
 if __name__ == '__main__':
-    print('\n### Background')
+    print('\n### Mutators')
 
 
-
-### Mutator and Seed
 
 if __name__ == '__main__':
-    print('\n### Mutator and Seed')
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
 
-
+from typing import List, Set, Any, Tuple, Dict, Union
+from collections.abc import Sequence
 
 import random
+
 from .Coverage import population_coverage
 
 class Mutator:
@@ -208,10 +208,10 @@ class Mutator(Mutator):
 if __name__ == '__main__':
     Mutator().mutate("good")
 
-### Power Schedules
+### Seeds and Power Schedules
 
 if __name__ == '__main__':
-    print('\n### Power Schedules')
+    print('\n### Seeds and Power Schedules')
 
 
 
@@ -279,10 +279,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     hits
 
-### Runner and Sample Program
+### Runners and a Sample Program
 
 if __name__ == '__main__':
-    print('\n### Runner and Sample Program')
+    print('\n### Runners and a Sample Program')
 
 
 
@@ -300,11 +300,11 @@ if __name__ == '__main__':
     crashme_runner.run("good")
     list(crashme_runner.coverage())
 
-## Blackbox, Greybox, and Boosted Greybox Fuzzing
-## ----------------------------------------------
+## Advanced Blackbox Mutation-based Fuzzing
+## ----------------------------------------
 
 if __name__ == '__main__':
-    print('\n## Blackbox, Greybox, and Boosted Greybox Fuzzing')
+    print('\n## Advanced Blackbox Mutation-based Fuzzing')
 
 
 
@@ -390,10 +390,11 @@ if __name__ == '__main__':
             if blackbox_coverage[idx] > blackbox_coverage[idx - 1]
         ]
 
-### Greybox Mutation-based Fuzzer
+## Greybox Mutation-based Fuzzing
+## ------------------------------
 
 if __name__ == '__main__':
-    print('\n### Greybox Mutation-based Fuzzer')
+    print('\n## Greybox Mutation-based Fuzzing')
 
 
 
@@ -454,10 +455,11 @@ if __name__ == '__main__':
     plt.xlabel('# of inputs')
     plt.ylabel('lines covered');
 
-### Boosted Greybox Fuzzer
+## Boosted Greybox Fuzzing
+## -----------------------
 
 if __name__ == '__main__':
-    print('\n### Boosted Greybox Fuzzer')
+    print('\n## Boosted Greybox Fuzzing')
 
 
 
@@ -578,10 +580,11 @@ if __name__ == '__main__':
     plt.xlabel('# of inputs')
     plt.ylabel('lines covered');
 
-### Complex Example: HTMLParser
+## A Complex Example: HTMLParser
+## -----------------------------
 
 if __name__ == '__main__':
-    print('\n### Complex Example: HTMLParser')
+    print('\n## A Complex Example: HTMLParser')
 
 
 
@@ -987,6 +990,17 @@ if __name__ == '__main__':
     if os.path.exists('callgraph.py'):
         os.remove('callgraph.py')
 
+## Compatibility
+## -------------
+
+if __name__ == '__main__':
+    print('\n## Compatibility')
+
+
+
+class MutationFuzzer(AdvancedMutationFuzzer):
+    pass
+
 ## Background
 ## ----------
 
@@ -1002,14 +1016,3 @@ if __name__ == '__main__':
     print('\n## Exercises')
 
 
-
-## Compatibility
-## -------------
-
-if __name__ == '__main__':
-    print('\n## Compatibility')
-
-
-
-class MutationFuzzer(AdvancedMutationFuzzer):
-    pass
