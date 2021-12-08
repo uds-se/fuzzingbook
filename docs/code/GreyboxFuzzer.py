@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2021-12-07 16:05:22+01:00
+# Last change: 2021-12-08 13:42:19+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,29 +68,27 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- ttp:/wwwgoogle.com/search?q=fuzzng,
- http:/www.gogle.com/search?q9fuzzidng,
- htVtp_z//ww7o4ggl=one~_c3}/ecch(?qA=f&qzzinw,
- htp^z//ww7o4ggl=oe~_c3}/ecch(t?qA=if&szzinw0,
- ^z//w7mL0kg7gl5la+o~_~}c5h(t=qFAv
- fzzn70,
- Qhtp^z//wv7+o6ggl=g&~B_s3}e#ch(tqA=iO"szzinw0,
- hpd^z/)s7o54gg|=Fof[e[C;/|eChP_ ot?qA=i&f&szzi-u,
- z*'/w 3rL0k:f7A/gHl5vlao~_~}c5Ah>=pFA
- ~h9dfzz,
- ^z//w7mL0kgglt5la+o~_~}%cw5h(t=qFA
- fzn,
- hd^z/)sGh|=Fob[E[F;d|uTglT_ !t?qA=i63rz-w,
- hot`'tpZT/w7Ao,;ggl=knev`_#}/ec}h(?#sA]}v&q{iw,
- ?^:f//\amL0kg>l5la+~~}%/5eh8kd=<>lq>A,
- hot`tpZT/jw7Ao,;ggl=knev`_#}/ec}h(?#sA]}v&q{iw,
- hpd^x/)7o54gg|=ZFof[e[C;|eCHP_ ot1>qA=i&Rf&szzi-u,
- z*#/w 3lrL0:f7A/gHl5[vlCo~_~}c5Ah>=npFA
- ~9dfzz,
- Lo{`t{pT/jw7g,;rgtgl=knvh_}/c}h#s-Q\yOvy1iw,
- hAttp:.www.gzog,d.comosa]h2q=fuzine,
- ~?^:f//\a-L0kg?l5la+~~}%/5eh8kd={A,
- Lo{pd{TZj_w7g;rgtg=jnvh_}}h#s-7CFQ\yOvy1ig]
+ uhtt,p://www.goocle.cnm/3arch?q=fuzzn',
+ rhCtp:k/ww.ges=fu~,#zu~`-,
+ lttp://www.google.comsarc!h?q=fuzzing,
+ lttpN:'www.goog!`de.comarc!h?q=fuzz5ing,
+ 1zH|C.tpk/s.e<>`C`om/fsah>s=g2~#zu`/,
+ lPNwu{;g/g!``3ec(oMar?efuhzing,
+ ?1zH|Gi.pk/s.<>2K`C`oM/fRsahs=g~zu`M[/,
+ lN2wu{;gg!``ec(oMarefuhziNg,
+ Glt|atBr^;'ww.goog#U1d%\cnearc!L?3a=dz{5ing,
+ lN2wu{:gg!``ec(/Ma[re:fuhziNg,
+ 1dzHjxC.ttki/sf,e,>`C`Om/Fsahg>=g"~zu`/,
+ NtIpN8gfws.ogdCyIQac`q=bzz5iTn,
+ rhCtp:k/ww.ges=~,#zu~`-,
+ ltp2://www.ggle.comqarc-1hq=fuzzn%,
+ t>;:q!gvwgmg.oqrc-1lq
+ *nze:6%,
+ l=vN2wut
+ :g``ec(na[zSe8fU(iNg,
+ http:GA//>www.gongle.co/search?1fzzing,
+ t?;:2q$!gdvSgkeur/1lu*#E/n%e6%,
+ yltvp:www.go(ogl]e.`osarcN!N`q=fzzi]
 
 Besides the simple `PowerSchedule`, we can have advanced power schedules.
 
@@ -117,6 +115,10 @@ if __name__ == '__main__':
     print('# Greybox Fuzzing')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('6Dwc55FnHBg')
 
 if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
