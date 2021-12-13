@@ -82,6 +82,7 @@ APPENDICES = \
 	PrototypingWithPython.ipynb \
 	ExpectError.ipynb \
 	Timer.ipynb \
+	Timeout.ipynb \
 	ClassDiagram.ipynb \
 	RailroadDiagrams.ipynb \
 	ControlFlow.ipynb
