@@ -3,7 +3,7 @@
 
 # "Class Diagrams" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ClassDiagram.html
-# Last change: 2021-11-08 18:42:37+01:00
+# Last change: 2021-12-13 15:52:32+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -550,6 +550,7 @@ def display_class_hierarchy(classes: Union[Type, List[Type]],
                 for tp in types:
                     tp_def = str(types[tp]).replace('typing.', '')
                     sig = sig.replace(tp_def, tp)
+                sig = sig.replace('__main__.', '')
 
                 method_doc = escape(name + sig)
                 if docstring(f):

@@ -3,7 +3,7 @@
 
 # "Mutation Analysis" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationAnalysis.html
-# Last change: 2021-12-07 13:35:51+01:00
+# Last change: 2021-12-13 17:13:09+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -80,84 +80,84 @@ The second class `MuProgramAnalyzer` targets standalone programs with test suite
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44733/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44424/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
 ----------------------------------------------------------------------
-Ran 1 test in 0.001s
+Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44733/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44424/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
 ----------------------------------------------------------------------
-Ran 1 test in 0.001s
+Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44733/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44424/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
 ----------------------------------------------------------------------
-Ran 1 test in 0.001s
+Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44733/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44424/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
 ----------------------------------------------------------------------
-Ran 1 test in 0.001s
+Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44733/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44424/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
 ----------------------------------------------------------------------
-Ran 1 test in 0.001s
+Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44733/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44424/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
 ----------------------------------------------------------------------
-Ran 1 test in 0.001s
+Ran 1 test in 0.000s
 
 FAILED (failures=1)
 ======================================================================
 FAIL: test_simple (__main__.TestGCD)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44733/2565918356.py", line 3, in test_simple
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_44424/2565918356.py", line 3, in test_simple
     assert cfg.gcd(1, 0) == 1
 AssertionError
 
 ----------------------------------------------------------------------
-Ran 1 test in 0.001s
+Ran 1 test in 0.000s
 
 FAILED (failures=1)
 
