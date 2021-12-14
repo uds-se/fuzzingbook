@@ -3,7 +3,7 @@
 
 # "Part I: Whetting Your Appetite" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/01_Intro.html
-# Last change: 2021-06-02 17:39:50+02:00
+# Last change: 2021-12-13 16:56:40+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors

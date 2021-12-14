@@ -40,6 +40,8 @@ assert do_import("def foo():\n    pass")
 assert do_import("# ignore\ndef foo():\n    pass")
 assert do_import("# ignore\nclass Bar:\n    pass")
 assert do_import("XYZ = 123")
+assert do_import("Timeout = A if f() else B")
+assert do_import("Zoo: Set[Animal] = {...}")
 assert not do_import("xyz = 123")
 assert not do_import("foo()")
 

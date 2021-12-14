@@ -3,7 +3,7 @@
 
 # "Fuzzing: Breaking Things with Random Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2021-11-09 14:01:19+01:00
+# Last change: 2021-12-13 17:09:55+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -685,6 +685,7 @@ class Fuzzer:
     """Base class for fuzzers."""
 
     def __init__(self) -> None:
+        """Constructor"""
         pass
 
     def fuzz(self) -> str:

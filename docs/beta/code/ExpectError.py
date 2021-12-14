@@ -3,7 +3,7 @@
 
 # "Error Handling" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ExpectError.html
-# Last change: 2021-06-02 17:56:28+02:00
+# Last change: 2021-12-13 17:32:55+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -47,7 +47,7 @@ The `ExpectError` class allows you to catch and report exceptions, yet resume ex
 >>> with ExpectError():
 >>>     x = 1 / 0
 Traceback (most recent call last):
-  File "", line 2, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_54210/2664980466.py", line 2, in 
     x = 1 / 0
 ZeroDivisionError: division by zero (expected)
 
@@ -63,14 +63,12 @@ Start
 3 seconds have passed
 
 Traceback (most recent call last):
-  File "", line 2, in 
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_54210/1223755941.py", line 2, in 
     long_running_test()
-  File "", line 5, in long_running_test
-    print(i, "seconds have passed")
-  File "", line 5, in long_running_test
-    print(i, "seconds have passed")
-  File "", line 25, in check_time
-    raise TimeoutError
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_54210/3930412460.py", line 4, in long_running_test
+    time.sleep(1)
+  File "/Users/zeller/Projects/fuzzingbook/notebooks/Timeout.ipynb", line 43, in timeout_handler
+    raise TimeoutError()
 TimeoutError (expected)
 
 
@@ -204,49 +202,28 @@ if __name__ == '__main__':
 import sys
 import time
 
-class ExpectTimeout:
+from .Timeout import Timeout
+
+class ExpectTimeout(Timeout):  # type: ignore
     """Execute a code block expecting (and catching) a timeout."""
 
-    def __init__(self, seconds: Union[int, float], 
+    def __init__(self, timeout: Union[int, float],
                  print_traceback: bool = True, mute: bool = False):
         """
-        Constructor. Interrupe execution after `seconds` seconds.
+        Constructor. Interrupt execution after `seconds` seconds.
         If `print_traceback` is set (default), print a traceback to stderr.
         If `mute` is set (default: False), do not print anything.
         """
+        super().__init__(timeout)
 
-        self.seconds_before_timeout = seconds
-        self.original_trace_function: Optional[Callable] = None
-        self.end_time: Optional[float] = None
         self.print_traceback = print_traceback
         self.mute = mute
 
-    def check_time(self, frame: FrameType, event: str, arg: Any) -> Callable:
-        """Tracing function"""
-        if self.original_trace_function is not None:
-            self.original_trace_function(frame, event, arg)
-
-        current_time = time.time()
-        if self.end_time and current_time >= self.end_time:
-            raise TimeoutError
-
-        return self.check_time
-
-    def __enter__(self) -> Any:
-        """Begin of `with` block"""
-
-        start_time = time.time()
-        self.end_time = start_time + self.seconds_before_timeout
-
-        self.original_trace_function = sys.gettrace()
-        sys.settrace(self.check_time)
-        return self
-
-    def __exit__(self, exc_type: type, 
+    def __exit__(self, exc_type: type,
                  exc_value: BaseException, tb: TracebackType) -> Optional[bool]:
         """End of `with` block"""
 
-        self.cancel()
+        super().__exit__(exc_type, exc_value, tb)
 
         if exc_type is None:
             return
@@ -264,10 +241,8 @@ class ExpectTimeout:
 
         if not self.mute:
             print(lines, "(expected)", file=sys.stderr)
-        return True  # Ignore it
 
-    def cancel(self) -> None:
-        sys.settrace(self.original_trace_function)
+        return True  # Ignore exception
 
 def long_running_test() -> None:
     print("Start")
@@ -281,8 +256,8 @@ if __name__ == '__main__':
         long_running_test()
 
 if __name__ == '__main__':
-    with ExpectTimeout(5):
-        with ExpectTimeout(3):
+    with ExpectTimeout(5, print_traceback=False):
+        with ExpectTimeout(3, print_traceback=False):
             long_running_test()
         long_running_test()
 

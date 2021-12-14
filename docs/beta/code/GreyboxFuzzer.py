@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2021-12-08 14:55:30+01:00
+# Last change: 2021-12-13 15:35:30+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,25 +68,23 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- htt://wsw.coo7Wgl%{e.m/ceavchqfuzjifXg,
- Qhtt:Rcmi3WG{m.VceyvhqFu~*iF?Hg,
- t:rgmq#Ginc%Xy4jqF*,
- tpp*//?wwwt.gooLgm.`o$m/sarhqfu@zuz{ilc,
- htt://wsw.coo7Wgl%{e.m-ceavch_qfuzj9ifg,
- http;//www.google.com/3earch?q=fqz~ing,
- h1tt:/wsw.coo7Wgl%{eR.m-ceavch_quzj9ifg,
- t*//$wsw.7gl%{m/cevchqfujiXc,
- h|t$p+//ww/gogleco=m./sacx=fuz_zsi:gg,
- http:/.www.goow,e&coM/seargh'?Q=fuzzing,
- htt;//wsw.coo7AWgl%{e.m-ceavch_qfuzj9ifg,
- @91vGt?wsw.coo7Wgl%{uR.mt/ceavch_q6uzGjR9ifG,
- ht4//wsw.#oo7Wgh%Yem-ceavch}9ifg,
- jtt/'ww>com/7Wg(!{em/ceavhQf]*5zjifXg,
- hvtp7://www.googm.co-/Search?=fuzing,
- http://ww.gnolecom/sdarah?q=fuzQzin#g,
- )hTtp://ww.gn!olecom/sdarah?q=fu.zQzin#g,
- htt://wsw.coo7Wg|%{e.m/ceavhqfuzjifXg,
- htt?p;//www./goog*le.com/3e:azrc7h?Q=fqz~kng]
+ htt`://www.go'le.aom{earch?q=buzZing,
+ htt`://www.go'le&1aoi{Earchq=buzZin,
+ tp://www.go'le.aomearch?a=juZin,
+ htt`://www.go'le&1aoi{Earc-hq=buHz6Zin+,
+ Hdtp:?/$wIwwgo'neco/saarc?=fuzzin'[,
+ p`/-?lww~lyz*go'e&1jaI{UaEch5s=bz^)n,
+ t://wZuwg'le&aome9a`c|ha5hutZin.,
+ //wg9&omg9/7hc,|ha5eZjk,
+ t2//wZuwg'le&aome9a`k|ha5hutZin.,
+ t:'/wZuwg'le&aIome9a`c|ha5hutZin.,
+ Kt:/wKZuwd'l&aome9ahF#|hauhutZin#uZuw'leaogke{Gcr|hi%huutin.,
+ htt`://www.go#le&1aoi{Earc-hq=buHz6Zin;,
+ hv`R//wwQw.go'lLeao{e`rch?Oq=bV;e#zng,
+ Zd*t:?/$wIw\gL'ne$co/saarc?=fKufziN',
+ sWeOZuw'leUioLgke{Gc2#uh'lgge{9G^v!czli%lu^ui.'KP-,
+ h`R//q*o'!lcA/{m`rwchOa=zVw;e$wIww
+ gk''Co#/s!ar==vzzin#[]
 
 Besides the simple `PowerSchedule`, we can have advanced power schedules.
 
@@ -165,6 +163,7 @@ class Mutator:
     """Mutate strings"""
 
     def __init__(self) -> None:
+        """Constructor"""
         self.mutators = [
             self.delete_random_character,
             self.insert_random_character,
@@ -200,7 +199,7 @@ class Mutator(Mutator):
         return s[:pos] + new_c + s[pos + 1:]
 
 class Mutator(Mutator):
-    def mutate(self, inp: str) -> str:
+    def mutate(self, inp: Any) -> Any:  # can be str or Seed (see below)
         """Return s with a random mutation applied. Can be overloaded in subclasses."""
         mutator = random.choice(self.mutators)
         return mutator(inp)
@@ -973,6 +972,14 @@ if __name__ == '__main__':
 
 
 
+## Background
+## ----------
+
+if __name__ == '__main__':
+    print('\n## Background')
+
+
+
 ## Next Steps
 ## ----------
 
@@ -1000,14 +1007,6 @@ if __name__ == '__main__':
 
 class MutationFuzzer(AdvancedMutationFuzzer):
     pass
-
-## Background
-## ----------
-
-if __name__ == '__main__':
-    print('\n## Background')
-
-
 
 ## Exercises
 ## ---------
