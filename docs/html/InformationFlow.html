@@ -11946,15 +11946,17 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#Taint-Aware-Fuzzing">&nbsp;&bull;&nbsp;&nbsp; Taint Aware Fuzzing</a>
 <ul><li class="has-sub"><a href="#TaintedDB">TaintedDB</a>
 </ul></li><li class="has-sub"><a href="#Preventing-Privacy-Leaks">&nbsp;&bull;&nbsp;&nbsp; Preventing Privacy Leaks</a>
-<ul><li class="has-sub"><a href="#Tracking-Character-Origins">Tracking Character Origins</a>
-</li><li class="has-sub"><a href="#Tracking-Individual-Characters">Tracking Individual Characters</a>
-</li><li class="has-sub"><a href="#A-Class-for-Tracking-Character-Origins">A Class for Tracking Character Origins</a>
+</li><li class="has-sub"><a href="#Tracking-Individual-Characters">&nbsp;&bull;&nbsp;&nbsp; Tracking Individual Characters</a>
+<ul><li class="has-sub"><a href="#A-Class-for-Tracking-Character-Origins">A Class for Tracking Character Origins</a>
+</li><li class="has-sub"><a href="#Excursion:-Implementing-String-Methods">Excursion: Implementing String Methods</a>
 </li><li class="has-sub"><a href="#Checking-Origins">Checking Origins</a>
 </li><li class="has-sub"><a href="#Privacy-Leaks-Revisited">Privacy Leaks Revisited</a>
 </ul></li><li class="has-sub"><a href="#Taint-Directed-Fuzzing">&nbsp;&bull;&nbsp;&nbsp; Taint-Directed Fuzzing</a>
 <ul><li class="has-sub"><a href="#TrackingDB">TrackingDB</a>
 </li><li class="has-sub"><a href="#TaintedGrammarFuzzer">TaintedGrammarFuzzer</a>
 </li><li class="has-sub"><a href="#The-Limits-of-Taint-Tracking">The Limits of Taint Tracking</a>
+</li><li class="has-sub"><a href="#Tracking-String-Taints">Tracking String Taints</a>
+</li><li class="has-sub"><a href="#Tracking-Character-Origins">Tracking Character Origins</a>
 </ul></li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps"><i class="fa fa-fw fa-arrows"></i> Next Steps</a>
 </li><li class="has-sub"><a href="#Background"><i class="fa fa-fw fa-mortar-board"></i> Background</a>
@@ -12057,7 +12059,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/typing.html" class="import" target="_blank">typing</a></span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/typing.html" class="import" target="_blank">typing</a></span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 </pre></div>
 
 </div>
@@ -12075,20 +12077,446 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </pre></div>
 <p>and then make use of the following features.</p>
 <p>This chapter provides two wrappers to Python <em>strings</em> that allow one to track various properties. These include information on the security properties of the input, and information on originating indexes of the input string.</p>
-<p>For tracking information on security properties, use <code>tstr</code> as follows:</p>
+<h3 id="Tracking-String-Taints">Tracking String Taints<a class="anchor-link" href="#Tracking-String-Taints">&#182;</a></h3><p><code>tstr</code> objects are replacements for Python strings that allows to track and check <em>taints</em> – that is, information on from where a string originated. For instance, one can mark strings that originate from third party input with a taint of "LOW", meaning that they have a low security level. The taint is passed in the constructor of a <code>tstr</code> object:</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">thello</span> <span class="o">=</span> <span class="n">tstr</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;LOW&#39;</span><span class="p">)</span>
 </pre></div>
-<p>Now, any operation from <code>thello</code> that results in a string fragment would include the correct taint. For example:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">thello</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">taint</span>
+<p>A <code>tstr</code> object is fully compatible with original Python strings. For instance, we can index it and access substrings:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">thello</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+<span class="s1">&#39;hell&#39;</span>
+</pre></div>
+<p>However, the <code>tstr</code> object also stores the taint, which can be accessed using the <code>taint</code> attribute:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">thello</span><span class="o">.</span><span class="n">taint</span>
 <span class="s1">&#39;LOW&#39;</span>
 </pre></div>
-<p>For tracking the originating indexes from the input string, use <code>ostr</code> as follows:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">ohw</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;hello</span><span class="se">\t</span><span class="s2">world&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<p>The neat thing about taints is that they propagate to all strings derived from the original tainted string.
+Indeed, any operation from a  <code>tstr</code> string that results in a string fragment produces another <code>tstr</code> object that includes the original taint. For example:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">thello</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">taint</span>
+<span class="s1">&#39;LOW&#39;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="ClassDiagram.html" class="import" target="_blank">ClassDiagram</a></span> <span class="kn">import</span> <span class="n">display_class_hierarchy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">tstr</span><span class="p">)</span>
 </pre></div>
-<p>The originating indexes can be recovered as follows:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">ohw</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">+</span> <span class="n">ohw</span><span class="p">[</span><span class="mi">6</span><span class="p">:])</span><span class="o">.</span><span class="n">origin</span>
-<span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="mi">102</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">106</span><span class="p">,</span> <span class="mi">107</span><span class="p">,</span> <span class="mi">108</span><span class="p">,</span> <span class="mi">109</span><span class="p">,</span> <span class="mi">110</span><span class="p">]</span>
+<p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.3 (20211023.0002)
+ -->
+<!-- Pages: 1 -->
+<svg width="270pt" height="498pt"
+ viewBox="0.00 0.00 269.50 498.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 494)">
+<g id="a_graph0"><a xlink:title="tstr class hierarchy">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-494 265.5,-494 265.5,4 -4,4"/>
+</a>
+</g>
+<!-- tstr -->
+<g id="node1" class="node">
+<title>tstr</title>
+<g id="a_node1"><a xlink:href="#" xlink:title="class tstr:&#10;Wrapper for strings, saving taint information">
+<polygon fill="none" stroke="black" points="0,-0.5 0,-416.5 125,-416.5 125,-0.5 0,-0.5"/>
+<text text-anchor="start" x="51" y="-402.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">tstr</text>
+<polyline fill="none" stroke="black" points="0,-393.5 125,-393.5 "/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="tstr">
+<g id="a_node1_1"><a xlink:href="#" xlink:title="__add__(self, *args, **kwargs):&#10;Return self+value.">
+<text text-anchor="start" x="8.5" y="-382" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__add__()</text>
+</a>
+</g>
+<g id="a_node1_2"><a xlink:href="#" xlink:title="__format__(self, *args, **kwargs):&#10;Return a formatted version of the string as described by format_spec.">
+<text text-anchor="start" x="8.5" y="-371" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__format__()</text>
+</a>
+</g>
+<g id="a_node1_3"><a xlink:href="#" xlink:title="__getitem__(self, *args, **kwargs):&#10;Return self[key].">
+<text text-anchor="start" x="8.5" y="-360" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__getitem__()</text>
+</a>
+</g>
+<g id="a_node1_4"><a xlink:href="#" xlink:title="__init__(self, value: Any, taint: Any = None, **kwargs) &#45;&gt; None:&#10;Constructor.&#10;`value` is the string value the `tstr` object is to be constructed from.&#10;`taint` is an (optional) taint to be propagated to derived strings.">
+<text text-anchor="start" x="8.5" y="-349" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node1_5"><a xlink:href="#" xlink:title="__mod__(self, *args, **kwargs):&#10;Return self%value.">
+<text text-anchor="start" x="8.5" y="-338" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__mod__()</text>
+</a>
+</g>
+<g id="a_node1_6"><a xlink:href="#" xlink:title="__mul__(self, *args, **kwargs):&#10;Return self*value.">
+<text text-anchor="start" x="8.5" y="-327" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__mul__()</text>
+</a>
+</g>
+<g id="a_node1_7"><a xlink:href="#" xlink:title="__new__(cls, value, *args, **kw):&#10;Create a tstr() instance. Used internally.">
+<text text-anchor="start" x="8.5" y="-316" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__new__()</text>
+</a>
+</g>
+<g id="a_node1_8"><a xlink:href="#" xlink:title="__radd__(self, value):&#10;Return value + self, as a `tstr` object">
+<text text-anchor="start" x="8.5" y="-305" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__radd__()</text>
+</a>
+</g>
+<g id="a_node1_9"><a xlink:href="#" xlink:title="__repr__(self) &#45;&gt; tstr:&#10;Return a representation.">
+<text text-anchor="start" x="8.5" y="-294" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__repr__()</text>
+</a>
+</g>
+<g id="a_node1_10"><a xlink:href="#" xlink:title="__rmod__(self, *args, **kwargs):&#10;Return value%self.">
+<text text-anchor="start" x="8.5" y="-283" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__rmod__()</text>
+</a>
+</g>
+<g id="a_node1_11"><a xlink:href="#" xlink:title="__rmul__(self, *args, **kwargs):&#10;Return value*self.">
+<text text-anchor="start" x="8.5" y="-272" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__rmul__()</text>
+</a>
+</g>
+<g id="a_node1_12"><a xlink:href="#" xlink:title="__str__(self) &#45;&gt; str:&#10;Convert to string">
+<text text-anchor="start" x="8.5" y="-261" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__str__()</text>
+</a>
+</g>
+<g id="a_node1_13"><a xlink:href="#" xlink:title="capitalize(self, *args, **kwargs):&#10;Return a capitalized version of the string.&#10;&#10;More specifically, make the first character have upper case and the rest lower&#10;case.">
+<text text-anchor="start" x="8.5" y="-250" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">capitalize()</text>
+</a>
+</g>
+<g id="a_node1_14"><a xlink:href="#" xlink:title="casefold(self, *args, **kwargs):&#10;Return a version of the string suitable for caseless comparisons.">
+<text text-anchor="start" x="8.5" y="-239" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">casefold()</text>
+</a>
+</g>
+<g id="a_node1_15"><a xlink:href="#" xlink:title="center(self, *args, **kwargs):&#10;Return a centered string of length width.&#10;&#10;Padding is done using the specified fill character (default is a space).">
+<text text-anchor="start" x="8.5" y="-228" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">center()</text>
+</a>
+</g>
+<g id="a_node1_16"><a xlink:href="#" xlink:title="clear_taint(self):&#10;Remove taint">
+<text text-anchor="start" x="8.5" y="-217" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">clear_taint()</text>
+</a>
+</g>
+<g id="a_node1_17"><a xlink:href="#" xlink:title="encode(self, *args, **kwargs):&#10;Encode the string using the codec registered for encoding.&#10;&#10;encoding&#10;The encoding in which to encode the string.&#10;errors&#10;The error handling scheme to use for encoding errors.&#10;The default is &#39;strict&#39; meaning that encoding errors raise a&#10;UnicodeEncodeError. &#160;Other possible values are &#39;ignore&#39;, &#39;replace&#39; and&#10;&#39;xmlcharrefreplace&#39; as well as any other name registered with&#10;codecs.register_error that can handle UnicodeEncodeErrors.">
+<text text-anchor="start" x="8.5" y="-206" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">encode()</text>
+</a>
+</g>
+<g id="a_node1_18"><a xlink:href="#" xlink:title="expandtabs(self, *args, **kwargs):&#10;Return a copy where all tab characters are expanded using spaces.&#10;&#10;If tabsize is not given, a tab size of 8 characters is assumed.">
+<text text-anchor="start" x="8.5" y="-195" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">expandtabs()</text>
+</a>
+</g>
+<g id="a_node1_19"><a xlink:href="#" xlink:title="format(self, *args, **kwargs):&#10;S.format(*args, **kwargs) &#45;&gt; str&#10;&#10;Return a formatted version of S, using substitutions from args and kwargs.&#10;The substitutions are identified by braces (&#39;{&#39; and &#39;}&#39;).">
+<text text-anchor="start" x="8.5" y="-184" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">format()</text>
+</a>
+</g>
+<g id="a_node1_20"><a xlink:href="#" xlink:title="format_map(self, *args, **kwargs):&#10;S.format_map(mapping) &#45;&gt; str&#10;&#10;Return a formatted version of S, using substitutions from mapping.&#10;The substitutions are identified by braces (&#39;{&#39; and &#39;}&#39;).">
+<text text-anchor="start" x="8.5" y="-173" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">format_map()</text>
+</a>
+</g>
+<g id="a_node1_21"><a xlink:href="#" xlink:title="has_taint(self):&#10;Check if taint is present">
+<text text-anchor="start" x="8.5" y="-162" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">has_taint()</text>
+</a>
+</g>
+<g id="a_node1_22"><a xlink:href="#" xlink:title="join(self, *args, **kwargs):&#10;Concatenate any number of strings.&#10;&#10;The string whose method is called is inserted in between each given string.&#10;The result is returned as a new string.&#10;&#10;Example: &#39;.&#39;.join([&#39;ab&#39;, &#39;pq&#39;, &#39;rs&#39;]) &#45;&gt; &#39;ab.pq.rs&#39;">
+<text text-anchor="start" x="8.5" y="-151" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">join()</text>
+</a>
+</g>
+<g id="a_node1_23"><a xlink:href="#" xlink:title="ljust(self, *args, **kwargs):&#10;Return a left&#45;justified string of length width.&#10;&#10;Padding is done using the specified fill character (default is a space).">
+<text text-anchor="start" x="8.5" y="-140" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">ljust()</text>
+</a>
+</g>
+<g id="a_node1_24"><a xlink:href="#" xlink:title="lower(self, *args, **kwargs):&#10;Return a copy of the string converted to lowercase.">
+<text text-anchor="start" x="8.5" y="-129" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">lower()</text>
+</a>
+</g>
+<g id="a_node1_25"><a xlink:href="#" xlink:title="lstrip(self, *args, **kwargs):&#10;Return a copy of the string with leading whitespace removed.&#10;&#10;If chars is given and not None, remove characters in chars instead.">
+<text text-anchor="start" x="8.5" y="-118" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">lstrip()</text>
+</a>
+</g>
+<g id="a_node1_26"><a xlink:href="#" xlink:title="make_str_wrapper(fun):&#10;Make `fun` (a `str` method) a method in `tstr`">
+<text text-anchor="start" x="8.5" y="-107" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">make_str_wrapper()</text>
+</a>
+</g>
+<g id="a_node1_27"><a xlink:href="#" xlink:title="replace(self, *args, **kwargs):&#10;Return a copy with all occurrences of substring old replaced by new.&#10;&#10;count&#10;Maximum number of occurrences to replace.&#10;&#45;1 (the default value) means replace all occurrences.&#10;&#10;If the optional argument count is given, only the first count occurrences are&#10;replaced.">
+<text text-anchor="start" x="8.5" y="-96" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">replace()</text>
+</a>
+</g>
+<g id="a_node1_28"><a xlink:href="#" xlink:title="rjust(self, *args, **kwargs):&#10;Return a right&#45;justified string of length width.&#10;&#10;Padding is done using the specified fill character (default is a space).">
+<text text-anchor="start" x="8.5" y="-85" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">rjust()</text>
+</a>
+</g>
+<g id="a_node1_29"><a xlink:href="#" xlink:title="rstrip(self, *args, **kwargs):&#10;Return a copy of the string with trailing whitespace removed.&#10;&#10;If chars is given and not None, remove characters in chars instead.">
+<text text-anchor="start" x="8.5" y="-74" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">rstrip()</text>
+</a>
+</g>
+<g id="a_node1_30"><a xlink:href="#" xlink:title="strip(self, *args, **kwargs):&#10;Return a copy of the string with leading and trailing whitespace removed.&#10;&#10;If chars is given and not None, remove characters in chars instead.">
+<text text-anchor="start" x="8.5" y="-63" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">strip()</text>
+</a>
+</g>
+<g id="a_node1_31"><a xlink:href="#" xlink:title="swapcase(self, *args, **kwargs):&#10;Convert uppercase characters to lowercase and lowercase characters to uppercase.">
+<text text-anchor="start" x="8.5" y="-52" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">swapcase()</text>
+</a>
+</g>
+<g id="a_node1_32"><a xlink:href="#" xlink:title="title(self, *args, **kwargs):&#10;Return a version of the string where each word is titlecased.&#10;&#10;More specifically, words start with uppercased characters and all remaining&#10;cased characters have lower case.">
+<text text-anchor="start" x="8.5" y="-41" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">title()</text>
+</a>
+</g>
+<g id="a_node1_33"><a xlink:href="#" xlink:title="translate(self, *args, **kwargs):&#10;Replace each character in the string using the given translation table.&#10;&#10;table&#10;Translation table, which must be a mapping of Unicode ordinals to&#10;Unicode ordinals, strings, or None.&#10;&#10;The table must implement lookup/indexing via __getitem__, for instance a&#10;dictionary or list. &#160;If this operation raises LookupError, the character is&#10;left untouched. &#160;Characters mapped to None are deleted.">
+<text text-anchor="start" x="8.5" y="-30" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">translate()</text>
+</a>
+</g>
+<g id="a_node1_34"><a xlink:href="#" xlink:title="upper(self, *args, **kwargs):&#10;Return a copy of the string converted to uppercase.">
+<text text-anchor="start" x="8.5" y="-19" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">upper()</text>
+</a>
+</g>
+<g id="a_node1_35"><a xlink:href="#" xlink:title="create(self, s)">
+<text text-anchor="start" x="8.5" y="-7" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">create()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- str -->
+<g id="node2" class="node">
+<title>str</title>
+<g id="a_node2"><a xlink:href="builtins.html" xlink:title="class str:&#10;str(object=&#39;&#39;) &#45;&gt; str&#10;str(bytes_or_buffer[, encoding[, errors]]) &#45;&gt; str&#10;&#10;Create a new string object from the given object. If encoding or&#10;errors is specified, then the object must expose a data buffer&#10;that will be decoded using the given encoding and error handler.&#10;Otherwise, returns the result of object.__str__() (if defined)&#10;or repr(object).&#10;encoding defaults to sys.getdefaultencoding().&#10;errors defaults to &#39;strict&#39;.">
+<polygon fill="none" stroke="black" points="35.5,-453.5 35.5,-489.5 89.5,-489.5 89.5,-453.5 35.5,-453.5"/>
+<text text-anchor="start" x="54" y="-468.8" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">str</text>
+</a>
+</g>
+</g>
+<!-- tstr&#45;&gt;str -->
+<g id="edge1" class="edge">
+<title>tstr&#45;&gt;str</title>
+<path fill="none" stroke="black" d="M62.5,-416.74C62.5,-426.5 62.5,-435.37 62.5,-442.96"/>
+<polygon fill="none" stroke="black" points="59,-443.14 62.5,-453.14 66,-443.14 59,-443.14"/>
+</g>
+<!-- Legend -->
+<g id="node3" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="143.5" y="-226" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="143.5" y="-216" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="149.5" y="-216" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="143.5" y="-206" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="149.5" y="-206" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="143.5" y="-196" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="149.5" y="-196" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="143.5" y="-186.8" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+</p>
+<h3 id="Tracking-Character-Origins">Tracking Character Origins<a class="anchor-link" href="#Tracking-Character-Origins">&#182;</a></h3><p><code>ostr</code> objects extend <code>tstr</code> objects by not only tracking a taint, but also the originating <em>indexes</em> from the input string, This allows you to exactly track where individual characters came from. Assume you have a long string, which at index 100 contains the password <code>"joshua1234"</code>. Then you can save this origin information using an <code>ostr</code> as follows:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">secret</span> <span class="o">=</span> <span class="n">ostr</span><span class="p">(</span><span class="s2">&quot;joshua1234&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="s1">&#39;SECRET&#39;</span><span class="p">)</span>
 </pre></div>
+<p>The <code>origin</code> attribute of an <code>ostr</code> provides access to a list of indexes:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">secret</span><span class="o">.</span><span class="n">origin</span>
+<span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="mi">102</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="mi">104</span><span class="p">,</span> <span class="mi">105</span><span class="p">,</span> <span class="mi">106</span><span class="p">,</span> <span class="mi">107</span><span class="p">,</span> <span class="mi">108</span><span class="p">,</span> <span class="mi">109</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">secret</span><span class="o">.</span><span class="n">taint</span>
+<span class="s1">&#39;SECRET&#39;</span>
+</pre></div>
+<p><code>ostr</code> objects are compatible with Python strings, except that string operations return <code>ostr</code> objects (together with the saved origin an index information). An index of <code>-1</code> indicates that the corresponding character has no origin as supplied to the <code>ostr()</code> constructor:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">secret_substr</span> <span class="o">=</span> <span class="p">(</span><span class="n">secret</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="n">secret</span><span class="p">[</span><span class="mi">6</span><span class="p">:])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">secret_substr</span><span class="o">.</span><span class="n">taint</span>
+<span class="s1">&#39;SECRET&#39;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">secret_substr</span><span class="o">.</span><span class="n">origin</span>
+<span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="mi">102</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">106</span><span class="p">,</span> <span class="mi">107</span><span class="p">,</span> <span class="mi">108</span><span class="p">,</span> <span class="mi">109</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="ClassDiagram.html" class="import" target="_blank">ClassDiagram</a></span> <span class="kn">import</span> <span class="n">display_class_hierarchy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">ostr</span><span class="p">)</span>
+</pre></div>
+<p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.3 (20211023.0002)
+ -->
+<!-- Pages: 1 -->
+<svg width="252pt" height="528pt"
+ viewBox="0.00 0.00 251.50 528.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 524)">
+<g id="a_graph0"><a xlink:title="ostr class hierarchy">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-524 247.5,-524 247.5,4 -4,4"/>
+</a>
+</g>
+<!-- ostr -->
+<g id="node1" class="node">
+<title>ostr</title>
+<g id="a_node1"><a xlink:href="#" xlink:title="class ostr:&#10;Wrapper for strings, saving taint and origin information">
+<polygon fill="none" stroke="black" points="0,-0.5 0,-446.5 107,-446.5 107,-0.5 0,-0.5"/>
+<text text-anchor="start" x="41" y="-432.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">ostr</text>
+<polyline fill="none" stroke="black" points="0,-423.5 107,-423.5 "/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="ostr">
+<g id="a_node1_1"><a xlink:href="#" xlink:title="DEFAULT_ORIGIN = 0">
+<text text-anchor="start" x="11.5" y="-411.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">DEFAULT_ORIGIN</text>
+</a>
+</g>
+<g id="a_node1_2"><a xlink:href="#" xlink:title="UNKNOWN_ORIGIN = &#45;1">
+<text text-anchor="start" x="11.5" y="-400.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">UNKNOWN_ORIGIN</text>
+</a>
+</g>
+</a>
+</g>
+<polyline fill="none" stroke="black" points="0,-393.5 107,-393.5 "/>
+<g id="a_node1_3"><a xlink:href="#" xlink:title="ostr">
+<g id="a_node1_4"><a xlink:href="#" xlink:title="__add__(self, other):&#10;Return self+value.">
+<text text-anchor="start" x="8.5" y="-382" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__add__()</text>
+</a>
+</g>
+<g id="a_node1_5"><a xlink:href="#" xlink:title="__getitem__(self, key):&#10;Return self[key].">
+<text text-anchor="start" x="8.5" y="-371" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__getitem__()</text>
+</a>
+</g>
+<g id="a_node1_6"><a xlink:href="#" xlink:title="__init__(self, value: Any, taint: Any = None, origin: Union[int, List[int], NoneType] = None, **kwargs) &#45;&gt; None:&#10;Constructor.&#10;`value` is the string value the `ostr` object is to be constructed from.&#10;`taint` is an (optional) taint to be propagated to derived strings.&#10;`origin` (optional) is either&#10;&#45; an integer denoting the index of the first character in `value`, or&#10;&#45; a list of integers denoting the origins of the characters in `value`,">
+<text text-anchor="start" x="8.5" y="-360" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node1_7"><a xlink:href="#" xlink:title="__iter__(self):&#10;Implement iter(self).">
+<text text-anchor="start" x="8.5" y="-349" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__iter__()</text>
+</a>
+</g>
+<g id="a_node1_8"><a xlink:href="#" xlink:title="__mod__(self, s):&#10;Return self%value.">
+<text text-anchor="start" x="8.5" y="-338" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__mod__()</text>
+</a>
+</g>
+<g id="a_node1_9"><a xlink:href="#" xlink:title="__new__(cls, value, *args, **kw):&#10;Create an ostr() instance. Used internally.">
+<text text-anchor="start" x="8.5" y="-327" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__new__()</text>
+</a>
+</g>
+<g id="a_node1_10"><a xlink:href="#" xlink:title="__repr__(self):&#10;Return repr(self).">
+<text text-anchor="start" x="8.5" y="-316" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__repr__()</text>
+</a>
+</g>
+<g id="a_node1_11"><a xlink:href="#" xlink:title="__rmod__(self, s):&#10;Return value%self.">
+<text text-anchor="start" x="8.5" y="-305" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__rmod__()</text>
+</a>
+</g>
+<g id="a_node1_12"><a xlink:href="#" xlink:title="__str__(self):&#10;Return str(self).">
+<text text-anchor="start" x="8.5" y="-294" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__str__()</text>
+</a>
+</g>
+<g id="a_node1_13"><a xlink:href="#" xlink:title="capitalize(self):&#10;Return a capitalized version of the string.&#10;&#10;More specifically, make the first character have upper case and the rest lower&#10;case.">
+<text text-anchor="start" x="8.5" y="-283" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">capitalize()</text>
+</a>
+</g>
+<g id="a_node1_14"><a xlink:href="#" xlink:title="expandtabs(self, n=8):&#10;Return a copy where all tab characters are expanded using spaces.&#10;&#10;If tabsize is not given, a tab size of 8 characters is assumed.">
+<text text-anchor="start" x="8.5" y="-272" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">expandtabs()</text>
+</a>
+</g>
+<g id="a_node1_15"><a xlink:href="#" xlink:title="join(self, iterable):&#10;Concatenate any number of strings.&#10;&#10;The string whose method is called is inserted in between each given string.&#10;The result is returned as a new string.&#10;&#10;Example: &#39;.&#39;.join([&#39;ab&#39;, &#39;pq&#39;, &#39;rs&#39;]) &#45;&gt; &#39;ab.pq.rs&#39;">
+<text text-anchor="start" x="8.5" y="-261" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">join()</text>
+</a>
+</g>
+<g id="a_node1_16"><a xlink:href="#" xlink:title="ljust(self, width, fillchar=&#39; &#39;):&#10;Return a left&#45;justified string of length width.&#10;&#10;Padding is done using the specified fill character (default is a space).">
+<text text-anchor="start" x="8.5" y="-250" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">ljust()</text>
+</a>
+</g>
+<g id="a_node1_17"><a xlink:href="#" xlink:title="lower(self):&#10;Return a copy of the string converted to lowercase.">
+<text text-anchor="start" x="8.5" y="-239" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">lower()</text>
+</a>
+</g>
+<g id="a_node1_18"><a xlink:href="#" xlink:title="lstrip(self, cl=None):&#10;Return a copy of the string with leading whitespace removed.&#10;&#10;If chars is given and not None, remove characters in chars instead.">
+<text text-anchor="start" x="8.5" y="-228" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">lstrip()</text>
+</a>
+</g>
+<g id="a_node1_19"><a xlink:href="#" xlink:title="partition(self, sep):&#10;Partition the string into three parts using the given separator.&#10;&#10;This will search for the separator in the string. &#160;If the separator is found,&#10;returns a 3&#45;tuple containing the part before the separator, the separator&#10;itself, and the part after it.&#10;&#10;If the separator is not found, returns a 3&#45;tuple containing the original string&#10;and two empty strings.">
+<text text-anchor="start" x="8.5" y="-217" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">partition()</text>
+</a>
+</g>
+<g id="a_node1_20"><a xlink:href="#" xlink:title="replace(self, a, b, n=None):&#10;Return a copy with all occurrences of substring old replaced by new.&#10;&#10;count&#10;Maximum number of occurrences to replace.&#10;&#45;1 (the default value) means replace all occurrences.&#10;&#10;If the optional argument count is given, only the first count occurrences are&#10;replaced.">
+<text text-anchor="start" x="8.5" y="-206" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">replace()</text>
+</a>
+</g>
+<g id="a_node1_21"><a xlink:href="#" xlink:title="rjust(self, width, fillchar=&#39; &#39;):&#10;Return a right&#45;justified string of length width.&#10;&#10;Padding is done using the specified fill character (default is a space).">
+<text text-anchor="start" x="8.5" y="-195" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">rjust()</text>
+</a>
+</g>
+<g id="a_node1_22"><a xlink:href="#" xlink:title="rpartition(self, sep):&#10;Partition the string into three parts using the given separator.&#10;&#10;This will search for the separator in the string, starting at the end. If&#10;the separator is found, returns a 3&#45;tuple containing the part before the&#10;separator, the separator itself, and the part after it.&#10;&#10;If the separator is not found, returns a 3&#45;tuple containing two empty strings&#10;and the original string.">
+<text text-anchor="start" x="8.5" y="-184" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">rpartition()</text>
+</a>
+</g>
+<g id="a_node1_23"><a xlink:href="#" xlink:title="rsplit(self, sep=None, maxsplit=&#45;1):&#10;Return a list of the words in the string, using sep as the delimiter string.&#10;&#10;sep&#10;The delimiter according which to split the string.&#10;None (the default value) means split according to any whitespace,&#10;and discard empty strings from the result.&#10;maxsplit&#10;Maximum number of splits to do.&#10;&#45;1 (the default value) means no limit.&#10;&#10;Splits are done starting at the end of the string and working to the front.">
+<text text-anchor="start" x="8.5" y="-173" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">rsplit()</text>
+</a>
+</g>
+<g id="a_node1_24"><a xlink:href="#" xlink:title="rstrip(self, cl=None):&#10;Return a copy of the string with trailing whitespace removed.&#10;&#10;If chars is given and not None, remove characters in chars instead.">
+<text text-anchor="start" x="8.5" y="-162" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">rstrip()</text>
+</a>
+</g>
+<g id="a_node1_25"><a xlink:href="#" xlink:title="split(self, sep=None, maxsplit=&#45;1):&#10;Return a list of the words in the string, using sep as the delimiter string.&#10;&#10;sep&#10;The delimiter according which to split the string.&#10;None (the default value) means split according to any whitespace,&#10;and discard empty strings from the result.&#10;maxsplit&#10;Maximum number of splits to do.&#10;&#45;1 (the default value) means no limit.">
+<text text-anchor="start" x="8.5" y="-151" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">split()</text>
+</a>
+</g>
+<g id="a_node1_26"><a xlink:href="#" xlink:title="strip(self, cl=None):&#10;Return a copy of the string with leading and trailing whitespace removed.&#10;&#10;If chars is given and not None, remove characters in chars instead.">
+<text text-anchor="start" x="8.5" y="-140" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">strip()</text>
+</a>
+</g>
+<g id="a_node1_27"><a xlink:href="#" xlink:title="swapcase(self):&#10;Convert uppercase characters to lowercase and lowercase characters to uppercase.">
+<text text-anchor="start" x="8.5" y="-129" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">swapcase()</text>
+</a>
+</g>
+<g id="a_node1_28"><a xlink:href="#" xlink:title="title(self):&#10;Return a version of the string where each word is titlecased.&#10;&#10;More specifically, words start with uppercased characters and all remaining&#10;cased characters have lower case.">
+<text text-anchor="start" x="8.5" y="-118" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">title()</text>
+</a>
+</g>
+<g id="a_node1_29"><a xlink:href="#" xlink:title="upper(self):&#10;Return a copy of the string converted to uppercase.">
+<text text-anchor="start" x="8.5" y="-107" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">upper()</text>
+</a>
+</g>
+<g id="a_node1_30"><a xlink:href="#" xlink:title="x(self, i=0):&#10;Extract substring at index/slice `i`">
+<text text-anchor="start" x="8.5" y="-96" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">x()</text>
+</a>
+</g>
+<g id="a_node1_31"><a xlink:href="#" xlink:title="__radd__(self, other)">
+<text text-anchor="start" x="8.5" y="-84" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">__radd__()</text>
+</a>
+</g>
+<g id="a_node1_32"><a xlink:href="#" xlink:title="_split_helper(self, sep, splitted)">
+<text text-anchor="start" x="8.5" y="-73" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">_split_helper()</text>
+</a>
+</g>
+<g id="a_node1_33"><a xlink:href="#" xlink:title="_split_space(self, splitted)">
+<text text-anchor="start" x="8.5" y="-62" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">_split_space()</text>
+</a>
+</g>
+<g id="a_node1_34"><a xlink:href="#" xlink:title="clear_origin(self)">
+<text text-anchor="start" x="8.5" y="-51" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">clear_origin()</text>
+</a>
+</g>
+<g id="a_node1_35"><a xlink:href="#" xlink:title="clear_taint(self)">
+<text text-anchor="start" x="8.5" y="-40" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">clear_taint()</text>
+</a>
+</g>
+<g id="a_node1_36"><a xlink:href="#" xlink:title="create(self, res, origin=None)">
+<text text-anchor="start" x="8.5" y="-29" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">create()</text>
+</a>
+</g>
+<g id="a_node1_37"><a xlink:href="#" xlink:title="has_origin(self)">
+<text text-anchor="start" x="8.5" y="-18" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">has_origin()</text>
+</a>
+</g>
+<g id="a_node1_38"><a xlink:href="#" xlink:title="has_taint(self)">
+<text text-anchor="start" x="8.5" y="-7" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">has_taint()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- str -->
+<g id="node2" class="node">
+<title>str</title>
+<g id="a_node2"><a xlink:href="builtins.html" xlink:title="class str:&#10;str(object=&#39;&#39;) &#45;&gt; str&#10;str(bytes_or_buffer[, encoding[, errors]]) &#45;&gt; str&#10;&#10;Create a new string object from the given object. If encoding or&#10;errors is specified, then the object must expose a data buffer&#10;that will be decoded using the given encoding and error handler.&#10;Otherwise, returns the result of object.__str__() (if defined)&#10;or repr(object).&#10;encoding defaults to sys.getdefaultencoding().&#10;errors defaults to &#39;strict&#39;.">
+<polygon fill="none" stroke="black" points="26.5,-483.5 26.5,-519.5 80.5,-519.5 80.5,-483.5 26.5,-483.5"/>
+<text text-anchor="start" x="45" y="-498.8" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">str</text>
+</a>
+</g>
+</g>
+<!-- ostr&#45;&gt;str -->
+<g id="edge1" class="edge">
+<title>ostr&#45;&gt;str</title>
+<path fill="none" stroke="black" d="M53.5,-446.63C53.5,-456.46 53.5,-465.36 53.5,-472.98"/>
+<polygon fill="none" stroke="black" points="50,-473.17 53.5,-483.17 57,-473.17 50,-473.17"/>
+</g>
+<!-- Legend -->
+<g id="node3" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="125.5" y="-241" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="125.5" y="-231" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="131.5" y="-231" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="125.5" y="-221" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="131.5" y="-221" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="125.5" y="-211" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="131.5" y="-211" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="125.5" y="-201.8" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+</p>
 </div>
 </div>
 </div>
@@ -12368,15 +12796,18 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">do_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
         <span class="o">...</span>
+
     <span class="k">def</span> <span class="nf">do_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
         <span class="o">...</span>
+
     <span class="k">def</span> <span class="nf">do_insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
         <span class="o">...</span>
+
     <span class="k">def</span> <span class="nf">do_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
         <span class="o">...</span>
 
     <span class="k">def</span> <span class="nf">sql</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
-        <span class="n">methods</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;select &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_select</span><span class="p">),</span> 
+        <span class="n">methods</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;select &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_select</span><span class="p">),</span>
                    <span class="p">(</span><span class="s1">&#39;update &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_update</span><span class="p">),</span>
                    <span class="p">(</span><span class="s1">&#39;insert into &#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_insert</span><span class="p">),</span>
                    <span class="p">(</span><span class="s1">&#39;delete from&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_delete</span><span class="p">)]</span>
@@ -12962,6 +13393,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
         <span class="n">table_end</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">WHERE</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">table_end</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span><span class="s1">&#39;Invalid DELETE (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
+
         <span class="n">t_name</span> <span class="o">=</span> <span class="n">query</span><span class="p">[:</span><span class="n">table_end</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">t_name</span><span class="p">)</span>
         <span class="n">where</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">table_end</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">WHERE</span><span class="p">):]</span>
@@ -12969,6 +13401,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
         <span class="n">deleted</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">hm</span> <span class="ow">in</span> <span class="n">selected</span> <span class="k">if</span> <span class="n">d</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">deleted</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="k">del</span> <span class="n">table</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> records were deleted&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">deleted</span><span class="p">)</span>
 </pre></div>
 
@@ -13835,11 +14268,17 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wrapper for strings, saving taint information&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a tstr() instance. Used internally.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="o">=</span> <span class="n">taint</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">taint</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+<span class="sd">        `value` is the string value the `tstr` object is to be constructed from.</span>
+<span class="sd">        `taint` is an (optional) taint to be propagated to derived strings.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">taint</span>
 </pre></div>
 
 </div>
@@ -13854,7 +14293,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tstr</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return a representation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">tstr</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">taint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">)</span>
 </pre></div>
 
@@ -13870,7 +14310,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convert to string&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </pre></div>
 
@@ -13965,10 +14406,12 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">clear_taint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove taint&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">has_taint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if taint is present&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 </pre></div>
 
@@ -14026,11 +14469,19 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">make_str_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">proxy</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">make_str_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make `fun` (a `str` method) a method in `tstr`&quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">fun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="s1">&#39;__doc__&#39;</span><span class="p">):</span>
+            <span class="c1"># Copy docstring</span>
+            <span class="n">proxy</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">fun</span><span class="o">.</span><span class="vm">__doc__</span>
+
+        <span class="k">return</span> <span class="n">proxy</span>
 </pre></div>
 
 </div>
@@ -14054,12 +14505,14 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">informationflow_init_1</span><span class="p">():</span>
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;__format__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__getitem__&#39;</span><span class="p">,</span> <span class="s1">&#39;__add__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mul__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmul__&#39;</span><span class="p">,</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;__format__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmod__&#39;</span><span class="p">,</span> <span class="s1">&#39;__getitem__&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;__add__&#39;</span><span class="p">,</span> <span class="s1">&#39;__mul__&#39;</span><span class="p">,</span> <span class="s1">&#39;__rmul__&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;capitalize&#39;</span><span class="p">,</span> <span class="s1">&#39;casefold&#39;</span><span class="p">,</span> <span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="s1">&#39;encode&#39;</span><span class="p">,</span>
-                 <span class="s1">&#39;expandtabs&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">,</span> <span class="s1">&#39;format_map&#39;</span><span class="p">,</span> <span class="s1">&#39;join&#39;</span><span class="p">,</span> <span class="s1">&#39;ljust&#39;</span><span class="p">,</span> <span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="s1">&#39;lstrip&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;expandtabs&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">,</span> <span class="s1">&#39;format_map&#39;</span><span class="p">,</span> <span class="s1">&#39;join&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;ljust&#39;</span><span class="p">,</span> <span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="s1">&#39;lstrip&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">,</span>
                  <span class="s1">&#39;rjust&#39;</span><span class="p">,</span> <span class="s1">&#39;rstrip&#39;</span><span class="p">,</span> <span class="s1">&#39;strip&#39;</span><span class="p">,</span> <span class="s1">&#39;swapcase&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;translate&#39;</span><span class="p">,</span> <span class="s1">&#39;upper&#39;</span><span class="p">]:</span>
         <span class="n">fun</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="n">tstr</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">make_str_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">tstr</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">tstr</span><span class="o">.</span><span class="n">make_str_wrapper</span><span class="p">(</span><span class="n">fun</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -14127,8 +14580,9 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">tstr</span><span class="p">(</span><span class="n">tstr</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">s</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return value + self, as a `tstr` object&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">value</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 </pre></div>
 
 </div>
@@ -14476,9 +14930,9 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/3935989889.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3935989889.py&#34;, line 2, in &lt;module&gt;
     bdb.sql(&#34;select year from INVENTORY&#34;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/995123203.py&#34;, line 3, in sql
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/995123203.py&#34;, line 3, in sql
     assert isinstance(s, tstr), &#34;Need a tainted string&#34;
 AssertionError: Need a tainted string (expected)
 </pre>
@@ -14515,9 +14969,9 @@ AssertionError: Need a tainted string (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/3307042773.py&#34;, line 3, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3307042773.py&#34;, line 3, in &lt;module&gt;
     bdb.sql(bad_user_input)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/995123203.py&#34;, line 4, in sql
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/995123203.py&#34;, line 4, in sql
     assert s.taint == &#39;TRUSTED&#39;, &#34;Need a string with trusted taint&#34;
 AssertionError: Need a string with trusted taint (expected)
 </pre>
@@ -14714,9 +15168,9 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/249000876.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/249000876.py&#34;, line 2, in &lt;module&gt;
     bdb.sql(sanitized_input)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/995123203.py&#34;, line 4, in sql
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/995123203.py&#34;, line 4, in sql
     assert s.taint == &#39;TRUSTED&#39;, &#34;Need a string with trusted taint&#34;
 AssertionError: Need a string with trusted taint (expected)
 </pre>
@@ -15136,9 +15590,9 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/3747050841.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3747050841.py&#34;, line 2, in &lt;module&gt;
     send_back(reply)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/3158733057.py&#34;, line 2, in send_back
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3158733057.py&#34;, line 2, in send_back
     assert not isinstance(s, tstr) and not s.taint == &#39;SECRET&#39;  # type: ignore
 AssertionError (expected)
 </pre>
@@ -15149,7 +15603,7 @@ AssertionError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracking-Character-Origins">Tracking Character Origins<a class="anchor-link" href="#Tracking-Character-Origins">&#182;</a></h3><p>Our <code>tstr</code> solution can help to identify information leaks – but it is by no means complete.  If we actually take the <code>heartbeat()</code> implementation from <a href="Fuzzer.html">the chapter on Fuzzing</a>, we will see that <em>any</em> reply is marked as <code>SECRET</code> – even those not even accessing secret memory:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Our <code>tstr</code> solution can help to identify information leaks – but it is by no means complete.  If we actually take the <code>heartbeat()</code> implementation from <a href="Fuzzer.html">the chapter on Fuzzing</a>, we will see that <em>any</em> reply is marked as <code>SECRET</code> – even those not even accessing secret memory:</p>
 </div>
 </div>
 </div>
@@ -15316,7 +15770,7 @@ AssertionError (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Tracking-Individual-Characters">Tracking Individual Characters<a class="anchor-link" href="#Tracking-Individual-Characters">&#182;</a></h3><p>Fortunately, there is a better, more generic way to solve the above problems.  The key to composition of differently tainted strings is to assign taints not only to strings, but actually to every bit of information – in our case, characters.  If every character has a taint on its own, a new composition of characters will simply inherit this very taint <em>per character</em>.  To this end, we introduce a second bit of information named <em>origin</em>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Tracking-Individual-Characters">Tracking Individual Characters<a class="anchor-link" href="#Tracking-Individual-Characters">&#182;</a></h2><p>Fortunately, there is a better, more generic way to solve the above problems.  The key to composition of differently tainted strings is to assign taints not only to strings, but actually to every bit of information – in our case, characters.  If every character has a taint on its own, a new composition of characters will simply inherit this very taint <em>per character</em>.  To this end, we introduce a second bit of information named <em>origin</em>.</p>
 </div>
 </div>
 </div>
@@ -15365,12 +15819,22 @@ AssertionError (expected)
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ostr</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wrapper for strings, saving taint and origin information&quot;&quot;&quot;</span>
     <span class="n">DEFAULT_ORIGIN</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create an ostr() instance. Used internally.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">taint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">taint</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">origin</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+<span class="sd">        `value` is the string value the `ostr` object is to be constructed from.</span>
+<span class="sd">        `taint` is an (optional) taint to be propagated to derived strings.</span>
+<span class="sd">        `origin` (optional) is either</span>
+<span class="sd">        - an integer denoting the index of the first character in `value`, or</span>
+<span class="sd">        - a list of integers denoting the origins of the characters in `value`,</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">taint</span> <span class="o">=</span> <span class="n">taint</span>
 
         <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -15384,6 +15848,15 @@ AssertionError (expected)
 
 </div>
 </div></div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>As with <code>tstr</code>, above, we implement methods for conversion into (regular) Python strings:</p>
+</div>
+</div>
 </div>
 </div>
 
@@ -15417,6 +15890,7 @@ AssertionError (expected)
         <span class="n">origin</span> <span class="o">=</span> <span class="p">[</span><span class="n">ostr</span><span class="o">.</span><span class="n">UNKNOWN_ORIGIN</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">):</span>
             <span class="n">origin</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">o</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="o">-</span> <span class="mi">2</span><span class="p">))</span>
+
         <span class="n">origin</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ostr</span><span class="o">.</span><span class="n">UNKNOWN_ORIGIN</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ostr</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">taint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">taint</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">)</span>
 </pre></div>
@@ -15692,6 +16166,9 @@ AssertionError (expected)
 </div>
 </div>
 </div>
+
+<details id="Excursion:-Implementing-String-Methods">
+<summary>Implementing String Methods</summary>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
@@ -16288,6 +16765,7 @@ AssertionError (expected)
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extract substring at index/slice `i`&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">origin</span><span class="o">.</span><span class="n">TaintException</span><span class="p">(</span><span class="s1">&#39;Invalid request idx&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -16376,6 +16854,7 @@ AssertionError (expected)
             <span class="n">b</span><span class="p">,</span> <span class="n">ostr</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">UNKNOWN_ORIGIN</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
         <span class="n">mystr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">n</span><span class="p">:</span>
                 <span class="k">break</span>
@@ -16387,6 +16866,7 @@ AssertionError (expected)
             <span class="n">partA</span><span class="p">,</span> <span class="n">partB</span> <span class="o">=</span> <span class="n">old_origin</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">],</span> <span class="n">old_origin</span><span class="p">[</span><span class="n">last</span><span class="p">:]</span>
             <span class="n">old_origin</span> <span class="o">=</span> <span class="n">partA</span> <span class="o">+</span> <span class="n">b_origin</span> <span class="o">+</span> <span class="n">partB</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">mystr</span><span class="p">,</span> <span class="n">old_origin</span><span class="p">)</span>
 </pre></div>
 
@@ -17269,6 +17749,8 @@ AssertionError (expected)
 </div>
 </div>
 
+</details>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
@@ -17752,7 +18234,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/2698516187.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/2698516187.py&#34;, line 2, in &lt;module&gt;
     assert hello_s.origin == [ostr.UNKNOWN_ORIGIN] * len(hello_s)
 AssertionError (expected)
 </pre>
@@ -17779,7 +18261,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/1358366226.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/1358366226.py&#34;, line 2, in &lt;module&gt;
     assert all(origin == ostr.UNKNOWN_ORIGIN for origin in hello_s.origin)
 AssertionError (expected)
 </pre>
@@ -17806,7 +18288,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/1577803914.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/1577803914.py&#34;, line 2, in &lt;module&gt;
     assert not any(origin &gt;= SECRET_ORIGIN for origin in hello_s.origin)
 AssertionError (expected)
 </pre>
@@ -18619,7 +19101,7 @@ Tainted[_==(7==(9)!=(---5)==1)==-8]
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/588526133.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/588526133.py&#34;, line 2, in &lt;module&gt;
     thello_stripped.origin
 AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected)
 </pre>
@@ -18706,7 +19188,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50523/2341342688.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/2341342688.py&#34;, line 2, in &lt;module&gt;
     &#39;&#39;.join([hello, &#39; &#39;, world]).origin  # type: ignore
 AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected)
 </pre>
@@ -18904,7 +19386,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2021-11-13 17:58:11+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2022-01-02 14:42:35+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -18920,19 +19402,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/InformationFlow.html">Tracking Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/InformationFlow.html">https://www.fuzzingbook.org/html/InformationFlow.html</a>.  Retrieved 2021-11-13 17:58:11+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/InformationFlow.html">Tracking Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/InformationFlow.html">https://www.fuzzingbook.org/html/InformationFlow.html</a>.  Retrieved 2022-01-02 14:42:35+01:00.
 </p>
 <pre>
-@incollection{fuzzingbook2021:InformationFlow,
+@incollection{fuzzingbook2022:InformationFlow,
     author = {Andreas Zeller and Rahul Gopinath and Marcel B{\"o}hme and Gordon Fraser and Christian Holler},
     booktitle = {The Fuzzing Book},
     title = {Tracking Information Flow},
-    year = {2021},
+    year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/html/InformationFlow.html}},
-    note = {Retrieved 2021-11-13 17:58:11+01:00},
+    note = {Retrieved 2022-01-02 14:42:35+01:00},
     url = {https://www.fuzzingbook.org/html/InformationFlow.html},
-    urldate = {2021-11-13 17:58:11+01:00}
+    urldate = {2022-01-02 14:42:35+01:00}
 }
 </pre>
 </div>

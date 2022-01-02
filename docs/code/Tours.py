@@ -3,7 +3,7 @@
 
 # "Tours through the Book" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Tours.html
-# Last change: 2021-12-14 17:57:00+01:00
+# Last change: 2022-01-02 16:16:56+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
