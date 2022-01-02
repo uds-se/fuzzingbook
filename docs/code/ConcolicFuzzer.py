@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-01-02 16:21:29+01:00
+# Last change: 2022-01-02 16:44:08+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -105,54 +105,49 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>             _[cgi_decode](v)
 >>>     scf.add_trace(_, v)
 ' '
-'%\\x00'
-'%A\\x00'
-'%Ad\\x00'
+'+\\x00'
+'++\\x00'
+'+\\x00+\\x00'
+'+\\x00\\x00+\\x00'
+'+\\x00\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
 
-'%\\x00C\\x00'
-'%\\x004\\x00'
-'%\\x004\\x00'
-'%E\\x00'
+'+'
+'+'
+'+\\x00\\x00\\x00\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
 
-'%\\x00d\\x00'
-'%\\x00F\\x00'
-'%9\\x00'
-'%98\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
 
-'%\\x00b\\x00'
-'%E6\\x00'
-'%E9\\x00'
-'%C\\x00'
+'+\\x80@@!+%\\x00'
 
 ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
 
-'%8\\x00'
-'%\\x00F\\x00'
+'+\\x03@\\x04\\x01++\\x00'
+'+\\x00\\x00\\x00\\x00%\\x00'
+'++\\x00\\x00+\\x00'
 
 ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
+
+'++'
+'+\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+'++\\x00\\x00\\x00%\\x00'
+
 ValueError: Invalid encoding (expected)
 
-'%A6\\x00'
-'%A8\\x00'
+'+\\x00\\x00\\x00\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'++\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
 
 
 We see how the additional inputs generated explore additional paths.
@@ -179,14 +174,17 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-select ((g>r/u))U==Z))qZ(s,G,e) from My3 where (--2)==DV
-Table ('My3') was not found
+select a from z where ((l))==(-66)*--69.9
+Table ('z') was not found
 
-select :-b+h/M(:)+t1Q(h/:) from vehicles
-Invalid WHERE ('(:-b+h/M(:)+t1Q(h/:))')
+update vehicles set F3=e where H+Q/W-R!=-4==Z(y)*FN-l,i!=f,z,U,T from vehicles
+Invalid WHERE ('(m+U+K>N-l,i!=f,z,U,T)')
 
-delete from vehicles where v-X-:*mH/g/V
-Invalid WHERE ('G!=M-f*X!=_-X-f(d)>H/g/V')
+delete from H3vM81 where z!=Z>v-J(Y)*(t)-.
+Table ('H3vM81') was not found
+
+update months set Y=y where ((2.7))==f+z-l*YP(v))
+Table ('u') was not found
 
 
 >>> display_class_hierarchy(ConcolicGrammarFuzzer)
@@ -368,10 +366,10 @@ if __name__ == '__main__':
 
 
 
-### Excursion: Implementing the Concolic Tracer
+### Excursion: Implementing ConcolicTracer
 
 if __name__ == '__main__':
-    print('\n### Excursion: Implementing the Concolic Tracer')
+    print('\n### Excursion: Implementing ConcolicTracer')
 
 
 
@@ -1731,10 +1729,10 @@ if __name__ == '__main__':
 
 
 
-### SimpleConcolicFuzzer
+### Excursion: Implementing SimpleConcolicFuzzer
 
 if __name__ == '__main__':
-    print('\n### SimpleConcolicFuzzer')
+    print('\n### Excursion: Implementing SimpleConcolicFuzzer')
 
 
 
@@ -1743,6 +1741,13 @@ from .Fuzzer import Fuzzer, hang_if_no_space
 from .ExpectError import ExpectTimeout, ExpectError
 
 import random
+
+#### Representing Decisions
+
+if __name__ == '__main__':
+    print('\n#### Representing Decisions')
+
+
 
 class TraceNode:
     def __init__(self, smt_val, parent, info):
@@ -1915,6 +1920,13 @@ class TraceNode(TraceNode):
         self.path = parent_path + [self]
         return self.path
 
+#### The SimpleConcolicFuzzer class
+
+if __name__ == '__main__':
+    print('\n#### The SimpleConcolicFuzzer class')
+
+
+
 class SimpleConcolicFuzzer(Fuzzer):
     def __init__(self):
         self.ct = TraceTree()
@@ -2023,10 +2035,10 @@ if __name__ == '__main__':
     path, cc = scf.get_newpath()
     path
 
-#### Fuzz
+#### The fuzzing method
 
 if __name__ == '__main__':
-    print('\n#### Fuzz')
+    print('\n#### The fuzzing method')
 
 
 
@@ -2060,9 +2072,12 @@ class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
             return elt
         return None
 
+### End of Excursion
+
 if __name__ == '__main__':
-    scf = SimpleConcolicFuzzer()
-    scf.fuzz()
+    print('\n### End of Excursion')
+
+
 
 def cgi_decode(s):
     """Decode the CGI-encoded string `s`:
@@ -2129,7 +2144,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     with ExpectError():
         with ConcolicTracer() as _:
-            _[cgi_decode](v)  
+            _[cgi_decode](v)
 
 if __name__ == '__main__':
     scf.add_trace(_, v)
@@ -2153,10 +2168,18 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     display_trace_tree(scf.ct.root)
 
-### ConcolicGrammarFuzzer
+## Concolic Grammar Fuzzing
+## ------------------------
 
 if __name__ == '__main__':
-    print('\n### ConcolicGrammarFuzzer')
+    print('\n## Concolic Grammar Fuzzing')
+
+
+
+### Excursion: Implementing ConcolicGrammarFuzzer
+
+if __name__ == '__main__':
+    print('\n### Excursion: Implementing ConcolicGrammarFuzzer')
 
 
 
@@ -2382,10 +2405,10 @@ if __name__ == '__main__':
                 print(e)
             print()
 
-#### All together
+#### Pruning and Updating
 
 if __name__ == '__main__':
-    print('\n#### All together')
+    print('\n#### Pruning and Updating')
 
 
 
@@ -2429,6 +2452,13 @@ if __name__ == '__main__':
         'nov', 'dec'
     ])])
     db.db
+
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
 
 if __name__ == '__main__':
     cgf = ConcolicGrammarFuzzer(INVENTORY_GRAMMAR)
