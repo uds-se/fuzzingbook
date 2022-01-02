@@ -3,7 +3,7 @@
 
 # "Tracking Information Flow" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2021-12-13 17:24:16+01:00
+# Last change: 2022-01-02 14:47:56+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -44,24 +44,51 @@ but before you do so, _read_ it and _interact_ with it at:
 
 This chapter provides two wrappers to Python _strings_ that allow one to track various properties. These include information on the security properties of the input, and information on originating indexes of the input string.
 
-For tracking information on security properties, use `tstr` as follows:
+### Tracking String Taints
+
+`tstr` objects are replacements for Python strings that allows to track and check _taints_ – that is, information on from where a string originated. For instance, one can mark strings that originate from third party input with a taint of "LOW", meaning that they have a low security level. The taint is passed in the constructor of a `tstr` object:
 
 >>> thello = tstr('hello', taint='LOW')
 
-Now, any operation from `thello` that results in a string fragment would include the correct taint. For example:
+A `tstr` object is fully compatible with original Python strings. For instance, we can index it and access substrings:
+
+>>> thello[:4]
+'hell'
+
+However, the `tstr` object also stores the taint, which can be accessed using the `taint` attribute:
+
+>>> thello.taint
+'LOW'
+
+The neat thing about taints is that they propagate to all strings derived from the original tainted string.
+Indeed, any operation from a  `tstr` string that results in a string fragment produces another `tstr` object that includes the original taint. For example:
 
 >>> thello[1:2].taint  # type: ignore
 'LOW'
+>>> from ClassDiagram import display_class_hierarchy
+>>> display_class_hierarchy(tstr)
+### Tracking Character Origins
 
-For tracking the originating indexes from the input string, use `ostr` as follows:
+`ostr` objects extend `tstr` objects by not only tracking a taint, but also the originating _indexes_ from the input string, This allows you to exactly track where individual characters came from. Assume you have a long string, which at index 100 contains the password `"joshua1234"`. Then you can save this origin information using an `ostr` as follows:
 
->>> ohw = ostr("hello\tworld", origin=100)
+>>> secret = ostr("joshua1234", origin=100, taint='SECRET')
 
-The originating indexes can be recovered as follows:
+The `origin` attribute of an `ostr` provides access to a list of indexes:
 
->>> (ohw[0:4] +"-"+ ohw[6:]).origin
-[100, 101, 102, 103, -1, 106, 107, 108, 109, 110]
+>>> secret.origin
+[100, 101, 102, 103, 104, 105, 106, 107, 108, 109]
+>>> secret.taint
+'SECRET'
 
+`ostr` objects are compatible with Python strings, except that string operations return `ostr` objects (together with the saved origin an index information). An index of `-1` indicates that the corresponding character has no origin as supplied to the `ostr()` constructor:
+
+>>> secret_substr = (secret[0:4] + "-" + secret[6:])
+>>> secret_substr.taint
+'SECRET'
+>>> secret_substr.origin
+[100, 101, 102, 103, -1, 106, 107, 108, 109]
+>>> from ClassDiagram import display_class_hierarchy
+>>> display_class_hierarchy(ostr)
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Tracking Information Flow"
@@ -87,7 +114,7 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
-from typing import List, Sequence
+from typing import List, Any, Optional, Union
 
 ## Synopsis
 ## --------
@@ -168,15 +195,18 @@ if __name__ == '__main__':
 class DB(DB):
     def do_select(self, query):
         ...
+
     def do_update(self, query):
         ...
+
     def do_insert(self, query):
         ...
+
     def do_delete(self, query):
         ...
 
     def sql(self, query):
-        methods = [('select ', self.do_select), 
+        methods = [('select ', self.do_select),
                    ('update ', self.do_update),
                    ('insert into ', self.do_insert),
                    ('delete from', self.do_delete)]
@@ -318,22 +348,22 @@ class DB(DB):
     def do_update(self, query):
         SET, WHERE = ' set ', ' where '
         table_end = query.find(SET)
-        
+
         if table_end < 0:
             raise SQLException('Invalid UPDATE (%s)' % repr(query))
-            
+
         set_end = table_end + 5
         t_name = query[:table_end]
         decls, table = self.table(t_name)
         names_end = query.find(WHERE)
-        
+
         if names_end >= 0:
             names = query[set_end:names_end]
             where = query[names_end + len(WHERE):]
         else:
             names = query[set_end:]
             where = ''
-            
+
         sets = [[i.strip() for i in name.split('=')]
                 for name in names.split(',')]
 
@@ -353,7 +383,7 @@ class DB(DB):
                 for key, kval in decls.items():
                     if key == k:
                         hm[key] = self.convert(kval, v)
-                
+
         return "%d records were updated" % len(updated)
 
 if __name__ == '__main__':
@@ -381,6 +411,7 @@ class DB(DB):
         table_end = query.find(WHERE)
         if table_end < 0:
             raise SQLException('Invalid DELETE (%s)' % query)
+
         t_name = query[:table_end].strip()
         _, table = self.table(t_name)
         where = query[table_end + len(WHERE):]
@@ -388,6 +419,7 @@ class DB(DB):
         deleted = [i for i, d, hm in selected if d]
         for i in sorted(deleted, reverse=True):
             del table[i]
+
         return "%d records were deleted" % len(deleted)
 
 if __name__ == '__main__':
@@ -574,18 +606,26 @@ if __name__ == '__main__':
 
 
 class tstr(str):
+    """Wrapper for strings, saving taint information"""
+
     def __new__(cls, value, *args, **kw):
+        """Create a tstr() instance. Used internally."""
         return str.__new__(cls, value)
 
-    def __init__(self, value, taint=None, **kwargs):
-        self.taint = taint
+    def __init__(self, value: Any, taint: Any = None, **kwargs) -> None:
+        """Constructor.
+        `value` is the string value the `tstr` object is to be constructed from.
+        `taint` is an (optional) taint to be propagated to derived strings."""
+        self.taint: Any = taint
 
 class tstr(tstr):
-    def __repr__(self):
+    def __repr__(self) -> tstr:
+        """Return a representation."""
         return tstr(str.__repr__(self), taint=self.taint)
 
 class tstr(tstr):
-    def __str__(self):
+    def __str__(self) -> str:
+        """Convert to string"""
         return str.__str__(self)
 
 if __name__ == '__main__':
@@ -599,10 +639,12 @@ if __name__ == '__main__':
 
 class tstr(tstr):
     def clear_taint(self):
+        """Remove taint"""
         self.taint = None
         return self
 
     def has_taint(self):
+        """Check if taint is present"""
         return self.taint is not None
 
 ### String Operators
@@ -616,19 +658,29 @@ class tstr(tstr):
     def create(self, s):
         return tstr(s, taint=self.taint)
 
-def make_str_wrapper(fun):
-    def proxy(self, *args, **kwargs):
-        res = fun(self, *args, **kwargs)
-        return self.create(res)
-    return proxy
+class tstr(tstr):
+    @staticmethod
+    def make_str_wrapper(fun):
+        """Make `fun` (a `str` method) a method in `tstr`"""
+        def proxy(self, *args, **kwargs):
+            res = fun(self, *args, **kwargs)
+            return self.create(res)
+
+        if hasattr(fun, '__doc__'):
+            # Copy docstring
+            proxy.__doc__ = fun.__doc__
+
+        return proxy
 
 def informationflow_init_1():
-    for name in ['__format__', '__mod__', '__rmod__', '__getitem__', '__add__', '__mul__', '__rmul__',
+    for name in ['__format__', '__mod__', '__rmod__', '__getitem__',
+                 '__add__', '__mul__', '__rmul__',
                  'capitalize', 'casefold', 'center', 'encode',
-                 'expandtabs', 'format', 'format_map', 'join', 'ljust', 'lower', 'lstrip', 'replace',
+                 'expandtabs', 'format', 'format_map', 'join',
+                 'ljust', 'lower', 'lstrip', 'replace',
                  'rjust', 'rstrip', 'strip', 'swapcase', 'title', 'translate', 'upper']:
         fun = getattr(str, name)
-        setattr(tstr, name, make_str_wrapper(fun))
+        setattr(tstr, name, tstr.make_str_wrapper(fun))
 
 if __name__ == '__main__':
     informationflow_init_1()
@@ -640,8 +692,9 @@ def initialize():
         fn()
 
 class tstr(tstr):
-    def __radd__(self, s):
-        return self.create(s + str(self))
+    def __radd__(self, value):
+        """Return value + self, as a `tstr` object"""
+        return self.create(value + str(self))
 
 if __name__ == '__main__':
     thello = tstr('hello', taint='LOW')
@@ -826,13 +879,6 @@ if __name__ == '__main__':
     with ExpectError():
         send_back(reply)
 
-### Tracking Character Origins
-
-if __name__ == '__main__':
-    print('\n### Tracking Character Origins')
-
-
-
 from .Fuzzer import heartbeat
 
 if __name__ == '__main__':
@@ -850,10 +896,11 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     thilo.taint  # type: ignore
 
-### Tracking Individual Characters
+## Tracking Individual Characters
+## ------------------------------
 
 if __name__ == '__main__':
-    print('\n### Tracking Individual Characters')
+    print('\n## Tracking Individual Characters')
 
 
 
@@ -865,12 +912,22 @@ if __name__ == '__main__':
 
 
 class ostr(str):
+    """Wrapper for strings, saving taint and origin information"""
     DEFAULT_ORIGIN = 0
 
     def __new__(cls, value, *args, **kw):
+        """Create an ostr() instance. Used internally."""
         return str.__new__(cls, value)
 
-    def __init__(self, value, taint=None, origin=None, **kwargs):
+    def __init__(self, value: Any, taint: Any = None,
+                 origin: Optional[Union[int, List[int]]] = None, **kwargs) -> None:
+        """Constructor.
+        `value` is the string value the `ostr` object is to be constructed from.
+        `taint` is an (optional) taint to be propagated to derived strings.
+        `origin` (optional) is either
+        - an integer denoting the index of the first character in `value`, or
+        - a list of integers denoting the origins of the characters in `value`,
+        """
         self.taint = taint
 
         if origin is None:
@@ -893,6 +950,7 @@ class ostr(ostr):
         origin = [ostr.UNKNOWN_ORIGIN]
         for s, o in zip(str(self), self.origin):
             origin.extend([o] * (len(repr(s)) - 2))
+
         origin.append(ostr.UNKNOWN_ORIGIN)
         return ostr(str.__repr__(self), taint=self.taint, origin=origin)
 
@@ -946,6 +1004,13 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     othello.clear_origin()
     assert not othello.has_origin()
+
+### Excursion: Implementing String Methods
+
+if __name__ == '__main__':
+    print('\n### Excursion: Implementing String Methods')
+
+
 
 #### Create
 
@@ -1122,6 +1187,7 @@ class ostr(ostr):
         pass
 
     def x(self, i=0):
+        """Extract substring at index/slice `i`"""
         if not self.origin:
             raise origin.TaintException('Invalid request idx')
         if isinstance(i, int):
@@ -1155,6 +1221,7 @@ class ostr(ostr):
             b, ostr) else [self.UNKNOWN_ORIGIN] * len(b)
         mystr = str(self)
         i = 0
+
         while True:
             if n and i >= n:
                 break
@@ -1166,6 +1233,7 @@ class ostr(ostr):
             partA, partB = old_origin[0:idx], old_origin[last:]
             old_origin = partA + b_origin + partB
             i += 1
+
         return self.create(mystr, old_origin)
 
 if __name__ == '__main__':
@@ -1536,6 +1604,13 @@ if __name__ == '__main__':
 
 INITIALIZER_LIST.append(informationflow_init_3)
 
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
+
 ### Checking Origins
 
 if __name__ == '__main__':
@@ -1883,17 +1958,53 @@ if __name__ == '__main__':
 
 
 
+### Tracking String Taints
+
+if __name__ == '__main__':
+    print('\n### Tracking String Taints')
+
+
+
 if __name__ == '__main__':
     thello = tstr('hello', taint='LOW')
 
 if __name__ == '__main__':
+    thello[:4]
+
+if __name__ == '__main__':
+    thello.taint
+
+if __name__ == '__main__':
     thello[1:2].taint  # type: ignore
 
-if __name__ == '__main__':
-    ohw = ostr("hello\tworld", origin=100)
+from .ClassDiagram import display_class_hierarchy
+display_class_hierarchy(tstr)
+
+### Tracking Character Origins
 
 if __name__ == '__main__':
-    (ohw[0:4] +"-"+ ohw[6:]).origin
+    print('\n### Tracking Character Origins')
+
+
+
+if __name__ == '__main__':
+    secret = ostr("joshua1234", origin=100, taint='SECRET')
+
+if __name__ == '__main__':
+    secret.origin
+
+if __name__ == '__main__':
+    secret.taint
+
+if __name__ == '__main__':
+    secret_substr = (secret[0:4] + "-" + secret[6:])
+    secret_substr.taint
+
+if __name__ == '__main__':
+    secret_substr.origin
+
+from .ClassDiagram import display_class_hierarchy
+display_class_hierarchy(ostr)
 
 ## Lessons Learned
 ## ---------------

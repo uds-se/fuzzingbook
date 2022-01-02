@@ -11931,20 +11931,23 @@ MathJax.Hub.Config({
            <ul><li class="has-sub"><a href="#Synopsis"><i class="fa fa-fw fa-map"></i> Synopsis</a>
 </li><li class="has-sub"><a href="#Tracking-Constraints">&nbsp;&bull;&nbsp;&nbsp; Tracking Constraints</a>
 </li><li class="has-sub"><a href="#Concolic-Execution">&nbsp;&bull;&nbsp;&nbsp; Concolic Execution</a>
-</li><li class="has-sub"><a href="#SMT-Solvers">&nbsp;&bull;&nbsp;&nbsp; SMT Solvers</a>
+</li><li class="has-sub"><a href="#Solving-Constraints">&nbsp;&bull;&nbsp;&nbsp; Solving Constraints</a>
 </li><li class="has-sub"><a href="#A-Concolic-Tracer">&nbsp;&bull;&nbsp;&nbsp; A Concolic Tracer</a>
-<ul><li class="has-sub"><a href="#Concolic-Proxy-Objects">Concolic Proxy Objects</a>
-</ul></li><li class="has-sub"><a href="#Examples">&nbsp;&bull;&nbsp;&nbsp; Examples</a>
-<ul><li class="has-sub"><a href="#Triangle">Triangle</a>
-</li><li class="has-sub"><a href="#Round">Round</a>
-</li><li class="has-sub"><a href="#Absolute-Maximum">Absolute Maximum</a>
-</li><li class="has-sub"><a href="#Binomial-Coefficient">Binomial Coefficient</a>
-</li><li class="has-sub"><a href="#Database">Database</a>
+<ul><li class="has-sub"><a href="#Excursion:-Implementing-the-Concolic-Tracer">Excursion: Implementing the Concolic Tracer</a>
+</li><li class="has-sub"><a href="#Example:-Triangle">Example: Triangle</a>
+</li><li class="has-sub"><a href="#Example:-Round">Example: Round</a>
+</li><li class="has-sub"><a href="#Example:-Absolute-Maximum">Example: Absolute Maximum</a>
+</li><li class="has-sub"><a href="#Example:-Binomial-Coefficient">Example: Binomial Coefficient</a>
+</li><li class="has-sub"><a href="#Example:-Database">Example: Database</a>
 </ul></li><li class="has-sub"><a href="#Fuzzing-with-Constraints">&nbsp;&bull;&nbsp;&nbsp; Fuzzing with Constraints</a>
-<ul><li class="has-sub"><a href="#SimpleConcolicFuzzer">SimpleConcolicFuzzer</a>
-</li><li class="has-sub"><a href="#ConcolicGrammarFuzzer">ConcolicGrammarFuzzer</a>
+<ul><li class="has-sub"><a href="#Excursion:-Implementing-SimpleConcolicFuzzer">Excursion: Implementing SimpleConcolicFuzzer</a>
+</li><li class="has-sub"><a href="#The-fuzzing-method">The fuzzing method</a>
+</li><li class="has-sub"><a href="#Concolic-Grammar-Fuzzing">Concolic Grammar Fuzzing</a>
 </ul></li><li class="has-sub"><a href="#Limitations">&nbsp;&bull;&nbsp;&nbsp; Limitations</a>
-</li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
+<ul><li class="has-sub"><a href="#ConcolicTracer">ConcolicTracer</a>
+</li><li class="has-sub"><a href="#SimpleConcolicFuzzer">SimpleConcolicFuzzer</a>
+</li><li class="has-sub"><a href="#ConcolicGrammarFuzzer">ConcolicGrammarFuzzer</a>
+</ul></li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
 </li><li class="has-sub"><a href="#Next-Steps"><i class="fa fa-fw fa-arrows"></i> Next Steps</a>
 </li><li class="has-sub"><a href="#Background"><i class="fa fa-fw fa-mortar-board"></i> Background</a>
 </li><li class="has-sub"><a href="#Exercises"><i class="fa fa-fw fa-edit"></i> Exercises</a>
@@ -12101,118 +12104,278 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="ConcolicFuzzer.html" class="import" target="_blank">fuzzingbook.ConcolicFuzzer</a></span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
 </pre></div>
 <p>and then make use of the following features.</p>
-<p>This chapter defines two main classes: <code>SimpleConcolicFuzzer</code> and <code>ConcolicGrammarFuzzer</code>. The <code>SimpleConcolicFuzzer</code> first uses a sample input to collect predicates encountered. The fuzzer then negates random predicates to generate new input constraints. These, when solved, produce inputs that explore paths that are close to the original path. It can be used as follows.</p>
-<p>We first obtain the constraints using <code>ConcolicTracer</code>.</p>
+<p>This chapter defines two main classes: <code>SimpleConcolicFuzzer</code> and <code>ConcolicGrammarFuzzer</code>. The <code>SimpleConcolicFuzzer</code> first uses a sample input to collect predicates encountered. The fuzzer then negates random predicates to generate new input constraints. These, when solved, produce inputs that explore paths that are close to the original path.</p>
+<h3 id="ConcolicTracer">ConcolicTracer<a class="anchor-link" href="#ConcolicTracer">&#182;</a></h3><p>At the heart of both fuzzers lies the concept of a <em>concolic tracer</em>, capturing symbolic variables and path conditions as a program gets executed.</p>
+<p><code>ConcolicTracer</code> is used in a <code>with</code> block; the syntax <code>tracer[function]</code> executes <code>function</code> within the <code>tracer</code> while capturing conditions. Here is an example for the <code>cgi_decode()</code> function:</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="s1">&#39;a</span><span class="si">%20d</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
-<p>These constraints are added to the concolic fuzzer as follows:</p>
+<p>Once executed, we can retrieve the symbolic variables and associated path constraints in the <code>context</code> attribute. This is a pair of two elements:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">declarations</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">_</span><span class="o">.</span><span class="n">context</span>
+</pre></div>
+<p>In the context, <code>declarations</code> is a mapping of symbolic variables to <em>types</em>:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">declarations</span>
+<span class="p">{</span><span class="s1">&#39;cgi_decode_s_str_1&#39;</span><span class="p">:</span> <span class="s1">&#39;String&#39;</span><span class="p">}</span>
+</pre></div>
+<p>whereas <code>path</code> is a list of constraints encountered during execution:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">path</span>
+<span class="p">[</span><span class="n">Not</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">substr</span><span class="p">(</span><span class="n">cgi_decode_s_str_1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span><span class="p">),</span>
+ <span class="n">Not</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">substr</span><span class="p">(</span><span class="n">cgi_decode_s_str_1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;%&quot;</span><span class="p">),</span>
+ <span class="n">Not</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">substr</span><span class="p">(</span><span class="n">cgi_decode_s_str_1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span><span class="p">),</span>
+ <span class="nb">str</span><span class="o">.</span><span class="n">substr</span><span class="p">(</span><span class="n">cgi_decode_s_str_1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;%&quot;</span><span class="p">,</span>
+ <span class="n">Not</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">substr</span><span class="p">(</span><span class="n">cgi_decode_s_str_1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span><span class="p">),</span>
+ <span class="n">Not</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">substr</span><span class="p">(</span><span class="n">cgi_decode_s_str_1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">),</span>
+ <span class="nb">str</span><span class="o">.</span><span class="n">substr</span><span class="p">(</span><span class="n">cgi_decode_s_str_1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+ <span class="nb">str</span><span class="o">.</span><span class="n">substr</span><span class="p">(</span><span class="n">cgi_decode_s_str_1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+ <span class="n">Not</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">substr</span><span class="p">(</span><span class="n">cgi_decode_s_str_1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span><span class="p">),</span>
+ <span class="n">Not</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">substr</span><span class="p">(</span><span class="n">cgi_decode_s_str_1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;%&quot;</span><span class="p">)]</span>
+</pre></div>
+<p>We can solve these constraints to obtain a value for the function parameters that follow the same path as the original (traced) invocation:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">_</span><span class="o">.</span><span class="n">zeval</span><span class="p">()</span>
+<span class="p">(</span><span class="s1">&#39;sat&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">x00%20&#39;</span><span class="p">,</span> <span class="s1">&#39;String&#39;</span><span class="p">)})</span>
+</pre></div>
+<p><em>Negating</em> some of these constraints will yield different paths taken, and thus greater code coverage. This is what our concolic fuzzers do.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="ClassDiagram.html" class="import" target="_blank">ClassDiagram</a></span> <span class="kn">import</span> <span class="n">display_class_hierarchy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">ConcolicTracer</span><span class="p">)</span>
+</pre></div>
+<p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.3 (20211023.0002)
+ -->
+<!-- Pages: 1 -->
+<svg width="250pt" height="128pt"
+ viewBox="0.00 0.00 250.00 128.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 124)">
+<g id="a_graph0"><a xlink:title="ConcolicTracer class hierarchy">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-124 246,-124 246,4 -4,4"/>
+</a>
+</g>
+<!-- ConcolicTracer -->
+<g id="node1" class="node">
+<title>ConcolicTracer</title>
+<g id="a_node1"><a xlink:href="#" xlink:title="class ConcolicTracer:&#10;Trace function execution, tracking variables and path conditions">
+<polygon fill="none" stroke="black" points="0,-0.5 0,-119.5 106,-119.5 106,-0.5 0,-0.5"/>
+<text text-anchor="start" x="8" y="-105.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">ConcolicTracer</text>
+<polyline fill="none" stroke="black" points="0,-96.5 106,-96.5 "/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="ConcolicTracer">
+<g id="a_node1_1"><a xlink:href="#" xlink:title="__call__(self, *args):&#10;Call self as a function.">
+<text text-anchor="start" x="14" y="-85.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__call__()</text>
+</a>
+</g>
+<g id="a_node1_2"><a xlink:href="#" xlink:title="__init__(self, context=None):&#10;Constructor.">
+<text text-anchor="start" x="14" y="-74.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node1_3"><a xlink:href="#" xlink:title="zeval(self, python=False, log=False):&#10;Evaluate predicates in given context.&#10;&#45; If `python` is set, use the z3 Python API; otherwise use z3 standalone.&#10;&#45; If `log` is set, show input to Z3.">
+<text text-anchor="start" x="14" y="-63.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">zeval()</text>
+</a>
+</g>
+<g id="a_node1_4"><a xlink:href="#" xlink:title="__enter__(self)">
+<text text-anchor="start" x="14" y="-51.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">__enter__()</text>
+</a>
+</g>
+<g id="a_node1_5"><a xlink:href="#" xlink:title="__exit__(self, exc_type, exc_value, tb)">
+<text text-anchor="start" x="14" y="-40.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">__exit__()</text>
+</a>
+</g>
+<g id="a_node1_6"><a xlink:href="#" xlink:title="__getitem__(self, fn)">
+<text text-anchor="start" x="14" y="-29.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">__getitem__()</text>
+</a>
+</g>
+<g id="a_node1_7"><a xlink:href="#" xlink:title="concolic(self, args)">
+<text text-anchor="start" x="14" y="-18.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">concolic()</text>
+</a>
+</g>
+<g id="a_node1_8"><a xlink:href="#" xlink:title="smt_expr(self, show_decl=False, simplify=False, path=[])">
+<text text-anchor="start" x="14" y="-7.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">smt_expr()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- Legend -->
+<g id="node2" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="124" y="-77.5" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="124" y="-67.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="130" y="-67.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="124" y="-57.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="130" y="-57.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="124" y="-47.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="130" y="-47.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="124" y="-38.3" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+</p>
+<h3 id="SimpleConcolicFuzzer">SimpleConcolicFuzzer<a class="anchor-link" href="#SimpleConcolicFuzzer">&#182;</a></h3><p>The constraints obtained from <code>ConcolicTracer</code> are added to the concolic fuzzer as follows:</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">scf</span> <span class="o">=</span> <span class="n">SimpleConcolicFuzzer</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">scf</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="s1">&#39;a</span><span class="si">%20d</span><span class="s1">&#39;</span><span class="p">)</span>
 </pre></div>
 <p>The concolic fuzzer then uses the constraints added to guide its fuzzing as follows:</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">scf</span> <span class="o">=</span> <span class="n">SimpleConcolicFuzzer</span><span class="p">()</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="n">v</span> <span class="o">=</span> <span class="n">scf</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 <span class="o">&gt;&gt;&gt;</span>         <span class="k">break</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="k">with</span> <span class="n">ExpectError</span><span class="p">(</span><span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="o">&gt;&gt;&gt;</span>         <span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
 <span class="o">&gt;&gt;&gt;</span>             <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="n">scf</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 <span class="s1">&#39; &#39;</span>
 <span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 <span class="s1">&#39;%A</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
-<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
-<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-
 <span class="s1">&#39;%Ad</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+
 <span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x00C</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">39</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
-<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
-<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-
 <span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x004</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 <span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x004</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 <span class="s1">&#39;</span><span class="si">%E</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
 
 <span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x00d</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 <span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x00F</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%9</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">9</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
-    <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">3</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__call__</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">concolic</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-  <span class="n">File</span> <span class="s2">&quot;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">42</span><span class="p">,</span> <span class="ow">in</span> <span class="n">cgi_decode</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid encoding&quot;</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+
+<span class="s1">&#39;%98</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x00b</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;</span><span class="si">%E</span><span class="s1">6</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;</span><span class="si">%E</span><span class="s1">9</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+
+<span class="s1">&#39;%C</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%8</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x00F</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%A6</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%A8</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
 </pre></div>
-<p>The <code>SimpleConcolicFuzzer</code> simply explores all paths near the original path traversed by the sample input. It uses a simple mechanism to explore the paths that are near the paths that it knows about, and other than code paths, knows nothing about the input.
-The <code>ConcolicGrammarFuzzer</code> on the other hand, knows about the input grammar, and can collect feedback from the subject under fuzzing. It can lift some of the constraints encountered to the grammar, enabling deeper fuzzing. It is used as follows:</p>
+<p>We see how the additional inputs generated explore additional paths.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">SimpleConcolicFuzzer</span><span class="p">)</span>
+</pre></div>
+<p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.3 (20211023.0002)
+ -->
+<!-- Pages: 1 -->
+<svg width="296pt" height="207pt"
+ viewBox="0.00 0.00 296.00 207.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 203)">
+<g id="a_graph0"><a xlink:title="SimpleConcolicFuzzer class hierarchy">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-203 292,-203 292,4 -4,4"/>
+</a>
+</g>
+<!-- SimpleConcolicFuzzer -->
+<g id="node1" class="node">
+<title>SimpleConcolicFuzzer</title>
+<g id="a_node1"><a xlink:href="#" xlink:title="class SimpleConcolicFuzzer:&#10;Base class for fuzzers.">
+<polygon fill="none" stroke="black" points="0,-0.5 0,-86.5 152,-86.5 152,-0.5 0,-0.5"/>
+<text text-anchor="start" x="8" y="-72.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">SimpleConcolicFuzzer</text>
+<polyline fill="none" stroke="black" points="0,-63.5 152,-63.5 "/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="SimpleConcolicFuzzer">
+<g id="a_node1_1"><a xlink:href="#" xlink:title="__init__(self):&#10;Constructor">
+<text text-anchor="start" x="37" y="-52" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node1_2"><a xlink:href="#" xlink:title="fuzz(self):&#10;Return fuzz input">
+<text text-anchor="start" x="37" y="-41" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+</a>
+</g>
+<g id="a_node1_3"><a xlink:href="#" xlink:title="add_trace(self, trace, s)">
+<text text-anchor="start" x="37" y="-29" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">add_trace()</text>
+</a>
+</g>
+<g id="a_node1_4"><a xlink:href="#" xlink:title="get_newpath(self)">
+<text text-anchor="start" x="37" y="-18" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">get_newpath()</text>
+</a>
+</g>
+<g id="a_node1_5"><a xlink:href="#" xlink:title="next_choice(self)">
+<text text-anchor="start" x="37" y="-7" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">next_choice()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- Fuzzer -->
+<g id="node2" class="node">
+<title>Fuzzer</title>
+<g id="a_node2"><a xlink:href="Fuzzer.html" xlink:title="class Fuzzer:&#10;Base class for fuzzers.">
+<polygon fill="none" stroke="black" points="37.5,-123.5 37.5,-198.5 114.5,-198.5 114.5,-123.5 37.5,-123.5"/>
+<text text-anchor="start" x="55" y="-184.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Fuzzer</text>
+<polyline fill="none" stroke="black" points="37.5,-175.5 114.5,-175.5 "/>
+<g id="a_node2_6"><a xlink:href="#" xlink:title="Fuzzer">
+<g id="a_node2_7"><a xlink:href="Fuzzer.html" xlink:title="__init__(self) &#45;&gt; None:&#10;Constructor">
+<text text-anchor="start" x="46" y="-164.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node2_8"><a xlink:href="Fuzzer.html" xlink:title="fuzz(self) &#45;&gt; str:&#10;Return fuzz input">
+<text text-anchor="start" x="46" y="-153.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+</a>
+</g>
+<g id="a_node2_9"><a xlink:href="Fuzzer.html" xlink:title="run(self, runner: Fuzzer.Runner = &lt;Fuzzer.Runner object at 0x10dbc7520&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
+<text text-anchor="start" x="46" y="-142.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">run()</text>
+</a>
+</g>
+<g id="a_node2_10"><a xlink:href="Fuzzer.html" xlink:title="runs(self, runner: Fuzzer.Runner = &lt;Fuzzer.PrintRunner object at 0x10dbc7a30&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
+<text text-anchor="start" x="46" y="-131.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">runs()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- SimpleConcolicFuzzer&#45;&gt;Fuzzer -->
+<g id="edge1" class="edge">
+<title>SimpleConcolicFuzzer&#45;&gt;Fuzzer</title>
+<path fill="none" stroke="black" d="M76,-86.52C76,-95.15 76,-104.28 76,-113.06"/>
+<polygon fill="none" stroke="black" points="72.5,-113.16 76,-123.16 79.5,-113.16 72.5,-113.16"/>
+</g>
+<!-- Legend -->
+<g id="node3" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="170" y="-61" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="170" y="-51" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="176" y="-51" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="170" y="-41" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="176" y="-41" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="170" y="-31" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="176" y="-31" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="170" y="-21.8" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+</p>
+<h3 id="ConcolicGrammarFuzzer">ConcolicGrammarFuzzer<a class="anchor-link" href="#ConcolicGrammarFuzzer">&#182;</a></h3><p>The <code>SimpleConcolicFuzzer</code> simply explores all paths near the original path traversed by the sample input. It uses a simple mechanism to explore the paths that are near the paths that it knows about, and other than code paths, knows nothing about the input.</p>
+<p>The <code>ConcolicGrammarFuzzer</code> on the other hand, knows about the input grammar, and can collect feedback from the subject under fuzzing. It can lift some of the constraints encountered to the grammar, enabling deeper fuzzing. It is used as follows:</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="InformationFlow.html" class="import" target="_blank">InformationFlow</a></span> <span class="kn">import</span> <span class="n">INVENTORY_GRAMMAR</span><span class="p">,</span> <span class="n">SQLException</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">cgf</span> <span class="o">=</span> <span class="n">ConcolicGrammarFuzzer</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">cgf</span><span class="o">.</span><span class="n">prune_tokens</span><span class="p">(</span><span class="n">prune_tokens</span><span class="p">)</span>
@@ -12220,7 +12383,7 @@ The <code>ConcolicGrammarFuzzer</code> on the other hand, knows about the input 
 <span class="o">&gt;&gt;&gt;</span>     <span class="n">query</span> <span class="o">=</span> <span class="n">cgf</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="nb">print</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+<span class="o">&gt;&gt;&gt;</span>         <span class="k">with</span> <span class="n">ExpectError</span><span class="p">(</span><span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="o">&gt;&gt;&gt;</span>             <span class="k">try</span><span class="p">:</span>
 <span class="o">&gt;&gt;&gt;</span>                 <span class="n">res</span> <span class="o">=</span> <span class="n">_</span><span class="p">[</span><span class="n">db_select</span><span class="p">](</span><span class="n">query</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>                 <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
@@ -12228,36 +12391,249 @@ The <code>ConcolicGrammarFuzzer</code> on the other hand, knows about the input 
 <span class="o">&gt;&gt;&gt;</span>                 <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>         <span class="n">cgf</span><span class="o">.</span><span class="n">update_grammar</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>         <span class="nb">print</span><span class="p">()</span>
-<span class="n">delete</span> <span class="kn">from</span> <span class="nn"><a href="Mi6.html" class="import" target="_blank">Mi6</a></span> <span class="n">where</span> <span class="n">m1</span><span class="p">(</span><span class="n">F</span><span class="p">,</span><span class="n">t</span><span class="p">)</span><span class="o">&gt;</span><span class="n">l</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="o">-</span><span class="n">F6</span><span class="p">(</span><span class="n">C</span><span class="p">,</span><span class="n">B</span><span class="p">)</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;Mi6&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">select</span> <span class="p">((</span><span class="n">g</span><span class="o">&gt;</span><span class="n">r</span><span class="o">/</span><span class="n">u</span><span class="p">))</span><span class="o">&lt;</span><span class="n">M</span><span class="o">+</span><span class="n">E</span><span class="o">-</span><span class="n">Q</span><span class="o">/</span><span class="n">N</span><span class="o">-</span><span class="n">l</span><span class="o">+</span><span class="n">N</span><span class="o">+</span><span class="n">n</span> <span class="kn">from</span> <span class="nn">v</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;v&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">delete</span> <span class="kn">from</span> <span class="nn">wd1l11iPlX68W</span> <span class="n">where</span> <span class="mf">5796.7</span><span class="o">==</span><span class="p">(((((</span><span class="n">h</span><span class="o">+</span><span class="n">e</span><span class="o">-</span><span class="n">Q</span><span class="o">-.</span><span class="p">)))))</span><span class="o">==</span><span class="mi">384514</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;wd1l11iPlX68W&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">select</span> <span class="p">(</span><span class="o">.</span><span class="p">)</span><span class="o">!=</span><span class="mi">3</span><span class="o">+</span><span class="n">Y</span><span class="o">/</span><span class="n">a</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">y</span><span class="p">)</span><span class="o">!=</span><span class="n">I</span><span class="o">&lt;</span><span class="n">m</span><span class="o">==</span><span class="mf">6.4</span> <span class="kn">from</span> <span class="nn">months</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;((.)!=3+Y/a(p,y)!=I&lt;m==6.4)&#39;</span><span class="p">)</span>
 
-<span class="n">select</span> <span class="n">H</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">h</span> <span class="kn">from</span> <span class="nn">m1</span> <span class="n">where</span> <span class="n">d</span><span class="o">/</span><span class="n">t</span><span class="o">&lt;</span><span class="n">S</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;m1&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn">r</span> <span class="n">where</span> <span class="n">sl</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">&lt;</span><span class="n">r</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">x</span><span class="o">/</span><span class="n">B</span><span class="o">+</span><span class="n">w</span><span class="o">+</span><span class="n">W</span><span class="o">*</span><span class="n">D</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">select</span> <span class="mf">4.8</span> <span class="kn">from</span> <span class="nn">months</span> <span class="n">where</span> <span class="n">o</span><span class="o">/</span><span class="n">r</span><span class="o">+</span><span class="n">u</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="n">O</span><span class="o">!=</span><span class="n">y9</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span><span class="o">&gt;</span><span class="n">o</span><span class="o">*</span><span class="n">j</span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(o/r+u+k*O!=y9(Q)&gt;o*j)&#39;</span><span class="p">)</span>
+<span class="n">insert</span> <span class="n">into</span> <span class="n">QnQ</span><span class="p">:</span><span class="mi">4691</span><span class="n">O1E</span> <span class="p">(</span><span class="n">B7P</span><span class="p">,</span><span class="n">g</span><span class="p">)</span> <span class="n">values</span> <span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;QnQ:4691O1E&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">select</span> <span class="n">m</span><span class="o">/</span><span class="n">h</span><span class="o">+</span><span class="n">v</span><span class="o">+</span><span class="n">P</span><span class="o">+</span><span class="n">E</span><span class="p">,</span><span class="n">L</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="n">W</span><span class="o">+</span><span class="n">o</span><span class="o">+</span><span class="n">k</span> <span class="kn">from</span> <span class="nn">vehicles</span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(m/h+v+P+E,L+j*W+o+k)&#39;</span><span class="p">)</span>
+<span class="n">select</span> <span class="n">gs5mV</span><span class="p">(((</span><span class="n">n</span><span class="o">&gt;</span><span class="n">U</span><span class="o">==</span><span class="n">Z</span><span class="p">))</span><span class="o">&lt;</span><span class="n">T</span><span class="o">*</span><span class="n">t</span><span class="o">-</span><span class="n">X</span><span class="o">*</span><span class="n">C</span><span class="o">/</span><span class="n">o</span><span class="o">*</span><span class="n">q</span><span class="o">+</span><span class="n">K</span><span class="p">(</span><span class="n">P</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">z</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">select</span> <span class="p">(</span><span class="n">O</span><span class="o">/</span><span class="n">S</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">months</span> <span class="n">where</span> <span class="n">o</span><span class="o">/</span><span class="n">y</span><span class="o">-</span><span class="p">:</span><span class="o">*</span><span class="n">M</span><span class="o">==</span><span class="n">D</span><span class="o">&lt;</span><span class="n">pC</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">z</span><span class="p">)</span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(o/y-:*M==D&lt;pC(a,z))&#39;</span><span class="p">)</span>
+<span class="n">select</span> <span class="p">(((</span><span class="o">.+</span><span class="n">c</span><span class="o">/</span><span class="n">T</span><span class="o">/</span><span class="n">U</span><span class="o">/</span><span class="n">O</span><span class="o">&lt;</span><span class="n">j</span><span class="o">*</span><span class="n">S</span><span class="o">/</span><span class="n">A</span><span class="o">-</span><span class="n">u</span><span class="o">*</span><span class="p">(</span><span class="n">B</span><span class="p">))))</span> <span class="kn">from</span> <span class="nn">x9o</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;x9o&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">select</span> <span class="n">v</span><span class="o">&lt;</span><span class="n">M</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">vehicles</span> <span class="n">where</span> <span class="n">_</span><span class="p">(</span><span class="n">E</span><span class="p">)</span><span class="o">/</span><span class="n">r</span><span class="o">/</span><span class="n">S</span><span class="o">&gt;</span><span class="n">C</span><span class="o">*</span><span class="n">K</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(_(E)/r/S&gt;C*K(Y))&#39;</span><span class="p">)</span>
+<span class="n">select</span> <span class="n">VqA</span><span class="p">,</span><span class="n">L</span><span class="o">+</span><span class="n">K</span><span class="o">+</span><span class="n">w</span><span class="o">*</span><span class="n">j</span><span class="o">/</span><span class="n">y</span><span class="o">&gt;</span><span class="n">qZ</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">G</span><span class="p">,</span><span class="n">e</span><span class="p">)</span> <span class="kn">from</span> <span class="nn"><a href="My3.html" class="import" target="_blank">My3</a></span> <span class="n">where</span> <span class="p">(</span><span class="o">--</span><span class="mi">2</span><span class="p">)</span><span class="o">==</span><span class="n">DV</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;My3&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">insert</span> <span class="n">into</span> <span class="n">months</span> <span class="p">(</span><span class="n">u3l7ua</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">H1</span><span class="p">)</span> <span class="n">values</span> <span class="p">(</span><span class="s1">&#39;Rk&#39;</span><span class="p">,</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
-<span class="n">Column</span> <span class="p">(</span><span class="s1">&#39;u3l7ua&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">select</span> <span class="p">:</span><span class="o">-</span><span class="n">b</span><span class="o">+</span><span class="n">h</span><span class="o">/</span><span class="n">M</span><span class="p">(:)</span><span class="o">+</span><span class="n">t1Q</span><span class="p">(</span><span class="n">h</span><span class="o">/</span><span class="p">:)</span> <span class="kn">from</span> <span class="nn">months</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(:-b+h/M(:)+t1Q(h/:))&#39;</span><span class="p">)</span>
 
-<span class="n">select</span> <span class="mf">3.7</span> <span class="kn">from</span> <span class="nn"><a href="I37.html" class="import" target="_blank">I37</a></span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;I37&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn">months</span> <span class="n">where</span> <span class="n">v</span><span class="o">-</span><span class="n">X</span><span class="o">-</span><span class="p">:</span><span class="o">*</span><span class="n">m</span><span class="o">&lt;</span><span class="n">k</span><span class="o">-</span><span class="n">N</span><span class="o">-</span><span class="n">F</span><span class="o">==</span><span class="p">((</span><span class="n">K</span><span class="o">-</span><span class="n">F</span><span class="o">-</span><span class="n">r</span><span class="p">))</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;v-X-:*m&lt;k-N-F==((K-F-r))&#39;</span><span class="p">)</span>
 
-<span class="n">update</span> <span class="n">months</span> <span class="nb">set</span> <span class="n">xK</span><span class="o">=</span><span class="n">S4</span> <span class="n">where</span> <span class="n">M</span><span class="o">+</span><span class="n">r</span><span class="o">*</span><span class="n">r</span><span class="o">-</span><span class="n">w</span><span class="o">&lt;</span><span class="n">X</span><span class="o">-</span><span class="n">k</span><span class="o">+</span><span class="n">g</span>
-<span class="n">Column</span> <span class="p">(</span><span class="s1">&#39;xK&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn">months</span> <span class="n">where</span> <span class="n">G</span><span class="o">!=</span><span class="n">M</span><span class="o">-</span><span class="n">f</span><span class="o">*</span><span class="n">X</span><span class="o">!=</span><span class="n">_</span><span class="o">-</span><span class="n">X</span><span class="o">-</span><span class="n">f</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">&gt;</span><span class="n">H</span><span class="o">/</span><span class="n">g</span><span class="o">/</span><span class="n">V</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;G!=M-f*X!=_-X-f(d)&gt;H/g/V&#39;</span><span class="p">)</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">ConcolicGrammarFuzzer</span><span class="p">)</span>
 </pre></div>
+<p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.3 (20211023.0002)
+ -->
+<!-- Pages: 1 -->
+<svg width="318pt" height="539pt"
+ viewBox="0.00 0.00 317.50 539.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 535)">
+<g id="a_graph0"><a xlink:title="ConcolicGrammarFuzzer class hierarchy">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-535 313.5,-535 313.5,4 -4,4"/>
+</a>
+</g>
+<!-- ConcolicGrammarFuzzer -->
+<g id="node1" class="node">
+<title>ConcolicGrammarFuzzer</title>
+<g id="a_node1"><a xlink:href="#" xlink:title="class ConcolicGrammarFuzzer:&#10;Produce strings from grammars efficiently, using derivation trees.">
+<polygon fill="none" stroke="black" points="5.5,-0.5 5.5,-97.5 173.5,-97.5 173.5,-0.5 5.5,-0.5"/>
+<text text-anchor="start" x="13.5" y="-83.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">ConcolicGrammarFuzzer</text>
+<polyline fill="none" stroke="black" points="5.5,-74.5 173.5,-74.5 "/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="ConcolicGrammarFuzzer">
+<g id="a_node1_1"><a xlink:href="#" xlink:title="fuzz(self):&#10;Produce a string from the grammar.">
+<text text-anchor="start" x="41.5" y="-63.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+</a>
+</g>
+<g id="a_node1_2"><a xlink:href="#" xlink:title="coalesce(self, children)">
+<text text-anchor="start" x="41.5" y="-51.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">coalesce()</text>
+</a>
+</g>
+<g id="a_node1_3"><a xlink:href="#" xlink:title="prune_tokens(self, tokens)">
+<text text-anchor="start" x="41.5" y="-40.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">prune_tokens()</text>
+</a>
+</g>
+<g id="a_node1_4"><a xlink:href="#" xlink:title="prune_tree(self, tree, tokens)">
+<text text-anchor="start" x="41.5" y="-29.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">prune_tree()</text>
+</a>
+</g>
+<g id="a_node1_5"><a xlink:href="#" xlink:title="tree_to_string(self, tree)">
+<text text-anchor="start" x="41.5" y="-18.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">tree_to_string()</text>
+</a>
+</g>
+<g id="a_node1_6"><a xlink:href="#" xlink:title="update_grammar(self, trace)">
+<text text-anchor="start" x="41.5" y="-7.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">update_grammar()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- GrammarFuzzer -->
+<g id="node2" class="node">
+<title>GrammarFuzzer</title>
+<g id="a_node2"><a xlink:href="GrammarFuzzer.html" xlink:title="class GrammarFuzzer:&#10;Produce strings from grammars efficiently, using derivation trees.">
+<polygon fill="none" stroke="black" points="0,-134.5 0,-418.5 179,-418.5 179,-134.5 0,-134.5"/>
+<text text-anchor="start" x="39.5" y="-404.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">GrammarFuzzer</text>
+<polyline fill="none" stroke="black" points="0,-395.5 179,-395.5 "/>
+<g id="a_node2_7"><a xlink:href="#" xlink:title="GrammarFuzzer">
+<g id="a_node2_8"><a xlink:href="GrammarFuzzer.html" xlink:title="__init__(self, grammar: Dict[str, List[Union[str, Tuple[str, Dict[str, Any]]]]], start_symbol: str = &#39;&lt;start&gt;&#39;, min_nonterminals: int = 0, max_nonterminals: int = 10, disp: bool = False, log: Union[bool, int] = False) &#45;&gt; None:&#10;Produce strings from `grammar`, starting with `start_symbol`.&#10;If `min_nonterminals` or `max_nonterminals` is given, use them as limits&#10;for the number of nonterminals produced.&#10;If `disp` is set, display the intermediate derivation trees.&#10;If `log` is set, show intermediate steps as text on standard output.">
+<text text-anchor="start" x="8.5" y="-384" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node2_9"><a xlink:href="GrammarFuzzer.html" xlink:title="check_grammar(self) &#45;&gt; None:&#10;Check the grammar passed">
+<text text-anchor="start" x="8.5" y="-373" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">check_grammar()</text>
+</a>
+</g>
+<g id="a_node2_10"><a xlink:href="GrammarFuzzer.html" xlink:title="choose_node_expansion(self, node: Tuple[str, Optional[List[Any]]], children_alternatives: List[List[Tuple[str, Optional[List[Any]]]]]) &#45;&gt; int:&#10;Return index of expansion in `children_alternatives` to be selected.&#10;&#39;children_alternatives`: a list of possible children for `node`.&#10;Defaults to random. To be overloaded in subclasses.">
+<text text-anchor="start" x="8.5" y="-362" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">choose_node_expansion()</text>
+</a>
+</g>
+<g id="a_node2_11"><a xlink:href="GrammarFuzzer.html" xlink:title="choose_tree_expansion(self, tree: Tuple[str, Optional[List[Any]]], children: List[Tuple[str, Optional[List[Any]]]]) &#45;&gt; int:&#10;Return index of subtree in `children` to be selected for expansion.&#10;Defaults to random.">
+<text text-anchor="start" x="8.5" y="-351" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">choose_tree_expansion()</text>
+</a>
+</g>
+<g id="a_node2_12"><a xlink:href="GrammarFuzzer.html" xlink:title="expand_node_randomly(self, node: Tuple[str, Optional[List[Any]]]) &#45;&gt; Tuple[str, Optional[List[Any]]]:&#10;Choose a random expansion for `node` and return it">
+<text text-anchor="start" x="8.5" y="-340" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">expand_node_randomly()</text>
+</a>
+</g>
+<g id="a_node2_13"><a xlink:href="GrammarFuzzer.html" xlink:title="expand_tree(self, tree: Tuple[str, Optional[List[Any]]]) &#45;&gt; Tuple[str, Optional[List[Any]]]:&#10;Expand `tree` in a three&#45;phase strategy until all expansions are complete.">
+<text text-anchor="start" x="8.5" y="-329" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">expand_tree()</text>
+</a>
+</g>
+<g id="a_node2_14"><a xlink:href="GrammarFuzzer.html" xlink:title="expand_tree_once(self, tree: Tuple[str, Optional[List[Any]]]) &#45;&gt; Tuple[str, Optional[List[Any]]]:&#10;Choose an unexpanded symbol in tree; expand it.&#10;Can be overloaded in subclasses.">
+<text text-anchor="start" x="8.5" y="-318" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">expand_tree_once()</text>
+</a>
+</g>
+<g id="a_node2_15"><a xlink:href="GrammarFuzzer.html" xlink:title="expand_tree_with_strategy(self, tree: Tuple[str, Optional[List[Any]]], expand_node_method: Callable, limit: Optional[int] = None):&#10;Expand tree using `expand_node_method` as node expansion function&#10;until the number of possible expansions reaches `limit`.">
+<text text-anchor="start" x="8.5" y="-307" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">expand_tree_with_strategy()</text>
+</a>
+</g>
+<g id="a_node2_16"><a xlink:href="GrammarFuzzer.html" xlink:title="fuzz(self) &#45;&gt; str:&#10;Produce a string from the grammar.">
+<text text-anchor="start" x="8.5" y="-296" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+</a>
+</g>
+<g id="a_node2_17"><a xlink:href="GrammarFuzzer.html" xlink:title="fuzz_tree(self) &#45;&gt; Tuple[str, Optional[List[Any]]]:&#10;Produce a derivation tree from the grammar.">
+<text text-anchor="start" x="8.5" y="-285" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">fuzz_tree()</text>
+</a>
+</g>
+<g id="a_node2_18"><a xlink:href="GrammarFuzzer.html" xlink:title="log_tree(self, tree: Tuple[str, Optional[List[Any]]]) &#45;&gt; None:&#10;Output a tree if self.log is set; if self.display is also set, show the tree structure">
+<text text-anchor="start" x="8.5" y="-274" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">log_tree()</text>
+</a>
+</g>
+<g id="a_node2_19"><a xlink:href="GrammarFuzzer.html" xlink:title="process_chosen_children(self, chosen_children: List[Tuple[str, Optional[List[Any]]]], expansion: Union[str, Tuple[str, Dict[str, Any]]]) &#45;&gt; List[Tuple[str, Optional[List[Any]]]]:&#10;Process children after selection. &#160;By default, does nothing.">
+<text text-anchor="start" x="8.5" y="-263" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">process_chosen_children()</text>
+</a>
+</g>
+<g id="a_node2_20"><a xlink:href="GrammarFuzzer.html" xlink:title="supported_opts(self) &#45;&gt; Set[str]:&#10;Set of supported options. To be overloaded in subclasses.">
+<text text-anchor="start" x="8.5" y="-252" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">supported_opts()</text>
+</a>
+</g>
+<g id="a_node2_21"><a xlink:href="GrammarFuzzer.html" xlink:title="any_possible_expansions(self, node: Tuple[str, Optional[List[Any]]]) &#45;&gt; bool">
+<text text-anchor="start" x="8.5" y="-240" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">any_possible_expansions()</text>
+</a>
+</g>
+<g id="a_node2_22"><a xlink:href="GrammarFuzzer.html" xlink:title="expand_node(self, node: Tuple[str, Optional[List[Any]]]) &#45;&gt; Tuple[str, Optional[List[Any]]]">
+<text text-anchor="start" x="8.5" y="-229" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">expand_node()</text>
+</a>
+</g>
+<g id="a_node2_23"><a xlink:href="GrammarFuzzer.html" xlink:title="expand_node_by_cost(self, node: Tuple[str, Optional[List[Any]]], choose: Callable = &lt;built&#45;in function min&gt;) &#45;&gt; Tuple[str, Optional[List[Any]]]">
+<text text-anchor="start" x="8.5" y="-218" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">expand_node_by_cost()</text>
+</a>
+</g>
+<g id="a_node2_24"><a xlink:href="GrammarFuzzer.html" xlink:title="expand_node_max_cost(self, node: Tuple[str, Optional[List[Any]]]) &#45;&gt; Tuple[str, Optional[List[Any]]]">
+<text text-anchor="start" x="8.5" y="-207" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">expand_node_max_cost()</text>
+</a>
+</g>
+<g id="a_node2_25"><a xlink:href="GrammarFuzzer.html" xlink:title="expand_node_min_cost(self, node: Tuple[str, Optional[List[Any]]]) &#45;&gt; Tuple[str, Optional[List[Any]]]">
+<text text-anchor="start" x="8.5" y="-196" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">expand_node_min_cost()</text>
+</a>
+</g>
+<g id="a_node2_26"><a xlink:href="GrammarFuzzer.html" xlink:title="expansion_cost(self, expansion: Union[str, Tuple[str, Dict[str, Any]]], seen: Set[str] = set()) &#45;&gt; Union[int, float]">
+<text text-anchor="start" x="8.5" y="-185" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">expansion_cost()</text>
+</a>
+</g>
+<g id="a_node2_27"><a xlink:href="GrammarFuzzer.html" xlink:title="expansion_to_children(self, expansion: Union[str, Tuple[str, Dict[str, Any]]]) &#45;&gt; List[Tuple[str, Optional[List[Any]]]]">
+<text text-anchor="start" x="8.5" y="-174" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">expansion_to_children()</text>
+</a>
+</g>
+<g id="a_node2_28"><a xlink:href="GrammarFuzzer.html" xlink:title="init_tree(self) &#45;&gt; Tuple[str, Optional[List[Any]]]">
+<text text-anchor="start" x="8.5" y="-163" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">init_tree()</text>
+</a>
+</g>
+<g id="a_node2_29"><a xlink:href="GrammarFuzzer.html" xlink:title="possible_expansions(self, node: Tuple[str, Optional[List[Any]]]) &#45;&gt; int">
+<text text-anchor="start" x="8.5" y="-152" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">possible_expansions()</text>
+</a>
+</g>
+<g id="a_node2_30"><a xlink:href="GrammarFuzzer.html" xlink:title="symbol_cost(self, symbol: str, seen: Set[str] = set()) &#45;&gt; Union[int, float]">
+<text text-anchor="start" x="8.5" y="-141" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">symbol_cost()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- ConcolicGrammarFuzzer&#45;&gt;GrammarFuzzer -->
+<g id="edge1" class="edge">
+<title>ConcolicGrammarFuzzer&#45;&gt;GrammarFuzzer</title>
+<path fill="none" stroke="black" d="M89.5,-97.55C89.5,-105.89 89.5,-114.96 89.5,-124.44"/>
+<polygon fill="none" stroke="black" points="86,-124.45 89.5,-134.45 93,-124.45 86,-124.45"/>
+</g>
+<!-- Fuzzer -->
+<g id="node3" class="node">
+<title>Fuzzer</title>
+<g id="a_node3"><a xlink:href="Fuzzer.html" xlink:title="class Fuzzer:&#10;Base class for fuzzers.">
+<polygon fill="none" stroke="black" points="51,-455.5 51,-530.5 128,-530.5 128,-455.5 51,-455.5"/>
+<text text-anchor="start" x="68.5" y="-516.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Fuzzer</text>
+<polyline fill="none" stroke="black" points="51,-507.5 128,-507.5 "/>
+<g id="a_node3_31"><a xlink:href="#" xlink:title="Fuzzer">
+<g id="a_node3_32"><a xlink:href="Fuzzer.html" xlink:title="__init__(self) &#45;&gt; None:&#10;Constructor">
+<text text-anchor="start" x="59.5" y="-496.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node3_33"><a xlink:href="Fuzzer.html" xlink:title="fuzz(self) &#45;&gt; str:&#10;Return fuzz input">
+<text text-anchor="start" x="59.5" y="-485.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+</a>
+</g>
+<g id="a_node3_34"><a xlink:href="Fuzzer.html" xlink:title="run(self, runner: Fuzzer.Runner = &lt;Fuzzer.Runner object at 0x10dbc7520&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
+<text text-anchor="start" x="59.5" y="-474.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">run()</text>
+</a>
+</g>
+<g id="a_node3_35"><a xlink:href="Fuzzer.html" xlink:title="runs(self, runner: Fuzzer.Runner = &lt;Fuzzer.PrintRunner object at 0x10dbc7a30&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
+<text text-anchor="start" x="59.5" y="-463.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">runs()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- GrammarFuzzer&#45;&gt;Fuzzer -->
+<g id="edge2" class="edge">
+<title>GrammarFuzzer&#45;&gt;Fuzzer</title>
+<path fill="none" stroke="black" d="M89.5,-418.78C89.5,-428.16 89.5,-437.15 89.5,-445.42"/>
+<polygon fill="none" stroke="black" points="86,-445.49 89.5,-455.49 93,-445.49 86,-445.49"/>
+</g>
+<!-- Legend -->
+<g id="node4" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="191.5" y="-66.5" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="191.5" y="-56.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="197.5" y="-56.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="191.5" y="-46.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="197.5" y="-46.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="191.5" y="-36.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="197.5" y="-36.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="191.5" y="-27.3" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+</p>
 </div>
 </div>
 </div>
@@ -12801,7 +13177,7 @@ The <code>ConcolicGrammarFuzzer</code> on the other hand, knows about the input 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="SMT-Solvers">SMT Solvers<a class="anchor-link" href="#SMT-Solvers">&#182;</a></h2></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Solving-Constraints">Solving Constraints<a class="anchor-link" href="#Solving-Constraints">&#182;</a></h2></div>
 </div>
 </div>
 </div>
@@ -12810,7 +13186,15 @@ The <code>ConcolicGrammarFuzzer</code> on the other hand, knows about the input 
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html"><p>To solve these constraints, one can use a <em>Satisfiability Modulo Theories</em> (SMT) solver. An SMT solver is built on top of a <em>SATISFIABILITY</em> (SAT) solver. A SAT solver is being used to check whether boolean formulas in first order logic (e.g <code>(a | b ) &amp; (~a | ~b)</code>) can be satisfied using any assignments for the variables (e.g <code>a = true, b = false</code>). An SMT solver extends these SAT solvers to specific background theories -- for example, <em>theory of integers</em>, or <em>theory of strings</em>. That is, given a string constraint expressed as a formula with string variables (e.g <code>h + t == 'hello,world'</code>), an SMT solver that understands <em>theory of strings</em> can be used to check if that constraint can be satisfied, and if satisfiable, provide an instantiation of concrete values for the variables used in the formula (e.g <code>h = 'hello,', t = 'world'</code>).</p>
-<p>We use the SMT solver, <code>Z3</code> in this chapter.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>We use the SMT solver Z3 in this chapter.</p>
 </div>
 </div>
 </div>
@@ -12848,7 +13232,7 @@ The <code>ConcolicGrammarFuzzer</code> on the other hand, knows about the input 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>To ensure that the string constraints we use in this chapter are successfully evaluated, we need to specify the <code>z3str3</code> solver. Further, we set the timeout for Z3 computations to 30 seconds.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us set up Z3 first. To ensure that the string constraints we use in this chapter are successfully evaluated, we need to specify the <code>z3str3</code> solver. Further, we set the timeout for Z3 computations to 30 seconds.</p>
 </div>
 </div>
 </div>
@@ -12872,7 +13256,7 @@ The <code>ConcolicGrammarFuzzer</code> on the other hand, knows about the input 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Encoding the constraint requires declaring a corresponding symbolic variable to the input <code>n</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>To encode constraints, we need symbolic variables. Here, we make <code>zn</code> a placeholder for the Z3 symbolic integer variable <code>n</code>.</p>
 </div>
 </div>
 </div>
@@ -12961,7 +13345,7 @@ n &lt; 0
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>z3.solve()</code> method can also be used to check if the constraints are satisfiable, and if they are, provide values for variables such that the constraints are satisfied. For example, we can ask z3 for an input that will take the <code>else</code> branch as follows:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us now solve constraints. The <code>z3.solve()</code> method checks if the constraints are satisfiable; if they are, it also provides values for variables such that the constraints are satisfied. For example, we can ask Z3 for an input that will take the <code>else</code> branch as follows:</p>
 </div>
 </div>
 </div>
@@ -13501,16 +13885,27 @@ n &lt; 0
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Concolic-Tracer">A Concolic Tracer<a class="anchor-link" href="#A-Concolic-Tracer">&#182;</a></h2><p>Given that there is a symbolic context under which the program is executed (that is the symbolic variables that are used in the program execution) we define a context manager called <code>ConcolicTracer</code> that keeps track of the context.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="A-Concolic-Tracer">A Concolic Tracer<a class="anchor-link" href="#A-Concolic-Tracer">&#182;</a></h2><p>Given that there is a symbolic context under which the program is executed (that is, the symbolic variables that are used in the program execution) we define a class <code>ConcolicTracer</code> that keeps track of the context.</p>
+<p>A <code>ConcolicTracer</code> is used in a <code>with</code> block, invoking functions through a <code>[]</code> item access:</p>
+<div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">ConcolicTracer</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
+    <span class="n">_</span><span class="o">.</span><span class="p">[</span><span class="n">function</span><span class="p">](</span><span class="n">args</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+<p>After execution, we can access the saved context in the <code>context</code> attribute:</p>
+<div class="highlight"><pre><span></span><span class="n">_</span><span class="o">.</span><span class="n">context</span>
+</pre></div>
+<p>This gives us a pair containing the <em>declarations</em> for the symbolic variables seen, and the _precondition paths), if any. If you read this for the first time, skip the implementation and head right to the examples.</p>
 </div>
 </div>
 </div>
 </div>
 
+<details id="Excursion:-Implementing-the-Concolic-Tracer">
+<summary>Implementing the Concolic Tracer</summary>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>ConcolicTracer</code> accepts a single argument which contains the declarations for the symbolic variables seen so far, and the pre-conditions if any.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>The <code>ConcolicTracer</code> accepts a single <code>context</code> argument which contains the declarations for the symbolic variables seen so far, and the pre-conditions if any.</p>
 </div>
 </div>
 </div>
@@ -13523,7 +13918,10 @@ n &lt; 0
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ConcolicTracer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Trace function execution, tracking variables and path conditions&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span> <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">({},</span> <span class="p">[])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decls</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span>
 </pre></div>
@@ -13536,7 +13934,7 @@ n &lt; 0
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We add the <code>enter</code> and <code>exit</code> methods for the context manager.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We add the enter and exit methods for the <code>with</code> block.</p>
 </div>
 </div>
 </div>
@@ -13564,7 +13962,7 @@ n &lt; 0
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We use introspection to determine the arguments to the function, which is hooked into the <code>getitem</code> method.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We use introspection to determine the arguments to the function, which is hooked into the <code>getitem()</code> method.</p>
 </div>
 </div>
 </div>
@@ -13698,7 +14096,7 @@ n &lt; 0
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Concolic-Proxy-Objects">Concolic Proxy Objects<a class="anchor-link" href="#Concolic-Proxy-Objects">&#182;</a></h3><p>We now define the concolic proxy objects that can be used for concolic tracing. First, we define the <code>zproxy_create()</code> method that given a class name, correctly creates an instance of that class, and the symbolic corresponding variable, and registers the symbolic variable in the context information <code>context</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Concolic-Proxy-Objects">Concolic Proxy Objects<a class="anchor-link" href="#Concolic-Proxy-Objects">&#182;</a></h4><p>We now define the concolic proxy objects that can be used for concolic tracing. First, we define the <code>zproxy_create()</code> method that given a class name, correctly creates an instance of that class, and the symbolic corresponding variable, and registers the symbolic variable in the context information <code>context</code>.</p>
 </div>
 </div>
 </div>
@@ -13917,7 +14315,8 @@ n &lt; 0
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ca</span><span class="p">,</span> <span class="n">za</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">z3</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">ca</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">za</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -15300,6 +15699,10 @@ This declares a symbolic string variable <code>s</code>
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">ConcolicTracer</span><span class="p">(</span><span class="n">ConcolicTracer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">zeval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate predicates in given context.</span>
+<span class="sd">        - If `python` is set, use the z3 Python API; otherwise use z3 standalone.</span>
+<span class="sd">        - If `log` is set, show input to Z3.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">r</span><span class="p">,</span> <span class="n">sol</span> <span class="o">=</span> <span class="p">(</span><span class="n">zeval_py</span> <span class="k">if</span> <span class="n">python</span> <span class="k">else</span> <span class="n">zeval_smt</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="s1">&#39;sat&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">sol</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fn_args</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn_args</span><span class="p">}</span>
@@ -17273,7 +17676,7 @@ sat
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(&#39;sat&#39;, {&#39;s&#39;: (&#39;\\f\\n \\ra b\\n\\f&#39;, &#39;String&#39;)})
+<pre>(&#39;sat&#39;, {&#39;s&#39;: (&#39;\\n\\n\\f\\fa b \\f&#39;, &#39;String&#39;)})
 </pre>
 </div>
 
@@ -17500,18 +17903,12 @@ sat
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Examples">Examples<a class="anchor-link" href="#Examples">&#182;</a></h2></div>
-</div>
-</div>
-</div>
+</details>
 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Triangle">Triangle<a class="anchor-link" href="#Triangle">&#182;</a></h3><p>We previously showed how to run <code>triangle()</code> under <code>ConcolicTracer</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Triangle">Example: Triangle<a class="anchor-link" href="#Example:-Triangle">&#182;</a></h3><p>We previously showed how to run <code>triangle()</code> under <code>ConcolicTracer</code>.</p>
 </div>
 </div>
 </div>
@@ -17648,7 +18045,7 @@ sat
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(&#39;sat&#39;, {&#39;a&#39;: 0, &#39;b&#39;: 1, &#39;c&#39;: -1})
+<pre>(&#39;sat&#39;, {&#39;a&#39;: -1, &#39;b&#39;: 1, &#39;c&#39;: 0})
 </pre>
 </div>
 
@@ -17689,7 +18086,7 @@ sat
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Round">Round<a class="anchor-link" href="#Round">&#182;</a></h3><p>Here is a function that gives you the nearest ten's multiplier</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Round">Example: Round<a class="anchor-link" href="#Example:-Round">&#182;</a></h3><p>Here is a function that gives you the nearest ten's multiplier</p>
 </div>
 </div>
 </div>
@@ -17739,7 +18136,7 @@ sat
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We verify that we were able to capture all the predicates</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We verify that we were able to capture all the predicates:</p>
 </div>
 </div>
 </div>
@@ -17814,7 +18211,7 @@ sat
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Absolute-Maximum">Absolute Maximum<a class="anchor-link" href="#Absolute-Maximum">&#182;</a></h3><p>Does our concolic proxies work across functions? Say we have a function <code>max_value()</code> as below.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Absolute-Maximum">Example: Absolute Maximum<a class="anchor-link" href="#Example:-Absolute-Maximum">&#182;</a></h3><p>Do our concolic proxies work across functions? Say we have a function <code>max_value()</code> as below.</p>
 </div>
 </div>
 </div>
@@ -18042,7 +18439,7 @@ sat
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Binomial-Coefficient">Binomial Coefficient<a class="anchor-link" href="#Binomial-Coefficient">&#182;</a></h3><p>For a larger example that uses different kinds of variables, say we want to compute the binomial coefficient by the following formulas</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Binomial-Coefficient">Example: Binomial Coefficient<a class="anchor-link" href="#Example:-Binomial-Coefficient">&#182;</a></h3><p>For a larger example that uses different kinds of variables, say we want to compute the binomial coefficient by the following formulas</p>
 <p>$$ 
 ^nP_k=\frac{n!}{(n-k)!}
 $$</p>
@@ -18199,7 +18596,7 @@ $$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Database">Database<a class="anchor-link" href="#Database">&#182;</a></h3></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Example:-Database">Example: Database<a class="anchor-link" href="#Example:-Database">&#182;</a></h3></div>
 </div>
 </div>
 </div>
@@ -18207,7 +18604,7 @@ $$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>For a larger example using the Concolic String class <code>zstr</code>, We use the DB class from the <a href="InformationFlow.html">chapter on information flow</a>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>For a larger example using the Concolic String class <code>zstr</code>, we use the DB class from the <a href="InformationFlow.html">chapter on information flow</a>.</p>
 </div>
 </div>
 </div>
@@ -18486,8 +18883,7 @@ $$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Fuzzing-with-Constraints">Fuzzing with Constraints<a class="anchor-link" href="#Fuzzing-with-Constraints">&#182;</a></h2><p>In this section, we show how to use the infrastructure we built for concolic execution for guiding fuzzing.</p>
-<h3 id="SimpleConcolicFuzzer">SimpleConcolicFuzzer<a class="anchor-link" href="#SimpleConcolicFuzzer">&#182;</a></h3><p>The <code>SimpleConcolicFuzzer</code> starts with a sample input generated by some other fuzzer. It then runs the function being tested under <code>ConcolicTracer</code>, and collects the path predicates. It then negates random predicates within the path and solves it with <em>z3</em> to produce a new output that is guaranteed to take a different path than the original.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Fuzzing-with-Constraints">Fuzzing with Constraints<a class="anchor-link" href="#Fuzzing-with-Constraints">&#182;</a></h2><p>The <code>SimpleConcolicFuzzer</code> class starts with a sample input generated by some other fuzzer. It then runs the function being tested under <code>ConcolicTracer</code>, and collects the path predicates. It then negates random predicates within the path and solves it with <em>z3</em> to produce a new output that is guaranteed to take a different path than the original.</p>
 </div>
 </div>
 </div>
@@ -18547,7 +18943,7 @@ $$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>To make the fuzzer work, we need a way to represent decisions made during trace. We keep this in a binary tree where each node represents a decision made, and each leaf represents a complete path. A node in the binary tree is represented by the <code>TraceNode</code> class.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>To make the fuzzer work, we need a way to represent decisions made during trace. We keep this in a <em>binary tree</em> where each node represents a decision made, and each leaf represents a complete path. A node in the binary tree is represented by the <code>TraceNode</code> class.</p>
 <p>When a new node is added, it represents a decision taken by the parent on some predicate. This predicate is supplied as <code>smt_val</code>, which is <code>True</code> for this child to be reached. Since the predicate is actually present in the parent node, we also carry a member <code>smt</code> which will be updated by the first child to be added.</p>
 </div>
 </div>
@@ -19566,7 +19962,7 @@ $$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Fuzz">Fuzz<a class="anchor-link" href="#Fuzz">&#182;</a></h4><p>The <code>fuzz()</code> method simply generates new lists of predicates, and solves them to produce new inputs.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="The-fuzzing-method">The fuzzing method<a class="anchor-link" href="#The-fuzzing-method">&#182;</a></h3><p>The <code>fuzz()</code> method simply generates new lists of predicates, and solves them to produce new inputs.</p>
 </div>
 </div>
 </div>
@@ -19589,12 +19985,14 @@ $$</p>
             <span class="n">path</span><span class="p">,</span> <span class="n">last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_newpath</span><span class="p">()</span>
             <span class="n">s</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">zeval_smt</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">last</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="s1">&#39;sat&#39;</span><span class="p">:</span>
-                <span class="c1">#raise Exception(&quot;Unexpected UNSAT&quot;)</span>
+                <span class="c1"># raise Exception(&quot;Unexpected UNSAT&quot;)</span>
                 <span class="k">continue</span>
+
             <span class="n">val</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">elt</span><span class="p">,</span> <span class="n">typ</span> <span class="o">=</span> <span class="n">val</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">elt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>  <span class="c1"># negative numbers are [-, x]</span>
                 <span class="n">elt</span> <span class="o">=</span> <span class="s1">&#39;-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">elt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
             <span class="c1"># make sure that we do not retry the tried paths</span>
             <span class="c1"># The tracer we add here is incomplete. This gets updated when</span>
             <span class="c1"># the add_trace is called from the concolic fuzzer context.</span>
@@ -20154,7 +20552,7 @@ $$</p>
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>A complete fuzzer run is as follows</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>A complete fuzzer run is as follows:</p>
 </div>
 </div>
 </div>
@@ -20173,7 +20571,7 @@ $$</p>
     <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">continue</span>
     <span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">ExpectError</span><span class="p">(</span><span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
             <span class="c1"># z3.StringVal(urllib.parse.unquote(&#39;%80&#39;)) &lt;-- bug in z3</span>
             <span class="n">_</span><span class="p">[</span><span class="n">cgi_decode</span><span class="p">](</span><span class="n">v</span><span class="p">)</span>
     <span class="n">scf</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
@@ -20191,6 +20589,7 @@ $$</p>
 &#39;+\\x00&#39;
 &#39;++\\x00&#39;
 &#39;+%\\x00&#39;
+&#39;+%D\\x00&#39;
 </pre>
 </div>
 
@@ -20199,21 +20598,8 @@ $$</p>
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/3882226816.py&#34;, line 10, in &lt;module&gt;
-    _[cgi_decode](v)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&#34;, line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&#34;, line 42, in cgi_decode
-    raise ValueError(&#34;Invalid encoding&#34;)
+<pre>ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
-Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/3882226816.py&#34;, line 10, in &lt;module&gt;
-    _[cgi_decode](v)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&#34;, line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&#34;, line 42, in cgi_decode
-    raise ValueError(&#34;Invalid encoding&#34;)
 ValueError: Invalid encoding (expected)
 </pre>
 </div>
@@ -20223,9 +20609,9 @@ ValueError: Invalid encoding (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>&#39;+%D\\x00&#39;
-&#39;+%DD\\x00&#39;
+<pre>&#39;+%DD\\x00&#39;
 &#39;+%4\\x00&#39;
+&#39;+%DE\\x00&#39;
 </pre>
 </div>
 
@@ -20234,29 +20620,7 @@ ValueError: Invalid encoding (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/3882226816.py&#34;, line 10, in &lt;module&gt;
-    _[cgi_decode](v)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&#34;, line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&#34;, line 39, in cgi_decode
-    raise ValueError(&#34;Invalid encoding&#34;)
-ValueError: Invalid encoding (expected)
-Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/3882226816.py&#34;, line 10, in &lt;module&gt;
-    _[cgi_decode](v)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&#34;, line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&#34;, line 42, in cgi_decode
-    raise ValueError(&#34;Invalid encoding&#34;)
-ValueError: Invalid encoding (expected)
-Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/3882226816.py&#34;, line 10, in &lt;module&gt;
-    _[cgi_decode](v)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&#34;, line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&#34;, line 39, in cgi_decode
-    raise ValueError(&#34;Invalid encoding&#34;)
+<pre>ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 </pre>
 </div>
@@ -20266,8 +20630,7 @@ ValueError: Invalid encoding (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>&#39;+%DE\\x00&#39;
-&#39;+++\\x00&#39;
+<pre>&#39;+++\\x00&#39;
 &#39;+%C\\x00&#39;
 </pre>
 </div>
@@ -20277,14 +20640,7 @@ ValueError: Invalid encoding (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/3882226816.py&#34;, line 10, in &lt;module&gt;
-    _[cgi_decode](v)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&#34;, line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py&#34;, line 42, in cgi_decode
-    raise ValueError(&#34;Invalid encoding&#34;)
-ValueError: Invalid encoding (expected)
+<pre>ValueError: Invalid encoding (expected)
 </pre>
 </div>
 
@@ -23614,7 +23970,7 @@ ValueError: Invalid encoding (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="ConcolicGrammarFuzzer">ConcolicGrammarFuzzer<a class="anchor-link" href="#ConcolicGrammarFuzzer">&#182;</a></h3><p>The concolic framework can be used directly in fuzzing. First, we extend our <code>GrammarFuzzer</code> with a helper method <code>tree_to_string()</code> such that we can retrieve the derivation tree of the fuzz output. We also define <code>prune_tree()</code> and <code>coalesce()</code> to reduce the depth of sub trees. These methods accept a list of tokens types such that a node belonging to the token type gets converted from a tree to a leaf node by calling <code>tree_to_string()</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Concolic-Grammar-Fuzzing">Concolic Grammar Fuzzing<a class="anchor-link" href="#Concolic-Grammar-Fuzzing">&#182;</a></h3><p>The concolic framework can be used directly in fuzzing. First, we extend our <code>GrammarFuzzer</code> with a helper method <code>tree_to_string()</code> such that we can retrieve the derivation tree of the fuzz output. We also define <code>prune_tree()</code> and <code>coalesce()</code> to reduce the depth of sub trees. These methods accept a list of tokens types such that a node belonging to the token type gets converted from a tree to a leaf node by calling <code>tree_to_string()</code>.</p>
 </div>
 </div>
 </div>
@@ -23765,17 +24121,17 @@ ValueError: Invalid encoding (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2536269233.py&#34;, line 4, in &lt;module&gt;
+  File &#34;/tmp/ipykernel_20102/2536269233.py&#34;, line 4, in &lt;module&gt;
     res = _[db_select](str(query))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py&#34;, line 3, in __call__
+  File &#34;/tmp/ipykernel_20102/2687284210.py&#34;, line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1994573112.py&#34;, line 4, in db_select
+  File &#34;/tmp/ipykernel_20102/1994573112.py&#34;, line 4, in db_select
     r = my_db.sql(s)
-  File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/InformationFlow.ipynb&#34;, line 59, in sql
+  File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/InformationFlow.ipynb&#34;, line 62, in sql
     return method(query[len(key):])
-  File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/InformationFlow.ipynb&#34;, line 78, in do_select
+  File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/InformationFlow.ipynb&#34;, line 81, in do_select
     _, table = self.table(t_name)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2474817571.py&#34;, line 6, in table
+  File &#34;/tmp/ipykernel_20102/2474817571.py&#34;, line 6, in table
     raise SQLException(&#39;Table (%s) was not found&#39; % repr(t_name))
 InformationFlow.SQLException: Table (&#39;G.2fN0&#39;) was not found (expected)
 </pre>
@@ -24529,7 +24885,7 @@ no solution
     <span class="n">qtree</span> <span class="o">=</span> <span class="n">cgf</span><span class="o">.</span><span class="n">fuzz_tree</span><span class="p">()</span>
     <span class="n">query</span> <span class="o">=</span> <span class="n">cgf</span><span class="o">.</span><span class="n">tree_to_string</span><span class="p">(</span><span class="n">qtree</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-    <span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">ExpectError</span><span class="p">(</span><span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
                 <span class="n">res</span> <span class="o">=</span> <span class="n">_</span><span class="p">[</span><span class="n">db_select</span><span class="p">](</span><span class="n">query</span><span class="p">)</span>
@@ -24602,7 +24958,7 @@ In effect, what we have done is to lift parts of predicates to the grammar. The 
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
     <span class="n">query</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
-    <span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">ExpectError</span><span class="p">(</span><span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="n">db_select</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
@@ -24822,7 +25178,7 @@ Table (&#39;jm48&#39;) was not found
     <span class="n">query</span> <span class="o">=</span> <span class="n">cgf</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">ConcolicTracer</span><span class="p">()</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">ExpectError</span><span class="p">(</span><span class="n">print_traceback</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">res</span> <span class="o">=</span> <span class="n">_</span><span class="p">[</span><span class="n">db_select</span><span class="p">](</span><span class="n">query</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">res</span><span class="p">))</span>
@@ -25715,7 +26071,7 @@ unknown
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConcolicFuzzer.ipynb" target=_blank)>Last change: 2021-12-09 09:39:51+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConcolicFuzzer.ipynb" target=_blank)>Last change: 2022-01-02 16:26:24+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -25731,19 +26087,19 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">Concolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html</a>.  Retrieved 2021-12-09 09:39:51+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">Concolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html">https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html</a>.  Retrieved 2022-01-02 16:26:24+01:00.
 </p>
 <pre>
-@incollection{fuzzingbook2021:ConcolicFuzzer,
+@incollection{fuzzingbook2022:ConcolicFuzzer,
     author = {Andreas Zeller and Rahul Gopinath and Marcel B{\"o}hme and Gordon Fraser and Christian Holler},
     booktitle = {The Fuzzing Book},
     title = {Concolic Fuzzing},
-    year = {2021},
+    year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html}},
-    note = {Retrieved 2021-12-09 09:39:51+01:00},
+    note = {Retrieved 2022-01-02 16:26:24+01:00},
     url = {https://www.fuzzingbook.org/beta/html/ConcolicFuzzer.html},
-    urldate = {2021-12-09 09:39:51+01:00}
+    urldate = {2022-01-02 16:26:24+01:00}
 }
 </pre>
 </div>

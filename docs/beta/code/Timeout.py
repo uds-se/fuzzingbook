@@ -3,7 +3,7 @@
 
 # "Timeout" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Timeout.html
-# Last change: 2021-12-13 17:33:26+01:00
+# Last change: 2022-01-02 13:24:54+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -53,6 +53,8 @@ Its typical usage is in conjunction with a `with` clause:
 >>>     print("Timeout!")
 Timeout!
 
+
+Note: On Unix/Linux systems, the `Timeout` class uses [https://docs.python.org/3.10/library/signal.html](`SIGALRM` signals) (interrupts) to implement timeouts; this has no effect on performance of the tracked code. On other systems (notably Windows), `Timeout` uses the [`sys.settrace()`](https://docs.python.org/3.10/library/sys.html?highlight=settrace#sys.settrace) function to check the timer after each line of code, which affects performance of the tracked code.
 
 
 For more details, source, and documentation, see
@@ -242,3 +244,11 @@ if __name__ == '__main__':
         print("complete!")
     except TimeoutError:
         print("Timeout!")
+
+## Exercises
+## ---------
+
+if __name__ == '__main__':
+    print('\n## Exercises')
+
+

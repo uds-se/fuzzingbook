@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2021-12-13 17:26:59+01:00
+# Last change: 2022-01-02 16:26:33+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -48,16 +48,16 @@ This chapter provides an implementation of a symbolic fuzzing engine `AdvancedSy
 >>> for i in range(10):
 >>>     r = gcd_fuzzer.fuzz()
 >>>     print(r)
-{'a': 8, 'b': 3}
+{'a': 7, 'b': 5}
 {'a': -1, 'b': 0}
-{'a': 3, 'b': 4}
-{'a': 5, 'b': 4}
-{'a': 9, 'b': 10}
+{'a': 2, 'b': 7}
+{'a': 7, 'b': 6}
+{'a': 3, 'b': 5}
 {'a': 0, 'b': -1}
-{'a': 3, 'b': 2}
-{'a': 1, 'b': 2}
-{'a': 0, 'b': -2}
-{'a': 4, 'b': 3}
+{'a': 15, 'b': 8}
+{'a': -2, 'b': 0}
+{'a': 9533, 'b': -9533}
+{'a': 12, 'b': 11}
 
 
 

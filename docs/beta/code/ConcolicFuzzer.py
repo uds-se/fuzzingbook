@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2021-12-13 17:25:45+01:00
+# Last change: 2022-01-02 16:26:01+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,14 +42,52 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/ConcolicFuzzer.html
 
-This chapter defines two main classes: `SimpleConcolicFuzzer` and `ConcolicGrammarFuzzer`. The `SimpleConcolicFuzzer` first uses a sample input to collect predicates encountered. The fuzzer then negates random predicates to generate new input constraints. These, when solved, produce inputs that explore paths that are close to the original path. It can be used as follows.
+This chapter defines two main classes: `SimpleConcolicFuzzer` and `ConcolicGrammarFuzzer`. The `SimpleConcolicFuzzer` first uses a sample input to collect predicates encountered. The fuzzer then negates random predicates to generate new input constraints. These, when solved, produce inputs that explore paths that are close to the original path.
 
-We first obtain the constraints using `ConcolicTracer`.
+### ConcolicTracer
+
+At the heart of both fuzzers lies the concept of a _concolic tracer_, capturing symbolic variables and path conditions as a program gets executed.
+
+`ConcolicTracer` is used in a `with` block; the syntax `tracer[function]` executes `function` within the `tracer` while capturing conditions. Here is an example for the `cgi_decode()` function:
 
 >>> with ConcolicTracer() as _:
 >>>     _[cgi_decode]('a%20d')
 
-These constraints are added to the concolic fuzzer as follows:
+Once executed, we can retrieve the symbolic variables and associated path constraints in the `context` attribute. This is a pair of two elements:
+
+>>> declarations, path = _.context
+
+In the context, `declarations` is a mapping of symbolic variables to _types_:
+
+>>> declarations
+{'cgi_decode_s_str_1': 'String'}
+
+whereas `path` is a list of constraints encountered during execution:
+
+>>> path
+[Not(str.substr(cgi_decode_s_str_1, 0, 1) == "+"),
+ Not(str.substr(cgi_decode_s_str_1, 0, 1) == "%"),
+ Not(str.substr(cgi_decode_s_str_1, 1, 1) == "+"),
+ str.substr(cgi_decode_s_str_1, 1, 1) == "%",
+ Not(str.substr(cgi_decode_s_str_1, 2, 1) == "0"),
+ Not(str.substr(cgi_decode_s_str_1, 2, 1) == "1"),
+ str.substr(cgi_decode_s_str_1, 2, 1) == "2",
+ str.substr(cgi_decode_s_str_1, 3, 1) == "0",
+ Not(str.substr(cgi_decode_s_str_1, 4, 1) == "+"),
+ Not(str.substr(cgi_decode_s_str_1, 4, 1) == "%")]
+
+We can solve these constraints to obtain a value for the function parameters that follow the same path as the original (traced) invocation:
+
+>>> _.zeval()
+('sat', {'s': ('\\x00%20', 'String')})
+
+_Negating_ some of these constraints will yield different paths taken, and thus greater code coverage. This is what our concolic fuzzers do.
+
+>>> from ClassDiagram import display_class_hierarchy
+>>> display_class_hierarchy(ConcolicTracer)
+### SimpleConcolicFuzzer
+
+The constraints obtained from `ConcolicTracer` are added to the concolic fuzzer as follows:
 
 >>> scf = SimpleConcolicFuzzer()
 >>> scf.add_trace(_, 'a%20d')
@@ -57,107 +95,72 @@ These constraints are added to the concolic fuzzer as follows:
 The concolic fuzzer then uses the constraints added to guide its fuzzing as follows:
 
 >>> scf = SimpleConcolicFuzzer()
->>> for i in range(10):
+>>> for i in range(20):
 >>>     v = scf.fuzz()
 >>>     if v is None:
 >>>         break
 >>>     print(repr(v))
->>>     with ExpectError():
+>>>     with ExpectError(print_traceback=False):
 >>>         with ConcolicTracer() as _:
 >>>             _[cgi_decode](v)
 >>>     scf.add_trace(_, v)
 ' '
 '%\\x00'
 '%A\\x00'
-
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py", line 42, in cgi_decode
-    raise ValueError("Invalid encoding")
-ValueError: Invalid encoding (expected)
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py", line 42, in cgi_decode
-    raise ValueError("Invalid encoding")
-ValueError: Invalid encoding (expected)
-
 '%Ad\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
 '%\\x00C\\x00'
-
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py", line 39, in cgi_decode
-    raise ValueError("Invalid encoding")
-ValueError: Invalid encoding (expected)
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py", line 42, in cgi_decode
-    raise ValueError("Invalid encoding")
-ValueError: Invalid encoding (expected)
-
 '%\\x004\\x00'
 '%\\x004\\x00'
 '%E\\x00'
 
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py", line 42, in cgi_decode
-    raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py", line 42, in cgi_decode
-    raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py", line 42, in cgi_decode
-    raise ValueError("Invalid encoding")
+ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
 '%\\x00d\\x00'
 '%\\x00F\\x00'
+'%9\\x00'
 
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py", line 42, in cgi_decode
-    raise ValueError("Invalid encoding")
 ValueError: Invalid encoding (expected)
-Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1222853776.py", line 9, in 
-    _[cgi_decode](v)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/2687284210.py", line 3, in __call__
-    self.result = self.fn(*self.concolic(args))
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_50970/1425235974.py", line 42, in cgi_decode
-    raise ValueError("Invalid encoding")
+ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
+'%98\\x00'
+'%\\x00b\\x00'
+'%E6\\x00'
+'%E9\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
+'%C\\x00'
+'%8\\x00'
+'%\\x00F\\x00'
+'%A6\\x00'
+'%A8\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
+
+We see how the additional inputs generated explore additional paths.
+
+>>> display_class_hierarchy(SimpleConcolicFuzzer)
+### ConcolicGrammarFuzzer
 
 The `SimpleConcolicFuzzer` simply explores all paths near the original path traversed by the sample input. It uses a simple mechanism to explore the paths that are near the paths that it knows about, and other than code paths, knows nothing about the input.
+
 The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, and can collect feedback from the subject under fuzzing. It can lift some of the constraints encountered to the grammar, enabling deeper fuzzing. It is used as follows:
 
 >>> from InformationFlow import INVENTORY_GRAMMAR, SQLException
@@ -167,7 +170,7 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>     query = cgf.fuzz()
 >>>     print(query)
 >>>     with ConcolicTracer() as _:
->>>         with ExpectError():
+>>>         with ExpectError(print_traceback=False):
 >>>             try:
 >>>                 res = _[db_select](query)
 >>>                 print(repr(res))
@@ -175,28 +178,18 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-delete from Mi6 where m1(F,t)>l(V)-F6(C,B)
-Table ('Mi6') was not found
+select ((g>r/u))U==Z))qZ(s,G,e) from My3 where (--2)==DV
+Table ('My3') was not found
 
-delete from wd1l11iPlX68W where 5796.7==(((((h+e-Q-.)))))==384514
-Table ('wd1l11iPlX68W') was not found
+select :-b+h/M(:)+t1Q(h/:) from months
+Invalid WHERE ('(:-b+h/M(:)+t1Q(h/:))')
 
-select H,w,S,h from m1 where d/to*j
-Invalid WHERE ('(o/r+u+k*O!=y9(Q)>o*j)')
+delete from months where v-X-:*mH/g/V
+Invalid WHERE ('G!=M-f*X!=_-X-f(d)>H/g/V')
 
-select m/h+v+P+E,L+j*W+o+k from vehicles
-Invalid WHERE ('(m/h+v+P+E,L+j*W+o+k)')
 
-select (O/S) from months where o/y-:*M==DC*K(Y)
-Invalid WHERE ('(_(E)/r/S>C*K(Y))')
+>>> display_class_hierarchy(ConcolicGrammarFuzzer)
 
-insert into months (u3l7ua,p,H1) values ('Rk','Y')
-Column ('u3l7ua') was not found
-
-select 3.7 from I37
-Table ('I37') was not found
-
-update months set xK=S4 where M+r*r-w
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
 at https://www.fuzzingbook.org/html/ConcolicFuzzer.html
@@ -302,11 +295,11 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     src[2], src[3], src[4]
 
-## SMT Solvers
-## -----------
+## Solving Constraints
+## -------------------
 
 if __name__ == '__main__':
-    print('\n## SMT Solvers')
+    print('\n## Solving Constraints')
 
 
 
@@ -374,8 +367,18 @@ if __name__ == '__main__':
 
 
 
+### Excursion: Implementing the Concolic Tracer
+
+if __name__ == '__main__':
+    print('\n### Excursion: Implementing the Concolic Tracer')
+
+
+
 class ConcolicTracer:
+    """Trace function execution, tracking variables and path conditions"""
+
     def __init__(self, context=None):
+        """Constructor."""
         self.context = context if context is not None else ({}, [])
         self.decls, self.path = self.context
 
@@ -408,10 +411,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     _.context
 
-### Concolic Proxy Objects
+#### Concolic Proxy Objects
 
 if __name__ == '__main__':
-    print('\n### Concolic Proxy Objects')
+    print('\n#### Concolic Proxy Objects')
 
 
 
@@ -474,7 +477,8 @@ class zbool(zbool):
         return r
 
 if __name__ == '__main__':
-    ca, za = 5, z3.Int('a')
+    ca = 5
+    za = z3.Int('a')
 
 if __name__ == '__main__':
     with ConcolicTracer() as _:
@@ -868,6 +872,10 @@ if __name__ == '__main__':
 
 class ConcolicTracer(ConcolicTracer):
     def zeval(self, python=False, log=False):
+        """Evaluate predicates in given context.
+        - If `python` is set, use the z3 Python API; otherwise use z3 standalone.
+        - If `log` is set, show input to Z3.
+        """
         r, sol = (zeval_py if python else zeval_smt)(self.path, self, log)
         if r == 'sat':
             return r, {k: sol.get(self.fn_args[k], None) for k in self.fn_args}
@@ -1536,18 +1544,17 @@ INITIALIZER_LIST.append(init_concolic_3)
 if __name__ == '__main__':
     init_concolic_3()
 
-## Examples
-## --------
+### End of Excursion
 
 if __name__ == '__main__':
-    print('\n## Examples')
+    print('\n### End of Excursion')
 
 
 
-### Triangle
+### Example: Triangle
 
 if __name__ == '__main__':
-    print('\n### Triangle')
+    print('\n### Example: Triangle')
 
 
 
@@ -1570,10 +1577,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     triangle(1, 0, 1)
 
-### Round
+### Example: Round
 
 if __name__ == '__main__':
-    print('\n### Round')
+    print('\n### Example: Round')
 
 
 
@@ -1592,10 +1599,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     _.zeval()
 
-### Absolute Maximum
+### Example: Absolute Maximum
 
 if __name__ == '__main__':
-    print('\n### Absolute Maximum')
+    print('\n### Example: Absolute Maximum')
 
 
 
@@ -1634,10 +1641,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     _.zeval()
 
-### Binomial Coefficient
+### Example: Binomial Coefficient
 
 if __name__ == '__main__':
-    print('\n### Binomial Coefficient')
+    print('\n### Example: Binomial Coefficient')
 
 
 
@@ -1667,10 +1674,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     _.zeval()
 
-### Database
+### Example: Database
 
 if __name__ == '__main__':
-    print('\n### Database')
+    print('\n### Example: Database')
 
 
 
@@ -2008,10 +2015,10 @@ if __name__ == '__main__':
     path, cc = scf.get_newpath()
     path
 
-#### Fuzz
+### The fuzzing method
 
 if __name__ == '__main__':
-    print('\n#### Fuzz')
+    print('\n### The fuzzing method')
 
 
 
@@ -2026,12 +2033,14 @@ class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
             path, last = self.get_newpath()
             s, v = zeval_smt(path, last, log=False)
             if s != 'sat':
-                #raise Exception("Unexpected UNSAT")
+                # raise Exception("Unexpected UNSAT")
                 continue
+
             val = list(v.values())[0]
             elt, typ = val
             if len(elt) == 2 and elt[0] == '-':  # negative numbers are [-, x]
                 elt = '-%s' % elt[1]
+
             # make sure that we do not retry the tried paths
             # The tracer we add here is incomplete. This gets updated when
             # the add_trace is called from the concolic fuzzer context.
@@ -2128,7 +2137,7 @@ if __name__ == '__main__':
         if v is None:
             continue
         with ConcolicTracer() as _:
-            with ExpectError():
+            with ExpectError(print_traceback=False):
                 # z3.StringVal(urllib.parse.unquote('%80')) <-- bug in z3
                 _[cgi_decode](v)
         scf.add_trace(_, v)
@@ -2136,10 +2145,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     display_trace_tree(scf.ct.root)
 
-### ConcolicGrammarFuzzer
+### Concolic Grammar Fuzzing
 
 if __name__ == '__main__':
-    print('\n### ConcolicGrammarFuzzer')
+    print('\n### Concolic Grammar Fuzzing')
 
 
 
@@ -2343,7 +2352,7 @@ if __name__ == '__main__':
         qtree = cgf.fuzz_tree()
         query = cgf.tree_to_string(qtree)
         print(query)
-        with ExpectError():
+        with ExpectError(print_traceback=False):
             try:
                 with ConcolicTracer() as _:
                     res = _[db_select](query)
@@ -2357,7 +2366,7 @@ if __name__ == '__main__':
     for i in range(10):
         query = gf.fuzz()
         print(query)
-        with ExpectError():
+        with ExpectError(print_traceback=False):
             try:
                 res = db_select(query)
                 print(repr(res))
@@ -2420,7 +2429,7 @@ if __name__ == '__main__':
         query = cgf.fuzz()
         print(query)
         with ConcolicTracer() as _:
-            with ExpectError():
+            with ExpectError(print_traceback=False):
                 try:
                     res = _[db_select](query)
                     print(repr(res))
@@ -2445,9 +2454,38 @@ if __name__ == '__main__':
 
 
 
+### ConcolicTracer
+
+if __name__ == '__main__':
+    print('\n### ConcolicTracer')
+
+
+
 if __name__ == '__main__':
     with ConcolicTracer() as _:
         _[cgi_decode]('a%20d')
+
+if __name__ == '__main__':
+    declarations, path = _.context
+
+if __name__ == '__main__':
+    declarations
+
+if __name__ == '__main__':
+    path
+
+if __name__ == '__main__':
+    _.zeval()
+
+from .ClassDiagram import display_class_hierarchy
+display_class_hierarchy(ConcolicTracer)
+
+### SimpleConcolicFuzzer
+
+if __name__ == '__main__':
+    print('\n### SimpleConcolicFuzzer')
+
+
 
 if __name__ == '__main__':
     scf = SimpleConcolicFuzzer()
@@ -2455,15 +2493,25 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     scf = SimpleConcolicFuzzer()
-    for i in range(10):
+    for i in range(20):
         v = scf.fuzz()
         if v is None:
             break
         print(repr(v))
-        with ExpectError():
+        with ExpectError(print_traceback=False):
             with ConcolicTracer() as _:
                 _[cgi_decode](v)
         scf.add_trace(_, v)
+
+if __name__ == '__main__':
+    display_class_hierarchy(SimpleConcolicFuzzer)
+
+### ConcolicGrammarFuzzer
+
+if __name__ == '__main__':
+    print('\n### ConcolicGrammarFuzzer')
+
+
 
 from .InformationFlow import INVENTORY_GRAMMAR, SQLException
 
@@ -2474,7 +2522,7 @@ if __name__ == '__main__':
         query = cgf.fuzz()
         print(query)
         with ConcolicTracer() as _:
-            with ExpectError():
+            with ExpectError(print_traceback=False):
                 try:
                     res = _[db_select](query)
                     print(repr(res))
@@ -2482,6 +2530,9 @@ if __name__ == '__main__':
                     print(e)
             cgf.update_grammar(_)
             print()
+
+if __name__ == '__main__':
+    display_class_hierarchy(ConcolicGrammarFuzzer)
 
 ## Lessons Learned
 ## ---------------
