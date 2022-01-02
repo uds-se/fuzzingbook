@@ -219,13 +219,28 @@ def get_sections(notebook):
     sections = [match.replace(r'\n', '') for match in matches]
     # print("Sections", repr(sections).encode('utf-8'))
     
-    # Filter out second synopsis section
+    # Move last synopsis section to top; ignore all others
     if '## Synopsis' in sections:
-        sections = ['## Synopsis'] + [sec for sec in sections if sec != '## Synopsis']
-    
+        synopsis_sections = []
+        body_sections = []
+        in_synopsis = False
+        for sec in sections:
+            if sec == '## Synopsis':
+                in_synopsis = True
+                synopsis_sections = []
+            elif sec.startswith('## '):
+                in_synopsis = False
+            
+            if in_synopsis:
+                synopsis_sections.append(sec)
+            else:
+                body_sections.append(sec)
+                
+        sections = synopsis_sections + body_sections
+
     # Filter out "End of Excursion" titles
     sections = [sec for sec in sections 
-        if sec != '## End of Excursion' and sec != '### End of Excursion']
+        if not sec.endswith('# End of Excursion')]
 
     return sections
 
