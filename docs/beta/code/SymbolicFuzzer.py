@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2022-01-02 16:26:33+01:00
+# Last change: 2022-01-02 16:44:41+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
