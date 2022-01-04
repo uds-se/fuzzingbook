@@ -3,7 +3,7 @@
 
 # "Tracking Information Flow" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2022-01-04 18:42:03+01:00
+# Last change: 2022-01-04 19:18:27+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -65,8 +65,8 @@ Indeed, any operation from a  `tstr` string that results in a string fragment pr
 
 >>> thello[1:2].taint  # type: ignore
 'LOW'
->>> from ClassDiagram import display_class_hierarchy
->>> display_class_hierarchy(tstr)
+
+`tstr` objects duplicate most `str` methods, as indicated in the class diagram:
 ### Tracking Character Origins
 
 `ostr` objects extend `tstr` objects by not only tracking a taint, but also the originating _indexes_ from the input string, This allows you to exactly track where individual characters came from. Assume you have a long string, which at index 100 contains the password `"joshua1234"`. Then you can save this origin information using an `ostr` as follows:
@@ -87,8 +87,8 @@ The `origin` attribute of an `ostr` provides access to a list of indexes:
 'SECRET'
 >>> secret_substr.origin
 [100, 101, 102, 103, -1, 106, 107, 108, 109]
->>> from ClassDiagram import display_class_hierarchy
->>> display_class_hierarchy(ostr)
+
+`ostr` objects duplicate most `str` methods, as indicated in the class diagram:
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Tracking Information Flow"
@@ -2027,8 +2027,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     secret_substr.origin
 
-from .ClassDiagram import display_class_hierarchy
-display_class_hierarchy(ostr)
+if __name__ == '__main__':
+    display_class_hierarchy(ostr)
 
 ## Lessons Learned
 ## ---------------

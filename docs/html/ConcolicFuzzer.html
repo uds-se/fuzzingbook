@@ -11798,7 +11798,7 @@ MathJax.Hub.Config({
 <meta property="og:url" content="https://www.fuzzingbook.org/html/ConcolicFuzzer.html" />
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Concolic Fuzzing - The Fuzzing Book" />
-<meta property="og:description" content="In the chapter on information flow, we have seen how one can use dynamic taints to produce more intelligent test cases than simply looking for program crashes. We have also seen how one can use the taints to update the grammar, and hence focus more on the dangerous methods. While taints are helpful, uninterpreted strings is only one of the attack vectors. Can we say anything more about the properties of variables at any point in the execution? For example, can we say for sure that a function will always receive the buffers with the correct length? Concolic execution offers a solution here. The idea of concolic execution over a function is as follows: We start with a sample input for the function, and execute the function under trace. At each point the execution passes through a conditional, we save the conditional encountered in the form of relations between symbolic variables. Here, a symbolic variable can be thought of as a sort of placeholder for the real variable, sort of like the x in solving for x in Algebra. The symbolic variables can be used to specify relations without actually solving them.With concolic execution, one can collect the constraints that an execution path encounters, and use it to answer questions about the program behavior at any point we prefer along the program execution path. We can further use concolic execution to enhance fuzzing.In this chapter, we explore in depth how to execute a Python function concolically, and how concolic execution can be used to enhance fuzzing.Prerequisites You should have read the chapter on coverage. You should have read the chapter on information flow. A familiarity with the basic idea of SMT solvers would be useful.We first set up our infrastructure so that we can make use of previously defined functions." />
+<meta property="og:description" content="In the chapter on information flow, we have seen how one can use dynamic taints to produce more intelligent test cases than simply looking for program crashes. We have also seen how one can use the taints to update the grammar, and hence focus more on the dangerous methods. While taints are helpful, uninterpreted strings is only one of the attack vectors. Can we say anything more about the properties of variables at any point in the execution? For example, can we say for sure that a function will always receive the buffers with the correct length? Concolic execution offers a solution here. The idea of concolic execution over a function is as follows: We start with a sample input for the function, and execute the function under trace. At each point the execution passes through a conditional, we save the conditional encountered in the form of relations between symbolic variables. Here, a symbolic variable can be thought of as a sort of placeholder for the real variable, sort of like the x in solving for x in Algebra. The symbolic variables can be used to specify relations without actually solving them.With concolic execution, one can collect the constraints that an execution path encounters, and use it to answer questions about the program behavior at any point we prefer along the program execution path. We can further use concolic execution to enhance fuzzing.In this chapter, we explore in depth how to execute a Python function concolically, and how concolic execution can be used to enhance fuzzing.Prerequisites You should have read the chapter on coverage. You should have read the chapter on information flow. A familiarity with the basic idea of SMT solvers would be useful." />
 <meta property="og:image" content="https://www.fuzzingbook.org/html/PICS/wordcloud.png" />
 
 <meta name="twitter:dnt" content="on">
@@ -12090,15 +12090,6 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </div>
 </div>
 
-<div class="input_markdown">
-<div class="cell border-box-sizing text_cell rendered">
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We first set up our infrastructure so that we can make use of previously defined functions.</p>
-</div>
-</div>
-</div>
-</div>
-
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -12167,9 +12158,6 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <span class="p">(</span><span class="s1">&#39;sat&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">x00%20&#39;</span><span class="p">,</span> <span class="s1">&#39;String&#39;</span><span class="p">)})</span>
 </pre></div>
 <p>The <code>zeval()</code> function also allows to pass <em>alternate</em> or <em>negated</em> constraints. See the chapter for examples.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="ClassDiagram.html" class="import" target="_blank">ClassDiagram</a></span> <span class="kn">import</span> <span class="n">display_class_hierarchy</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">ConcolicTracer</span><span class="p">)</span>
-</pre></div>
 <p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -12260,49 +12248,51 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <span class="o">&gt;&gt;&gt;</span>     <span class="n">scf</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 <span class="s1">&#39; &#39;</span>
 <span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;%7</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%3</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x004</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
 
-<span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x000</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x009</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x00c</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%34</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 <span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-
-<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-
-<span class="s1">&#39;</span><span class="si">%7e</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;%b</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;&#39;</span>
-
-<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-
-<span class="s1">&#39;%77</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;</span><span class="si">%7E</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;%73</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;%7&#39;</span>
-<span class="s1">&#39;%77</span><span class="se">\\</span><span class="s1">x00+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;%77</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-
-<span class="ne">IndexError</span><span class="p">:</span> <span class="n">string</span> <span class="n">index</span> <span class="n">out</span> <span class="n">of</span> <span class="nb">range</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
-
-<span class="s1">&#39;%1</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;</span><span class="si">%7E</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x006</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
 
-<span class="s1">&#39;%75</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x00C</span><span class="se">\\</span><span class="s1">x00&#39;</span>
-<span class="s1">&#39;%73</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%34</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+
+<span class="s1">&#39;%34</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+
+<span class="s1">&#39;+</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+
+<span class="s1">&#39;%36</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;%34</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00%</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+
+<span class="s1">&#39;+&#39;</span>
+<span class="s1">&#39;%</span><span class="se">\\</span><span class="s1">x00d</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">encoding</span> <span class="p">(</span><span class="n">expected</span><span class="p">)</span>
+
+<span class="s1">&#39;%34</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00</span><span class="se">\\</span><span class="s1">x00+</span><span class="se">\\</span><span class="s1">x00&#39;</span>
+<span class="s1">&#39;</span><span class="si">%3F</span><span class="se">\\</span><span class="s1">x00&#39;</span>
 </pre></div>
 <p>We see how the additional inputs generated explore additional paths.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">SimpleConcolicFuzzer</span><span class="p">)</span>
-</pre></div>
 <p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -12365,11 +12355,11 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <text text-anchor="start" x="46" y="-153.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
 </a>
 </g>
-<g id="a_node2_9"><a xlink:href="Fuzzer.html" xlink:title="run(self, runner: Fuzzer.Runner = &lt;Fuzzer.Runner object at 0x112a1a100&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
+<g id="a_node2_9"><a xlink:href="Fuzzer.html" xlink:title="run(self, runner: Fuzzer.Runner = &lt;Fuzzer.Runner object at 0x1125ea100&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
 <text text-anchor="start" x="46" y="-142.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">run()</text>
 </a>
 </g>
-<g id="a_node2_10"><a xlink:href="Fuzzer.html" xlink:title="runs(self, runner: Fuzzer.Runner = &lt;Fuzzer.PrintRunner object at 0x112a1a7c0&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
+<g id="a_node2_10"><a xlink:href="Fuzzer.html" xlink:title="runs(self, runner: Fuzzer.Runner = &lt;Fuzzer.PrintRunner object at 0x1125ead00&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
 <text text-anchor="start" x="46" y="-131.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">runs()</text>
 </a>
 </g>
@@ -12416,37 +12406,35 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <span class="o">&gt;&gt;&gt;</span>                 <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>         <span class="n">cgf</span><span class="o">.</span><span class="n">update_grammar</span><span class="p">(</span><span class="n">_</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span>         <span class="nb">print</span><span class="p">()</span>
-<span class="n">update</span> <span class="n">w</span> <span class="nb">set</span> <span class="n">kF</span><span class="o">=</span><span class="p">:</span> <span class="n">where</span> <span class="n">w8</span><span class="p">(</span><span class="n">y</span><span class="p">(</span><span class="n">W</span><span class="p">)</span><span class="o">&lt;</span><span class="n">h</span><span class="p">)</span><span class="o">-</span><span class="n">j</span><span class="o">!=</span><span class="p">:</span><span class="n">BLlf</span><span class="p">((</span><span class="n">C</span><span class="o">&gt;</span><span class="n">R</span><span class="p">)</span><span class="o">!=</span><span class="p">:)</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">select</span> <span class="n">T</span><span class="o">+</span><span class="n">M</span><span class="o">/</span><span class="n">V</span><span class="o">-</span><span class="n">o</span><span class="o">+</span><span class="n">G</span><span class="o">&gt;</span><span class="n">N</span><span class="p">(</span><span class="n">K</span><span class="p">),</span><span class="n">Q</span><span class="p">(</span><span class="n">d</span><span class="p">),</span><span class="n">X</span> <span class="kn">from</span> <span class="nn"><a href="Tn43.html" class="import" target="_blank">Tn43</a></span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;Tn43&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">delete</span> <span class="kn">from</span> <span class="nn">months</span> <span class="n">where</span> <span class="p">(</span><span class="o">--</span><span class="mi">0</span><span class="o">==</span><span class="n">L</span><span class="o">&lt;</span><span class="n">c</span><span class="o">/</span><span class="n">K</span><span class="p">)</span><span class="o">!=</span><span class="n">H</span><span class="o">-</span><span class="n">W</span><span class="o">&gt;</span><span class="n">S</span><span class="o">/</span><span class="n">N</span><span class="o">==</span><span class="n">m</span><span class="o">==</span><span class="n">l</span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(--0==L&lt;c/K)!=H-W&gt;S/N==m==l&#39;</span><span class="p">)</span>
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn">vehicles</span> <span class="n">where</span> <span class="n">C</span><span class="o">+</span><span class="n">h</span><span class="o">*</span><span class="n">l</span><span class="o">*</span><span class="n">g</span><span class="o">-</span><span class="n">d</span><span class="o">+</span><span class="n">a</span><span class="o">+</span><span class="n">Z</span><span class="o">!=</span><span class="p">(</span><span class="n">y</span><span class="p">(</span><span class="o">.</span><span class="p">,</span><span class="n">L</span><span class="p">))</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;C+h*l*g-d+a+Z!=(y(.,L))&#39;</span><span class="p">)</span>
 
-<span class="n">select</span> <span class="o">-</span><span class="mf">6.9</span> <span class="kn">from</span> <span class="nn">nYD38G47083</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;nYD38G47083&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">update</span> <span class="n">vehicles</span> <span class="nb">set</span> <span class="n">E</span><span class="o">=</span><span class="n">P</span><span class="p">,</span><span class="n">M</span><span class="o">=</span><span class="n">S</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="n">N</span><span class="p">,</span><span class="n">G</span><span class="o">=</span><span class="n">w</span> <span class="n">where</span> <span class="n">z</span><span class="o">-</span><span class="n">M</span><span class="o">+</span><span class="n">W</span><span class="o">==</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+<span class="n">Column</span> <span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">select</span> <span class="p">(((</span><span class="n">r</span><span class="p">)</span><span class="o">==</span><span class="p">((</span><span class="n">L</span><span class="p">))</span><span class="o">!=</span><span class="n">q</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">bhTy</span> <span class="n">where</span> <span class="n">I</span><span class="o">==</span><span class="n">i</span><span class="o">*</span><span class="n">S</span><span class="o">==</span><span class="n">x</span><span class="o">==</span><span class="n">F</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;bhTy&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">update</span> <span class="n">vehicles</span> <span class="nb">set</span> <span class="n">d</span><span class="o">=</span><span class="n">v</span> <span class="n">where</span> <span class="mf">04.59</span><span class="o">!=</span><span class="n">D</span><span class="o">+</span><span class="n">p</span><span class="o">!=</span><span class="n">h</span><span class="o">/</span><span class="n">n</span><span class="o">+</span><span class="n">O</span><span class="o">*</span><span class="n">e</span><span class="o">!=</span><span class="n">x</span><span class="o">+</span><span class="n">K</span><span class="o">-</span><span class="n">J</span><span class="o">+</span><span class="n">z</span>
+<span class="n">Column</span> <span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">insert</span> <span class="n">into</span> <span class="n">vehicles</span> <span class="p">(</span><span class="n">Vb</span><span class="p">,</span><span class="n">L</span><span class="p">)</span> <span class="n">values</span> <span class="p">(</span><span class="mf">88.578</span><span class="p">)</span>
-<span class="n">Column</span> <span class="p">(</span><span class="s1">&#39;Vb&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn"><a href="LKP.html" class="import" target="_blank">LKP</a></span> <span class="n">where</span> <span class="n">U</span><span class="o">*</span><span class="n">u</span><span class="o">/</span><span class="n">J</span><span class="o">*</span><span class="n">v</span><span class="o">-</span><span class="n">o</span><span class="o">-</span><span class="n">F</span><span class="o">==</span><span class="n">C</span><span class="o">&lt;</span><span class="n">n</span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;LKP&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">select</span> <span class="p">(</span><span class="n">C</span><span class="o">/</span><span class="n">c</span><span class="o">&gt;</span><span class="n">B</span><span class="p">(</span><span class="n">d</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="n">X</span><span class="p">)),</span><span class="n">d</span><span class="p">,</span><span class="n">J</span><span class="p">,</span><span class="n">R</span> <span class="kn">from</span> <span class="nn"><a href="S.html" class="import" target="_blank">S</a></span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;S&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">select</span> <span class="p">(</span><span class="n">H</span><span class="o">==</span><span class="n">y</span><span class="p">)</span><span class="o">&lt;</span><span class="n">v</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">J</span><span class="p">),</span><span class="n">k</span><span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="n">x</span><span class="p">,</span><span class="n">D</span><span class="p">,</span><span class="n">C</span> <span class="kn">from</span> <span class="nn"><a href="Px6.html" class="import" target="_blank">Px6</a></span>
+<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;Px6&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 
-<span class="n">insert</span> <span class="n">into</span> <span class="n">PG58</span> <span class="p">(</span><span class="n">L</span><span class="p">)</span> <span class="n">values</span> <span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;PG58&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn">months</span> <span class="n">where</span> <span class="p">((</span><span class="n">j</span><span class="o">!=</span><span class="n">s</span><span class="p">)</span><span class="o">-</span><span class="n">V1</span><span class="p">(</span><span class="n">K</span><span class="p">)</span><span class="o">+</span><span class="n">P</span><span class="p">)</span><span class="o">&gt;</span><span class="p">(</span><span class="n">o</span><span class="o">+</span><span class="n">B</span><span class="o">&gt;</span><span class="n">x</span><span class="o">!=</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;((j!=s)-V1(K)+P)&gt;(o+B&gt;x!=(e))&#39;</span><span class="p">)</span>
 
-<span class="n">select</span> <span class="o">--</span><span class="mf">932.7</span><span class="o">==</span><span class="n">R0Q</span> <span class="kn">from</span> <span class="nn">r993</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;r993&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">select</span> <span class="n">G</span><span class="o">/</span><span class="n">x</span><span class="p">,</span><span class="n">P</span> <span class="kn">from</span> <span class="nn">months</span> <span class="n">where</span> <span class="n">I</span><span class="o">*</span><span class="n">O</span><span class="o">+</span><span class="n">b</span><span class="p">(</span><span class="n">P</span><span class="p">)</span><span class="o">&gt;</span><span class="n">eX5</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;(I*O+b(P)&gt;eX5(Q))&#39;</span><span class="p">)</span>
 
-<span class="n">insert</span> <span class="n">into</span> <span class="n">S9Iz1C</span> <span class="p">(</span><span class="n">la</span><span class="p">,</span><span class="n">B9</span><span class="p">)</span> <span class="n">values</span> <span class="p">(</span><span class="s1">&#39;aqu&#39;</span><span class="p">)</span>
-<span class="n">Table</span> <span class="p">(</span><span class="s1">&#39;S9Iz1C&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
+<span class="n">delete</span> <span class="kn">from</span> <span class="nn">vehicles</span> <span class="n">where</span> <span class="n">C</span><span class="o">/</span><span class="n">P</span><span class="o">-</span><span class="n">J</span><span class="p">(</span><span class="n">m</span><span class="p">)</span><span class="o">/</span><span class="n">A</span><span class="o">==</span><span class="n">g</span><span class="o">&gt;</span><span class="n">Ne</span><span class="p">(</span><span class="o">.!=</span><span class="n">z</span><span class="p">)</span>
+<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;C/P-J(m)/A==g&gt;Ne(.!=z)&#39;</span><span class="p">)</span>
 
-<span class="n">delete</span> <span class="kn">from</span> <span class="nn">vehicles</span> <span class="n">where</span> <span class="n">W</span><span class="o">/</span><span class="n">V</span><span class="o">!=</span><span class="n">A</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">+</span><span class="n">t</span><span class="o">&lt;</span><span class="n">O</span><span class="o">*</span><span class="n">E</span><span class="o">/</span><span class="n">S</span><span class="o">-.</span>
-<span class="n">Invalid</span> <span class="n">WHERE</span> <span class="p">(</span><span class="s1">&#39;W/V!=A(f)+t&lt;O*E/S-.&#39;</span><span class="p">)</span>
-
-<span class="o">&gt;&gt;&gt;</span> <span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">ConcolicGrammarFuzzer</span><span class="p">)</span>
+<span class="n">insert</span> <span class="n">into</span> <span class="n">vehicles</span> <span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="n">values</span> <span class="p">(</span><span class="o">-</span><span class="mf">6.4</span><span class="p">,</span><span class="s1">&#39;G&#39;</span><span class="p">,</span><span class="s1">&#39;Fx+Y&#39;</span><span class="p">)</span>
+<span class="n">Column</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span> <span class="n">was</span> <span class="ow">not</span> <span class="n">found</span>
 </pre></div>
 <p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
@@ -12625,11 +12613,11 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <text text-anchor="start" x="59.5" y="-485.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
 </a>
 </g>
-<g id="a_node3_34"><a xlink:href="Fuzzer.html" xlink:title="run(self, runner: Fuzzer.Runner = &lt;Fuzzer.Runner object at 0x112a1a100&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
+<g id="a_node3_34"><a xlink:href="Fuzzer.html" xlink:title="run(self, runner: Fuzzer.Runner = &lt;Fuzzer.Runner object at 0x1125ea100&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
 <text text-anchor="start" x="59.5" y="-474.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">run()</text>
 </a>
 </g>
-<g id="a_node3_35"><a xlink:href="Fuzzer.html" xlink:title="runs(self, runner: Fuzzer.Runner = &lt;Fuzzer.PrintRunner object at 0x112a1a7c0&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
+<g id="a_node3_35"><a xlink:href="Fuzzer.html" xlink:title="runs(self, runner: Fuzzer.Runner = &lt;Fuzzer.PrintRunner object at 0x1125ead00&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
 <text text-anchor="start" x="59.5" y="-463.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">runs()</text>
 </a>
 </g>
@@ -21628,26 +21616,7 @@ $$</p>
 <pre>&#39; &#39;
 &#39;+\\x00&#39;
 &#39;%\\x00&#39;
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-</pre>
-</div>
-
-</div>
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>&#39;%\\x005\\x00&#39;
-&#39;%\\x00A\\x00&#39;
+&#39;%\\x005\\x00&#39;
 </pre>
 </div>
 
@@ -21667,7 +21636,8 @@ ValueError: Invalid encoding (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>&#39;%\\x00d\\x00&#39;
+<pre>&#39;%\\x00A\\x00&#39;
+&#39;%\\x00d\\x00&#39;
 &#39;%\\x009\\x00&#39;
 &#39;%1\\x00&#39;
 </pre>
@@ -21679,6 +21649,8 @@ ValueError: Invalid encoding (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 </pre>
 </div>
@@ -25422,17 +25394,17 @@ ValueError: Invalid encoding (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_54938/2536269233.py&#34;, line 4, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_67753/2536269233.py&#34;, line 4, in &lt;module&gt;
     res = _[db_select](str(query))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_54938/2687284210.py&#34;, line 3, in __call__
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_67753/2687284210.py&#34;, line 3, in __call__
     self.result = self.fn(*self.concolic(args))
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_54938/1994573112.py&#34;, line 4, in db_select
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_67753/1994573112.py&#34;, line 4, in db_select
     r = my_db.sql(s)
   File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/InformationFlow.ipynb&#34;, line 65, in sql
     return method(query[len(key):])
   File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/InformationFlow.ipynb&#34;, line 84, in do_select
     _, table = self.table(t_name)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_54938/2474817571.py&#34;, line 6, in table
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_67753/2474817571.py&#34;, line 6, in table
     raise SQLException(&#39;Table (%s) was not found&#39; % repr(t_name))
 InformationFlow.SQLException: Table (&#39;G.2fN0&#39;) was not found (expected)
 </pre>
@@ -26505,29 +26477,29 @@ Table (&#39;XT&#39;) was not found
 delete from months where (359)==7.28
 &#39;0 records were deleted&#39;
 
-select (--1.98418) from vehicles
-[1.98418, 1.98418, 1.98418]
+select (-0.8) from bC
+Table (&#39;bC&#39;) was not found
 
-select _,l&lt;P!=u!=x,495,w(l)*U-x(T) from vehicles
-Invalid WHERE (&#39;(_,l&lt;P!=u!=x,495,w(l)*U-x(T))&#39;)
+delete from months where OM(O,u)&gt;I/p-U+B/f3(c)
+Invalid WHERE (&#39;OM(O,u)&gt;I/p-U+B/f3(c)&#39;)
 
-insert into vehicles (PZe) values (&#39;&amp;&#39;,9)
-Column (&#39;PZe&#39;) was not found
+select (X(w,J,d)-C*v+_&lt;e5(B,V)) from vehicles
+Invalid WHERE (&#39;((X(w,J,d)-C*v+_&lt;e5(B,V)))&#39;)
 
-update vehicles set year=eI,p=wUr,company=q where (i/U)==M71
-Column (&#39;p&#39;) was not found
+update vehicles set b=Z,O=H,N=f where i-E&gt;a(H)*l
+Column (&#39;b&#39;) was not found
 
-insert into g39yi (company) values (7,-2)
-Table (&#39;g39yi&#39;) was not found
+select b,-0.1,p from months
+Invalid WHERE (&#39;(b,-0.1,p)&#39;)
 
-select ((X8)) from months
-Invalid WHERE (&#39;(((X8)))&#39;)
+update p set T=q,G=e where d/l(F)&lt;M(B,T)
+Table (&#39;p&#39;) was not found
 
-insert into wc (kind) values (&#39;Cj&#39;,&#39;D&#39;,-36,&#39;Q&#39;)
-Table (&#39;wc&#39;) was not found
+delete from vehicles where q6z9HO5!=w+z*V(N)*Y(q-G,q)-l(e)
+Invalid WHERE (&#39;q6z9HO5!=w+z*V(N)*Y(q-G,q)-l(e)&#39;)
 
-update months set k=SS80 where K/b/z-U-J/m(a)&gt;v(X)+q
-Column (&#39;k&#39;) was not found
+select (:&gt;z),E from months where d*_/_&lt;f*G
+Invalid WHERE (&#39;(d*_/_&lt;f*G)&#39;)
 </pre>
 </div>
 
@@ -27381,7 +27353,7 @@ unknown
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConcolicFuzzer.ipynb" target=_blank)>Last change: 2022-01-04 18:37:45+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/ConcolicFuzzer.ipynb" target=_blank)>Last change: 2022-01-04 19:20:47+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -27397,7 +27369,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/ConcolicFuzzer.html">Concolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/ConcolicFuzzer.html">https://www.fuzzingbook.org/html/ConcolicFuzzer.html</a>.  Retrieved 2022-01-04 18:37:45+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/ConcolicFuzzer.html">Concolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/ConcolicFuzzer.html">https://www.fuzzingbook.org/html/ConcolicFuzzer.html</a>.  Retrieved 2022-01-04 19:20:47+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2022:ConcolicFuzzer,
@@ -27407,9 +27379,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/html/ConcolicFuzzer.html}},
-    note = {Retrieved 2022-01-04 18:37:45+01:00},
+    note = {Retrieved 2022-01-04 19:20:47+01:00},
     url = {https://www.fuzzingbook.org/html/ConcolicFuzzer.html},
-    urldate = {2022-01-04 18:37:45+01:00}
+    urldate = {2022-01-04 19:20:47+01:00}
 }
 </pre>
 </div>
