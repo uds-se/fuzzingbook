@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-01-04 17:43:53+01:00
+# Last change: 2022-01-04 18:42:59+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -106,52 +106,43 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>     scf.add_trace(_, v)
 ' '
 '%\\x00'
-'%A\\x00'
-'%Ad\\x00'
+'%7\\x00'
 
 ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
+'%\\x000\\x00'
+'%\\x009\\x00'
+'+\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'%7e\\x00'
+'%b\\x00'
+''
+
+ValueError: Invalid encoding (expected)
+
+'%77\\x00'
+'%7E\\x00'
+'%73\\x00'
+'%7'
+'%77\\x00+\\x00'
+'%77\\x00\\x00\\x00+\\x00'
+
+IndexError: string index out of range (expected)
+
+'%1\\x00'
+'%7E\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
+'%75\\x00'
 '%\\x00C\\x00'
-'%\\x004\\x00'
-'%\\x004\\x00'
+'%73\\x00\\x00%\\x00'
 
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
-'%E\\x00'
-'%\\x00d\\x00'
-'%\\x00F\\x00'
-
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
-'%9\\x00'
-'%98\\x00'
-'%\\x00b\\x00'
-'%E6\\x00'
-
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
-'%E9\\x00'
-'%C\\x00'
-'%8\\x00'
-
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
-'%\\x00F\\x00'
-'%A6\\x00'
-'%A8\\x00'
-
-ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
@@ -180,17 +171,34 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-select ((g>r/u))U==Z))qZ(s,G,e) from My3 where (--2)==DV
-Table ('My3') was not found
+update w set kF=: where w8(y(W)R)!=:)
+Table ('w') was not found
 
-select :-b+h/M(:)+t1Q(h/:) from months
-Invalid WHERE ('(:-b+h/M(:)+t1Q(h/:))')
+delete from months where (--0==LS/N==m==l
+Invalid WHERE ('(--0==LS/N==m==l')
 
-delete from months where v-X-:*mH/g/V
-Invalid WHERE ('G!=M-f*X!=_-X-f(d)>H/g/V')
+select -6.9 from nYD38G47083
+Table ('nYD38G47083') was not found
 
+select (((r)==((L))!=q)) from bhTy where I==i*S==x==F
+Table ('bhTy') was not found
 
->>> display_class_hierarchy(ConcolicGrammarFuzzer)
+insert into vehicles (Vb,L) values (88.578)
+Column ('Vb') was not found
+
+select (C/c>B(d,n,X)),d,J,R from S
+Table ('S') was not found
+
+insert into PG58 (L) values (5)
+Table ('PG58') was not found
+
+select --932.7==R0Q from r993
+Table ('r993') was not found
+
+insert into S9Iz1C (la,B9) values ('aqu')
+Table ('S9Iz1C') was not found
+
+delete from vehicles where W/V!=A(f)+t>> display_class_hierarchy(ConcolicGrammarFuzzer)
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
@@ -210,6 +218,10 @@ if __name__ == '__main__':
     print('# Concolic Fuzzing')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('5jBfa1njy18')
 
 if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
