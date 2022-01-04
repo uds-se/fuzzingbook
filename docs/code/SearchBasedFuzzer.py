@@ -3,7 +3,7 @@
 
 # "Search-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SearchBasedFuzzer.html
-# Last change: 2021-12-13 17:12:35+01:00
+# Last change: 2022-01-04 18:48:46+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -407,7 +407,7 @@ def bad_fitness(x, y):
 if __name__ == '__main__':
     xx = np.outer(np.linspace(-10, 10, 30), np.ones(30))
     yy = xx.copy().T
-    zz = abs(xx * xx - yy * yy * (xx % 20))
+    zz = abs(xx * xx - yy * yy * (xx % 20))  # type: ignore
 
 if __name__ == '__main__':
     fig = plt.figure()

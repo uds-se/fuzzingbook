@@ -3,7 +3,7 @@
 
 # "Tracking Information Flow" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2022-01-04 17:43:09+01:00
+# Last change: 2022-01-04 18:42:03+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -108,6 +108,10 @@ if __name__ == '__main__':
     print('# Tracking Information Flow')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('MJ0VGzVbhYc')
 
 if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
