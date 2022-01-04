@@ -15659,758 +15659,13 @@ div.jp-OutputPrompt {
 <p>However, at this point, the individual methods for handling SQL statements are not yet defined. Let us do this in the next steps.</p>
 
 </div>
-</div></div></section><section>
+</div></div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Selecting-Data">Selecting Data<a class="anchor-link" href="#Selecting-Data">&#182;</a></h3><p>The <code>do_select()</code> method handles SQL <code>select</code> statements to retrieve data from a table.</p>
-
-</div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[15]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">do_select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
-        <span class="n">FROM</span><span class="p">,</span> <span class="n">WHERE</span> <span class="o">=</span> <span class="s1">&#39; from &#39;</span><span class="p">,</span> <span class="s1">&#39; where &#39;</span>
-        <span class="n">table_start</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">FROM</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">table_start</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span><span class="s1">&#39;no table specified&#39;</span><span class="p">)</span>
-
-        <span class="n">where_start</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">WHERE</span><span class="p">)</span>
-        <span class="n">select</span> <span class="o">=</span> <span class="n">query</span><span class="p">[:</span><span class="n">table_start</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">where_start</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">t_name</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">table_start</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">FROM</span><span class="p">):</span><span class="n">where_start</span><span class="p">]</span>
-            <span class="n">where</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">where_start</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">WHERE</span><span class="p">):]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">t_name</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">table_start</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">FROM</span><span class="p">):]</span>
-            <span class="n">where</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">t_name</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">where</span><span class="p">:</span>
-            <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression_clause</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">where</span><span class="p">)</span>
-            <span class="n">selected_rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">hm</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">hm</span> <span class="ow">in</span> <span class="n">selected</span> <span class="k">if</span> <span class="n">data</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">selected_rows</span> <span class="o">=</span> <span class="n">table</span>
-
-        <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression_clause</span><span class="p">(</span><span class="n">selected_rows</span><span class="p">,</span> <span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">select</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">data</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">hm</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">]</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>The <code>expression_clause()</code> method is used for two purposes:</p>
-<ol>
-<li>In the form <code>select</code> $x$, $y$, $z$ <code>from</code> $t$, it <em>evaluates</em> (and returns) the expressions $x$, $y$, $z$ in the contexts of the selected rows.</li>
-<li>If a clause <code>where</code> $p$ is given, it also evaluates $p$ in the context of the rows and includes the rows in the selection only if $p$ holds.</li>
-</ol>
-<p>To evaluate expressions like $x$, $y$, $z$ or $p$, we make use of the Python evaluation function.</p>
-
-</div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[16]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">expression_clause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="n">statement</span><span class="p">):</span>
-        <span class="n">selected</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">table</span><span class="p">):</span>
-            <span class="n">selected</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">my_eval</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="p">{},</span> <span class="n">hm</span><span class="p">),</span> <span class="n">hm</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="n">selected</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div><div class="fragment">
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Which internally calls <code>my_eval()</code> to evaluate any given statement.</p>
+<p>Here is how our database can be used.</p>
 
 </div>
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[17]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">my_eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statement</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span><span class="s1">&#39;Invalid WHERE (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">statement</span><span class="p">))</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Note:</strong> Using <code>eval()</code> here introduces some important security issues, which we will discuss later in this chapter.</p>
-
-</div>
-</div><div class="fragment">
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Here's how we can use <code>sql()</code> to issue a query.  Note that the table is yet empty.</p>
-
-</div>
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[18]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">sample_db</span><span class="p">()</span>
-<span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select year from inventory&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[18]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>[]</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[19]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">sample_db</span><span class="p">()</span>
-<span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select year from inventory where year == 2018&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[19]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>[]</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Inserting-Data">Inserting Data<a class="anchor-link" href="#Inserting-Data">&#182;</a></h3><p>The <code>do_insert()</code> method handles SQL <code>insert</code> statements.</p>
-
-</div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[20]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">do_insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
-        <span class="n">VALUES</span> <span class="o">=</span> <span class="s1">&#39; values &#39;</span>
-        <span class="n">table_end</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span>
-        <span class="n">t_name</span> <span class="o">=</span> <span class="n">query</span><span class="p">[:</span><span class="n">table_end</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">names_end</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)</span>
-        <span class="n">decls</span><span class="p">,</span> <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">t_name</span><span class="p">)</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">query</span><span class="p">[</span><span class="n">table_end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">names_end</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
-
-        <span class="c1"># verify columns exist</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">decls</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-
-        <span class="n">values_start</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">VALUES</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">values_start</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span><span class="s1">&#39;Invalid INSERT (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">query</span><span class="p">))</span>
-
-        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">query</span><span class="p">[</span><span class="n">values_start</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">VALUES</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-        <span class="p">]</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span>
-                <span class="s1">&#39;names(</span><span class="si">%s</span><span class="s1">) != values(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">names</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">values</span><span class="p">)))</span>
-
-        <span class="c1"># dict lookups happen in C code, so we cant use that</span>
-        <span class="n">kvs</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">kval</span> <span class="ow">in</span> <span class="n">decls</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
-                    <span class="n">kvs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">kval</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">kvs</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>In SQL, a column can come in any supported data type.  To ensure it is stored using the type originally declared, we need the ability to convert the values to specific types which is provided by <code>convert()</code>.</p>
-
-</div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[22]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span><span class="s1">&#39;Invalid Conversion </span><span class="si">%s</span><span class="s1">(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cast</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></div><div class="fragment">
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Here is an example of how to use the SQL <code>insert</code> command:</p>
-
-</div>
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[23]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">sample_db</span><span class="p">()</span>
-<span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;insert into inventory (year, kind, company, model) values (1997, &quot;van&quot;, &quot;Ford&quot;, &quot;E350&quot;)&#39;</span><span class="p">)</span>
-<span class="n">db</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s1">&#39;inventory&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[23]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>({&#39;year&#39;: int, &#39;kind&#39;: str, &#39;company&#39;: str, &#39;model&#39;: str},
- [{&#39;year&#39;: 1997, &#39;kind&#39;: &#39;van&#39;, &#39;company&#39;: &#39;Ford&#39;, &#39;model&#39;: &#39;E350&#39;}])</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>With the database filled, we can also run more complex queries:</p>
-
-</div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[24]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select year + 1, kind from inventory&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[24]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>[(1998, &#39;van&#39;)]</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[25]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select year, kind from inventory where year == 1997&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[25]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>[(1997, &#39;van&#39;)]</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Updating-Data">Updating Data<a class="anchor-link" href="#Updating-Data">&#182;</a></h3><p>Similarly, <code>do_update()</code> handles SQL <code>update</code> statements.</p>
-
-</div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[26]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">do_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
-        <span class="n">SET</span><span class="p">,</span> <span class="n">WHERE</span> <span class="o">=</span> <span class="s1">&#39; set &#39;</span><span class="p">,</span> <span class="s1">&#39; where &#39;</span>
-        <span class="n">table_end</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">SET</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">table_end</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span><span class="s1">&#39;Invalid UPDATE (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">query</span><span class="p">))</span>
-
-        <span class="n">set_end</span> <span class="o">=</span> <span class="n">table_end</span> <span class="o">+</span> <span class="mi">5</span>
-        <span class="n">t_name</span> <span class="o">=</span> <span class="n">query</span><span class="p">[:</span><span class="n">table_end</span><span class="p">]</span>
-        <span class="n">decls</span><span class="p">,</span> <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">t_name</span><span class="p">)</span>
-        <span class="n">names_end</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">WHERE</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">names_end</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">set_end</span><span class="p">:</span><span class="n">names_end</span><span class="p">]</span>
-            <span class="n">where</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">names_end</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">WHERE</span><span class="p">):]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">set_end</span><span class="p">:]</span>
-            <span class="n">where</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-
-        <span class="n">sets</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)]</span>
-                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
-
-        <span class="c1"># verify columns exist</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sets</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">decls</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">where</span><span class="p">:</span>
-            <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression_clause</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">where</span><span class="p">)</span>
-            <span class="n">updated</span> <span class="o">=</span> <span class="p">[</span><span class="n">hm</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">hm</span> <span class="ow">in</span> <span class="n">selected</span> <span class="k">if</span> <span class="n">d</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">updated</span> <span class="o">=</span> <span class="n">table</span>
-
-        <span class="k">for</span> <span class="n">hm</span> <span class="ow">in</span> <span class="n">updated</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sets</span><span class="p">:</span>
-                <span class="c1"># we can not do dict lookups because it is implemetned in C.</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">kval</span> <span class="ow">in</span> <span class="n">decls</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">k</span><span class="p">:</span>
-                        <span class="n">hm</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">kval</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> records were updated&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">updated</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Here is an example.  Let us first fill the database again with values:</p>
-
-</div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[27]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">sample_db</span><span class="p">()</span>
-<span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;insert into inventory (year, kind, company, model) values (1997, &quot;van&quot;, &quot;Ford&quot;, &quot;E350&quot;)&#39;</span><span class="p">)</span>
-<span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select year from inventory&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[27]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>[1997]</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div><div class="fragment">
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Now we can update things:</p>
-
-</div>
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[28]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;update inventory set year = 1998 where year == 1997&#39;</span><span class="p">)</span>
-<span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select year from inventory&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[28]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>[1998]</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[29]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="s1">&#39;inventory&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[29]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>({&#39;year&#39;: int, &#39;kind&#39;: str, &#39;company&#39;: str, &#39;model&#39;: str},
- [{&#39;year&#39;: 1998, &#39;kind&#39;: &#39;van&#39;, &#39;company&#39;: &#39;Ford&#39;, &#39;model&#39;: &#39;E350&#39;}])</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Deleting-Data">Deleting Data<a class="anchor-link" href="#Deleting-Data">&#182;</a></h3><p>Finally, SQL <code>delete</code> statements are handled by <code>do_delete()</code>.</p>
-
-</div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[30]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DB</span><span class="p">(</span><span class="n">DB</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">do_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">):</span>
-        <span class="n">WHERE</span> <span class="o">=</span> <span class="s1">&#39; where &#39;</span>
-        <span class="n">table_end</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">WHERE</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">table_end</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span><span class="s1">&#39;Invalid DELETE (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">query</span><span class="p">)</span>
-
-        <span class="n">t_name</span> <span class="o">=</span> <span class="n">query</span><span class="p">[:</span><span class="n">table_end</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">t_name</span><span class="p">)</span>
-        <span class="n">where</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="n">table_end</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">WHERE</span><span class="p">):]</span>
-        <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression_clause</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">where</span><span class="p">)</span>
-        <span class="n">deleted</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">hm</span> <span class="ow">in</span> <span class="n">selected</span> <span class="k">if</span> <span class="n">d</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">deleted</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-            <span class="k">del</span> <span class="n">table</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> records were deleted&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">deleted</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Here is an example.  Let us first fill the database again with values:</p>
-
-</div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[31]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">sample_db</span><span class="p">()</span>
-<span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;insert into inventory (year, kind, company, model) values (1997, &quot;van&quot;, &quot;Ford&quot;, &quot;E350&quot;)&#39;</span><span class="p">)</span>
-<span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select year from inventory&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[31]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>[1997]</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div><div class="fragment">
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Now we can delete data:</p>
-
-</div>
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[32]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;delete from inventory where company == &quot;Ford&quot;&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[32]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>&#39;1 records were deleted&#39;</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div><div class="fragment">
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Our database is now empty:</p>
-
-</div>
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[33]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">db</span><span class="o">.</span><span class="n">sql</span><span class="p">(</span><span class="s1">&#39;select year from inventory&#39;</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[33]:</div>
-
-
-
-
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>[]</pre>
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div></div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="All-Methods-Together">All Methods Together<a class="anchor-link" href="#All-Methods-Together">&#182;</a></h3><p>Here is how our database can be used.</p>
-
-</div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[34]:</div>
@@ -16427,7 +15682,7 @@ div.jp-OutputPrompt {
 </div></div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>Again, we first create a table in our database with the correct data types.</p>
+<p>We first create a table in our database with the correct data types.</p>
 
 </div>
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
@@ -16451,7 +15706,7 @@ div.jp-OutputPrompt {
 <p>Here is a simple convenience function to update the table using our dataset.</p>
 
 </div>
-</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[36]:</div>
@@ -16470,7 +15725,7 @@ div.jp-OutputPrompt {
 </div>
 </div>
 
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[37]:</div>
@@ -16485,7 +15740,7 @@ div.jp-OutputPrompt {
 </div>
 </div>
 
-</div></div><div class="fragment">
+</div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p>Our database now contains the same dataset as <code>VEHICLES</code> under <code>INVENTORY</code> table.</p>
@@ -16531,13 +15786,13 @@ div.jp-OutputPrompt {
 
 </div>
 
-</div></div></section><section>
+</div></div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p>Here is a sample select statement.</p>
 
 </div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[39]:</div>
@@ -16617,7 +15872,7 @@ div.jp-OutputPrompt {
 <p>We can run updates on it.</p>
 
 </div>
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[41]:</div>
@@ -16654,7 +15909,7 @@ div.jp-OutputPrompt {
 
 </div>
 
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[42]:</div>
@@ -16700,7 +15955,7 @@ div.jp-OutputPrompt {
 <p>It can even do mathematics on the fly!</p>
 
 </div>
-</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[43]:</div>
@@ -16737,7 +15992,7 @@ div.jp-OutputPrompt {
 
 </div>
 
-</div><div class="fragment">
+</div></div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p>Adding a new row to our table.</p>
@@ -16757,7 +16012,7 @@ div.jp-OutputPrompt {
 </div>
 </div>
 
-</div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[45]:</div>
@@ -16798,7 +16053,7 @@ div.jp-OutputPrompt {
 
 </div>
 
-</div></div><div class="fragment">
+</div><div class="fragment">
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p>Which we then delete.</p>
@@ -16847,119 +16102,7 @@ div.jp-OutputPrompt {
 <h3 id="Fuzzing-SQL">Fuzzing SQL<a class="anchor-link" href="#Fuzzing-SQL">&#182;</a></h3><p>To verify that everything is OK, let us fuzz. First we define our grammar.</p>
 
 </div>
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[49]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">EXPR_GRAMMAR</span><span class="p">:</span> <span class="n">Grammar</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;&lt;start&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;bexpr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;aexpr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;(&lt;expr&gt;)&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;bexpr&gt;&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">&quot;&lt;aexpr&gt;&lt;lt&gt;&lt;aexpr&gt;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;&lt;aexpr&gt;&lt;gt&gt;&lt;aexpr&gt;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;&lt;expr&gt;==&lt;expr&gt;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;&lt;expr&gt;!=&lt;expr&gt;&quot;</span><span class="p">,</span>
-    <span class="p">],</span>
-    <span class="s2">&quot;&lt;aexpr&gt;&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">&quot;&lt;aexpr&gt;+&lt;aexpr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;aexpr&gt;-&lt;aexpr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;aexpr&gt;*&lt;aexpr&gt;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;&lt;aexpr&gt;/&lt;aexpr&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;word&gt;(&lt;exprs&gt;)&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span>
-    <span class="p">],</span>
-    <span class="s2">&quot;&lt;exprs&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;expr&gt;,&lt;exprs&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;expr&gt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;lt&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;gt&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&gt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;term&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;number&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;word&gt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;number&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;integer&gt;.&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;-&lt;number&gt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;integer&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;digit&gt;&lt;integer&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;word&gt;&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;&lt;word&gt;&lt;letter&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;word&gt;&lt;digit&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;letter&gt;&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;&lt;digit&gt;&quot;</span><span class="p">:</span>
-    <span class="nb">list</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">),</span>
-    <span class="s2">&quot;&lt;letter&gt;&quot;</span><span class="p">:</span>
-    <span class="nb">list</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="s1">&#39;_:.&#39;</span><span class="p">)</span>
-<span class="p">}</span>
-
-<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[50]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">PRINTABLE_CHARS</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">printable</span> 
-                                    <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">&quot;&lt;&gt;&#39;</span><span class="se">\&quot;\t\n\r\x0b\x0c\x00</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;&lt;lt&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;gt&gt;&#39;</span><span class="p">]</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[51]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">INVENTORY_GRAMMAR</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">,</span>
-    <span class="p">{</span>
-        <span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;query&gt;&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;&lt;query&gt;&#39;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s1">&#39;select &lt;exprs&gt; from &lt;table&gt;&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;select &lt;exprs&gt; from &lt;table&gt; where &lt;bexpr&gt;&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;insert into &lt;table&gt; (&lt;names&gt;) values (&lt;literals&gt;)&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;update &lt;table&gt; set &lt;assignments&gt; where &lt;bexpr&gt;&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;delete from &lt;table&gt; where &lt;bexpr&gt;&#39;</span><span class="p">,</span>
-        <span class="p">],</span>
-        <span class="s1">&#39;&lt;table&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;word&gt;&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;&lt;names&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;column&gt;,&lt;names&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;column&gt;&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;&lt;column&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;word&gt;&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;&lt;literals&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;literal&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;literal&gt;,&lt;literals&gt;&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;&lt;literal&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;number&gt;&#39;</span><span class="p">,</span> <span class="s2">&quot;&#39;&lt;chars&gt;&#39;&quot;</span><span class="p">],</span>
-        <span class="s1">&#39;&lt;assignments&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;kvp&gt;,&lt;assignments&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;kvp&gt;&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;&lt;kvp&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;column&gt;=&lt;value&gt;&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;&lt;value&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;word&gt;&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;&lt;chars&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;&lt;char&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;char&gt;&lt;chars&gt;&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;&lt;char&gt;&#39;</span><span class="p">:</span> <span class="n">PRINTABLE_CHARS</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-    <span class="p">})</span>
-
-<span class="k">assert</span> <span class="n">is_valid_grammar</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>As can be seen from the source of our database, the functions always check whether the table name is correct. Hence, we modify the grammar to choose our particular table so that it will have a better chance of reaching deeper. We will see in the later sections how this can be done automatically.</p>
-
-</div>
-</div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[52]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">INVENTORY_GRAMMAR_F</span> <span class="o">=</span> <span class="n">extend_grammar</span><span class="p">(</span><span class="n">INVENTORY_GRAMMAR</span><span class="p">,</span> 
-                                     <span class="p">{</span><span class="s1">&#39;&lt;table&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;inventory&#39;</span><span class="p">]})</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-</div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
+</div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
 <div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[54]:</div>
@@ -17042,10 +16185,10 @@ div.jp-OutputPrompt {
 <p>Fuzzing does not seem to have triggered any crashes.  However, are crashes the only errors that we should be worried about?</p>
 
 </div>
-</div></section></section><section><section>
+</div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="The-Evil-of-Eval">The Evil of Eval<a class="anchor-link" href="#The-Evil-of-Eval">&#182;</a></h2><p>In our implementation, we have made use of <code>eval()</code> to evaluate expressions using the Python interpreter.  This allows us to unleash the full power of Python expressions within our SQL statements.</p>
+<h3 id="The-Evil-of-Eval">The Evil of Eval<a class="anchor-link" href="#The-Evil-of-Eval">&#182;</a></h3><p>In our database implementation – notably in the <code>expression_clause()</code> method -, we have made use of <code>eval()</code> to evaluate expressions using the Python interpreter.  This allows us to unleash the full power of Python expressions within our SQL statements.</p>
 
 </div>
 </div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
@@ -17977,9 +17120,9 @@ div.jp-OutputPrompt {
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3935989889.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/3935989889.py&#34;, line 2, in &lt;module&gt;
     bdb.sql(&#34;select year from INVENTORY&#34;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/995123203.py&#34;, line 3, in sql
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/995123203.py&#34;, line 3, in sql
     assert isinstance(s, tstr), &#34;Need a tainted string&#34;
 AssertionError: Need a tainted string (expected)
 </pre>
@@ -18025,9 +17168,9 @@ AssertionError: Need a tainted string (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3307042773.py&#34;, line 3, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/3307042773.py&#34;, line 3, in &lt;module&gt;
     bdb.sql(bad_user_input)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/995123203.py&#34;, line 4, in sql
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/995123203.py&#34;, line 4, in sql
     assert s.taint == &#39;TRUSTED&#39;, &#34;Need a string with trusted taint&#34;
 AssertionError: Need a string with trusted taint (expected)
 </pre>
@@ -18286,9 +17429,9 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/249000876.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/249000876.py&#34;, line 2, in &lt;module&gt;
     bdb.sql(sanitized_input)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/995123203.py&#34;, line 4, in sql
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/995123203.py&#34;, line 4, in sql
     assert s.taint == &#39;TRUSTED&#39;, &#34;Need a string with trusted taint&#34;
 AssertionError: Need a string with trusted taint (expected)
 </pre>
@@ -18742,9 +17885,9 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3747050841.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/3747050841.py&#34;, line 2, in &lt;module&gt;
     send_back(reply)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3158733057.py&#34;, line 2, in send_back
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/3158733057.py&#34;, line 2, in send_back
     assert not isinstance(s, tstr) and not s.taint == &#39;SECRET&#39;  # type: ignore
 AssertionError (expected)
 </pre>
@@ -19954,7 +19097,7 @@ AssertionError (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/2698516187.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/2698516187.py&#34;, line 2, in &lt;module&gt;
     assert hello_s.origin == [ostr.UNKNOWN_ORIGIN] * len(hello_s)
 AssertionError (expected)
 </pre>
@@ -19993,7 +19136,7 @@ AssertionError (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/1358366226.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/1358366226.py&#34;, line 2, in &lt;module&gt;
     assert all(origin == ostr.UNKNOWN_ORIGIN for origin in hello_s.origin)
 AssertionError (expected)
 </pre>
@@ -20032,7 +19175,7 @@ AssertionError (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/1577803914.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/1577803914.py&#34;, line 2, in &lt;module&gt;
     assert not any(origin &gt;= SECRET_ORIGIN for origin in hello_s.origin)
 AssertionError (expected)
 </pre>
@@ -20836,7 +19979,7 @@ Tainted[_==(7==(9)!=(---5)==1)==-8]
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/588526133.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/588526133.py&#34;, line 2, in &lt;module&gt;
     thello_stripped.origin
 AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected)
 </pre>
@@ -20937,7 +20080,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/2341342688.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_72105/2341342688.py&#34;, line 2, in &lt;module&gt;
     &#39;&#39;.join([hello, &#39; &#39;, world]).origin  # type: ignore
 AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected)
 </pre>

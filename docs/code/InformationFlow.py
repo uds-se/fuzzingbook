@@ -3,7 +3,7 @@
 
 # "Tracking Information Flow" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2022-01-02 14:47:56+01:00
+# Last change: 2022-01-04 13:26:25+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -219,10 +219,17 @@ if __name__ == '__main__':
     some_db = DB()
     some_db.sql('select year from inventory')
 
-### Selecting Data
+### Excursion: Implementing SQL Statements
 
 if __name__ == '__main__':
-    print('\n### Selecting Data')
+    print('\n### Excursion: Implementing SQL Statements')
+
+
+
+#### Selecting Data
+
+if __name__ == '__main__':
+    print('\n#### Selecting Data')
 
 
 
@@ -276,10 +283,10 @@ if __name__ == '__main__':
     db = sample_db()
     db.sql('select year from inventory where year == 2018')
 
-### Inserting Data
+#### Inserting Data
 
 if __name__ == '__main__':
-    print('\n### Inserting Data')
+    print('\n#### Inserting Data')
 
 
 
@@ -309,7 +316,7 @@ class DB(DB):
             raise SQLException(
                 'names(%s) != values(%s)' % (repr(names), repr(values)))
 
-        # dict lookups happen in C code, so we cant use that
+        # dict lookups happen in C code, so we can't use that
         kvs = {}
         for k,v in zip(names, values):
             for key,kval in decls.items():
@@ -337,10 +344,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     db.sql('select year, kind from inventory where year == 1997')
 
-### Updating Data
+#### Updating Data
 
 if __name__ == '__main__':
-    print('\n### Updating Data')
+    print('\n#### Updating Data')
 
 
 
@@ -379,7 +386,7 @@ class DB(DB):
 
         for hm in updated:
             for k, v in sets:
-                # we can not do dict lookups because it is implemetned in C.
+                # we can not do dict lookups because it is implemented in C.
                 for key, kval in decls.items():
                     if key == k:
                         hm[key] = self.convert(kval, v)
@@ -398,10 +405,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     db.table('inventory')
 
-### Deleting Data
+#### Deleting Data
 
 if __name__ == '__main__':
-    print('\n### Deleting Data')
+    print('\n#### Deleting Data')
 
 
 
@@ -433,10 +440,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     db.sql('select year from inventory')
 
-### All Methods Together
+### End of Excursion
 
 if __name__ == '__main__':
-    print('\n### All Methods Together')
+    print('\n### End of Excursion')
 
 
 
@@ -489,6 +496,13 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     print('\n### Fuzzing SQL')
+
+
+
+#### Excursion: Defining a SQL grammar
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Defining a SQL grammar')
 
 
 
@@ -555,6 +569,13 @@ assert is_valid_grammar(INVENTORY_GRAMMAR)
 INVENTORY_GRAMMAR_F = extend_grammar(INVENTORY_GRAMMAR, 
                                      {'<table>': ['inventory']})
 
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
 from .GrammarFuzzer import GrammarFuzzer
 
 if __name__ == '__main__':
@@ -573,11 +594,10 @@ if __name__ == '__main__':
             break
         print()
 
-## The Evil of Eval
-## ----------------
+### The Evil of Eval
 
 if __name__ == '__main__':
-    print('\n## The Evil of Eval')
+    print('\n### The Evil of Eval')
 
 
 
