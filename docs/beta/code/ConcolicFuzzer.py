@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-01-04 18:42:59+01:00
+# Last change: 2022-01-04 19:24:24+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -82,9 +82,6 @@ We can solve these constraints to obtain a value for the function parameters tha
 ('sat', {'s': ('\\x00%20', 'String')})
 
 The `zeval()` function also allows to pass _alternate_ or _negated_ constraints. See the chapter for examples.
-
->>> from ClassDiagram import display_class_hierarchy
->>> display_class_hierarchy(ConcolicTracer)
 ### SimpleConcolicFuzzer
 
 The constraints obtained from `ConcolicTracer` are added to the concolic fuzzer as follows:
@@ -106,50 +103,52 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>     scf.add_trace(_, v)
 ' '
 '%\\x00'
-'%7\\x00'
+'%3\\x00'
+'%\\x004\\x00'
 
 ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
 
-'%\\x000\\x00'
-'%\\x009\\x00'
+'%\\x00c\\x00'
+'%34\\x00'
 '+\\x00'
-
-ValueError: Invalid encoding (expected)
-
-'%7e\\x00'
-'%b\\x00'
-''
-
-ValueError: Invalid encoding (expected)
-
-'%77\\x00'
-'%7E\\x00'
-'%73\\x00'
-'%7'
-'%77\\x00+\\x00'
-'%77\\x00\\x00\\x00+\\x00'
-
-IndexError: string index out of range (expected)
-
-'%1\\x00'
-'%7E\\x00%\\x00'
+'%\\x006\\x00'
 
 ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
-'%75\\x00'
-'%\\x00C\\x00'
-'%73\\x00\\x00%\\x00'
+'+\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+'%34\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
+
+'%34\\x00\\x00\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00\\x00\\x00\\x00%\\x00'
+
 ValueError: Invalid encoding (expected)
+
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'%36\\x00'
+'%34\\x00\\x00\\x00\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'+'
+'%\\x00d\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'%34\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+'%3F\\x00'
 
 
 We see how the additional inputs generated explore additional paths.
-
->>> display_class_hierarchy(SimpleConcolicFuzzer)
 ### ConcolicGrammarFuzzer
 
 The `SimpleConcolicFuzzer` simply explores all paths near the original path traversed by the sample input. It uses a simple mechanism to explore the paths that are near the paths that it knows about, and other than code paths, knows nothing about the input.
@@ -171,34 +170,29 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-update w set kF=: where w8(y(W)R)!=:)
-Table ('w') was not found
+select T+M/V-o+G>N(K),Q(d),X from Tn43
+Table ('Tn43') was not found
 
-delete from months where (--0==LS/N==m==l
-Invalid WHERE ('(--0==LS/N==m==l')
+delete from vehicles where C+h*l*g-d+a+Z!=(y(.,L))
+Invalid WHERE ('C+h*l*g-d+a+Z!=(y(.,L))')
 
-select -6.9 from nYD38G47083
-Table ('nYD38G47083') was not found
+update vehicles set E=P,M=S,T=N,G=w where z-M+W==(K)
+Column ('E') was not found
 
-select (((r)==((L))!=q)) from bhTy where I==i*S==x==F
-Table ('bhTy') was not found
+update vehicles set d=v where 04.59!=D+p!=h/n+O*e!=x+K-J+z
+Column ('d') was not found
 
-insert into vehicles (Vb,L) values (88.578)
-Column ('Vb') was not found
+delete from LKP where U*u/J*v-o-F==C(o+B>x!=(e))
+Invalid WHERE ('((j!=s)-V1(K)+P)>(o+B>x!=(e))')
 
-select (C/c>B(d,n,X)),d,J,R from S
-Table ('S') was not found
+select G/x,P from months where I*O+b(P)>eX5(Q)
+Invalid WHERE ('(I*O+b(P)>eX5(Q))')
 
-insert into PG58 (L) values (5)
-Table ('PG58') was not found
+delete from vehicles where C/P-J(m)/A==g>Ne(.!=z)
+Invalid WHERE ('C/P-J(m)/A==g>Ne(.!=z)')
 
-select --932.7==R0Q from r993
-Table ('r993') was not found
-
-insert into S9Iz1C (la,B9) values ('aqu')
-Table ('S9Iz1C') was not found
-
-delete from vehicles where W/V!=A(f)+t>> display_class_hierarchy(ConcolicGrammarFuzzer)
+insert into vehicles (A) values (-6.4,'G','Fx+Y')
+Column ('A') was not found
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
