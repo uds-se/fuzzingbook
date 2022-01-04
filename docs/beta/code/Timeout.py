@@ -3,7 +3,7 @@
 
 # "Timeout" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Timeout.html
-# Last change: 2022-01-02 13:24:54+01:00
+# Last change: 2022-01-03 13:07:16+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -142,7 +142,7 @@ class SignalTimeout:
         signal.signal(signal.SIGALRM, self.old_handler)
         signal.setitimer(signal.ITIMER_REAL, self.old_timeout)
 
-    def timeout_handler(self, signum: int, frame: FrameType) -> None:
+    def timeout_handler(self, signum: int, frame: Optional[FrameType]) -> None:
         """Handle timeout (SIGALRM) signal"""
         raise TimeoutError()
 

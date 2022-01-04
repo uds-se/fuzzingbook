@@ -11934,14 +11934,10 @@ MathJax.Hub.Config({
 </ul></li><li class="has-sub"><a href="#A-Vulnerable-Database">&nbsp;&bull;&nbsp;&nbsp; A Vulnerable Database</a>
 <ul><li class="has-sub"><a href="#Representing-Tables">Representing Tables</a>
 </li><li class="has-sub"><a href="#Executing-SQL-Statements">Executing SQL Statements</a>
-</li><li class="has-sub"><a href="#Selecting-Data">Selecting Data</a>
-</li><li class="has-sub"><a href="#Inserting-Data">Inserting Data</a>
-</li><li class="has-sub"><a href="#Updating-Data">Updating Data</a>
-</li><li class="has-sub"><a href="#Deleting-Data">Deleting Data</a>
-</li><li class="has-sub"><a href="#All-Methods-Together">All Methods Together</a>
+</li><li class="has-sub"><a href="#Excursion:-Implementing-SQL-Statements">Excursion: Implementing SQL Statements</a>
 </li><li class="has-sub"><a href="#Fuzzing-SQL">Fuzzing SQL</a>
-</ul></li><li class="has-sub"><a href="#The-Evil-of-Eval">&nbsp;&bull;&nbsp;&nbsp; The Evil of Eval</a>
-</li><li class="has-sub"><a href="#Tracking-String-Taints">&nbsp;&bull;&nbsp;&nbsp; Tracking String Taints</a>
+</li><li class="has-sub"><a href="#The-Evil-of-Eval">The Evil of Eval</a>
+</ul></li><li class="has-sub"><a href="#Tracking-String-Taints">&nbsp;&bull;&nbsp;&nbsp; Tracking String Taints</a>
 <ul><li class="has-sub"><a href="#A-Class-for-Tainted-Strings">A Class for Tainted Strings</a>
 </li><li class="has-sub"><a href="#String-Operators">String Operators</a>
 </ul></li><li class="has-sub"><a href="#Tracking-Untrusted-Input">&nbsp;&bull;&nbsp;&nbsp; Tracking Untrusted Input</a>
@@ -12855,10 +12851,13 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 </div>
 </div>
 
+<details id="Excursion:-Implementing-SQL-Statements">
+<summary>Implementing SQL Statements</summary>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Selecting-Data">Selecting Data<a class="anchor-link" href="#Selecting-Data">&#182;</a></h3><p>The <code>do_select()</code> method handles SQL <code>select</code> statements to retrieve data from a table.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Selecting-Data">Selecting Data<a class="anchor-link" href="#Selecting-Data">&#182;</a></h4><p>The <code>do_select()</code> method handles SQL <code>select</code> statements to retrieve data from a table.</p>
 </div>
 </div>
 </div>
@@ -12911,7 +12910,7 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 <li>In the form <code>select</code> $x$, $y$, $z$ <code>from</code> $t$, it <em>evaluates</em> (and returns) the expressions $x$, $y$, $z$ in the contexts of the selected rows.</li>
 <li>If a clause <code>where</code> $p$ is given, it also evaluates $p$ in the context of the rows and includes the rows in the selection only if $p$ holds.</li>
 </ol>
-<p>To evaluate expressions like $x$, $y$, $z$ or $p$, we make use of the Python evaluation function.</p>
+<p>To evaluate expressions like $x$, $y$, $z$ or $p$, we make use of the Python <code>eval()</code> evaluation function.</p>
 </div>
 </div>
 </div>
@@ -13034,7 +13033,7 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Inserting-Data">Inserting Data<a class="anchor-link" href="#Inserting-Data">&#182;</a></h3><p>The <code>do_insert()</code> method handles SQL <code>insert</code> statements.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Inserting-Data">Inserting Data<a class="anchor-link" href="#Inserting-Data">&#182;</a></h4><p>The <code>do_insert()</code> method handles SQL <code>insert</code> statements.</p>
 </div>
 </div>
 </div>
@@ -13072,7 +13071,7 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
             <span class="k">raise</span> <span class="n">SQLException</span><span class="p">(</span>
                 <span class="s1">&#39;names(</span><span class="si">%s</span><span class="s1">) != values(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">names</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">values</span><span class="p">)))</span>
 
-        <span class="c1"># dict lookups happen in C code, so we cant use that</span>
+        <span class="c1"># dict lookups happen in C code, so we can&#39;t use that</span>
         <span class="n">kvs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">kval</span> <span class="ow">in</span> <span class="n">decls</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -13221,7 +13220,7 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Updating-Data">Updating Data<a class="anchor-link" href="#Updating-Data">&#182;</a></h3><p>Similarly, <code>do_update()</code> handles SQL <code>update</code> statements.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Updating-Data">Updating Data<a class="anchor-link" href="#Updating-Data">&#182;</a></h4><p>Similarly, <code>do_update()</code> handles SQL <code>update</code> statements.</p>
 </div>
 </div>
 </div>
@@ -13268,7 +13267,7 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 
         <span class="k">for</span> <span class="n">hm</span> <span class="ow">in</span> <span class="n">updated</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sets</span><span class="p">:</span>
-                <span class="c1"># we can not do dict lookups because it is implemetned in C.</span>
+                <span class="c1"># we can not do dict lookups because it is implemented in C.</span>
                 <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">kval</span> <span class="ow">in</span> <span class="n">decls</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">k</span><span class="p">:</span>
                         <span class="n">hm</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">kval</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
@@ -13375,7 +13374,7 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Deleting-Data">Deleting Data<a class="anchor-link" href="#Deleting-Data">&#182;</a></h3><p>Finally, SQL <code>delete</code> statements are handled by <code>do_delete()</code>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Deleting-Data">Deleting Data<a class="anchor-link" href="#Deleting-Data">&#182;</a></h4><p>Finally, SQL <code>delete</code> statements are handled by <code>do_delete()</code>.</p>
 </div>
 </div>
 </div>
@@ -13508,10 +13507,12 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 
 </div>
 
+</details>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="All-Methods-Together">All Methods Together<a class="anchor-link" href="#All-Methods-Together">&#182;</a></h3><p>Here is how our database can be used.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Here is how our database can be used.</p>
 </div>
 </div>
 </div>
@@ -13534,7 +13535,7 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Again, we first create a table in our database with the correct data types.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We first create a table in our database with the correct data types.</p>
 </div>
 </div>
 </div>
@@ -13869,6 +13870,9 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 </div>
 </div>
 
+<details id="Excursion:-Defining-a-SQL-grammar">
+<summary>Defining a SQL grammar</summary>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -14013,6 +14017,8 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 </div>
 </div>
 
+</details>
+
 <div class="input_code">
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -14103,7 +14109,7 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="The-Evil-of-Eval">The Evil of Eval<a class="anchor-link" href="#The-Evil-of-Eval">&#182;</a></h2><p>In our implementation, we have made use of <code>eval()</code> to evaluate expressions using the Python interpreter.  This allows us to unleash the full power of Python expressions within our SQL statements.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="The-Evil-of-Eval">The Evil of Eval<a class="anchor-link" href="#The-Evil-of-Eval">&#182;</a></h3><p>In our database implementation – notably in the <code>expression_clause()</code> method -, we have made use of <code>eval()</code> to evaluate expressions using the Python interpreter.  This allows us to unleash the full power of Python expressions within our SQL statements.</p>
 </div>
 </div>
 </div>
@@ -14930,9 +14936,9 @@ Indeed, any operation from a  <code>tstr</code> string that results in a string 
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3935989889.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/3935989889.py&#34;, line 2, in &lt;module&gt;
     bdb.sql(&#34;select year from INVENTORY&#34;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/995123203.py&#34;, line 3, in sql
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/995123203.py&#34;, line 3, in sql
     assert isinstance(s, tstr), &#34;Need a tainted string&#34;
 AssertionError: Need a tainted string (expected)
 </pre>
@@ -14969,9 +14975,9 @@ AssertionError: Need a tainted string (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3307042773.py&#34;, line 3, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/3307042773.py&#34;, line 3, in &lt;module&gt;
     bdb.sql(bad_user_input)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/995123203.py&#34;, line 4, in sql
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/995123203.py&#34;, line 4, in sql
     assert s.taint == &#39;TRUSTED&#39;, &#34;Need a string with trusted taint&#34;
 AssertionError: Need a string with trusted taint (expected)
 </pre>
@@ -15168,9 +15174,9 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/249000876.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/249000876.py&#34;, line 2, in &lt;module&gt;
     bdb.sql(sanitized_input)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/995123203.py&#34;, line 4, in sql
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/995123203.py&#34;, line 4, in sql
     assert s.taint == &#39;TRUSTED&#39;, &#34;Need a string with trusted taint&#34;
 AssertionError: Need a string with trusted taint (expected)
 </pre>
@@ -15590,9 +15596,9 @@ AssertionError: Need a string with trusted taint (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3747050841.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/3747050841.py&#34;, line 2, in &lt;module&gt;
     send_back(reply)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/3158733057.py&#34;, line 2, in send_back
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/3158733057.py&#34;, line 2, in send_back
     assert not isinstance(s, tstr) and not s.taint == &#39;SECRET&#39;  # type: ignore
 AssertionError (expected)
 </pre>
@@ -18234,7 +18240,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/2698516187.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/2698516187.py&#34;, line 2, in &lt;module&gt;
     assert hello_s.origin == [ostr.UNKNOWN_ORIGIN] * len(hello_s)
 AssertionError (expected)
 </pre>
@@ -18261,7 +18267,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/1358366226.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/1358366226.py&#34;, line 2, in &lt;module&gt;
     assert all(origin == ostr.UNKNOWN_ORIGIN for origin in hello_s.origin)
 AssertionError (expected)
 </pre>
@@ -18288,7 +18294,7 @@ AssertionError (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/1577803914.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/1577803914.py&#34;, line 2, in &lt;module&gt;
     assert not any(origin &gt;= SECRET_ORIGIN for origin in hello_s.origin)
 AssertionError (expected)
 </pre>
@@ -19101,7 +19107,7 @@ Tainted[_==(7==(9)!=(---5)==1)==-8]
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/588526133.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/588526133.py&#34;, line 2, in &lt;module&gt;
     thello_stripped.origin
 AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected)
 </pre>
@@ -19188,7 +19194,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_80590/2341342688.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_14641/2341342688.py&#34;, line 2, in &lt;module&gt;
     &#39;&#39;.join([hello, &#39; &#39;, world]).origin  # type: ignore
 AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected)
 </pre>
@@ -19386,7 +19392,7 @@ AttributeError: &#39;str&#39; object has no attribute &#39;origin&#39; (expected
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2022-01-02 14:42:35+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/InformationFlow.ipynb" target=_blank)>Last change: 2022-01-04 16:09:57+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -19402,7 +19408,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">Tracking Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">https://www.fuzzingbook.org/beta/html/InformationFlow.html</a>.  Retrieved 2022-01-02 14:42:35+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">Tracking Information Flow</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/InformationFlow.html">https://www.fuzzingbook.org/beta/html/InformationFlow.html</a>.  Retrieved 2022-01-04 16:09:57+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2022:InformationFlow,
@@ -19412,9 +19418,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/InformationFlow.html}},
-    note = {Retrieved 2022-01-02 14:42:35+01:00},
+    note = {Retrieved 2022-01-04 16:09:57+01:00},
     url = {https://www.fuzzingbook.org/beta/html/InformationFlow.html},
-    urldate = {2022-01-02 14:42:35+01:00}
+    urldate = {2022-01-04 16:09:57+01:00}
 }
 </pre>
 </div>

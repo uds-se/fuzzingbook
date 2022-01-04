@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-01-02 16:44:08+01:00
+# Last change: 2022-01-04 16:15:19+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -53,18 +53,14 @@ At the heart of both fuzzers lies the concept of a _concolic tracer_, capturing 
 >>> with ConcolicTracer() as _:
 >>>     _[cgi_decode]('a%20d')
 
-Once executed, we can retrieve the symbolic variables and associated path constraints in the `context` attribute. This is a pair of two elements:
+Once executed, we can retrieve the symbolic variables in the `decls` attribute. This is a mapping of symbolic variables to types.
 
->>> declarations, path = _.context
-
-In the context, `declarations` is a mapping of symbolic variables to _types_:
-
->>> declarations
+>>> _.decls
 {'cgi_decode_s_str_1': 'String'}
 
-whereas `path` is a list of constraints encountered during execution:
+The extracted path conditions can be found in the `path` attribute:
 
->>> path
+>>> _.path
 [Not(str.substr(cgi_decode_s_str_1, 0, 1) == "+"),
  Not(str.substr(cgi_decode_s_str_1, 0, 1) == "%"),
  Not(str.substr(cgi_decode_s_str_1, 1, 1) == "+"),
@@ -76,12 +72,16 @@ whereas `path` is a list of constraints encountered during execution:
  Not(str.substr(cgi_decode_s_str_1, 4, 1) == "+"),
  Not(str.substr(cgi_decode_s_str_1, 4, 1) == "%")]
 
+The `context` attribute holds a pair of `decls` and `path` attributes; this is useful for passing it into the `ConcolicTracer` constructor.
+
+>>> assert _.context == (_.decls, _.path)
+
 We can solve these constraints to obtain a value for the function parameters that follow the same path as the original (traced) invocation:
 
 >>> _.zeval()
 ('sat', {'s': ('\\x00%20', 'String')})
 
-_Negating_ some of these constraints will yield different paths taken, and thus greater code coverage. This is what our concolic fuzzers do.
+The `zeval()` function also allows to pass _alternate_ or _negated_ constraints. See the chapter for examples.
 
 >>> from ClassDiagram import display_class_hierarchy
 >>> display_class_hierarchy(ConcolicTracer)
@@ -105,49 +105,51 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>             _[cgi_decode](v)
 >>>     scf.add_trace(_, v)
 ' '
-'+\\x00'
-'++\\x00'
-'+\\x00+\\x00'
-'+\\x00\\x00+\\x00'
-'+\\x00\\x00\\x00%\\x00'
+'%\\x00'
+'%2\\x00'
+'%\\x004\\x00'
 
 ValueError: Invalid encoding (expected)
-
-'+'
-'+'
-'+\\x00\\x00\\x00\\x00\\x00%\\x00'
-
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+'%\\x00B\\x00'
+'%e\\x00'
+'%d\\x00'
+'%e4\\x00'
 
 ValueError: Invalid encoding (expected)
-
-'+\\x80@@!+%\\x00'
-
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
-'+\\x03@\\x04\\x01++\\x00'
-'+\\x00\\x00\\x00\\x00%\\x00'
-'++\\x00\\x00+\\x00'
+'%dc\\x00'
+'%A\\x00'
+'%Ae\\x00'
 
 ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+IndexError: string index out of range (expected)
 
-'++'
-'+\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
-'++\\x00\\x00\\x00%\\x00'
+'%d'
+'%2d\\x00'
+'%\\x008\\x00'
+'%ed\\x00'
 
 ValueError: Invalid encoding (expected)
-
-'+\\x00\\x00\\x00\\x00%\\x00'
-
+ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
-'++\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+'%\\x00d\\x00'
+'%22\\x00'
+'%e\\x00'
+'%4\\x00'
+'%e5\\x00'
 
 ValueError: Invalid encoding (expected)
-
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
 
 
 We see how the additional inputs generated explore additional paths.
@@ -174,17 +176,29 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-select a from z where ((l))==(-66)*--69.9
-Table ('z') was not found
+delete from CzX1u where ((6))!=(G)==Y*o/y(g)-c+f*Z/g==xg
+Table ('CzX1u') was not found
 
-update vehicles set F3=e where H+Q/W-R!=-4==Z(y)*FN-l,i!=f,z,U,T from vehicles
-Invalid WHERE ('(m+U+K>N-l,i!=f,z,U,T)')
+update w set M=g,k=y,X=z,j=z where D>F!=(L!=z)
+Table ('w') was not found
 
-delete from H3vM81 where z!=Z>v-J(Y)*(t)-.
-Table ('H3vM81') was not found
+delete from months where u(Q,i)/o.((67),Q(H)*_*f*i)*N(V==t,((e)),q)
+Invalid WHERE ('R>.((67),Q(H)*_*f*i)*N(V==t,((e)),q)')
 
-update months set Y=y where ((2.7))==f+z-l*YP(v))
-Table ('u') was not found
+insert into vehicles (n,v5_) values (8,'TO:')
+Column ('n') was not found
+
+select LL from n
+Table ('n') was not found
+
+insert into vehicles (AoWj) values ('H')
+Column ('AoWj') was not found
+
+delete from Z37 where p((K))*x>:/n>Q+U*Z/H*U
+Table ('Z37') was not found
+
+select v(g,P,q)+G*r/D/v-V+g-f!=j from vehicles
+Invalid WHERE ('(v(g,P,q)+G*r/D/v-V+g-f!=j)')
 
 
 >>> display_class_hierarchy(ConcolicGrammarFuzzer)
@@ -292,7 +306,7 @@ if __name__ == '__main__':
     src[1]
 
 if __name__ == '__main__':
-    src[2], src[3], src[4]
+    src[2], src[3], src[4], src[5]
 
 ## Solving Constraints
 ## -------------------
@@ -343,13 +357,13 @@ if __name__ == '__main__':
     to_graph(gen_cfg(inspect.getsource(factorial)), arcs=cov.arcs())
 
 if __name__ == '__main__':
-    src[4]
+    src[5]
 
 if __name__ == '__main__':
     predicates = [z3.Not(zn < 0), z3.Not(zn == 0)]
 
 if __name__ == '__main__':
-    src[6]
+    src[8]
 
 if __name__ == '__main__':
     predicates = [z3.Not(zn < 0), z3.Not(zn == 0), z3.Not(zn == 1)]
@@ -408,7 +422,10 @@ if __name__ == '__main__':
         _[factorial](1)
 
 if __name__ == '__main__':
-    _.context
+    _.decls
+
+if __name__ == '__main__':
+    _.path
 
 #### Concolic Proxy Objects
 
@@ -417,10 +434,10 @@ if __name__ == '__main__':
 
 
 
-def zproxy_create(cls, sname, z3var, context, zn, v=None):
-    zv = cls(context, z3var(zn), v)
-    context[0][zn] = sname
-    return zv
+def zproxy_create(cls, z_type, z3var, context, z_name, v=None):
+    z_value = cls(context, z3var(z_name), v)
+    context[0][z_name] = z_type  # add to decls
+    return z_value
 
 #### A Proxy Class for Booleans
 
@@ -431,19 +448,30 @@ if __name__ == '__main__':
 
 class zbool:
     @classmethod
-    def create(cls, context, zn, v):
-        return zproxy_create(cls, 'Bool', z3.Bool, context, zn, v)
+    def create(cls, context, z_name, v):
+        return zproxy_create(cls, 'Bool', z3.Bool, context, z_name, v)
 
     def __init__(self, context, z, v=None):
-        self.context, self.z, self.v = context, z, v
+        self.context = context
+        self.z = z
+        self.v = v
         self.decl, self.path = self.context
 
 if __name__ == '__main__':
     with ConcolicTracer() as _:
-        za, zb = z3.Ints('a b')
         val = zbool.create(_.context, 'my_bool_arg', True)
-        print(val.z, val.v)
+
+if __name__ == '__main__':
+    val.z
+
+if __name__ == '__main__':
+    val.v
+
+if __name__ == '__main__':
     _.context
+
+if __name__ == '__main__':
+    val.context
 
 ##### Negation of Encoded formula
 
@@ -459,7 +487,14 @@ class zbool(zbool):
 if __name__ == '__main__':
     with ConcolicTracer() as _:
         val = zbool.create(_.context, 'my_bool_arg', True).__not__()
-        print(val.z, val.v)
+
+if __name__ == '__main__':
+    val.z
+
+if __name__ == '__main__':
+    val.v
+
+if __name__ == '__main__':
     _.context
 
 ##### Registering Predicates on Conditionals
@@ -517,7 +552,14 @@ class zint(zint):
 if __name__ == '__main__':
     with ConcolicTracer() as _:
         val = zint.create(_.context, 'int_arg', 0)
-        print(val.z, val.v)
+
+if __name__ == '__main__':
+    val.z
+
+if __name__ == '__main__':
+    val.v
+
+if __name__ == '__main__':
     _.context
 
 class zint(zint):
@@ -527,8 +569,12 @@ class zint(zint):
 if __name__ == '__main__':
     with ConcolicTracer() as _:
         val = zint.create(_.context, 'int_arg', 0)
-        print(val._zv(0))
-        print(val._zv(val))
+
+if __name__ == '__main__':
+    val._zv(0)
+
+if __name__ == '__main__':
+    val._zv(val)
 
 ##### Equality between Integers
 
@@ -870,12 +916,31 @@ if __name__ == '__main__':
 
 
 class ConcolicTracer(ConcolicTracer):
-    def zeval(self, python=False, log=False):
-        """Evaluate predicates in given context.
+    def zeval(self, predicates=None, *,python=False, log=False):
+        """Evaluate `predicates` in current context.
         - If `python` is set, use the z3 Python API; otherwise use z3 standalone.
-        - If `log` is set, show input to Z3.
+        - If `log` is set, show input to z3.
+        Return a pair (`result`, `solution`) where
+        - `result` is either `'sat'` (satisfiable); then 
+           solution` is a mapping of variables to (value, type) pairs; or
+        - `result` is not `'sat'`, indicating an error; then `solution` is `None`
         """
-        r, sol = (zeval_py if python else zeval_smt)(self.path, self, log)
+        if predicates is None:
+            path = self.path
+        else:
+            path = list(self.path)
+            for i in sorted(predicates):
+                if len(path) > i:
+                    path[i] = predicates[i]
+                else:
+                    path.append(predicates[i])
+        if log:
+            print('Predicates in path:')
+            for i,p in enumerate(path):
+                print(i, p)
+            print()
+
+        r, sol = (zeval_py if python else zeval_smt)(path, self, log)
         if r == 'sat':
             return r, {k: sol.get(self.fn_args[k], None) for k in self.fn_args}
         else:
@@ -1562,19 +1627,127 @@ if __name__ == '__main__':
         print(_[triangle](1, 2, 3))
 
 if __name__ == '__main__':
+    _.decls
+
+if __name__ == '__main__':
     _.path
 
 if __name__ == '__main__':
     _.zeval()
 
 if __name__ == '__main__':
-    za, zb, zc = [z3.Int(s) for s in _.context[0].keys()]
+    triangle(0, -2, -1)
+
+if __name__ == '__main__':
+    za, zb, zc = [z3.Int(s) for s in _.decls.keys()]
+
+if __name__ == '__main__':
+    za, zb, zc
 
 if __name__ == '__main__':
     _.zeval({1: zb == zc})
 
 if __name__ == '__main__':
     triangle(1, 0, 1)
+
+### Example: Decoding CGI Strings
+
+if __name__ == '__main__':
+    print('\n### Example: Decoding CGI Strings')
+
+
+
+def cgi_decode(s):
+    """Decode the CGI-encoded string `s`:
+       * replace "+" by " "
+       * replace "%xx" by the character with hex number xx.
+       Return the decoded string.  Raise `ValueError` for invalid inputs."""
+
+    # Mapping of hex digits to their integer values
+    hex_values = {
+        '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
+        '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+        'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
+        'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
+    }
+
+    t = ''
+    i = 0
+    while i < len(s):
+        c = s[i]
+        if c == '+':
+            t += ' '
+        elif c == '%':
+            digit_high, digit_low = s[i + 1], s[i + 2]
+            i = i + 2
+            found = 0
+            v = 0
+            for key in hex_values:
+                if key == digit_high:
+                    found = found + 1
+                    v = hex_values[key] * 16
+                    break
+            for key in hex_values:
+                if key == digit_low:
+                    found = found + 1
+                    v = v + hex_values[key]
+                    break
+            if found == 2:
+                if v >= 128:
+                    # z3.StringVal(urllib.parse.unquote('%80')) <-- bug in z3
+                    raise ValueError("Invalid encoding")
+                t = t + chr(v)
+            else:
+                raise ValueError("Invalid encoding")
+        else:
+            t = t + c
+        i = i + 1
+    return t
+
+if __name__ == '__main__':
+    with ConcolicTracer() as _:
+        _[cgi_decode]('a%20d')
+
+if __name__ == '__main__':
+    _.decls
+
+if __name__ == '__main__':
+    _.path
+
+if __name__ == '__main__':
+    assert _.context == (_.decls, _.path)
+
+if __name__ == '__main__':
+    _.zeval()
+
+if __name__ == '__main__':
+    _.path[0]
+
+if __name__ == '__main__':
+    zs = z3.String('cgi_decode_s_str_1')
+
+if __name__ == '__main__':
+    z3.SubString(zs, 0, 1) == z3.StringVal('a')
+
+if __name__ == '__main__':
+    (result, new_vars) = _.zeval({0: z3.SubString(zs, 0, 1) == z3.StringVal('+')})
+    assert result == 'sat'
+
+if __name__ == '__main__':
+    new_vars
+
+if __name__ == '__main__':
+    (new_s, new_s_type) = new_vars['s']
+
+if __name__ == '__main__':
+    new_s
+
+if __name__ == '__main__':
+    with ConcolicTracer() as _:
+        _[cgi_decode](new_s)
+
+if __name__ == '__main__':
+    _.path
 
 ### Example: Round
 
@@ -2058,14 +2231,14 @@ class SimpleConcolicFuzzer(SimpleConcolicFuzzer):
 
             val = list(v.values())[0]
             elt, typ = val
-            if len(elt) == 2 and elt[0] == '-':  # negative numbers are [-, x]
-                elt = '-%s' % elt[1]
 
             # make sure that we do not retry the tried paths
             # The tracer we add here is incomplete. This gets updated when
             # the add_trace is called from the concolic fuzzer context.
             # self.add_trace(ConcolicTracer((last.decls, path)), elt)
             if typ == 'Int':
+                if len(elt) == 2 and elt[0] == '-':  # negative numbers are [-, x]
+                    return -1*int(elt[1])
                 return int(elt)
             elif typ == 'String':
                 return elt
@@ -2078,53 +2251,6 @@ if __name__ == '__main__':
     print('\n### End of Excursion')
 
 
-
-def cgi_decode(s):
-    """Decode the CGI-encoded string `s`:
-       * replace "+" by " "
-       * replace "%xx" by the character with hex number xx.
-       Return the decoded string.  Raise `ValueError` for invalid inputs."""
-
-    # Mapping of hex digits to their integer values
-    hex_values = {
-        '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
-        '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
-        'a': 10, 'b': 11, 'c': 12, 'd': 13, 'e': 14, 'f': 15,
-        'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15,
-    }
-
-    t = ''
-    i = 0
-    while i < len(s):
-        c = s[i]
-        if c == '+':
-            t += ' '
-        elif c == '%':
-            digit_high, digit_low = s[i + 1], s[i + 2]
-            i = i + 2
-            found = 0
-            v = 0
-            for key in hex_values:
-                if key == digit_high:
-                    found = found + 1
-                    v = hex_values[key] * 16
-                    break
-            for key in hex_values:
-                if key == digit_low:
-                    found = found + 1
-                    v = v + hex_values[key]
-                    break
-            if found == 2:
-                if v >= 128:
-                    # z3.StringVal(urllib.parse.unquote('%80')) <-- bug in z3
-                    raise ValueError("Invalid encoding")
-                t = t + chr(v)
-            else:
-                raise ValueError("Invalid encoding")
-        else:
-            t = t + c
-        i = i + 1
-    return t
 
 if __name__ == '__main__':
     with ConcolicTracer() as _:
@@ -2139,7 +2265,9 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     v = scf.fuzz()
-    v
+    while not v:
+        v = scf.fuzz()
+    print(v)
 
 if __name__ == '__main__':
     with ExpectError():
@@ -2504,13 +2632,13 @@ if __name__ == '__main__':
         _[cgi_decode]('a%20d')
 
 if __name__ == '__main__':
-    declarations, path = _.context
+    _.decls
 
 if __name__ == '__main__':
-    declarations
+    _.path
 
 if __name__ == '__main__':
-    path
+    assert _.context == (_.decls, _.path)
 
 if __name__ == '__main__':
     _.zeval()
