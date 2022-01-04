@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-01-04 16:05:33+01:00
+# Last change: 2022-01-04 16:15:19+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -106,51 +106,49 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>     scf.add_trace(_, v)
 ' '
 '%\\x00'
-'%3\\x00'
-
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
+'%2\\x00'
 '%\\x004\\x00'
-'%\\x00c\\x00'
-'%34\\x00'
 
 ValueError: Invalid encoding (expected)
-
-'+\\x00'
-'%\\x006\\x00'
-'+\\x00\\x00\\x00+\\x00'
-
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+'%\\x00B\\x00'
+'%e\\x00'
+'%d\\x00'
+'%e4\\x00'
 
 ValueError: Invalid encoding (expected)
-
-'%34\\x00\\x00%\\x00'
-
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
-'%34\\x00\\x00\\x00\\x00\\x00+\\x00'
-'+\\x00\\x00\\x00\\x00\\x00%\\x00'
+'%dc\\x00'
+'%A\\x00'
+'%Ae\\x00'
 
 ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+IndexError: string index out of range (expected)
 
-'%36\\x00'
-'%34\\x00\\x00\\x00\\x00+\\x00'
+'%d'
+'%2d\\x00'
+'%\\x008\\x00'
+'%ed\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
 '%\\x00d\\x00'
+'%22\\x00'
+'%e\\x00'
+'%4\\x00'
+'%e5\\x00'
 
 ValueError: Invalid encoding (expected)
-
-'%3F\\x00'
-'%E\\x00'
-
 ValueError: Invalid encoding (expected)
-
-'%3e\\x00'
-'%f\\x00'
-
 ValueError: Invalid encoding (expected)
 
 
@@ -178,29 +176,29 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-select U+W/L/T-k+k(I)-A>C(v!=E) from TnrL
-Table ('TnrL') was not found
+delete from CzX1u where ((6))!=(G)==Y*o/y(g)-c+f*Z/g==xg
+Table ('CzX1u') was not found
 
-select S09KL0 from n
+update w set M=g,k=y,X=z,j=z where D>F!=(L!=z)
+Table ('w') was not found
+
+delete from months where u(Q,i)/o.((67),Q(H)*_*f*i)*N(V==t,((e)),q)
+Invalid WHERE ('R>.((67),Q(H)*_*f*i)*N(V==t,((e)),q)')
+
+insert into vehicles (n,v5_) values (8,'TO:')
+Column ('n') was not found
+
+select LL from n
 Table ('n') was not found
 
-select 6.5 from vehicles where a+x/q/x-X+Vp,p)
-Invalid WHERE ('(a+x/q/x-X+Vp,p))')
+insert into vehicles (AoWj) values ('H')
+Column ('AoWj') was not found
 
-select ((-55348)) from months
-[-55348, -55348, -55348, -55348, -55348, -55348, -55348, -55348, -55348, -55348, -55348, -55348]
+delete from Z37 where p((K))*x>:/n>Q+U*Z/H*U
+Table ('Z37') was not found
 
-update months set J=T,W=B where U2(O,K)>g-B-G
-Column ('J') was not found
-
-select (H)==X!=A,S==I,(U) from vehicles where c-e-n*s!=o==D/Y
-Invalid WHERE ('(c-e-n*s!=o==D/Y)')
-
-update vehicles set m=W,w=s where j*Sp
-Table ('e25') was not found
-
-insert into vehicles (og7X5f0Z1G,s) values (-49,4.02)
-Column ('og7X5f0Z1G') was not found
+select v(g,P,q)+G*r/D/v-V+g-f!=j from vehicles
+Invalid WHERE ('(v(g,P,q)+G*r/D/v-V+g-f!=j)')
 
 
 >>> display_class_hierarchy(ConcolicGrammarFuzzer)
