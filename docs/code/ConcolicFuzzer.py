@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-01-04 19:24:24+01:00
+# Last change: 2022-01-05 18:28:38+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -102,50 +102,56 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>             _[cgi_decode](v)
 >>>     scf.add_trace(_, v)
 ' '
-'%\\x00'
-'%3\\x00'
-'%\\x004\\x00'
-
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
-'%\\x00c\\x00'
-'%34\\x00'
 '+\\x00'
-'%\\x006\\x00'
+'++\\x00'
+'+++\\x00'
+'+\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
 ValueError: Invalid encoding (expected)
 
-'+\\x00\\x00\\x00+\\x00'
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
-'%34\\x00\\x00%\\x00'
+'+\\x00\\x00%\\x00'
+'+\\x81\\x04\\x80!%C\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'%34\\x00\\x00\\x00\\x00\\x00+\\x00'
-'+\\x00\\x00\\x00\\x00\\x00%\\x00'
+'+\\x81\\x04\\x80!%8\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+'++%\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'%36\\x00'
-'%34\\x00\\x00\\x00\\x00%\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+'+\\x81\\x04\\x80!%6\\x00'
 
 ValueError: Invalid encoding (expected)
-
-'+'
-'%\\x00d\\x00'
-
 ValueError: Invalid encoding (expected)
 
-'%34\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
-'%3F\\x00'
+'++\\x00\\x00%\\x00'
+'+++\\x00+\\x00'
+'+\\x81\\x04\\x80!%8\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
+'+\\x81\\x04\\x80!%1\\x00'
+'+\\x81\\x04\\x80!%A\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
+'+\\x81\\x04\\x80!%2\\x00'
+'++%\\x008\\x00'
+'++\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
+'+\\x81\\x04\\x80!%D\\x00'
+
+ValueError: Invalid encoding (expected)
 
 
 We see how the additional inputs generated explore additional paths.
@@ -170,29 +176,20 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-select T+M/V-o+G>N(K),Q(d),X from Tn43
-Table ('Tn43') was not found
+update h4 set J=y9z where a/T-P-k(S)K(R)-t/c-D
+Invalid WHERE ('(3>K(R)-t/c-D)')
 
-delete from vehicles where C+h*l*g-d+a+Z!=(y(.,L))
-Invalid WHERE ('C+h*l*g-d+a+Z!=(y(.,L))')
+update months set e=O,a=W,W=t where (-4.52)==2.7
+Column ('e') was not found
 
-update vehicles set E=P,M=S,T=N,G=w where z-M+W==(K)
-Column ('E') was not found
+select S!=I from :x21 where I*Z>X==(g(S,B))
+Table (':x21') was not found
 
-update vehicles set d=v where 04.59!=D+p!=h/n+O*e!=x+K-J+z
-Column ('d') was not found
+update w85 set M=i,L=s where ((N+z-x/:+t))==c+.
+Table ('w85') was not found
 
-delete from LKP where U*u/J*v-o-F==C(o+B>x!=(e))
-Invalid WHERE ('((j!=s)-V1(K)+P)>(o+B>x!=(e))')
-
-select G/x,P from months where I*O+b(P)>eX5(Q)
-Invalid WHERE ('(I*O+b(P)>eX5(Q))')
-
-delete from vehicles where C/P-J(m)/A==g>Ne(.!=z)
-Invalid WHERE ('C/P-J(m)/A==g>Ne(.!=z)')
-
-insert into vehicles (A) values (-6.4,'G','Fx+Y')
-Column ('A') was not found
+select r==C>u/h*x/Q,T,(a),wu/h*x/Q,T,(a),wG(6.14)
+Invalid WHERE ('((j))/c-O/.*B+u>G(6.14)')
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
@@ -1013,19 +1010,23 @@ if __name__ == '__main__':
     parse_sexp('abcd (hello 123 (world "hello world"))')
 
 import tempfile
+import os
 
 def zeval_smt(path, cc, log):
     s = cc.smt_expr(True, True, path)
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.smt') as f:
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.smt', delete=False) as f:
         f.write(s)
         f.write("\n(check-sat)")
         f.write("\n(get-model)")
         f.flush()
 
-        if log:
+        if log: 
             print(s, '(check-sat)', '(get-model)', sep='\n')
-        output = subprocess.getoutput("z3 -t:60 " + f.name)
+
+    output = subprocess.getoutput("z3 -t:60 " + f.name)
+    
+    os.remove(f.name)
 
     if log:
         print(output)
