@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-01-05 18:28:38+01:00
+# Last change: 2022-01-07 16:07:22+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -103,53 +103,42 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>     scf.add_trace(_, v)
 ' '
 '+\\x00'
-'++\\x00'
-'+++\\x00'
-'+\\x00%\\x00'
-
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
 '+\\x00\\x00%\\x00'
-'+\\x81\\x04\\x80!%C\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'+\\x81\\x04\\x80!%8\\x00'
+'+\\x00\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'++%\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
 
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'+\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00\\x00\\x00\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'+\\x00\\x00\\x00\\x00\\x00+\\x00'
 '+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
-'+\\x81\\x04\\x80!%6\\x00'
+'+\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
 
-'++\\x00\\x00%\\x00'
-'+++\\x00+\\x00'
-'+\\x81\\x04\\x80!%8\\x00'
-
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
-'+\\x81\\x04\\x80!%1\\x00'
-'+\\x81\\x04\\x80!%A\\x00'
-
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
-'+\\x81\\x04\\x80!%2\\x00'
-'++%\\x008\\x00'
-'++\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
-
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
-'+\\x81\\x04\\x80!%D\\x00'
+'+'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00+\\x00'
+'+'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
 
@@ -176,20 +165,20 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-update h4 set J=y9z where a/T-P-k(S)K(R)-t/c-D
-Invalid WHERE ('(3>K(R)-t/c-D)')
+update bzT set y=r2_ where e*bj+G/.6(d)
+Table ('P') was not found
 
-update months set e=O,a=W,W=t where (-4.52)==2.7
-Column ('e') was not found
+update months set n=hX,t=U where x*k((n))*S-A
+Invalid WHERE ('(bt7(N)-Q>((n))*S-A)')
 
-select S!=I from :x21 where I*Z>X==(g(S,B))
-Table (':x21') was not found
+insert into months (Ah10z4) values (-6.1,-3311,57415.9,--6)
+Column ('Ah10z4') was not found
 
-update w85 set M=i,L=s where ((N+z-x/:+t))==c+.
-Table ('w85') was not found
+select o_>l(P!=y,j_>l(P!=y,jO+m*l-Z/z
+Table ('l') was not found
 
-select r==C>u/h*x/Q,T,(a),wu/h*x/Q,T,(a),wG(6.14)
-Invalid WHERE ('((j))/c-O/.*B+u>G(6.14)')
+insert into U8Dlj (name) values (6)
+Table ('U8Dlj') was not found
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
@@ -1012,6 +1001,8 @@ if __name__ == '__main__':
 import tempfile
 import os
 
+Z3_OPTIONS = '-t:60'  # Z3 options - a soft timeout of 60 milliseconds
+
 def zeval_smt(path, cc, log):
     s = cc.smt_expr(True, True, path)
 
@@ -1021,11 +1012,11 @@ def zeval_smt(path, cc, log):
         f.write("\n(get-model)")
         f.flush()
 
-        if log: 
+        if log:
             print(s, '(check-sat)', '(get-model)', sep='\n')
 
-    output = subprocess.getoutput("z3 -t:60 " + f.name)
-    
+    output = subprocess.getoutput(f"z3 {Z3_OPTIONS} {f.name}")
+
     os.remove(f.name)
 
     if log:
@@ -1038,10 +1029,12 @@ def zeval_smt(path, cc, log):
     kind = o[0]
     if kind == 'unknown':
         return 'Gave up', None
+    elif kind == 'timeout':
+        return 'Timeout', None
     elif kind == 'unsat':
         return 'No Solutions', {}
 
-    assert kind == 'sat'
+    assert kind == 'sat', kind
     assert o[1][0] == 'model'
     return 'sat', {i[1]: (i[-1], i[-2]) for i in o[1][1:]}
 
@@ -1970,10 +1963,10 @@ class PlausibleChild(PlausibleChild):
             return self.parent.info['cc']
         # if there is a plausible child node, it means that there can
         # be at most one child.
-        sibilings = list(self.parent.children.values())
-        assert len(sibilings) == 1
+        siblings = list(self.parent.children.values())
+        assert len(siblings) == 1
         # We expect at the other child to have cc
-        return sibilings[0].info['cc']
+        return siblings[0].info['cc']
 
 class PlausibleChild(PlausibleChild):
     def path_expression(self):
