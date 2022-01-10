@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2022-01-07 16:07:58+01:00
+# Last change: 2022-01-10 11:00:19+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,7 +42,7 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/SymbolicFuzzer.html
 
-This chapter provides an implementation of a symbolic fuzzing engine `AdvancedSymbolicFuzzer`. The fuzzer uses symbolic execution to exhaustively explore paths in the program to a limited depth, and generate inputs that will reach these paths. Given a program to explore (`gcd` here), the fuzzer can be used as follows:
+This chapter provides an implementation of a symbolic fuzzing engine `AdvancedSymbolicFuzzer`. The fuzzer uses symbolic execution to exhaustively explore paths in the program to a limited depth, and generate inputs that will reach these paths. Given a function to explore (say, `gcd()`), the fuzzer can be used as follows:
 
 >>> gcd_fuzzer = AdvancedSymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
 >>> for i in range(10):
@@ -56,8 +56,8 @@ This chapter provides an implementation of a symbolic fuzzing engine `AdvancedSy
 {'a': 0, 'b': -1}
 {'a': 15, 'b': 8}
 {'a': -2, 'b': 0}
-{'a': 9533, 'b': -9533}
-{'a': 12, 'b': 11}
+{'a': 2, 'b': -2}
+{'a': 17, 'b': 9}
 
 
 
@@ -306,16 +306,16 @@ if __name__ == '__main__':
     (x,), r = get_symbolicparams(abs_value)
 
 if __name__ == '__main__':
-    l2_F = x < 0
-    l2_T = z3.Not(x < 0)
+    l2_T = x < 0
+    l2_F = z3.Not(x < 0)
 
 if __name__ == '__main__':
     v_0 = z3.Real('v_0')
-    l3 = z3.And(l2_F, v_0 == -x)
+    l3 = z3.And(l2_T, v_0 == -x)
 
 if __name__ == '__main__':
     v_1 = z3.Real('v_1')
-    l5 = z3.And(l2_T, v_1 == x)
+    l5 = z3.And(l2_F, v_1 == x)
 
 if __name__ == '__main__':
     v = z3.Real('v')
@@ -353,6 +353,7 @@ if __name__ == '__main__':
             break
         s.add(z3.Not(x == x_val))
 
+if __name__ == '__main__':
     s
 
 if __name__ == '__main__':
@@ -393,7 +394,29 @@ def prefix_vars(astnode, prefix):
         return astnode
 
 if __name__ == '__main__':
-    ast.parse('x+y')
+    xy_ast = ast.parse('x+y')
+
+from .bookutils import rich_output
+
+if __name__ == '__main__':
+    if rich_output():
+        # Normally, this will do
+        from showast import show_ast
+    else:
+        def show_ast(tree):
+            ast.dump(tree, indent=4)
+
+if __name__ == '__main__':
+    show_ast(xy_ast)
+
+if __name__ == '__main__':
+    xy_ast
+
+if __name__ == '__main__':
+    xy_ast.body[0]
+
+if __name__ == '__main__':
+    xy_ast.body[0].value  # type: ignore
 
 def get_expression(src):
     return ast.parse(src).body[0].value
@@ -498,7 +521,8 @@ def declarations(astnode, hm=None):
         for b in astnode.body:
             declarations(b, hm)
     elif isinstance(astnode, ast.FunctionDef):
-        #hm[astnode.name + '__return__'] = translate_to_z3_name(astnode.returns.id)
+        # hm[astnode.name + '__return__'] = \
+        # translate_to_z3_name(astnode.returns.id)
         for a in astnode.args.args:
             hm[a.arg] = translate_to_z3_name(a.annotation.id)
         for b in astnode.body:
@@ -650,11 +674,11 @@ if __name__ == '__main__':
     sorted([(d, m2[d]) for d in m2.decls() if not d.name(
     ).startswith('abs')], key=lambda x: x[0].name())
 
-## SimpleSymbolicFuzzer
-## --------------------
+## Simple Symbolic Fuzzing
+## -----------------------
 
 if __name__ == '__main__':
-    print('\n## SimpleSymbolicFuzzer')
+    print('\n## Simple Symbolic Fuzzing')
 
 
 
@@ -872,11 +896,11 @@ if __name__ == '__main__':
             v = gcd(r['a'].as_long(), r['b'].as_long())
             print(r, v)
 
-## Advanced Symbolic Fuzzer
-## ------------------------
+## Advanced Symbolic Fuzzing
+## -------------------------
 
 if __name__ == '__main__':
-    print('\n## Advanced Symbolic Fuzzer')
+    print('\n## Advanced Symbolic Fuzzing')
 
 
 
@@ -884,10 +908,10 @@ class AdvancedSymbolicFuzzer(SimpleSymbolicFuzzer):
     def options(self, kwargs):
         super().options(kwargs)
 
-### Dealing with Reassingments
+### Dealing with Reassignments
 
 if __name__ == '__main__':
-    print('\n### Dealing with Reassingments')
+    print('\n### Dealing with Reassignments')
 
 
 
@@ -1431,17 +1455,17 @@ if __name__ == '__main__':
 
 
 
-### Exercise 1: _Extending Symbolic Fuzzer to use function summaries_
+### Exercise 1: Extending Symbolic Fuzzer to use function summaries
 
 if __name__ == '__main__':
-    print('\n### Exercise 1: _Extending Symbolic Fuzzer to use function summaries_')
+    print('\n### Exercise 1: Extending Symbolic Fuzzer to use function summaries')
 
 
 
-### Exercise 2: _Statically checking if a loop should be unrolled further_
+### Exercise 2: Statically checking if a loop should be unrolled further
 
 if __name__ == '__main__':
-    print('\n### Exercise 2: _Statically checking if a loop should be unrolled further_')
+    print('\n### Exercise 2: Statically checking if a loop should be unrolled further')
 
 
 
@@ -1483,10 +1507,10 @@ class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
         exec("s.add(z3.And(%s))" % ','.join(s2), globals(), locals())
         return s.check() == z3.sat
 
-### Exercise 3: _Implementing a Concolic Fuzzer_
+### Exercise 3: Implementing a Concolic Fuzzer
 
 if __name__ == '__main__':
-    print('\n### Exercise 3: _Implementing a Concolic Fuzzer_')
+    print('\n### Exercise 3: Implementing a Concolic Fuzzer')
 
 
 

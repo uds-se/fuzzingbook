@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-01-07 16:07:22+01:00
+# Last change: 2022-01-10 10:08:03+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -103,42 +103,55 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>     scf.add_trace(_, v)
 ' '
 '+\\x00'
+'++\\x00'
+'+++\\x00'
+'+\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
 '+\\x00\\x00%\\x00'
+'+\\x81\\x04\\x80!%C\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'+\\x00\\x00\\x00%\\x00'
+'+\\x81\\x04\\x80!%8\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+'++%\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
-'+\\x00\\x00%\\x00'
-
-ValueError: Invalid encoding (expected)
-
-'+\\x00\\x00\\x00+\\x00'
-'+\\x00\\x00\\x00\\x00\\x00%\\x00'
-
-ValueError: Invalid encoding (expected)
-
-'+\\x00\\x00\\x00\\x00\\x00+\\x00'
 '+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
-'+\\x00\\x00\\x00+\\x00'
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
-'+\\x00\\x00%\\x00'
+'+\\x81\\x04\\x80!%6\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'+'
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
-'+\\x00\\x00\\x00\\x00+\\x00'
-'+\\x00\\x00+\\x00'
-'+'
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+'++\\x00\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'+++\\x00+\\x00'
+'+\\x81\\x04\\x80!%8\\x00'
+'+\\x81\\x04\\x80!%1\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
+'+\\x81\\x04\\x80!%A\\x00'
+'+\\x81\\x04\\x80!%2\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
+'++%\\x008\\x00'
+'++\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+ValueError: Invalid encoding (expected)
+
+'+\\x81\\x04\\x80!%D\\x00'
 
 ValueError: Invalid encoding (expected)
 
@@ -165,20 +178,20 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-update bzT set y=r2_ where e*bj+G/.6(d)
-Table ('P') was not found
+update h4 set J=y9z where a/T-P-k(S)K(R)-t/c-D
+Invalid WHERE ('(3>K(R)-t/c-D)')
 
-update months set n=hX,t=U where x*k((n))*S-A
-Invalid WHERE ('(bt7(N)-Q>((n))*S-A)')
+update months set e=O,a=W,W=t where (-4.52)==2.7
+Column ('e') was not found
 
-insert into months (Ah10z4) values (-6.1,-3311,57415.9,--6)
-Column ('Ah10z4') was not found
+select S!=I from :x21 where I*Z>X==(g(S,B))
+Table (':x21') was not found
 
-select o_>l(P!=y,j_>l(P!=y,jO+m*l-Z/z
-Table ('l') was not found
+update w85 set M=i,L=s where ((N+z-x/:+t))==c+.
+Table ('w85') was not found
 
-insert into U8Dlj (name) values (6)
-Table ('U8Dlj') was not found
+select r==C>u/h*x/Q,T,(a),wu/h*x/Q,T,(a),wG(6.14)
+Invalid WHERE ('((j))/c-O/.*B+u>G(6.14)')
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
