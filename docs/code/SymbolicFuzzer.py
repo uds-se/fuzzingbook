@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2022-01-10 11:00:19+01:00
+# Last change: 2022-01-10 16:43:48+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,24 +42,22 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/SymbolicFuzzer.html
 
-This chapter provides an implementation of a symbolic fuzzing engine `AdvancedSymbolicFuzzer`. The fuzzer uses symbolic execution to exhaustively explore paths in the program to a limited depth, and generate inputs that will reach these paths. Given a function to explore (say, `gcd()`), the fuzzer can be used as follows:
+This chapter provides an implementation of a symbolic fuzzing engine `SymbolicFuzzer`. The fuzzer uses symbolic execution to exhaustively explore paths in the program to a limited depth, and generate inputs that will reach these paths. Given a function to explore (say, `gcd()`), the fuzzer can be used as follows:
 
->>> gcd_fuzzer = AdvancedSymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
+>>> gcd_fuzzer = SymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
 >>> for i in range(10):
 >>>     r = gcd_fuzzer.fuzz()
 >>>     print(r)
-{'a': 7, 'b': 5}
+{'a': 1, 'b': 2}
+{'a': 2, 'b': 1}
+{'a': -8, 'b': -7}
+{'a': 3, 'b': 1}
+{'a': 0, 'b': 3}
+{'a': -9, 'b': -8}
+{'a': 0, 'b': 4}
 {'a': -1, 'b': 0}
-{'a': 2, 'b': 7}
-{'a': 7, 'b': 6}
-{'a': 3, 'b': 5}
-{'a': 0, 'b': -1}
-{'a': 15, 'b': 8}
-{'a': -2, 'b': 0}
-{'a': 2, 'b': -2}
-{'a': 17, 'b': 9}
-
-
+{'a': 6, 'b': 2}
+{'a': 4, 'b': 5}
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Symbolic Fuzzing"
@@ -149,8 +147,12 @@ if __name__ == '__main__':
 import z3  # type: ignore
 
 if __name__ == '__main__':
-    assert z3.get_version() >= (4, 8, 6, 0), "Please check z3 version"
-    assert z3.get_version() <= (4, 8, 9, 0), "Please check z3 version"
+    z3_ver = z3.get_version()
+    print(z3_ver)
+
+if __name__ == '__main__':
+    assert z3_ver >= (4, 8, 6, 0), "Please check z3 version"
+    assert z3_ver <= (4, 8, 10, 0), "Please check z3 version"
 
 def get_annotations(fn):
     sig = inspect.signature(fn)
@@ -685,7 +687,10 @@ if __name__ == '__main__':
 from .Fuzzer import Fuzzer
 
 class SimpleSymbolicFuzzer(Fuzzer):
+    """Simple symbolic fuzzer"""
+
     def __init__(self, fn, **kwargs):
+        """Constructor. `fn` is a function to be fuzzed."""
         self.fn_name = fn.__name__
         py_cfg = PyCFG()
         py_cfg.gen_cfg(inspect.getsource(fn))
@@ -701,7 +706,7 @@ class SimpleSymbolicFuzzer(Fuzzer):
         self.process()
 
     def process(self):
-        pass
+        ...
 
 MAX_DEPTH = 100
 
@@ -843,10 +848,12 @@ class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
 
 class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
     def fuzz(self):
+        """Produce one solution for each path"""
         for i in range(self.max_tries):
             res = self.solve_path_constraint(self.get_next_path())
             if res:
                 return res
+
         return {}
 
 if __name__ == '__main__':
@@ -904,7 +911,9 @@ if __name__ == '__main__':
 
 
 
-class AdvancedSymbolicFuzzer(SimpleSymbolicFuzzer):
+class SymbolicFuzzer(SimpleSymbolicFuzzer):
+    """Symbolic fuzzing with reassignments and loop unrolling"""
+
     def options(self, kwargs):
         super().options(kwargs)
 
@@ -1160,7 +1169,7 @@ def identifiers_with_types(identifiers, defined):
             with_types[i] = typ
     return with_types
 
-class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
+class SymbolicFuzzer(SymbolicFuzzer):
     def extract_constraints(self, path):
         return [to_src(p) for p in to_single_assignment_predicates(path) if p]
 
@@ -1171,7 +1180,7 @@ if __name__ == '__main__':
 
 
 
-class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
+class SymbolicFuzzer(SymbolicFuzzer):
     def solve_path_constraint(self, path):
         # re-initializing does not seem problematic.
         # a = z3.Int('a').get_id() remains the same.
@@ -1192,9 +1201,11 @@ class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
             m = self.z3.model()
             solutions = {d.name(): m[d] for d in m.decls()}
             my_args = {k: solutions.get(k, None) for k in self.fn_args}
+
         predicate = 'z3.And(%s)' % ','.join(
             ["%s == %s" % (k, v) for k, v in my_args.items()])
         eval('self.z3.add(z3.Not(%s))' % predicate)
+
         return my_args
 
 ### Generating All Paths
@@ -1204,7 +1215,7 @@ if __name__ == '__main__':
 
 
 
-class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
+class SymbolicFuzzer(SymbolicFuzzer):
     def get_all_paths(self, fenter):
         path_lst = [PNode(0, fenter)]
         completed = []
@@ -1224,7 +1235,7 @@ class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
         return completed + path_lst
 
 if __name__ == '__main__':
-    asymfz_gcd = AdvancedSymbolicFuzzer(
+    asymfz_gcd = SymbolicFuzzer(
         gcd, max_iter=10, max_tries=10, max_depth=10)
     all_paths = asymfz_gcd.get_all_paths(asymfz_gcd.fnenter)
 
@@ -1245,7 +1256,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     constraints
 
-class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
+class SymbolicFuzzer(SymbolicFuzzer):
     def get_next_path(self):
         self.last_path -= 1
         if self.last_path == -1:
@@ -1260,7 +1271,7 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    asymfz_gcd = AdvancedSymbolicFuzzer(
+    asymfz_gcd = SymbolicFuzzer(
         gcd, max_tries=10, max_iter=10, max_depth=10)
     data = []
     for i in range(10):
@@ -1310,7 +1321,7 @@ def sym_to_float(v):
     return v.numerator_as_long() / v.denominator_as_long()
 
 if __name__ == '__main__':
-    asymfz_roots = AdvancedSymbolicFuzzer(
+    asymfz_roots = SymbolicFuzzer(
         roots,
         max_tries=10,
         max_iter=10,
@@ -1338,6 +1349,7 @@ def roots2(a: float, b: float, c: float) -> Tuple[float, float]:
     while (xa - xb) > 0.1:
         xb = 0.5 * (xa + d / xa)
         xa = xb
+
     s: float = xb
 
     if a == 0:
@@ -1348,11 +1360,13 @@ def roots2(a: float, b: float, c: float) -> Tuple[float, float]:
     return -ba2 + s / a2, -ba2 - s / a2
 
 if __name__ == '__main__':
-    asymfz_roots = AdvancedSymbolicFuzzer(
+    asymfz_roots = SymbolicFuzzer(
         roots2,
         max_tries=10,
         max_iter=10,
         max_depth=10)
+
+if __name__ == '__main__':
     with ExpectError():
         for i in range(1000):
             r = asymfz_roots.fuzz()
@@ -1389,11 +1403,13 @@ def roots3(a: float, b: float, c: float) -> Tuple[float, float]:
     return -ba2 + s / a2, -ba2 - s / a2
 
 if __name__ == '__main__':
-    asymfz_roots = AdvancedSymbolicFuzzer(
+    asymfz_roots = SymbolicFuzzer(
         roots3,
         max_tries=10,
         max_iter=10,
         max_depth=10)
+
+if __name__ == '__main__':
     for i in range(10):
         r = asymfz_roots.fuzz()
         print(r)
@@ -1418,10 +1434,13 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
-    gcd_fuzzer = AdvancedSymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
+    gcd_fuzzer = SymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
     for i in range(10):
         r = gcd_fuzzer.fuzz()
         print(r)
+
+from .ClassDiagram import display_class_hierarchy
+display_class_hierarchy(SymbolicFuzzer)
 
 ## Lessons Learned
 ## ---------------
@@ -1474,7 +1493,7 @@ if __name__ == '__main__':
     while i < 10:
         i += 1
 
-class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
+class SymbolicFuzzer(SymbolicFuzzer):
     def get_all_paths(self, fenter):
         path_lst = [PNode(0, fenter)]
         completed = []
@@ -1496,7 +1515,7 @@ class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
             path_lst = new_paths
         return completed + path_lst
 
-class AdvancedSymbolicFuzzer(AdvancedSymbolicFuzzer):
+class SymbolicFuzzer(SymbolicFuzzer):
     def can_be_satisfied(self, p):
         s2 = self.extract_constraints(p.get_path_to_root())
         s = z3.Solver()
@@ -1526,7 +1545,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     cov.offsets_from_entry('roots3')
 
-class ConcolicTracer(AdvancedSymbolicFuzzer):
+class ConcolicTracer(SymbolicFuzzer):
     def __init__(self, fn, fnargs, **kwargs):
         with TrackingArcCoverage() as cov:
             fn(*fnargs)
@@ -1630,3 +1649,13 @@ if __name__ == '__main__':
     with ArcCoverage() as cov:
         roots3(1, 0, -11 / 20)
     show_cfg(roots3, arcs=cov.arcs())
+
+## Compatibility
+## -------------
+
+if __name__ == '__main__':
+    print('\n## Compatibility')
+
+
+
+AdvancedSymbolicFuzzer = SymbolicFuzzer

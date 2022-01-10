@@ -11953,7 +11953,8 @@ MathJax.Hub.Config({
 <ul><li class="has-sub"><a href="#Exercise-1:-Extending-Symbolic-Fuzzer-to-use-function-summaries">Exercise 1: Extending Symbolic Fuzzer to use function summaries</a>
 </li><li class="has-sub"><a href="#Exercise-2:-Statically-checking-if-a-loop-should-be-unrolled-further">Exercise 2: Statically checking if a loop should be unrolled further</a>
 </li><li class="has-sub"><a href="#Exercise-3:-Implementing-a-Concolic-Fuzzer">Exercise 3: Implementing a Concolic Fuzzer</a>
-</ul></li></ul></li>
+</ul></li><li class="has-sub"><a href="#Compatibility">&nbsp;&bull;&nbsp;&nbsp; Compatibility</a>
+</ul></li>
      </li>
      
      <li class="has-sub"><a href="#"><span title="Resources"><i class="fa fa-fw fa-cube"></i> </span><span class="menu_3">Resources</span></a>
@@ -12062,22 +12063,169 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="SymbolicFuzzer.html" class="import" target="_blank">fuzzingbook.SymbolicFuzzer</a></span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
 </pre></div>
 <p>and then make use of the following features.</p>
-<p>This chapter provides an implementation of a symbolic fuzzing engine <code>AdvancedSymbolicFuzzer</code>. The fuzzer uses symbolic execution to exhaustively explore paths in the program to a limited depth, and generate inputs that will reach these paths. Given a function to explore (say, <code>gcd()</code>), the fuzzer can be used as follows:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">gcd_fuzzer</span> <span class="o">=</span> <span class="n">AdvancedSymbolicFuzzer</span><span class="p">(</span><span class="n">gcd</span><span class="p">,</span> <span class="n">max_tries</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<p>This chapter provides an implementation of a symbolic fuzzing engine <code>SymbolicFuzzer</code>. The fuzzer uses symbolic execution to exhaustively explore paths in the program to a limited depth, and generate inputs that will reach these paths. Given a function to explore (say, <code>gcd()</code>), the fuzzer can be used as follows:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">gcd_fuzzer</span> <span class="o">=</span> <span class="n">SymbolicFuzzer</span><span class="p">(</span><span class="n">gcd</span><span class="p">,</span> <span class="n">max_tries</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="n">r</span> <span class="o">=</span> <span class="n">gcd_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">7</span><span class="p">}</span>
+<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">9</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">8</span><span class="p">}</span>
+<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">}</span>
 <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
-<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">}</span>
-<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span>
-<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
-<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}</span>
-<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">}</span>
-<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
-<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">2</span><span class="p">}</span>
-<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">17</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">}</span>
+<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+<span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
 </pre></div>
+<p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.3 (20211023.0002)
+ -->
+<!-- Pages: 1 -->
+<svg width="301pt" height="363pt"
+ viewBox="0.00 0.00 300.50 363.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 359)">
+<g id="a_graph0"><a xlink:title="SymbolicFuzzer class hierarchy">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-359 296.5,-359 296.5,4 -4,4"/>
+</a>
+</g>
+<!-- SymbolicFuzzer -->
+<g id="node1" class="node">
+<title>SymbolicFuzzer</title>
+<g id="a_node1"><a xlink:href="#" xlink:title="class SymbolicFuzzer:&#10;Symbolic fuzzing with reassignments and loop unrolling">
+<polygon fill="none" stroke="black" points="1,-0.5 1,-86.5 156,-86.5 156,-0.5 1,-0.5"/>
+<text text-anchor="start" x="29.5" y="-72.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">SymbolicFuzzer</text>
+<polyline fill="none" stroke="black" points="1,-63.5 156,-63.5 "/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="SymbolicFuzzer">
+<g id="a_node1_1"><a xlink:href="#" xlink:title="extract_constraints(self, path)">
+<text text-anchor="start" x="9.5" y="-52" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">extract_constraints()</text>
+</a>
+</g>
+<g id="a_node1_2"><a xlink:href="#" xlink:title="get_all_paths(self, fenter)">
+<text text-anchor="start" x="9.5" y="-41" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">get_all_paths()</text>
+</a>
+</g>
+<g id="a_node1_3"><a xlink:href="#" xlink:title="get_next_path(self)">
+<text text-anchor="start" x="9.5" y="-30" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">get_next_path()</text>
+</a>
+</g>
+<g id="a_node1_4"><a xlink:href="#" xlink:title="options(self, kwargs)">
+<text text-anchor="start" x="9.5" y="-19" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">options()</text>
+</a>
+</g>
+<g id="a_node1_5"><a xlink:href="#" xlink:title="solve_path_constraint(self, path)">
+<text text-anchor="start" x="9.5" y="-8" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">solve_path_constraint()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- SimpleSymbolicFuzzer -->
+<g id="node2" class="node">
+<title>SimpleSymbolicFuzzer</title>
+<g id="a_node2"><a xlink:href="#" xlink:title="class SimpleSymbolicFuzzer:&#10;Simple symbolic fuzzer">
+<polygon fill="none" stroke="black" points="0,-123.5 0,-242.5 157,-242.5 157,-123.5 0,-123.5"/>
+<text text-anchor="start" x="8" y="-228.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">SimpleSymbolicFuzzer</text>
+<polyline fill="none" stroke="black" points="0,-219.5 157,-219.5 "/>
+<g id="a_node2_6"><a xlink:href="#" xlink:title="SimpleSymbolicFuzzer">
+<g id="a_node2_7"><a xlink:href="#" xlink:title="__init__(self, fn, **kwargs):&#10;Constructor. `fn` is a function to be fuzzed.">
+<text text-anchor="start" x="9.5" y="-208.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node2_8"><a xlink:href="#" xlink:title="fuzz(self):&#10;Produce one solution for each path">
+<text text-anchor="start" x="9.5" y="-197.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+</a>
+</g>
+<g id="a_node2_9"><a xlink:href="#" xlink:title="extract_constraints(self, path)">
+<text text-anchor="start" x="9.5" y="-186.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">extract_constraints()</text>
+</a>
+</g>
+<g id="a_node2_10"><a xlink:href="#" xlink:title="get_all_paths(self, fenter, depth=0)">
+<text text-anchor="start" x="9.5" y="-175.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">get_all_paths()</text>
+</a>
+</g>
+<g id="a_node2_11"><a xlink:href="#" xlink:title="get_next_path(self)">
+<text text-anchor="start" x="9.5" y="-164.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">get_next_path()</text>
+</a>
+</g>
+<g id="a_node2_12"><a xlink:href="#" xlink:title="options(self, kwargs)">
+<text text-anchor="start" x="9.5" y="-153.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">options()</text>
+</a>
+</g>
+<g id="a_node2_13"><a xlink:href="#" xlink:title="process(self)">
+<text text-anchor="start" x="9.5" y="-141.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">process()</text>
+</a>
+</g>
+<g id="a_node2_14"><a xlink:href="#" xlink:title="solve_path_constraint(self, path)">
+<text text-anchor="start" x="9.5" y="-131.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">solve_path_constraint()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- SymbolicFuzzer&#45;&gt;SimpleSymbolicFuzzer -->
+<g id="edge1" class="edge">
+<title>SymbolicFuzzer&#45;&gt;SimpleSymbolicFuzzer</title>
+<path fill="none" stroke="black" d="M78.5,-86.5C78.5,-94.94 78.5,-104.01 78.5,-113.08"/>
+<polygon fill="none" stroke="black" points="75,-113.3 78.5,-123.3 82,-113.3 75,-113.3"/>
+</g>
+<!-- Fuzzer -->
+<g id="node3" class="node">
+<title>Fuzzer</title>
+<g id="a_node3"><a xlink:href="Fuzzer.html" xlink:title="class Fuzzer:&#10;Base class for fuzzers.">
+<polygon fill="none" stroke="black" points="40,-279.5 40,-354.5 117,-354.5 117,-279.5 40,-279.5"/>
+<text text-anchor="start" x="57.5" y="-340.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Fuzzer</text>
+<polyline fill="none" stroke="black" points="40,-331.5 117,-331.5 "/>
+<g id="a_node3_15"><a xlink:href="#" xlink:title="Fuzzer">
+<g id="a_node3_16"><a xlink:href="Fuzzer.html" xlink:title="__init__(self) &#45;&gt; None:&#10;Constructor">
+<text text-anchor="start" x="48.5" y="-320.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node3_17"><a xlink:href="Fuzzer.html" xlink:title="fuzz(self) &#45;&gt; str:&#10;Return fuzz input">
+<text text-anchor="start" x="48.5" y="-309.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
+</a>
+</g>
+<g id="a_node3_18"><a xlink:href="Fuzzer.html" xlink:title="run(self, runner: Fuzzer.Runner = &lt;Fuzzer.Runner object at 0x10bed9940&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
+<text text-anchor="start" x="48.5" y="-298.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">run()</text>
+</a>
+</g>
+<g id="a_node3_19"><a xlink:href="Fuzzer.html" xlink:title="runs(self, runner: Fuzzer.Runner = &lt;Fuzzer.PrintRunner object at 0x10bed9670&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
+<text text-anchor="start" x="48.5" y="-287.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">runs()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- SimpleSymbolicFuzzer&#45;&gt;Fuzzer -->
+<g id="edge2" class="edge">
+<title>SimpleSymbolicFuzzer&#45;&gt;Fuzzer</title>
+<path fill="none" stroke="black" d="M78.5,-242.67C78.5,-251.58 78.5,-260.66 78.5,-269.27"/>
+<polygon fill="none" stroke="black" points="75,-269.49 78.5,-279.49 82,-269.49 75,-269.49"/>
+</g>
+<!-- Legend -->
+<g id="node4" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="174.5" y="-61" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="174.5" y="-51" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="180.5" y="-51" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="174.5" y="-41" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="180.5" y="-41" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="174.5" y="-31" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="180.5" y="-31" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="174.5" y="-21.8" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+</p>
 </div>
 </div>
 </div>
@@ -12525,8 +12673,32 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">z3</span><span class="o">.</span><span class="n">get_version</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;Please check z3 version&quot;</span>
-<span class="k">assert</span> <span class="n">z3</span><span class="o">.</span><span class="n">get_version</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;Please check z3 version&quot;</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">z3_ver</span> <span class="o">=</span> <span class="n">z3</span><span class="o">.</span><span class="n">get_version</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">z3_ver</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>(4, 8, 7, 0)
+</pre>
+</div>
+
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">assert</span> <span class="n">z3_ver</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;Please check z3 version&quot;</span>
+<span class="k">assert</span> <span class="n">z3_ver</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;Please check z3 version&quot;</span>
 </pre></div>
 
 </div>
@@ -13899,7 +14071,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[v_0 = 1/2, v = 0, v_1 = 0, x = 0]
+<pre>[v_0 = 1/2, v = 1/2, v_1 = 0, x = -1/2]
 </pre>
 </div>
 
@@ -13951,11 +14123,11 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[v_0 = 1/2, v = 0, v_1 = 0, x = 0]
-[v = 1, v_1 = 1, x = 1]
-[v = 1/2, v_1 = 1/2, x = 1/2]
-[v = 1/4, v_1 = 1/4, x = 1/4]
-[v = 1/8, v_1 = 1/8, x = 1/8]
+<pre>[v_0 = 1/2, v = 1/2, v_1 = 0, x = -1/2]
+[v_0 = 3/2, v = 3/2, x = -3/2]
+[v_0 = 5/2, v = 5/2, x = -5/2]
+[v_0 = 7/2, v = 7/2, x = -7/2]
+[v_0 = 9/2, v = 9/2, x = -9/2]
 </pre>
 </div>
 
@@ -13966,11 +14138,11 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_html rendered_html output_subarea output_execute_result">
 
 [x &lt; 0 &and; v_0 = -x &and; v = v_0 &or; &not;(x &lt; 0) &and; v_1 = x &and; v = v_1,
- &not;(0 = x),
- &not;(1 = x),
- &not;(1/2 = x),
- &not;(1/4 = x),
- &not;(1/8 = x)]
+ &not;(-1/2 = x),
+ &not;(-3/2 = x),
+ &not;(-5/2 = x),
+ &not;(-7/2 = x),
+ &not;(-9/2 = x)]
 
 </div>
 
@@ -14011,11 +14183,11 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>[v_0 = 1, v = 1, x = -1]
-[v_0 = 2, v = 2, x = -2]
-[v_0 = 3, v = 3, x = -3]
-[v_0 = 4, v = 4, x = -4]
-[v_0 = 5, v = 5, x = -5]
+<pre>[v_0 = 11/2, v = 11/2, x = -11/2]
+[v_0 = 13/2, v = 13/2, x = -13/2]
+[v_0 = 15/2, v = 15/2, x = -15/2]
+[v_0 = 17/2, v = 17/2, x = -17/2]
+[v_0 = 19/2, v = 19/2, x = -19/2]
 </pre>
 </div>
 
@@ -14040,17 +14212,17 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="output_html rendered_html output_subarea output_execute_result">
 
 [x &lt; 0 &and; v_0 = -x &and; v = v_0 &or; &not;(x &lt; 0) &and; v_1 = x &and; v = v_1,
- &not;(0 = x),
- &not;(1 = x),
- &not;(1/2 = x),
- &not;(1/4 = x),
- &not;(1/8 = x),
+ &not;(-1/2 = x),
+ &not;(-3/2 = x),
+ &not;(-5/2 = x),
+ &not;(-7/2 = x),
+ &not;(-9/2 = x),
  x &lt; 0,
- &not;(-1 = x),
- &not;(-2 = x),
- &not;(-3 = x),
- &not;(-4 = x),
- &not;(-5 = x)]
+ &not;(-11/2 = x),
+ &not;(-13/2 = x),
+ &not;(-15/2 = x),
+ &not;(-17/2 = x),
+ &not;(-19/2 = x)]
 
 </div>
 
@@ -14416,7 +14588,7 @@ x &lt; 0 &and; v_0 = -x &and; v = v_0 &or; &not;(x &lt; 0) &and; v_1 = x &and; v
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;ast.Module at 0x112b8d100&gt;
+<pre>&lt;ast.Module at 0x1112098e0&gt;
 </pre>
 </div>
 
@@ -14448,7 +14620,7 @@ x &lt; 0 &and; v_0 = -x &and; v = v_0 &or; &not;(x &lt; 0) &and; v_1 = x &and; v
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;ast.Expr at 0x112b8d6d0&gt;
+<pre>&lt;ast.Expr at 0x111209910&gt;
 </pre>
 </div>
 
@@ -14480,7 +14652,7 @@ x &lt; 0 &and; v_0 = -x &and; v = v_0 &or; &not;(x &lt; 0) &and; v_1 = x &and; v
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;ast.BinOp at 0x112b8d4c0&gt;
+<pre>&lt;ast.BinOp at 0x111209e50&gt;
 </pre>
 </div>
 
@@ -14537,7 +14709,7 @@ x &lt; 0 &and; v_0 = -x &and; v = v_0 &or; &not;(x &lt; 0) &and; v_1 = x &and; v
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;ast.BinOp at 0x114b15280&gt;
+<pre>&lt;ast.BinOp at 0x10bff5a00&gt;
 </pre>
 </div>
 
@@ -14773,7 +14945,7 @@ x &lt; 0 &and; v_0 = -x &and; v = v_0 &or; &not;(x &lt; 0) &and; v_1 = x &and; v
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[&#39;v_0&#39;, &#39;x&#39;, &#39;v_1&#39;, &#39;v&#39;]
+<pre>[&#39;v_1&#39;, &#39;x&#39;, &#39;v&#39;, &#39;v_0&#39;]
 </pre>
 </div>
 
@@ -15669,7 +15841,7 @@ b1 = abs2_v &and;
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[(a, 1/2), (a1, 1/2), (b, -1/4), (b1, 1/4), (c_0, 1/2)]
+<pre>[(a, 1/2), (a1, 1/2), (b, 0), (b1, 0), (c_0, 1/2)]
 </pre>
 </div>
 
@@ -15720,7 +15892,7 @@ b1 = abs2_v &and;
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[(a, -1/4), (a1, 1/4), (b, 1/4), (b1, 1/4), (c_1, 1/4)]
+<pre>[(a, 0), (a1, 0), (b, 0), (b1, 0), (c_1, 0)]
 </pre>
 </div>
 
@@ -15798,7 +15970,10 @@ b1 = abs2_v &and;
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleSymbolicFuzzer</span><span class="p">(</span><span class="n">Fuzzer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simple symbolic fuzzer&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor. `fn` is a function to be fuzzed.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fn_name</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="vm">__name__</span>
         <span class="n">py_cfg</span> <span class="o">=</span> <span class="n">PyCFG</span><span class="p">()</span>
         <span class="n">py_cfg</span><span class="o">.</span><span class="n">gen_cfg</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">fn</span><span class="p">))</span>
@@ -15814,7 +15989,7 @@ b1 = abs2_v &and;
         <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
+        <span class="o">...</span>
 </pre></div>
 
 </div>
@@ -16345,10 +16520,12 @@ If solutions were found, we also make sure that we never reuse those solutions.<
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SimpleSymbolicFuzzer</span><span class="p">(</span><span class="n">SimpleSymbolicFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">fuzz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Produce one solution for each path&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_tries</span><span class="p">):</span>
             <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solve_path_constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_next_path</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">res</span>
+
         <span class="k">return</span> <span class="p">{}</span>
 </pre></div>
 
@@ -16393,9 +16570,9 @@ If solutions were found, we also make sure that we never reuse those solutions.<
 {&#39;a&#39;: 0, &#39;b&#39;: 2, &#39;c&#39;: 0} result: Isosceles
 {&#39;a&#39;: 3, &#39;b&#39;: 3, &#39;c&#39;: 0} result: Isosceles
 {&#39;a&#39;: 2, &#39;b&#39;: 2, &#39;c&#39;: 2} result: Equilateral
-{&#39;a&#39;: 1, &#39;b&#39;: 3, &#39;c&#39;: 3} result: Isosceles
-{&#39;a&#39;: 1, &#39;b&#39;: 5, &#39;c&#39;: 4} result: Scalene
-{&#39;a&#39;: 0, &#39;b&#39;: 4, &#39;c&#39;: 0} result: Isosceles
+{&#39;a&#39;: 1, &#39;b&#39;: 4, &#39;c&#39;: 4} result: Isosceles
+{&#39;a&#39;: 1, &#39;b&#39;: 6, &#39;c&#39;: 5} result: Scalene
+{&#39;a&#39;: 1, &#39;b&#39;: 5, &#39;c&#39;: 1} result: Isosceles
 {&#39;a&#39;: 5, &#39;b&#39;: 5, &#39;c&#39;: 0} result: Isosceles
 </pre>
 </div>
@@ -16427,11 +16604,11 @@ If solutions were found, we also make sure that we never reuse those solutions.<
 {&#39;x&#39;: -1} result: 1.0
 {&#39;x&#39;: 1} result: 1.0
 {&#39;x&#39;: -2} result: 2.0
-{&#39;x&#39;: 2} result: 2.0
+{&#39;x&#39;: 1/2} result: 0.5
 {&#39;x&#39;: -3/2} result: 1.5
+{&#39;x&#39;: 2} result: 2.0
+{&#39;x&#39;: -3} result: 3.0
 {&#39;x&#39;: 3/2} result: 1.5
-{&#39;x&#39;: -1/2} result: 0.5
-{&#39;x&#39;: 5/4} result: 1.25
 </pre>
 </div>
 
@@ -16694,20 +16871,20 @@ If solutions were found, we also make sure that we never reuse those solutions.<
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/3731434224.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/3731434224.py&#34;, line 2, in &lt;module&gt;
     symfz_gcd = SimpleSymbolicFuzzer(gcd, max_depth=1000, max_iter=10)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/3721101788.py&#34;, line 15, in __init__
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/3795203305.py&#34;, line 18, in __init__
     self.process()
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/4234366425.py&#34;, line 3, in process
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/4234366425.py&#34;, line 3, in process
     self.paths = self.get_all_paths(self.fnenter)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/228300930.py&#34;, line 10, in get_all_paths
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/228300930.py&#34;, line 10, in get_all_paths
     child_paths = self.get_all_paths(child, depth + 1)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/228300930.py&#34;, line 10, in get_all_paths
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/228300930.py&#34;, line 10, in get_all_paths
     child_paths = self.get_all_paths(child, depth + 1)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/228300930.py&#34;, line 10, in get_all_paths
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/228300930.py&#34;, line 10, in get_all_paths
     child_paths = self.get_all_paths(child, depth + 1)
   [Previous line repeated 998 more times]
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/228300930.py&#34;, line 4, in get_all_paths
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/228300930.py&#34;, line 4, in get_all_paths
     raise Exception(&#39;Maximum depth exceeded&#39;)
 Exception: Maximum depth exceeded (expected)
 </pre>
@@ -16735,7 +16912,7 @@ Exception: Maximum depth exceeded (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>We next define <code>AdvancedSymbolicFuzzer</code> that can deal with reassignments and <em>unrolling of loops</em>.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We next define <code>SymbolicFuzzer</code> that can deal with reassignments and <em>unrolling of loops</em>.</p>
 </div>
 </div>
 </div>
@@ -16747,7 +16924,9 @@ Exception: Maximum depth exceeded (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">AdvancedSymbolicFuzzer</span><span class="p">(</span><span class="n">SimpleSymbolicFuzzer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SymbolicFuzzer</span><span class="p">(</span><span class="n">SimpleSymbolicFuzzer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Symbolic fuzzing with reassignments and loop unrolling&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
@@ -17627,7 +17806,7 @@ However, not all loops will need to be unrolled until <code>MAX_DEPTH</code> is 
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">AdvancedSymbolicFuzzer</span><span class="p">(</span><span class="n">AdvancedSymbolicFuzzer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SymbolicFuzzer</span><span class="p">(</span><span class="n">SymbolicFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">extract_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">to_src</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">to_single_assignment_predicates</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="p">]</span>
 </pre></div>
@@ -17652,7 +17831,7 @@ However, not all loops will need to be unrolled until <code>MAX_DEPTH</code> is 
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">AdvancedSymbolicFuzzer</span><span class="p">(</span><span class="n">AdvancedSymbolicFuzzer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SymbolicFuzzer</span><span class="p">(</span><span class="n">SymbolicFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">solve_path_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="c1"># re-initializing does not seem problematic.</span>
         <span class="c1"># a = z3.Int(&#39;a&#39;).get_id() remains the same.</span>
@@ -17673,9 +17852,11 @@ However, not all loops will need to be unrolled until <code>MAX_DEPTH</code> is 
             <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z3</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
             <span class="n">solutions</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="p">():</span> <span class="n">m</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">decls</span><span class="p">()}</span>
             <span class="n">my_args</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">solutions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fn_args</span><span class="p">}</span>
+
         <span class="n">predicate</span> <span class="o">=</span> <span class="s1">&#39;z3.And(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="p">[</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> == </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">my_args</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
         <span class="nb">eval</span><span class="p">(</span><span class="s1">&#39;self.z3.add(z3.Not(</span><span class="si">%s</span><span class="s1">))&#39;</span> <span class="o">%</span> <span class="n">predicate</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">my_args</span>
 </pre></div>
 
@@ -17707,7 +17888,7 @@ However, not all loops will need to be unrolled until <code>MAX_DEPTH</code> is 
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">AdvancedSymbolicFuzzer</span><span class="p">(</span><span class="n">AdvancedSymbolicFuzzer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SymbolicFuzzer</span><span class="p">(</span><span class="n">SymbolicFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_all_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fenter</span><span class="p">):</span>
         <span class="n">path_lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">PNode</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fenter</span><span class="p">)]</span>
         <span class="n">completed</span> <span class="o">=</span> <span class="p">[]</span>
@@ -17747,7 +17928,7 @@ However, not all loops will need to be unrolled until <code>MAX_DEPTH</code> is 
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">asymfz_gcd</span> <span class="o">=</span> <span class="n">AdvancedSymbolicFuzzer</span><span class="p">(</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">asymfz_gcd</span> <span class="o">=</span> <span class="n">SymbolicFuzzer</span><span class="p">(</span>
     <span class="n">gcd</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_tries</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">all_paths</span> <span class="o">=</span> <span class="n">asymfz_gcd</span><span class="o">.</span><span class="n">get_all_paths</span><span class="p">(</span><span class="n">asymfz_gcd</span><span class="o">.</span><span class="n">fnenter</span><span class="p">)</span>
 </pre></div>
@@ -17919,7 +18100,7 @@ _b_2 != 0
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">AdvancedSymbolicFuzzer</span><span class="p">(</span><span class="n">AdvancedSymbolicFuzzer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SymbolicFuzzer</span><span class="p">(</span><span class="n">SymbolicFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_next_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_path</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_path</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
@@ -17956,7 +18137,7 @@ _b_2 != 0
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">asymfz_gcd</span> <span class="o">=</span> <span class="n">AdvancedSymbolicFuzzer</span><span class="p">(</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">asymfz_gcd</span> <span class="o">=</span> <span class="n">SymbolicFuzzer</span><span class="p">(</span>
     <span class="n">gcd</span><span class="p">,</span> <span class="n">max_tries</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
@@ -17974,16 +18155,16 @@ _b_2 != 0
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{&#39;a&#39;: 7, &#39;b&#39;: 5} result: 1
+<pre>{&#39;a&#39;: 1, &#39;b&#39;: 2} result: 1
+{&#39;a&#39;: 2, &#39;b&#39;: 1} result: 1
+{&#39;a&#39;: -8, &#39;b&#39;: -7} result: -1
+{&#39;a&#39;: 3, &#39;b&#39;: 1} result: 1
+{&#39;a&#39;: 0, &#39;b&#39;: 3} result: 3
+{&#39;a&#39;: -9, &#39;b&#39;: -8} result: -1
+{&#39;a&#39;: 0, &#39;b&#39;: 4} result: 4
 {&#39;a&#39;: -1, &#39;b&#39;: 0} result: -1
-{&#39;a&#39;: 2, &#39;b&#39;: 7} result: 1
-{&#39;a&#39;: 7, &#39;b&#39;: 6} result: 1
-{&#39;a&#39;: 3, &#39;b&#39;: 5} result: 1
-{&#39;a&#39;: 0, &#39;b&#39;: -1} result: -1
-{&#39;a&#39;: 15, &#39;b&#39;: 8} result: 1
-{&#39;a&#39;: -2, &#39;b&#39;: 0} result: -2
-{&#39;a&#39;: 2, &#39;b&#39;: -2} result: -2
-{&#39;a&#39;: 17, &#39;b&#39;: 9} result: 1
+{&#39;a&#39;: -2, &#39;b&#39;: -16} result: -2
+{&#39;a&#39;: -18, &#39;b&#39;: -17} result: -1
 </pre>
 </div>
 
@@ -18324,7 +18505,7 @@ function <code>sym_to_float()</code> to convert symbolic values to floating poin
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">asymfz_roots</span> <span class="o">=</span> <span class="n">AdvancedSymbolicFuzzer</span><span class="p">(</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">asymfz_roots</span> <span class="o">=</span> <span class="n">SymbolicFuzzer</span><span class="p">(</span>
     <span class="n">roots</span><span class="p">,</span>
     <span class="n">max_tries</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
@@ -18358,119 +18539,7 @@ function <code>sym_to_float()</code> to convert symbolic values to floating poin
 [0.5, 0.125, -4.0] (2.87890625, -3.12890625)
 {&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 3}
 [0.5, 0.125, 3.0] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 4}
-[0.5, 0.125, 4.0] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -5}
-[0.5, 0.125, -5.0] (3.37890625, -3.62890625)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 7/2}
-[0.5, 0.125, 3.5] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -1}
-[0.5, 0.125, -1.0] (1.37890625, -1.62890625)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -3/2}
-[0.5, 0.125, -1.5] (1.62890625, -1.87890625)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 5/2}
-[0.5, 0.125, 2.5] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 9/4}
-[0.5, 0.125, 2.25] (-0.125, -0.125)
-{&#39;a&#39;: 3/2, &#39;b&#39;: 0, &#39;c&#39;: 0}
-[1.5, 0.0, 0.0] (0.0, -0.0)
-{&#39;a&#39;: 2, &#39;b&#39;: 3, &#39;c&#39;: 5}
-[2.0, 3.0, 5.0] (-0.75, -0.75)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 19/8}
-[0.5, 0.125, 2.375] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -7/4}
-[0.5, 0.125, -1.75] (1.75390625, -2.00390625)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 37/16}
-[0.5, 0.125, 2.3125] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -15/8}
-[0.5, 0.125, -1.875] (1.81640625, -2.06640625)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 73/32}
-[0.5, 0.125, 2.28125] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -31/16}
-[0.5, 0.125, -1.9375] (1.84765625, -2.09765625)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 145/64}
-[0.5, 0.125, 2.265625] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 289/128}
-[0.5, 0.125, 2.2578125] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -63/32}
-[0.5, 0.125, -1.96875] (1.86328125, -2.11328125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 577/256}
-[0.5, 0.125, 2.25390625] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -127/64}
-[0.5, 0.125, -1.984375] (1.87109375, -2.12109375)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -255/128}
-[0.5, 0.125, -1.9921875] (1.875, -2.125)
-{&#39;a&#39;: 1/8, &#39;b&#39;: 1/2, &#39;c&#39;: -1/2}
-[0.125, 0.5, -0.5] (2.5, -6.5)
-{&#39;a&#39;: 1/8, &#39;b&#39;: 1/2, &#39;c&#39;: -2}
-[0.125, 0.5, -2.0] (3.25, -7.25)
-{&#39;a&#39;: 1/8, &#39;b&#39;: 1/2, &#39;c&#39;: -3}
-[0.125, 0.5, -3.0] (3.75, -7.75)
-{&#39;a&#39;: 1, &#39;b&#39;: 4, &#39;c&#39;: 5}
-[1.0, 4.0, 5.0] (-2.0, -2.0)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 1153/512}
-[0.5, 0.125, 2.251953125] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -511/256}
-[0.5, 0.125, -1.99609375] (1.876953125, -2.126953125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 2305/1024}
-[0.5, 0.125, 2.2509765625] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -1023/512}
-[0.5, 0.125, -1.998046875] (1.8779296875, -2.1279296875)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 4609/2048}
-[0.5, 0.125, 2.25048828125] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -2047/1024}
-[0.5, 0.125, -1.9990234375] (1.87841796875, -2.12841796875)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 9217/4096}
-[0.5, 0.125, 2.250244140625] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 18433/8192}
-[0.5, 0.125, 2.2501220703125] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -4095/2048}
-[0.5, 0.125, -1.99951171875] (1.878662109375, -2.128662109375)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 36865/16384}
-[0.5, 0.125, 2.25006103515625] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -8191/4096}
-[0.5, 0.125, -1.999755859375] (1.8787841796875, -2.1287841796875)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -16383/8192}
-[0.5, 0.125, -1.9998779296875] (1.87884521484375, -2.12884521484375)
-{&#39;a&#39;: 1/8, &#39;b&#39;: 1/2, &#39;c&#39;: -4}
-[0.125, 0.5, -4.0] (4.25, -8.25)
-{&#39;a&#39;: 1/8, &#39;b&#39;: 1/2, &#39;c&#39;: -1}
-[0.125, 0.5, -1.0] (2.75, -6.75)
-{&#39;a&#39;: 1/8, &#39;b&#39;: 1/2, &#39;c&#39;: -3/2}
-[0.125, 0.5, -1.5] (3.0, -7.0)
-{&#39;a&#39;: 5, &#39;b&#39;: 6, &#39;c&#39;: 7}
-[5.0, 6.0, 7.0] (-0.6, -0.6)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 73729/32768}
-[0.5, 0.125, 2.250030517578125] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -32767/16384}
-[0.5, 0.125, -1.99993896484375] (1.878875732421875, -2.128875732421875)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 147457/65536}
-[0.5, 0.125, 2.2500152587890625] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -65535/32768}
-[0.5, 0.125, -1.999969482421875] (1.8788909912109375, -2.1288909912109375)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 294913/131072}
-[0.5, 0.125, 2.2500076293945312] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -131071/65536}
-[0.5, 0.125, -1.9999847412109375] (1.8788986206054688, -2.1288986206054688)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 589825/262144}
-[0.5, 0.125, 2.2500038146972656] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 1179649/524288}
-[0.5, 0.125, 2.250001907348633] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -262143/131072}
-[0.5, 0.125, -1.9999923706054688] (1.8789024353027344, -2.1289024353027344)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: 1179649/524288}
-[0.5, 0.125, 2.250001907348633] (-0.125, -0.125)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -524287/262144}
-[0.5, 0.125, -1.9999961853027344] (1.8789043426513672, -2.128904342651367)
-{&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -1048575/524288}
-[0.5, 0.125, -1.9999980926513672] (1.8789052963256836, -2.1289052963256836)
-{&#39;a&#39;: 1/8, &#39;b&#39;: 1/2, &#39;c&#39;: -7/4}
-[0.125, 0.5, -1.75] (3.125, -7.125)
-{&#39;a&#39;: 1/8, &#39;b&#39;: 1/2, &#39;c&#39;: -15/8}
-[0.125, 0.5, -1.875] (3.1875, -7.1875)
-{&#39;a&#39;: 1/8, &#39;b&#39;: 1/2, &#39;c&#39;: -31/16}
-[0.125, 0.5, -1.9375] (3.21875, -7.21875)
-{&#39;a&#39;: 0, &#39;b&#39;: 2, &#39;c&#39;: 5}
+{&#39;a&#39;: 0, &#39;b&#39;: 0, &#39;c&#39;: 25/8}
 </pre>
 </div>
 
@@ -18480,9 +18549,9 @@ function <code>sym_to_float()</code> to convert symbolic values to floating poin
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/2733494840.py&#34;, line 11, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/1483853657.py&#34;, line 11, in &lt;module&gt;
     v = roots(*d)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/3901012876.py&#34;, line 11, in roots
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/3901012876.py&#34;, line 11, in roots
     ba2: float = b / a2
 ZeroDivisionError: float division by zero (expected)
 </pre>
@@ -18521,6 +18590,7 @@ ZeroDivisionError: float division by zero (expected)
     <span class="k">while</span> <span class="p">(</span><span class="n">xa</span> <span class="o">-</span> <span class="n">xb</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">:</span>
         <span class="n">xb</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">xa</span> <span class="o">+</span> <span class="n">d</span> <span class="o">/</span> <span class="n">xa</span><span class="p">)</span>
         <span class="n">xa</span> <span class="o">=</span> <span class="n">xb</span>
+
     <span class="n">s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">xb</span>
 
     <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -18542,12 +18612,25 @@ ZeroDivisionError: float division by zero (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">asymfz_roots</span> <span class="o">=</span> <span class="n">AdvancedSymbolicFuzzer</span><span class="p">(</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">asymfz_roots</span> <span class="o">=</span> <span class="n">SymbolicFuzzer</span><span class="p">(</span>
     <span class="n">roots2</span><span class="p">,</span>
     <span class="n">max_tries</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">asymfz_roots</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
         <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">sym_to_float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">]]</span>
@@ -18564,9 +18647,9 @@ ZeroDivisionError: float division by zero (expected)
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/1140150925.py&#34;, line 10, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/567876003.py&#34;, line 5, in &lt;module&gt;
     v = roots2(*d)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_71008/1742037252.py&#34;, line 12, in roots2
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_55352/714795544.py&#34;, line 13, in roots2
     return -c / b, -c / b  # only one solution
 ZeroDivisionError: float division by zero (expected)
 </pre>
@@ -18642,12 +18725,25 @@ ZeroDivisionError: float division by zero (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">asymfz_roots</span> <span class="o">=</span> <span class="n">AdvancedSymbolicFuzzer</span><span class="p">(</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">asymfz_roots</span> <span class="o">=</span> <span class="n">SymbolicFuzzer</span><span class="p">(</span>
     <span class="n">roots3</span><span class="p">,</span>
     <span class="n">max_tries</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="n">max_depth</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
     <span class="n">r</span> <span class="o">=</span> <span class="n">asymfz_roots</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
     <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">sym_to_float</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">]]</span>
@@ -18663,24 +18759,24 @@ ZeroDivisionError: float division by zero (expected)
 <div class="output_area">
 
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>{&#39;a&#39;: -1, &#39;b&#39;: 0, &#39;c&#39;: 0}
-[-1.0, 0.0, 0.0] (0.0, 0.0)
+<pre>{&#39;a&#39;: 1, &#39;b&#39;: 1/8, &#39;c&#39;: 1}
+[1.0, 0.125, 1.0] (-0.0625, -0.0625)
 {&#39;a&#39;: 1, &#39;b&#39;: 1/8, &#39;c&#39;: -2}
 [1.0, 0.125, -2.0] (1.439453125, -1.564453125)
-{&#39;a&#39;: 1, &#39;b&#39;: 1/8, &#39;c&#39;: 1}
-[1.0, 0.125, 1.0] (-0.0625, -0.0625)
+{&#39;a&#39;: 1, &#39;b&#39;: 1/8, &#39;c&#39;: 2}
+[1.0, 0.125, 2.0] (-0.0625, -0.0625)
 {&#39;a&#39;: 0, &#39;b&#39;: 1/4, &#39;c&#39;: 0}
 [0.0, 0.25, 0.0] (-0.0, -0.0)
 {&#39;a&#39;: 0, &#39;b&#39;: 0, &#39;c&#39;: 2}
 [0.0, 0.0, 2.0] (inf, inf)
 {&#39;a&#39;: 0, &#39;b&#39;: 1, &#39;c&#39;: -1/4}
 [0.0, 1.0, -0.25] (0.25, 0.25)
-{&#39;a&#39;: 1, &#39;b&#39;: 1/8, &#39;c&#39;: 2}
-[1.0, 0.125, 2.0] (-0.0625, -0.0625)
+{&#39;a&#39;: 1, &#39;b&#39;: 1/8, &#39;c&#39;: 3}
+[1.0, 0.125, 3.0] (-0.0625, -0.0625)
 {&#39;a&#39;: 0, &#39;b&#39;: 1/4, &#39;c&#39;: -1}
 [0.0, 0.25, -1.0] (4.0, 4.0)
-{&#39;a&#39;: 0, &#39;b&#39;: 0, &#39;c&#39;: 3}
-[0.0, 0.0, 3.0] (inf, inf)
+{&#39;a&#39;: 0, &#39;b&#39;: 0, &#39;c&#39;: 4}
+[0.0, 0.0, 4.0] (inf, inf)
 {&#39;a&#39;: 1/2, &#39;b&#39;: 1/8, &#39;c&#39;: -2}
 [0.5, 0.125, -2.0] (1.87890625, -2.12890625)
 </pre>
@@ -18691,7 +18787,7 @@ ZeroDivisionError: float division by zero (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>With this, we have demonstrated that we can use our <em>AdvancedSymbolicFuzzer</em> to fuzz programs, and it can aid in identifying problems in code.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>With this, we have demonstrated that we can use our <em>SymbolicFuzzer</em> to fuzz programs, and it can aid in identifying problems in code.</p>
 </div>
 </div>
 </div>
@@ -18700,7 +18796,16 @@ ZeroDivisionError: float division by zero (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Limitations">Limitations<a class="anchor-link" href="#Limitations">&#182;</a></h2><p>There is an evident error in this program. We are not checking for negative roots. However, the symbolic execution does not seem to have detected it. Why are we not able to detect the problem of negative roots? Because we stop execution at a predetermined depth without throwing an error. That is, our symbolic execution is wide but shallow. One of the ways this limitation can be overcome is by relying on <a href="ConcolicFuzzer.html">concolic execution</a>, that allows one to go deeper than pure symbolic execution. A second problem is that symbolic execution is necessarily computation intensive. Which means that specification based fuzzers are often able to generate a much larger set of inputs, and consecutively more coverage on programs that do not check for magic bytes, such that they provide a reasonable gradient of exploration.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Limitations">Limitations<a class="anchor-link" href="#Limitations">&#182;</a></h2><p>There is an evident error in the <code>roots3()</code> function. We are not checking for negative roots. However, the symbolic execution does not seem to have detected it. Why are we not able to detect the problem of negative roots? Because we stop execution at a predetermined depth without throwing an error. That is, our symbolic execution is wide but shallow. One of the ways this limitation can be overcome is by relying on <a href="ConcolicFuzzer.html">concolic execution</a>, that allows one to go deeper than pure symbolic execution.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>A second problem is that symbolic execution is necessarily computation intensive. This means that specification based fuzzers are often able to generate a much larger set of inputs, and consecutively more coverage on programs that do not check for magic bytes, such that they provide a reasonable gradient of exploration.</p>
 </div>
 </div>
 </div>
@@ -18751,7 +18856,7 @@ ZeroDivisionError: float division by zero (expected)
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Extending-Symbolic-Fuzzer-to-use-function-summaries">Exercise 1: Extending Symbolic Fuzzer to use function summaries<a class="anchor-link" href="#Exercise-1:-Extending-Symbolic-Fuzzer-to-use-function-summaries">&#182;</a></h3><p>We showed in the first section how function summaries may be produced. Can you extend the <code>AdvancedSymbolicFuzzer</code> to use function summaries when needed?</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Exercise-1:-Extending-Symbolic-Fuzzer-to-use-function-summaries">Exercise 1: Extending Symbolic Fuzzer to use function summaries<a class="anchor-link" href="#Exercise-1:-Extending-Symbolic-Fuzzer-to-use-function-summaries">&#182;</a></h3><p>We showed in the first section how function summaries may be produced. Can you extend the <code>SymbolicFuzzer</code> to use function summaries when needed?</p>
 
     
 <p><div class="solution_link"><a href="https://mybinder.org/v2/gh/uds-se/fuzzingbook/master?filepath=docs/notebooks/SymbolicFuzzer.ipynb#Exercises" target=_blank>Use the notebook</a> to work on the exercises and see solutions.</div></p>
@@ -18800,7 +18905,7 @@ ZeroDivisionError: float division by zero (expected)
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">AdvancedSymbolicFuzzer</span><span class="p">(</span><span class="n">AdvancedSymbolicFuzzer</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">SymbolicFuzzer</span><span class="p">(</span><span class="n">SymbolicFuzzer</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_all_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fenter</span><span class="p">):</span>
         <span class="n">path_lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">PNode</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fenter</span><span class="p">)]</span>
         <span class="n">completed</span> <span class="o">=</span> <span class="p">[]</span>
@@ -18888,13 +18993,44 @@ ZeroDivisionError: float division by zero (expected)
 </div>
 </div>
 
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><h2 id="Compatibility">Compatibility<a class="anchor-link" href="#Compatibility">&#182;</a></h2></div>
+</div>
+</div>
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Earlier versions of this chapter used the name <code>AdvancedSymbolicFuzzer</code> for <code>SymbolicFuzzer</code>.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">AdvancedSymbolicFuzzer</span> <span class="o">=</span> <span class="n">SymbolicFuzzer</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
         
 <p class="imprint">
 <img style="float:right" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons License">
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/SymbolicFuzzer.ipynb" target=_blank)>Last change: 2022-01-10 10:56:56+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/SymbolicFuzzer.ipynb" target=_blank)>Last change: 2022-01-10 16:39:12+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -18910,7 +19046,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/SymbolicFuzzer.html">Symbolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/SymbolicFuzzer.html">https://www.fuzzingbook.org/html/SymbolicFuzzer.html</a>.  Retrieved 2022-01-10 10:56:56+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/SymbolicFuzzer.html">Symbolic Fuzzing</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/SymbolicFuzzer.html">https://www.fuzzingbook.org/html/SymbolicFuzzer.html</a>.  Retrieved 2022-01-10 16:39:12+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2022:SymbolicFuzzer,
@@ -18920,9 +19056,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/html/SymbolicFuzzer.html}},
-    note = {Retrieved 2022-01-10 10:56:56+01:00},
+    note = {Retrieved 2022-01-10 16:39:12+01:00},
     url = {https://www.fuzzingbook.org/html/SymbolicFuzzer.html},
-    urldate = {2022-01-10 10:56:56+01:00}
+    urldate = {2022-01-10 16:39:12+01:00}
 }
 </pre>
 </div>

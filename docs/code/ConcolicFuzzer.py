@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-01-10 10:08:03+01:00
+# Last change: 2022-01-10 16:05:27+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -103,55 +103,63 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>     scf.add_trace(_, v)
 ' '
 '+\\x00'
-'++\\x00'
-'+++\\x00'
-'+\\x00%\\x00'
-
-ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
-
 '+\\x00\\x00%\\x00'
-'+\\x81\\x04\\x80!%C\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'+\\x81\\x04\\x80!%8\\x00'
+'+\\x10\\x01\\x08\\x01\\x01\\x02\\x01\\x08%\\x00c\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'++%\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%e\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
-'+\\x81\\x04\\x80!%6\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00A\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'++\\x00\\x00%\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
 
-'+++\\x00+\\x00'
-'+\\x81\\x04\\x80!%8\\x00'
-'+\\x81\\x04\\x80!%1\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
-ValueError: Invalid encoding (expected)
 
-'+\\x81\\x04\\x80!%A\\x00'
-'+\\x81\\x04\\x80!%2\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
 
 ValueError: Invalid encoding (expected)
+
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00+\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%8\\x00'
+
 ValueError: Invalid encoding (expected)
 
-'++%\\x008\\x00'
-'++\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%b\\x00'
 
 ValueError: Invalid encoding (expected)
+
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+
 ValueError: Invalid encoding (expected)
 
-'+\\x81\\x04\\x80!%D\\x00'
+'+\\x10\\x01\\x08\\x01\\x01\\x02\\x01\\x08%\\x008\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'+\\x10\\x01\\x08\\x01\\x01\\x02\\x01\\x08%\\x00D\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00'
+
+ValueError: Invalid encoding (expected)
+
+'+\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00%\\x00a\\x00'
 
 ValueError: Invalid encoding (expected)
 
@@ -178,21 +186,28 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-update h4 set J=y9z where a/T-P-k(S)K(R)-t/c-D
-Invalid WHERE ('(3>K(R)-t/c-D)')
+select K+G/E*M(C)/H-H/O/T>K(y),p from W
+Table ('W') was not found
 
-update months set e=O,a=W,W=t where (-4.52)==2.7
-Column ('e') was not found
+update NnX set x=c7 where a==(Z>Z)
+Table ('NnX') was not found
 
-select S!=I from :x21 where I*Z>X==(g(S,B))
-Table (':x21') was not found
+insert into months (Y,X,U,M5) values ('6')
+Column ('Y') was not found
 
-update w85 set M=i,L=s where ((N+z-x/:+t))==c+.
-Table ('w85') was not found
+select O(E)*y+u/I from vehicles where n*y-l+nQ*E*G*g+t)!=2
+Column ('s') was not found
 
-select r==C>u/h*x/Q,T,(a),wu/h*x/Q,T,(a),wG(6.14)
-Invalid WHERE ('((j))/c-O/.*B+u>G(6.14)')
+delete from months where -8!=h(P(UrI))>Cl(R(r)+Z,S+n,I==P)==e935
+Invalid WHERE ('-8!=h(P(UrI))>Cl(R(r)+Z,S+n,I==P)==e935')
 
+update y set z=V,r=O,Z=Z where D(p)!=l==.==A
+Table ('y') was not found
+
+delete from vehicles where V(F/p/j/.-B/v)==(6!=p!=j>l)
+Invalid WHERE ('V(F/p/j/.-B/v)==(6!=p!=j>l)')
+
+update vehicles set P=T,R=t,e=z where h+T*O
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
 at https://www.fuzzingbook.org/html/ConcolicFuzzer.html
@@ -313,8 +328,14 @@ if __name__ == '__main__':
 import z3  # type: ignore
 
 if __name__ == '__main__':
-    assert z3.get_version() >= (4, 8, 6, 0), "Please check z3 version"
-    assert z3.get_version() <= (4, 8, 9, 0), "Please check z3 version"
+    z3_ver = z3.get_version()
+
+if __name__ == '__main__':
+    print(z3_ver)
+
+if __name__ == '__main__':
+    assert z3_ver >= (4, 8, 6, 0), "Please check z3 version (current: %s)" % z3_ver
+    assert z3_ver <= (4, 8, 10, 0), "Please check z3 version (current: %s)" % z3_ver
 
 if __name__ == '__main__':
     z3.set_option('smt.string_solver', 'z3str3')
@@ -930,7 +951,7 @@ class ConcolicTracer(ConcolicTracer):
                     path.append(predicates[i])
         if log:
             print('Predicates in path:')
-            for i,p in enumerate(path):
+            for i, p in enumerate(path):
                 print(i, p)
             print()
 
@@ -1014,21 +1035,27 @@ if __name__ == '__main__':
 import tempfile
 import os
 
-Z3_OPTIONS = '-t:60'  # Z3 options - a soft timeout of 60 milliseconds
+Z3_BINARY = 'z3'  # Z3 binary to invoke
+
+Z3_OPTIONS = '-t:6000'  # Z3 options - a soft timeout of 6000 milliseconds
 
 def zeval_smt(path, cc, log):
     s = cc.smt_expr(True, True, path)
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.smt', delete=False) as f:
-        f.write(s)
-        f.write("\n(check-sat)")
-        f.write("\n(get-model)")
-        f.flush()
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.smt',
+                                     delete=False) as f:
+        f.write(s + "\n")
+        f.write("(check-sat)\n")
+        f.write("(get-model)\n")
 
-        if log:
-            print(s, '(check-sat)', '(get-model)', sep='\n')
+    if log:
+        print(open(f.name).read())
 
-    output = subprocess.getoutput(f"z3 {Z3_OPTIONS} {f.name}")
+    cmd = f"{Z3_BINARY} {Z3_OPTIONS} {f.name}"
+    if log:
+        print(cmd)
+
+    output = subprocess.getoutput(cmd)
 
     os.remove(f.name)
 
@@ -1049,7 +1076,11 @@ def zeval_smt(path, cc, log):
 
     assert kind == 'sat', kind
     assert o[1][0] == 'model'
-    return 'sat', {i[1]: (i[-1], i[-2]) for i in o[1][1:]}
+
+    if o[1][0] == 'model': # up to 4.8.8.0
+        return 'sat', {i[1]: (i[-1], i[-2]) for i in o[1][1:]}
+    else:
+        return 'sat', {i[1]: (i[-1], i[-2]) for i in o[1][0:]}
 
 if __name__ == '__main__':
     with ConcolicTracer() as _:
@@ -1854,6 +1885,12 @@ if __name__ == '__main__':
     print('\n### Example: Database')
 
 
+
+if __name__ == '__main__':
+    if z3.get_version() > (4, 8, 7, 0):
+        print("""Note: The following example may not work with your Z3 version;
+    see https://github.com/Z3Prover/z3/issues/5763 for details.
+    Consider `pip install z3-solver==4.8.7.0` as a workaround.""")
 
 from .InformationFlow import DB, sample_db, update_inventory
 
@@ -2878,6 +2915,12 @@ if __name__ == '__main__':
     print('\n### Exercise 2: Bit Manipulation')
 
 
+
+if __name__ == '__main__':
+    if z3.get_version() > (4, 8, 7, 0):
+        print("""Note: The following example may not work with your Z3 version;
+    see https://github.com/Z3Prover/z3/issues/5763 for details.
+    Consider `pip install z3-solver==4.8.7.0` as a workaround.""")
 
 def make_int_bit_wrapper(fname, fun, zfun):
     def proxy(self, other):
