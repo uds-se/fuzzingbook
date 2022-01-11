@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2022-01-11 11:49:49+01:00
+# Last change: 2022-01-11 17:39:36+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -119,6 +119,10 @@ if __name__ == '__main__':
     print('# Symbolic Fuzzing')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('RLQ_ORBezkk')
 
 ## Synopsis
 ## --------
