@@ -83,7 +83,10 @@ and then make use of the following features.
                 elif cell.source.startswith("# docassert"):
                     pass
                 else:
-                    synopsis += "```python\n>>> " + cell.source.replace('\n', '\n>>> ') + "\n```\n"
+                    cmd = '>>> ' + cell.source.replace('\n', '\n>>> ')
+                    synopsis += "```python\n" + cmd + "\n```\n"
+                    # print(cmd)
+
                 output_text = ''
                 for output in cell.outputs:
                     text = None
@@ -126,7 +129,7 @@ and then make use of the following features.
                     # PNG output
                     if (text is None and hasattr(output, 'data') and
                         'image/png' in output.data):
-                        png = output.data['image/png']
+                        png = output.data['image/png'].strip()
                         if png is not None:
                             png_basename = (notebook_basename +
                                 '-synopsis-' + repr(img_count) + '.png')
