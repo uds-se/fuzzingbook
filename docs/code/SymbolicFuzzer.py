@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2022-01-10 16:43:48+01:00
+# Last change: 2022-01-11 11:49:49+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,22 +42,64 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/SymbolicFuzzer.html
 
-This chapter provides an implementation of a symbolic fuzzing engine `SymbolicFuzzer`. The fuzzer uses symbolic execution to exhaustively explore paths in the program to a limited depth, and generate inputs that will reach these paths. Given a function to explore (say, `gcd()`), the fuzzer can be used as follows:
+This chapter provides an implementation of a symbolic fuzzing engine `SymbolicFuzzer`. The fuzzer uses symbolic execution to exhaustively explore paths in the program to a limited depth, and generate inputs that will reach these paths.
+
+As an example, consider the function `gcd()`, computing the greatest common divisor of `a` and `b`:
+
+def gcd(a: int, b: int) -> int:
+    if a < b:
+        c: int = a  # type: ignore
+        a = b
+        b = c
+
+    while b != 0:
+        c: int = a  # type: ignore
+        a = b
+        b = c % b
+
+    return a
+
+To explore `gcd()`, the fuzzer can be used as follows, producing values for arguments that cover different paths in `gcd()` (including multiple times of loop iterations):
 
 >>> gcd_fuzzer = SymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
 >>> for i in range(10):
->>>     r = gcd_fuzzer.fuzz()
->>>     print(r)
-{'a': 1, 'b': 2}
-{'a': 2, 'b': 1}
-{'a': -8, 'b': -7}
-{'a': 3, 'b': 1}
-{'a': 0, 'b': 3}
-{'a': -9, 'b': -8}
-{'a': 0, 'b': 4}
-{'a': -1, 'b': 0}
-{'a': 6, 'b': 2}
+>>>     args = gcd_fuzzer.fuzz()
+>>>     print(args)
+{'a': 5, 'b': 3}
+{'a': 1, 'b': 4}
 {'a': 4, 'b': 5}
+{'a': 6, 'b': -12}
+{'a': 3, 'b': 4}
+{'a': 2, 'b': 2}
+{'a': 7, 'b': 3}
+{'a': 8, 'b': 16}
+{'a': 17, 'b': 17}
+{'a': 18, 'b': 17}
+
+
+Note that the variable values returned by `fuzz()` are Z3 _symbolic_ values; to convert them to Python numbers, use their method `as_long()`:
+
+>>> for i in range(10):
+>>>     args = gcd_fuzzer.fuzz()
+>>>     a = args['a'].as_long()
+>>>     b = args['b'].as_long()
+>>>     d = gcd(a, b)
+>>>     print(f"gcd({a}, {b}) = {d}")
+gcd(0, 17) = 17
+gcd(-1, 0) = -1
+gcd(19, 18) = 1
+gcd(0, 19) = 19
+gcd(16, 19) = 1
+gcd(4, 1) = 1
+gcd(-2, 20) = -2
+gcd(19, 0) = 19
+gcd(8, 5) = 1
+gcd(-3, 20) = -1
+
+
+The symbolic fuzzer is subject to a number of constraints. First, it requires that the function to be fuzzed has correct type annotations, including all local variables. Second, it solves loops by unrolling them, but only for a fixed amount.
+
+For programs without loops and variable reassignments, the `SimpleSymbolicFuzzer` is a faster, but more limited alternative.
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Symbolic Fuzzing"
@@ -152,7 +194,6 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     assert z3_ver >= (4, 8, 6, 0), "Please check z3 version"
-    assert z3_ver <= (4, 8, 10, 0), "Please check z3 version"
 
 def get_annotations(fn):
     sig = inspect.signature(fn)
@@ -690,7 +731,15 @@ class SimpleSymbolicFuzzer(Fuzzer):
     """Simple symbolic fuzzer"""
 
     def __init__(self, fn, **kwargs):
-        """Constructor. `fn` is a function to be fuzzed."""
+        """Constructor.
+        `fn` is the function to be fuzzed.
+        Possible keyword parameters:
+        * `max_depth` - the depth to which one should attempt
+          to trace the execution (default 100) 
+        * `max_tries` - the maximum number of attempts
+          we will try to produce a value before giving up (default 100)
+        * `max_iter` - the number of iterations we will attempt (default 100).
+        """
         self.fn_name = fn.__name__
         py_cfg = PyCFG()
         py_cfg.gen_cfg(inspect.getsource(fn))
@@ -706,7 +755,7 @@ class SimpleSymbolicFuzzer(Fuzzer):
         self.process()
 
     def process(self):
-        ...
+        ...  # to be defined later
 
 MAX_DEPTH = 100
 
@@ -848,7 +897,8 @@ class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
 
 class SimpleSymbolicFuzzer(SimpleSymbolicFuzzer):
     def fuzz(self):
-        """Produce one solution for each path"""
+        """Produce one solution for each path.
+        Returns a mapping of variable names to (symbolic) Z3 values."""
         for i in range(self.max_tries):
             res = self.solve_path_constraint(self.get_next_path())
             if res:
@@ -860,16 +910,19 @@ if __name__ == '__main__':
     a, b, c = None, None, None
     symfz_ct = SimpleSymbolicFuzzer(check_triangle)
     for i in range(1, 10):
-        r = symfz_ct.fuzz()
-        v = check_triangle(r['a'].as_long(), r['b'].as_long(), r['c'].as_long())
-        print(r, "result:", v)
+        args = symfz_ct.fuzz()
+        res = check_triangle(args['a'].as_long(),
+                             args['b'].as_long(),
+                             args['c'].as_long())
+        print(args, "result:", res)
 
 if __name__ == '__main__':
     symfz_av = SimpleSymbolicFuzzer(abs_value)
     for i in range(1, 10):
-        r = symfz_av.fuzz()
-        v = abs_value(r['x'].numerator_as_long() / r['x'].denominator_as_long())
-        print(r, "result:", v)
+        args = symfz_av.fuzz()
+        abs_res = abs_value(args['x'].numerator_as_long() /
+                            args['x'].denominator_as_long())
+        print(args, "result:", abs_res)
 
 ### Problems with the Simple Fuzzer
 
@@ -888,6 +941,7 @@ def gcd(a: int, b: int) -> int:
         c: int = a  # type: ignore
         a = b
         b = c % b
+
     return a
 
 if __name__ == '__main__':
@@ -1307,10 +1361,11 @@ def roots(a: float, b: float, c: float) -> Tuple[float, float]:
     while (ax - bx) > 0.1:
         bx = 0.5 * (ax + d / ax)
         ax = bx
-    s: float = bx
 
+    s: float = bx
     a2: float = 2 * a
     ba2: float = b / a2
+
     return -ba2 + s / a2, -ba2 - s / a2
 
 def sym_to_float(v):
@@ -1326,6 +1381,8 @@ if __name__ == '__main__':
         max_tries=10,
         max_iter=10,
         max_depth=10)
+
+if __name__ == '__main__':
     with ExpectError():
         for i in range(100):
             r = asymfz_roots.fuzz()
@@ -1433,11 +1490,24 @@ if __name__ == '__main__':
 
 
 
+from .bookutils import print_content
+
+if __name__ == '__main__':
+    print_content(inspect.getsource(gcd), '.py')
+
 if __name__ == '__main__':
     gcd_fuzzer = SymbolicFuzzer(gcd, max_tries=10, max_iter=10, max_depth=10)
     for i in range(10):
-        r = gcd_fuzzer.fuzz()
-        print(r)
+        args = gcd_fuzzer.fuzz()
+        print(args)
+
+if __name__ == '__main__':
+    for i in range(10):
+        args = gcd_fuzzer.fuzz()
+        a = args['a'].as_long()
+        b = args['b'].as_long()
+        d = gcd(a, b)
+        print(f"gcd({a}, {b}) = {d}")
 
 from .ClassDiagram import display_class_hierarchy
 display_class_hierarchy(SymbolicFuzzer)

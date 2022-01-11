@@ -15339,51 +15339,6 @@ div.jp-OutputPrompt {
 </div></div></section></section><section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
-
-<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.Fuzzer</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
-</pre></div>
-<p>and then make use of the following features.</p>
-<p>This chapter provides two important classes, introduced in <a href="#A-Fuzzing-Architecture">A Fuzzing Architecture</a>:</p>
-<ul>
-<li><code>Fuzzer</code> as a base class for fuzzers; and</li>
-<li><code>Runner</code> as a base class for programs under test.</li>
-</ul>
-<h3 id="Fuzzers">Fuzzers<a class="anchor-link" href="#Fuzzers">&#182;</a></h3><p><code>Fuzzer</code> is a base class for fuzzers, with <code>RandomFuzzer</code> as a simple instantiation.  The <code>fuzz()</code> method of <code>Fuzzer</code> objects returns a string with a generated input.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">random_fuzzer</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">()</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-<span class="s1">&#39;%$&lt;1&amp;&lt;%+=!&quot;83?+)9:++9138 42/ &quot;7;0-,)06 &quot;1(2;6&gt;?99$%7!!*#96=&gt;2&amp;-/(5*)=$;0$$+;&lt;12&quot;?30&amp;&#39;</span>
-</pre></div>
-<p>The <code>RandomFuzzer()</code> constructor allows to specify a number of keyword arguments:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">RandomFuzzer</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
-<span class="n">Produce</span> <span class="n">strings</span> <span class="n">of</span> <span class="err">`</span><span class="n">min_length</span><span class="err">`</span> <span class="n">to</span> <span class="err">`</span><span class="n">max_length</span><span class="err">`</span> <span class="n">characters</span>
-           <span class="ow">in</span> <span class="n">the</span> <span class="nb">range</span> <span class="p">[</span><span class="err">`</span><span class="n">char_start</span><span class="err">`</span><span class="p">,</span> <span class="err">`</span><span class="n">char_start</span><span class="err">`</span> <span class="o">+</span> <span class="err">`</span><span class="n">char_range</span><span class="err">`</span><span class="p">]</span>
-
-<span class="o">&gt;&gt;&gt;</span> <span class="n">random_fuzzer</span> <span class="o">=</span> <span class="n">RandomFuzzer</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">char_start</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span> <span class="n">char_range</span><span class="o">=</span><span class="mi">26</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">random_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-<span class="s1">&#39;XGZVDDPZOOW&#39;</span>
-</pre></div>
-<p><img src="PICS/Fuzzer-synopsis-1.svg" alt=""></p>
-<h3 id="Runners">Runners<a class="anchor-link" href="#Runners">&#182;</a></h3><p>A <code>Fuzzer</code> can be paired with a <code>Runner</code>, which takes the fuzzed strings as input. Its result is a class-specific <em>status</em> and an <em>outcome</em> (<code>PASS</code>, <code>FAIL</code>, or <code>UNRESOLVED</code>). A <code>PrintRunner</code> will simply print out the given input and return a <code>PASS</code> outcome:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">print_runner</span> <span class="o">=</span> <span class="n">PrintRunner</span><span class="p">()</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">random_fuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">print_runner</span><span class="p">)</span>
-<span class="n">EQYGAXPTVPJGTYHXFJ</span>
-
-<span class="p">(</span><span class="s1">&#39;EQYGAXPTVPJGTYHXFJ&#39;</span><span class="p">,</span> <span class="s1">&#39;UNRESOLVED&#39;</span><span class="p">)</span>
-</pre></div>
-<p>A <code>ProgramRunner</code> will feed the generated input into an external program.  Its result is a pair of the program status (a <code>CompletedProcess</code> instance) and an <em>outcome</em> (<code>PASS</code>, <code>FAIL</code>, or <code>UNRESOLVED</code>):</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">cat</span> <span class="o">=</span> <span class="n">ProgramRunner</span><span class="p">(</span><span class="s1">&#39;cat&#39;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">random_fuzzer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cat</span><span class="p">)</span>
-<span class="p">(</span><span class="n">CompletedProcess</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="s1">&#39;cat&#39;</span><span class="p">,</span> <span class="n">returncode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="s1">&#39;BZOQTXFBTEOVYX&#39;</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
- <span class="s1">&#39;PASS&#39;</span><span class="p">)</span>
-</pre></div>
-<p><img src="PICS/Fuzzer-synopsis-2.svg" alt=""></p>
-
-</div>
-</div></section></section><section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h2 id="A-Testing-Assignment">A Testing Assignment<a class="anchor-link" href="#A-Testing-Assignment">&#182;</a></h2><p>Fuzzing was born in a "dark and stormy night in the Fall of 1988" \cite{Takanen2008}.  Sitting in his apartment in Wisconsin, Madison, professor Barton Miller was connected to his university computer via a 1200 baud telephone line.  The thunderstorm caused noise on the line, and this noise in turn caused the UNIX commands on either end to get bad inputs – and crash.  The frequent crashes surprised him – surely, programs should be more robust than that?  As a scientist, he wanted to investigate the extent of the problem and its causes.  So he crafted a <em>programming exercise</em> for his students at the University of Wisconsin-Madison – an exercise that would have his students create the first fuzzers.</p>
 
 </div>
@@ -15648,22 +15603,22 @@ div.jp-OutputPrompt {
     <p>
     <div class="quiz_options" title="Pick a choice.">
     
-        <input type="radio" name="0cc314f2-5c2f-11ec-bae0-acde48001122" id="0cc314f2-5c2f-11ec-bae0-acde48001122-1" onclick="clear_selection('0cc314f2-5c2f-11ec-bae0-acde48001122')">
-        <label id="0cc314f2-5c2f-11ec-bae0-acde48001122-1-label" for="0cc314f2-5c2f-11ec-bae0-acde48001122-1"><code>fuzzer(100, 1, 100)</code></label><br>
+        <input type="radio" name="8be109c0-72bd-11ec-ac2c-acde48001122" id="8be109c0-72bd-11ec-ac2c-acde48001122-1" onclick="clear_selection('8be109c0-72bd-11ec-ac2c-acde48001122')">
+        <label id="8be109c0-72bd-11ec-ac2c-acde48001122-1-label" for="8be109c0-72bd-11ec-ac2c-acde48001122-1"><code>fuzzer(100, 1, 100)</code></label><br>
     
-        <input type="radio" name="0cc314f2-5c2f-11ec-bae0-acde48001122" id="0cc314f2-5c2f-11ec-bae0-acde48001122-2" onclick="clear_selection('0cc314f2-5c2f-11ec-bae0-acde48001122')">
-        <label id="0cc314f2-5c2f-11ec-bae0-acde48001122-2-label" for="0cc314f2-5c2f-11ec-bae0-acde48001122-2"><code>fuzzer(100, 100, 0)</code></label><br>
+        <input type="radio" name="8be109c0-72bd-11ec-ac2c-acde48001122" id="8be109c0-72bd-11ec-ac2c-acde48001122-2" onclick="clear_selection('8be109c0-72bd-11ec-ac2c-acde48001122')">
+        <label id="8be109c0-72bd-11ec-ac2c-acde48001122-2-label" for="8be109c0-72bd-11ec-ac2c-acde48001122-2"><code>fuzzer(100, 100, 0)</code></label><br>
     
-        <input type="radio" name="0cc314f2-5c2f-11ec-bae0-acde48001122" id="0cc314f2-5c2f-11ec-bae0-acde48001122-3" onclick="clear_selection('0cc314f2-5c2f-11ec-bae0-acde48001122')">
-        <label id="0cc314f2-5c2f-11ec-bae0-acde48001122-3-label" for="0cc314f2-5c2f-11ec-bae0-acde48001122-3"><code>fuzzer(100, 10, ord('0'))</code></label><br>
+        <input type="radio" name="8be109c0-72bd-11ec-ac2c-acde48001122" id="8be109c0-72bd-11ec-ac2c-acde48001122-3" onclick="clear_selection('8be109c0-72bd-11ec-ac2c-acde48001122')">
+        <label id="8be109c0-72bd-11ec-ac2c-acde48001122-3-label" for="8be109c0-72bd-11ec-ac2c-acde48001122-3"><code>fuzzer(100, 10, ord('0'))</code></label><br>
     
-        <input type="radio" name="0cc314f2-5c2f-11ec-bae0-acde48001122" id="0cc314f2-5c2f-11ec-bae0-acde48001122-4" onclick="clear_selection('0cc314f2-5c2f-11ec-bae0-acde48001122')">
-        <label id="0cc314f2-5c2f-11ec-bae0-acde48001122-4-label" for="0cc314f2-5c2f-11ec-bae0-acde48001122-4"><code>fuzzer(100, ord('0'), 10)</code></label><br>
+        <input type="radio" name="8be109c0-72bd-11ec-ac2c-acde48001122" id="8be109c0-72bd-11ec-ac2c-acde48001122-4" onclick="clear_selection('8be109c0-72bd-11ec-ac2c-acde48001122')">
+        <label id="8be109c0-72bd-11ec-ac2c-acde48001122-4-label" for="8be109c0-72bd-11ec-ac2c-acde48001122-4"><code>fuzzer(100, ord('0'), 10)</code></label><br>
     
     </div>
     </p>
-    <input id="0cc314f2-5c2f-11ec-bae0-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('0cc314f2-5c2f-11ec-bae0-acde48001122', 16, 0, '1 ** (2 % 3) * 4')">
-    <span class="quiz_hint" id="0cc314f2-5c2f-11ec-bae0-acde48001122-hint"></span>
+    <input id="8be109c0-72bd-11ec-ac2c-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('8be109c0-72bd-11ec-ac2c-acde48001122', 16, 0, '1 ** (2 % 3) * 4')">
+    <span class="quiz_hint" id="8be109c0-72bd-11ec-ac2c-acde48001122-hint"></span>
     </div>
     
 </div>
@@ -15758,7 +15713,7 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt
+<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt
 </pre>
 </div>
 </div>
@@ -16127,22 +16082,22 @@ div.jp-OutputPrompt {
     <p>
     <div class="quiz_options" title="Pick a choice.">
     
-        <input type="radio" name="0cd53c9a-5c2f-11ec-bae0-acde48001122" id="0cd53c9a-5c2f-11ec-bae0-acde48001122-1" onclick="clear_selection('0cd53c9a-5c2f-11ec-bae0-acde48001122')">
-        <label id="0cd53c9a-5c2f-11ec-bae0-acde48001122-1-label" for="0cd53c9a-5c2f-11ec-bae0-acde48001122-1">About one in a billion</label><br>
+        <input type="radio" name="8bf3afee-72bd-11ec-ac2c-acde48001122" id="8bf3afee-72bd-11ec-ac2c-acde48001122-1" onclick="clear_selection('8bf3afee-72bd-11ec-ac2c-acde48001122')">
+        <label id="8bf3afee-72bd-11ec-ac2c-acde48001122-1-label" for="8bf3afee-72bd-11ec-ac2c-acde48001122-1">About one in a billion</label><br>
     
-        <input type="radio" name="0cd53c9a-5c2f-11ec-bae0-acde48001122" id="0cd53c9a-5c2f-11ec-bae0-acde48001122-2" onclick="clear_selection('0cd53c9a-5c2f-11ec-bae0-acde48001122')">
-        <label id="0cd53c9a-5c2f-11ec-bae0-acde48001122-2-label" for="0cd53c9a-5c2f-11ec-bae0-acde48001122-2">About one in a million</label><br>
+        <input type="radio" name="8bf3afee-72bd-11ec-ac2c-acde48001122" id="8bf3afee-72bd-11ec-ac2c-acde48001122-2" onclick="clear_selection('8bf3afee-72bd-11ec-ac2c-acde48001122')">
+        <label id="8bf3afee-72bd-11ec-ac2c-acde48001122-2-label" for="8bf3afee-72bd-11ec-ac2c-acde48001122-2">About one in a million</label><br>
     
-        <input type="radio" name="0cd53c9a-5c2f-11ec-bae0-acde48001122" id="0cd53c9a-5c2f-11ec-bae0-acde48001122-3" onclick="clear_selection('0cd53c9a-5c2f-11ec-bae0-acde48001122')">
-        <label id="0cd53c9a-5c2f-11ec-bae0-acde48001122-3-label" for="0cd53c9a-5c2f-11ec-bae0-acde48001122-3">About one in a thousand</label><br>
+        <input type="radio" name="8bf3afee-72bd-11ec-ac2c-acde48001122" id="8bf3afee-72bd-11ec-ac2c-acde48001122-3" onclick="clear_selection('8bf3afee-72bd-11ec-ac2c-acde48001122')">
+        <label id="8bf3afee-72bd-11ec-ac2c-acde48001122-3-label" for="8bf3afee-72bd-11ec-ac2c-acde48001122-3">About one in a thousand</label><br>
     
-        <input type="radio" name="0cd53c9a-5c2f-11ec-bae0-acde48001122" id="0cd53c9a-5c2f-11ec-bae0-acde48001122-4" onclick="clear_selection('0cd53c9a-5c2f-11ec-bae0-acde48001122')">
-        <label id="0cd53c9a-5c2f-11ec-bae0-acde48001122-4-label" for="0cd53c9a-5c2f-11ec-bae0-acde48001122-4">About one in ten</label><br>
+        <input type="radio" name="8bf3afee-72bd-11ec-ac2c-acde48001122" id="8bf3afee-72bd-11ec-ac2c-acde48001122-4" onclick="clear_selection('8bf3afee-72bd-11ec-ac2c-acde48001122')">
+        <label id="8bf3afee-72bd-11ec-ac2c-acde48001122-4-label" for="8bf3afee-72bd-11ec-ac2c-acde48001122-4">About one in ten</label><br>
     
     </div>
     </p>
-    <input id="0cd53c9a-5c2f-11ec-bae0-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('0cd53c9a-5c2f-11ec-bae0-acde48001122', 8, 0, '9 ** 0.5')">
-    <span class="quiz_hint" id="0cd53c9a-5c2f-11ec-bae0-acde48001122-hint"></span>
+    <input id="8bf3afee-72bd-11ec-ac2c-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('8bf3afee-72bd-11ec-ac2c-acde48001122', 8, 0, '9 ** 0.5')">
+    <span class="quiz_hint" id="8bf3afee-72bd-11ec-ac2c-acde48001122-hint"></span>
     </div>
     
 </div>
@@ -16365,26 +16320,26 @@ div.jp-OutputPrompt {
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
 <pre>&#39;5&amp;8&gt;&#34;86,?&#34;/7!1%5-**&amp;-$&amp;)$91;&#34;21(\&#39;8&#34;(%$4,(&#34;(&amp;!67%89$!.?(*(96(28$=6029:&lt;:$(6 !-+2622(&amp;4&#39;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: &#34;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: &amp;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: ?
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: :
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: :
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: $
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: parse error
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpcfvxq3e6/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: &#34;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: &amp;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: ?
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: :
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: :
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: $
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: parse error
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmp_zwegzzu/input.txt 1: illegal character: &amp;
 
 </pre>
 </div>
@@ -16587,9 +16542,9 @@ div.jp-OutputPrompt {
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/292568387.py&#34;, line 5, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/292568387.py&#34;, line 5, in &lt;module&gt;
     crash_if_too_long(s)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/2784561514.py&#34;, line 4, in crash_if_too_long
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/2784561514.py&#34;, line 4, in crash_if_too_long
     raise ValueError
 ValueError (expected)
 </pre>
@@ -16686,9 +16641,9 @@ ValueError (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/3194687366.py&#34;, line 5, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/3194687366.py&#34;, line 5, in &lt;module&gt;
     hang_if_no_space(s)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/3035466707.py&#34;, line 7, in hang_if_no_space
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/3035466707.py&#34;, line 7, in hang_if_no_space
     i += 1
   File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/Timeout.ipynb&#34;, line 43, in timeout_handler
     raise TimeoutError()
@@ -16819,9 +16774,9 @@ TimeoutError (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/2775103647.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/2775103647.py&#34;, line 2, in &lt;module&gt;
     collapse_if_too_large(long_number)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/1591744602.py&#34;, line 3, in collapse_if_too_large
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/1591744602.py&#34;, line 3, in collapse_if_too_large
     raise ValueError
 ValueError (expected)
 </pre>
@@ -16996,7 +16951,8 @@ ValueError (expected)
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>42
+<pre>program(3754,0x10cef8600) malloc: nano zone abandoned due to inability to preallocate reserved vm space.
+42
 </pre>
 </div>
 </div>
@@ -17037,17 +16993,18 @@ ValueError (expected)
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>=================================================================
-<span class="ansi-red-intense-fg ansi-bold">==39661==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60b0000000ae at pc 0x00010e515eef bp 0x7ffee16ecea0 sp 0x7ffee16ece98
+<pre>program(3755,0x10e3e4600) malloc: nano zone abandoned due to inability to preallocate reserved vm space.
+=================================================================
+<span class="ansi-red-intense-fg ansi-bold">==3755==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x60b0000000ae at pc 0x00010c60ceef bp 0x7ff7b38f5c90 sp 0x7ff7b38f5c88
 </span><span class="ansi-blue-intense-fg ansi-bold">READ of size 1 at 0x60b0000000ae thread T0</span>
-    #0 0x10e515eee in main program.c:12
-    #1 0x7fff203adf3c in start+0x0 (libdyld.dylib:x86_64+0x15f3c)
+    #0 0x10c60ceee in main program.c:12
+    #1 0x10e3694fd in start+0x1cd (dyld:x86_64+0x54fd)
 
 <span class="ansi-green-intense-fg ansi-bold">0x60b0000000ae is located 10 bytes to the right of 100-byte region [0x60b000000040,0x60b0000000a4)
 </span><span class="ansi-magenta-intense-fg ansi-bold">allocated by thread T0 here:</span>
-    #0 0x10e56b4c0 in wrap_malloc+0xa0 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x484c0)
-    #1 0x10e515e3f in main program.c:7
-    #2 0x7fff203adf3c in start+0x0 (libdyld.dylib:x86_64+0x15f3c)
+    #0 0x10ca664c0 in wrap_malloc+0xa0 (libclang_rt.asan_osx_dynamic.dylib:x86_64h+0x484c0)
+    #1 0x10c60ce3f in main program.c:7
+    #2 0x10e3694fd in start+0x1cd (dyld:x86_64+0x54fd)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow program.c:12 in main
 Shadow bytes around the buggy address:
@@ -17082,7 +17039,7 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   Left alloca redzone:     <span class="ansi-blue-intense-fg ansi-bold">ca</span>
   Right alloca redzone:    <span class="ansi-blue-intense-fg ansi-bold">cb</span>
   Shadow gap:              cc
-==39661==ABORTING
+==3755==ABORTING
 </pre>
 </div>
 </div>
@@ -17386,7 +17343,7 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/4040656327.py&#34;, line 4, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/4040656327.py&#34;, line 4, in &lt;module&gt;
     assert not s.find(uninitialized_memory_marker)
 AssertionError (expected)
 </pre>
@@ -17655,11 +17612,11 @@ AssertionError (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/2308942452.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/2308942452.py&#34;, line 2, in &lt;module&gt;
     assert airport_codes_repOK()
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/480627665.py&#34;, line 3, in airport_codes_repOK
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/480627665.py&#34;, line 3, in airport_codes_repOK
     assert code_repOK(code)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/865020192.py&#34;, line 2, in code_repOK
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/865020192.py&#34;, line 2, in code_repOK
     assert len(code) == 3, &#34;Airport code must have three characters: &#34; + repr(code)
 AssertionError: Airport code must have three characters: &#39;YMML&#39; (expected)
 </pre>
@@ -17741,11 +17698,11 @@ AssertionError: Airport code must have three characters: &#39;YMML&#39; (expecte
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/1427835309.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/1427835309.py&#34;, line 2, in &lt;module&gt;
     add_new_airport(&#34;London-Heathrow&#34;, &#34;LHR&#34;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/2655039924.py&#34;, line 2, in add_new_airport
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/2655039924.py&#34;, line 2, in add_new_airport
     assert code_repOK(code)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/865020192.py&#34;, line 2, in code_repOK
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/865020192.py&#34;, line 2, in code_repOK
     assert len(code) == 3, &#34;Airport code must have three characters: &#34; + repr(code)
 AssertionError: Airport code must have three characters: &#39;London-Heathrow&#39; (expected)
 </pre>
@@ -17814,13 +17771,13 @@ AssertionError: Airport code must have three characters: &#39;London-Heathrow&#3
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/4151824846.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/4151824846.py&#34;, line 2, in &lt;module&gt;
     add_new_airport_2(&#34;IST&#34;, &#34;Istanbul Yeni Havalimanı&#34;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/2099116665.py&#34;, line 3, in add_new_airport_2
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/2099116665.py&#34;, line 3, in add_new_airport_2
     assert airport_codes_repOK()
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/480627665.py&#34;, line 3, in airport_codes_repOK
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/480627665.py&#34;, line 3, in airport_codes_repOK
     assert code_repOK(code)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_39517/865020192.py&#34;, line 2, in code_repOK
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_3636/865020192.py&#34;, line 2, in code_repOK
     assert len(code) == 3, &#34;Airport code must have three characters: &#34; + repr(code)
 AssertionError: Airport code must have three characters: &#39;YMML&#39; (expected)
 </pre>
@@ -18778,11 +18735,11 @@ airports.py: error: Invalid index <span class="nb">type</span> <span class="s2">
 <text text-anchor="start" x="24.5" y="-120.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">fuzz()</text>
 </a>
 </g>
-<g id="a_node2_6"><a xlink:href="#" xlink:title="run(self, runner: Runner = &lt;Runner object at 0x10bf56940&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
+<g id="a_node2_6"><a xlink:href="#" xlink:title="run(self, runner: Runner = &lt;Runner object at 0x10891d460&gt;) &#45;&gt; Tuple[subprocess.CompletedProcess, str]:&#10;Run `runner` with fuzz input">
 <text text-anchor="start" x="24.5" y="-109.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">run()</text>
 </a>
 </g>
-<g id="a_node2_7"><a xlink:href="#" xlink:title="runs(self, runner: Runner = &lt;PrintRunner object at 0x10bf56850&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
+<g id="a_node2_7"><a xlink:href="#" xlink:title="runs(self, runner: Runner = &lt;PrintRunner object at 0x10891df10&gt;, trials: int = 10) &#45;&gt; List[Tuple[subprocess.CompletedProcess, str]]:&#10;Run `runner` with fuzz input, `trials` times">
 <text text-anchor="start" x="24.5" y="-98.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">runs()</text>
 </a>
 </g>
