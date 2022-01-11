@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2021-12-14 18:00:03+01:00
+# Last change: 2022-01-11 10:08:51+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,25 +68,29 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- ht4p://www.g@oogle.com/search?=fezzing,
- Fhttp:/wwwngofle.com/sEarch?`q=fuzzing,
- tyP/;/svww!&BgVDDooe.cowm/sdar*ch7Q=gtDg,
- tp:/www#i.gEoogNle._om/s0earch?q}fuin,
- hqolt_dp:?.wwwgBogln/M/qe@rsh;qkfzJtng,
- tp/wbw#a.oo^le.U+0c*pcKlq}k,
- A$t]:wwAgmf|Ae(c/{Eah`q=fuzkg,
- ht4p://www.gPoogle.com/search=fez$zino,
- tp:/9w?w#1i,EoOle._o'eq0ech?q}ftin,
- dyiP/;/svosw!&BgVDDooe.cowm/sdar*ch?QDg,
- -tp:w7w#i.gEooN&Km/s0earxsch/q}}puin,
- hqoOt_dp:*wwwBog'ln/Maqe@rsh;qkfzJtng,
- dyiP/;/svosw!&BgVDDooe.cow}/sar*ch?Q:g,
- Fhtt:/wwwngfle.com/szEarh?`q=fuzzing,
- tt/wwm&EoglY amrchq&}fi,n,
- ryNxiP/M;svsw!&JwvwDDomc.pZ={owmUeZ*cl?QDg{,
- tyP/;/svww&BgVD^Dooe.cowmh/sdahr*#h7Q=gt@g,
- |p:/9w#1ij,EoOle._o'eq0ech?q}ftin,
- dDyiRzX//P?svoss1&BgVDDooecowlm/sdr*ch?PCDg]
+ h&tv[p:S/ww.googlve.com/earch?q=fuzzing,
+ h&tv[p>S/wwU.googlve.com/ezarch?q=fezzing,
+ http://ww.google.com/search?q=fuzzig,
+ h.Dvt://w.gSleh.sUnm/eRuh!?!=fuzi',
+ up:S/@kwwgo|gl\voe/co~ml/eercq=F1z~nf,
+ hDvZt*+'j.esFtjm/%eZTh.!!=zi',
+ hvp://ww.SgoGl|we.kosm/BcR1a6z0#h?=Quzig,
+ hvq3u//ww.#SgmGl|we.kosm/Bc1a6z0#h?=Quzpig,
+ upTzkuGo|l{\vOeo-~l;ern=F1&H,
+ h"&];@Sw$w.-|g}oglve.0c/nearshTq=fuzzin&gB,
+ wpTzjsHuWo|l\l
+ eOo/~l;+evz=fB1y&]X,
+ j.LDvt:/ow.gSlehsNUnm/eRuh!?k!=Qfuzm',
+ h&];Sw$w%|}owgV.T0c/n3rMshVq
+ fzzin&?g,
+ h"&Y;@Sw$w.-|g}oglve.0cN+nearshTqC=fuzzin&gB,
+ h&];Sw$w%|}mwgPV.Tc/n3rMshVq
+ fzzin&?g,
+ khM;Rw$e|}GowgV.T8a~k3MsV
+ nBxin&9?g,
+ hDvZ^t*+'w.esGFtjm/%eZh.!!=i',
+ h"&Y;@Sw$w.-|g}oglve.0cN+.earFshTC=fuz:in&gB,
+ r/]/VWS..Unm/Buh#='if9qz']
 
 Besides the simple `PowerSchedule`, we can have advanced power schedules.
 

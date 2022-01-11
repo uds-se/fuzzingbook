@@ -15337,54 +15337,6 @@ div.jp-OutputPrompt {
 </div></section></section><section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
-
-<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.DynamicInvariants</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
-</pre></div>
-<p>and then make use of the following features.</p>
-<p>This chapter provides two classes that automatically extract specifications from a function and a set of inputs:</p>
-<ul>
-<li><code>TypeAnnotator</code> for <em>types</em>, and</li>
-<li><code>InvariantAnnotator</code> for <em>pre-</em> and <em>postconditions</em>.</li>
-</ul>
-<p>Both work by <em>observing</em> a function and its invocations within a <code>with</code> clause.  Here is an example for the type annotator:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">TypeAnnotator</span><span class="p">()</span> <span class="k">as</span> <span class="n">type_annotator</span><span class="p">:</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="nb">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-</pre></div>
-<p>The <code>typed_functions()</code> method will return a representation of <code>sum2()</code> annotated with types observed during execution.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">type_annotator</span><span class="o">.</span><span class="n">typed_functions</span><span class="p">())</span>
-<span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
-</pre></div>
-<p>The invariant annotator works in a similar fashion:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">InvariantAnnotator</span><span class="p">()</span> <span class="k">as</span> <span class="n">inv_annotator</span><span class="p">:</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="nb">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="nb">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-</pre></div>
-<p>The <code>functions_with_invariants()</code> method will return a representation of <code>sum2()</code> annotated with inferred pre- and postconditions that all hold for the observed values.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">inv_annotator</span><span class="o">.</span><span class="n">functions_with_invariants</span><span class="p">())</span>
-<span class="nd">@precondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
-<span class="nd">@precondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
-<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">a</span> <span class="o">==</span> <span class="n">return_value</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
-<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">b</span> <span class="o">==</span> <span class="n">return_value</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
-<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">return_value</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
-<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">return_value</span> <span class="o">==</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
-<span class="nd">@postcondition</span><span class="p">(</span><span class="k">lambda</span> <span class="n">return_value</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">return_value</span> <span class="o">==</span> <span class="n">b</span> <span class="o">+</span> <span class="n">a</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
-</pre></div>
-<p>Such type specifications and invariants can be helpful as <em>oracles</em> (to detect deviations from a given set of runs) as well as for all kinds of <em>symbolic code analyses</em>.  The chapter gives details on how to customize the properties checked for.</p>
-
-</div>
-</div></section></section><section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h2 id="Specifications-and-Assertions">Specifications and Assertions<a class="anchor-link" href="#Specifications-and-Assertions">&#182;</a></h2><p>When implementing a function or program, one usually works against a <em>specification</em> – a set of documented requirements to be satisfied by the code.  Such specifications can come in natural language.  A formal specification, however, allows the computer to check whether the specification is satisfied.</p>
 <p>In the <a href="Intro_Testing.slides.html">introduction to testing</a>, we have seen how <em>preconditions</em> and <em>postconditions</em> can describe what a function does.  Consider the following (simple) square root function:</p>
 
@@ -15483,9 +15435,9 @@ div.jp-OutputPrompt {
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/829521914.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/829521914.py&#34;, line 2, in &lt;module&gt;
     my_sqrt(&#34;foo&#34;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/2661069967.py&#34;, line 4, in my_sqrt
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/2661069967.py&#34;, line 4, in my_sqrt
     guess = x / 2
 TypeError: unsupported operand type(s) for /: &#39;str&#39; and &#39;int&#39; (expected)
 </pre>
@@ -15524,9 +15476,9 @@ TypeError: unsupported operand type(s) for /: &#39;str&#39; and &#39;int&#39; (e
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/1975547953.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/1975547953.py&#34;, line 2, in &lt;module&gt;
     x = my_sqrt(0.0)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/2661069967.py&#34;, line 7, in my_sqrt
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/2661069967.py&#34;, line 7, in my_sqrt
     guess = (approx + x / approx) / 2
 ZeroDivisionError: float division by zero (expected)
 </pre>
@@ -15571,9 +15523,9 @@ ZeroDivisionError: float division by zero (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/1349814288.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/1349814288.py&#34;, line 2, in &lt;module&gt;
     x = my_sqrt(-1.0)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/2661069967.py&#34;, line 7, in my_sqrt
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/2661069967.py&#34;, line 7, in my_sqrt
     guess = (approx + x / approx) / 2
   File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/Timeout.ipynb&#34;, line 43, in timeout_handler
     raise TimeoutError()
@@ -15673,7 +15625,7 @@ TimeoutError (expected)
 
 
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
-<pre>&#39;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpxb384dxc.py&#39;</pre>
+<pre>&#39;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpxqri16jn.py&#39;</pre>
 </div>
 
 </div>
@@ -15801,10 +15753,10 @@ TimeoutError (expected)
 
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpxb384dxc.py:1: error: Function is missing a type annotation
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpxb384dxc.py:12: error: Returning Any from function declared to return &#34;float&#34;
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpxb384dxc.py:12: error: Call to untyped function &#34;my_sqrt&#34; in typed context
-/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpxb384dxc.py:14: error: Argument 1 to &#34;my_sqrt_with_type_annotations&#34; has incompatible type &#34;str&#34;; expected &#34;float&#34;
+<pre>/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpxqri16jn.py:1: error: Function is missing a type annotation
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpxqri16jn.py:12: error: Returning Any from function declared to return &#34;float&#34;
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpxqri16jn.py:12: error: Call to untyped function &#34;my_sqrt&#34; in typed context
+/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/tmpxqri16jn.py:14: error: Argument 1 to &#34;my_sqrt_with_type_annotations&#34; has incompatible type &#34;str&#34;; expected &#34;float&#34;
 Found 4 errors in 1 file (checked 1 source file)
 
 </pre>
@@ -16197,7 +16149,7 @@ Found 4 errors in 1 file (checked 1 source file)
 my_sqrt(x=25) returns 5.0
 my_sqrt(x=2.0)
 my_sqrt(x=2.0) returns 1.414213562373095
-__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallTracker object at 0x11c0cb880&gt;)
+__exit__(tb=None, exc_value=None, exc_type=None, self=&lt;__main__.CallTracker object at 0x107f9bee0&gt;)
 </pre>
 </div>
 </div>
@@ -19036,9 +18988,9 @@ the appropriate type of a given value (as a string):</p>
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/2353876897.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/2353876897.py&#34;, line 2, in &lt;module&gt;
     my_sqrt_with_precondition(-1.0)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/906718213.py&#34;, line 6, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/906718213.py&#34;, line 6, in wrapper
     assert precondition(*args, **kwargs), &#34;Precondition violated&#34;
 AssertionError: Precondition violated (expected)
 </pre>
@@ -19173,9 +19125,9 @@ AssertionError: Precondition violated (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/1985029262.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/1985029262.py&#34;, line 2, in &lt;module&gt;
     y = buggy_my_sqrt_with_postcondition(2.0)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/906718213.py&#34;, line 10, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/906718213.py&#34;, line 10, in wrapper
     assert postcondition(retval, *args, **kwargs), &#34;Postcondition violated&#34;
 AssertionError: Postcondition violated (expected)
 </pre>
@@ -21259,13 +21211,13 @@ X &lt; 0 ((&#39;y&#39;, 1),) False
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/3390953352.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/3390953352.py&#34;, line 2, in &lt;module&gt;
     my_sqrt_annotated(-1.0)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/906718213.py&#34;, line 8, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/906718213.py&#34;, line 8, in wrapper
     retval = func(*args, **kwargs) # call original function or method
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/906718213.py&#34;, line 8, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/906718213.py&#34;, line 8, in wrapper
     retval = func(*args, **kwargs) # call original function or method
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/906718213.py&#34;, line 6, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/906718213.py&#34;, line 6, in wrapper
     assert precondition(*args, **kwargs), &#34;Precondition violated&#34;
 AssertionError: Precondition violated (expected)
 </pre>
@@ -21310,9 +21262,9 @@ AssertionError: Precondition violated (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/2605599394.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/2605599394.py&#34;, line 2, in &lt;module&gt;
     my_sqrt(-1.0)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/2661069967.py&#34;, line 7, in my_sqrt
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/2661069967.py&#34;, line 7, in my_sqrt
     guess = (approx + x / approx) / 2
   File &#34;/Users/zeller/Projects/fuzzingbook/notebooks/Timeout.ipynb&#34;, line 43, in timeout_handler
     raise TimeoutError()
@@ -21443,16 +21395,16 @@ TimeoutError (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/2428286732.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/2428286732.py&#34;, line 2, in &lt;module&gt;
     my_sqrt_negative(2.0)  # type: ignore
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/906718213.py&#34;, line 8, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/906718213.py&#34;, line 8, in wrapper
     retval = func(*args, **kwargs) # call original function or method
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/906718213.py&#34;, line 8, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/906718213.py&#34;, line 8, in wrapper
     retval = func(*args, **kwargs) # call original function or method
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/906718213.py&#34;, line 8, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/906718213.py&#34;, line 8, in wrapper
     retval = func(*args, **kwargs) # call original function or method
   [Previous line repeated 4 more times]
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/906718213.py&#34;, line 10, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/906718213.py&#34;, line 10, in wrapper
     assert postcondition(retval, *args, **kwargs), &#34;Postcondition violated&#34;
 AssertionError: Postcondition violated (expected)
 </pre>
@@ -22108,9 +22060,9 @@ def sum(a, b):
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/2212034949.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/2212034949.py&#34;, line 2, in &lt;module&gt;
     remove_first_char(&#39;&#39;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/906718213.py&#34;, line 6, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/906718213.py&#34;, line 6, in wrapper
     assert precondition(*args, **kwargs), &#34;Precondition violated&#34;
 AssertionError: Precondition violated (expected)
 </pre>
@@ -22253,9 +22205,9 @@ AssertionError: Precondition violated (expected)
 
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/2212034949.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/2212034949.py&#34;, line 2, in &lt;module&gt;
     remove_first_char(&#39;&#39;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_52243/860932556.py&#34;, line 6, in wrapper
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_11137/860932556.py&#34;, line 6, in wrapper
     assert precondition(*args, **kwargs), &#34;Precondition violated: &#34; + doc
 AssertionError: Precondition violated: len(s) &gt; 0 (expected)
 </pre>

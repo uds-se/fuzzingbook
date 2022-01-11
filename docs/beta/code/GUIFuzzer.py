@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2021-12-13 15:47:02+01:00
+# Last change: 2022-01-11 10:26:57+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -52,7 +52,6 @@ We let the browser open the URL of the server we want to investigate (in this ca
 
 >>> gui_driver.get(httpd_url)
 >>> Image(gui_driver.get_screenshot_as_png())
-
 The `GUICoverageFuzzer` class explores the user interface and builds a _grammar_ that encodes all states as well as the user interactions required to move from one state to the next.  It is paired with a `GUIRunner` which interacts with the GUI driver.
 
 >>> gui_fuzzer = GUICoverageFuzzer(gui_driver)
@@ -65,19 +64,34 @@ The `explore_all()` method extracts all states and all transitions from a Web us
 The grammar embeds a finite state automation and is best visualized as such.
 
 >>> fsm_diagram(gui_fuzzer.grammar)
-
 The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow paths through the finite state machine.  Since `GUICoverageFuzzer` is derived from `CoverageFuzzer` (see the [chapter on coverage-based grammar fuzzing](GrammarCoverageFuzzer.ipynb)), it automatically covers (a) as many transitions between states as well as (b) as many form elements as possible.  In our case, the first set of actions explores the transition via the "order form" link; the second set then goes until the "" state.
 
 >>> gui_driver.get(httpd_url)
 >>> actions = gui_fuzzer.fuzz()
 >>> print(actions)
+click('terms and conditions')
+click('order form')
+fill('email', 'V@l')
+check('terms', False)
+fill('city', 'E')
+fill('name', 'MI')
+fill('zip', '3')
+submit('submit')
+click('order form')
+fill('email', 'e@J')
+check('terms', True)
+fill('city', 'i')
+fill('name', 'a')
+fill('zip', '4')
+submit('submit')
+
+
 
 These actions can be fed into the GUI runner, which will execute them on the given GUI driver.
 
 >>> gui_driver.get(httpd_url)
 >>> result, outcome = gui_runner.run(actions)
 >>> Image(gui_driver.get_screenshot_as_png())
-
 Further invocations of `fuzz()` will further cover the model – for instance, exploring the terms and conditions.
 
 A tool like `GUICoverageFuzzer` will provide "deep" exploration of user interfaces, even filling out forms to explore what is behind them. Keep in mind, though, that `GUICoverageFuzzer` is experimental: It only supports a subset of HTML form and link features, and does not take JavaScript into account.
@@ -189,14 +203,14 @@ def start_webdriver(browser=BROWSER, headless=HEADLESS, zoom=1.4):
         options.add_argument('headless')
     else:
         options.headless = headless
-    
+
     # Start the browser, and obtain a _web driver_ object such that we can interact with it.
     if browser == 'firefox':
         # For firefox, set a higher resolution for our screenshots
         profile = webdriver.firefox.firefox_profile.FirefoxProfile()
         profile.set_preference("layout.css.devPixelsPerPx", repr(zoom))
         gui_driver = webdriver.Firefox(firefox_profile=profile, options=options)
-        
+
         # We set the window size such that it fits our order form exactly;
         # this is useful for not wasting too much space when taking screen shots.
         gui_driver.set_window_size(700, 300)
@@ -204,7 +218,7 @@ def start_webdriver(browser=BROWSER, headless=HEADLESS, zoom=1.4):
     elif browser == 'chrome':
         gui_driver = webdriver.Chrome(options=options)
         gui_driver.set_window_size(700, 210 if headless else 340)
-            
+
     return gui_driver
 
 if __name__ == '__main__':
@@ -316,7 +330,7 @@ def test_successful_order(driver, url):
     email = "white@jpwynne.edu"
     city = "Albuquerque"
     zip_code = "87101"
-    
+
     driver.get(url)
     driver.find_element_by_name("name").send_keys(name)
     driver.find_element_by_name("email").send_keys(email)
@@ -324,7 +338,7 @@ def test_successful_order(driver, url):
     driver.find_element_by_name('zip').send_keys(zip_code)
     driver.find_element_by_name('terms').click()
     driver.find_element_by_name('submit').click()
-    
+
     title = driver.find_element_by_id('title')
     assert title is not None
     assert title.text.find("Thank you") >= 0
@@ -336,7 +350,7 @@ def test_successful_order(driver, url):
     assert confirmation.text.find(email) >= 0
     assert confirmation.text.find(city) >= 0
     assert confirmation.text.find(zip_code) >= 0
-    
+
     return True
 
 if __name__ == '__main__':
@@ -415,7 +429,7 @@ from selenium.common.exceptions import StaleElementReferenceException
 class GUIGrammarMiner(GUIGrammarMiner):
     def mine_input_element_actions(self):
         actions = set()
-        
+
         for elem in self.driver.find_elements_by_tag_name("input"):
             try:
                 input_type = elem.get_attribute("type")
@@ -453,7 +467,7 @@ if __name__ == '__main__':
 class GUIGrammarMiner(GUIGrammarMiner):
     def mine_button_element_actions(self):
         actions = set()
-        
+
         for elem in self.driver.find_elements_by_tag_name("button"):
             try:
                 button_type = elem.get_attribute("type")
@@ -503,7 +517,7 @@ class GUIGrammarMiner(GUIGrammarMiner):
     def follow_link(self, link):
         if not self.stay_on_host:
             return True
-        
+
         current_url = self.driver.current_url
         target_url = urljoin(current_url, link)
         return urlsplit(current_url).hostname == urlsplit(target_url).hostname       
@@ -598,21 +612,21 @@ class GUIGrammarMiner(GUIGrammarMiner):
         "<string>": ["<character>", "<string><character>"],
         "<character>": ["<letter>", "<digit>", "<special>"],
         "<letter>": crange('a', 'z') + crange('A', 'Z'),
-        
+
         "<number>": ["<digits>"],
         "<digits>": ["<digit>", "<digits><digit>"],
         "<digit>": crange('0', '9'),
-        
+
         "<special>": srange(". !"),
 
         "<email>": ["<letters>@<letters>"],
         "<letters>": ["<letter>", "<letters><letter>"],
-        
+
         "<boolean>": ["True", "False"],
 
         # Use a fixed password in case we need to repeat it
         "<password>": ["abcABC.123"],
-        
+
         "<hidden>": ["<string>"],
     })
 
@@ -637,12 +651,12 @@ class GUIGrammarMiner(GUIGrammarMiner):
         for action in self.mine_state_actions():
             if action.startswith("submit"):
                 submit = action
-                
+
             elif action.startswith("click"):
                 link_target = self.new_state_symbol(grammar)
                 grammar[link_target] = [self.UNEXPLORED_STATE]
                 alternatives.append(action + '\n' + link_target)
-                
+
             elif action.startswith("ignore"):
                 pass
 
@@ -660,17 +674,17 @@ class GUIGrammarMiner(GUIGrammarMiner):
             form_target = self.new_state_symbol(grammar)
             grammar[form_target] = [self.UNEXPLORED_STATE]
             alternatives.append(form + '\n' + form_target)
-            
+
         alternatives += [self.FINAL_STATE]
 
         grammar[state_symbol] = alternatives
-        
+
         # Remove unused parts
         for nonterminal in unreachable_nonterminals(grammar):
             del grammar[nonterminal]
 
         assert is_valid_grammar(grammar)
-        
+
         return grammar
 
 if __name__ == '__main__':
@@ -696,7 +710,7 @@ from .bookutils import unicode_escape
 def fsm_diagram(grammar, start_symbol=START_SYMBOL):
     from graphviz import Digraph
     from IPython.display import display
-    
+
     def left_align(label):
         return dot_escape(label.replace('\n', r'\l')).replace(r'\\l', '\\l')
 
@@ -704,12 +718,12 @@ def fsm_diagram(grammar, start_symbol=START_SYMBOL):
 
     symbols = deque([start_symbol])
     symbols_seen = set()
-    
+
     while len(symbols) > 0:
         symbol = symbols.popleft()
         symbols_seen.add(symbol)
         dot.node(symbol, dot_escape(unicode_escape(symbol)))
-        
+
         for expansion in grammar[symbol]:
             nts = nonterminals(expansion)
             if len(nts) > 0:
@@ -719,8 +733,7 @@ def fsm_diagram(grammar, start_symbol=START_SYMBOL):
 
                 label = expansion.replace(target_symbol, '')
                 dot.edge(symbol, target_symbol, left_align(unicode_escape(label)))
-                         
-                
+
     return display(dot)
 
 if __name__ == '__main__':
@@ -748,20 +761,23 @@ from .Fuzzer import Runner
 class GUIRunner(Runner):
     def __init__(self, driver):
         self.driver = driver
-        
+
     def run(self, inp):
         def fill(name, value):
             self.do_fill(html.unescape(name), html.unescape(value))
+
         def check(name, state):
             self.do_check(html.unescape(name), state)
+
         def submit(name):
             self.do_submit(html.unescape(name))
+
         def click(name):
             self.do_click(html.unescape(name))
-        
+
         exec(inp, {'__builtins__': {}},
                   {'fill': fill, 'check': check, 'submit': submit, 'click': click})
-        
+
         return inp, self.PASS
 
 from selenium.common.exceptions import NoSuchElementException
@@ -876,7 +892,7 @@ class GUIFuzzer(GrammarFuzzer):
         self.state_symbol = GUIGrammarMiner.START_STATE
         self.state = self.miner.mine_state_actions()
         self.states_seen[self.state] = self.state_symbol
-        
+
         grammar = self.miner.mine_state_grammar()
         super().__init__(grammar, **kwargs)
 
@@ -940,7 +956,7 @@ if __name__ == '__main__':
 class GUIFuzzer(GUIFuzzer):
     def run(self, runner):
         assert isinstance(runner, GUIRunner)
-        
+
         self.restart()
         action = self.fuzz()
         self.state_symbol = self.fsm_last_state_symbol(self.derivation_tree)
@@ -949,7 +965,7 @@ class GUIFuzzer(GUIFuzzer):
             print("Action", action.strip(), "->", self.state_symbol)
 
         result, outcome = runner.run(action)
-        
+
         if self.state_symbol != GUIGrammarMiner.FINAL_STATE:
             self.update_state()
 
@@ -970,7 +986,7 @@ class GUIFuzzer(GUIFuzzer):
 class GUIFuzzer(GUIFuzzer):
     def set_grammar(self, new_grammar):
         self.grammar = new_grammar
-        
+
         if self.disp_gui_exploration and rich_output():
             display(fsm_diagram(self.grammar))
 
@@ -990,7 +1006,7 @@ from .Grammars import exp_string, exp_opts
 def replace_symbol(grammar, old_symbol, new_symbol):
     """Return a grammar in which all occurrences of `old_symbol` are replaced by `new_symbol`"""
     new_grammar = {}
-    
+
     for symbol in grammar:
         new_expansions = []
         for expansion in grammar[symbol]:
@@ -1000,16 +1016,16 @@ def replace_symbol(grammar, old_symbol, new_symbol):
             else:
                 new_expansion = new_expansion_string
             new_expansions.append(new_expansion)
-                
+
         new_grammar[symbol] = new_expansions
-        
+
     # Remove unused parts
     for nonterminal in unreachable_nonterminals(new_grammar):
         del new_grammar[nonterminal]
 
     return new_grammar
 
-class GUIFuzzer(GUIFuzzer):            
+class GUIFuzzer(GUIFuzzer):
     def update_existing_state(self):
         if self.log_gui_exploration:
             print("In existing state", self.states_seen[self.state])
@@ -1018,7 +1034,7 @@ class GUIFuzzer(GUIFuzzer):
             if self.log_gui_exploration:
                 print("Replacing expected state %s by %s" %
                       (self.state_symbol, self.states_seen[self.state]))
-            
+
             new_grammar = replace_symbol(self.grammar, self.state_symbol, 
                                          self.states_seen[self.state])
             self.state_symbol = self.states_seen[self.state]

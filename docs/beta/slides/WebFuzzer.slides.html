@@ -15327,40 +15327,6 @@ div.jp-OutputPrompt {
 </ul>
 
 </div>
-</div></section></section><section><section>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h2 id="Synopsis">Synopsis<a class="anchor-link" href="#Synopsis">&#182;</a></h2><!-- Automatically generated. Do not edit. -->
-
-<p>To <a href="Importing.slides.html">use the code provided in this chapter</a>, write</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">fuzzingbook.WebFuzzer</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
-</pre></div>
-<p>and then make use of the following features.</p>
-<p>This chapter provides a simple (and vulnerable) Web server and two experimental fuzzers that are applied to it.</p>
-<h3 id="Fuzzing-Web-Forms">Fuzzing Web Forms<a class="anchor-link" href="#Fuzzing-Web-Forms">&#182;</a></h3><p><code>WebFormFuzzer</code> demonstrates how to interact with a Web form.  Given a URL with a Web form, it automatically extracts a grammar that produces a URL; this URL contains values for all form elements.  Support is limited to GET forms and a subset of HTML form elements.</p>
-<p>Here's the grammar extracted for our vulnerable Web server:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">web_form_fuzzer</span> <span class="o">=</span> <span class="n">WebFormFuzzer</span><span class="p">(</span><span class="n">httpd_url</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">web_form_fuzzer</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="s1">&#39;&lt;start&gt;&#39;</span><span class="p">]</span>
-<span class="p">[</span><span class="s1">&#39;&lt;action&gt;?&lt;query&gt;&#39;</span><span class="p">]</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">web_form_fuzzer</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="s1">&#39;&lt;action&gt;&#39;</span><span class="p">]</span>
-<span class="p">[</span><span class="s1">&#39;/order&#39;</span><span class="p">]</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">web_form_fuzzer</span><span class="o">.</span><span class="n">grammar</span><span class="p">[</span><span class="s1">&#39;&lt;query&gt;&#39;</span><span class="p">]</span>
-<span class="p">[</span><span class="s1">&#39;&lt;item&gt;&amp;&lt;name&gt;&amp;&lt;email-1&gt;&amp;&lt;city&gt;&amp;&lt;zip&gt;&amp;&lt;terms&gt;&amp;&lt;submit-1&gt;&#39;</span><span class="p">]</span>
-</pre></div>
-<p>Using it for fuzzing yields a path with all form values filled; accessing this path acts like filling out and submitting the form.</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">web_form_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-<span class="s1">&#39;/order?item=lockset&amp;name=%43+&amp;email=+c%40_+c&amp;city=%37b_4&amp;zip=5&amp;terms=on&amp;submit=&#39;</span>
-</pre></div>
-<p>Repeated calls to <code>WebFormFuzzer.fuzz()</code> invoke the form again and again, each time with different (fuzzed) values.</p>
-<h3 id="SQL-Injection-Attacks">SQL Injection Attacks<a class="anchor-link" href="#SQL-Injection-Attacks">&#182;</a></h3><p><code>SQLInjectionFuzzer</code> is an experimental extension of <code>WebFormFuzzer</code> whose constructor takes an additional <em>payload</em> – an SQL command to be injected and executed on the server.  Otherwise, it is used like <code>WebFormFuzzer</code>:</p>
-<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sql_fuzzer</span> <span class="o">=</span> <span class="n">SQLInjectionFuzzer</span><span class="p">(</span><span class="n">httpd_url</span><span class="p">,</span> <span class="s2">&quot;DELETE FROM orders&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">sql_fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span>
-<span class="s2">&quot;/order?item=lockset&amp;name=+&amp;email=0%404&amp;city=+&#39;+)%3b+DELETE+FROM+orders%3b+--&amp;zip=&#39;+OR+1</span><span class="si">%3d</span><span class="s2">1--&#39;&amp;terms=on&amp;submit=&quot;</span>
-</pre></div>
-<p>As you can see, the path to be retrieved contains the payload encoded into one of the form field values.</p>
-<p><code>SQLInjectionFuzzer</code> is a proof-of-concept on how to build a malicious fuzzer; you should study and extend its code to make actual use of it.</p>
-
-</div>
 </div></section><section>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
@@ -16998,7 +16964,7 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:32] "GET / HTTP/1.1" 200 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:21] "GET / HTTP/1.1" 200 -
 </pre>
 </div>
 
@@ -17158,7 +17124,7 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:32] INSERT INTO orders VALUES ('tshirt', 'Jane Doe', 'doe@example.com', 'Seattle', '98104')
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:21] INSERT INTO orders VALUES ('tshirt', 'Jane Doe', 'doe@example.com', 'Seattle', '98104')
 </pre>
 </div>
 
@@ -17172,7 +17138,7 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:32] "GET /order?item=tshirt&name=Jane+Doe&email=doe%40example.com&city=Seattle&zip=98104 HTTP/1.1" 200 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:21] "GET /order?item=tshirt&name=Jane+Doe&email=doe%40example.com&city=Seattle&zip=98104 HTTP/1.1" 200 -
 </pre>
 </div>
 
@@ -17311,7 +17277,7 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:32] "GET /some/other/path HTTP/1.1" 404 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:21] "GET /some/other/path HTTP/1.1" 404 -
 </pre>
 </div>
 
@@ -18156,7 +18122,7 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:34] INSERT INTO orders VALUES ('lockset', 'Jane Doe', 'j_smith@example.com', 'Seattle', '16631')
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:23] INSERT INTO orders VALUES ('lockset', 'Jane Doe', 'j_smith@example.com', 'Seattle', '16631')
 </pre>
 </div>
 
@@ -18170,7 +18136,7 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:34] "GET /order?item=lockset&name=Jane+Doe&email=j_smith%40example.com&city=Seattle&zip=16631 HTTP/1.1" 200 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:23] "GET /order?item=lockset&name=Jane+Doe&email=j_smith%40example.com&city=Seattle&zip=16631 HTTP/1.1" 200 -
 </pre>
 </div>
 
@@ -18434,7 +18400,7 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:34] "GET /order?item=drill&nae=Jane+Doe&email=j.doe%40example.com&city=Seattle&zip=45732 HTTP/1.1" 500 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:23] "GET /order?item=drill&nae=Jane+Doe&email=j.doe%40example.com&city=Seattle&zip=45732 HTTP/1.1" 500 -
 </pre>
 </div>
 
@@ -18448,12 +18414,12 @@ div.jp-OutputPrompt {
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:34] Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/739974898.py", line 8, in do_GET
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:23] Traceback (most recent call last):
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/739974898.py", line 8, in do_GET
     self.handle_order()
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/1342827050.py", line 4, in handle_order
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/1342827050.py", line 4, in handle_order
     self.store_order(values)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/1382513861.py", line 5, in store_order
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/1382513861.py", line 5, in store_order
     sql_command = "INSERT INTO orders VALUES ('{item}', '{name}', '{email}', '{city}', '{zip}')".format(**values)
 KeyError: 'name'
 </pre>
@@ -18476,11 +18442,11 @@ KeyError: 'name'
   <p>
   The server has encountered an internal error.  Go to our <a href="/">order form</a>.
   <pre>Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/739974898.py", line 8, in do_GET
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/739974898.py", line 8, in do_GET
     self.handle_order()
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/1342827050.py", line 4, in handle_order
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/1342827050.py", line 4, in handle_order
     self.store_order(values)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/1382513861.py", line 5, in store_order
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/1382513861.py", line 5, in store_order
     sql_command = "INSERT INTO orders VALUES ('{item}', '{name}', '{email}', '{city}', '{zip}')".format(**values)
 KeyError: 'name'
 </pre>
@@ -18724,7 +18690,7 @@ KeyError: 'name'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:35] "GET /order HTTP/1.1" 500 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:24] "GET /order HTTP/1.1" 500 -
 </pre>
 </div>
 
@@ -18738,12 +18704,12 @@ KeyError: 'name'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:35] Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/739974898.py", line 8, in do_GET
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:24] Traceback (most recent call last):
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/739974898.py", line 8, in do_GET
     self.handle_order()
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/1342827050.py", line 4, in handle_order
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/1342827050.py", line 4, in handle_order
     self.store_order(values)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/1382513861.py", line 5, in store_order
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/1382513861.py", line 5, in store_order
     sql_command = "INSERT INTO orders VALUES ('{item}', '{name}', '{email}', '{city}', '{zip}')".format(**values)
 KeyError: 'item'
 </pre>
@@ -18766,11 +18732,11 @@ KeyError: 'item'
   <p>
   The server has encountered an internal error.  Go to our <a href="/">order form</a>.
   <pre>Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/739974898.py", line 8, in do_GET
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/739974898.py", line 8, in do_GET
     self.handle_order()
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/1342827050.py", line 4, in handle_order
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/1342827050.py", line 4, in handle_order
     self.store_order(values)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/1382513861.py", line 5, in store_order
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/1382513861.py", line 5, in store_order
     sql_command = "INSERT INTO orders VALUES ('{item}', '{name}', '{email}', '{city}', '{zip}')".format(**values)
 KeyError: 'item'
 </pre>
@@ -18832,7 +18798,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:35] "GET / HTTP/1.1" 200 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:24] "GET / HTTP/1.1" 200 -
 </pre>
 </div>
 
@@ -19596,7 +19562,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:35] INSERT INTO orders VALUES ('drill', ' ', '5F @p   a ', 'cdb', '3230')
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:24] INSERT INTO orders VALUES ('drill', ' ', '5F @p   a ', 'cdb', '3230')
 </pre>
 </div>
 
@@ -19610,7 +19576,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:35] "GET /order?item=drill&name=+&email=5F+%40p+++a+&city=cdb&zip=3230&terms=on&submit= HTTP/1.1" 200 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:24] "GET /order?item=drill&name=+&email=5F+%40p+++a+&city=cdb&zip=3230&terms=on&submit= HTTP/1.1" 200 -
 </pre>
 </div>
 
@@ -19969,7 +19935,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:35] "GET /robots.txt HTTP/1.1" 404 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:25] "GET /robots.txt HTTP/1.1" 404 -
 </pre>
 </div>
 
@@ -19983,7 +19949,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:35] "GET / HTTP/1.1" 200 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:25] "GET / HTTP/1.1" 200 -
 </pre>
 </div>
 
@@ -20573,6 +20539,19 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
+<pre><a href="https://www.fuzzingbook.org/html/Timeout.html">https://www.fuzzingbook.org/html/Timeout.html</a></pre>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
 <pre><a href="https://www.fuzzingbook.org/html/ClassDiagram.html">https://www.fuzzingbook.org/html/ClassDiagram.html</a></pre>
 </div>
 
@@ -20887,7 +20866,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:36] INSERT INTO orders VALUES ('drill', '
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:25] INSERT INTO orders VALUES ('drill', '
     Jane Doe<p>
     <strong><a href="www.lots.of.malware">Click here for cute cat pictures!</a></strong>
     </p>
@@ -20905,7 +20884,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:36] "GET /order?item=drill&name=%0A++++Jane+Doe%3Cp%3E%0A++++%3Cstrong%3E%3Ca+href%3D%22www.lots.of.malware%22%3EClick+here+for+cute+cat+pictures!%3C%2Fa%3E%3C%2Fstrong%3E%0A++++%3C%2Fp%3E%0A++++&email=j_smith%40example.com&city=Seattle&zip=02805 HTTP/1.1" 200 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:25] "GET /order?item=drill&name=%0A++++Jane+Doe%3Cp%3E%0A++++%3Cstrong%3E%3Ca+href%3D%22www.lots.of.malware%22%3EClick+here+for+cute+cat+pictures!%3C%2Fa%3E%3C%2Fstrong%3E%0A++++%3C%2Fp%3E%0A++++&email=j_smith%40example.com&city=Seattle&zip=02805 HTTP/1.1" 200 -
 </pre>
 </div>
 
@@ -21487,7 +21466,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:36] INSERT INTO orders VALUES ('drill', 'Jane', 'x', 'x', 'x'); DELETE FROM orders; --', 'j.doe@example.com', 'New York', '14083')
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:25] INSERT INTO orders VALUES ('drill', 'Jane', 'x', 'x', 'x'); DELETE FROM orders; --', 'j.doe@example.com', 'New York', '14083')
 </pre>
 </div>
 
@@ -21501,7 +21480,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:36] "GET /order?item=drill&name=Jane',+'x',+'x',+'x')%3B+DELETE+FROM+orders%3B+--&email=j.doe%40example.com&city=New+York&zip=14083 HTTP/1.1" 200 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:25] "GET /order?item=drill&name=Jane',+'x',+'x',+'x')%3B+DELETE+FROM+orders%3B+--&email=j.doe%40example.com&city=New+York&zip=14083 HTTP/1.1" 200 -
 </pre>
 </div>
 
@@ -21630,11 +21609,11 @@ KeyError: 'item'
   <p>
   The server has encountered an internal error.  Go to our <a href="/">order form</a>.
   <pre>Traceback (most recent call last):
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/739974898.py", line 8, in do_GET
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/739974898.py", line 8, in do_GET
     self.handle_order()
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/1342827050.py", line 4, in handle_order
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/1342827050.py", line 4, in handle_order
     self.store_order(values)
-  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_96174/1382513861.py", line 5, in store_order
+  File "/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_12447/1382513861.py", line 5, in store_order
     sql_command = "INSERT INTO orders VALUES ('{item}', '{name}', '{email}', '{city}', '{zip}')".format(**values)
 KeyError: 'item'
 </pre>
@@ -21954,7 +21933,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:36] INSERT INTO orders VALUES ('tshirt', 'Jane Doe', 'doe@example.com', 'Seattle', '98104')
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:25] INSERT INTO orders VALUES ('tshirt', 'Jane Doe', 'doe@example.com', 'Seattle', '98104')
 </pre>
 </div>
 
@@ -21968,7 +21947,7 @@ KeyError: 'item'
 
 
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output " data-mime-type="text/html">
-<pre style="background: NavajoWhite;">127.0.0.1 - - [13/Dec/2021 15:45:36] "GET /order?item=tshirt&name=Jane+Doe&email=doe%40example.com&city=Seattle&zip=98104 HTTP/1.1" 200 -
+<pre style="background: NavajoWhite;">127.0.0.1 - - [11/Jan/2022 10:25:25] "GET /order?item=tshirt&name=Jane+Doe&email=doe%40example.com&city=Seattle&zip=98104 HTTP/1.1" 200 -
 </pre>
 </div>
 
