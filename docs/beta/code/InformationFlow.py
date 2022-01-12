@@ -3,7 +3,7 @@
 
 # "Tracking Information Flow" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/InformationFlow.html
-# Last change: 2022-01-11 10:20:45+01:00
+# Last change: 2022-01-12 14:51:55+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -276,7 +276,7 @@ class DB(DB):
     def my_eval(self, statement, g, l):
         try:
             return eval(statement, g, l)
-        except:
+        except Exception:
             raise SQLException('Invalid WHERE (%s)' % repr(statement))
 
 if __name__ == '__main__':

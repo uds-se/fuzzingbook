@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxGrammarFuzzer.html
-# Last change: 2022-01-11 10:17:57+01:00
+# Last change: 2022-01-12 14:49:17+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -52,6 +52,8 @@ Rather than mutating strings randomly, the `DictMutator` class allows to insert 
 >>> seeds = ["HelloWorld"]
 >>> for i in range(10):
 >>>     print(dict_mutator.mutate(seeds[0]))
+HelloWorldhtml>
+HelloWorldml>
 HelloWorld
 HelloWorld
 HelloWorld
@@ -59,9 +61,7 @@ HelloWorld
 HelloWorld
 HelloWorld
 HelloWorld
-HelloWorlddy>
-World
-HellolWorld
+Hello|/head>World
 
 
 This `DictMutator` can be used as an argument to `GreyboxFuzzer`:
@@ -85,12 +85,12 @@ The fuzzer itself is initialized with a list of seeds, the above `FragmentMutato
 >>>     print(lang_fuzzer.fuzz())
 HelloWorld
 HelloWorld
-World
 HelloWorld
-Hello
-
-Hello
-Hello
+HelloWorld
+HelloWorld
+HelloWorld
+HelloWorld
+HelloWorld
 HelloWorld
 HelloWorld
 ### Fuzzing with Input Regions
