@@ -3,7 +3,7 @@
 
 # "Testing Configurations" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2022-01-12 14:53:39+01:00
+# Last change: 2022-01-18 13:13:36+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -54,9 +54,139 @@ This chapter provides two classes:
 The grammar can be extracted via the method `ebnf_grammar()`:
 
 >>> option_ebnf_grammar = autopep8_runner.ebnf_grammar()
->>> print(option_ebnf_grammar)
-{'': ['()*'], '': [' -h', ' --help', ' --version', ' -v', ' --verbose', ' -d', ' --diff', ' -i', ' --in-place', ' --global-config ', ' --ignore-local-config', ' -r', ' --recursive', ' -j ', ' --jobs ', ' -p ', ' --pep8-passes ', ' -a', ' --aggressive', ' --experimental', ' --exclude ', ' --list-fixes', ' --ignore ', ' --select ', ' --max-line-length ', ' --line-range  ', ' --range  ', ' --indent-size ', ' --hang-closing', ' --exit-code'], '': [' foo.py'], '': ['+'], '': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'], '': [''], '': ['(-)?+'], '': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], '': [''], '': [''], '': [''], '': ['']}
-
+>>> option_ebnf_grammar
+{'': ['()*'],
+ '': [' -h',
+  ' --help',
+  ' --version',
+  ' -v',
+  ' --verbose',
+  ' -d',
+  ' --diff',
+  ' -i',
+  ' --in-place',
+  ' --global-config ',
+  ' --ignore-local-config',
+  ' -r',
+  ' --recursive',
+  ' -j ',
+  ' --jobs ',
+  ' -p ',
+  ' --pep8-passes ',
+  ' -a',
+  ' --aggressive',
+  ' --experimental',
+  ' --exclude ',
+  ' --list-fixes',
+  ' --ignore ',
+  ' --select ',
+  ' --max-line-length ',
+  ' --line-range  ',
+  ' --range  ',
+  ' --indent-size ',
+  ' --hang-closing',
+  ' --exit-code'],
+ '': [' foo.py'],
+ '': ['+'],
+ '': ['0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  'a',
+  'b',
+  'c',
+  'd',
+  'e',
+  'f',
+  'g',
+  'h',
+  'i',
+  'j',
+  'k',
+  'l',
+  'm',
+  'n',
+  'o',
+  'p',
+  'q',
+  'r',
+  's',
+  't',
+  'u',
+  'v',
+  'w',
+  'x',
+  'y',
+  'z',
+  'A',
+  'B',
+  'C',
+  'D',
+  'E',
+  'F',
+  'G',
+  'H',
+  'I',
+  'J',
+  'K',
+  'L',
+  'M',
+  'N',
+  'O',
+  'P',
+  'Q',
+  'R',
+  'S',
+  'T',
+  'U',
+  'V',
+  'W',
+  'X',
+  'Y',
+  'Z',
+  '!',
+  '"',
+  '#',
+  '$',
+  '%',
+  '&',
+  "'",
+  '(',
+  ')',
+  '*',
+  '+',
+  ',',
+  '-',
+  '.',
+  '/',
+  ':',
+  ';',
+  '',
+  '?',
+  '@',
+  '[',
+  '\\',
+  ']',
+  '^',
+  '_',
+  '`',
+  '{',
+  '|',
+  '}',
+  '~'],
+ '': [''],
+ '': ['(-)?+'],
+ '': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+ '': [''],
+ '': [''],
+ '': [''],
+ '': ['']}
 
 The grammar can be immediately used for fuzzing. A `GrammarCoverageFuzzer` will ensure all options are covered:
 
@@ -80,6 +210,7 @@ The final step in testing would now to invoke the program with these arguments.
 
 Note that `OptionRunner` is experimental: It assumes that the Python program in question uses the `argparse` module; and not all `argparse` features are supported.  Still, it does a pretty good job even on nontrivial programs.
 
+The `OptionRunner` constructor accepts an additional `miner` keyword parameter, which takes the class of the argument grammar miner to be used. By default, this is `OptionGrammarMiner` – a helper class that can be used (and extended) to create own option grammar miners.
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Testing Configurations"
@@ -99,6 +230,13 @@ if __name__ == '__main__':
     print('# Testing Configurations')
 
 
+
+if __name__ == '__main__':
+    # We use the same fixed seed as the notebook to ensure consistency
+    import random
+    random.seed(2001)
+
+from typing import List, Union, Optional, Callable, Type
 
 ## Synopsis
 ## --------
@@ -260,7 +398,13 @@ class ParseInterrupt(Exception):
     pass
 
 class OptionGrammarMiner:
-    def __init__(self, function, log=False):
+    """Helper class for extracting option grammars"""
+
+    def __init__(self, function: Callable, log: bool = False):
+        """Constructor.
+        `function` - a function processing arguments using argparse()
+        `log` - output diagnostics if True
+        """
         self.function = function
         self.log = log
 
@@ -269,6 +413,7 @@ class OptionGrammarMiner(OptionGrammarMiner):
     ARGUMENTS_SYMBOL = "<arguments>"
 
     def mine_ebnf_grammar(self):
+        """Extract EBNF option grammar"""
         self.grammar = {
             START_SYMBOL: ["(" + self.OPTION_SYMBOL + ")*" + self.ARGUMENTS_SYMBOL],
             self.OPTION_SYMBOL: [],
@@ -287,6 +432,7 @@ class OptionGrammarMiner(OptionGrammarMiner):
         return self.grammar
 
     def mine_grammar(self):
+        """Extract BNF option grammar"""
         return convert_ebnf_grammar(self.mine_ebnf_grammar())
 
 class OptionGrammarMiner(OptionGrammarMiner):
@@ -605,12 +751,28 @@ if __name__ == '__main__':
 
 
 
+from .Grammars import unreachable_nonterminals
+
 class OptionRunner(ProgramRunner):
-    def __init__(self, program, arguments=None):
+    """Run a program while determining its option grammar"""
+
+    def __init__(self, program: Union[str, List[str]],
+                 arguments: Optional[str] = None, *,
+                 miner_class: Optional[Type[OptionGrammarMiner]] = None):
+        """Constructor.
+        `program` - the (Python) program to be executed
+        `arguments` - an (optional) string with arguments for `program`
+        `miner` - the `OptionGrammarMiner` class to be used
+                  (default: `OptionGrammarMiner`)
+        """
         if isinstance(program, str):
             self.base_executable = program
         else:
             self.base_executable = program[0]
+
+        if miner_class is None:
+            miner_class = OptionGrammarMiner
+        self.miner_class = miner_class
 
         self.find_contents()
         self.find_grammar()
@@ -633,16 +795,16 @@ class OptionRunner(OptionRunner):
 
 class OptionRunner(OptionRunner):
     def find_grammar(self):
-        miner = OptionGrammarMiner(self.invoker)
+        miner = self.miner_class(self.invoker)
         self._ebnf_grammar = miner.mine_ebnf_grammar()
 
     def ebnf_grammar(self):
+        """Return extracted grammar in EBNF form"""
         return self._ebnf_grammar
 
     def grammar(self):
+        """Return extracted grammar in BNF form"""
         return convert_ebnf_grammar(self._ebnf_grammar)
-
-from .Grammars import unreachable_nonterminals
 
 class OptionRunner(OptionRunner):
     def set_arguments(self, args):
@@ -661,7 +823,10 @@ if __name__ == '__main__':
     print(autopep8_runner.ebnf_grammar()["<option>"])
 
 class OptionFuzzer(GrammarCoverageFuzzer):
-    def __init__(self, runner, *args, **kwargs):
+    """Fuzz a (Python) program using its arguments"""
+
+    def __init__(self, runner: OptionRunner, *args, **kwargs):
+        """Constructor. `runner` is an OptionRunner."""
         assert issubclass(type(runner), OptionRunner)
         self.runner = runner
         grammar = runner.grammar()
@@ -806,7 +971,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     option_ebnf_grammar = autopep8_runner.ebnf_grammar()
-    print(option_ebnf_grammar)
+    option_ebnf_grammar
 
 from .Grammars import convert_ebnf_grammar
 
@@ -820,6 +985,43 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     [autopep8_fuzzer.fuzz() for i in range(3)]
+
+from .ClassDiagram import display_class_hierarchy
+from .Fuzzer import Fuzzer, Runner, ProgramRunner
+from .Grammars import Expansion
+from .GrammarFuzzer import GrammarFuzzer, DerivationTree
+from .GrammarCoverageFuzzer import TrackingGrammarCoverageFuzzer
+
+if __name__ == '__main__':
+    display_class_hierarchy([OptionRunner, OptionFuzzer, OptionGrammarMiner],
+                            public_methods=[
+                                Fuzzer.__init__,
+                                Fuzzer.fuzz,
+                                Fuzzer.run,
+                                Fuzzer.runs,
+                                GrammarFuzzer.__init__,
+                                GrammarFuzzer.fuzz,
+                                GrammarFuzzer.fuzz_tree,
+                                TrackingGrammarCoverageFuzzer.__init__,
+                                OptionFuzzer.__init__,
+                                OptionFuzzer.run,
+                                Runner.__init__,
+                                Runner.run,
+                                ProgramRunner.__init__,
+                                ProgramRunner.__init__,
+                                OptionRunner.__init__,
+                                OptionRunner.ebnf_grammar,
+                                OptionRunner.grammar,
+                                OptionGrammarMiner.__init__,
+                                OptionGrammarMiner.mine_ebnf_grammar,
+                                OptionGrammarMiner.mine_grammar,
+                            ],
+                            types={
+                                'DerivationTree': DerivationTree,
+                                'Expansion': Expansion,
+                                'Grammar': Grammar
+                            },
+                            project='fuzzingbook')
 
 ## Lessons Learned
 ## ---------------

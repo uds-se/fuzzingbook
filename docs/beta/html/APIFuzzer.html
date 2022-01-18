@@ -12021,39 +12021,85 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="APIFuzzer.html" class="import" target="_blank">fuzzingbook.APIFuzzer</a></span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span>
 </pre></div>
 <p>and then make use of the following features.</p>
-<p>This chapter provides grammars grammar constructors that are useful for generating function calls.</p>
-<ul>
-<li><code>INT_GRAMMAR</code>, <code>FLOAT_GRAMMAR</code>, <code>ASCII_STRING_GRAMMAR</code> produce integers, floats, and strings, respectively.</li>
-<li><code>int_grammar_with_range(start, end)</code> produces an integer grammar with values <code>N</code> such that <code>start &lt;= N &lt;= end</code>.</li>
-<li><code>float_grammar_with_range(start, end)</code> produces a floating-number grammar with values <code>N</code> such that <code>start &lt;= N &lt;= end</code>.</li>
-</ul>
+<p>This chapter provides <em>grammar constructors</em> that are useful for generating <em>function calls</em>.</p>
 <p>The grammars are <a href="ProbabilisticGrammarFuzzer.html">probabilistic</a> and make use of <a href="GeneratorGrammarFuzzer.html">generators</a>, so use <code>ProbabilisticGeneratorGrammarFuzzer</code> as a producer.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="GeneratorGrammarFuzzer.html" class="import" target="_blank">GeneratorGrammarFuzzer</a></span> <span class="kn">import</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">int_grammar</span> <span class="o">=</span> <span class="n">int_grammar_with_range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+</pre></div>
+<p><code>INT_GRAMMAR</code>, <code>FLOAT_GRAMMAR</code>, <code>ASCII_STRING_GRAMMAR</code> produce integers, floats, and strings, respectively:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">INT_GRAMMAR</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+<span class="p">[</span><span class="s1">&#39;-51&#39;</span><span class="p">,</span> <span class="s1">&#39;9&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;32&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">FLOAT_GRAMMAR</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+<span class="p">[</span><span class="s1">&#39;0e0&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;-9.43e34&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;-7.3282e0&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;-9.5e-9&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;0&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;-30.840386e-5&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;3&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;-4.1e0&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;-9.7&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;413&#39;</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">ASCII_STRING_GRAMMAR</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+<span class="p">[</span><span class="s1">&#39;&quot;#vYV*t@I%KNTT[q~}&amp;-v+[zAzj[X-z|RzC$(g$Br]1tC</span><span class="se">\&#39;</span><span class="s1">:5&lt;F-&quot;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;&quot;&quot;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;&quot;^S/&quot;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;&quot;y)QDs_9&quot;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;&quot;)dY~?WYqMh,bwn3</span><span class="se">\\</span><span class="s1">&quot;A!02Pk`gx&quot;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;&quot;01n|(dd$-d.sx</span><span class="se">\\</span><span class="s1">&quot;83</span><span class="se">\\</span><span class="s1">&quot;h/]qx)d9LPNdrk$}$4t3zhC.%3VY@AZZ0wCs2 N&quot;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;&quot;D</span><span class="se">\\</span><span class="s1">6</span><span class="se">\\</span><span class="s1">xgw#TQ}$</span><span class="se">\&#39;</span><span class="s1">3&quot;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;&quot;LaM{&quot;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;&quot;</span><span class="se">\\</span><span class="s1">&quot;ux</span><span class="se">\&#39;</span><span class="s1">1H!=%;2T$.=l&quot;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;&quot;=vkiV~w.Ypt,?JwcEr}Moc&gt;!5&lt;U+DdYAup</span><span class="se">\\</span><span class="s1">&quot;N 0V?h3x~jFN3&quot;&#39;</span><span class="p">]</span>
+</pre></div>
+<p><code>int_grammar_with_range(start, end)</code> produces an integer grammar with values <code>N</code> such that <code>start &lt;= N &lt;= end</code>:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">int_grammar</span> <span class="o">=</span> <span class="n">int_grammar_with_range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">int_grammar</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
-<span class="p">[</span><span class="s1">&#39;172&#39;</span><span class="p">,</span> <span class="s1">&#39;102&#39;</span><span class="p">,</span> <span class="s1">&#39;127&#39;</span><span class="p">,</span> <span class="s1">&#39;119&#39;</span><span class="p">,</span> <span class="s1">&#39;167&#39;</span><span class="p">,</span> <span class="s1">&#39;186&#39;</span><span class="p">,</span> <span class="s1">&#39;133&#39;</span><span class="p">,</span> <span class="s1">&#39;155&#39;</span><span class="p">,</span> <span class="s1">&#39;111&#39;</span><span class="p">,</span> <span class="s1">&#39;111&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="s1">&#39;154&#39;</span><span class="p">,</span> <span class="s1">&#39;149&#39;</span><span class="p">,</span> <span class="s1">&#39;185&#39;</span><span class="p">,</span> <span class="s1">&#39;117&#39;</span><span class="p">,</span> <span class="s1">&#39;182&#39;</span><span class="p">,</span> <span class="s1">&#39;154&#39;</span><span class="p">,</span> <span class="s1">&#39;131&#39;</span><span class="p">,</span> <span class="s1">&#39;194&#39;</span><span class="p">,</span> <span class="s1">&#39;147&#39;</span><span class="p">,</span> <span class="s1">&#39;192&#39;</span><span class="p">]</span>
 </pre></div>
-<p>Such values can be immediately used for testing function calls:</p>
+<p><code>float_grammar_with_range(start, end)</code> produces a floating-number grammar with values <code>N</code> such that <code>start &lt;= N &lt;= end</code>.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">float_grammar</span> <span class="o">=</span> <span class="n">float_grammar_with_range</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">float_grammar</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+<span class="p">[</span><span class="s1">&#39;121.8092479227325&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;187.18037169119634&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;127.9576486784452&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;125.47768739781723&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;151.8091820472274&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;117.864410860742&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;187.50918008379483&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;119.29335112884749&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;149.2637029583114&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;126.61818995939146&#39;</span><span class="p">]</span>
+</pre></div>
+<p>All such values can be immediately used for testing function calls:</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/math.html" class="import" target="_blank">math</a></span> <span class="kn">import</span> <span class="n">sqrt</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;sqrt(&quot;</span> <span class="o">+</span> <span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
-<span class="mf">13.45362404707371</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">int_grammar</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">call</span> <span class="o">=</span> <span class="s2">&quot;sqrt(&quot;</span> <span class="o">+</span> <span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">call</span>
+<span class="s1">&#39;sqrt(143)&#39;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">eval</span><span class="p">(</span><span class="n">call</span><span class="p">)</span>
+<span class="mf">11.958260743101398</span>
 </pre></div>
-<p>These grammars can also be composed to form more complex grammars:</p>
-<ul>
-<li><code>list_grammar(object_grammar)</code> returns a grammar that produces lists of objects as defined by <code>object_grammar</code>.</li>
-</ul>
+<p>These grammars can also be composed to form more complex grammars. <code>list_grammar(object_grammar)</code> returns a grammar that produces lists of objects as defined by <code>object_grammar</code>.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">int_list_grammar</span> <span class="o">=</span> <span class="n">list_grammar</span><span class="p">(</span><span class="n">int_grammar</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">fuzzer</span> <span class="o">=</span> <span class="n">ProbabilisticGeneratorGrammarFuzzer</span><span class="p">(</span><span class="n">int_list_grammar</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)]</span>
-<span class="p">[</span><span class="s1">&#39;[194, 118, 169, 164, 169, 190, 172, 144, 174]&#39;</span><span class="p">,</span>
- <span class="s1">&#39;[109, 127, 185, 155]&#39;</span><span class="p">,</span>
- <span class="s1">&#39;[146, 103, 114, 185, 119, 148, 169, 167, 161]&#39;</span><span class="p">,</span>
- <span class="s1">&#39;[]&#39;</span><span class="p">,</span>
- <span class="s1">&#39;[138, 123, 147, 112, 139, 190, 114, 112]&#39;</span><span class="p">]</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="nb">eval</span><span class="p">(</span><span class="s2">&quot;len(&quot;</span> <span class="o">+</span> <span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
-<span class="mi">2</span>
+<span class="p">[</span><span class="s1">&#39;[118, 111, 188, 137, 129]&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;[170, 172]&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;[171, 161, 117, 191, 175, 183, 164]&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;[189]&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;[129, 110, 178]&#39;</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">some_list</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">fuzzer</span><span class="o">.</span><span class="n">fuzz</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">some_list</span>
+<span class="p">[</span><span class="mi">172</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">106</span><span class="p">,</span> <span class="mi">192</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="mi">191</span><span class="p">,</span> <span class="mi">161</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">117</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">some_list</span><span class="p">)</span>
+<span class="mi">9</span>
 </pre></div>
+<p>In a similar vein, we can construct arbitrary further data types for testing individual functions programmatically.</p>
 </div>
 </div>
 </div>
@@ -12155,8 +12201,8 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">URL_GRAMMAR</span><span class="p">,</span> <span class="n">is_valid_grammar</span><span class="p">,</span> <span class="n">START_SYMBOL</span>
-<span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">new_symbol</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">extend_grammar</span><span class="p">,</span> <span class="n">Grammar</span>
-<span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="kn">import</span> <span class="n">GrammarFuzzer</span><span class="p">,</span> <span class="n">display_tree</span><span class="p">,</span> <span class="n">all_terminals</span>
+<span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">opts</span><span class="p">,</span> <span class="n">extend_grammar</span><span class="p">,</span> <span class="n">Grammar</span>
+<span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="kn">import</span> <span class="n">GrammarFuzzer</span>
 </pre></div>
 
 </div>
@@ -13516,7 +13562,7 @@ assert result.query == &#39;def=18&amp;abc=abc&#39;
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/APIFuzzer.ipynb" target=_blank)>Last change: 2022-01-11 09:27:09+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/APIFuzzer.ipynb" target=_blank)>Last change: 2022-01-18 13:11:25+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -13532,7 +13578,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">Fuzzing APIs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">https://www.fuzzingbook.org/beta/html/APIFuzzer.html</a>.  Retrieved 2022-01-11 09:27:09+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">Fuzzing APIs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/APIFuzzer.html">https://www.fuzzingbook.org/beta/html/APIFuzzer.html</a>.  Retrieved 2022-01-18 13:11:25+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2022:APIFuzzer,
@@ -13542,9 +13588,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/APIFuzzer.html}},
-    note = {Retrieved 2022-01-11 09:27:09+01:00},
+    note = {Retrieved 2022-01-18 13:11:25+01:00},
     url = {https://www.fuzzingbook.org/beta/html/APIFuzzer.html},
-    urldate = {2022-01-11 09:27:09+01:00}
+    urldate = {2022-01-18 13:11:25+01:00}
 }
 </pre>
 </div>
