@@ -3,7 +3,7 @@
 
 # "Testing Configurations" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2022-01-18 13:13:36+01:00
+# Last change: 2022-01-18 18:33:20+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -300,7 +300,7 @@ if __name__ == '__main__':
 from .ExpectError import ExpectError
 
 if __name__ == '__main__':
-    with ExpectError(print_traceback=False):
+    with ExpectError(SystemExit, print_traceback=False):
         process_numbers(["--sum", "--max", "1", "2", "3"])
 
 ## A Grammar for Configurations
@@ -442,8 +442,8 @@ class OptionGrammarMiner(OptionGrammarMiner):
 
         if "self" not in frame.f_locals:
             return
-        self_var = frame.f_locals["self"]
 
+        self_var = frame.f_locals["self"]
         method_name = frame.f_code.co_name
 
         if method_name == "add_argument":
@@ -457,7 +457,7 @@ class OptionGrammarMiner(OptionGrammarMiner):
         elif method_name == "parse_args":
             raise ParseInterrupt
 
-        return None
+        return self.traceit
 
 class OptionGrammarMiner(OptionGrammarMiner):
     def process_argument(self, locals, in_group):
@@ -758,11 +758,13 @@ class OptionRunner(ProgramRunner):
 
     def __init__(self, program: Union[str, List[str]],
                  arguments: Optional[str] = None, *,
+                 log: bool = False,
                  miner_class: Optional[Type[OptionGrammarMiner]] = None):
         """Constructor.
         `program` - the (Python) program to be executed
         `arguments` - an (optional) string with arguments for `program`
-        `miner` - the `OptionGrammarMiner` class to be used
+        `log` - if True, enable logging in miner
+        `miner_class` - the `OptionGrammarMiner` class to be used
                   (default: `OptionGrammarMiner`)
         """
         if isinstance(program, str):
@@ -773,6 +775,7 @@ class OptionRunner(ProgramRunner):
         if miner_class is None:
             miner_class = OptionGrammarMiner
         self.miner_class = miner_class
+        self.log = log
 
         self.find_contents()
         self.find_grammar()
@@ -783,19 +786,26 @@ class OptionRunner(ProgramRunner):
 class OptionRunner(OptionRunner):
     def find_contents(self):
         self._executable = find_executable(self.base_executable)
+        if self._executable is None:
+            raise IOError(self.base_executable + ": not found")
+
         first_line = open(self._executable).readline()
-        assert first_line.find("python") >= 0
+        if first_line.find("python") < 0:
+            raise IOError(self.base_executable + ": not a Python executable")
+
         self.contents = open(self._executable).read()
 
     def invoker(self):
-        exec(self.contents)
+        # We are passing the local variables as is, such that we can access `self`
+        # We set __name__ to '__main__' to invoke the script as an executable
+        exec(self.contents, {'__name__': '__main__'})
 
     def executable(self):
         return self._executable
 
 class OptionRunner(OptionRunner):
     def find_grammar(self):
-        miner = self.miner_class(self.invoker)
+        miner = self.miner_class(self.invoker, log=self.log)
         self._ebnf_grammar = miner.mine_ebnf_grammar()
 
     def ebnf_grammar(self):
