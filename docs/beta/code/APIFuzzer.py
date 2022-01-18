@@ -3,7 +3,7 @@
 
 # "Fuzzing APIs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2022-01-18 13:14:19+01:00
+# Last change: 2022-01-18 18:51:53+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -135,6 +135,10 @@ if __name__ == '__main__':
     print('# Fuzzing APIs')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('U842dC2R3V0')
 
 ## Synopsis
 ## --------
