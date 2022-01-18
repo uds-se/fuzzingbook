@@ -3,7 +3,7 @@
 
 # "Fuzzing APIs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/APIFuzzer.html
-# Last change: 2022-01-12 14:54:25+01:00
+# Last change: 2022-01-18 13:14:19+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -42,40 +42,79 @@ but before you do so, _read_ it and _interact_ with it at:
 
     https://www.fuzzingbook.org/html/APIFuzzer.html
 
-This chapter provides grammars grammar constructors that are useful for generating function calls.
-
-* `INT_GRAMMAR`, `FLOAT_GRAMMAR`, `ASCII_STRING_GRAMMAR` produce integers, floats, and strings, respectively.
-* `int_grammar_with_range(start, end)` produces an integer grammar with values `N` such that `start <= N <= end`.
-* `float_grammar_with_range(start, end)` produces a floating-number grammar with values `N` such that `start <= N <= end`.
+This chapter provides *grammar constructors* that are useful for generating _function calls_.
 
 The grammars are [probabilistic](ProbabilisticGrammarFuzzer.ipynb) and make use of [generators](GeneratorGrammarFuzzer.ipynb), so use `ProbabilisticGeneratorGrammarFuzzer` as a producer.
 
 >>> from GeneratorGrammarFuzzer import ProbabilisticGeneratorGrammarFuzzer
->>> int_grammar = int_grammar_with_range(100, 200)
+
+`INT_GRAMMAR`, `FLOAT_GRAMMAR`, `ASCII_STRING_GRAMMAR` produce integers, floats, and strings, respectively:
+
+>>> fuzzer = ProbabilisticGeneratorGrammarFuzzer(INT_GRAMMAR)
+>>> [fuzzer.fuzz() for i in range(10)]
+['-51', '9', '0', '0', '0', '0', '32', '0', '0', '0']
+>>> fuzzer = ProbabilisticGeneratorGrammarFuzzer(FLOAT_GRAMMAR)
+>>> [fuzzer.fuzz() for i in range(10)]
+['0e0',
+ '-9.43e34',
+ '-7.3282e0',
+ '-9.5e-9',
+ '0',
+ '-30.840386e-5',
+ '3',
+ '-4.1e0',
+ '-9.7',
+ '413']
+>>> fuzzer = ProbabilisticGeneratorGrammarFuzzer(ASCII_STRING_GRAMMAR)
+>>> [fuzzer.fuzz() for i in range(10)]
+['"#vYV*t@I%KNTT[q~}&-v+[zAzj[X-z|RzC$(g$Br]1tC\':5!5>> int_grammar = int_grammar_with_range(100, 200)
 >>> fuzzer = ProbabilisticGeneratorGrammarFuzzer(int_grammar)
 >>> [fuzzer.fuzz() for i in range(10)]
-['172', '102', '127', '119', '167', '186', '133', '155', '111', '111']
+['154', '149', '185', '117', '182', '154', '131', '194', '147', '192']
 
-Such values can be immediately used for testing function calls:
+`float_grammar_with_range(start, end)` produces a floating-number grammar with values `N` such that `start <= N <= end`.
+
+>>> float_grammar = float_grammar_with_range(100, 200)
+>>> fuzzer = ProbabilisticGeneratorGrammarFuzzer(float_grammar)
+>>> [fuzzer.fuzz() for i in range(10)]
+['121.8092479227325',
+ '187.18037169119634',
+ '127.9576486784452',
+ '125.47768739781723',
+ '151.8091820472274',
+ '117.864410860742',
+ '187.50918008379483',
+ '119.29335112884749',
+ '149.2637029583114',
+ '126.61818995939146']
+
+All such values can be immediately used for testing function calls:
 
 >>> from math import sqrt
->>> eval("sqrt(" + fuzzer.fuzz() + ")")
-13.45362404707371
+>>> fuzzer = ProbabilisticGeneratorGrammarFuzzer(int_grammar)
+>>> call = "sqrt(" + fuzzer.fuzz() + ")"
+>>> call
+'sqrt(143)'
+>>> eval(call)
+11.958260743101398
 
-These grammars can also be composed to form more complex grammars:
-
-* `list_grammar(object_grammar)` returns a grammar that produces lists of objects as defined by `object_grammar`.
+These grammars can also be composed to form more complex grammars. `list_grammar(object_grammar)` returns a grammar that produces lists of objects as defined by `object_grammar`.
 
 >>> int_list_grammar = list_grammar(int_grammar)
 >>> fuzzer = ProbabilisticGeneratorGrammarFuzzer(int_list_grammar)
 >>> [fuzzer.fuzz() for i in range(5)]
-['[194, 118, 169, 164, 169, 190, 172, 144, 174]',
- '[109, 127, 185, 155]',
- '[146, 103, 114, 185, 119, 148, 169, 167, 161]',
- '[]',
- '[138, 123, 147, 112, 139, 190, 114, 112]']
->>> eval("len(" + fuzzer.fuzz() + ")")
-2
+['[118, 111, 188, 137, 129]',
+ '[170, 172]',
+ '[171, 161, 117, 191, 175, 183, 164]',
+ '[189]',
+ '[129, 110, 178]']
+>>> some_list = eval(fuzzer.fuzz())
+>>> some_list
+[172, 120, 106, 192, 124, 191, 161, 100, 117]
+>>> len(some_list)
+9
+
+In a similar vein, we can construct arbitrary further data types for testing individual functions programmatically.
 
 
 For more details, source, and documentation, see
@@ -124,8 +163,8 @@ if __name__ == '__main__':
     urlparse('https://www.fuzzingbook.com/html/APIFuzzer.html')
 
 from .Grammars import URL_GRAMMAR, is_valid_grammar, START_SYMBOL
-from .Grammars import new_symbol, opts, extend_grammar, Grammar
-from .GrammarFuzzer import GrammarFuzzer, display_tree, all_terminals
+from .Grammars import opts, extend_grammar, Grammar
+from .GrammarFuzzer import GrammarFuzzer
 
 if __name__ == '__main__':
     url_fuzzer = GrammarFuzzer(URL_GRAMMAR)
@@ -448,14 +487,36 @@ if __name__ == '__main__':
 from .GeneratorGrammarFuzzer import ProbabilisticGeneratorGrammarFuzzer
 
 if __name__ == '__main__':
+    fuzzer = ProbabilisticGeneratorGrammarFuzzer(INT_GRAMMAR)
+    [fuzzer.fuzz() for i in range(10)]
+
+if __name__ == '__main__':
+    fuzzer = ProbabilisticGeneratorGrammarFuzzer(FLOAT_GRAMMAR)
+    [fuzzer.fuzz() for i in range(10)]
+
+if __name__ == '__main__':
+    fuzzer = ProbabilisticGeneratorGrammarFuzzer(ASCII_STRING_GRAMMAR)
+    [fuzzer.fuzz() for i in range(10)]
+
+if __name__ == '__main__':
     int_grammar = int_grammar_with_range(100, 200)
     fuzzer = ProbabilisticGeneratorGrammarFuzzer(int_grammar)
+    [fuzzer.fuzz() for i in range(10)]
+
+if __name__ == '__main__':
+    float_grammar = float_grammar_with_range(100, 200)
+    fuzzer = ProbabilisticGeneratorGrammarFuzzer(float_grammar)
     [fuzzer.fuzz() for i in range(10)]
 
 from math import sqrt
 
 if __name__ == '__main__':
-    eval("sqrt(" + fuzzer.fuzz() + ")")
+    fuzzer = ProbabilisticGeneratorGrammarFuzzer(int_grammar)
+    call = "sqrt(" + fuzzer.fuzz() + ")"
+    call
+
+if __name__ == '__main__':
+    eval(call)
 
 if __name__ == '__main__':
     int_list_grammar = list_grammar(int_grammar)
@@ -463,7 +524,13 @@ if __name__ == '__main__':
     [fuzzer.fuzz() for i in range(5)]
 
 if __name__ == '__main__':
-    eval("len(" + fuzzer.fuzz() + ")")
+    some_list = eval(fuzzer.fuzz())
+
+if __name__ == '__main__':
+    some_list
+
+if __name__ == '__main__':
+    len(some_list)
 
 ## Lessons Learned
 ## ---------------
