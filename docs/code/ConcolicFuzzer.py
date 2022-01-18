@@ -2158,17 +2158,10 @@ class TraceNode(TraceNode):
 
         # first we update our smt decision
         if bit == self.tree.yes_bit:  # yes, which means the smt can be used as is
-            if self.smt is not None:
-                assert self.smt == child_node._smt_val
-            else:
-                self.smt = child_node._smt_val
+            self.smt = child_node._smt_val
         # no, which means we have to negate it to get the decision.
         elif bit == self.tree.no_bit:
-            smt_ = z3.simplify(z3.Not(child_node._smt_val))
-            if self.smt is not None:
-                assert smt_ == self.smt
-            else:
-                self.smt = smt_
+            self.smt = z3.simplify(z3.Not(child_node._smt_val))
         else:
             assert False
 
