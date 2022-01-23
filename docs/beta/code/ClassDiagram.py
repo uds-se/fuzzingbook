@@ -3,7 +3,7 @@
 
 # "Class Diagrams" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ClassDiagram.html
-# Last change: 2022-01-11 10:39:43+01:00
+# Last change: 2022-01-23 14:38:02+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -404,12 +404,15 @@ from inspect import signature
 
 import warnings
 
-def display_class_hierarchy(classes: Union[Type, List[Type]], 
+import os
+
+def display_class_hierarchy(classes: Union[Type, List[Type]], *,
                             public_methods: Optional[List] = None,
                             abstract_classes: Optional[List] = None,
                             include_methods: bool = True,
-                            include_class_vars: bool =True,
+                            include_class_vars: bool = True,
                             include_legend: bool = True,
+                            local_defs_only: bool = True,
                             types: Dict[str, Any] = {},
                             project: str = 'fuzzingbook',
                             log: bool = False) -> Any:
@@ -419,8 +422,9 @@ def display_class_hierarchy(classes: Union[Type, List[Type]],
   (Default: all methods with a docstring)
 `abstract_classes`, if given, is a list of classes to be shown as "abstract" (cursive).
   (Default: all classes with an abstract method)
-`include_methods`: if True, include all methods (default)
-`include_legend`: if True, include a legend (default)
+`include_methods`: if set (default), include all methods
+`include_legend`: if set (default), include a legend
+`local_defs_only`: if set (default), hide details of imported classes
 `types`: type names with definitions, to be used in docs
     """
     from graphviz import Digraph  # type: ignore
@@ -496,6 +500,16 @@ def display_class_hierarchy(classes: Union[Type, List[Type]],
 
         return bool(docstring(f))
 
+    def frame_module(frameinfo) -> str:
+        return os.path.splitext(os.path.basename(frameinfo.frame.f_code.co_filename))[0]
+
+    def callers() -> List[str]:
+        frames = inspect.getouterframes(inspect.currentframe())
+        return [frame_module(frameinfo) for frameinfo in frames]
+
+    def is_local_class(cls: Type) -> bool:
+        return cls.__module__ == '__main__' or cls.__module__ in callers()
+
     def class_vars_string(cls: Type, url: str) -> str:
         cls_vars = class_vars(cls)
         if len(cls_vars) == 0:
@@ -524,16 +538,19 @@ def display_class_hierarchy(classes: Union[Type, List[Type]],
     def class_methods_string(cls: Type, url: str) -> str:
         methods = public_class_methods(cls)
         # return "<br/>".join([name + "()" for (name, f) in methods])
-        if len(methods) == 0:
-            return ""
-
         methods_string = f'<table border="0" cellpadding="0" ' \
                          f'cellspacing="0" ' \
                          f'align="left" tooltip="{cls.__name__}" href="#">'
 
+        public_methods_only = local_defs_only and not is_local_class(cls)
+
+        methods_seen = False
         for public in [True, False]:
             for (name, f) in methods:
                 if public != is_public(name, f):
+                    continue
+
+                if public_methods_only and not public:
                     continue
 
                 if log:
@@ -568,6 +585,10 @@ def display_class_hierarchy(classes: Union[Type, List[Type]],
                 methods_string += method_string(name, public, overloaded)
 
                 methods_string += '</td></tr>'
+                methods_seen = True
+
+        if not methods_seen:
+            return ""
 
         methods_string += '</table>'
         return methods_string
