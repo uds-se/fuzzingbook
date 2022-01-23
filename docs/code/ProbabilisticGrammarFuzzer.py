@@ -3,7 +3,7 @@
 
 # "Probabilistic Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ProbabilisticGrammarFuzzer.html
-# Last change: 2022-01-12 14:46:23+01:00
+# Last change: 2022-01-23 17:05:33+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -356,6 +356,8 @@ if __name__ == '__main__':
 import random
 
 class ProbabilisticGrammarFuzzer(GrammarFuzzer):
+    """A grammar-based fuzzer respecting probabilities in grammars."""
+
     def check_grammar(self) -> None:
         super().check_grammar()
         assert is_valid_probabilistic_grammar(self.grammar)
@@ -921,6 +923,7 @@ if __name__ == '__main__':
                                 GrammarFuzzer.__init__,
                                 GrammarFuzzer.fuzz,
                                 GrammarFuzzer.fuzz_tree,
+                                ProbabilisticGrammarFuzzer.__init__,
                             ],
                             types={
                                 'DerivationTree': DerivationTree,

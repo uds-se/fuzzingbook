@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2022-01-12 14:57:05+01:00
+# Last change: 2022-01-23 18:01:22+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -69,7 +69,19 @@ The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow pa
 >>> gui_driver.get(httpd_url)
 >>> actions = gui_fuzzer.fuzz()
 >>> print(actions)
-click('terms and conditions')
+check('terms', False)
+fill('zip', '4')
+fill('city', 'Gi')
+fill('name', 'f')
+fill('email', 'J@o')
+submit('submit')
+click('order form')
+check('terms', True)
+fill('zip', '9')
+fill('city', 'I')
+fill('name', 'y')
+fill('email', 'F@b')
+submit('submit')
 
 
 
@@ -81,7 +93,6 @@ These actions can be fed into the GUI runner, which will execute them on the giv
 Further invocations of `fuzz()` will further cover the model – for instance, exploring the terms and conditions.
 
 A tool like `GUICoverageFuzzer` will provide "deep" exploration of user interfaces, even filling out forms to explore what is behind them. Keep in mind, though, that `GUICoverageFuzzer` is experimental: It only supports a subset of HTML form and link features, and does not take JavaScript into account.
-
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Testing Graphical User Interfaces"
@@ -130,6 +141,8 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
+from typing import Set, FrozenSet, List, Optional, Tuple, Any
+
 import os
 import sys
 
@@ -139,7 +152,8 @@ if __name__ == '__main__':
         # since it can't run a headless Web browser
         sys.exit(0)
 
-from .WebFuzzer import init_db, start_httpd, webbrowser, print_httpd_messages, print_url, ORDERS_DB
+from .WebFuzzer import init_db, start_httpd, webbrowser, print_httpd_messages
+from .WebFuzzer import print_url, ORDERS_DB
 
 import html
 
@@ -174,8 +188,8 @@ import shutil
 if __name__ == '__main__':
     if BROWSER == 'firefox':
         assert shutil.which('geckodriver') is not None, \
-        "Please install 'geckodriver' executable " \
-        "from https://github.com/mozilla/geckodriver/releases"
+            "Please install 'geckodriver' executable " \
+            "from https://github.com/mozilla/geckodriver/releases"
 
 HEADLESS = True
 
@@ -368,14 +382,20 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     for element in ui_elements:
-        print("Name: %-10s | Type: %-10s | Text: %s" % (element.get_attribute('name'), element.get_attribute('type'), element.text))
+        print("Name: %-10s | Type: %-10s | Text: %s" %
+              (element.get_attribute('name'),
+               element.get_attribute('type'),
+               element.text))
 
 if __name__ == '__main__':
     ui_elements = gui_driver.find_elements_by_tag_name("a")
 
 if __name__ == '__main__':
     for element in ui_elements:
-        print("Name: %-10s | Type: %-10s | Text: %s" % (element.get_attribute('name'), element.get_attribute('type'), element.text))
+        print("Name: %-10s | Type: %-10s | Text: %s" %
+              (element.get_attribute('name'),
+               element.get_attribute('type'),
+               element.text))
 
 ### User Interface Actions
 
@@ -392,28 +412,53 @@ if __name__ == '__main__':
 
 
 class GUIGrammarMiner:
-    def __init__(self, driver, stay_on_host=True):
+    """Retrieve a grammar of possible GUI interaction sequences"""
+
+    def __init__(self, driver, stay_on_host: bool = True) -> None:
+        """Constructor.
+        `driver` - a web driver as produced by Selenium.
+        `stay_on_host` - if True (default), no not follow links to other hosts.
+        """
         self.driver = driver
         self.stay_on_host = stay_on_host
-        self.grammar = {}
+        self.grammar: Grammar = {}
 
-class GUIGrammarMiner(GUIGrammarMiner):
-    def mine_state_actions(self):
-        return frozenset(self.mine_input_element_actions()
-            | self.mine_button_element_actions()
-            | self.mine_a_element_actions())
-
-#### Input Element Actions
+#### Excursion: Implementing Retrieving Actions
 
 if __name__ == '__main__':
-    print('\n#### Input Element Actions')
+    print('\n#### Excursion: Implementing Retrieving Actions')
+
+
+
+class GUIGrammarMiner(GUIGrammarMiner):
+    def mine_state_actions(self) -> FrozenSet[str]:
+        """Return a set of all possible actions on the current Web site"""
+        return frozenset(self.mine_input_element_actions()
+                         | self.mine_button_element_actions()
+                         | self.mine_a_element_actions())
+
+    def mine_input_element_actions(self) -> Set[str]:
+        return set()  # to be defined later
+
+    def mine_button_element_actions(self) -> Set[str]:
+        return set()  # to be defined later
+
+    def mine_a_element_actions(self) -> Set[str]:
+        return set()  # to be defined later
+
+##### Input Element Actions
+
+if __name__ == '__main__':
+    print('\n##### Input Element Actions')
 
 
 
 from selenium.common.exceptions import StaleElementReferenceException
 
 class GUIGrammarMiner(GUIGrammarMiner):
-    def mine_input_element_actions(self):
+    def mine_input_element_actions(self) -> Set[str]:
+        """Determine all input actions on the current Web page"""
+
         actions = set()
 
         for elem in self.driver.find_elements_by_tag_name("input"):
@@ -443,15 +488,17 @@ if __name__ == '__main__':
     gui_grammar_miner = GUIGrammarMiner(gui_driver)
     gui_grammar_miner.mine_input_element_actions()
 
-#### Button Element Actions
+##### Button Element Actions
 
 if __name__ == '__main__':
-    print('\n#### Button Element Actions')
+    print('\n##### Button Element Actions')
 
 
 
 class GUIGrammarMiner(GUIGrammarMiner):
-    def mine_button_element_actions(self):
+    def mine_button_element_actions(self) -> Set[str]:
+        """Determine all button actions on the current Web page"""
+
         actions = set()
 
         for elem in self.driver.find_elements_by_tag_name("button"):
@@ -473,15 +520,19 @@ if __name__ == '__main__':
     gui_grammar_miner = GUIGrammarMiner(gui_driver)
     gui_grammar_miner.mine_button_element_actions()
 
-#### Link Element Actions
+##### Link Element Actions
 
 if __name__ == '__main__':
-    print('\n#### Link Element Actions')
+    print('\n##### Link Element Actions')
 
 
+
+from urllib.parse import urljoin, urlsplit
 
 class GUIGrammarMiner(GUIGrammarMiner):
-    def mine_a_element_actions(self):
+    def mine_a_element_actions(self) -> Set[str]:
+        """Determine all link actions on the current Web page"""
+
         actions = set()
 
         for elem in self.driver.find_elements_by_tag_name("a"):
@@ -497,16 +548,16 @@ class GUIGrammarMiner(GUIGrammarMiner):
 
         return actions
 
-from urllib.parse import urljoin, urlsplit
-
 class GUIGrammarMiner(GUIGrammarMiner):
-    def follow_link(self, link):
+    def follow_link(self, link: str) -> bool:
+        """Return True iff we are allowed to follow the `link` URL"""
+
         if not self.stay_on_host:
             return True
 
         current_url = self.driver.current_url
         target_url = urljoin(current_url, link)
-        return urlsplit(current_url).hostname == urlsplit(target_url).hostname       
+        return urlsplit(current_url).hostname == urlsplit(target_url).hostname
 
 if __name__ == '__main__':
     gui_grammar_miner = GUIGrammarMiner(gui_driver)
@@ -521,10 +572,10 @@ if __name__ == '__main__':
     gui_grammar_miner = GUIGrammarMiner(gui_driver)
     gui_grammar_miner.mine_a_element_actions()
 
-#### All Together
+#### End of Excursion
 
 if __name__ == '__main__':
-    print('\n#### All Together')
+    print('\n#### End of Excursion')
 
 
 
@@ -549,19 +600,21 @@ if __name__ == '__main__':
 
 from graphviz import Digraph
 
-if __name__ == '__main__':
-    from IPython.display import display
-
 from .GrammarFuzzer import dot_escape
 
 if __name__ == '__main__':
     dot = Digraph(comment="Finite State Machine")
     dot.node(dot_escape('<start>'))
-    dot.edge(dot_escape('<start>'), dot_escape('<Order Form>'))
-    dot.edge(dot_escape('<Order Form>'), dot_escape('<Terms and Conditions>'), "click('Terms and conditions')")
-    dot.edge(dot_escape('<Order Form>'), dot_escape('<Thank You>'), r"fill(...)\lsubmit('submit')")
-    dot.edge(dot_escape('<Terms and Conditions>'), dot_escape('<Order Form>'), "click('order form')")
-    dot.edge(dot_escape('<Thank You>'), dot_escape('<Order Form>'), "click('order form')")
+    dot.edge(dot_escape('<start>'),
+             dot_escape('<Order Form>'))
+    dot.edge(dot_escape('<Order Form>'),
+             dot_escape('<Terms and Conditions>'), "click('Terms and conditions')")
+    dot.edge(dot_escape('<Order Form>'),
+             dot_escape('<Thank You>'), r"fill(...)\lsubmit('submit')")
+    dot.edge(dot_escape('<Terms and Conditions>'),
+             dot_escape('<Order Form>'), "click('order form')")
+    dot.edge(dot_escape('<Thank You>'),
+             dot_escape('<Order Form>'), "click('order form')")
     display(dot)
 
 ### State Machines as Grammars
@@ -578,10 +631,17 @@ if __name__ == '__main__':
 
 
 
+#### Excursion: Implementing Extracting State Grammars
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Implementing Extracting State Grammars')
+
+
+
 from .Grammars import new_symbol
 
 from .Grammars import nonterminals, START_SYMBOL
-from .Grammars import extend_grammar, unreachable_nonterminals, opts, crange, srange
+from .Grammars import extend_grammar, unreachable_nonterminals, crange, srange
 from .Grammars import syntax_diagram, is_valid_grammar, Grammar
 
 class GUIGrammarMiner(GUIGrammarMiner):
@@ -620,11 +680,15 @@ if __name__ == '__main__':
     syntax_diagram(GUIGrammarMiner.GUI_GRAMMAR)
 
 class GUIGrammarMiner(GUIGrammarMiner):
-    def new_state_symbol(self, grammar):
+    def new_state_symbol(self, grammar: Grammar) -> str:
+        """Return a new symbol for some state in `grammar`"""
         return new_symbol(grammar, self.START_STATE)
 
-    def mine_state_grammar(self, grammar={}, state_symbol=None):
-        grammar = extend_grammar(self.GUI_GRAMMAR, grammar)
+    def mine_state_grammar(self, grammar: Grammar = {},
+                           state_symbol: str = None) -> Grammar:
+        """Return a state grammar for the actions on the current Web site"""
+
+        grammar = extend_grammar(self.GUI_GRAMMAR, grammar)  # type: ignore
 
         if state_symbol is None:
             state_symbol = self.new_state_symbol(grammar)
@@ -663,7 +727,7 @@ class GUIGrammarMiner(GUIGrammarMiner):
 
         alternatives += [self.FINAL_STATE]
 
-        grammar[state_symbol] = alternatives
+        grammar[state_symbol] = alternatives  # type: ignore
 
         # Remove unused parts
         for nonterminal in unreachable_nonterminals(grammar):
@@ -673,31 +737,19 @@ class GUIGrammarMiner(GUIGrammarMiner):
 
         return grammar
 
-if __name__ == '__main__':
-    gui_grammar_miner = GUIGrammarMiner(gui_driver)
-    state_grammar = gui_grammar_miner.mine_state_grammar()
-
-if __name__ == '__main__':
-    state_grammar[GUIGrammarMiner.START_STATE]
-
-if __name__ == '__main__':
-    state_grammar['<state-1>']
-
-if __name__ == '__main__':
-    state_grammar['<state-2>']
-
-if __name__ == '__main__':
-    state_grammar['<unexplored>']
-
 from collections import deque
 
 from .bookutils import unicode_escape
 
-def fsm_diagram(grammar, start_symbol=START_SYMBOL):
+def fsm_diagram(grammar: Grammar, start_symbol: str = START_SYMBOL) -> Any:
+    """Produce a FSM diagram for the state grammar `grammar`.
+    `start_symbol` - the start symbol (default: START_SYMBOL)"""
+
     from graphviz import Digraph
     from IPython.display import display
 
-    def left_align(label):
+    def left_align(label: str) -> str:
+        """Render `label` as left-aligned in dot"""
         return dot_escape(label.replace('\n', r'\l')).replace(r'\\l', '\\l')
 
     dot = Digraph(comment="Grammar as Finite State Machine")
@@ -711,6 +763,8 @@ def fsm_diagram(grammar, start_symbol=START_SYMBOL):
         dot.node(symbol, dot_escape(unicode_escape(symbol)))
 
         for expansion in grammar[symbol]:
+            assert type(expansion) == str  # no opts() here
+
             nts = nonterminals(expansion)
             if len(nts) > 0:
                 target_symbol = nts[-1]
@@ -722,8 +776,34 @@ def fsm_diagram(grammar, start_symbol=START_SYMBOL):
 
     return display(dot)
 
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
+
+if __name__ == '__main__':
+    gui_grammar_miner = GUIGrammarMiner(gui_driver)
+    state_grammar = gui_grammar_miner.mine_state_grammar()
+
+if __name__ == '__main__':
+    state_grammar
+
 if __name__ == '__main__':
     fsm_diagram(state_grammar)
+
+if __name__ == '__main__':
+    state_grammar[GUIGrammarMiner.START_STATE]
+
+if __name__ == '__main__':
+    state_grammar['<state-1>']
+
+if __name__ == '__main__':
+    state_grammar['<state-2>']
+
+if __name__ == '__main__':
+    state_grammar['<unexplored>']
 
 from .GrammarFuzzer import GrammarFuzzer
 
@@ -745,10 +825,24 @@ if __name__ == '__main__':
 from .Fuzzer import Runner
 
 class GUIRunner(Runner):
-    def __init__(self, driver):
+    """Execute the actions in a given action string"""
+
+    def __init__(self, driver) -> None:
+        """Constructor. `driver` is a Selenium Web driver"""
         self.driver = driver
 
-    def run(self, inp):
+#### Excursion: Implementing Executing UI Actions
+
+if __name__ == '__main__':
+    print('\n#### Excursion: Implementing Executing UI Actions')
+
+
+
+class GUIRunner(GUIRunner):
+    def run(self, inp: str) -> Tuple[str, str]:
+        """Execute the action string `inp` on the current Web site.
+        Return a pair (`inp`, `outcome`)."""
+
         def fill(name, value):
             self.do_fill(html.unescape(name), html.unescape(value))
 
@@ -762,7 +856,12 @@ class GUIRunner(Runner):
             self.do_click(html.unescape(name))
 
         exec(inp, {'__builtins__': {}},
-                  {'fill': fill, 'check': check, 'submit': submit, 'click': click})
+                  {
+                      'fill': fill,
+                      'check': check,
+                      'submit': submit,
+                      'click': click,
+                  })
 
         return inp, self.PASS
 
@@ -770,7 +869,10 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import ElementClickInterceptedException, ElementNotInteractableException
 
 class GUIRunner(GUIRunner):
-    def find_element(self, name):
+    def find_element(self, name: str) -> Any:
+        """Search for an element named `name` on the current Web site.
+        Matches can occur by name or by link text."""
+
         try:
             return self.driver.find_element_by_name(name)
         except NoSuchElementException:
@@ -786,29 +888,44 @@ class GUIRunner(GUIRunner):
     DELAY_AFTER_CLICK = 1
 
 class GUIRunner(GUIRunner):
-    def do_fill(self, name, value):
+    def do_fill(self, name: str, value: str) -> None:
+        """Fill the text element `name` with `value`"""
+
         element = self.find_element(name)
         element.send_keys(value)
         WebDriverWait(self.driver, self.DELAY_AFTER_FILL)
 
 class GUIRunner(GUIRunner):
-    def do_check(self, name, state):
+    def do_check(self, name: str, state: bool) -> None:
+        """Set the check element `name` to `state`"""
+
         element = self.find_element(name)
         if bool(state) != bool(element.is_selected()):
             element.click()
         WebDriverWait(self.driver, self.DELAY_AFTER_CHECK)
 
 class GUIRunner(GUIRunner):
-    def do_submit(self, name):
+    def do_submit(self, name: str) -> None:
+        """Click on the submit element `name`"""
+
         element = self.find_element(name)
         element.click()
         WebDriverWait(self.driver, self.DELAY_AFTER_SUBMIT)
 
 class GUIRunner(GUIRunner):
-    def do_click(self, name):
+    def do_click(self, name: str) -> None:
+        """Click on the element `name`"""
+
         element = self.find_element(name)
         element.click()
         WebDriverWait(self.driver, self.DELAY_AFTER_CLICK)
+
+#### End of Excursion
+
+if __name__ == '__main__':
+    print('\n#### End of Excursion')
+
+
 
 if __name__ == '__main__':
     gui_driver.get(httpd_url)
@@ -857,16 +974,34 @@ if __name__ == '__main__':
 
 
 
+### Excursion: Implementing GUIFuzzer
+
+if __name__ == '__main__':
+    print('\n### Excursion: Implementing GUIFuzzer')
+
+
+
 from .Grammars import is_nonterminal
 
 from .GrammarFuzzer import GrammarFuzzer
 
 class GUIFuzzer(GrammarFuzzer):
-    def __init__(self, driver, 
-                 stay_on_host=True,
-                 log_gui_exploration=False, 
-                 disp_gui_exploration=False, 
-                 **kwargs):
+    """A fuzzer for GUIs, using Selenium."""
+
+    def __init__(self, driver, *,
+                 stay_on_host: bool = True,
+                 log_gui_exploration: bool = False,
+                 disp_gui_exploration: bool = False,
+                 **kwargs) -> None:
+        """Constructor.
+        `driver` - the Selenium driver to use.
+        `stay_on_host` - if True (default), do not explore external links.
+        `log_gui_exploration` - if set, print out exploration steps.
+        `disp_gui_exploration` - if set, display screenshot of current Web page
+            as well as FSM diagrams during exploration.
+        Other keyword arguments are passed to the `GrammarFuzzer` superclass.
+        """
+
         self.driver = driver
         self.miner = GUIGrammarMiner(driver)
         self.stay_on_host = True
@@ -876,7 +1011,7 @@ class GUIFuzzer(GrammarFuzzer):
 
         self.states_seen = {}  # Maps states to symbols
         self.state_symbol = GUIGrammarMiner.START_STATE
-        self.state = self.miner.mine_state_actions()
+        self.state: FrozenSet[str] = self.miner.mine_state_actions()
         self.states_seen[self.state] = self.state_symbol
 
         grammar = self.miner.mine_state_grammar()
@@ -896,9 +1031,11 @@ if __name__ == '__main__':
     gui_fuzzer.states_seen[gui_fuzzer.state]
 
 class GUIFuzzer(GUIFuzzer):
-    def restart(self):
+    def restart(self) -> None:
+        """Get back to original URL"""
+
         self.driver.get(self.initial_url)
-        self.state = GUIGrammarMiner.START_STATE
+        self.state = frozenset(GUIGrammarMiner.START_STATE)
 
 if __name__ == '__main__':
     while True:
@@ -906,15 +1043,16 @@ if __name__ == '__main__':
         if action.find('click(') >= 0:
             break
 
-from .GrammarFuzzer import display_tree
+from .GrammarFuzzer import display_tree, DerivationTree
 
 if __name__ == '__main__':
     tree = gui_fuzzer.derivation_tree
     display_tree(tree)
 
 class GUIFuzzer(GUIFuzzer):
-    def fsm_path(self, tree):
-        """Return sequence of state symbols"""
+    def fsm_path(self, tree: DerivationTree) -> List[str]:
+        """Return sequence of state symbols."""
+
         (node, children) = tree
         if node == GUIGrammarMiner.UNEXPLORED_STATE:
             return []
@@ -928,11 +1066,13 @@ if __name__ == '__main__':
     gui_fuzzer.fsm_path(tree)
 
 class GUIFuzzer(GUIFuzzer):
-    def fsm_last_state_symbol(self, tree):
+    def fsm_last_state_symbol(self, tree: DerivationTree) -> str:
         """Return current (expected) state symbol"""
+
         for state in reversed(self.fsm_path(tree)):
             if is_nonterminal(state):
                 return state
+
         assert False
 
 if __name__ == '__main__':
@@ -940,7 +1080,8 @@ if __name__ == '__main__':
     gui_fuzzer.fsm_last_state_symbol(tree)
 
 class GUIFuzzer(GUIFuzzer):
-    def run(self, runner):
+    def run(self, runner: GUIRunner) -> Tuple[str, str]:  # type: ignore
+        """Run the fuzzer on the given GUIRunner `runner`."""
         assert isinstance(runner, GUIRunner)
 
         self.restart()
@@ -958,7 +1099,9 @@ class GUIFuzzer(GUIFuzzer):
         return self.state_symbol, outcome
 
 class GUIFuzzer(GUIFuzzer):
-    def update_state(self):
+    def update_state(self) -> None:
+        """Determine current state from current Web page"""
+
         if self.disp_gui_exploration:
             display(Image(self.driver.get_screenshot_as_png()))
 
@@ -970,16 +1113,21 @@ class GUIFuzzer(GUIFuzzer):
             self.update_existing_state()
 
 class GUIFuzzer(GUIFuzzer):
-    def set_grammar(self, new_grammar):
+    def set_grammar(self, new_grammar: Grammar) -> None:
+        """Set grammar to `new_grammar`."""
+
         self.grammar = new_grammar
 
         if self.disp_gui_exploration and rich_output():
             display(fsm_diagram(self.grammar))
 
 class GUIFuzzer(GUIFuzzer):
-    def update_new_state(self):
+    def update_new_state(self) -> None:
+        """Found new state; extend grammar accordingly"""
+
         if self.log_gui_exploration:
-            print("In new state", unicode_escape(self.state_symbol), unicode_escape(repr(self.state)))
+            print("In new state", unicode_escape(self.state_symbol),
+                                  unicode_escape(repr(self.state)))
 
         state_grammar = self.miner.mine_state_grammar(grammar=self.grammar, 
                                                       state_symbol=self.state_symbol)
@@ -987,11 +1135,16 @@ class GUIFuzzer(GUIFuzzer):
         del state_grammar[GUIGrammarMiner.START_STATE]
         self.set_grammar(extend_grammar(self.grammar, state_grammar))
 
+    def update_existing_state(self) -> None:
+        pass  # See below
+
 from .Grammars import exp_string, exp_opts
 
-def replace_symbol(grammar, old_symbol, new_symbol):
+def replace_symbol(grammar: Grammar, 
+                   old_symbol: str, new_symbol: str) -> Grammar:
     """Return a grammar in which all occurrences of `old_symbol` are replaced by `new_symbol`"""
-    new_grammar = {}
+
+    new_grammar: Grammar = {}
 
     for symbol in grammar:
         new_expansions = []
@@ -1000,10 +1153,10 @@ def replace_symbol(grammar, old_symbol, new_symbol):
             if len(exp_opts(expansion)) > 0:
                 new_expansion = (new_expansion_string, exp_opts(expansion))
             else:
-                new_expansion = new_expansion_string
+                new_expansion = new_expansion_string  # type: ignore
             new_expansions.append(new_expansion)
 
-        new_grammar[symbol] = new_expansions
+        new_grammar[symbol] = new_expansions  # type: ignore
 
     # Remove unused parts
     for nonterminal in unreachable_nonterminals(new_grammar):
@@ -1012,7 +1165,9 @@ def replace_symbol(grammar, old_symbol, new_symbol):
     return new_grammar
 
 class GUIFuzzer(GUIFuzzer):
-    def update_existing_state(self):
+    def update_existing_state(self) -> None:
+        """Update actions of existing state"""
+
         if self.log_gui_exploration:
             print("In existing state", self.states_seen[self.state])
 
@@ -1025,6 +1180,13 @@ class GUIFuzzer(GUIFuzzer):
                                          self.states_seen[self.state])
             self.state_symbol = self.states_seen[self.state]
             self.set_grammar(new_grammar)
+
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
 
 if __name__ == '__main__':
     gui_driver.get(httpd_url)
@@ -1057,12 +1219,17 @@ if __name__ == '__main__':
     inheritance_conflicts(GUIFuzzer, GrammarCoverageFuzzer)
 
 class GUICoverageFuzzer(GUIFuzzer, GrammarCoverageFuzzer):
+    """Systematically explore all states of the current Web page"""
+
     def __init__(self, *args, **kwargs):
+        """Constructor. All args are passed to the `GUIFuzzer` superclass."""
         GUIFuzzer.__init__(self, *args, **kwargs)
         self.reset_coverage()
 
 class GUICoverageFuzzer(GUICoverageFuzzer):
-    def explore_all(self, runner, max_actions=100):
+    def explore_all(self, runner: GUIRunner, max_actions=100) -> None:
+        """Explore all states of the GUI, up to `max_actions` (default 100)."""
+
         actions = 0
         while GUIGrammarMiner.UNEXPLORED_STATE in self.grammar and actions < max_actions:
             actions += 1
@@ -1164,6 +1331,40 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
+
+from .ClassDiagram import display_class_hierarchy
+from .Fuzzer import Fuzzer, Runner
+from .Grammars import Grammar, Expansion
+from .GrammarFuzzer import GrammarFuzzer, DerivationTree
+
+if __name__ == '__main__':
+    display_class_hierarchy([GUIFuzzer, GUICoverageFuzzer,
+                             GUIRunner],
+                            public_methods=[
+                                Fuzzer.__init__,
+                                Fuzzer.fuzz,
+                                Fuzzer.run,
+                                Fuzzer.runs,
+                                Runner.__init__,
+                                Runner.run,
+                                GUIRunner.__init__,
+                                GUIRunner.run,
+                                GrammarFuzzer.__init__,
+                                GrammarFuzzer.fuzz,
+                                GrammarFuzzer.fuzz_tree,
+                                GUIFuzzer.__init__,
+                                GUIFuzzer.restart,
+                                GUIFuzzer.run,
+                                GrammarCoverageFuzzer.__init__,
+                                GUICoverageFuzzer.__init__,
+                                GUICoverageFuzzer.explore_all,
+                            ],
+                            types={
+                                'DerivationTree': DerivationTree,
+                                'Expansion': Expansion,
+                                'Grammar': Grammar
+                            },
+                            project='fuzzingbook')
 
 ## Lessons Learned
 ## ---------------

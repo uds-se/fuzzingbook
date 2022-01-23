@@ -3,7 +3,7 @@
 
 # "Fuzzing with Generators" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GeneratorGrammarFuzzer.html
-# Last change: 2022-01-12 14:47:07+01:00
+# Last change: 2022-01-23 17:18:06+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -923,15 +923,22 @@ if __name__ == '__main__':
 
 class ProbabilisticGeneratorGrammarFuzzer(GeneratorGrammarFuzzer,
                                           ProbabilisticGrammarFuzzer):
+    """Join the features of `GeneratorGrammarFuzzer` 
+    and `ProbabilisticGrammarFuzzer`"""
+
     def supported_opts(self) -> Set[str]:
         return (super(GeneratorGrammarFuzzer, self).supported_opts() |
                 super(ProbabilisticGrammarFuzzer, self).supported_opts())
 
-    def __init__(self, grammar: Grammar, replacement_attempts: int = 10,
+    def __init__(self, grammar: Grammar, *, replacement_attempts: int = 10,
                  **kwargs):
+        """Constructor.
+        `replacement_attempts` - see `GeneratorGrammarFuzzer` constructor.
+        All other keywords go into `ProbabilisticGrammarFuzzer`.
+        """
         super(GeneratorGrammarFuzzer, self).__init__(
                 grammar,
-                replacement_attempts)
+                replacement_attempts=replacement_attempts)
         super(ProbabilisticGrammarFuzzer, self).__init__(grammar, **kwargs)
 
 CONSTRAINED_VAR_GRAMMAR.update({
@@ -966,12 +973,19 @@ import copy
 
 class ProbabilisticGeneratorGrammarCoverageFuzzer(GeneratorGrammarFuzzer,
                                                   ProbabilisticGrammarCoverageFuzzer):
+    """Join the features of `GeneratorGrammarFuzzer` 
+    and `ProbabilisticGrammarCoverageFuzzer`"""
+
     def supported_opts(self) -> Set[str]:
         return (super(GeneratorGrammarFuzzer, self).supported_opts() |
                 super(ProbabilisticGrammarCoverageFuzzer, self).supported_opts())
 
-    def __init__(self, grammar: Grammar,
+    def __init__(self, grammar: Grammar, *,
                  replacement_attempts: int = 10, **kwargs) -> None:
+        """Constructor.
+        `replacement_attempts` - see `GeneratorGrammarFuzzer` constructor.
+        All other keywords go into `ProbabilisticGrammarFuzzer`.
+        """
         super(GeneratorGrammarFuzzer, self).__init__(
                 grammar,
                 replacement_attempts)
@@ -981,6 +995,7 @@ class ProbabilisticGeneratorGrammarCoverageFuzzer(GeneratorGrammarFuzzer,
 
 class ProbabilisticGeneratorGrammarCoverageFuzzer(
         ProbabilisticGeneratorGrammarCoverageFuzzer):
+
     def fuzz_tree(self) -> DerivationTree:
         self.orig_covered_expansions = copy.deepcopy(self.covered_expansions)
         tree = super().fuzz_tree()
@@ -1002,6 +1017,7 @@ class ProbabilisticGeneratorGrammarCoverageFuzzer(
 
 class ProbabilisticGeneratorGrammarCoverageFuzzer(
         ProbabilisticGeneratorGrammarCoverageFuzzer):
+
     def restart_expansion(self) -> None:
         super().restart_expansion()
         self.covered_expansions = self.orig_covered_expansions
@@ -1018,6 +1034,7 @@ if __name__ == '__main__':
     [pggc_fuzzer.fuzz() for i in range(10)]
 
 class PGGCFuzzer(ProbabilisticGeneratorGrammarCoverageFuzzer):
+    """The one grammar-based fuzzer that supports all fuzzingbook features"""
     pass
 
 ## Synopsis
@@ -1052,6 +1069,14 @@ if __name__ == '__main__':
                                 GrammarFuzzer.__init__,
                                 GrammarFuzzer.fuzz,
                                 GrammarFuzzer.fuzz_tree,
+                                GeneratorGrammarFuzzer.__init__,
+                                GeneratorGrammarFuzzer.fuzz_tree,
+                                GrammarCoverageFuzzer.__init__,
+                                ProbabilisticGrammarFuzzer.__init__,
+                                ProbabilisticGrammarCoverageFuzzer.__init__,
+                                ProbabilisticGeneratorGrammarCoverageFuzzer.__init__,
+                                ProbabilisticGeneratorGrammarCoverageFuzzer.fuzz_tree,
+                                PGGCFuzzer.__init__,
                             ],
                             types={
                                 'DerivationTree': DerivationTree,

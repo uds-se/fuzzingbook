@@ -3,7 +3,7 @@
 
 # "Efficient Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2022-01-12 14:43:50+01:00
+# Last change: 2022-01-23 14:24:53+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -49,13 +49,13 @@ This chapter introduces `GrammarFuzzer`, an efficient grammar fuzzer that takes 
 >>> from Grammars import US_PHONE_GRAMMAR
 >>> phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
 >>> phone_fuzzer.fuzz()
-'(855)846-4471'
+'(519)333-4454'
 
 The `GrammarFuzzer` constructor takes a number of keyword arguments to control its behavior.  `start_symbol`, for instance, allows to set the symbol that expansion starts with (instead of ``):
 
 >>> area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='')
 >>> area_fuzzer.fuzz()
-'796'
+'718'
 
 Here's how to parameterize the `GrammarFuzzer` constructor:
 
@@ -76,20 +76,20 @@ In the internal representation of a derivation tree, a _node_ is a pair (`symbol
  [('',
    [('(', []),
     ('',
-     [('', [('8', [])]),
-      ('', [('5', [])]),
-      ('', [('5', [])])]),
+     [('', [('5', [])]),
+      ('', [('1', [])]),
+      ('', [('9', [])])]),
     (')', []),
     ('',
-     [('', [('8', [])]),
-      ('', [('4', [])]),
-      ('', [('6', [])])]),
+     [('', [('3', [])]),
+      ('', [('3', [])]),
+      ('', [('3', [])])]),
     ('-', []),
     ('',
      [('', [('4', [])]),
       ('', [('4', [])]),
-      ('', [('7', [])]),
-      ('', [('1', [])])])])])
+      ('', [('5', [])]),
+      ('', [('4', [])])])])])
 
 The chapter contains various helpers to work with derivation trees, including visualization tools – notably, `display_tree()`, above.
 

@@ -16836,15 +16836,16 @@ div.jp-OutputPrompt {
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs  ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[61]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[62]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">display_class_hierarchy</span><span class="p">(</span><span class="n">classes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">]],</span> 
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">display_class_hierarchy</span><span class="p">(</span><span class="n">classes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Type</span><span class="p">]],</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">public_methods</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">abstract_classes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="n">include_methods</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                            <span class="n">include_class_vars</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">include_class_vars</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                             <span class="n">include_legend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="n">local_defs_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                             <span class="n">types</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
                             <span class="n">project</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;fuzzingbook&#39;</span><span class="p">,</span>
                             <span class="n">log</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
@@ -16854,8 +16855,9 @@ div.jp-OutputPrompt {
 <span class="sd">  (Default: all methods with a docstring)</span>
 <span class="sd">`abstract_classes`, if given, is a list of classes to be shown as &quot;abstract&quot; (cursive).</span>
 <span class="sd">  (Default: all classes with an abstract method)</span>
-<span class="sd">`include_methods`: if True, include all methods (default)</span>
-<span class="sd">`include_legend`: if True, include a legend (default)</span>
+<span class="sd">`include_methods`: if set (default), include all methods</span>
+<span class="sd">`include_legend`: if set (default), include a legend</span>
+<span class="sd">`local_defs_only`: if set (default), hide details of imported classes</span>
 <span class="sd">`types`: type names with definitions, to be used in docs</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">graphviz</span> <span class="kn">import</span> <span class="n">Digraph</span>  <span class="c1"># type: ignore</span>
@@ -16931,6 +16933,16 @@ div.jp-OutputPrompt {
 
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">docstring</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
 
+    <span class="k">def</span> <span class="nf">frame_module</span><span class="p">(</span><span class="n">frameinfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">frameinfo</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">callers</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">frames</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getouterframes</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">currentframe</span><span class="p">())</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">frame_module</span><span class="p">(</span><span class="n">frameinfo</span><span class="p">)</span> <span class="k">for</span> <span class="n">frameinfo</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">is_local_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span> <span class="ow">or</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__module__</span> <span class="ow">in</span> <span class="n">callers</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="nf">class_vars_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">cls_vars</span> <span class="o">=</span> <span class="n">class_vars</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cls_vars</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -16959,16 +16971,19 @@ div.jp-OutputPrompt {
     <span class="k">def</span> <span class="nf">class_methods_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">methods</span> <span class="o">=</span> <span class="n">public_class_methods</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="c1"># return &quot;&lt;br/&gt;&quot;.join([name + &quot;()&quot; for (name, f) in methods])</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">methods</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
-
         <span class="n">methods_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&lt;table border=&quot;0&quot; cellpadding=&quot;0&quot; &#39;</span> \
                          <span class="sa">f</span><span class="s1">&#39;cellspacing=&quot;0&quot; &#39;</span> \
                          <span class="sa">f</span><span class="s1">&#39;align=&quot;left&quot; tooltip=&quot;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">&quot; href=&quot;#&quot;&gt;&#39;</span>
 
+        <span class="n">public_methods_only</span> <span class="o">=</span> <span class="n">local_defs_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_local_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+        <span class="n">methods_seen</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="n">public</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]:</span>
             <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">public</span> <span class="o">!=</span> <span class="n">is_public</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">public_methods_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">public</span><span class="p">:</span>
                     <span class="k">continue</span>
 
                 <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
@@ -17003,6 +17018,10 @@ div.jp-OutputPrompt {
                 <span class="n">methods_string</span> <span class="o">+=</span> <span class="n">method_string</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">public</span><span class="p">,</span> <span class="n">overloaded</span><span class="p">)</span>
 
                 <span class="n">methods_string</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/td&gt;&lt;/tr&gt;&#39;</span>
+                <span class="n">methods_seen</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">methods_seen</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
         <span class="n">methods_string</span> <span class="o">+=</span> <span class="s1">&#39;&lt;/table&gt;&#39;</span>
         <span class="k">return</span> <span class="n">methods_string</span>
@@ -17102,7 +17121,7 @@ div.jp-OutputPrompt {
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[62]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[63]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">D_Class</span><span class="p">,</span> <span class="n">types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;SomeType&#39;</span><span class="p">:</span> <span class="n">SomeType</span><span class="p">},</span>
@@ -17152,7 +17171,7 @@ Drawing class C_Class
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[62]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[63]:</div>
 
 
 
@@ -17302,7 +17321,7 @@ Drawing class C_Class
 </div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[63]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[64]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">D_Class</span><span class="p">,</span> <span class="n">types</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;SomeType&#39;</span><span class="p">:</span> <span class="n">SomeType</span><span class="p">},</span>
@@ -17322,7 +17341,7 @@ Drawing class C_Class
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[63]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[64]:</div>
 
 
 
@@ -17478,7 +17497,7 @@ Drawing class C_Class
 </div></div></section><section><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[64]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[65]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">display_class_hierarchy</span><span class="p">([</span><span class="n">A_Class</span><span class="p">,</span> <span class="n">B_Class</span><span class="p">],</span>
@@ -17526,7 +17545,7 @@ Drawing class B_Class
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[64]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[65]:</div>
 
 
 
@@ -17645,7 +17664,7 @@ Drawing class B_Class
 </div></div><div class="fragment"><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[65]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[66]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">display_class_hierarchy</span><span class="p">(</span><span class="n">D_Class</span><span class="p">,</span> <span class="n">abstract_classes</span><span class="o">=</span><span class="p">[</span><span class="n">A_Class</span><span class="p">])</span>
@@ -17664,7 +17683,7 @@ Drawing class B_Class
 <div class="jp-OutputArea-child">
 
     
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[65]:</div>
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[66]:</div>
 
 
 
