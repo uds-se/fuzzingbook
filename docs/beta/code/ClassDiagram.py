@@ -3,7 +3,7 @@
 
 # "Class Diagrams" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ClassDiagram.html
-# Last change: 2022-01-23 14:38:02+01:00
+# Last change: 2022-01-24 11:09:12+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -500,7 +500,7 @@ def display_class_hierarchy(classes: Union[Type, List[Type]], *,
 
         return bool(docstring(f))
 
-    def frame_module(frameinfo) -> str:
+    def frame_module(frameinfo: Any) -> str:
         return os.path.splitext(os.path.basename(frameinfo.frame.f_code.co_filename))[0]
 
     def callers() -> List[str]:

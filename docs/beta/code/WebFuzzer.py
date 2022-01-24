@@ -3,7 +3,7 @@
 
 # "Testing Web Applications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2022-01-23 18:00:22+01:00
+# Last change: 2022-01-24 11:05:37+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
