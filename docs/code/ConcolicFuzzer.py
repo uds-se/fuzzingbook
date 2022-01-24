@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-01-23 14:33:01+01:00
+# Last change: 2022-01-24 11:01:32+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -122,11 +122,11 @@ IndexError: string index out of range (expected)
 'ABC'
 'ABC%'
 'A%'
-
-IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
-
 'ABC+DE'
+
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+
 'AB'
 'AB+'
 'A'
