@@ -628,7 +628,8 @@ endif
 $(REVEAL_JS) reveal.js: .FORCE
 	@-test -d "$(REVEAL_JS)" || (cd $(SLIDES_TARGET); \
 		git submodule add https://github.com/hakimel/reveal.js.git)
-	@git submodule update --remote
+	git submodule update --remote
+	-git commit -m "Update from source" $(REVEAL_JS)
 
 $(CODE_TARGET)setup.py: $(CODE_TARGET)setup.py.in
 	cat $< > $@
