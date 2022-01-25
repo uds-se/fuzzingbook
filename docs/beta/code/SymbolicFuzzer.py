@@ -3,7 +3,7 @@
 
 # "Symbolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/SymbolicFuzzer.html
-# Last change: 2022-01-24 11:03:04+01:00
+# Last change: 2022-01-25 18:26:13+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -65,16 +65,16 @@ To explore `gcd()`, the fuzzer can be used as follows, producing values for argu
 >>> for i in range(10):
 >>>     args = gcd_fuzzer.fuzz()
 >>>     print(args)
-{'a': 5, 'b': 3}
-{'a': 1, 'b': 4}
-{'a': 4, 'b': 5}
-{'a': 6, 'b': -7}
+{'a': 8, 'b': 3}
+{'a': 1, 'b': 2}
 {'a': 3, 'b': 4}
-{'a': 1, 'b': 1}
-{'a': 13, 'b': 7}
-{'a': 2, 'b': 4}
-{'a': 6, 'b': 6}
+{'a': 9, 'b': -18}
+{'a': 2, 'b': 3}
+{'a': 4, 'b': 4}
 {'a': 9, 'b': 8}
+{'a': 5, 'b': 10}
+{'a': 4, 'b': 1}
+{'a': 10, 'b': 9}
 
 
 Note that the variable values returned by `fuzz()` are Z3 _symbolic_ values; to convert them to Python numbers, use their method `as_long()`:
@@ -85,16 +85,16 @@ Note that the variable values returned by `fuzz()` are Z3 _symbolic_ values; to 
 >>>     b = args['b'].as_long()
 >>>     d = gcd(a, b)
 >>>     print(f"gcd({a}, {b}) = {d}")
-gcd(0, 5) = 5
-gcd(-1, 0) = -1
-gcd(14, 13) = 1
-gcd(0, 14) = 14
-gcd(14, 15) = 1
-gcd(15, 15) = 15
-gcd(2, 3) = 1
-gcd(16, 0) = 16
-gcd(16, -1) = -1
-gcd(-1, 1) = -1
+gcd(0, 11) = 11
+gcd(-1, 11) = -1
+gcd(13, 12) = 1
+gcd(0, 4) = 4
+gcd(-1, 4) = -1
+gcd(12, 12) = 12
+gcd(-20, -19) = -1
+gcd(11, 0) = 11
+gcd(5, 5) = 5
+gcd(-2, -1) = -1
 
 
 The symbolic fuzzer is subject to a number of constraints. First, it requires that the function to be fuzzed has correct type annotations, including all local variables. Second, it solves loops by unrolling them, but only for a fixed amount.
