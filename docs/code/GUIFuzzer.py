@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2022-01-25 20:59:08+01:00
+# Last change: 2022-01-25 22:48:41+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -71,18 +71,18 @@ The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow pa
 >>> print(actions)
 click('terms and conditions')
 click('order form')
-check('terms', True)
-fill('city', 'O')
-fill('email', 'x@N')
-fill('name', 'C')
-fill('zip', '0')
+check('terms', False)
+fill('email', 'S@qy')
+fill('name', 'x')
+fill('zip', '6')
+fill('city', 'Cf')
 submit('submit')
 click('order form')
-check('terms', True)
-fill('city', 'E')
-fill('email', 's@y')
-fill('name', 'k')
-fill('zip', '9')
+check('terms', False)
+fill('email', 'L@U')
+fill('name', 'G')
+fill('zip', '5')
+fill('city', 'w')
 submit('submit')
 
 
@@ -199,9 +199,9 @@ if __name__ == '__main__':
             "Please install 'geckodriver' executable " \
             "from https://github.com/mozilla/geckodriver/releases"
 
-HEADLESS = False
+HEADLESS = True
 
-def start_webdriver(browser=BROWSER, headless=HEADLESS, zoom=3.0):
+def start_webdriver(browser=BROWSER, headless=HEADLESS, zoom=1.4):
     if browser == 'firefox':
         options = webdriver.FirefoxOptions()
     if browser == 'chrome':
