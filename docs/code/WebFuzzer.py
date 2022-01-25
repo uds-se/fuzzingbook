@@ -3,7 +3,7 @@
 
 # "Testing Web Applications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2022-01-24 11:05:37+01:00
+# Last change: 2022-01-25 18:48:58+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -99,6 +99,10 @@ if __name__ == '__main__':
     print('# Testing Web Applications')
 
 
+
+if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('5agY5kg8Pvk')
 
 ## Synopsis
 ## --------
@@ -535,12 +539,10 @@ class SimpleHTTPRequestHandler(SimpleHTTPRequestHandler):
                     format % args))
         HTTPD_MESSAGE_QUEUE.put(message)
 
-if __name__ == '__main__':
-    import requests
+import requests
 
 def webbrowser(url: str, mute: bool = False) -> str:
     """Download and return the http/https resource given by the URL"""
-    import requests  # for imports
 
     try:
         r = requests.get(url)

@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2022-01-24 11:08:11+01:00
+# Last change: 2022-01-25 18:50:51+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -70,7 +70,6 @@ The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow pa
 >>> actions = gui_fuzzer.fuzz()
 >>> print(actions)
 click('terms and conditions')
-click('order form')
 
 
 
@@ -80,6 +79,8 @@ These actions can be fed into the GUI runner, which will execute them on the giv
 >>> result, outcome = gui_runner.run(actions)
 >>> Image(gui_driver.get_screenshot_as_png())
 Further invocations of `fuzz()` will further cover the model – for instance, exploring the terms and conditions.
+
+Internally, `GUIFuzzer` and `GUICoverageFuzzer` use a subclass `GUIGrammarMiner` which implements the analysis of the GUI and all its states. Subclassing `GUIGrammarMiner` allows to extend the interpretation of GUIs; the `GUIFuzzer` constructor allows to pass a miner via the `miner` keyword parameter.
 
 A tool like `GUICoverageFuzzer` will provide "deep" exploration of user interfaces, even filling out forms to explore what is behind them. Keep in mind, though, that `GUICoverageFuzzer` is experimental: It only supports a subset of HTML form and link features, and does not take JavaScript into account.
 
@@ -421,7 +422,8 @@ if __name__ == '__main__':
 
 class GUIGrammarMiner(GUIGrammarMiner):
     def mine_state_actions(self) -> FrozenSet[str]:
-        """Return a set of all possible actions on the current Web site"""
+        """Return a set of all possible actions on the current Web site.
+        Can be overloaded in subclasses."""
         return frozenset(self.mine_input_element_actions()
                          | self.mine_button_element_actions()
                          | self.mine_a_element_actions())
@@ -675,7 +677,8 @@ class GUIGrammarMiner(GUIGrammarMiner):
 
     def mine_state_grammar(self, grammar: Grammar = {},
                            state_symbol: str = None) -> Grammar:
-        """Return a state grammar for the actions on the current Web site"""
+        """Return a state grammar for the actions on the current Web site.
+        Can be overloaded in subclasses."""
 
         grammar = extend_grammar(self.GUI_GRAMMAR, grammar)  # type: ignore
 
@@ -978,12 +981,14 @@ class GUIFuzzer(GrammarFuzzer):
     """A fuzzer for GUIs, using Selenium."""
 
     def __init__(self, driver, *,
+                 miner: Optional[GUIGrammarMiner] = None,
                  stay_on_host: bool = True,
                  log_gui_exploration: bool = False,
                  disp_gui_exploration: bool = False,
                  **kwargs) -> None:
         """Constructor.
         `driver` - the Selenium driver to use.
+        `miner` - the miner to use (default: `GUIGrammarMiner(driver)`)
         `stay_on_host` - if True (default), do not explore external links.
         `log_gui_exploration` - if set, print out exploration steps.
         `disp_gui_exploration` - if set, display screenshot of current Web page
@@ -992,14 +997,18 @@ class GUIFuzzer(GrammarFuzzer):
         """
 
         self.driver = driver
-        self.miner = GUIGrammarMiner(driver)
+
+        if miner is None:
+            miner = GUIGrammarMiner(driver)
+
+        self.miner = miner
         self.stay_on_host = True
         self.log_gui_exploration = log_gui_exploration
         self.disp_gui_exploration = disp_gui_exploration
         self.initial_url = driver.current_url
 
         self.states_seen = {}  # Maps states to symbols
-        self.state_symbol = GUIGrammarMiner.START_STATE
+        self.state_symbol = self.miner.START_STATE
         self.state: FrozenSet[str] = self.miner.mine_state_actions()
         self.states_seen[self.state] = self.state_symbol
 
@@ -1024,7 +1033,7 @@ class GUIFuzzer(GUIFuzzer):
         """Get back to original URL"""
 
         self.driver.get(self.initial_url)
-        self.state = frozenset(GUIGrammarMiner.START_STATE)
+        self.state = frozenset(self.miner.START_STATE)
 
 if __name__ == '__main__':
     while True:
@@ -1043,7 +1052,7 @@ class GUIFuzzer(GUIFuzzer):
         """Return sequence of state symbols."""
 
         (node, children) = tree
-        if node == GUIGrammarMiner.UNEXPLORED_STATE:
+        if node == self.miner.UNEXPLORED_STATE:
             return []
         elif children is None or len(children) == 0:
             return [node]
@@ -1082,7 +1091,7 @@ class GUIFuzzer(GUIFuzzer):
 
         result, outcome = runner.run(action)
 
-        if self.state_symbol != GUIGrammarMiner.FINAL_STATE:
+        if self.state_symbol != self.miner.FINAL_STATE:
             self.update_state()
 
         return self.state_symbol, outcome
@@ -1121,7 +1130,7 @@ class GUIFuzzer(GUIFuzzer):
         state_grammar = self.miner.mine_state_grammar(grammar=self.grammar, 
                                                       state_symbol=self.state_symbol)
         del state_grammar[START_SYMBOL]
-        del state_grammar[GUIGrammarMiner.START_STATE]
+        del state_grammar[self.miner.START_STATE]
         self.set_grammar(extend_grammar(self.grammar, state_grammar))
 
     def update_existing_state(self) -> None:
@@ -1220,7 +1229,8 @@ class GUICoverageFuzzer(GUICoverageFuzzer):
         """Explore all states of the GUI, up to `max_actions` (default 100)."""
 
         actions = 0
-        while GUIGrammarMiner.UNEXPLORED_STATE in self.grammar and actions < max_actions:
+        while (self.miner.UNEXPLORED_STATE in self.grammar and 
+               actions < max_actions):
             actions += 1
             if self.log_gui_exploration:
                 print("Run #" + repr(actions))
@@ -1328,7 +1338,7 @@ from .GrammarFuzzer import GrammarFuzzer, DerivationTree
 
 if __name__ == '__main__':
     display_class_hierarchy([GUIFuzzer, GUICoverageFuzzer,
-                             GUIRunner],
+                             GUIRunner, GUIGrammarMiner],
                             public_methods=[
                                 Fuzzer.__init__,
                                 Fuzzer.fuzz,
@@ -1344,6 +1354,7 @@ if __name__ == '__main__':
                                 GUIFuzzer.__init__,
                                 GUIFuzzer.restart,
                                 GUIFuzzer.run,
+                                GUIGrammarMiner.__init__,
                                 GrammarCoverageFuzzer.__init__,
                                 GUICoverageFuzzer.__init__,
                                 GUICoverageFuzzer.explore_all,
