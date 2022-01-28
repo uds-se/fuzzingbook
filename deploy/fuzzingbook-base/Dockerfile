@@ -2,8 +2,8 @@
 FROM ubuntu
 
 # Please change to whoever is going to maintain this.
-LABEL Sascha Just <sascha.just@cispa.saarland>
-LABEL description="v0.1"
+LABEL Johannes Lampel <johannes.lampel@cispa.de>
+LABEL description="v0.2"
 
 # Tell debian that we are not in interactive mode.
 ENV DEBIAN_FRONTEND noninteractive
@@ -64,7 +64,7 @@ WORKDIR /root
 # Dockerfile. 
 ADD requirements.txt /root/install-requirements.txt
 # ADD https://raw.githubusercontent.com/$OWNER/fuzzingbook/${FUZZINGBOOK_VERSION}/deploy/fuzzingbook-base/requirements.txt /root/install-requirements.txt
-ADD https://raw.githubusercontent.com/$OWNER/fuzzingbook/$FUZZINGBOOK_VERSION/binder/requirements.txt /root/fuzzingbook-requirements.txt
+ADD https://raw.githubusercontent.com/$OWNER/fuzzingbook/$FUZZINGBOOK_VERSION/requirements.txt /root/fuzzingbook-requirements.txt
 ADD https://raw.githubusercontent.com/MozillaSecurity/FuzzManager/${FUZZMANAGER_VERSION}/server/requirements.txt /root/fuzzmanager-requirements.txt
 
 # Same for the ubuntu packages. These have been moved to a file to facilitate 

@@ -1,7 +1,7 @@
 FROM jupyter/scipy-notebook
 
-LABEL maintainer="Nataniel Borges Jr."
-LABEL description="v0.1"
+LABEL maintainer="Johannes Lampel"
+LABEL description="v0.2"
 
 USER root
 
@@ -88,6 +88,7 @@ RUN rm -rf /var/lib/apt/lists/*
 COPY start-singleuser-custom.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start-singleuser-custom.sh
 RUN mv /usr/local/bin/start-singleuser.sh /usr/local/bin/start-singleuser-old.sh
+RUN pip install -r /home/$NB_USER/fuzzingbook/requirements.txt
 #RUN cp /usr/local/bin/custom-start.sh /usr/local/bin/start-singleuser.sh
 
 # Quit root mode
