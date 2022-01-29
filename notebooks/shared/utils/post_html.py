@@ -207,8 +207,9 @@ def get_description(notebook):
 
 def get_sections(notebook):
     """Return the section titles from a notebook file"""
+
     contents = get_text_contents(notebook)
-    matches = re.findall(r'^(# .*)', contents, re.MULTILINE)
+    matches = re.findall(r'\n\s*\n(# .*)', contents, re.MULTILINE)
     if len(matches) >= 5:
         # Multiple top sections (book?) - use these
         pass
