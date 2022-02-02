@@ -5,17 +5,20 @@ LABEL description="v0.2"
 
 USER root
 
+ARG publish=yes
+ARG branch=master
+
+ADD https://raw.githubusercontent.com/uds-se/fuzzingbook/${branch}/binder/apt.txt /root/fuzzingbook-packages.txt
+
 # Install required APT packages
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends graphviz curl inkscape bc ed texinfo groff wget
 RUN if [ "$publish" = "yes" ]; then apt-get install -y --no-install-recommends firefox vim tmux ; fi
+RUN apt-get install --no-install-recommends -y $(grep -v -e '^\s*#' fuzzingbook-packages.txt)
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
 USER $NB_UID
-
-ARG publish=yes
-ARG branch=master
 
 # Install required python packages
 RUN if [ "$publish" = "yes" ]; then conda install -c anaconda python=3.6 ; fi
