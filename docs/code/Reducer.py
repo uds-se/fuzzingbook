@@ -3,7 +3,7 @@
 
 # "Reducing Failure-Inducing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2022-02-01 17:27:05+01:00
+# Last change: 2022-02-02 10:40:27+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -77,7 +77,7 @@ Delta Debugging is a simple and robust reduction algorithm.  We can tie a `Delta
 >>> dd.reduce(python_input)
 '3/0'
 
-The input is reduced to the maximum: We get the essence of the division by zero.
+The input is reduced to the minimum: We get the essence of the division by zero.
 
 
 For more details, source, and documentation, see
@@ -123,6 +123,10 @@ if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
+
+from .bookutils import quiz
+
+from .ExpectError import ExpectError
 
 from .Fuzzer import RandomFuzzer, Runner
 
@@ -270,6 +274,20 @@ class DeltaDebuggingReducer(CachingReducer):
 if __name__ == '__main__':
     dd_reducer = DeltaDebuggingReducer(mystery, log_test=True)
     dd_reducer.reduce(failing_input)
+
+if __name__ == '__main__':
+    quiz("What happens if the function under test does not fail?",
+        [
+            "Delta debugging searches for the minimal input"
+            " that produces the same result",
+            "Delta debugging starts a fuzzer to find a failure",
+            "Delta debugging raises an AssertionError",
+            "Delta debugging runs forever in a loop",
+        ], '0 ** 0 + 1 ** 0 + 0 ** 1 + 1 ** 1')
+
+if __name__ == '__main__':
+    with ExpectError():
+        dd_reducer.reduce("I am a passing input")
 
 ## Grammar-Based Input Reduction
 ## -----------------------------

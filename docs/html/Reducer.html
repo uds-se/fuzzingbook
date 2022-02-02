@@ -12087,7 +12087,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <span class="o">&gt;&gt;&gt;</span> <span class="n">dd</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">python_input</span><span class="p">)</span>
 <span class="s1">&#39;3/0&#39;</span>
 </pre></div>
-<p>The input is reduced to the maximum: We get the essence of the division by zero.</p>
+<p>The input is reduced to the minimum: We get the essence of the division by zero.</p>
 </div>
 </div>
 </div>
@@ -12120,6 +12120,34 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://github.com/uds-se/fuzzingbook//tree/master/notebooks/shared/bookutils" class="import" target="_blank">bookutils</a></span> <span class="kn">import</span> <span class="n">quiz</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="kn">import</span> <span class="n">ExpectError</span>
 </pre></div>
 
 </div>
@@ -12835,6 +12863,158 @@ Test #29 &#39;)&#39; 1 PASS
 </div>
 </div>
 </div>
+</div>
+
+<div class="output_area">
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+    <script>
+    var bad_answers = new Map();
+
+    function answer(quiz_id) {
+        ans = 0;
+        for (i = 1;; i++) {
+            checkbox = document.getElementById(quiz_id + "-" + i.toString());
+            if (!checkbox)
+                break;
+            if (checkbox.checked)
+                ans |= (1 << i);
+        }
+        return ans;
+    }
+    function check_selection(quiz_id, correct_answer, multiple_choice, hint) {
+        given_answer = answer(quiz_id);
+        if (given_answer == correct_answer)
+        {
+            document.getElementById(quiz_id + "-submit").value = "Correct!";
+            document.getElementById(quiz_id + "-hint").innerHTML = "";
+
+            for (i = 1;; i++) {
+                checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+                if (!checkbox)
+                    break;
+
+                if (checkbox.checked) {
+                    label.style.fontWeight = "bold";
+                }
+                else {
+                    label.style.textDecoration = "line-through";
+                }
+            }
+        }
+        else 
+        {
+            document.getElementById(quiz_id + "-submit").value = "Try again";
+
+            if (!bad_answers.has(quiz_id)) {
+                bad_answers.set(quiz_id, 1);
+            }
+            else {
+                bad_answers.set(quiz_id, bad_answers.get(quiz_id) + 1);
+            }
+
+            if (bad_answers.get(quiz_id) >= 2 && hint.length > 0) {
+                document.getElementById(quiz_id + "-hint").innerHTML = 
+                    "&nbsp;&nbsp;(Hint: <code>" + hint + "</code>)";
+            }
+
+            if (!multiple_choice) {
+                for (i = 1;; i++) {
+                    checkbox = document.getElementById(quiz_id + "-" + i.toString());
+                    label = document.getElementById(quiz_id + "-" + i.toString() + "-label")
+
+                    if (!checkbox)
+                        break;
+                    if (checkbox.checked) {
+                        label.style.textDecoration = "line-through";
+                    }
+                }
+            }
+        }
+    }
+    function clear_selection(quiz_id) {
+        document.getElementById(quiz_id + "-submit").value = "Submit";
+        document.getElementById(quiz_id + "-hint").innerHTML = "";
+    }
+    </script>
+
+    <div class="quiz">
+    <h3 class="quiz_title">Quiz</h3>
+    <p>
+    <div class="quiz_question">What happens if the function under test does not fail?</div>
+    </p>
+    <p>
+    <div class="quiz_options" title="Pick a choice.">
+
+        <input type="radio" name="19b3e132-840c-11ec-98a3-acde48001122" id="19b3e132-840c-11ec-98a3-acde48001122-1" onclick="clear_selection('19b3e132-840c-11ec-98a3-acde48001122')">
+        <label id="19b3e132-840c-11ec-98a3-acde48001122-1-label" for="19b3e132-840c-11ec-98a3-acde48001122-1">Delta debugging searches for the minimal input that produces the same result</label><br>
+
+        <input type="radio" name="19b3e132-840c-11ec-98a3-acde48001122" id="19b3e132-840c-11ec-98a3-acde48001122-2" onclick="clear_selection('19b3e132-840c-11ec-98a3-acde48001122')">
+        <label id="19b3e132-840c-11ec-98a3-acde48001122-2-label" for="19b3e132-840c-11ec-98a3-acde48001122-2">Delta debugging starts a fuzzer to find a failure</label><br>
+
+        <input type="radio" name="19b3e132-840c-11ec-98a3-acde48001122" id="19b3e132-840c-11ec-98a3-acde48001122-3" onclick="clear_selection('19b3e132-840c-11ec-98a3-acde48001122')">
+        <label id="19b3e132-840c-11ec-98a3-acde48001122-3-label" for="19b3e132-840c-11ec-98a3-acde48001122-3">Delta debugging raises an AssertionError</label><br>
+
+        <input type="radio" name="19b3e132-840c-11ec-98a3-acde48001122" id="19b3e132-840c-11ec-98a3-acde48001122-4" onclick="clear_selection('19b3e132-840c-11ec-98a3-acde48001122')">
+        <label id="19b3e132-840c-11ec-98a3-acde48001122-4-label" for="19b3e132-840c-11ec-98a3-acde48001122-4">Delta debugging runs forever in a loop</label><br>
+
+    </div>
+    </p>
+    <input id="19b3e132-840c-11ec-98a3-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('19b3e132-840c-11ec-98a3-acde48001122', 8, 0, '0 ** 0 + 1 ** 0 + 0 ** 1 + 1 ** 1')">
+    <span class="quiz_hint" id="19b3e132-840c-11ec-98a3-acde48001122-hint"></span>
+    </div>
+
+</div>
+
+</div>
+
+<div class="input_markdown">
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html"><p>Indeed, <code>DeltaDebugger</code> checks if its assumptions hold. If not, an assertion fails.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ExpectError</span><span class="p">():</span>
+    <span class="n">dd_reducer</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="s2">&quot;I am a passing input&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Test #1 &#39;I am a passing input&#39; 20 PASS
+</pre>
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Traceback (most recent call last):
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_13985/3080932113.py&#34;, line 2, in &lt;module&gt;
+    dd_reducer.reduce(&#34;I am a passing input&#34;)
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_13985/1870200769.py&#34;, line 4, in reduce
+    assert self.test(inp) != Runner.PASS
+AssertionError (expected)
+</pre>
+</div>
+
 </div>
 
 <div class="input_markdown">
@@ -15961,7 +16141,7 @@ Test #3 &#39;3&#39; 1 PASS
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.15805980700000077
+<pre>0.19165528899999984
 </pre>
 </div>
 
@@ -16041,7 +16221,7 @@ Test #3 &#39;3&#39; 1 PASS
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>5.450845967999999
+<pre>7.17615387
 </pre>
 </div>
 
@@ -16222,7 +16402,7 @@ Extend it such that whenever a new input is added to the population, it is first
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Reducer.ipynb" target=_blank)>Last change: 2022-02-01 17:14:06+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Reducer.ipynb" target=_blank)>Last change: 2022-02-02 10:30:56+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -16238,7 +16418,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Reducer.html">Reducing Failure-Inducing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/Reducer.html">https://www.fuzzingbook.org/html/Reducer.html</a>.  Retrieved 2022-02-01 17:14:06+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/html/Reducer.html">Reducing Failure-Inducing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/html/Reducer.html">https://www.fuzzingbook.org/html/Reducer.html</a>.  Retrieved 2022-02-02 10:30:56+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2022:Reducer,
@@ -16248,9 +16428,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/html/Reducer.html}},
-    note = {Retrieved 2022-02-01 17:14:06+01:00},
+    note = {Retrieved 2022-02-02 10:30:56+01:00},
     url = {https://www.fuzzingbook.org/html/Reducer.html},
-    urldate = {2022-02-01 17:14:06+01:00}
+    urldate = {2022-02-02 10:30:56+01:00}
 }
 </pre>
 </div>
