@@ -11937,10 +11937,7 @@ MathJax.Hub.Config({
 </li><li class="has-sub"><a href="#A-Grammmar-Based-Reduction-Approach">A Grammmar-Based Reduction Approach</a>
 </li><li class="has-sub"><a href="#Simplifying-by-Replacing-Subtrees">Simplifying by Replacing Subtrees</a>
 </li><li class="has-sub"><a href="#Simplifying-by-Alternative-Expansions">Simplifying by Alternative Expansions</a>
-</li><li class="has-sub"><a href="#A-Class-for-Reducing-with-Grammars">A Class for Reducing with Grammars</a>
-</li><li class="has-sub"><a href="#A-Few-Helpers">A Few Helpers</a>
-</li><li class="has-sub"><a href="#Simplification-Strategies">Simplification Strategies</a>
-</li><li class="has-sub"><a href="#The-Reduction-Strategy">The Reduction Strategy</a>
+</li><li class="has-sub"><a href="#Excursion:-A-Class-for-Reducing-with-Grammars">Excursion: A Class for Reducing with Grammars</a>
 </li><li class="has-sub"><a href="#A-Depth-Oriented-Strategy">A Depth-Oriented Strategy</a>
 </li><li class="has-sub"><a href="#Comparing-Strategies">Comparing Strategies</a>
 </ul></li><li class="has-sub"><a href="#Lessons-Learned"><i class="fa fa-fw fa-trophy"></i> Lessons Learned</a>
@@ -12067,18 +12064,20 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 </pre></div>
 <p>Can we reduce this input to a minimum?  To use a <code>Reducer</code>, one first has to build a <code>Runner</code> whose outcome is <code>FAIL</code> if the precise error occurs.  We therefore build a <code>ZeroDivisionRunner</code> whose <code>run()</code> method will specifically return a <code>FAIL</code> outcome if a <code>ZeroDivisionError</code> occurs.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn"><a href="Fuzzer.html" class="import" target="_blank">Fuzzer</a></span> <span class="kn">import</span> <span class="n">ProgramRunner</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn"><a href="https://docs.python.org/3/library/subprocess.html" class="import" target="_blank">subprocess</a></span>
 <span class="o">&gt;&gt;&gt;</span> <span class="k">class</span> <span class="nc">ZeroDivisionRunner</span><span class="p">(</span><span class="n">ProgramRunner</span><span class="p">):</span>
 <span class="o">&gt;&gt;&gt;</span>     <span class="s2">&quot;&quot;&quot;Make outcome &#39;FAIL&#39; if ZeroDivisionError occurs&quot;&quot;&quot;</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;ZeroDivisionError&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+<span class="o">&gt;&gt;&gt;</span> 
+<span class="o">&gt;&gt;&gt;</span>     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">subprocess</span><span class="o">.</span><span class="n">CompletedProcess</span><span class="p">,</span> <span class="n">Outcome</span><span class="p">]:</span>
+<span class="o">&gt;&gt;&gt;</span>         <span class="n">process</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span>         <span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;ZeroDivisionError&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
 <span class="o">&gt;&gt;&gt;</span>             <span class="n">outcome</span> <span class="o">=</span> <span class="s1">&#39;FAIL&#39;</span>
-<span class="o">&gt;&gt;&gt;</span>         <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span>
+<span class="o">&gt;&gt;&gt;</span>         <span class="k">return</span> <span class="n">process</span><span class="p">,</span> <span class="n">outcome</span>
 </pre></div>
 <p>If we feed this expression into a <code>ZeroDivisionRunner</code>, it will produce an outcome of <code>FAIL</code> as designed.</p>
 <div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">python_input</span> <span class="o">=</span> <span class="s2">&quot;x = 1 + 2 * 3 / 0&quot;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">python_runner</span> <span class="o">=</span> <span class="n">ZeroDivisionRunner</span><span class="p">(</span><span class="s2">&quot;python&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="n">python_runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">python_input</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">process</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="n">python_runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">python_input</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">outcome</span>
 <span class="s1">&#39;FAIL&#39;</span>
 </pre></div>
@@ -12088,6 +12087,164 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <span class="s1">&#39;3/0&#39;</span>
 </pre></div>
 <p>The input is reduced to the minimum: We get the essence of the division by zero.</p>
+<p><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.49.3 (20211023.0002)
+ -->
+<!-- Pages: 1 -->
+<svg width="477pt" height="330pt"
+ viewBox="0.00 0.00 476.50 330.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 326)">
+<g id="a_graph0"><a xlink:title="DeltaDebuggingReducer class hierarchy">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-326 472.5,-326 472.5,4 -4,4"/>
+</a>
+</g>
+<!-- DeltaDebuggingReducer -->
+<g id="node1" class="node">
+<title>DeltaDebuggingReducer</title>
+<g id="a_node1"><a xlink:href="#" xlink:title="class DeltaDebuggingReducer:&#10;Reduce inputs using delta debugging.">
+<polygon fill="none" stroke="black" points="0,-39 0,-81 165,-81 165,-39 0,-39"/>
+<text text-anchor="start" x="8" y="-66.8" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">DeltaDebuggingReducer</text>
+<polyline fill="none" stroke="black" points="0,-58 165,-58 "/>
+<g id="a_node1_0"><a xlink:href="#" xlink:title="DeltaDebuggingReducer">
+<g id="a_node1_1"><a xlink:href="#" xlink:title="reduce(self, inp: str) &#45;&gt; str:&#10;Reduce input `inp` using delta debugging. Return reduced input.">
+<text text-anchor="start" x="58.5" y="-46.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">reduce()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- CachingReducer -->
+<g id="node2" class="node">
+<title>CachingReducer</title>
+<g id="a_node2"><a xlink:href="#" xlink:title="class CachingReducer:&#10;A reducer that also caches test outcomes">
+<polygon fill="none" stroke="black" points="111.5,-156.5 111.5,-209.5 227.5,-209.5 227.5,-156.5 111.5,-156.5"/>
+<text text-anchor="start" x="119.5" y="-195.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">CachingReducer</text>
+<polyline fill="none" stroke="black" points="111.5,-186.5 227.5,-186.5 "/>
+<g id="a_node2_2"><a xlink:href="#" xlink:title="CachingReducer">
+<g id="a_node2_3"><a xlink:href="#" xlink:title="reset(self):&#10;Reset the test counter to zero. To be extended in subclasses.">
+<text text-anchor="start" x="148.5" y="-175.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">reset()</text>
+</a>
+</g>
+<g id="a_node2_4"><a xlink:href="#" xlink:title="test(self, inp):&#10;Test with input `inp`. Return outcome.&#10;To be extended in subclasses.">
+<text text-anchor="start" x="148.5" y="-164.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">test()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- DeltaDebuggingReducer&#45;&gt;CachingReducer -->
+<g id="edge1" class="edge">
+<title>DeltaDebuggingReducer&#45;&gt;CachingReducer</title>
+<path fill="none" stroke="black" d="M97.06,-81.25C110.13,-99.43 129.57,-126.47 145.03,-147.96"/>
+<polygon fill="none" stroke="black" points="142.27,-150.12 150.95,-156.19 147.95,-146.03 142.27,-150.12"/>
+</g>
+<!-- Reducer -->
+<g id="node3" class="node">
+<title>Reducer</title>
+<g id="a_node3"><a xlink:href="#" xlink:title="class Reducer:&#10;Base class for reducers.">
+<polygon fill="none" stroke="black" points="131,-246.5 131,-321.5 208,-321.5 208,-246.5 131,-246.5"/>
+<text text-anchor="start" x="144" y="-307.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">Reducer</text>
+<polyline fill="none" stroke="black" points="131,-298.5 208,-298.5 "/>
+<g id="a_node3_5"><a xlink:href="#" xlink:title="Reducer">
+<g id="a_node3_6"><a xlink:href="#" xlink:title="__init__(self, runner: Fuzzer.Runner, log_test: bool = False) &#45;&gt; None:&#10;Attach reducer to the given `runner`">
+<text text-anchor="start" x="139.5" y="-287.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node3_7"><a xlink:href="#" xlink:title="reduce(self, inp: str) &#45;&gt; str:&#10;Reduce input `inp`. Return reduced input.&#10;To be defined in subclasses.">
+<text text-anchor="start" x="139.5" y="-276.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">reduce()</text>
+</a>
+</g>
+<g id="a_node3_8"><a xlink:href="#" xlink:title="reset(self) &#45;&gt; None:&#10;Reset the test counter to zero. To be extended in subclasses.">
+<text text-anchor="start" x="139.5" y="-265.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">reset()</text>
+</a>
+</g>
+<g id="a_node3_9"><a xlink:href="#" xlink:title="test(self, inp: str) &#45;&gt; str:&#10;Test with input `inp`. Return outcome.&#10;To be extended in subclasses.">
+<text text-anchor="start" x="139.5" y="-254.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="10.00">test()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- CachingReducer&#45;&gt;Reducer -->
+<g id="edge2" class="edge">
+<title>CachingReducer&#45;&gt;Reducer</title>
+<path fill="none" stroke="black" d="M169.5,-209.75C169.5,-217.83 169.5,-227.01 169.5,-236.07"/>
+<polygon fill="none" stroke="black" points="166,-236.19 169.5,-246.19 173,-236.19 166,-236.19"/>
+</g>
+<!-- GrammarReducer -->
+<g id="node4" class="node">
+<title>GrammarReducer</title>
+<g id="a_node4"><a xlink:href="#" xlink:title="class GrammarReducer:&#10;Reduce inputs using grammars">
+<polygon fill="none" stroke="black" points="183,-0.5 183,-119.5 332,-119.5 332,-0.5 183,-0.5"/>
+<text text-anchor="start" x="203" y="-105.3" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="14.00" fill="#b03a2e">GrammarReducer</text>
+<polyline fill="none" stroke="black" points="183,-96.5 332,-96.5 "/>
+<g id="a_node4_10"><a xlink:href="#" xlink:title="GrammarReducer">
+<g id="a_node4_11"><a xlink:href="#" xlink:title="__init__(self, runner: Fuzzer.Runner, parser: Parser.Parser, *, log_test: bool = False, log_reduce: bool = False):&#10;Constructor.&#10;`runner` is the runner to be used.&#10;`parser` is the parser to be used.&#10;`log_test` &#45; if set, show tests and results.&#10;`log_reduce` &#45; if set, show reduction steps.">
+<text text-anchor="start" x="191.5" y="-85.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">__init__()</text>
+</a>
+</g>
+<g id="a_node4_12"><a xlink:href="#" xlink:title="reduce(self, inp):&#10;Reduce input `inp`. Return reduced input.&#10;To be defined in subclasses.">
+<text text-anchor="start" x="191.5" y="-74.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-style="italic" font-size="10.00">reduce()</text>
+</a>
+</g>
+<g id="a_node4_13"><a xlink:href="#" xlink:title="alternate_reductions(self, tree: DerivationTree, symbol: str, depth: int = &#45;1)">
+<text text-anchor="start" x="191.5" y="-62.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">alternate_reductions()</text>
+</a>
+</g>
+<g id="a_node4_14"><a xlink:href="#" xlink:title="parse(self, inp)">
+<text text-anchor="start" x="191.5" y="-51.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">parse()</text>
+</a>
+</g>
+<g id="a_node4_15"><a xlink:href="#" xlink:title="reduce_subtree(self, tree: DerivationTree, subtree: DerivationTree, depth: int = &#45;1)">
+<text text-anchor="start" x="191.5" y="-40.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">reduce_subtree()</text>
+</a>
+</g>
+<g id="a_node4_16"><a xlink:href="#" xlink:title="reduce_tree(self, tree)">
+<text text-anchor="start" x="191.5" y="-29.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">reduce_tree()</text>
+</a>
+</g>
+<g id="a_node4_17"><a xlink:href="#" xlink:title="subtrees_with_symbol(self, tree: DerivationTree, symbol: str, depth: int = &#45;1, ignore_root: bool = True) &#45;&gt; List[DerivationTree]:&#10;Find all subtrees in `tree` whose root is `symbol`.&#10;If `ignore_root` is true, ignore the root note of `tree`.">
+<text text-anchor="start" x="191.5" y="-18.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">subtrees_with_symbol()</text>
+</a>
+</g>
+<g id="a_node4_18"><a xlink:href="#" xlink:title="symbol_reductions(self, tree: DerivationTree, symbol: str, depth: int = &#45;1):&#10;Find all expansion alternatives for the given symbol">
+<text text-anchor="start" x="191.5" y="-7.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="10.00">symbol_reductions()</text>
+</a>
+</g>
+</a>
+</g>
+</a>
+</g>
+</g>
+<!-- GrammarReducer&#45;&gt;CachingReducer -->
+<g id="edge3" class="edge">
+<title>GrammarReducer&#45;&gt;CachingReducer</title>
+<path fill="none" stroke="black" d="M214.79,-119.73C207.69,-129.49 200.54,-139.32 194.09,-148.19"/>
+<polygon fill="none" stroke="black" points="191.19,-146.22 188.14,-156.37 196.86,-150.34 191.19,-146.22"/>
+</g>
+<!-- Legend -->
+<g id="node5" class="node">
+<title>Legend</title>
+<text text-anchor="start" x="350.5" y="-77.5" font-family="Patua One, Helvetica, sans-serif" font-weight="bold" font-size="10.00" fill="#b03a2e">Legend</text>
+<text text-anchor="start" x="350.5" y="-67.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="356.5" y="-67.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-weight="bold" font-size="8.00">public_method()</text>
+<text text-anchor="start" x="350.5" y="-57.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="356.5" y="-57.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-size="8.00">private_method()</text>
+<text text-anchor="start" x="350.5" y="-47.5" font-family="Patua One, Helvetica, sans-serif" font-size="10.00">• </text>
+<text text-anchor="start" x="356.5" y="-47.5" font-family="'Fira Mono', 'Source Code Pro', 'Courier', monospace" font-style="italic" font-size="8.00">overloaded_method()</text>
+<text text-anchor="start" x="350.5" y="-38.3" font-family="Helvetica,sans-Serif" font-size="9.00">Hover over names to see doc</text>
+</g>
+</g>
+</svg>
+</p>
 </div>
 </div>
 </div>
@@ -12147,6 +12304,20 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="https://docs.python.org/3/library/typing.html" class="import" target="_blank">typing</a></span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="ExpectError.html" class="import" target="_blank">ExpectError</a></span> <span class="kn">import</span> <span class="n">ExpectError</span>
 </pre></div>
 
@@ -12161,7 +12332,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Fuzzer.html" class="import" target="_blank">Fuzzer</a></span> <span class="kn">import</span> <span class="n">RandomFuzzer</span><span class="p">,</span> <span class="n">Runner</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Fuzzer.html" class="import" target="_blank">Fuzzer</a></span> <span class="kn">import</span> <span class="n">RandomFuzzer</span><span class="p">,</span> <span class="n">Runner</span><span class="p">,</span> <span class="n">Outcome</span>
 </pre></div>
 
 </div>
@@ -12190,7 +12361,7 @@ onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=https%3a%2f%2
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">MysteryRunner</span><span class="p">(</span><span class="n">Runner</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Outcome</span><span class="p">]:</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mo">0o17</span> <span class="o">+</span> <span class="mo">0o31</span><span class="p">))</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mo">0o27</span> <span class="o">+</span> <span class="mo">0o22</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">y</span><span class="p">:</span>
@@ -12630,23 +12801,32 @@ the first quarter, the second quarter, and so on.</p>
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">Reducer</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">,</span> <span class="n">log_test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for reducers.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">:</span> <span class="n">Runner</span><span class="p">,</span> <span class="n">log_test</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Attach reducer to the given `runner`&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runner</span> <span class="o">=</span> <span class="n">runner</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log_test</span> <span class="o">=</span> <span class="n">log_test</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reset the test counter to zero. To be extended in subclasses.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tests</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Outcome</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Test with input `inp`. Return outcome.</span>
+<span class="sd">        To be extended in subclasses.&quot;&quot;&quot;</span>
+
         <span class="n">result</span><span class="p">,</span> <span class="n">outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">runner</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tests</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_test</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test #</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tests</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">inp</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)),</span> <span class="n">outcome</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">outcome</span>
 
-    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reduce input `inp`. Return reduced input.</span>
+<span class="sd">        To be defined in subclasses.&quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="c1"># Default: Don&#39;t reduce</span>
         <span class="k">return</span> <span class="n">inp</span>
@@ -12673,6 +12853,8 @@ the first quarter, the second quarter, and so on.</p>
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">CachingReducer</span><span class="p">(</span><span class="n">Reducer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A reducer that also caches test outcomes&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
@@ -12716,13 +12898,17 @@ the first quarter, the second quarter, and so on.</p>
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">DeltaDebuggingReducer</span><span class="p">(</span><span class="n">CachingReducer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reduce inputs using delta debugging.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reduce input `inp` using delta debugging. Return reduced input.&quot;&quot;&quot;</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Runner</span><span class="o">.</span><span class="n">PASS</span>
 
         <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>     <span class="c1"># Initial granularity</span>
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="mf">0.0</span>
             <span class="n">subset_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span>
             <span class="n">some_complement_is_failing</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -12948,22 +13134,22 @@ Test #29 &#39;)&#39; 1 PASS
     <p>
     <div class="quiz_options" title="Pick a choice.">
 
-        <input type="radio" name="19b3e132-840c-11ec-98a3-acde48001122" id="19b3e132-840c-11ec-98a3-acde48001122-1" onclick="clear_selection('19b3e132-840c-11ec-98a3-acde48001122')">
-        <label id="19b3e132-840c-11ec-98a3-acde48001122-1-label" for="19b3e132-840c-11ec-98a3-acde48001122-1">Delta debugging searches for the minimal input that produces the same result</label><br>
+        <input type="radio" name="6e160072-84f5-11ec-a264-acde48001122" id="6e160072-84f5-11ec-a264-acde48001122-1" onclick="clear_selection('6e160072-84f5-11ec-a264-acde48001122')">
+        <label id="6e160072-84f5-11ec-a264-acde48001122-1-label" for="6e160072-84f5-11ec-a264-acde48001122-1">Delta debugging searches for the minimal input that produces the same result</label><br>
 
-        <input type="radio" name="19b3e132-840c-11ec-98a3-acde48001122" id="19b3e132-840c-11ec-98a3-acde48001122-2" onclick="clear_selection('19b3e132-840c-11ec-98a3-acde48001122')">
-        <label id="19b3e132-840c-11ec-98a3-acde48001122-2-label" for="19b3e132-840c-11ec-98a3-acde48001122-2">Delta debugging starts a fuzzer to find a failure</label><br>
+        <input type="radio" name="6e160072-84f5-11ec-a264-acde48001122" id="6e160072-84f5-11ec-a264-acde48001122-2" onclick="clear_selection('6e160072-84f5-11ec-a264-acde48001122')">
+        <label id="6e160072-84f5-11ec-a264-acde48001122-2-label" for="6e160072-84f5-11ec-a264-acde48001122-2">Delta debugging starts a fuzzer to find a failure</label><br>
 
-        <input type="radio" name="19b3e132-840c-11ec-98a3-acde48001122" id="19b3e132-840c-11ec-98a3-acde48001122-3" onclick="clear_selection('19b3e132-840c-11ec-98a3-acde48001122')">
-        <label id="19b3e132-840c-11ec-98a3-acde48001122-3-label" for="19b3e132-840c-11ec-98a3-acde48001122-3">Delta debugging raises an AssertionError</label><br>
+        <input type="radio" name="6e160072-84f5-11ec-a264-acde48001122" id="6e160072-84f5-11ec-a264-acde48001122-3" onclick="clear_selection('6e160072-84f5-11ec-a264-acde48001122')">
+        <label id="6e160072-84f5-11ec-a264-acde48001122-3-label" for="6e160072-84f5-11ec-a264-acde48001122-3">Delta debugging raises an AssertionError</label><br>
 
-        <input type="radio" name="19b3e132-840c-11ec-98a3-acde48001122" id="19b3e132-840c-11ec-98a3-acde48001122-4" onclick="clear_selection('19b3e132-840c-11ec-98a3-acde48001122')">
-        <label id="19b3e132-840c-11ec-98a3-acde48001122-4-label" for="19b3e132-840c-11ec-98a3-acde48001122-4">Delta debugging runs forever in a loop</label><br>
+        <input type="radio" name="6e160072-84f5-11ec-a264-acde48001122" id="6e160072-84f5-11ec-a264-acde48001122-4" onclick="clear_selection('6e160072-84f5-11ec-a264-acde48001122')">
+        <label id="6e160072-84f5-11ec-a264-acde48001122-4-label" for="6e160072-84f5-11ec-a264-acde48001122-4">Delta debugging runs forever in a loop</label><br>
 
     </div>
     </p>
-    <input id="19b3e132-840c-11ec-98a3-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('19b3e132-840c-11ec-98a3-acde48001122', 8, 0, '0 ** 0 + 1 ** 0 + 0 ** 1 + 1 ** 1')">
-    <span class="quiz_hint" id="19b3e132-840c-11ec-98a3-acde48001122-hint"></span>
+    <input id="6e160072-84f5-11ec-a264-acde48001122-submit" type="submit" value="Submit" onclick="check_selection('6e160072-84f5-11ec-a264-acde48001122', 8, 0, '0 ** 0 + 1 ** 0 + 0 ** 1 + 1 ** 1')">
+    <span class="quiz_hint" id="6e160072-84f5-11ec-a264-acde48001122-hint"></span>
     </div>
 
 </div>
@@ -13007,9 +13193,9 @@ Test #29 &#39;)&#39; 1 PASS
 
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>Traceback (most recent call last):
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_13985/3080932113.py&#34;, line 2, in &lt;module&gt;
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_92482/3080932113.py&#34;, line 2, in &lt;module&gt;
     dd_reducer.reduce(&#34;I am a passing input&#34;)
-  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_13985/1870200769.py&#34;, line 4, in reduce
+  File &#34;/var/folders/n2/xd9445p97rb3xh7m1dfx8_4h0006ts/T/ipykernel_92482/2870451724.py&#34;, line 8, in reduce
     assert self.test(inp) != Runner.PASS
 AssertionError (expected)
 </pre>
@@ -13112,7 +13298,7 @@ Test #15 &#39;(&#39; 1 PASS
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Parser.html" class="import" target="_blank">Parser</a></span> <span class="kn">import</span> <span class="n">EarleyParser</span>  <span class="c1"># minor dependency</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Parser.html" class="import" target="_blank">Parser</a></span> <span class="kn">import</span> <span class="n">EarleyParser</span><span class="p">,</span> <span class="n">Parser</span>  <span class="c1"># minor dependency</span>
 </pre></div>
 
 </div>
@@ -13127,13 +13313,13 @@ Test #15 &#39;(&#39; 1 PASS
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">EvalMysteryRunner</span><span class="p">(</span><span class="n">MysteryRunner</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">EarleyParser</span><span class="p">(</span><span class="n">EXPR_GRAMMAR</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Outcome</span><span class="p">]:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">tree</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">SyntaxError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">Runner</span><span class="o">.</span><span class="n">UNRESOLVED</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
@@ -13257,7 +13443,8 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="kn">import</span> <span class="n">all_terminals</span><span class="p">,</span> <span class="n">expansion_to_children</span><span class="p">,</span> <span class="n">display_tree</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="Grammars.html" class="import" target="_blank">Grammars</a></span> <span class="kn">import</span> <span class="n">Grammar</span>
+<span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="kn">import</span> <span class="n">all_terminals</span><span class="p">,</span> <span class="n">expansion_to_children</span><span class="p">,</span> <span class="n">display_tree</span>
 </pre></div>
 
 </div>
@@ -14537,10 +14724,13 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 </div>
 </div>
 
+<details id="Excursion:-A-Class-for-Reducing-with-Grammars">
+<summary>A Class for Reducing with Grammars</summary>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="A-Class-for-Reducing-with-Grammars">A Class for Reducing with Grammars<a class="anchor-link" href="#A-Class-for-Reducing-with-Grammars">&#182;</a></h3><p>We introduce the <code>GrammarReducer</code> class, which is again a <code>Reducer</code>.  Note that we derive from <code>CachingReducer</code>, as the strategy will produce several duplicates.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>We introduce the <code>GrammarReducer</code> class, which is again a <code>Reducer</code>. Note that we derive from <code>CachingReducer</code>, as the strategy will produce several duplicates.</p>
 </div>
 </div>
 </div>
@@ -14553,7 +14743,17 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">CachingReducer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">log_test</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log_reduce</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reduce inputs using grammars&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">runner</span><span class="p">:</span> <span class="n">Runner</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">Parser</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">log_test</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">log_reduce</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructor.</span>
+<span class="sd">        `runner` is the runner to be used.</span>
+<span class="sd">        `parser` is the parser to be used.</span>
+<span class="sd">        `log_test` - if set, show tests and results.</span>
+<span class="sd">        `log_reduce` - if set, show reduction steps.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">runner</span><span class="p">,</span> <span class="n">log_test</span><span class="o">=</span><span class="n">log_test</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">grammar</span><span class="p">()</span>
@@ -14570,7 +14770,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="A-Few-Helpers">A Few Helpers<a class="anchor-link" href="#A-Few-Helpers">&#182;</a></h3><p>We define a number of helper functions, which we will need for our strategy.  <code>tree_list_to_string()</code> does what the name suggest, creating a string from a list of derivation trees:</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="A-Few-Helpers">A Few Helpers<a class="anchor-link" href="#A-Few-Helpers">&#182;</a></h4><p>We define a number of helper functions, which we will need for our strategy.  <code>tree_list_to_string()</code> does what the name suggest, creating a string from a list of derivation trees:</p>
 </div>
 </div>
 </div>
@@ -14582,7 +14782,21 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">tree_list_to_string</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn"><a href="GrammarFuzzer.html" class="import" target="_blank">GrammarFuzzer</a></span> <span class="kn">import</span> <span class="n">DerivationTree</span>
+</pre></div>
+
+</div>
+</div></div>
+</div>
+</div>
+
+<div class="input_code">
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+<div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">tree_list_to_string</span><span class="p">(</span><span class="n">q</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DerivationTree</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">return</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">all_terminals</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="k">for</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">q</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
 </pre></div>
 
@@ -14629,7 +14843,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
 
@@ -14641,6 +14855,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
             <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">possible_combinations</span><span class="p">(</span><span class="n">list_of_lists</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
                 <span class="n">new_combo</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span>
                 <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_combo</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">ret</span>
 </pre></div>
 
@@ -14687,8 +14902,11 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">number_of_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="n">DerivationTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
+    <span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
     <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">([</span><span class="n">number_of_nodes</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">])</span>
 </pre></div>
 
@@ -14726,10 +14944,11 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 
 <div class="inner_cell">
 <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">max_height</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">max_height</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="n">DerivationTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="mi">1</span>
+
     <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">max</span><span class="p">([</span><span class="n">max_height</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">children</span><span class="p">])</span>
 </pre></div>
 
@@ -14764,7 +14983,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="Simplification-Strategies">Simplification Strategies<a class="anchor-link" href="#Simplification-Strategies">&#182;</a></h3><p>Let us now implement our two simplification strategies – replacing subtrees and alternate expansions.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Simplification-Strategies">Simplification Strategies<a class="anchor-link" href="#Simplification-Strategies">&#182;</a></h4><p>Let us now implement our two simplification strategies – replacing subtrees and alternate expansions.</p>
 </div>
 </div>
 </div>
@@ -14773,7 +14992,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Finding-Subtrees">Finding Subtrees<a class="anchor-link" href="#Finding-Subtrees">&#182;</a></h4><p>The method <code>subtrees_with_symbol()</code> returns all subtrees in the given tree which's root is equal to the given symbol.  If <code>ignore_root</code> is set (default), then the root node of <code>tree</code> is not compared against.  (The <code>depth</code> parameter will be discussed below.)</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h5 id="Finding-Subtrees">Finding Subtrees<a class="anchor-link" href="#Finding-Subtrees">&#182;</a></h5><p>The method <code>subtrees_with_symbol()</code> returns all subtrees in the given tree which's root is equal to the given symbol.  If <code>ignore_root</code> is set (default), then the root node of <code>tree</code> is not compared against.  (The <code>depth</code> parameter will be discussed below.)</p>
 </div>
 </div>
 </div>
@@ -14786,9 +15005,11 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">subtrees_with_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">ignore_root</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="c1"># Find all subtrees in TREE whose root is SYMBOL.</span>
-        <span class="c1"># If IGNORE_ROOT is true, ignore the root note of TREE.</span>
+    <span class="k">def</span> <span class="nf">subtrees_with_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">DerivationTree</span><span class="p">,</span>
+                             <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">ignore_root</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">DerivationTree</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Find all subtrees in `tree` whose root is `symbol`.</span>
+<span class="sd">        If `ignore_root` is true, ignore the root note of `tree`.&quot;&quot;&quot;</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="p">(</span><span class="n">child_symbol</span><span class="p">,</span> <span class="n">children</span><span class="p">)</span> <span class="o">=</span> <span class="n">tree</span>
@@ -14896,7 +15117,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Alternate-Expansions">Alternate Expansions<a class="anchor-link" href="#Alternate-Expansions">&#182;</a></h4></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h5 id="Alternate-Expansions">Alternate Expansions<a class="anchor-link" href="#Alternate-Expansions">&#182;</a></h5></div>
 </div>
 </div>
 </div>
@@ -14917,7 +15138,8 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">alternate_reductions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">alternate_reductions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">DerivationTree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                             <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">reductions</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="n">expansions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grammar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="p">[])</span>
@@ -15072,7 +15294,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h4 id="Both-Strategies-Together">Both Strategies Together<a class="anchor-link" href="#Both-Strategies-Together">&#182;</a></h4></div>
+<div class="text_cell_render border-box-sizing rendered_html"><h5 id="Both-Strategies-Together">Both Strategies Together<a class="anchor-link" href="#Both-Strategies-Together">&#182;</a></h5></div>
 </div>
 </div>
 </div>
@@ -15093,7 +15315,8 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">symbol_reductions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">symbol_reductions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">DerivationTree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+                          <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Find all expansion alternatives for the given symbol&quot;&quot;&quot;</span>
         <span class="n">reductions</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subtrees_with_symbol</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">)</span>
                       <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">alternate_reductions</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">))</span>
@@ -15221,7 +15444,7 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><h3 id="The-Reduction-Strategy">The Reduction Strategy<a class="anchor-link" href="#The-Reduction-Strategy">&#182;</a></h3><p>We are now able to return a number of alternatives for each symbol in the tree.  This is what we apply in the core function of our reduction strategy, <code>reduce_subtree()</code>.  Starting with <code>subtree</code>, for every child, we find possible reductions.  For every reduction, we replace the child with the reduction and test the resulting (full) tree.  If it fails, our reduction was successful; otherwise, we put the child back into place and try out the next reduction.  Eventually, we apply <code>reduce_subtree()</code> on all children, reducing these as well.</p>
+<div class="text_cell_render border-box-sizing rendered_html"><h4 id="The-Reduction-Strategy">The Reduction Strategy<a class="anchor-link" href="#The-Reduction-Strategy">&#182;</a></h4><p>We are now able to return a number of alternatives for each symbol in the tree.  This is what we apply in the core function of our reduction strategy, <code>reduce_subtree()</code>.  Starting with <code>subtree</code>, for every child, we find possible reductions.  For every reduction, we replace the child with the reduction and test the resulting (full) tree.  If it fails, our reduction was successful; otherwise, we put the child back into place and try out the next reduction.  Eventually, we apply <code>reduce_subtree()</code> on all children, reducing these as well.</p>
 </div>
 </div>
 </div>
@@ -15234,9 +15457,10 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 <div class="inner_cell">
 <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">GrammarReducer</span><span class="p">(</span><span class="n">GrammarReducer</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">reduce_subtree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">subtree</span><span class="p">,</span> <span class="n">depth</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">reduce_subtree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tree</span><span class="p">:</span> <span class="n">DerivationTree</span><span class="p">,</span>
+                       <span class="n">subtree</span><span class="p">:</span> <span class="n">DerivationTree</span><span class="p">,</span> <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">symbol</span><span class="p">,</span> <span class="n">children</span> <span class="o">=</span> <span class="n">subtree</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_reduce</span><span class="p">:</span>
@@ -15246,6 +15470,9 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">reduced_child</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">children</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
                 <span class="p">(</span><span class="n">child_symbol</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">child</span>
                 <span class="k">for</span> <span class="n">reduction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbol_reductions</span><span class="p">(</span>
                         <span class="n">child</span><span class="p">,</span> <span class="n">child_symbol</span><span class="p">,</span> <span class="n">depth</span><span class="p">):</span>
@@ -15369,10 +15596,12 @@ Test #21 &#39;1 + (2 * 3&#39; 10 UNRESOLVED
 </div>
 </div>
 
+</details>
+
 <div class="input_markdown">
 <div class="cell border-box-sizing text_cell rendered">
 <div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html"><p>Let us try this out in practice on our input <code>expr_input</code> and the <code>mystery()</code> function.  How quickly can we reduce it?</p>
+<div class="text_cell_render border-box-sizing rendered_html"><p>Let us try out our <code>GrammarReducer</code> class in practice on our input <code>expr_input</code> and the <code>mystery()</code> function.  How quickly can we reduce it?</p>
 </div>
 </div>
 </div>
@@ -16141,7 +16370,7 @@ Test #3 &#39;3&#39; 1 PASS
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0.19165528899999984
+<pre>0.15811178299999895
 </pre>
 </div>
 
@@ -16221,7 +16450,7 @@ Test #3 &#39;3&#39; 1 PASS
 <div class="output_area">
 
 <div class="output_text output_subarea output_execute_result">
-<pre>7.17615387
+<pre>5.4580275490000005
 </pre>
 </div>
 
@@ -16402,7 +16631,7 @@ Extend it such that whenever a new input is added to the population, it is first
 The content of this project is licensed under the
 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target=_blank>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
 The source code that is part of the content, as well as the source code used to format and display that content is licensed under the <a href="https://github.com/uds-se/fuzzingbook/blob/master/LICENSE.md#mit-license">MIT License</a>.
-<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Reducer.ipynb" target=_blank)>Last change: 2022-02-02 10:30:56+01:00</a> &bull; 
+<a href="https://github.com/uds-se/fuzzingbook/commits/master/notebooks/Reducer.ipynb" target=_blank)>Last change: 2022-02-03 14:26:07+01:00</a> &bull; 
 <a href="#citation" id="cite" onclick="revealCitation()">Cite</a> &bull;
 <a href="https://cispa.de/en/impressum" target=_blank>Imprint</a>
 </p>
@@ -16418,7 +16647,7 @@ function revealCitation() {
 <a name="citation"></a>
 <h2>How to Cite this Work</h2>
 <p>
-Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Reducer.html">Reducing Failure-Inducing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/Reducer.html">https://www.fuzzingbook.org/beta/html/Reducer.html</a>.  Retrieved 2022-02-02 10:30:56+01:00.
+Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler: "<a href="https://www.fuzzingbook.org/beta/html/Reducer.html">Reducing Failure-Inducing Inputs</a>".  In Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holler, "<a href="https://www.fuzzingbook.org/beta/">The Fuzzing Book</a>", <a href="https://www.fuzzingbook.org/beta/html/Reducer.html">https://www.fuzzingbook.org/beta/html/Reducer.html</a>.  Retrieved 2022-02-03 14:26:07+01:00.
 </p>
 <pre>
 @incollection{fuzzingbook2022:Reducer,
@@ -16428,9 +16657,9 @@ Andreas Zeller, Rahul Gopinath, Marcel Böhme, Gordon Fraser, and Christian Holl
     year = {2022},
     publisher = {CISPA Helmholtz Center for Information Security},
     howpublished = {\url{https://www.fuzzingbook.org/beta/html/Reducer.html}},
-    note = {Retrieved 2022-02-02 10:30:56+01:00},
+    note = {Retrieved 2022-02-03 14:26:07+01:00},
     url = {https://www.fuzzingbook.org/beta/html/Reducer.html},
-    urldate = {2022-02-02 10:30:56+01:00}
+    urldate = {2022-02-03 14:26:07+01:00}
 }
 </pre>
 </div>
