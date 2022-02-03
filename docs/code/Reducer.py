@@ -3,7 +3,7 @@
 
 # "Reducing Failure-Inducing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Reducer.html
-# Last change: 2022-02-02 10:40:27+01:00
+# Last change: 2022-02-03 14:30:38+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -55,19 +55,21 @@ ZeroDivisionError: division by zero
 Can we reduce this input to a minimum?  To use a `Reducer`, one first has to build a `Runner` whose outcome is `FAIL` if the precise error occurs.  We therefore build a `ZeroDivisionRunner` whose `run()` method will specifically return a `FAIL` outcome if a `ZeroDivisionError` occurs.
 
 >>> from Fuzzer import ProgramRunner
+>>> import subprocess
 >>> class ZeroDivisionRunner(ProgramRunner):
 >>>     """Make outcome 'FAIL' if ZeroDivisionError occurs"""
->>>     def run(self, inp=""):
->>>         result, outcome = super().run(inp)
->>>         if result.stderr.find('ZeroDivisionError') >= 0:
+>>> 
+>>>     def run(self, inp: str = "") -> Tuple[subprocess.CompletedProcess, Outcome]:
+>>>         process, outcome = super().run(inp)
+>>>         if process.stderr.find('ZeroDivisionError') >= 0:
 >>>             outcome = 'FAIL'
->>>         return result, outcome
+>>>         return process, outcome
 
 If we feed this expression into a `ZeroDivisionRunner`, it will produce an outcome of `FAIL` as designed.
 
 >>> python_input = "x = 1 + 2 * 3 / 0"
 >>> python_runner = ZeroDivisionRunner("python")
->>> result, outcome = python_runner.run(python_input)
+>>> process, outcome = python_runner.run(python_input)
 >>> outcome
 'FAIL'
 
@@ -78,7 +80,6 @@ Delta Debugging is a simple and robust reduction algorithm.  We can tie a `Delta
 '3/0'
 
 The input is reduced to the minimum: We get the essence of the division by zero.
-
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Reducing Failure-Inducing Inputs"
@@ -126,14 +127,16 @@ if __name__ == '__main__':
 
 from .bookutils import quiz
 
+from typing import Tuple, List, Sequence, Any, Optional
+
 from .ExpectError import ExpectError
 
-from .Fuzzer import RandomFuzzer, Runner
+from .Fuzzer import RandomFuzzer, Runner, Outcome
 
 import re
 
 class MysteryRunner(Runner):
-    def run(self, inp):
+    def run(self, inp: str) -> Tuple[str, Outcome]:
         x = inp.find(chr(0o17 + 0o31))
         y = inp.find(chr(0o27 + 0o22))
         if x >= 0 and y >= 0 and x < y:
@@ -207,28 +210,39 @@ if __name__ == '__main__':
     mystery.run(input_without_first_and_fourth_quarter)
 
 class Reducer:
-    def __init__(self, runner, log_test=False):
+    """Base class for reducers."""
+
+    def __init__(self, runner: Runner, log_test: bool = False) -> None:
         """Attach reducer to the given `runner`"""
         self.runner = runner
         self.log_test = log_test
         self.reset()
 
-    def reset(self):
+    def reset(self) -> None:
+        """Reset the test counter to zero. To be extended in subclasses."""
         self.tests = 0
 
-    def test(self, inp):
+    def test(self, inp: str) -> Outcome:
+        """Test with input `inp`. Return outcome.
+        To be extended in subclasses."""
+
         result, outcome = self.runner.run(inp)
         self.tests += 1
         if self.log_test:
             print("Test #%d" % self.tests, repr(inp), repr(len(inp)), outcome)
         return outcome
 
-    def reduce(self, inp):
+    def reduce(self, inp: str) -> str:
+        """Reduce input `inp`. Return reduced input.
+        To be defined in subclasses."""
+
         self.reset()
         # Default: Don't reduce
         return inp
 
 class CachingReducer(Reducer):
+    """A reducer that also caches test outcomes"""
+
     def reset(self):
         super().reset()
         self.cache = {}
@@ -242,13 +256,17 @@ class CachingReducer(Reducer):
         return outcome
 
 class DeltaDebuggingReducer(CachingReducer):
-    def reduce(self, inp):
+    """Reduce inputs using delta debugging."""
+
+    def reduce(self, inp: str) -> str:
+        """Reduce input `inp` using delta debugging. Return reduced input."""
+
         self.reset()
         assert self.test(inp) != Runner.PASS
 
         n = 2     # Initial granularity
         while len(inp) >= 2:
-            start = 0
+            start = 0.0
             subset_length = len(inp) / n
             some_complement_is_failing = False
 
@@ -311,16 +329,16 @@ if __name__ == '__main__':
 
 from .Grammars import EXPR_GRAMMAR
 
-from .Parser import EarleyParser  # minor dependency
+from .Parser import EarleyParser, Parser  # minor dependency
 
 class EvalMysteryRunner(MysteryRunner):
-    def __init__(self):
+    def __init__(self) -> None:
         self.parser = EarleyParser(EXPR_GRAMMAR)
 
-    def run(self, inp):
+    def run(self, inp: str) -> Tuple[str, Outcome]:
         try:
             tree, *_ = self.parser.parse(inp)
-        except SyntaxError as exc:
+        except SyntaxError:
             return (inp, Runner.UNRESOLVED)
 
         return super().run(inp)
@@ -339,6 +357,7 @@ if __name__ == '__main__':
 
 
 
+from .Grammars import Grammar
 from .GrammarFuzzer import all_terminals, expansion_to_children, display_tree
 
 if __name__ == '__main__':
@@ -389,15 +408,25 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     all_terminals(new_derivation_tree)
 
-### A Class for Reducing with Grammars
+### Excursion: A Class for Reducing with Grammars
 
 if __name__ == '__main__':
-    print('\n### A Class for Reducing with Grammars')
+    print('\n### Excursion: A Class for Reducing with Grammars')
 
 
 
 class GrammarReducer(CachingReducer):
-    def __init__(self, runner, parser, log_test=False, log_reduce=False):
+    """Reduce inputs using grammars"""
+
+    def __init__(self, runner: Runner, parser: Parser, *,
+                 log_test: bool = False, log_reduce: bool = False):
+        """Constructor.
+        `runner` is the runner to be used.
+        `parser` is the parser to be used.
+        `log_test` - if set, show tests and results.
+        `log_reduce` - if set, show reduction steps.
+        """
+
         super().__init__(runner, log_test=log_test)
         self.parser = parser
         self.grammar = parser.grammar()
@@ -405,20 +434,22 @@ class GrammarReducer(CachingReducer):
         self.log_reduce = log_reduce
         self.try_all_combinations = False
 
-### A Few Helpers
+#### A Few Helpers
 
 if __name__ == '__main__':
-    print('\n### A Few Helpers')
+    print('\n#### A Few Helpers')
 
 
 
-def tree_list_to_string(q):
+from .GrammarFuzzer import DerivationTree
+
+def tree_list_to_string(q: List[DerivationTree]) -> str:
     return "[" + ", ".join([all_terminals(tree) for tree in q]) + "]"
 
 if __name__ == '__main__':
     tree_list_to_string([derivation_tree, derivation_tree])
 
-def possible_combinations(list_of_lists):
+def possible_combinations(list_of_lists: List[List[Any]]) -> List[List[Any]]:
     if len(list_of_lists) == 0:
         return []
 
@@ -430,45 +461,52 @@ def possible_combinations(list_of_lists):
             for c in possible_combinations(list_of_lists[1:]):
                 new_combo = [e] + c
                 ret.append(new_combo)
+
     return ret
 
 if __name__ == '__main__':
     possible_combinations([[1, 2], ['a', 'b']])
 
-def number_of_nodes(tree):
+def number_of_nodes(tree: DerivationTree) -> int:
     (symbol, children) = tree
+    if children is None:
+        return 1
+
     return 1 + sum([number_of_nodes(c) for c in children])
 
 if __name__ == '__main__':
     number_of_nodes(derivation_tree)
 
-def max_height(tree):
+def max_height(tree: DerivationTree) -> int:
     (symbol, children) = tree
-    if len(children) == 0:
+    if children is None or len(children) == 0:
         return 1
+
     return 1 + max([max_height(c) for c in children])
 
 if __name__ == '__main__':
     max_height(derivation_tree)
 
-### Simplification Strategies
+#### Simplification Strategies
 
 if __name__ == '__main__':
-    print('\n### Simplification Strategies')
+    print('\n#### Simplification Strategies')
 
 
 
-#### Finding Subtrees
+##### Finding Subtrees
 
 if __name__ == '__main__':
-    print('\n#### Finding Subtrees')
+    print('\n##### Finding Subtrees')
 
 
 
 class GrammarReducer(GrammarReducer):
-    def subtrees_with_symbol(self, tree, symbol, depth=-1, ignore_root=True):
-        # Find all subtrees in TREE whose root is SYMBOL.
-        # If IGNORE_ROOT is true, ignore the root note of TREE.
+    def subtrees_with_symbol(self, tree: DerivationTree,
+                             symbol: str, depth: int = -1,
+                             ignore_root: bool = True) -> List[DerivationTree]:
+        """Find all subtrees in `tree` whose root is `symbol`.
+        If `ignore_root` is true, ignore the root note of `tree`."""
 
         ret = []
         (child_symbol, children) = tree
@@ -498,15 +536,16 @@ if __name__ == '__main__':
     [all_terminals(t) for t in grammar_reducer.subtrees_with_symbol(
         derivation_tree, "<term>")]
 
-#### Alternate Expansions
+##### Alternate Expansions
 
 if __name__ == '__main__':
-    print('\n#### Alternate Expansions')
+    print('\n##### Alternate Expansions')
 
 
 
 class GrammarReducer(GrammarReducer):
-    def alternate_reductions(self, tree, symbol, depth=-1):
+    def alternate_reductions(self, tree: DerivationTree, symbol: str, 
+                             depth: int = -1):
         reductions = []
 
         expansions = self.grammar.get(symbol, [])
@@ -563,15 +602,16 @@ if __name__ == '__main__':
     [all_terminals(t) for t in grammar_reducer.alternate_reductions(
         derivation_tree, "<term>")]
 
-#### Both Strategies Together
+##### Both Strategies Together
 
 if __name__ == '__main__':
-    print('\n#### Both Strategies Together')
+    print('\n##### Both Strategies Together')
 
 
 
 class GrammarReducer(GrammarReducer):
-    def symbol_reductions(self, tree, symbol, depth=-1):
+    def symbol_reductions(self, tree: DerivationTree, symbol: str, 
+                          depth: int = -1):
         """Find all expansion alternatives for the given symbol"""
         reductions = (self.subtrees_with_symbol(tree, symbol, depth=depth)
                       + self.alternate_reductions(tree, symbol, depth=depth))
@@ -601,17 +641,18 @@ if __name__ == '__main__':
     reductions = grammar_reducer.symbol_reductions(derivation_tree, "<term>")
     tree_list_to_string([r for r in reductions])
 
-### The Reduction Strategy
+#### The Reduction Strategy
 
 if __name__ == '__main__':
-    print('\n### The Reduction Strategy')
+    print('\n#### The Reduction Strategy')
 
 
 
 class GrammarReducer(GrammarReducer):
-    def reduce_subtree(self, tree, subtree, depth=-1):
+    def reduce_subtree(self, tree: DerivationTree,
+                       subtree: DerivationTree, depth: int = -1):
         symbol, children = subtree
-        if len(children) == 0:
+        if children is None or len(children) == 0:
             return False
 
         if self.log_reduce:
@@ -621,6 +662,9 @@ class GrammarReducer(GrammarReducer):
         while True:
             reduced_child = False
             for i, child in enumerate(children):
+                if child is None:
+                    continue
+
                 (child_symbol, _) = child
                 for reduction in self.symbol_reductions(
                         child, child_symbol, depth):
@@ -674,6 +718,13 @@ class GrammarReducer(GrammarReducer):
         tree = self.parse(inp)
         self.reduce_tree(tree)
         return all_terminals(tree)
+
+### End of Excursion
+
+if __name__ == '__main__':
+    print('\n### End of Excursion')
+
+
 
 if __name__ == '__main__':
     expr_input
@@ -784,24 +835,45 @@ if __name__ == '__main__':
     os.system(f"python -c 'x = 1 + 2 * 3 / 0'")
 
 from .Fuzzer import ProgramRunner
+import subprocess
 
 class ZeroDivisionRunner(ProgramRunner):
     """Make outcome 'FAIL' if ZeroDivisionError occurs"""
-    def run(self, inp=""):
-        result, outcome = super().run(inp)
-        if result.stderr.find('ZeroDivisionError') >= 0:
+
+    def run(self, inp: str = "") -> Tuple[subprocess.CompletedProcess, Outcome]:
+        process, outcome = super().run(inp)
+        if process.stderr.find('ZeroDivisionError') >= 0:
             outcome = 'FAIL'
-        return result, outcome
+        return process, outcome
 
 if __name__ == '__main__':
     python_input = "x = 1 + 2 * 3 / 0"
     python_runner = ZeroDivisionRunner("python")
-    result, outcome = python_runner.run(python_input)
+    process, outcome = python_runner.run(python_input)
     outcome
 
 if __name__ == '__main__':
     dd = DeltaDebuggingReducer(python_runner)
     dd.reduce(python_input)
+
+from .ClassDiagram import display_class_hierarchy
+
+if __name__ == '__main__':
+    display_class_hierarchy([DeltaDebuggingReducer, GrammarReducer],
+                            public_methods=[
+                                Reducer.__init__,
+                                Reducer.reset,
+                                Reducer.reduce,
+                                DeltaDebuggingReducer.reduce,
+                                GrammarReducer.__init__,
+                                GrammarReducer.reduce,
+                            ],
+                            types={
+                                'DerivationTree': DerivationTree,
+                                'Grammar': Grammar,
+                                'Outcome': Outcome,
+                            },
+                            project='fuzzingbook')
 
 ## Lessons Learned
 ## ---------------
