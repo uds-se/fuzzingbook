@@ -3,7 +3,7 @@
 
 # "When To Stop Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WhenToStopFuzzing.html
-# Last change: 2022-01-11 10:34:01+01:00
+# Last change: 2022-02-08 18:51:47+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -63,15 +63,15 @@ if __name__ == '__main__':
 
 
 if __name__ == '__main__':
+    from .bookutils import YouTubeVideo
+    YouTubeVideo('an9Z23l-xc0')
+
+if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency
     import random
     random.seed(2001)
 
 from typing import Dict
-
-from . import Fuzzer
-
-from .Coverage import Coverage, cgi_decode
 
 ## The Enigma Machine
 ## ------------------
@@ -184,7 +184,7 @@ class BletchleyPark:
             max_length=3,
             char_start=65,
             char_range=26)
-        
+
     def break_message(self, message):
         """Returning the trigram for an encoded message"""
         self.enigma.cur_msg = message
@@ -392,6 +392,7 @@ class BletchleyPark(BletchleyPark):
                 self.cur_observed += 1
                 self.timeseries[self.cur_attempts] = self.cur_observed
             cur_msg += 1
+
         return n_messages
 
 if __name__ == '__main__':
@@ -555,7 +556,6 @@ if __name__ == '__main__':
     all_coverage = population_trace_coverage([inp1, inp2, inp3], cgi_decode)[0]
     assert len(all_coverage) == 2
 
-from .Fuzzer import RandomFuzzer
 from .Coverage import population_coverage
 from html.parser import HTMLParser
 
@@ -803,7 +803,7 @@ if __name__ == '__main__':
 
 
 
-from .Coverage import population_coverage, Coverage
+from .Coverage import population_coverage
 ...
 
 def population_stmt_coverage(population, function):
