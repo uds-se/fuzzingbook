@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2022-01-24 10:49:41+01:00
+# Last change: 2022-02-09 08:21:44+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,18 +68,23 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- httph/www:.go-gL(e.com#/eRhK?p=fuzz|ing,
- h[ttph/pw(Oww.go-L(}.om#CoeRh?pm#eRpVm#eR{pVtetph/tw;x[.g-L(}>m#eqSpuzz|I,
- hteth/tw;x[.g-L(}>m3eqSpuzz:I,
- htph/www:,go-g(e.com#/eRhK;pYfu;zz|ig]
-
-Besides the simple `PowerSchedule`, we can have advanced power schedules.
-
-* `AFLFastSchedule` assigns high energy to "unusual" paths not taken very often.
-* `AFLGoSchedule` assigns high energy to paths close to uncovered program locations. 
-
-The `AFLGoSchedule` class constructor requires a `distance` metric from each node towards target locations, as determined via analysis of the program code. See the chapter for details.
-
+ htt`://www.goglNe.com/searchq=fuzzing,
+ h:// uw`w.oglNe.cm/seach9fzz)nF,
+ h:// ug`w.oglNe.cm/seach9fzzJ)nF,
+ httt:?/wwsFggl.o|mVsmerchEhM;q=fzi|,
+ Znhtt#;mw7Vw.gLgle`o`m%srkh=qiu:zkng,
+ Okhttt:?/wsFglo|PmWGs-er#b1hEhM?q?fri,
+ h uww.oglNeycm/ech9fzz)nF,
+ hOutt:/wws\gla=.o|mV]smerch;qdzi|,
+ hhktp://www.oo#G-e.pcCoKfm/ce0a24sq5qzag,
+ hOwtt:/ww&\gla=.k|mV]sGmeb#h;qdzi|,
+ h{`:+w?w./#G-eq
+ cQmKGm/]be0a24sqQ7z!c,
+ vt6vw&\-odeK.myVMgme9f#h9pdQzi| ,
+ hOhptath:$-,w.$7OlNg*cnm/e@arch sa=nubzzifl,
+ h uww.oglNeycm?echU9fzz)nF,
+ Okhttt:?/wsFglo}XmWGs-er#b1nEhM?q?fri,
+  uw.qlN7m.ch;dz
 For more details, source, and documentation, see
 "The Fuzzing Book - Greybox Fuzzing"
 at https://www.fuzzingbook.org/html/GreyboxFuzzer.html

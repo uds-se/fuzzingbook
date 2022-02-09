@@ -3,7 +3,7 @@
 
 # "Fuzzing: Breaking Things with Random Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2022-01-24 10:43:57+01:00
+# Last change: 2022-02-09 09:07:14+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -59,7 +59,7 @@ The `RandomFuzzer()` constructor allows to specify a number of keyword arguments
 
 >>> print(RandomFuzzer.__init__.__doc__)
 Produce strings of `min_length` to `max_length` characters
-           in the range [`char_start`, `char_start` + `char_range`]
+           in the range [`char_start`, `char_start` + `char_range`)
 
 >>> random_fuzzer = RandomFuzzer(min_length=10, max_length=20, char_start=65, char_range=26)
 >>> random_fuzzer.fuzz()
@@ -141,7 +141,7 @@ import random
 
 def fuzzer(max_length: int = 100, char_start: int = 32, char_range: int = 32) -> str:
     """A string of up to `max_length` characters
-       in the range [`char_start`, `char_start` + `char_range`]"""
+       in the range [`char_start`, `char_start` + `char_range`)"""
     string_length = random.randrange(0, max_length + 1)
     out = ""
     for i in range(0, string_length):
@@ -714,7 +714,7 @@ class RandomFuzzer(Fuzzer):
     def __init__(self, min_length: int = 10, max_length: int = 100,
                  char_start: int = 32, char_range: int = 32) -> None:
         """Produce strings of `min_length` to `max_length` characters
-           in the range [`char_start`, `char_start` + `char_range`]"""
+           in the range [`char_start`, `char_start` + `char_range`)"""
         self.min_length = min_length
         self.max_length = max_length
         self.char_start = char_start
