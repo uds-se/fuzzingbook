@@ -1,21 +1,24 @@
 FROM jupyter/scipy-notebook
 
-LABEL maintainer="Nataniel Borges Jr."
-LABEL description="v0.1"
+LABEL maintainer="Johannes Lampel"
+LABEL description="v0.2"
 
 USER root
+
+ARG publish=yes
+ARG branch=master
+
+ADD https://raw.githubusercontent.com/uds-se/fuzzingbook/${branch}/binder/apt.txt /root/fuzzingbook-packages.txt
 
 # Install required APT packages
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends graphviz curl inkscape bc ed texinfo groff wget
 RUN if [ "$publish" = "yes" ]; then apt-get install -y --no-install-recommends firefox vim tmux ; fi
+RUN apt-get install --no-install-recommends -y $(grep -v -e '^\s*#' fuzzingbook-packages.txt)
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 
 USER $NB_UID
-
-ARG publish=yes
-ARG branch=master
 
 # Install required python packages
 RUN if [ "$publish" = "yes" ]; then conda install -c anaconda python=3.6 ; fi
@@ -88,6 +91,7 @@ RUN rm -rf /var/lib/apt/lists/*
 COPY start-singleuser-custom.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start-singleuser-custom.sh
 RUN mv /usr/local/bin/start-singleuser.sh /usr/local/bin/start-singleuser-old.sh
+RUN pip install -r /home/$NB_USER/fuzzingbook/requirements.txt
 #RUN cp /usr/local/bin/custom-start.sh /usr/local/bin/start-singleuser.sh
 
 # Quit root mode
