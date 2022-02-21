@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2022-02-09 08:21:44+01:00
+# Last change: 2022-02-21 09:14:07+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,23 +68,30 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- htt`://www.goglNe.com/searchq=fuzzing,
- h:// uw`w.oglNe.cm/seach9fzz)nF,
- h:// ug`w.oglNe.cm/seach9fzzJ)nF,
- httt:?/wwsFggl.o|mVsmerchEhM;q=fzi|,
- Znhtt#;mw7Vw.gLgle`o`m%srkh=qiu:zkng,
- Okhttt:?/wsFglo|PmWGs-er#b1hEhM?q?fri,
- h uww.oglNeycm/ech9fzz)nF,
- hOutt:/wws\gla=.o|mV]smerch;qdzi|,
- hhktp://www.oo#G-e.pcCoKfm/ce0a24sq5qzag,
- hOwtt:/ww&\gla=.k|mV]sGmeb#h;qdzi|,
- h{`:+w?w./#G-eq
- cQmKGm/]be0a24sqQ7z!c,
- vt6vw&\-odeK.myVMgme9f#h9pdQzi| ,
- hOhptath:$-,w.$7OlNg*cnm/e@arch sa=nubzzifl,
- h uww.oglNeycm?echU9fzz)nF,
- Okhttt:?/wsFglo}XmWGs-er#b1nEhM?q?fri,
-  uw.qlN7m.ch;dz
+ httpm://www.goglecom/search?u=fuzzing,
+ t`:u//Awuw.gle.=coM/magqf&nlzzkg=&,
+ {ttp://7wwD.gonk%a.om?su3uarch%?.qfyuz'ziAn,
+ t`:u//Aww.gle.=oM/magqf&nlzzkg=&,
+ tAtp$//zwwwo'mgae.com/sea2c+(;q=fuzzing,
+ httpm^ /vwww.g(oglecao/kceacwh?t-fuzzg,
+ y5tb:uAw.g~l(+He]=o`y/lageNynlzk=g,
+ t`u//Qwu)7.gej=joM/maguF&3lzhzkg=&,
+ {t#=pz/O7w.zon^%amms53\eerch%?q&uz'jiAof,
+ t`:u//Aww.gle.=oM/magqd&nlzzkg=;&,
+ ht1pm:Z/ww>iu.m$glckmCGearc/?uFjzing,
+ t`:u//Aww.glMe.=o/magqd&nlzzko=1;&,
+ ltp;/wwgoogle.dcom7/:arc(?qiu.zl$gl#xkm@C#Geasrc//uFjzing,
+ xtqpm:ZBw>iu.#zl$l#xkm@C#Geasrco//_uFjzin%g,
+ lgtp;wgoielu.dcom-tC.arb(?wgoigu.dco[Am-t.arb(??g%shgc.OMm#qdP&lzxF=,
+ http:/www.gLoogle.com/searh?q=fuzz'ing]
+
+Besides the simple `PowerSchedule`, we can have advanced power schedules.
+
+* `AFLFastSchedule` assigns high energy to "unusual" paths not taken very often.
+* `AFLGoSchedule` assigns high energy to paths close to uncovered program locations. 
+
+The `AFLGoSchedule` class constructor requires a `distance` metric from each node towards target locations, as determined via analysis of the program code. See the chapter for details.
+
 For more details, source, and documentation, see
 "The Fuzzing Book - Greybox Fuzzing"
 at https://www.fuzzingbook.org/html/GreyboxFuzzer.html

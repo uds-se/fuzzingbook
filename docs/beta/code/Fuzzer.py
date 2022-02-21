@@ -3,7 +3,7 @@
 
 # "Fuzzing: Breaking Things with Random Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Fuzzer.html
-# Last change: 2022-02-09 09:07:14+01:00
+# Last change: 2022-02-21 09:09:32+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -700,13 +700,7 @@ class Fuzzer:
     def runs(self, runner: Runner = PrintRunner(), trials: int = 10) \
             -> List[Tuple[subprocess.CompletedProcess, Outcome]]:
         """Run `runner` with fuzz input, `trials` times"""
-        # Note: the list comprehension below does not invoke self.run() for subclasses
-        # return [self.run(runner) for i in range(trials)]
-        outcomes = []
-        for i in range(trials):
-            outcomes.append(self.run(runner))
-
-        return outcomes
+        return [self.run(runner) for i in range(trials)]
 
 class RandomFuzzer(Fuzzer):
     """Produce random inputs."""
