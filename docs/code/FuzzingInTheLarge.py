@@ -3,7 +3,7 @@
 
 # "Fuzzing in the Large" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2022-02-09 08:43:18+01:00
+# Last change: 2022-02-21 09:52:23+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -129,23 +129,19 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     import os
-    os.system(f'git clone https://github.com/MozillaSecurity/FuzzManager')
+    os.system(f'git clone https://github.com/uds-se/FuzzManager')
 
 if __name__ == '__main__':
     import os
-    os.system(f'cd FuzzManager; git checkout 0.4.1')
+    os.system(f'{sys.executable} -m pip install -r FuzzManager/server/requirements.txt > /dev/null')
 
 if __name__ == '__main__':
     import os
-    os.system(f'pip install -r FuzzManager/server/requirements.txt > /dev/null')
+    os.system(f'cd FuzzManager; {sys.executable} server/manage.py migrate > /dev/null')
 
 if __name__ == '__main__':
     import os
-    os.system(f'cd FuzzManager; python server/manage.py migrate > /dev/null')
-
-if __name__ == '__main__':
-    import os
-    os.system(f'(cd FuzzManager; echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser(\'demo\', \'demo@fuzzingbook.org\', \'demo\')" | python server/manage.py shell)')
+    os.system(f'(cd FuzzManager; echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser(\'demo\', \'demo@fuzzingbook.org\', \'demo\')" | {sys.executable} server/manage.py shell)')
 
 import subprocess
 import sys
@@ -305,7 +301,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     import os
-    os.system(f'git clone https://github.com/choller/simply-buggy')
+    os.system(f'git clone https://github.com/uds-se/simply-buggy')
 
 if __name__ == '__main__':
     import os
@@ -597,11 +593,11 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     import os
-    os.system(f'git clone https://github.com/choller/simply-buggy $HOME/simply-buggy-server    ')
+    os.system(f'git clone https://github.com/uds-se/simply-buggy simply-buggy-server    ')
 
 if __name__ == '__main__':
     import os
-    os.system(f'cd FuzzManager; python3 server/manage.py setup_repository simply-buggy GITSourceCodeProvider $HOME/simply-buggy-server')
+    os.system(f'cd FuzzManager; {sys.executable} server/manage.py setup_repository simply-buggy GITSourceCodeProvider ../simply-buggy-server')
 
 import random
 import subprocess
@@ -649,7 +645,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     import os
-    os.system(f'cd FuzzManager; python3 -mCovReporter --repository simply-buggy --description "Test1" --submit ../coverage.json')
+    os.system(f'cd FuzzManager; {sys.executable} -mCovReporter --repository simply-buggy --description "Test1" --submit ../coverage.json')
 
 if __name__ == '__main__':
     gui_driver.get(fuzzmanager_url + "/covmanager")
@@ -742,7 +738,7 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     home = os.path.expanduser("~")
     for temp_dir in ['coverage', 'simply-buggy', 'simply-buggy-server',
-                     os.path.join(home, 'simply-buggy-server'),
+                     'simply-buggy-server',
                      'FuzzManager']:
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)

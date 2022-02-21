@@ -3,7 +3,7 @@
 
 # "Fuzzing with Grammars" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Grammars.html
-# Last change: 2022-02-09 08:22:52+01:00
+# Last change: 2022-02-21 09:15:31+01:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -1219,7 +1219,7 @@ JSON_EBNF_GRAMMAR: Grammar = {
 
     "<number>": ["<int><frac><exp>"],
 
-    "<int>": ["<digit>", "<onenine><digits>", "-<digits>", "-<onenine><digits>"],
+    "<int>": ["<digit>", "<onenine><digits>", "-<digit>", "-<onenine><digits>"],
 
     "<digits>": ["<digit>+"],
 
