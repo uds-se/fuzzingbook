@@ -15,7 +15,7 @@ import warnings
 
 from itertools import groupby, chain
 from collections import namedtuple
-from jinja2.utils import Markup, escape, pformat, urlize, soft_unicode, \
+from jinja2.utils import Markup, escape, pformat, urlize, soft_str, \
      unicode_urlencode, htmlsafe_json_dumps
 from jinja2.runtime import Undefined
 from jinja2.exceptions import FilterArgumentError
@@ -136,18 +136,18 @@ def do_replace(eval_ctx, s, old, new, count=None):
        not hasattr(s, '__html__'):
         s = escape(s)
     else:
-        s = soft_unicode(s)
-    return s.replace(soft_unicode(old), soft_unicode(new), count)
+        s = soft_str(s)
+    return s.replace(soft_str(old), soft_str(new), count)
 
 
 def do_upper(s):
     """Convert a value to uppercase."""
-    return soft_unicode(s).upper()
+    return soft_str(s).upper()
 
 
 def do_lower(s):
     """Convert a value to lowercase."""
-    return soft_unicode(s).lower()
+    return soft_str(s).lower()
 
 
 @evalcontextfilter
@@ -190,7 +190,7 @@ def do_capitalize(s):
     """Capitalize a value. The first character will be uppercase, all others
     lowercase.
     """
-    return soft_unicode(s).capitalize()
+    return soft_str(s).capitalize()
 
 
 def do_title(s):
@@ -199,7 +199,7 @@ def do_title(s):
     """
     return ''.join(
         [item[0].upper() + item[1:].lower()
-         for item in _word_beginning_split_re.split(soft_unicode(s))
+         for item in _word_beginning_split_re.split(soft_str(s))
          if item])
 
 
@@ -421,7 +421,7 @@ def do_join(eval_ctx, value, d=u'', attribute=None):
         return d.join(value)
 
     # no html involved, to normal joining
-    return soft_unicode(d).join(imap(soft_unicode, value))
+    return soft_str(d).join(imap(soft_str, value))
 
 
 def do_center(value, width=80):
@@ -682,12 +682,12 @@ def do_format(value, *args, **kwargs):
     if args and kwargs:
         raise FilterArgumentError('can\'t handle positional and keyword '
                                   'arguments at the same time')
-    return soft_unicode(value) % (kwargs or args)
+    return soft_str(value) % (kwargs or args)
 
 
 def do_trim(value):
     """Strip leading and trailing whitespace."""
-    return soft_unicode(value).strip()
+    return soft_str(value).strip()
 
 
 def do_striptags(value):
@@ -1173,7 +1173,7 @@ FILTERS = {
     'selectattr':           do_selectattr,
     'slice':                do_slice,
     'sort':                 do_sort,
-    'string':               soft_unicode,
+    'string':               soft_str,
     'striptags':            do_striptags,
     'sum':                  do_sum,
     'title':                do_title,

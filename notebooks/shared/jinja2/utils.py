@@ -644,4 +644,4 @@ except SyntaxError:
 
 
 # Imported here because that's where it was in the past
-from markupsafe import Markup, escape, soft_unicode
+from markupsafe import Markup, escape, soft_str
