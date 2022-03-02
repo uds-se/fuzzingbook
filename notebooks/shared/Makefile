@@ -1177,6 +1177,14 @@ update-synopsis synopsis:
 no-synopsis:
 	@echo Chapters without synopsis:
 	@grep -L '## Synopsis' $(ALL_CHAPTER_SOURCES) | grep -v '[0-9]'
+	
+
+# App icon
+appicon: $(NOTEBOOKS)/PICS/appicon.png
+$(NOTEBOOKS)/PICS/appicon.png: $(NOTEBOOKS)/PICS/Icon.png
+	(cd $(SHARED)icon_gen; $(PYTHON) icon_gen.py)
+	cp $(SHARED)icon_gen/out/Icon-114.png $@
+	$(RM) -r $(SHARED)icon_gen/out
 
 
 ## Python packages
