@@ -1183,6 +1183,7 @@ no-synopsis:
 appicon: $(NOTEBOOKS)/PICS/appicon.png
 $(NOTEBOOKS)/PICS/appicon.png: $(NOTEBOOKS)/PICS/Icon.png
 	-chmod +w $(SHARED)icon_gen
+	cp $(NOTEBOOKS)/PICS/Icon.png $(SHARED)icon_gen
 	(cd $(SHARED)icon_gen; $(PYTHON) icon_gen.py)
 	cp $(SHARED)icon_gen/out/Icon-114.png $@
 	$(RM) -r $(SHARED)icon_gen/out
