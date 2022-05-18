@@ -3,7 +3,7 @@
 
 # "Efficient Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2022-05-17 19:03:49+02:00
+# Last change: 2022-05-18 12:53:45+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -49,13 +49,13 @@ This chapter introduces `GrammarFuzzer`, an efficient grammar fuzzer that takes 
 >>> from Grammars import US_PHONE_GRAMMAR
 >>> phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
 >>> phone_fuzzer.fuzz()
-'(261)406-1134'
+'(519)333-4454'
 
 The `GrammarFuzzer` constructor takes a number of keyword arguments to control its behavior.  `start_symbol`, for instance, allows to set the symbol that expansion starts with (instead of ``):
 
 >>> area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='')
 >>> area_fuzzer.fuzz()
-'734'
+'718'
 
 Here's how to parameterize the `GrammarFuzzer` constructor:
 
@@ -76,19 +76,19 @@ In the internal representation of a derivation tree, a _node_ is a pair (`symbol
  [('',
    [('(', []),
     ('',
-     [('', [('2', [])]),
-      ('', [('6', [])]),
-      ('', [('1', [])])]),
+     [('', [('5', [])]),
+      ('', [('1', [])]),
+      ('', [('9', [])])]),
     (')', []),
     ('',
-     [('', [('4', [])]),
-      ('', [('0', [])]),
-      ('', [('6', [])])]),
+     [('', [('3', [])]),
+      ('', [('3', [])]),
+      ('', [('3', [])])]),
     ('-', []),
     ('',
-     [('', [('1', [])]),
-      ('', [('1', [])]),
-      ('', [('3', [])]),
+     [('', [('4', [])]),
+      ('', [('4', [])]),
+      ('', [('5', [])]),
       ('', [('4', [])])])])])
 
 The chapter contains various helpers to work with derivation trees, including visualization tools – notably, `display_tree()`, above.
@@ -280,6 +280,7 @@ import re
 
 def dot_escape(s: str) -> str:
     """Return s in a form suitable for dot"""
+    s = s.replace('\n', '\\n')
     s = re.sub(r'([^a-zA-Z0-9" ])', r"\\\1", s)
     return s
 
@@ -287,6 +288,7 @@ if __name__ == '__main__':
     assert dot_escape("hello") == "hello"
     assert dot_escape("<hello>, world") == "\\<hello\\>\\, world"
     assert dot_escape("\\n") == "\\\\n"
+    assert dot_escape("\n") == "\\\\n"
 
 def extract_node(node, id):
     symbol, children, *annotation = node

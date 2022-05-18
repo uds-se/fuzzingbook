@@ -3,7 +3,7 @@
 
 # "Testing Configurations" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConfigurationFuzzer.html
-# Last change: 2022-05-17 19:31:10+02:00
+# Last change: 2022-05-18 12:46:16+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -193,18 +193,18 @@ The grammar can be immediately used for fuzzing. A `GrammarCoverageFuzzer` will 
 >>> from Grammars import convert_ebnf_grammar
 >>> fuzzer = GrammarCoverageFuzzer(convert_ebnf_grammar(option_ebnf_grammar))
 >>> [fuzzer.fuzz() for i in range(3)]
-[' foo.py',
- ' --max-line-length 6 --jobs -594 --ignore , --ignore-local-config -r --in-place --list-fixes --recursive -v --experimental -p 72 -h --aggressive --indent-size 3 --exit-code --hang-closing --pep8-passes -180 -d --global-config XQjT --diff --exclude *g -j 43 --help --select A --version --verbose -a --line-range -3963 0 --range 1 4 -i --in-place --version foo.py',
- ' --global-config 2 --select PuR --ignore b --ignore @ --ignore ;7d --ignore ) --ignore Fw1Z --ignore 0 --global-config ynf --select >G --select + --global-config ( --exclude v --exclude V --ignore ^ --select L --exclude 6 --exclude =$` --ignore % --global-config N --ignore [8maop --ignore 3! --select ~?c< --exclude C --select U --exclude h --global-config # --global-config 5O --select x --select B] --ignore _ --global-config .K --global-config S --exclude r --global-config qW --exclude te4/ --exclude J} --ignore " --exclude |H --global-config -&k{s --global-config E --select :I --ignore 9 --global-config M --exclude YD --select \\ --exclude z --ignore i --select \'l --ignore M --ignore ;h --exit-code foo.py']
+[' -d foo.py',
+ ' --max-line-length -5 --version --line-range 3 -14 --verbose --in-place --ignore-local-config --help --jobs -8 --recursive --list-fixes --exit-code -h --hang-closing --ignore $n --range -002 -9 -j -67 --pep8-passes -8 --global-config YO&lT -i -a --experimental --indent-size 79 -r --aggressive -p -4 --exclude ?oh -v --diff --select fXd) --global-config c --ignore FV --global-config 8_Mk --global-config 1 --ignore b5 --global-config pj --ignore 6>[ --global-config ~N --exclude 0 --select L --exclude #I --ignore !B --ignore eC]9z` --ignore K --global-config Ew --global-config A --select - --exclude .v --ignore P --select + --ignore H --select :ga --global-config @t --exclude R --exclude J{" --select s^< --ignore %\' --global-config x --ignore 7/( --global-config Z --global-config W2 --exclude D --ignore m --exclude y --select 3 --exclude ;,QU| --exclude } --global-config uq --ignore =S*r --ignore i\\ --ignore 4 --select G --ignore z --select zl --in-place foo.py',
+ ' --help --ignore A --global-config S foo.py']
 
 The `OptionFuzzer` class summarizes these steps.  Its constructor takes an `OptionRunner` to automatically extract the grammar; it does the necessary steps to extract the grammar and fuzz with it.
 
 >>> autopep8_runner = OptionRunner("autopep8", "foo.py")
 >>> autopep8_fuzzer = OptionFuzzer(autopep8_runner)
 >>> [autopep8_fuzzer.fuzz() for i in range(3)]
-[' --diff foo.py',
- ' --exclude  --global-config V --select He --global-config | --global-config n}aicm --ignore 7 --ignore b --global-config u --exclude WB` --exclude 2 --exclude JpZt --exclude l_ --select *%^ --exclude & --exclude )Lv --global-config [ --global-config " --exclude sOEXP --aggressive --exclude \' --help --diff --experimental foo.py',
- ' --ignore FCw; --global-config /1K?:6 --exclude U --exclude z --ignore rQ --select x --select Y --select { --global-config o --select 3#4 --exclude ]j --select ~ --exclude 9@ --ignore w --global-config CVL --diff foo.py']
+[' foo.py',
+ " --exclude 1n --select J -h --in-place -p -50 --diff --experimental --max-line-length 86 --line-range 3 -9 -a --jobs -2 --recursive --aggressive --global-config tqHaBS --pep8-passes 7 --ignore fb; --list-fixes --help -j 14 --indent-size 7 --exit-code --ignore-local-config --version -v --hang-closing -i --range 1 9 --verbose -d -r --global-config = --exclude hD --global-config L` --exclude C~ --global-config 4w --ignore $ --ignore 7 --ignore P --select [6?e --global-config # --global-config g --global-config / --select N|i --ignore _ --select osk --ignore O+ --exclude x --exclude 5 --ignore % --global-config { --ignore U --select p --exclude v8 --ignore ^z --select }*M --exclude Q&lyG -h --ignore ' -h --list-fixes --recursive foo.py",
+ ' --global-config d --exclude K --ignore 9(rIX --global-config R --select E! --select , --global-config @ --global-config ] --ignore j --exclude Z --global-config c --global-config \\> --global-config ) --exclude F<23 --exclude m --version --version --recursive foo.py']
 
 The final step in testing would now to invoke the program with these arguments.
 
@@ -901,8 +901,13 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     assert find_executable("notedown") is not None
 
+import warnings
+
 if __name__ == '__main__':
-    notedown_runner = OptionRunner("notedown")
+    with warnings.catch_warnings():
+        # Workaround: `notedown` can issue a `DeprecationWarning`
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        notedown_runner = OptionRunner("notedown")
 
 if __name__ == '__main__':
     print(notedown_runner.ebnf_grammar()["<option>"])
