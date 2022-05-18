@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2022-02-21 09:14:07+01:00
+# Last change: 2022-05-17 19:02:54+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,22 +68,14 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- httpm://www.goglecom/search?u=fuzzing,
- t`:u//Awuw.gle.=coM/magqf&nlzzkg=&,
- {ttp://7wwD.gonk%a.om?su3uarch%?.qfyuz'ziAn,
- t`:u//Aww.gle.=oM/magqf&nlzzkg=&,
- tAtp$//zwwwo'mgae.com/sea2c+(;q=fuzzing,
- httpm^ /vwww.g(oglecao/kceacwh?t-fuzzg,
- y5tb:uAw.g~l(+He]=o`y/lageNynlzk=g,
- t`u//Qwu)7.gej=joM/maguF&3lzhzkg=&,
- {t#=pz/O7w.zon^%amms53\eerch%?q&uz'jiAof,
- t`:u//Aww.gle.=oM/magqd&nlzzkg=;&,
- ht1pm:Z/ww>iu.m$glckmCGearc/?uFjzing,
- t`:u//Aww.glMe.=o/magqd&nlzzko=1;&,
- ltp;/wwgoogle.dcom7/:arc(?qiu.zl$gl#xkm@C#Geasrc//uFjzing,
- xtqpm:ZBw>iu.#zl$l#xkm@C#Geasrco//_uFjzin%g,
- lgtp;wgoielu.dcom-tC.arb(?wgoigu.dco[Am-t.arb(??g%shgc.OMm#qdP&lzxF=,
- http:/www.gLoogle.com/searh?q=fuzz'ing]
+ h4t:/O/g;{Hoogme&cPo/m'Mqqdei2,
+ d^7ww05s.%?`Ogjc,4[joQp(seMc,|QFLfLSp:i'2,
+ h#t:/O/c;y{Hoog}&CPo/mZ)'Cd7ww ;5s@.%?aOgjc,4[oQp(seMc,|QFLfLS0:!I'2,
+ hN+{H;;4=/wB}h&1Co(/MZ)$(r?tuzyiQngo,
+ ?h#t/K/+y{H;og}Ih&Co
+ /mR'Z$)$N+{H;4=/wB}h&1Co(/MZ)$(ruzyiQngo,
+ i4tg:/g{HoggmecPo-7MqqZw`zf)q=f xxing+,
+ h]c>Gg9G1`[ogRlefc6\mxmerqqY5+2]
 
 Besides the simple `PowerSchedule`, we can have advanced power schedules.
 
@@ -113,7 +105,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
-    YouTubeVideo('6Dwc55FnHBg')
+    YouTubeVideo('vBrNT9q2t1Y')
 
 ## Synopsis
 ## --------

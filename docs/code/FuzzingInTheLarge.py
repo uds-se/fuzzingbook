@@ -3,7 +3,7 @@
 
 # "Fuzzing in the Large" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2022-02-21 09:52:23+01:00
+# Last change: 2022-05-17 20:11:55+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -275,16 +275,18 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
+from selenium.webdriver.common.by import By
+
 if __name__ == '__main__':
-    username = gui_driver.find_element_by_name("username")
+    username = gui_driver.find_element(By.NAME, "username")
     username.send_keys("demo")
 
 if __name__ == '__main__':
-    password = gui_driver.find_element_by_name("password")
+    password = gui_driver.find_element(By.NAME, "password")
     password.send_keys("demo")
 
 if __name__ == '__main__':
-    login = gui_driver.find_element_by_tag_name("button")
+    login = gui_driver.find_element(By.TAG_NAME, "button")
     login.click()
     time.sleep(1)
 
@@ -412,7 +414,7 @@ if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
 if __name__ == '__main__':
-    crash = gui_driver.find_element_by_xpath('//td/a[contains(@href,"/crashmanager/crashes/")]')
+    crash = gui_driver.find_element(By.XPATH, '//td/a[contains(@href,"/crashmanager/crashes/")]')
     crash.click()
     time.sleep(1)
 
@@ -431,7 +433,7 @@ if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
 if __name__ == '__main__':
-    create = gui_driver.find_element_by_xpath('//a[contains(@href,"/signatures/new/")]')
+    create = gui_driver.find_element(By.XPATH, '//a[contains(@href,"/signatures/new/")]')
     create.click()
     time.sleep(1)
 
@@ -442,7 +444,7 @@ if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
 if __name__ == '__main__':
-    save = gui_driver.find_element_by_name("submit_save")
+    save = gui_driver.find_element(By.NAME, "submit_save")
     save.click()
     time.sleep(1)
 
@@ -654,7 +656,7 @@ if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
 if __name__ == '__main__':
-    first_id = gui_driver.find_element_by_xpath('//td/a[contains(@href,"/browse")]')
+    first_id = gui_driver.find_element(By.XPATH, '//td/a[contains(@href,"/browse")]')
     first_id.click()
     time.sleep(1)
 
@@ -662,7 +664,7 @@ if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
 if __name__ == '__main__':
-    maze_cpp = gui_driver.find_element_by_xpath("//*[contains(text(), 'maze.cpp')]")
+    maze_cpp = gui_driver.find_element(By.XPATH, "//*[contains(text(), 'maze.cpp')]")
     maze_cpp.click()
     time.sleep(1)
 

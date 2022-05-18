@@ -3,7 +3,7 @@
 
 # "Testing Web Applications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/WebFuzzer.html
-# Last change: 2022-02-21 09:29:26+01:00
+# Last change: 2022-05-18 12:46:31+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -102,7 +102,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
-    YouTubeVideo('5agY5kg8Pvk')
+    YouTubeVideo('cgtpQ2KLZC8')
 
 ## Synopsis
 ## --------
