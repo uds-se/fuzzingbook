@@ -1231,7 +1231,7 @@ class FasterGrammarFuzzer(GrammarFuzzer):
             return cached_result
 
         result = super().expansion_to_children(expansion)
-        self._expansion_cache[expansion] = result
+        self._expansion_cache[expansion] = copy.deepcopy(result)
         return result
 
 if __name__ == '__main__':
