@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-02-21 09:26:16+01:00
+# Last change: 2022-05-17 19:54:21+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -109,29 +109,31 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 '%'
 'AB'
 ''
-'ABC'
-
-IndexError: string index out of range (expected)
-
+'CBA'
 'A'
 'AB+'
 'AB'
+
+IndexError: string index out of range (expected)
+
 'ABCD'
 'ABC+'
 'A'
 'ABC'
 'ABC%'
-
-IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
-
 'A%'
-'ABC+DE'
+'ABC+D'
 'AB'
 'AB+'
+
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
+
 'A'
 'ABCD'
-'A'
+'ABC%'
+
+IndexError: string index out of range (expected)
 
 
 We see how the additional inputs generated explore additional paths.
@@ -198,7 +200,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
-    YouTubeVideo('5jBfa1njy18')
+    YouTubeVideo('KDcMjWX5ulU')
 
 if __name__ == '__main__':
     # We use the same fixed seed as the notebook to ensure consistency

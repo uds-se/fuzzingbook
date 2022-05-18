@@ -3,7 +3,7 @@
 
 # "Grammar Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarCoverageFuzzer.html
-# Last change: 2022-02-21 09:17:29+01:00
+# Last change: 2022-05-17 19:04:03+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
-    YouTubeVideo('yq1orQJF6ys')
+    YouTubeVideo('GGb3e5p0HC8')
 
 ## Synopsis
 ## --------

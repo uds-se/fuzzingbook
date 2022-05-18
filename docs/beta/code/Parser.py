@@ -3,7 +3,7 @@
 
 # "Parsing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2022-02-21 09:18:36+01:00
+# Last change: 2022-05-17 19:04:25+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
-    YouTubeVideo('2yS9EfBEirE')
+    YouTubeVideo('k39i9de0L54')
 
 ## Synopsis
 ## --------

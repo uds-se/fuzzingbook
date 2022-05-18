@@ -3,7 +3,7 @@
 
 # "Testing Graphical User Interfaces" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GUIFuzzer.html
-# Last change: 2022-02-21 09:31:02+01:00
+# Last change: 2022-05-17 20:10:09+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -69,21 +69,14 @@ The GUI Fuzzer `fuzz()` method produces sequences of interactions that follow pa
 >>> gui_driver.get(httpd_url)
 >>> actions = gui_fuzzer.fuzz()
 >>> print(actions)
-fill('zip', '6')
-fill('email', 'DV@c')
-fill('name', 'Av')
-fill('city', 'S')
 check('terms', False)
+fill('city', 'VL')
+fill('email', 'C@ms')
+fill('zip', '509')
+fill('name', 'd')
 submit('submit')
 click('order form')
 click('terms and conditions')
-click('order form')
-fill('zip', '0')
-fill('email', 'i@b')
-fill('name', 'G')
-fill('city', 'f')
-check('terms', True)
-submit('submit')
 
 
 
@@ -119,7 +112,7 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     from .bookutils import YouTubeVideo
-    YouTubeVideo('cjqxi8NCC28')
+    YouTubeVideo('79-HRgFot4k')
 
 ## Synopsis
 ## --------
@@ -215,9 +208,8 @@ def start_webdriver(browser=BROWSER, headless=HEADLESS, zoom=1.4):
     # Start the browser, and obtain a _web driver_ object such that we can interact with it.
     if browser == 'firefox':
         # For firefox, set a higher resolution for our screenshots
-        profile = webdriver.firefox.firefox_profile.FirefoxProfile()
-        profile.set_preference("layout.css.devPixelsPerPx", repr(zoom))
-        gui_driver = webdriver.Firefox(firefox_profile=profile, options=options)
+        options.set_preference("layout.css.devPixelsPerPx", repr(zoom))
+        gui_driver = webdriver.Firefox(options=options)
 
         # We set the window size such that it fits our order form exactly;
         # this is useful for not wasting too much space when taking screen shots.
@@ -248,8 +240,10 @@ if __name__ == '__main__':
 
 
 
+from selenium.webdriver.common.by import By
+
 if __name__ == '__main__':
-    name = gui_driver.find_element_by_name("name")
+    name = gui_driver.find_element(By.NAME, "name")
 
 if __name__ == '__main__':
     name.send_keys("Jane Doe")
@@ -258,29 +252,29 @@ if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
 if __name__ == '__main__':
-    email = gui_driver.find_element_by_name("email")
+    email = gui_driver.find_element(By.NAME, "email")
     email.send_keys("j.doe@example.com")
 
 if __name__ == '__main__':
-    city = gui_driver.find_element_by_name('city')
+    city = gui_driver.find_element(By.NAME, 'city')
     city.send_keys("Seattle")
 
 if __name__ == '__main__':
-    zip = gui_driver.find_element_by_name('zip')
+    zip = gui_driver.find_element(By.NAME, 'zip')
     zip.send_keys("98104")
 
 if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
 if __name__ == '__main__':
-    terms = gui_driver.find_element_by_name('terms')
+    terms = gui_driver.find_element(By.NAME, 'terms')
     terms.click()
 
 if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
 if __name__ == '__main__':
-    submit = gui_driver.find_element_by_name('submit')
+    submit = gui_driver.find_element(By.NAME, 'submit')
     submit.click()
 
 if __name__ == '__main__':
@@ -303,7 +297,7 @@ if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
 if __name__ == '__main__':
-    links = gui_driver.find_elements_by_tag_name("a")
+    links = gui_driver.find_elements(By.TAG_NAME, "a")
 
 if __name__ == '__main__':
     links[0].get_attribute('href')
@@ -340,18 +334,18 @@ def test_successful_order(driver, url):
     zip_code = "87101"
 
     driver.get(url)
-    driver.find_element_by_name("name").send_keys(name)
-    driver.find_element_by_name("email").send_keys(email)
-    driver.find_element_by_name('city').send_keys(city)
-    driver.find_element_by_name('zip').send_keys(zip_code)
-    driver.find_element_by_name('terms').click()
-    driver.find_element_by_name('submit').click()
+    driver.find_element(By.NAME, "name").send_keys(name)
+    driver.find_element(By.NAME, "email").send_keys(email)
+    driver.find_element(By.NAME, 'city').send_keys(city)
+    driver.find_element(By.NAME, 'zip').send_keys(zip_code)
+    driver.find_element(By.NAME, 'terms').click()
+    driver.find_element(By.NAME, 'submit').click()
 
-    title = driver.find_element_by_id('title')
+    title = driver.find_element(By.ID, 'title')
     assert title is not None
     assert title.text.find("Thank you") >= 0
 
-    confirmation = driver.find_element_by_id("confirmation")
+    confirmation = driver.find_element(By.ID, "confirmation")
     assert confirmation is not None
 
     assert confirmation.text.find(name) >= 0
@@ -386,7 +380,7 @@ if __name__ == '__main__':
     Image(gui_driver.get_screenshot_as_png())
 
 if __name__ == '__main__':
-    ui_elements = gui_driver.find_elements_by_tag_name("input")
+    ui_elements = gui_driver.find_elements(By.TAG_NAME, "input")
 
 if __name__ == '__main__':
     for element in ui_elements:
@@ -396,7 +390,7 @@ if __name__ == '__main__':
                element.text))
 
 if __name__ == '__main__':
-    ui_elements = gui_driver.find_elements_by_tag_name("a")
+    ui_elements = gui_driver.find_elements(By.TAG_NAME, "a")
 
 if __name__ == '__main__':
     for element in ui_elements:
@@ -470,7 +464,7 @@ class GUIGrammarMiner(GUIGrammarMiner):
 
         actions = set()
 
-        for elem in self.driver.find_elements_by_tag_name("input"):
+        for elem in self.driver.find_elements(By.TAG_NAME, "input"):
             try:
                 input_type = elem.get_attribute("type")
                 input_name = elem.get_attribute("name")
@@ -510,7 +504,7 @@ class GUIGrammarMiner(GUIGrammarMiner):
 
         actions = set()
 
-        for elem in self.driver.find_elements_by_tag_name("button"):
+        for elem in self.driver.find_elements(By.TAG_NAME, "button"):
             try:
                 button_type = elem.get_attribute("type")
                 button_name = elem.get_attribute("name")
@@ -544,7 +538,7 @@ class GUIGrammarMiner(GUIGrammarMiner):
 
         actions = set()
 
-        for elem in self.driver.find_elements_by_tag_name("a"):
+        for elem in self.driver.find_elements(By.TAG_NAME, "a"):
             try:
                 a_href = elem.get_attribute("href")
                 if a_href is not None:
@@ -884,9 +878,9 @@ class GUIRunner(GUIRunner):
         Matches can occur by name or by link text."""
 
         try:
-            return self.driver.find_element_by_name(name)
+            return self.driver.find_element(By.NAME, name)
         except NoSuchElementException:
-            return self.driver.find_element_by_link_text(name)
+            return self.driver.find_element(By.LINK_TEXT, name)
 
 from selenium.webdriver.support.ui import WebDriverWait
 
