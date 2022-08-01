@@ -529,7 +529,7 @@ check-bib-ascii: .$(BIB).ascii
 check-bib-python: .$(BIB).python
 .$(BIB).python: $(BIB)
 	@echo "Checking $(BIB) for Python usage with bibtexparser"
-	@$(PYTHON) -W error -c 'import bibtexparser; fd = open("$(BIB)"); bibtexparser.load(fd); fd.close()'
+	@$(PYTHON) -c 'import bibtexparser; fd = open("$(BIB)"); bibtexparser.load(fd); fd.close()'
 	@touch $@
 
 check-bib-biber: .$(BIB).biber
