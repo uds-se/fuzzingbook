@@ -149,7 +149,7 @@ class NotebookFinder(MetaPathFinder):
     def find_spec(self, fullname: str, path: Any = None, target: Any = None) -> Any:
         loader = self.find_module(fullname, path)
         if not loader:
-            raise ImportError(f'No module or notebook named {fullname}')
+            return None
         
         return ModuleSpec(fullname, loader)
 
