@@ -14,7 +14,7 @@
 """
 import types
 import operator
-from collections import Mapping
+from collections.abc import Mapping
 from jinja2.environment import Environment
 from jinja2.exceptions import SecurityError
 from jinja2._compat import string_types, PY2
