@@ -134,7 +134,7 @@ class NotebookFinder(MetaPathFinder):
     def find_module(self, fullname: str, path: Any = None) -> Any:
         nb_path = find_notebook(fullname, path)
         if not nb_path:
-            return
+            return None
 
         key = path
         if path:
@@ -148,6 +148,9 @@ class NotebookFinder(MetaPathFinder):
     # New since Python 3.4
     def find_spec(self, fullname: str, path: Any = None, target: Any = None) -> Any:
         loader = self.find_module(fullname, path)
+        if not loader:
+            raise ImportError(f'No module or notebook named {fullname}')
+        
         return ModuleSpec(fullname, loader)
 
 sys.meta_path.append(NotebookFinder())
