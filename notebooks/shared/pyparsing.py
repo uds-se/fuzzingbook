@@ -3242,7 +3242,7 @@ class ParseExpression(ParserElement):
 
         if isinstance( exprs, basestring ):
             self.exprs = [ ParserElement._literalStringClass( exprs ) ]
-        elif isinstance( exprs, collections.Iterable ):
+        elif isinstance( exprs, collections.abc.Iterable ):
             exprs = list(exprs)
             # if sequence of strings provided, wrap with Literal
             if all(isinstance(expr, basestring) for expr in exprs):
@@ -4583,7 +4583,7 @@ def oneOf( strs, caseless=False, useRegex=True ):
     symbols = []
     if isinstance(strs,basestring):
         symbols = strs.split()
-    elif isinstance(strs, collections.Iterable):
+    elif isinstance(strs, collections.abc.Iterable):
         symbols = list(strs)
     else:
         warnings.warn("Invalid argument to oneOf, expected string or iterable",
