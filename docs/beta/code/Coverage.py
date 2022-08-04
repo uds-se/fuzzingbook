@@ -3,7 +3,7 @@
 
 # "Code Coverage" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Coverage.html
-# Last change: 2022-08-01 14:58:21+02:00
+# Last change: 2022-08-04 18:52:51+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -90,9 +90,41 @@ Printing out a coverage object shows the covered functions, with covered lines p
 The `trace()` method returns the _trace_ – that is, the list of locations executed in order. Each location comes as a pair (`function name`, `line`).
 
 >>> cov.trace()
-[('cgi_decode', 9),
+[('cgi_decode', 8),
+ ('cgi_decode', 9),
+ ('cgi_decode', 8),
+ ('cgi_decode', 9),
+ ('cgi_decode', 8),
+ ('cgi_decode', 9),
+ ('cgi_decode', 8),
+ ('cgi_decode', 9),
+ ('cgi_decode', 8),
+ ('cgi_decode', 9),
+ ('cgi_decode', 8),
  ('cgi_decode', 10),
+ ('cgi_decode', 8),
+ ('cgi_decode', 10),
+ ('cgi_decode', 8),
+ ('cgi_decode', 10),
+ ('cgi_decode', 8),
+ ('cgi_decode', 10),
+ ('cgi_decode', 8),
+ ('cgi_decode', 10),
+ ('cgi_decode', 8),
  ('cgi_decode', 11),
+ ('cgi_decode', 8),
+ ('cgi_decode', 11),
+ ('cgi_decode', 8),
+ ('cgi_decode', 11),
+ ('cgi_decode', 8),
+ ('cgi_decode', 11),
+ ('cgi_decode', 8),
+ ('cgi_decode', 11),
+ ('cgi_decode', 8),
+ ('cgi_decode', 11),
+ ('cgi_decode', 8),
+ ('cgi_decode', 12),
+ ('cgi_decode', 8),
  ('cgi_decode', 12),
  ('cgi_decode', 8),
  ('cgi_decode', 15),

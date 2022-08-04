@@ -3,7 +3,7 @@
 
 # "Fuzzing with Constraints" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingWithConstraints.html
-# Last change: 2022-08-04 17:21:55+02:00
+# Last change: 2022-08-04 19:45:20+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -81,6 +81,13 @@ if __name__ == '__main__':
     import random
     random.seed(2001)
 
+import sys
+
+if __name__ == '__main__':
+    if sys.version_info < (3, 10):
+        print("This code requires Python 3.10 or later")
+        sys.exit(0)
+
 ## Synopsis
 ## --------
 
@@ -97,7 +104,7 @@ if __name__ == '__main__':
 
 
 
-from .Grammars import Grammar, is_valid_grammar
+from .Grammars import Grammar, is_valid_grammar, syntax_diagram
 
 import string
 
@@ -117,7 +124,10 @@ CONFIG_GRAMMAR: Grammar = {
 if __name__ == '__main__':
     assert is_valid_grammar(CONFIG_GRAMMAR)
 
-from .GrammarFuzzer import GrammarFuzzer
+if __name__ == '__main__':
+    syntax_diagram(CONFIG_GRAMMAR)
+
+from .GrammarFuzzer import GrammarFuzzer, DerivationTree
 
 if __name__ == '__main__':
     fuzzer = GrammarFuzzer(CONFIG_GRAMMAR)
@@ -214,6 +224,40 @@ if __name__ == '__main__':
 
 
 
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                    '''
+                <pagesize>.<int> = <bufsize>.<int>
+                ''')
+    print(next(solver.solve()))
+
+from .ExpectError import ExpectError
+
+if __name__ == '__main__':
+    with ExpectError():
+        solver = ISLaSolver(CONFIG_GRAMMAR, 
+                    '''
+                <config>..<digit> = "7"
+                ''')
+        print(next(solver.solve()))
+
+from .Parser import EarleyParser
+from .GrammarFuzzer import display_tree
+
+if __name__ == '__main__':
+    inp = 'pagesize=12\nbufsize=34'
+    parser = EarleyParser(CONFIG_GRAMMAR)
+    tree = next(parser.parse(inp))
+    display_tree(tree)
+
+if __name__ == '__main__':
+    with ExpectError():
+        solver = ISLaSolver(CONFIG_GRAMMAR, 
+                    '''
+                <int>.<digit>[2] = "7"
+                ''')
+        print(next(solver.solve()))
+
 ## Quantifiers
 ## -----------
 
@@ -222,6 +266,31 @@ if __name__ == '__main__':
 
 
 
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            exists <int> i in <start>:
+                (str.to.int(i) > 1000)
+            ''')
+    for i in range(10):
+        print(i)
+        print(next(solver.solve()))
+
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            forall <int> i in <start>:
+                (str.to.int(i) > 1000)
+            ''')
+    print(next(solver.solve()))
+
+if __name__ == '__main__':
+    solver = ISLaSolver(CONFIG_GRAMMAR, 
+                '''
+            str.to.int(<int>) > 1000
+            ''')
+    print(next(solver.solve()))
+
 ## Checking Inputs
 ## ---------------
 
@@ -229,6 +298,24 @@ if __name__ == '__main__':
     print('\n## Checking Inputs')
 
 
+
+if __name__ == '__main__':
+    constraint = '<pagesize> = <bufsize>'
+    solver = ISLaSolver(CONFIG_GRAMMAR, constraint)
+
+if __name__ == '__main__':
+    tree = solver.parse('<config>', 'pagesize=12\nbufsize=34')
+
+from isla.evaluator import evaluate  # type: ignore
+
+if __name__ == '__main__':
+    evaluate(constraint, tree, CONFIG_GRAMMAR)
+
+if __name__ == '__main__':
+    tree = solver.parse('<config>', 'pagesize=27\nbufsize=27')
+
+if __name__ == '__main__':
+    evaluate(constraint, tree, CONFIG_GRAMMAR)
 
 ## A Simple Language
 ## -----------------

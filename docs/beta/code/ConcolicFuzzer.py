@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-08-04 16:48:23+02:00
+# Last change: 2022-08-04 18:59:02+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -113,25 +113,24 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 'A'
 'AB+'
 'AB'
+'ABCD'
 
 IndexError: string index out of range (expected)
 
-'ABCD'
 'ABC+'
 'A'
 'ABC'
 'ABC%'
 'A%'
-
-IndexError: string index out of range (expected)
-IndexError: string index out of range (expected)
-
 'ABC+DE'
 'AB'
 'AB+'
 'A'
 'ABCD'
 'A'
+
+IndexError: string index out of range (expected)
+IndexError: string index out of range (expected)
 
 
 We see how the additional inputs generated explore additional paths.
@@ -162,14 +161,14 @@ Table ('W') was not found
 select S>R(j),A from C3 where U4==9249
 Table ('C3') was not found
 
-select I/I*U/n1(M),T/E*d(S) from vehicles
+select I/I*U/n1(M),T/E*d(S) from months
 Invalid WHERE ('(I/I*U/n1(M),T/E*d(S))')
 
-select (v==X),t,h,E from months where r8(w)B/P(g)
+select (v==X),t,h,E from vehicles where r8(w)B/P(g)
 
-select x/z+.(L)-h from months where -9!=Y>G(A)
+select x/z+.(L)-h from vehicles where -9!=Y>G(A)
 
-delete from h4OB60J where K-w/MA) from vehicles where B(e,R)>D
+delete from h4OB60J where K-w/MA) from months where B(e,R)>D
 
 
 TypeError: 'NotImplementedType' object is not callable (expected)

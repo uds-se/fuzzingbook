@@ -3,7 +3,7 @@
 
 # "Introduction to Software Testing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Intro_Testing.html
-# Last change: 2022-08-01 13:58:35+02:00
+# Last change: 2022-08-04 18:52:19+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors

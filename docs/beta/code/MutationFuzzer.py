@@ -3,7 +3,7 @@
 
 # "Mutation-Based Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/MutationFuzzer.html
-# Last change: 2022-08-01 14:58:44+02:00
+# Last change: 2022-08-04 18:53:09+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -48,21 +48,26 @@ This chapter introduces a `MutationFuzzer` class that takes a list of _seed inpu
 >>> mutation_fuzzer = MutationFuzzer(seed=[seed_input])
 >>> [mutation_fuzzer.fuzz() for i in range(10)]
 ['http://www.google.com/search?q=fuzzing',
- '=http:/.www.googje.om/;earch?q5fuzzing',
- 'http://wwqw.googLle.com/sgearch?q=fuzzing',
- 'ht,tp*//www.ggogle.com/search?a=fuzzing',
- "h(tpy:/wGw.goo'l%.com/searc?q=fuz~ing",
- 'hp://www.gooelecom/)search?q=fuz?zing?',
- "httpv//www.goo6gl.#om'search?q=Puzzin",
- 'htp://www.gogle.com/search?q#W=fuzzng',
- 'http://www.google.com>> mutation_fuzzer = MutationCoverageFuzzer(seed=[seed_input])
+ "http:/_/w5ww.'ooglecom/sHahrch?q=f1uzzing",
+ 'htdtp:*//www.gogl..com/search?Vq=vuzzig',
+ 'http//www.goo\'le.c"om/serch?q=f}zzing',
+ 'h=|tp://www.ooglE.com/search?q=fzzang',
+ 'hBvtp//HwMu.google.com/qearcho?q=fuzzing',
+ 'hptp*//www.}}google&bo/searcth?q\x1d&uzzing',
+ 'http:/www.gOogle.cgm/searchQn?qguzzin',
+ 'hTtp://www*google.com/searc?q=fuzzingL',
+ 'httr//www.googlg.om/search?q=fu*zinOg']
+
+The `MutationCoverageFuzzer` maintains a _population_ of inputs, which are then evolved in order to maximize coverage.
+
+>>> mutation_fuzzer = MutationCoverageFuzzer(seed=[seed_input])
 >>> mutation_fuzzer.runs(http_runner, trials=10000)
 >>> mutation_fuzzer.population[:5]
 ['http://www.google.com/search?q=fuzzing',
- 'http://~www.goog|eV.com/search?q=fuzzing',
- 'http://~www.goog|eV._co/seazc>q=fuzzing.',
- 'http://~www.go/og|eVcom_/ser#h?vq=fqzzisne',
- 'http://~www.goo|T.co/xsazc>]q=fu:zing']
+ 'http://www.google.co/se?arch?=fuzzin',
+ 'http://www.gyogle.com/searchKq=fNuing',
+ 'http://sw7.googl|a.com.search=pfuzzng',
+ "http://sw7.'oogl|a.#om.rearch=pFuzTzng"]
 
 For more details, source, and documentation, see
 "The Fuzzing Book - Mutation-Based Fuzzing"

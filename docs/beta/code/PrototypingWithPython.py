@@ -3,7 +3,7 @@
 
 # "Prototyping with Python" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/PrototypingWithPython.html
-# Last change: 2022-08-01 15:09:24+02:00
+# Last change: 2022-08-04 19:04:25+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors

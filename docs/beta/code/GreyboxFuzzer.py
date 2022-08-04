@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2022-08-03 19:07:26+02:00
+# Last change: 2022-08-04 18:54:05+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,26 +68,36 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- httr:/www.google.com/sEarch?q=fwzzing,
- _`tBt:+//tr_~w9.coogLesT/jom/sdaR;=fqjzan,
- _`TBNt:+//r_~w9.coooLesT/j>1om/sdaR>=fqjzan,
- ttp:/www.gomglew*com/REach?q=fwzzing,
- c`uvZv|t8t/tr_w.oogLrds/kjoM-5sTdSafR;=fqK>jzn,
- V$ww,goVgl.c}s3ec.q=Fuzzixg,
- hsFrt0:]/wo.oTgld.cm"/smar#>=fquzpzi.g{,
- _`tBt:+o/tb_~9c.soogLenG{T/jo?m/saR/;=6fqWKzan,
- (sFrt0:]/7o.oVgld.cm"/smar#>=fquzpzig{,
- V$ww,goVgl.c}s3ec.q=Fuzzixg,
- hsFr`0:\.wo.oTgd.km"/cmar#>=fquzpzig{,
- rt }4]/m.EoT[lDec"/soaxr#a.=&u?qziv.?g{,
- http:/wsw.oogle.om/sJeacQh?qS=fEuDzzi5nf'@,
- hsFrt0:./wo.oTglJd.c7m/smar#>=fquqzi.1g{,
- hsFrt.t:\./wU[o\g,lJd.ci/ewMa2Q{;=fquqz`.gwI{,
- hsBrhT;]wnoKLd.c/sr#quz\r.g[,
- $sBrh6;
- :W nO2Kl.k/+sz\.e(,
- xthp*/Aw.cooDlgg.cosachs5fuxzbg,
- _xt':/mo/b_5vP9cp*soogLc".9G[T/jo
+ hjttp:/wwwA.gno*gl'2*e.snm/erch!?q=fuzjging,
+ http://wTw:w.go/le.com/searchp=fzzino,
+ hjtup/:EgwwA^.gNo.l&2ja.s!jm/$@echFf!/H(q
+ zjin:pg,
+ httgp:/pwTw:w.go/ld.com/sarchp=zino,
+ hjtt p:/wwwA.no*'l'2*e.sn"m'ech!?q=vuzjging,
+ h|T:owws[gOg$co?6sarc;[5=Adu#zn,
+ hjtt://wwwA%.no*'l'*e.s/n"m'c!=q=vuzji^lg,
+ http//www.google.com/search?q=fuzzhng,
+ ://LTwA5weg+ov.co/Cs>earchBEp2f{yno,
+ http:/wTw:Uw.go/l[e.c/lm(d/sy8Kayrchp-fzzihno,
+ hUttp://Tw:w&go/le.cn/searchp=fzzmo.,
+ httq:/SwTv:E.go4/l[av>c/m(sd/sy8Kayrch-fzzihno,
+ http:/OTw:Uw.go/l[e.c/lm(d/s;yKayzcp
+ fzihno,
+ jt/t2/wwAz^|g`no*gl#dj*uEsD/oGoerch!?y-=fufzbgiO,
+ tt#p:/OTw:Uw.goI;l[eclm(ds;yKatzc4P
+ fzihNuo,
+ :./LTgA5eg*ov.co/Cs>archBEp3fyno,
+ Ht|p/pwT;:wo/(.km/sM5rc&hp-BzNo,
+ Ht|r`/pT*;:wo(.km/sM5rc&hp,BNoD,
+ Lt|C/p{T;*f"woZ'V&}km+lsLU!d5rc{&ip->BzNof]
+
+Besides the simple `PowerSchedule`, we can have advanced power schedules.
+
+* `AFLFastSchedule` assigns high energy to "unusual" paths not taken very often.
+* `AFLGoSchedule` assigns high energy to paths close to uncovered program locations. 
+
+The `AFLGoSchedule` class constructor requires a `distance` metric from each node towards target locations, as determined via analysis of the program code. See the chapter for details.
+
 For more details, source, and documentation, see
 "The Fuzzing Book - Greybox Fuzzing"
 at https://www.fuzzingbook.org/html/GreyboxFuzzer.html

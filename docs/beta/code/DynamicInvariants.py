@@ -3,7 +3,7 @@
 
 # "Mining Function Specifications" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/DynamicInvariants.html
-# Last change: 2022-08-04 16:48:36+02:00
+# Last change: 2022-08-04 18:59:30+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
