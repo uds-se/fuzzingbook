@@ -3,7 +3,7 @@
 
 # "Parsing Inputs" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/Parser.html
-# Last change: 2022-05-18 12:54:18+02:00
+# Last change: 2022-08-01 15:00:59+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors

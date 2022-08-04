@@ -3,7 +3,7 @@
 
 # "Efficient Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2022-05-18 12:53:45+02:00
+# Last change: 2022-08-01 15:00:26+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -654,8 +654,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     quiz("Is the original `expr_tree` affected by this change?",
          [
-             "Yes, it has also gained a new child",
-             "No, it is unchanged"
+             "No, it is unchanged",
+             "Yes, it has also gained a new child"
          ], "1 ** (1 - 1)")
 
 if __name__ == '__main__':
