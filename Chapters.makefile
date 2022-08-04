@@ -57,7 +57,8 @@ SEMANTICAL_PART = \
 	SymbolicFuzzer.ipynb \
 	DynamicInvariants.ipynb
 SEMANTICAL_PART_READY =
-SEMANTICAL_PART_TODO =
+SEMANTICAL_PART_TODO = 	FuzzingWithConstraints.ipynb
+# When final, FuzzingWithConstraints should be the first chapter in this part
 
 DOMAINS_PART = \
 	05_Domain-Specific_Fuzzing.ipynb \
