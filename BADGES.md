@@ -2,7 +2,9 @@
 
 <!-- Badges to be shown on project page -->
 
-[![Code Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml)
+[![Python 3.9 Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code.yml)
+&nbsp;
+[![Python 3.10 Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code-3-10.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-code-3-10.yml)
 &nbsp;
 [![Notebook Tests](https://github.com/uds-se/fuzzingbook/actions/workflows/check-notebooks.yml/badge.svg)](https://github.com/uds-se/fuzzingbook/actions/workflows/check-notebooks.yml)
 &nbsp;
