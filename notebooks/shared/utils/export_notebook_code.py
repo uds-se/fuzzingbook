@@ -329,7 +329,12 @@ def export_notebook_code(notebook_name: str,
             
             bang = False
             if code.startswith('!'):
-                code = "import os\nos.system(f" + repr(code[1:]) + ")"
+                new_code = "import os\n"
+                for line in code.split('\n'):
+                    if line.startswith('!'):
+                        line = line[1:]
+                    new_code += f"os.system(" + repr(line) + ")")
+                code = new_code
                 bang = True
 
             if RE_IMPORT_BOOKUTILS.match(code):
