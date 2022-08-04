@@ -40,6 +40,12 @@ def convert(svg_filename, png_filename):
 
     else:
         raise ValueError("Please install Inkscape (preferred) or ImageMagick")
+        
+
+def sanitize_svg(svg):
+    # Don't include (unique) object addresses in SVG
+    # they are not rendered anyway
+    return re.sub(r" at 0x[0-9a-f]*", "", svg)
 
 
 def notebook_synopsis(notebook_name):
@@ -111,7 +117,7 @@ and then make use of the following features.
                                 
                             print("Creating", svg_filename)
                             with open(svg_filename, "w") as f:
-                                f.write(svg)
+                                f.write(sanitize_svg(svg))
                             print("Creating", png_filename)
                             
                             convert(svg_filename, png_filename)
