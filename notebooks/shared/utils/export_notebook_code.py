@@ -329,11 +329,11 @@ def export_notebook_code(notebook_name: str,
             
             bang = False
             if code.startswith('!'):
-                new_code = "import os\n"
+                new_code = "import os"
                 for line in code.split('\n'):
                     if line.startswith('!'):
                         line = line[1:]
-                    new_code += f"os.system(" + repr(line) + ")\n"
+                    new_code += f"\nos.system(" + repr(line) + ")"
                 code = new_code
                 bang = True
 
