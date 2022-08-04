@@ -333,7 +333,7 @@ def export_notebook_code(notebook_name: str,
                 for line in code.split('\n'):
                     if line.startswith('!'):
                         line = line[1:]
-                    new_code += f"\nos.system(" + repr(line) + ")"
+                    new_code += f"\nos.system(f" + repr(line) + ")"
                 code = new_code
                 bang = True
 
