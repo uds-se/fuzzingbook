@@ -3,7 +3,7 @@
 
 # "Concolic Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ConcolicFuzzer.html
-# Last change: 2022-05-18 12:45:52+02:00
+# Last change: 2022-08-04 16:48:23+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -106,31 +106,32 @@ The concolic fuzzer then uses the constraints added to guide its fuzzing as foll
 >>>             _[cgi_decode](v)
 >>>     scf.add_trace(_, v)
 ' '
-'+'
 '%'
-'+A'
 'AB'
-'++'
-'++A'
-'+++'
-
-IndexError: string index out of range (expected)
-
+''
+'ABC'
 'A'
-'+A'
-'+++A'
-'+AB'
-'++'
-'%'
-'++AB'
-'++A+'
-'+A'
-'++'
-'+'
-'+%'
+'AB+'
+'AB'
+
+IndexError: string index out of range (expected)
+
+'ABCD'
+'ABC+'
+'A'
+'ABC'
+'ABC%'
+'A%'
 
 IndexError: string index out of range (expected)
 IndexError: string index out of range (expected)
+
+'ABC+DE'
+'AB'
+'AB+'
+'A'
+'ABCD'
+'A'
 
 
 We see how the additional inputs generated explore additional paths.
@@ -155,18 +156,27 @@ The `ConcolicGrammarFuzzer` on the other hand, knows about the input grammar, an
 >>>                 print(e)
 >>>         cgf.update_grammar(_)
 >>>         print()
-select 245 from :2 where r(_)-N+e>n
-Table (':2') was not found
+insert into W (Ru_2,.Wj186518W8) values ('@','}','h')
+Table ('W') was not found
 
-delete from vehicles where Q/x/j/q(p)/H*h-B==cz
-Invalid WHERE ('Q/x/j/q(p)/H*h-B==cz')
+select S>R(j),A from C3 where U4==9249
+Table ('C3') was not found
 
-insert into months (:b) values (22.72)
-Column (':b') was not found
+select I/I*U/n1(M),T/E*d(S) from vehicles
+Invalid WHERE ('(I/I*U/n1(M),T/E*d(S))')
 
-select i*q!=(4) from months where L*S/l/u/b+b==W
+select (v==X),t,h,E from months where r8(w)B/P(g)
 
-delete from months where W/V!=A(f)+tL+S))==((:+lL+S))==((:+l
+select x/z+.(L)-h from months where -9!=Y>G(A)
+
+delete from h4OB60J where K-w/MA) from vehicles where B(e,R)>D
+
+
+TypeError: 'NotImplementedType' object is not callable (expected)
+TypeError: 'NotImplementedType' object is not callable (expected)
+TypeError: 'NotImplementedType' object is not callable (expected)
+TypeError: 'NotImplementedType' object is not callable (expected)
+
 For more details, source, and documentation, see
 "The Fuzzing Book - Concolic Fuzzing"
 at https://www.fuzzingbook.org/html/ConcolicFuzzer.html

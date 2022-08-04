@@ -3,7 +3,7 @@
 
 # "Efficient Grammar Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GrammarFuzzer.html
-# Last change: 2022-05-18 12:53:45+02:00
+# Last change: 2022-08-04 16:44:28+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -49,13 +49,13 @@ This chapter introduces `GrammarFuzzer`, an efficient grammar fuzzer that takes 
 >>> from Grammars import US_PHONE_GRAMMAR
 >>> phone_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR)
 >>> phone_fuzzer.fuzz()
-'(519)333-4454'
+'(291)993-0087'
 
 The `GrammarFuzzer` constructor takes a number of keyword arguments to control its behavior.  `start_symbol`, for instance, allows to set the symbol that expansion starts with (instead of ``):
 
 >>> area_fuzzer = GrammarFuzzer(US_PHONE_GRAMMAR, start_symbol='')
 >>> area_fuzzer.fuzz()
-'718'
+'477'
 
 Here's how to parameterize the `GrammarFuzzer` constructor:
 
@@ -76,20 +76,20 @@ In the internal representation of a derivation tree, a _node_ is a pair (`symbol
  [('',
    [('(', []),
     ('',
-     [('', [('5', [])]),
-      ('', [('1', [])]),
-      ('', [('9', [])])]),
+     [('', [('2', [])]),
+      ('', [('9', [])]),
+      ('', [('1', [])])]),
     (')', []),
     ('',
-     [('', [('3', [])]),
-      ('', [('3', [])]),
+     [('', [('9', [])]),
+      ('', [('9', [])]),
       ('', [('3', [])])]),
     ('-', []),
     ('',
-     [('', [('4', [])]),
-      ('', [('4', [])]),
-      ('', [('5', [])]),
-      ('', [('4', [])])])])])
+     [('', [('0', [])]),
+      ('', [('0', [])]),
+      ('', [('8', [])]),
+      ('', [('7', [])])])])])
 
 The chapter contains various helpers to work with derivation trees, including visualization tools – notably, `display_tree()`, above.
 
@@ -654,8 +654,8 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     quiz("Is the original `expr_tree` affected by this change?",
          [
-             "Yes, it has also gained a new child",
-             "No, it is unchanged"
+             "No, it is unchanged",
+             "Yes, it has also gained a new child"
          ], "1 ** (1 - 1)")
 
 if __name__ == '__main__':

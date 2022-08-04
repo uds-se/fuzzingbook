@@ -3,7 +3,7 @@
 
 # "Control Flow Graph" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/ControlFlow.html
-# Last change: 2022-01-11 10:40:34+01:00
+# Last change: 2022-08-03 19:08:02+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -875,7 +875,11 @@ def callgraph(code, name="callgraph"):
 def get_callgraph(code, name="callgraph"):
     if not os.path.isfile(name + '.dot'):
         construct_callgraph(code, name)
-    return nx.drawing.nx_pydot.read_dot(name + '.dot')
+
+    # This is deprecated:
+    # return nx.drawing.nx_pydot.read_dot(name + '.dot')
+    
+    return nx.nx_agraph.read_dot(name + '.dot')
 
 ### Example: Maze
 

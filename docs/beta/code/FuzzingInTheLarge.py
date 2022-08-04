@@ -3,7 +3,7 @@
 
 # "Fuzzing in the Large" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/FuzzingInTheLarge.html
-# Last change: 2022-05-17 20:11:55+02:00
+# Last change: 2022-08-04 10:07:50+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -134,6 +134,10 @@ if __name__ == '__main__':
 if __name__ == '__main__':
     import os
     os.system(f'{sys.executable} -m pip install -r FuzzManager/server/requirements.txt > /dev/null')
+
+if __name__ == '__main__':
+    import os
+    os.system(f'{sys.executable} -m pip install --upgrade celery > /dev/null 2>&1')
 
 if __name__ == '__main__':
     import os

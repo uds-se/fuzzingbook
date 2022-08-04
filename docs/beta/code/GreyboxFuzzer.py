@@ -3,7 +3,7 @@
 
 # "Greybox Fuzzing" - a chapter of "The Fuzzing Book"
 # Web site: https://www.fuzzingbook.org/html/GreyboxFuzzer.html
-# Last change: 2022-05-17 19:02:54+02:00
+# Last change: 2022-08-03 19:07:26+02:00
 #
 # Copyright (c) 2021 CISPA Helmholtz Center for Information Security
 # Copyright (c) 2018-2020 Saarland University, authors, and contributors
@@ -68,22 +68,26 @@ After fuzzing, we can inspect the population:
 
 >>> greybox_fuzzer.population[:20]
 [http://www.google.com/search?q=fuzzing,
- h4t:/O/g;{Hoogme&cPo/m'Mqqdei2,
- d^7ww05s.%?`Ogjc,4[joQp(seMc,|QFLfLSp:i'2,
- h#t:/O/c;y{Hoog}&CPo/mZ)'Cd7ww ;5s@.%?aOgjc,4[oQp(seMc,|QFLfLS0:!I'2,
- hN+{H;;4=/wB}h&1Co(/MZ)$(r?tuzyiQngo,
- ?h#t/K/+y{H;og}Ih&Co
- /mR'Z$)$N+{H;4=/wB}h&1Co(/MZ)$(ruzyiQngo,
- i4tg:/g{HoggmecPo-7MqqZw`zf)q=f xxing+,
- h]c>Gg9G1`[ogRlefc6\mxmerqqY5+2]
-
-Besides the simple `PowerSchedule`, we can have advanced power schedules.
-
-* `AFLFastSchedule` assigns high energy to "unusual" paths not taken very often.
-* `AFLGoSchedule` assigns high energy to paths close to uncovered program locations. 
-
-The `AFLGoSchedule` class constructor requires a `distance` metric from each node towards target locations, as determined via analysis of the program code. See the chapter for details.
-
+ httr:/www.google.com/sEarch?q=fwzzing,
+ _`tBt:+//tr_~w9.coogLesT/jom/sdaR;=fqjzan,
+ _`TBNt:+//r_~w9.coooLesT/j>1om/sdaR>=fqjzan,
+ ttp:/www.gomglew*com/REach?q=fwzzing,
+ c`uvZv|t8t/tr_w.oogLrds/kjoM-5sTdSafR;=fqK>jzn,
+ V$ww,goVgl.c}s3ec.q=Fuzzixg,
+ hsFrt0:]/wo.oTgld.cm"/smar#>=fquzpzi.g{,
+ _`tBt:+o/tb_~9c.soogLenG{T/jo?m/saR/;=6fqWKzan,
+ (sFrt0:]/7o.oVgld.cm"/smar#>=fquzpzig{,
+ V$ww,goVgl.c}s3ec.q=Fuzzixg,
+ hsFr`0:\.wo.oTgd.km"/cmar#>=fquzpzig{,
+ rt }4]/m.EoT[lDec"/soaxr#a.=&u?qziv.?g{,
+ http:/wsw.oogle.om/sJeacQh?qS=fEuDzzi5nf'@,
+ hsFrt0:./wo.oTglJd.c7m/smar#>=fquqzi.1g{,
+ hsFrt.t:\./wU[o\g,lJd.ci/ewMa2Q{;=fquqz`.gwI{,
+ hsBrhT;]wnoKLd.c/sr#quz\r.g[,
+ $sBrh6;
+ :W nO2Kl.k/+sz\.e(,
+ xthp*/Aw.cooDlgg.cosachs5fuxzbg,
+ _xt':/mo/b_5vP9cp*soogLc".9G[T/jo
 For more details, source, and documentation, see
 "The Fuzzing Book - Greybox Fuzzing"
 at https://www.fuzzingbook.org/html/GreyboxFuzzer.html
